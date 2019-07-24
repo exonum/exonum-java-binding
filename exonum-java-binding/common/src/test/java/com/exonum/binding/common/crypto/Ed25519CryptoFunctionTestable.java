@@ -30,17 +30,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.test.Bytes;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class Ed25519CryptoFunctionTest {
+abstract class Ed25519CryptoFunctionTestable {
 
-  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
+  abstract Ed25519CryptoFunction createFunction();
+
+  private Ed25519CryptoFunction cryptoFunction;
+
+  @BeforeEach
+  void createCryptoFunction() {
+    cryptoFunction = createFunction();
+  }
 
   @Test
   void generateKeyPairWithSeed() {
     byte[] seed = new byte[SEED_BYTES];
 
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair(seed);
+    KeyPair keyPair = cryptoFunction.generateKeyPair(seed);
     assertNotNull(keyPair);
     assertThat(keyPair.getPrivateKey().size(), equalTo(PRIVATE_KEY_BYTES));
     assertThat(keyPair.getPublicKey().size(), equalTo(PUBLIC_KEY_BYTES));
@@ -53,94 +61,94 @@ class Ed25519CryptoFunctionTest {
 
 
     IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-        () -> CRYPTO_FUNCTION.generateKeyPair(seed));
+        () -> cryptoFunction.generateKeyPair(seed));
     assertEquals("Seed byte array has invalid size (2), must be "
         + SEED_BYTES, thrown.getMessage());
   }
 
   @Test
   void generateKeyPairNullSeed() {
-    assertThrows(NullPointerException.class, () -> CRYPTO_FUNCTION.generateKeyPair(null));
+    assertThrows(NullPointerException.class, () -> cryptoFunction.generateKeyPair(null));
   }
 
   @Test
   void validSignatureVerificationTest() {
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    KeyPair keyPair = cryptoFunction.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = bytes("myMessage");
-    byte[] signature = CRYPTO_FUNCTION.signMessage(message, privateKey);
-    assertTrue(CRYPTO_FUNCTION.verify(message, signature, publicKey));
+    byte[] signature = cryptoFunction.signMessage(message, privateKey);
+    assertTrue(cryptoFunction.verify(message, signature, publicKey));
   }
 
   @Test
   void validSignatureEmptyMessageVerificationTest() {
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    KeyPair keyPair = cryptoFunction.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] emptyMessage = new byte[0];
-    byte[] signature = CRYPTO_FUNCTION.signMessage(emptyMessage, privateKey);
-    assertTrue(CRYPTO_FUNCTION.verify(emptyMessage, signature, publicKey));
+    byte[] signature = cryptoFunction.signMessage(emptyMessage, privateKey);
+    assertTrue(cryptoFunction.verify(emptyMessage, signature, publicKey));
   }
 
   @Test
   void invalidLengthSignatureVerificationTest() {
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    KeyPair keyPair = cryptoFunction.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = bytes("myMessage");
     byte[] invalidSignature = bytes("invalidLengthMessage");
-    assertFalse(CRYPTO_FUNCTION.verify(message, invalidSignature, publicKey));
+    assertFalse(cryptoFunction.verify(message, invalidSignature, publicKey));
   }
 
   @Test
   void invalidSignatureVerificationTest() {
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    KeyPair keyPair = cryptoFunction.generateKeyPair();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = bytes("myMessage");
     byte[] invalidSignature = Bytes.createPrefixed(message, SIGNATURE_BYTES);
-    assertFalse(CRYPTO_FUNCTION.verify(message, invalidSignature, publicKey));
+    assertFalse(cryptoFunction.verify(message, invalidSignature, publicKey));
   }
 
   @Test
   void invalidPublicKeyVerificationTest() {
     // Generate a key pair.
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    KeyPair keyPair = cryptoFunction.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     byte[] message = bytes("myMessage");
     // Sign a message properly.
-    byte[] signature = CRYPTO_FUNCTION.signMessage(message, privateKey);
+    byte[] signature = cryptoFunction.signMessage(message, privateKey);
 
     // Try to use another public key.
-    PublicKey publicKey = CRYPTO_FUNCTION.generateKeyPair().getPublicKey();
-    assertFalse(CRYPTO_FUNCTION.verify(message, signature, publicKey));
+    PublicKey publicKey = cryptoFunction.generateKeyPair().getPublicKey();
+    assertFalse(cryptoFunction.verify(message, signature, publicKey));
   }
 
   @Test
   void invalidPublicKeyLengthVerificationTest() {
     // Generate a key pair.
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    KeyPair keyPair = cryptoFunction.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     byte[] message = bytes("myMessage");
     // Sign a message.
-    byte[] signature = CRYPTO_FUNCTION.signMessage(message, privateKey);
+    byte[] signature = cryptoFunction.signMessage(message, privateKey);
 
     // Try to use a public key of incorrect length.
     PublicKey publicKey = PublicKey.fromHexString("abcd");
 
     IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-        () -> CRYPTO_FUNCTION.verify(message, signature, publicKey));
+        () -> cryptoFunction.verify(message, signature, publicKey));
     assertEquals("Public key has invalid size (2), must be "
         + PUBLIC_KEY_BYTES, thrown.getMessage());
   }
 
   @Test
   void invalidMessageVerificationTest() {
-    KeyPair keyPair = CRYPTO_FUNCTION.generateKeyPair();
+    KeyPair keyPair = cryptoFunction.generateKeyPair();
     PrivateKey privateKey = keyPair.getPrivateKey();
     PublicKey publicKey = keyPair.getPublicKey();
     byte[] message = bytes("myMessage");
-    byte[] signature = CRYPTO_FUNCTION.signMessage(message, privateKey);
+    byte[] signature = cryptoFunction.signMessage(message, privateKey);
     byte[] anotherMessage = bytes("anotherMessage");
-    assertFalse(CRYPTO_FUNCTION.verify(anotherMessage, signature, publicKey));
+    assertFalse(cryptoFunction.verify(anotherMessage, signature, publicKey));
   }
 }

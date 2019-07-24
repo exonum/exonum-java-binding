@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- `Ed25519CryptoFunction` to use the system libsodium by default. If libsodium is not installed,
+  it will load the bundled library. (#991)
+- `Ed25519CryptoFunction` is made package-private. It remains accessible via 
+  `CryptoFunctions#ed25519`.
+
 ## [0.7.0] - 2019-07-17
 
 ### Overview

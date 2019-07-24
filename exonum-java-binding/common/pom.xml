@@ -22,7 +22,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <lazysodium-java.version>3.8.0</lazysodium-java.version>
+    <lazysodium-java.version>4.0.0</lazysodium-java.version>
     <auto-value.version>1.6.5</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
   </properties>
@@ -168,7 +168,34 @@
             ${jacoco.args}
             ${java.vm.assertionFlag}
           </argLine>
+          <excludedGroups>${excludeTags}, forked</excludedGroups>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>
+            ${jacoco.it.args}
+            ${java.vm.assertionFlag}
+          </argLine>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <groups>forked</groups>
+          <!-- Run each test class in its own VM -->
+          <reuseForks>false</reuseForks>
+        </configuration>
+        <executions>
+          <execution>
+            <id>run-forked-its</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
