@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Database, TemporaryDB, Patch};
+use exonum_merkledb::{Database, Patch, TemporaryDB};
 use jni::{
     objects::{JClass, JObject},
     JNIEnv,
@@ -85,8 +85,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
     let res = panic::catch_unwind(|| {
         let db = handle::cast_handle::<TemporaryDB>(db_handle);
         let patch = handle::acquire_handle_ownership::<Patch>(patch_handle);
-        db.merge(*patch)
-            .expect("Unable to merge fork");
+        db.merge(*patch).expect("Unable to merge fork");
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)

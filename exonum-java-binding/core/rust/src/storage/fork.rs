@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use jni::{
-    sys::jboolean,
-    objects::JObject,
-    JNIEnv,
-};
+use jni::{objects::JObject, sys::jboolean, JNIEnv};
 
 use std::panic;
 
-use handle::{self, Handle, acquire_handle_ownership};
+use handle::{self, acquire_handle_ownership, Handle};
 use storage::db::View;
-use ::{utils, to_handle};
+use {to_handle, utils};
 
 /// Returns true if this View can be converted into patch.
 #[no_mangle]
