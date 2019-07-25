@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+# Resolves symlinks (including relative symlinks) to this script
+# and sets the EXONUM_HOME directory path.
+function get_exonum_home() {
+    local PRG="$0"
+
+    while [ -h "$PRG" ] ; do
+      local ls=`ls -ld "$PRG"`
+      local link=`expr "$ls" : '.*-> \(.*\)$'`
+      if expr "$link" : '/.*' > /dev/null; then
+        local PRG="$link"
+      else
+        local PRG="`dirname "$PRG"`/$link"
+      fi
+    done
+
+    EXONUM_HOME=`dirname "$PRG"`/..
+}
+
 # Try to detect the Java home directory from installed executable in case JAVA_HOME is not set.
 JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version \
   2>&1 > /dev/null |\
@@ -12,7 +30,7 @@ LIBJVM_PATH="$(find -L ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
 export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 
 # Detect the root directory of the installed app.
-EXONUM_HOME="$(dirname $0)/.."
+get_exonum_home
 
 # Delegate execution to the app executable.
 ${EXONUM_HOME}/exonum-java "$@"
