@@ -16,18 +16,24 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Database;
+import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.MemoryDb;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +60,10 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   abstract IndexT create(String name, View view);
+
+  abstract @Nullable IndexT createInGroup(String groupName, byte[] idInGroup, View view);
+
+  abstract StorageIndex createOfOtherType(String name, View view);
 
   /**
    * Get any element from this index.
@@ -111,6 +121,55 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @Test
+  void indexConstructorAllowsMultipleInstancesFromFork() throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      String name = "test_index";
+      Fork view = database.createFork(cleaner);
+      // Create two indices with the same name from the same Fork. It is disallowed currently
+      // in Rust, but must work in Java with indices performing instance de-duplication.
+      IndexT i1 = create(name, view);
+      IndexT i2 = create(name, view);
+
+      assertNotNull(i1);
+      assertThat(i2, sameInstance(i1));
+    }
+  }
+
+  @Test
+  void indexConstructorAllowsMultipleInstancesFromForkInGroup() throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      String name = "test_index";
+      byte[] idInGroup = bytes("index id in the group");
+      Fork view = database.createFork(cleaner);
+      // Create two indices with the same name from the same Fork. It is disallowed currently
+      // in Rust, but must work in Java with indices performing instance de-duplication.
+      IndexT i1 = createInGroup(name, idInGroup, view);
+      IndexT i2 = createInGroup(name, idInGroup, view);
+
+      assumeFalse(i1 == null, "Groups are not supported by EntryIndex");
+      assertThat(i2, sameInstance(i1));
+    }
+  }
+
+  @Test
+  void indexConstructorThrowsIfIndexWithSameNameButOtherTypeIsOpened()
+      throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      String name = "test_index";
+      Fork view = database.createFork(cleaner);
+
+      // Try to create two indices of different types with the same name
+      StorageIndex other = createOfOtherType(name, view);
+      Exception e = assertThrows(IllegalArgumentException.class, () -> create(name, view));
+
+      String message = e.getMessage();
+      assertThat(message, containsString("Cannot create index"));
+      assertThat(message, containsString(name));
+      assertThat(message, containsString(String.valueOf(other)));
+    }
+  }
+
+  @Test
   void getName() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
@@ -118,6 +177,33 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       IndexT index = create(name, view);
 
       assertThat(index.getName(), equalTo(name));
+    }
+  }
+
+  @Test
+  void getAddress() throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      String name = "test_index";
+      View view = database.createSnapshot(cleaner);
+      IndexT index = create(name, view);
+
+      IndexAddress expected = IndexAddress.valueOf(name);
+      assertThat(index.getAddress(), equalTo(expected));
+    }
+  }
+
+  @Test
+  void getAddressInGroup() throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      String groupName = "test_index";
+      byte[] idInGroup = bytes("prefix");
+      View view = database.createSnapshot(cleaner);
+      IndexT index = createInGroup(groupName, idInGroup, view);
+
+      assumeFalse(index == null, "Groups are not supported by EntryIndex");
+
+      IndexAddress address = IndexAddress.valueOf(groupName, idInGroup);
+      assertThat(index.getAddress(), equalTo(address));
     }
   }
 

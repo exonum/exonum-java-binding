@@ -176,6 +176,16 @@ class KeySetIndexProxyIntegrationTest
   }
 
   @Override
+  KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return KeySetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(KeySetIndexProxy<String> index) {
     return index.contains("k1");
   }

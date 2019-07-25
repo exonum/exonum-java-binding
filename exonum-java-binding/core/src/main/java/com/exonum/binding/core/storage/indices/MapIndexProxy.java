@@ -16,8 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
@@ -106,15 +105,11 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   public static <K, V> MapIndexProxy<K, V> newInstance(String name, View view,
                                                        Serializer<K> keySerializer,
                                                        Serializer<V> valueSerializer) {
-    checkIndexName(name);
-    CheckingSerializerDecorator<K> ks = CheckingSerializerDecorator.from(keySerializer);
-    CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
-
+    IndexAddress address = IndexAddress.valueOf(name);
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle mapNativeHandle = createNativeMap(view,
-        () -> nativeCreate(name, viewNativeHandle));
+    LongSupplier nativeMapConstructor = () -> nativeCreate(name, viewNativeHandle);
 
-    return new MapIndexProxy<>(mapNativeHandle, name, view, ks, vs);
+    return getOrCreate(address, view, keySerializer, valueSerializer, nativeMapConstructor);
   }
 
   /**
@@ -140,16 +135,40 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
                                                             View view,
                                                             Serializer<K> keySerializer,
                                                             Serializer<V> valueSerializer) {
-    checkIndexName(groupName);
-    checkIdInGroup(mapId);
+    IndexAddress address = IndexAddress.valueOf(groupName, mapId);
+    long viewNativeHandle = view.getViewNativeHandle();
+    LongSupplier nativeMapConstructor =
+        () -> nativeCreateInGroup(groupName, mapId, viewNativeHandle);
+
+    return getOrCreate(address, view, keySerializer, valueSerializer, nativeMapConstructor);
+  }
+
+  private static <K, V> MapIndexProxy<K, V> getOrCreate(IndexAddress address, View view,
+      Serializer<K> keySerializer, Serializer<V> valueSerializer,
+      LongSupplier nativeMapConstructor) {
+    return view.findIndex(address)
+        .map(MapIndexProxy::<K, V>checkCachedInstance)
+        .orElseGet(() -> newMapIndexProxy(address, view, keySerializer, valueSerializer,
+            nativeMapConstructor));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  private static <K, V> MapIndexProxy<K, V> checkCachedInstance(StorageIndex cachedIndex) {
+    checkIndexType(cachedIndex, MapIndexProxy.class);
+    return (MapIndexProxy<K, V>) cachedIndex;
+  }
+
+  private static <K, V> MapIndexProxy<K, V> newMapIndexProxy(IndexAddress address, View view,
+      Serializer<K> keySerializer, Serializer<V> valueSerializer,
+      LongSupplier nativeMapConstructor) {
     CheckingSerializerDecorator<K> ks = CheckingSerializerDecorator.from(keySerializer);
     CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
 
-    long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle mapNativeHandle = createNativeMap(view,
-        () -> nativeCreateInGroup(groupName, mapId, viewNativeHandle));
+    NativeHandle mapNativeHandle = createNativeMap(view, nativeMapConstructor);
 
-    return new MapIndexProxy<>(mapNativeHandle, groupName, view, ks, vs);
+    MapIndexProxy<K, V> map = new MapIndexProxy<>(mapNativeHandle, address, view, ks, vs);
+    view.registerIndex(map);
+    return map;
   }
 
   private static NativeHandle createNativeMap(View view, LongSupplier nativeMapConstructor) {
@@ -161,10 +180,10 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
     return mapNativeHandle;
   }
 
-  private MapIndexProxy(NativeHandle nativeHandle, String name, View view,
+  private MapIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
                         CheckingSerializerDecorator<K> keySerializer,
                         CheckingSerializerDecorator<V> valueSerializer) {
-    super(nativeHandle, name, view);
+    super(nativeHandle, address, view);
     this.keySerializer = keySerializer;
     this.valueSerializer = valueSerializer;
   }

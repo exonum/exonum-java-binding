@@ -281,6 +281,16 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Override
+  ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return ValueSetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(ValueSetIndexProxy<String> index) {
     return index.contains("v1");
   }

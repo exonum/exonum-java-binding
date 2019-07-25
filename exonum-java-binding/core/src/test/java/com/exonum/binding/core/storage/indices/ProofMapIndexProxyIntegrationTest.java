@@ -73,7 +73,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -852,6 +851,17 @@ class ProofMapIndexProxyIntegrationTest
   @Override
   ProofMapIndexProxy<HashCode, String> create(String name, View view) {
     return createProofMap(name, view);
+  }
+
+  @Override
+  ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return ProofMapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.hash(),
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
   @Override

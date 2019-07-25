@@ -19,6 +19,9 @@ package com.exonum.binding.core.storage.database;
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
+import com.exonum.binding.core.storage.indices.IndexAddress;
+import com.exonum.binding.core.storage.indices.StorageIndex;
+import java.util.Optional;
 
 /**
  * Represents a view of the database.
@@ -39,6 +42,7 @@ public abstract class View extends AbstractNativeProxy {
 
   private final Cleaner cleaner;
   private final ModificationCounter modCounter;
+  private final OpenIndexRegistry indexRegistry = new OpenIndexRegistry();
   private final boolean canModify;
 
   /**
@@ -72,6 +76,32 @@ public abstract class View extends AbstractNativeProxy {
    */
   public long getViewNativeHandle() {
     return super.getNativeHandle();
+  }
+
+  /**
+   * Finds an open index by the given address.
+   *
+   * <p><em>This method is not designed to be used by services, rather by index factories.</em>
+   *
+   * @param address the index address
+   * @return an index with the given address; or {@code Optional.empty()} if no index
+   *     with such address was open in this view
+   */
+  public Optional<StorageIndex> findIndex(IndexAddress address) {
+    return indexRegistry.findIndex(address, StorageIndex.class);
+  }
+
+  /**
+   * Registers a new index created with this view.
+   *
+   * <p><em>This method is not designed to be used by services, rather by index factories.</em>
+   *
+   * @param index a new index to register
+   * @throws IllegalArgumentException if the index is already registered
+   * @see #findIndex(IndexAddress)
+   */
+  public void registerIndex(StorageIndex index) {
+    indexRegistry.registerIndex(index.getAddress(), index);
   }
 
   /**

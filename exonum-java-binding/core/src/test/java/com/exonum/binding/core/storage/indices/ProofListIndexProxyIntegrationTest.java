@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -55,6 +54,16 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   @Override
   ProofListIndexProxy<String> create(String name, View view) {
     return ProofListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
+  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
   @Override

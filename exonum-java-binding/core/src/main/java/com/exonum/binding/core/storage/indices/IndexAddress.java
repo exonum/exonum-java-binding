@@ -16,28 +16,60 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.google.common.base.MoreObjects;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * An Exonum index address: a pair of the name and an optional family id, which identifies
+ * An Exonum index address: a pair of the name and an optional id in a group, which identifies
  * an Exonum index.
  */
 public final class IndexAddress {
 
   private final String name;
-  @Nullable private final byte[] familyId;
+  @Nullable private final byte[] idInGroup;
 
-  public IndexAddress(String name) {
-    this(name, null);
+  /**
+   * Creates an address of an individual index.
+   *
+   * @param name the name of the index
+   */
+  public static IndexAddress valueOf(String name) {
+    return new IndexAddress(checkIndexName(name), null);
   }
 
-  public IndexAddress(String name, @Nullable byte[] familyId) {
-    this.name = checkNotNull(name);
-    this.familyId = familyId;
+  /**
+   * Creates an address of an index belonging to an index group.
+   *
+   * @param groupName the name of the index group
+   * @param idInGroup the id of the index in group
+   */
+  public static IndexAddress valueOf(String groupName, byte[] idInGroup) {
+    return new IndexAddress(checkIndexName(groupName), checkIdInGroup(idInGroup));
+  }
+
+  private IndexAddress(String name, @Nullable byte[] idInGroup) {
+    this.name = name;
+    this.idInGroup = idInGroup;
+  }
+
+  /**
+   * Returns the name of the index or index group.
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Returns the index id in a group if it belongs to one, otherwise returns an empty optional.
+   */
+  public Optional<byte[]> getIdInGroup() {
+    return Optional.ofNullable(idInGroup);
   }
 
   @Override
@@ -50,13 +82,22 @@ public final class IndexAddress {
     }
     IndexAddress that = (IndexAddress) o;
     return name.equals(that.name) &&
-        Arrays.equals(familyId, that.familyId);
+        Arrays.equals(idInGroup, that.idInGroup);
   }
 
   @Override
   public int hashCode() {
     int result = Objects.hash(name);
-    result = 31 * result + Arrays.hashCode(familyId);
+    result = 31 * result + Arrays.hashCode(idInGroup);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("name", name)
+        .add("idInGroup", idInGroup)
+        .omitNullValues()
+        .toString();
   }
 }
