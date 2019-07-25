@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Database, TemporaryDB};
+use exonum_merkledb::{Database, TemporaryDB, Patch};
 use jni::{
     objects::{JClass, JObject},
     JNIEnv,
@@ -72,22 +72,20 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Merges the given fork into the database.
-/// Invalidates provided `view_handle` by replacing it with new Fork. `view_handle` must be
-/// freed immediately by Java side.
+/// Merges the given patch into the database.
+/// The provided `patch_handle` is invalidated after the procedure and the
+/// Rust side is responsible for it.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeMerge(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
-    view_handle: Handle,
+    patch_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
         let db = handle::cast_handle::<TemporaryDB>(db_handle);
-        let view_ref = handle::cast_handle::<View>(view_handle);
-        let view = std::mem::replace(view_ref, View::from_owned_fork(db.fork()));
-        let fork = view.into_fork();
-        db.merge(fork.into_patch())
+        let patch = handle::acquire_handle_ownership::<Patch>(patch_handle);
+        db.merge(*patch)
             .expect("Unable to merge fork");
         Ok(())
     });
