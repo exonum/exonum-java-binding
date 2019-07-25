@@ -33,7 +33,7 @@ class OpenIndexRegistryTest {
   @Nested
   class WithSingleIndex {
 
-    private final IndexAddress address = new IndexAddress("name");
+    private final IndexAddress address = IndexAddress.valueOf("name");
     private final String entry = "John";
 
     @BeforeEach
@@ -76,7 +76,7 @@ class OpenIndexRegistryTest {
 
   @Test
   void findUnknownIndex() {
-    IndexAddress unknownAddress = new IndexAddress("Unknown");
+    IndexAddress unknownAddress = IndexAddress.valueOf("Unknown");
     Optional<String> index = registry.findIndex(unknownAddress, String.class);
 
     assertThat(index).isEmpty();
