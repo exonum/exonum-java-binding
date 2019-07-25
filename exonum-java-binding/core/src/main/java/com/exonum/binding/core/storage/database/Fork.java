@@ -145,7 +145,7 @@ public final class Fork extends View {
    * Converts this fork into patch, consuming the object, and returns the native handle
    * to the patch.
    *
-   * In case of failure RuntimeException is thrown and provided nativeHandle is
+   * <p>In case of failure RuntimeException is thrown and provided nativeHandle is
    * invalidated.
    */
   private static native long nativeIntoPatch(long nativeHandle);
