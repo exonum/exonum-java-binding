@@ -78,12 +78,6 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
    * are closed and cannot be used anymore. Any subsequent operations on these objects will result
    * in {@link IllegalStateException}.
    *
-   * <p>TODO(@bogdanov): If the fork cannot be applied to the database …
-   *
-   * <p>Once this method completes, any indexes created with the fork and the fork itself
-   * are closed and cannot be used. Any subsequent operations on these objects will result
-   * in {@link IllegalStateException}.
-   *
    * <p>If the fork cannot be applied to the database {@link RuntimeException} is
    * thrown and the provided fork is closed.
    *
