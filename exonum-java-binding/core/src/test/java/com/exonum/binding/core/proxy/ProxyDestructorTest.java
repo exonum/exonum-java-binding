@@ -19,7 +19,9 @@ package com.exonum.binding.core.proxy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -81,6 +83,24 @@ class ProxyDestructorTest {
     // Verify that the expected interactions happened exactly once.
     verify(handle).close();
     verify(destructor).accept(rawNativeHandle);
+  }
+
+  @Test
+  void cancelPreventsClean() {
+    NativeHandle handle = spy(new NativeHandle(1L));
+    LongConsumer destructor = mock(LongConsumer.class);
+
+    ProxyDestructor d = newDestructor(handle, destructor);
+
+    // Cancel the destructor execution
+    d.cancel();
+
+    // Clean
+    d.clean();
+
+    // Verify no operation has been performed
+    verify(handle, never()).close();
+    verify(destructor, never()).accept(anyLong());
   }
 
   @Test
