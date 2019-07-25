@@ -46,7 +46,8 @@ class ListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   @Override
   ListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return ListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string());
+    return ListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
   }
 
   @Override

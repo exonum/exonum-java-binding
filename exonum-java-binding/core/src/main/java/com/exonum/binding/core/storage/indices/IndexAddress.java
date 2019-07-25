@@ -81,8 +81,8 @@ public final class IndexAddress {
       return false;
     }
     IndexAddress that = (IndexAddress) o;
-    return name.equals(that.name) &&
-        Arrays.equals(idInGroup, that.idInGroup);
+    return name.equals(that.name)
+        && Arrays.equals(idInGroup, that.idInGroup);
   }
 
   @Override

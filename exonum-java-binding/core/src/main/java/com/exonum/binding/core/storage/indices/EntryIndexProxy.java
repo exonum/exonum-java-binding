@@ -107,11 +107,12 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
     //  On top of that, we put serializers in decorators,
     //  hence care must be exercised to 'unpack' them (that, in turn, somewhat breaks
     //  encapsulation of CheckingSerializerDecorator).
-//    Class<?> cachedSerializerType = cachedIndex.serializer.getClass();
-//    Class<?> requestedSerializerType = requestedSerializer.getClass();
-//    checkArgument(cachedSerializerType.equals(requestedSerializerType),
-//        "Cached instance of index (%s) has serializer of type (%s), but (%s) requested",
-//        cachedIndex, cachedSerializerType, requestedSerializerType);
+
+    //    Class<?> cachedSerializerType = cachedIndex.serializer.getClass();
+    //    Class<?> requestedSerializerType = requestedSerializer.getClass();
+    //    checkArgument(cachedSerializerType.equals(requestedSerializerType),
+    //        "Cached instance of index (%s) has serializer of type (%s), but (%s) requested",
+    //        cachedIndex, cachedSerializerType, requestedSerializerType);
 
     return (EntryIndexProxy<E>) cachedIndex;
   }

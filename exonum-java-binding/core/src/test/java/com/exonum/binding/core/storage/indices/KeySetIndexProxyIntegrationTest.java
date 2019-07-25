@@ -177,7 +177,8 @@ class KeySetIndexProxyIntegrationTest
 
   @Override
   KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return KeySetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string());
+    return KeySetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
   }
 
   @Override

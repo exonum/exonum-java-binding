@@ -854,9 +854,10 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   @Override
-  ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return ProofMapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.hash(),
-        StandardSerializers.string());
+  ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
+      View view) {
+    return ProofMapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.hash(), StandardSerializers.string());
   }
 
   @Override

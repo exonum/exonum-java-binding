@@ -282,7 +282,8 @@ class ValueSetIndexProxyIntegrationTest
 
   @Override
   ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return ValueSetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string());
+    return ValueSetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
   }
 
   @Override

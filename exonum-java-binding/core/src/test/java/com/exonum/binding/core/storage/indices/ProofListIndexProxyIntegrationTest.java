@@ -58,7 +58,8 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Override
   ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string());
+    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
   }
 
   @Override
