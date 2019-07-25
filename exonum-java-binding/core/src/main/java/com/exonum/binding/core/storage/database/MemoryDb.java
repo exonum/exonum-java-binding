@@ -84,7 +84,8 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
    * are closed and cannot be used. Any subsequent operations on these objects will result
    * in {@link IllegalStateException}.
    *
-   * <p>TBD: If the fork cannot be applied to the database …
+   * <p>If the fork cannot be applied to the database {@link RuntimeException} is
+   * thrown and the provided fork is closed.
    *
    * @param fork a fork to get changes from
    */
@@ -104,7 +105,7 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
 
   private native long nativeCreateFork(long dbNativeHandle);
 
-  private native void nativeMerge(long dbNativeHandle, long forkNativeHandle);
+  private native void nativeMerge(long dbNativeHandle, long patchNativeHandle);
 
   private static native void nativeFree(long dbNativeHandle);
 }
