@@ -60,6 +60,11 @@ class ListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
     return index.get(0L);
   }
 
+  @Override
+  void update(AbstractListIndexProxy<String> index) {
+    index.add(V1);
+  }
+
   @Test
   void removeLastEmptyList() {
     runTestWithView(database::createFork, (l) -> {

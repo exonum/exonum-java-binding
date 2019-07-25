@@ -18,6 +18,7 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K9;
+import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -189,5 +190,10 @@ class KeySetIndexProxyIntegrationTest
   @Override
   Object getAnyElement(KeySetIndexProxy<String> index) {
     return index.contains("k1");
+  }
+
+  @Override
+  void update(KeySetIndexProxy<String> index) {
+    index.add(V1);
   }
 }

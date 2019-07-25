@@ -72,6 +72,11 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     return index.get(0L);
   }
 
+  @Override
+  void update(AbstractListIndexProxy<String> index) {
+    index.add(V1);
+  }
+
   @Disabled //FIXME: Tests are disabled until proofs code fixed ECR-3319
   @Test
   void getRootHashEmptyList() {

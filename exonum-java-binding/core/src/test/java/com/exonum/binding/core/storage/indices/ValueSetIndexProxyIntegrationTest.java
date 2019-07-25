@@ -293,6 +293,11 @@ class ValueSetIndexProxyIntegrationTest
 
   @Override
   Object getAnyElement(ValueSetIndexProxy<String> index) {
-    return index.contains("v1");
+    return index.contains(V1);
+  }
+
+  @Override
+  void update(ValueSetIndexProxy<String> index) {
+    index.add(V1);
   }
 }

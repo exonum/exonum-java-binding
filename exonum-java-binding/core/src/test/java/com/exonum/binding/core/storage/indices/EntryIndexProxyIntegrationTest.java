@@ -156,4 +156,9 @@ class EntryIndexProxyIntegrationTest
   Object getAnyElement(EntryIndexProxy<String> index) {
     return index.get();
   }
+
+  @Override
+  void update(EntryIndexProxy<String> index) {
+    index.set(V1);
+  }
 }

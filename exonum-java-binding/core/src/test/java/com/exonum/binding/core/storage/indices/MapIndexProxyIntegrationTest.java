@@ -506,6 +506,11 @@ class MapIndexProxyIntegrationTest
     return index.get(K1);
   }
 
+  @Override
+  void update(MapIndexProxy<String, String> index) {
+    index.put(K1, V1);
+  }
+
   private static MapIndexProxy<String, String> createMap(String name, View view) {
     return MapIndexProxy.newInstance(name, view, StandardSerializers.string(),
         StandardSerializers.string());
