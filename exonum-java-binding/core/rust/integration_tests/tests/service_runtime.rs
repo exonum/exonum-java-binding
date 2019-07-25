@@ -32,7 +32,6 @@ lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
 }
 
-#[ignore] //FIXME: Ignored until proofs are fixed
 #[test]
 fn load_one_service() {
     let runtime = get_runtime();
@@ -45,7 +44,6 @@ fn load_one_service() {
     testkit.create_block();
 }
 
-#[ignore] //FIXME: Ignored until proofs are fixed
 #[test]
 fn load_two_services() {
     let runtime = get_runtime();
