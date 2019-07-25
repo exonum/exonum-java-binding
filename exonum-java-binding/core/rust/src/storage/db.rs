@@ -103,6 +103,15 @@ impl View {
             panic!("`into_fork` called on non-owning View");
         }
     }
+
+    /// Returns `true` iff `into_fork` conversion is possible.
+    pub fn can_convert_into_fork(&self) -> bool {
+        match self._owned {
+            None => false,
+            Some(ViewOwned::Snapshot(_)) => false,
+            Some(ViewOwned::Fork(_)) => true,
+        }
+    }
 }
 
 impl ViewRef {
