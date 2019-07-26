@@ -3,18 +3,26 @@
 # Resolves symlinks (including relative symlinks) to this script
 # and sets the EXONUM_HOME directory path.
 function get_exonum_home() {
+    # Save the script name
     local PRG="$0"
 
+    # While file is a symbolic link do…
     while [ -h "$PRG" ] ; do
+      # Output the symlink info in a form of "file_name -> real_path"
       local ls=`ls -ld "$PRG"`
+      # Use regexp to get "real_path" part
       local link=`expr "$ls" : '.*-> \(.*\)$'`
+      # If the path is absolute already
       if expr "$link" : '/.*' > /dev/null; then
+        # Use the path as script name for the next iteration
         local PRG="$link"
       else
+        # Else do the same but make it absolute before
         local PRG="`dirname "$PRG"`/$link"
       fi
     done
 
+    # Go one level up as the script is located in $EXONUM_HOME/bin directory.
     EXONUM_HOME=`dirname "$PRG"`/..
 }
 
