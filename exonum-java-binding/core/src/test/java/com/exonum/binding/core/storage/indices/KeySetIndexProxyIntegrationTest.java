@@ -143,9 +143,8 @@ class KeySetIndexProxyIntegrationTest
             K1)));
   }
 
-  // TODO: disabled until ECR-3317 completion (here and below)
   @Test
-  @Disabled
+  @Disabled("Fails until ECR-3317 is done")
   void getSetSize() {
     runTestWithView(database::createFork, (set) -> {
       set.add(K1);
@@ -155,13 +154,13 @@ class KeySetIndexProxyIntegrationTest
   }
 
   @Test
-  @Disabled
+  @Disabled("Fails until ECR-3317 is done")
   void isEmptyShouldReturnTrueForEmptySet() {
     runTestWithView(database::createSnapshot, (set) -> assertTrue(set.isEmpty()));
   }
 
   @Test
-  @Disabled
+  @Disabled("Fails until ECR-3317 is done")
   void isEmptyShouldReturnFalseForNonEmptySet() {
     runTestWithView(database::createFork, (set) -> {
       set.add(K1);
