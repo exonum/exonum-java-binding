@@ -34,7 +34,7 @@ class DefaultCleanActionTest {
   }
 
   @Test
-  void from() {
+  void from() throws Exception {
     Runnable r = mock(Runnable.class);
     String expectedResourceType = "Native proxy";
 

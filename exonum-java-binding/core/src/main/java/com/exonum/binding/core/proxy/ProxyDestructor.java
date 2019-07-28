@@ -26,7 +26,7 @@ import java.util.function.LongConsumer;
 /**
  * ProxyDestructor is a clean action that destroys a native proxy and closes its native handle.
  *
- * <p>Native proxies do not implement any interface (e.g., {@link CloseableNativeProxy})
+ * <p>Most native proxies do not implement any interface (e.g., {@link CloseableNativeProxy})
  * and use this class so that there is no public #close method available in the interface
  * of the proxy, making the risk of misuse smaller.
  *
@@ -34,12 +34,13 @@ import java.util.function.LongConsumer;
  *
  * <p>This class is not thread-safe.
  */
-public final class ProxyDestructor implements CleanAction<Class<?>> {
+public final class ProxyDestructor implements CancellableCleanAction<Class<?>> {
 
   private final NativeHandle nativeHandle;
   private final LongConsumer cleanFunction;
   private final Class<?> proxyClass;
   private boolean destroyed;
+  private boolean cancelled;
 
   /**
    * Creates a new destructor of a native proxy, registered in the given cleaner.
@@ -72,19 +73,20 @@ public final class ProxyDestructor implements CleanAction<Class<?>> {
     this.cleanFunction = checkNotNull(destructorFunction);
     this.proxyClass = checkNotNull(proxyClass);
     destroyed = false;
+    cancelled = false;
   }
 
   /**
    * Closes the native handle, so that it can no longer be accessed, and performs a clean action,
    * passing the native handle value.
    *
-   *<p>If native handle is not valid, does nothing.
+   * <p>If native handle is not valid, does nothing.
    *
    * <p>This method is idempotent.
    */
   @Override
   public void clean() {
-    if (destroyed) {
+    if (destroyed || cancelled) {
       return;
     }
 
@@ -110,11 +112,17 @@ public final class ProxyDestructor implements CleanAction<Class<?>> {
   }
 
   @Override
+  public void cancel() {
+    cancelled = true;
+  }
+
+  @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
+        .add("nativeHandle", nativeHandle)
         .add("proxyClass", proxyClass)
         .add("destroyed", destroyed)
-        .add("nativeHandle", nativeHandle)
+        .add("cancelled", cancelled)
         .toString();
   }
 }
