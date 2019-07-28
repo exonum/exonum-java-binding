@@ -22,9 +22,11 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -32,7 +34,6 @@ import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.TestStorageItems;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.List;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -145,6 +146,21 @@ class TemporaryDbIntegrationTest {
       for (int i = 0; i < values.size(); i++) {
         assertThat(values.get(i), equalTo(list.get(i)));
       }
+    }
+  }
+
+  @Test
+  @Disabled("Depends on ECR-3330")
+  void mergingAlreadyMergedForkFails() throws CloseFailuresException {
+    try (MemoryDb db = MemoryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
+      Fork fork = db.createFork(cleaner);
+
+      // Merge the patch
+      db.merge(fork);
+
+      // Check it cannot be merged again
+      assertThrows(IllegalStateException.class, () -> db.merge(fork));
     }
   }
 

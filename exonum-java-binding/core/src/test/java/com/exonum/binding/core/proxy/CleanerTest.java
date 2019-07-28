@@ -40,7 +40,7 @@ class CleanerTest {
   }
 
   @Test
-  void addActionToClosedExecutesAction() throws CloseFailuresException {
+  void addActionToClosedExecutesAction() throws Exception {
     context.close();
 
     CleanAction action = mock(CleanAction.class);
@@ -53,7 +53,7 @@ class CleanerTest {
   }
 
   @Test
-  void addThrowingActionExceptionIncludesSuppressed() throws CloseFailuresException {
+  void addThrowingActionExceptionIncludesSuppressed() throws Exception {
     context.close();
 
     // Create a throwing action.
@@ -72,7 +72,7 @@ class CleanerTest {
   }
 
   @Test
-  void closeOneAction() throws CloseFailuresException {
+  void closeOneAction() throws Exception {
     CleanAction action = mock(CleanAction.class);
 
     context.add(action);
@@ -83,7 +83,7 @@ class CleanerTest {
   }
 
   @Test
-  void closeMultipleActions() throws CloseFailuresException {
+  void closeMultipleActions() throws Exception {
     CleanAction a1 = mock(CleanAction.class);
     CleanAction a2 = mock(CleanAction.class);
 
@@ -99,7 +99,7 @@ class CleanerTest {
   }
 
   @Test
-  void closeMultipleActionsWhenFirstToBeClosedFails() {
+  void closeMultipleActionsWhenFirstToBeClosedFails() throws Exception {
     CleanAction a1 = mock(CleanAction.class);
     CleanAction a2 = mock(CleanAction.class);
     doThrow(RuntimeException.class).when(a2).clean();
@@ -119,7 +119,7 @@ class CleanerTest {
   }
 
   @Test
-  void closeIsIdempotent() throws CloseFailuresException {
+  void closeIsIdempotent() throws Exception {
     CleanAction action = mock(CleanAction.class);
 
     context.add(action);
