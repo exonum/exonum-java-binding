@@ -241,7 +241,6 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  @Disabled("Fails until ECR-3317 is done")
   void getSetSize() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);
@@ -251,13 +250,11 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
-  @Disabled("Fails until ECR-3317 is done")
   void isEmptyShouldReturnTrueForEmptySet() {
     runTestWithView(database::createSnapshot, (set) -> assertTrue(set.isEmpty()));
   }
 
   @Test
-  @Disabled("Fails until ECR-3317 is done")
   void isEmptyShouldReturnFalseForNonEmptySet() {
     runTestWithView(database::createFork, (set) -> {
       set.add(V1);

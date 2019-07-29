@@ -704,7 +704,6 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  @Disabled("Fails until ECR-3317 is done")
   void getMapSize() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
@@ -714,13 +713,11 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  @Disabled("Fails until ECR-3317 is done")
   void isEmptyShouldReturnTrueForEmptyMap() {
     runTestWithView(database::createSnapshot, (map) -> assertTrue(map.isEmpty()));
   }
 
   @Test
-  @Disabled("Fails until ECR-3317 is done")
   void isEmptyShouldReturnFalseForNonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
