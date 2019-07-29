@@ -81,7 +81,8 @@ public abstract class View extends AbstractNativeProxy {
   /**
    * Finds an open index by the given address.
    *
-   * <p><em>This method is not designed to be used by services, rather by index factories.</em>
+   * <p><em>This method is for internal use. It is not designed to be used by services,
+   * rather by index factories.</em>
    *
    * @param address the index address
    * @return an index with the given address; or {@code Optional.empty()} if no index
@@ -94,7 +95,8 @@ public abstract class View extends AbstractNativeProxy {
   /**
    * Registers a new index created with this view.
    *
-   * <p><em>This method is not designed to be used by services, rather by index factories.</em>
+   * <p><em>This method is for internal use. It is not designed to be used by services,
+   * rather by index factories.</em>
    *
    * @param index a new index to register
    * @throws IllegalArgumentException if the index is already registered
