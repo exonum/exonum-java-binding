@@ -23,9 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.Database;
-import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import org.junit.jupiter.api.AfterEach;
