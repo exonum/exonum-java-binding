@@ -15,7 +15,7 @@
 use exonum::crypto::Hash;
 use exonum_merkledb::{
     proof_list_index::{ListProof, ProofListIndexIter},
-    Fork, ProofListIndex, Snapshot,
+    Fork, ObjectHash, ProofListIndex, Snapshot,
 };
 use jni::{
     errors::Result,
@@ -188,20 +188,18 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
 /// Returns the root hash of the proof list or default hash value if it is empty.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRootHash(
-    _env: JNIEnv,
+    env: JNIEnv,
     _: JObject,
-    _list_handle: Handle,
+    list_handle: Handle,
 ) -> jbyteArray {
-    //    // FIXME: uncomment when new proofs are implemented
-    //    let res = panic::catch_unwind(|| {
-    //        let hash = match *handle::cast_handle::<IndexType>(list_handle) {
-    //            IndexType::SnapshotIndex(ref list) => list.merkle_root(),
-    //            IndexType::ForkIndex(ref list) => list.merkle_root(),
-    //        };
-    //        utils::convert_hash(&env, &hash)
-    //    });
-    //    utils::unwrap_exc_or(&env, res, ptr::null_mut())
-    ptr::null_mut()
+    let res = panic::catch_unwind(|| {
+        let hash = match *handle::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.object_hash(),
+            IndexType::ForkIndex(ref list) => list.object_hash(),
+        };
+        utils::convert_hash(&env, &hash)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Returns Java representation of the proof that an element exists at the specified index.
@@ -225,22 +223,20 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
 /// Returns Java representation of the proof that some elements exists in the specified range.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
-    _env: JNIEnv,
+    env: JNIEnv,
     _: JObject,
-    _list_handle: Handle,
-    _from: jlong,
-    _to: jlong,
+    list_handle: Handle,
+    from: jlong,
+    to: jlong,
 ) -> jobject {
-    //    // FIXME: uncomment when new proofs are implemented
-    //    let res = panic::catch_unwind(|| {
-    //        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
-    //            IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64, to as u64),
-    //            IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64, to as u64),
-    //        };
-    //        make_java_proof(&env, &proof).map(|x| x.into_inner())
-    //    });
-    //    utils::unwrap_exc_or(&env, res, ptr::null_mut())
-    ptr::null_mut()
+    let res = panic::catch_unwind(|| {
+        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64..to as u64),
+            IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64..to as u64),
+        };
+        make_java_proof(&env, &proof).map(|x| x.into_inner())
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Returns pointer to the iterator over list.
@@ -389,7 +385,9 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
             make_java_proof_branch(env, left, right)
         }
         ListProof::Leaf(ref value) => make_java_proof_element(env, value),
-        ListProof::Absent(_) => unreachable!(), // FIXME: temporary solution, rewrite
+        ListProof::Absent(_) => {
+            unimplemented!("The ProofOfAbsence structure is not public for the moment")
+        }
     }
 }
 
