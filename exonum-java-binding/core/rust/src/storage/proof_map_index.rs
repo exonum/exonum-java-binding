@@ -112,7 +112,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     handle::drop_handle::<IndexType>(&env, map_handle);
 }
 
-/// Returns the root hash of the proof map or default hash value if it is empty.
+/// Returns the object hash of the proof map or default hash value if it is empty.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetRootHash(
     env: JNIEnv,
