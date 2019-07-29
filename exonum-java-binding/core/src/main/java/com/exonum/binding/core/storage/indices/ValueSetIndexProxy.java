@@ -139,7 +139,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
 
   private static <E> ValueSetIndexProxy<E> getOrCreate(IndexAddress address, View view,
       Serializer<E> serializer, LongSupplier nativeSetConstructor) {
-    return view.findIndex(address)
+    return view.findOpenIndex(address)
         .map(ValueSetIndexProxy::<E>checkCachedInstance)
         .orElseGet(() -> newValueSetProxy(address, view, serializer, nativeSetConstructor));
   }

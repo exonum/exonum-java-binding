@@ -92,7 +92,7 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
   public static <E> EntryIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
     IndexAddress address = IndexAddress.valueOf(name);
-    return view.findIndex(address)
+    return view.findOpenIndex(address)
         .map(EntryIndexProxy::<E>checkCachedInstance)
         .orElseGet(() -> newEntryIndexProxy(address, view, serializer));
   }

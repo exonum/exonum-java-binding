@@ -132,7 +132,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
 
   private static <E> KeySetIndexProxy<E> getOrCreate(IndexAddress address, View view,
       Serializer<E> serializer, LongSupplier nativeSetConstructor) {
-    return view.findIndex(address)
+    return view.findOpenIndex(address)
         .map(KeySetIndexProxy::<E>checkCachedInstance)
         .orElseGet(() -> newKeySetProxy(address, view, serializer, nativeSetConstructor));
   }

@@ -125,7 +125,7 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
 
   private static <E> ListIndexProxy<E> getOrCreate(IndexAddress address, View view,
       Serializer<E> serializer, LongSupplier nativeListConstructor) {
-    return view.findIndex(address)
+    return view.findOpenIndex(address)
         .map(ListIndexProxy::<E>checkCachedInstance)
         .orElseGet(() -> newListIndexProxy(address, view, serializer, nativeListConstructor));
   }

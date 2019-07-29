@@ -136,7 +136,7 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
 
   private static <E> ProofListIndexProxy<E> getOrCreate(IndexAddress address, View view,
       Serializer<E> serializer, LongSupplier nativeListConstructor) {
-    return view.findIndex(address)
+    return view.findOpenIndex(address)
         .map(ProofListIndexProxy::<E>checkCachedInstance)
         .orElseGet(() -> newListIndexProxy(address, view, serializer, nativeListConstructor));
   }

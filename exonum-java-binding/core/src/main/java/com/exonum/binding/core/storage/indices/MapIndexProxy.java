@@ -146,7 +146,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   private static <K, V> MapIndexProxy<K, V> getOrCreate(IndexAddress address, View view,
       Serializer<K> keySerializer, Serializer<V> valueSerializer,
       LongSupplier nativeMapConstructor) {
-    return view.findIndex(address)
+    return view.findOpenIndex(address)
         .map(MapIndexProxy::<K, V>checkCachedInstance)
         .orElseGet(() -> newMapIndexProxy(address, view, keySerializer, valueSerializer,
             nativeMapConstructor));

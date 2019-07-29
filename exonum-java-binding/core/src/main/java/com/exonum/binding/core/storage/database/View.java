@@ -88,7 +88,7 @@ public abstract class View extends AbstractNativeProxy {
    * @return an index with the given address; or {@code Optional.empty()} if no index
    *     with such address was open in this view
    */
-  public Optional<StorageIndex> findIndex(IndexAddress address) {
+  public Optional<StorageIndex> findOpenIndex(IndexAddress address) {
     return indexRegistry.findIndex(address, StorageIndex.class);
   }
 
@@ -100,7 +100,7 @@ public abstract class View extends AbstractNativeProxy {
    *
    * @param index a new index to register
    * @throws IllegalArgumentException if the index is already registered
-   * @see #findIndex(IndexAddress)
+   * @see #findOpenIndex(IndexAddress)
    */
   public void registerIndex(StorageIndex index) {
     indexRegistry.registerIndex(index.getAddress(), index);
