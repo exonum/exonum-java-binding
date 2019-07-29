@@ -152,7 +152,7 @@ class TemporaryDbIntegrationTest {
   @Test
   @Disabled("Depends on ECR-3330")
   void mergingAlreadyMergedForkFails() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
 

@@ -74,7 +74,7 @@ public final class TemporaryDb extends AbstractCloseableNativeProxy implements D
   }
 
   /**
-   * Applies the changes from the given fork to the database state. MemoryDb can only
+   * Applies the changes from the given fork to the database state. TemporaryDb can only
    * merge forks that {@linkplain #createFork(Cleaner) it created itself}.
    *
    * <p>Once this method completes, any indexes created with the fork and the fork itself

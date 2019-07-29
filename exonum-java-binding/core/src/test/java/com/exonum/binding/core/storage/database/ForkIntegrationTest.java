@@ -38,11 +38,11 @@ class ForkIntegrationTest {
   @Test
   @Disabled("Depends on ECR-3330")
   void mergeInvalidatesForkAndDependencies() throws Exception {
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner("parent")) {
       // Create some indexes and an iterator using a fork.
       // Each of them shall be registered with the internal Fork cleaner,
-      // ensuring destruction on intoPatch (MemoryDb#merge)
+      // ensuring destruction on intoPatch (TemporaryDb#merge)
       Fork fork = db.createFork(cleaner);
       ListIndex<String> list1 = newList("list_1", fork);
       list1.add(V1);
@@ -66,7 +66,7 @@ class ForkIntegrationTest {
   @Test
   @Disabled("Depends on ECR-3330")
   void mergeAbortedIfCollectionsFailedToClose() throws Exception {
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner("parent")) {
       Fork fork = db.createFork(cleaner);
       // Create a 'normal' collection
@@ -97,7 +97,7 @@ class ForkIntegrationTest {
     ListIndex<String> list2;
     Iterator<String> it;
 
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner("parent")) {
       // Create some indexes and an iterator using a fork.
       // Each of them shall be registered with the Fork cleaner, which, in turn,
