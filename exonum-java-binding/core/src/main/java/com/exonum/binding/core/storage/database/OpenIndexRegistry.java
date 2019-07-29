@@ -31,11 +31,7 @@ import java.util.Optional;
  */
 class OpenIndexRegistry {
 
-  private final Map<IndexAddress, Object> indexes;
-
-  OpenIndexRegistry() {
-    this.indexes = new HashMap<>();
-  }
+  private final Map<IndexAddress, Object> indexes = new HashMap<>();
 
   void registerIndex(IndexAddress address, Object index) {
     Object present = indexes.putIfAbsent(address, index);
