@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.core.storage.indices.CheckedMapProofMatcher.isValid;
 import static com.exonum.binding.core.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.core.storage.indices.MapTestEntry.absentEntry;
