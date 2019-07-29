@@ -48,7 +48,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
    * An empty list root hash: an all-zero hash code.
    */
   private static final HashCode EMPTY_LIST_ROOT_HASH =
-      HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
+      HashCode.fromString("c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9");
 
   private static final String LIST_NAME = "test_proof_list";
 
@@ -62,7 +62,6 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     return index.get(0L);
   }
 
-  @Disabled //FIXME: Tests are disabled until proofs code fixed ECR-3319
   @Test
   void getRootHashEmptyList() {
     runTestWithView(database::createSnapshot, (list) -> {
@@ -70,7 +69,6 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  @Disabled
   @Test
   void getRootHashSingletonList() {
     runTestWithView(database::createFork, (list) -> {
@@ -88,7 +86,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
         (list) -> assertThrows(IndexOutOfBoundsException.class, () -> list.getProof(0)));
   }
 
-  @Disabled
+  @Disabled //FIXME: Tests here and below are disabled until proofs code is updated ECR-3318
   @Test
   void getProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
