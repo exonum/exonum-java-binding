@@ -109,8 +109,8 @@ class ProofMapIndexProxyIntegrationTest
 
   private static final HashCode INVALID_PROOF_KEY = HashCode.fromString("1234");
 
-  private static final HashCode EMPTY_MAP_ROOT_HASH = HashCode.fromBytes(
-      new byte[DEFAULT_HASH_SIZE_BYTES]);
+  private static final HashCode EMPTY_MAP_ROOT_HASH = HashCode.fromString(
+          "7324b5c72b51bb5d4c180f1109cfd347b60473882145841c39f3e584576296f9");
 
   @Test
   void containsKey() {
@@ -209,14 +209,12 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   void getRootHash_EmptyMap() {
     runTestWithView(database::createSnapshot,
         (map) -> assertThat(map.getRootHash(), equalTo(EMPTY_MAP_ROOT_HASH)));
   }
 
-  @Disabled
   @Test
   void getRootHash_NonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
@@ -229,7 +227,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled  //FIXME: Tests here and below are disabled until ECR-3320
   @Test
   void getProof_EmptyMapDoesNotContainSingleKey() {
     runTestWithView(database::createSnapshot,
