@@ -26,7 +26,7 @@ use utils;
 
 /// Returns pointer to created `TemporaryDB` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeCreate(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb_nativeCreate(
     env: JNIEnv,
     _: JClass,
 ) -> Handle {
@@ -36,7 +36,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
 
 /// Destroys underlying `TemporaryDB` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb_nativeFree(
     env: JNIEnv,
     _: JClass,
     db_handle: Handle,
@@ -46,7 +46,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
 
 /// Returns pointer to created `Snapshot` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeCreateSnapshot(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb_nativeCreateSnapshot(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
@@ -60,7 +60,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
 
 /// Returns pointer to created `Fork` object.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeCreateFork(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb_nativeCreateFork(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
@@ -74,7 +74,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_na
 
 /// Merges the given fork into the database.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_database_MemoryDb_nativeMerge(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb_nativeMerge(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,

@@ -38,17 +38,17 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
-class MemoryDbIntegrationTest {
+class TemporaryDbIntegrationTest {
 
   @Test
   void databaseMustClosePromptly() {
-    MemoryDb database = MemoryDb.newInstance();
+    TemporaryDb database = TemporaryDb.newInstance();
     database.close();  // No exceptions.
   }
 
   @Test
   void getSnapshotShallCreateNonNullSnapshot() throws Exception {
-    try (MemoryDb database = MemoryDb.newInstance();
+    try (TemporaryDb database = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot snapshot = database.createSnapshot(cleaner);
       assertNotNull(snapshot);
@@ -57,7 +57,7 @@ class MemoryDbIntegrationTest {
 
   @Test
   void getForkShallCreateNonNullFork() throws Exception {
-    try (MemoryDb database = MemoryDb.newInstance();
+    try (TemporaryDb database = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork fork = database.createFork(cleaner);
       assertNotNull(fork);
@@ -67,7 +67,7 @@ class MemoryDbIntegrationTest {
   @Disabled // FIXME: Tests are disabled until ECR-3330
   @Test
   void merge_singleList() throws Exception {
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       String listName = "list";
 
@@ -90,7 +90,7 @@ class MemoryDbIntegrationTest {
   @Disabled
   @Test
   void merge_twoIndices() throws Exception {
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       String listName = "list";
       String mapName = "map";
@@ -123,7 +123,7 @@ class MemoryDbIntegrationTest {
   @Disabled
   @Test
   void merge_multipleForks() throws Exception {
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       String listName = "list";
 
@@ -152,7 +152,7 @@ class MemoryDbIntegrationTest {
   @Test
   @Disabled("Depends on ECR-3330")
   void mergingAlreadyMergedForkFails() throws CloseFailuresException {
-    try (MemoryDb db = MemoryDb.newInstance();
+    try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
 
