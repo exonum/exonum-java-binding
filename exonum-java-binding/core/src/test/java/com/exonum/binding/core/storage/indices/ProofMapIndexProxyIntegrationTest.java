@@ -40,6 +40,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -73,7 +74,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -682,24 +682,12 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  /**
-   * A simple integration test that ensures that:
-   * - ProofMap constructor preserves the index type and
-   * - Map constructor checks it, preventing illegal access to ProofMap internals.
-   */
   @Test
-  void constructorShallPreserveTypeInformation() {
-    runTestWithView(database::createFork, (view, map) -> {
+  void getMapSize() {
+    runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      // Create a regular map with the same name as the proof map above.
-      RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-        MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
-            StandardSerializers.hash(), StandardSerializers.string());
-      });
-      // TODO: Change message after https://jira.bf.local/browse/ECR-3354
-      assertThat(thrown.getLocalizedMessage(),
-              containsString("Index type doesn't match specified"));
+      assertEquals(map.size(), 1);
     });
   }
 
@@ -855,8 +843,25 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   @Override
+  ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
+      View view) {
+    return ProofMapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.hash(), StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(ProofMapIndexProxy<HashCode, String> index) {
     return index.get(PK1);
+  }
+
+  @Override
+  void update(ProofMapIndexProxy<HashCode, String> index) {
+    index.put(PK1, V1);
   }
 
   private static ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {

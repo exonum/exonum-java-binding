@@ -143,7 +143,22 @@ class EntryIndexProxyIntegrationTest
   }
 
   @Override
+  EntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return null; // Entry index does not support groups
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(EntryIndexProxy<String> index) {
     return index.get();
+  }
+
+  @Override
+  void update(EntryIndexProxy<String> index) {
+    index.set(V1);
   }
 }

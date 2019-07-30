@@ -19,7 +19,7 @@ package com.exonum.binding.app;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.exonum.binding.core.runtime.ServiceRuntime;
-import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ class ServiceRuntimeBootstrapIntegrationTest {
 
     // Check that once createServiceRuntime returns, the native library is loaded. If it’s not,
     // we’ll get an UnsatisfiedLinkError, failing the test.
-    try (MemoryDb database = MemoryDb.newInstance()) {
+    try (TemporaryDb database = TemporaryDb.newInstance()) {
       assertNotNull(database);
     }
   }

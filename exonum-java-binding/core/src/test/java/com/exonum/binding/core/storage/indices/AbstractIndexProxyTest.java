@@ -36,7 +36,6 @@ class AbstractIndexProxyTest {
 
   private static final String INDEX_NAME = "index_name";
 
-
   private AbstractIndexProxy proxy;
 
   @Test
@@ -111,7 +110,7 @@ class AbstractIndexProxyTest {
     private static final long NATIVE_HANDLE = 0x11L;
 
     IndexProxyImpl(View view) {
-      super(new NativeHandle(NATIVE_HANDLE), INDEX_NAME, view);
+      super(new NativeHandle(NATIVE_HANDLE), IndexAddress.valueOf(INDEX_NAME), view);
     }
   }
 

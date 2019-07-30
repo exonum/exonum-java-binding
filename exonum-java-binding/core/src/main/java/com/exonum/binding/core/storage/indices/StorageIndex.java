@@ -24,8 +24,16 @@ import com.exonum.binding.core.storage.database.View;
  * <p>Also known as a collection, a table, and also as (rarely) a view for
  * a {@linkplain View database view} is inherently associated with an index.
  */
-interface StorageIndex {
+public interface StorageIndex {
 
   /** Returns the name of this index. */
-  String getName();
+  default String getName() {
+    return getAddress().getName();
+  }
+
+  /**
+   * Returns the <em>index address</em>: its unique identifier in the database. It consists
+   * of the name and, in case this index belongs to an index family, a family identifier.
+   */
+  IndexAddress getAddress();
 }

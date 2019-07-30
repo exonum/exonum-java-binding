@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
@@ -40,7 +39,7 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    */
   final ModificationCounter modCounter;
 
-  private final String name;
+  private final IndexAddress address;
 
   /**
    * Creates a new index.
@@ -48,21 +47,20 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    * <p>Subclasses shall create a native object and pass a native handle to this constructor.
    *
    * @param nativeHandle a native handle of the created index
-   * @param name a name of this index
+   * @param address the address of this index
    * @param view a database view from which the index has been created
    * @throws NullPointerException if any parameter is null
    */
-  AbstractIndexProxy(NativeHandle nativeHandle, String name, View view) {
+  AbstractIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view) {
     super(nativeHandle);
-    this.name = checkIndexName(name);
-    this.dbView = checkNotNull(view);
+    this.address = checkNotNull(address);
+    this.dbView = view;
     this.modCounter = view.getModificationCounter();
   }
 
-  /** Returns the name of this index. */
   @Override
-  public final String getName() {
-    return name;
+  public IndexAddress getAddress() {
+    return address;
   }
 
   /**
@@ -90,6 +88,6 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
   @Override
   public String toString() {
     // test_map: ProofMap
-    return name + ": " + getClass().getName();
+    return getName() + ": " + getClass().getName();
   }
 }
