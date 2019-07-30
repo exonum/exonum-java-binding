@@ -45,8 +45,24 @@ class ListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
   }
 
   @Override
+  ListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return ListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ProofListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(AbstractListIndexProxy<String> index) {
     return index.get(0L);
+  }
+
+  @Override
+  void update(AbstractListIndexProxy<String> index) {
+    index.add(V1);
   }
 
   @Test

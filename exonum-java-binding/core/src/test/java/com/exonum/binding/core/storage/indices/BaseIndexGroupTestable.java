@@ -17,7 +17,7 @@
 package com.exonum.binding.core.storage.indices;
 
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -32,11 +32,11 @@ abstract class BaseIndexGroupTestable {
    */
   Cleaner cleaner;
 
-  MemoryDb db;
+  TemporaryDb db;
 
   @BeforeEach
   public void setUp() {
-    db = MemoryDb.newInstance();
+    db = TemporaryDb.newInstance();
     cleaner = new Cleaner();
   }
 
