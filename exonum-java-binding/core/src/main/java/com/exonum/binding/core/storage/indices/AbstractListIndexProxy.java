@@ -37,9 +37,9 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
 
   final CheckingSerializerDecorator<T> serializer;
 
-  AbstractListIndexProxy(NativeHandle nativeHandle, String name, View view,
+  AbstractListIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
                          CheckingSerializerDecorator<T> userSerializer) {
-    super(nativeHandle, name, view);
+    super(nativeHandle, address, view);
     this.serializer = userSerializer;
   }
 

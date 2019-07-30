@@ -23,17 +23,25 @@ import static com.exonum.binding.common.crypto.CryptoFunctions.Ed25519.SIGNATURE
 import static com.exonum.binding.common.crypto.CryptoUtils.hasLength;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
+import com.goterl.lazycode.lazysodium.utils.LibraryLoader;
+import com.goterl.lazycode.lazysodium.utils.LibraryLoader.Mode;
 
 /**
  * A ED25519 public-key signature system crypto function.
  */
-public enum Ed25519CryptoFunction implements CryptoFunction {
+final class Ed25519CryptoFunction implements CryptoFunction {
 
-  INSTANCE;
+  static final Ed25519CryptoFunction INSTANCE = new Ed25519CryptoFunction(Mode.PREFER_SYSTEM);
 
-  private final LazySodiumJava lazySodium = new LazySodiumJava(new SodiumJava());
+  private final LazySodiumJava lazySodium;
+
+  @VisibleForTesting
+  Ed25519CryptoFunction(LibraryLoader.Mode mode) {
+    lazySodium = new LazySodiumJava(new SodiumJava(mode));
+  }
 
   @Override
   public KeyPair generateKeyPair(byte[] seed) {

@@ -18,8 +18,10 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K9;
+import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -141,6 +143,29 @@ class KeySetIndexProxyIntegrationTest
             K1)));
   }
 
+  @Test
+  void getSetSize() {
+    runTestWithView(database::createFork, (set) -> {
+      set.add(K1);
+
+      assertEquals(set.size(), 1);
+    });
+  }
+
+  @Test
+  void isEmptyShouldReturnTrueForEmptySet() {
+    runTestWithView(database::createSnapshot, (set) -> assertTrue(set.isEmpty()));
+  }
+
+  @Test
+  void isEmptyShouldReturnFalseForNonEmptySet() {
+    runTestWithView(database::createFork, (set) -> {
+      set.add(K1);
+
+      assertFalse(set.isEmpty());
+    });
+  }
+
   /**
    * Creates a view, a key set index and runs a test against the view and the set.
    * Automatically closes the view and the set.
@@ -176,7 +201,23 @@ class KeySetIndexProxyIntegrationTest
   }
 
   @Override
+  KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return KeySetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(KeySetIndexProxy<String> index) {
     return index.contains("k1");
+  }
+
+  @Override
+  void update(KeySetIndexProxy<String> index) {
+    index.add(V1);
   }
 }

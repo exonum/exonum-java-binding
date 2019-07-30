@@ -16,8 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkStorageValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -105,14 +104,11 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    */
   public static <E> ValueSetIndexProxy<E> newInstance(String name, View view,
                                                       Serializer<E> serializer) {
-    checkIndexName(name);
-    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
-
+    IndexAddress address = IndexAddress.valueOf(name);
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle setNativeHandle = createNativeSet(view,
-        () -> nativeCreate(name, viewNativeHandle));
+    LongSupplier nativeSetConstructor = () -> nativeCreate(name, viewNativeHandle);
 
-    return new ValueSetIndexProxy<>(setNativeHandle, name, view, s);
+    return getOrCreate(address, view, serializer, nativeSetConstructor);
   }
 
   /**
@@ -133,15 +129,36 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    */
   public static <E> ValueSetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
                                                            View view, Serializer<E> serializer) {
-    checkIndexName(groupName);
-    checkIdInGroup(indexId);
+    IndexAddress address = IndexAddress.valueOf(groupName, indexId);
+    long viewNativeHandle = view.getViewNativeHandle();
+    LongSupplier nativeSetConstructor =
+        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle);
+
+    return getOrCreate(address, view, serializer, nativeSetConstructor);
+  }
+
+  private static <E> ValueSetIndexProxy<E> getOrCreate(IndexAddress address, View view,
+      Serializer<E> serializer, LongSupplier nativeSetConstructor) {
+    return view.findOpenIndex(address)
+        .map(ValueSetIndexProxy::<E>checkCachedInstance)
+        .orElseGet(() -> newValueSetProxy(address, view, serializer, nativeSetConstructor));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  private static <E> ValueSetIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
+    checkIndexType(cachedIndex, ValueSetIndexProxy.class);
+    return (ValueSetIndexProxy<E>) cachedIndex;
+  }
+
+  private static <E> ValueSetIndexProxy<E> newValueSetProxy(IndexAddress address, View view,
+      Serializer<E> serializer, LongSupplier nativeSetConstructor) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle setNativeHandle = createNativeSet(view,
-        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle));
+    NativeHandle setNativeHandle = createNativeSet(view, nativeSetConstructor);
 
-    return new ValueSetIndexProxy<>(setNativeHandle, groupName, view, s);
+    ValueSetIndexProxy<E> set = new ValueSetIndexProxy<>(setNativeHandle, address, view, s);
+    view.registerIndex(set);
+    return set;
   }
 
   private static NativeHandle createNativeSet(View view, LongSupplier nativeSetConstructor) {
@@ -153,9 +170,9 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     return setNativeHandle;
   }
 
-  private ValueSetIndexProxy(NativeHandle nativeHandle, String name, View view,
+  private ValueSetIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
                              CheckingSerializerDecorator<E> serializer) {
-    super(nativeHandle, name, view);
+    super(nativeHandle, address, view);
     this.serializer = serializer;
   }
 
@@ -333,6 +350,20 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     nativeRemoveByHash(getNativeHandle(), elementHash.asBytes());
   }
 
+  /**
+   * Returns the number of elements in this set.
+   */
+  public long size() {
+    return nativeSize(getNativeHandle());
+  }
+
+  /**
+   * Returns true if this set has no elements.
+   */
+  public boolean isEmpty() {
+    return nativeIsEmpty(getNativeHandle());
+  }
+
   private static native long nativeCreate(String setName, long viewNativeHandle);
 
   private static native long nativeCreateInGroup(String familyName, byte[] setId,
@@ -358,4 +389,8 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   private native void nativeRemoveByHash(long nativeHandle, byte[] elementHash);
 
   private static native void nativeFree(long nativeHandle);
+
+  private native long nativeSize(long nativeHandle);
+
+  private native boolean nativeIsEmpty(long nativeHandle);
 }

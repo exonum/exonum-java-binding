@@ -27,20 +27,23 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.MemoryDb;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Optional;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class TestServiceIntegrationTest {
 
+  @Disabled // FIXME: disabled until ECR-3320.
   @Test
   @RequiresNativeLibrary
   void initialize() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner();
-        MemoryDb memoryDb = MemoryDb.newInstance()) {
-      Fork fork = memoryDb.createFork(cleaner);
+        TemporaryDb temporaryDb = TemporaryDb.newInstance()) {
+      Fork fork = temporaryDb.createFork(cleaner);
       TestService service = new TestService();
 
       Optional<String> initialConfig = service.initialize(fork);

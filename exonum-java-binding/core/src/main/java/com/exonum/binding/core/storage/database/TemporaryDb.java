@@ -20,30 +20,34 @@ import static com.exonum.binding.core.proxy.NativeHandle.INVALID_NATIVE_HANDLE;
 
 import com.exonum.binding.core.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * An in-memory database for testing purposes. It can create both read-only snapshots
- * and read-write forks. The changes made to database forks can be
- * {@linkplain MemoryDb#merge(Fork) applied} to the database state.
+ * A MerkleDB which stores its data in the temporary directory for testing purposes.
+ * It can create both read-only snapshots and read-write forks. The changes made to
+ * database forks can be {@linkplain TemporaryDb#merge(Fork) applied} to the database state.
+ *
+ * <p>The corresponding database is deleted when TemporaryDb is
+ * {@linkplain TemporaryDb#close() closed}.
  *
  * @see com.exonum.binding.core.service.NodeFake
  */
-public final class MemoryDb extends AbstractCloseableNativeProxy implements Database {
+public final class TemporaryDb extends AbstractCloseableNativeProxy implements Database {
 
   static {
     LibraryLoader.load();
   }
 
   /**
-   * Creates a new empty MemoryDb.
+   * Creates a new empty TemporaryDb.
    */
-  public static MemoryDb newInstance() {
+  public static TemporaryDb newInstance() {
     long nativeHandle = INVALID_NATIVE_HANDLE;
     try {
       nativeHandle = nativeCreate();
-      return new MemoryDb(nativeHandle);
+      return new TemporaryDb(nativeHandle);
     } catch (Throwable t) {
       if (nativeHandle != INVALID_NATIVE_HANDLE) {
         nativeFree(nativeHandle);
@@ -53,7 +57,7 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
   }
 
   @VisibleForTesting  // Used in native resource manager tests, must not be exported.
-  MemoryDb(long nativeHandle) {
+  TemporaryDb(long nativeHandle) {
     super(nativeHandle, true);
   }
 
@@ -70,12 +74,20 @@ public final class MemoryDb extends AbstractCloseableNativeProxy implements Data
   }
 
   /**
-   * Applies the changes from the given fork to the database state.
+   * Applies the changes from the given fork to the database state. TemporaryDb can only
+   * merge forks that {@linkplain #createFork(Cleaner) it created itself}.
+   *
+   * <p>Once this method completes, any indexes created with the fork and the fork itself
+   * are closed and cannot be used anymore. Any subsequent operations on these objects will result
+   * in {@link IllegalStateException}.
+   *
+   * <p>TODO(@bogdanov): If the fork cannot be applied to the database …
    *
    * @param fork a fork to get changes from
    */
   public void merge(Fork fork) {
-    nativeMerge(getNativeHandle(), fork.getViewNativeHandle());
+    NativeHandle patchHandle = fork.intoPatch();
+    nativeMerge(getNativeHandle(), patchHandle.get());
   }
 
   @Override

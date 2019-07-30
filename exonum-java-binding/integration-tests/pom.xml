@@ -5,17 +5,17 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>exonum-java-binding-integration-tests</artifactId>
-  <version>0.7.0-SNAPSHOT</version>
+  <version>0.8.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Integration Tests</name>
   <description>
     A module providing integration tests for Core and Time Oracle modules that require
-    a node running a service. Such tests cannot be written using plain MemoryDb, hence use
+    a node running a service. Such tests cannot be written using plain TemporaryDb, hence use
     the TestKit.
     This module is not supposed to have sources and produce a jar file; it's created for
     integration tests execution during the project build.
@@ -102,6 +102,14 @@
       <!-- Skip the deployment of internal module as it is inherited from parent pom -->
       <plugin>
         <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <!-- Skip the signing as there is no artifact -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
         <configuration>
           <skip>true</skip>
         </configuration>

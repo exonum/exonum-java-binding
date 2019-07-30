@@ -5,11 +5,11 @@
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>exonum-java-binding-common</artifactId>
-  <version>0.7.0-SNAPSHOT</version>
+  <version>0.8.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Common</name>
@@ -22,7 +22,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <lazysodium-java.version>3.8.0</lazysodium-java.version>
+    <lazysodium-java.version>4.0.0</lazysodium-java.version>
     <auto-value.version>1.6.5</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
   </properties>
@@ -168,7 +168,34 @@
             ${jacoco.args}
             ${java.vm.assertionFlag}
           </argLine>
+          <excludedGroups>${excludeTags}, forked</excludedGroups>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <argLine>
+            ${jacoco.it.args}
+            ${java.vm.assertionFlag}
+          </argLine>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <groups>forked</groups>
+          <!-- Run each test class in its own VM -->
+          <reuseForks>false</reuseForks>
+        </configuration>
+        <executions>
+          <execution>
+            <id>run-forked-its</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>

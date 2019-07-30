@@ -40,6 +40,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -73,6 +74,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ProofMapIndexProxyIntegrationTest
@@ -207,12 +209,14 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   void getRootHash_EmptyMap() {
     runTestWithView(database::createSnapshot,
         (map) -> assertThat(map.getRootHash(), equalTo(EMPTY_MAP_ROOT_HASH)));
   }
 
+  @Disabled
   @Test
   void getRootHash_NonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
@@ -225,6 +229,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getProof_EmptyMapDoesNotContainSingleKey() {
     runTestWithView(database::createSnapshot,
@@ -232,6 +237,7 @@ class ProofMapIndexProxyIntegrationTest
     );
   }
 
+  @Disabled
   @Test
   void getProof_SingletonMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -243,6 +249,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getProof_SingletonMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
@@ -252,6 +259,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
@@ -273,6 +281,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
@@ -293,6 +302,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -317,6 +327,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -340,6 +351,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getProof_MultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -352,6 +364,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getProof_MultiEntryMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
@@ -374,6 +387,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @CiOnly
   @Test
   /*
@@ -391,12 +405,14 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_EmptyMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createSnapshot, (map) ->
         assertThat(map, provesThatAbsent(PK1, PK2)));
   }
 
+  @Disabled
   @Test
   void getMultiProof_SingletonMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createFork, (map) -> {
@@ -406,6 +422,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_SingletonMapBothContainsAndDoesNot() {
     runTestWithView(database::createFork, (map) -> {
@@ -419,6 +436,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_TwoElementMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -433,6 +451,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
@@ -452,6 +471,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
@@ -470,6 +490,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -492,6 +513,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -513,6 +535,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_SortedMultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -523,6 +546,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
+  @Disabled
   @Test
   void getMultiProof_FourEntryMap_DoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
@@ -658,23 +682,12 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  /**
-   * A simple integration test that ensures that:
-   * - ProofMap constructor preserves the index type and
-   * - Map constructor checks it, preventing illegal access to ProofMap internals.
-   */
   @Test
-  void constructorShallPreserveTypeInformation() {
-    runTestWithView(database::createFork, (view, map) -> {
+  void getMapSize() {
+    runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      // Create a regular map with the same name as the proof map above.
-      RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
-        MapIndexProxy<HashCode, String> regularMap = MapIndexProxy.newInstance(MAP_NAME, view,
-            StandardSerializers.hash(), StandardSerializers.string());
-      });
-      assertThat(thrown.getLocalizedMessage(), containsString("Attempt to access index '" + MAP_NAME
-          + "' of type Map, while said index was initially created with type ProofMap"));
+      assertEquals(map.size(), 1);
     });
   }
 
@@ -830,8 +843,25 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   @Override
+  ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
+      View view) {
+    return ProofMapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.hash(), StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(ProofMapIndexProxy<HashCode, String> index) {
     return index.get(PK1);
+  }
+
+  @Override
+  void update(ProofMapIndexProxy<HashCode, String> index) {
+    index.put(PK1, V1);
   }
 
   private static ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {

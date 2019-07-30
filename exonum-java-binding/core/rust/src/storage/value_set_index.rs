@@ -12,25 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::value_set_index::{ValueSetIndexHashes, ValueSetIndexIter};
-use exonum::storage::{Fork, Snapshot, ValueSetIndex};
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jobject};
-use jni::JNIEnv;
+use exonum_merkledb::{
+    value_set_index::{ValueSetIndexHashes, ValueSetIndexIter},
+    Fork, Snapshot, ValueSetIndex,
+};
+use jni::{
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray, jlong, jobject},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use handle::{self, Handle};
-use storage::db::{Value, View, ViewRef};
-use storage::PairIter;
+use storage::{
+    db::{Value, View, ViewRef},
+    PairIter,
+};
 use utils;
 
 type Index<T> = ValueSetIndex<T, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
-    ForkIndex(Index<&'static mut Fork>),
+    ForkIndex(Index<&'static Fork>),
 }
 
 type Iter<'a> = PairIter<ValueSetIndexIter<'a, Value>>;
@@ -53,7 +58,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
-                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });
@@ -77,7 +82,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &set_id, &*snapshot))
             }
-            ViewRef::Fork(ref mut fork) => {
+            ViewRef::Fork(fork) => {
                 IndexType::ForkIndex(Index::new_in_family(group_name, &set_id, fork))
             }
         }))
@@ -266,6 +271,38 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ValueSetIndexProx
             set.remove_by_hash(&hash);
             Ok(())
         }
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns `true` if the set has no elements.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetIndexProxy_nativeIsEmpty(
+    env: JNIEnv,
+    _: JObject,
+    set_handle: Handle,
+) -> jboolean {
+    let res = panic::catch_unwind(|| {
+        Ok(match *handle::cast_handle::<IndexType>(set_handle) {
+            IndexType::SnapshotIndex(ref set) => set.is_empty(),
+            IndexType::ForkIndex(ref set) => set.is_empty(),
+        } as jboolean)
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns the number of elements in the set.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetIndexProxy_nativeSize(
+    env: JNIEnv,
+    _: JObject,
+    set_handle: Handle,
+) -> jlong {
+    let res = panic::catch_unwind(|| {
+        Ok(match *handle::cast_handle::<IndexType>(set_handle) {
+            IndexType::SnapshotIndex(ref set) => set.len(),
+            IndexType::ForkIndex(ref set) => set.len(),
+        } as jlong)
     });
     utils::unwrap_exc_or_default(&env, res)
 }

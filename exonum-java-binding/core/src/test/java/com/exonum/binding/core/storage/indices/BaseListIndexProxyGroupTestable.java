@@ -29,6 +29,7 @@ import com.google.common.collect.ListMultimap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 abstract class BaseListIndexProxyGroupTestable extends BaseIndexGroupTestable {

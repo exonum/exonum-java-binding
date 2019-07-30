@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::{
-    blockchain::Schema,
-    storage::{Fork, Snapshot, StorageValue},
-};
+use exonum::blockchain::Schema;
+use exonum_merkledb::{BinaryValue, Fork, Snapshot};
 use handle::{self, Handle};
 use jni::{
     objects::JClass,
@@ -31,7 +29,7 @@ type CoreSchema<T> = Schema<T>;
 
 enum SchemaType {
     SnapshotSchema(CoreSchema<&'static Snapshot>),
-    ForkSchema(CoreSchema<&'static mut Fork>),
+    ForkSchema(CoreSchema<&'static Fork>),
 }
 
 /// Returns pointer to created CoreSchemaProxy object
@@ -44,7 +42,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_n
     let res = panic::catch_unwind(|| {
         let schema_type = match *handle::cast_handle::<View>(view_handle).get() {
             ViewRef::Snapshot(snapshot) => SchemaType::SnapshotSchema(Schema::new(snapshot)),
-            ViewRef::Fork(ref mut fork) => SchemaType::ForkSchema(Schema::new(fork)),
+            ViewRef::Fork(fork) => SchemaType::ForkSchema(Schema::new(fork)),
         };
         Ok(handle::to_handle(schema_type))
     });

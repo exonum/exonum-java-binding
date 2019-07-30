@@ -33,12 +33,13 @@ use java_bindings::{
         blockchain::{Transaction, TransactionContext, TransactionError, TransactionErrorType},
         crypto::{self, Hash, PublicKey, SecretKey},
         messages::{Message, RawTransaction},
-        storage::{Database, Entry, Fork, MemoryDB, Snapshot},
     },
+    exonum_merkledb::{Database, Entry, Fork, IndexAccess, TemporaryDB},
     jni::JavaVM,
     serde_json, Executor,
 };
 
+use integration_tests::mock::transaction::TEST_SERVICE_NAME;
 use std::sync::Arc;
 
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
@@ -51,7 +52,7 @@ lazy_static! {
 
 #[test]
 fn execute_valid_transaction() {
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let snapshot = db.snapshot();
     let entry = create_test_entry(&*snapshot);
     assert_eq!(None, entry.get());
@@ -76,7 +77,7 @@ fn execute_valid_transaction() {
 #[should_panic(expected = "Java exception: java.lang.OutOfMemoryError")]
 fn execute_should_panic_if_java_error_occurred() {
     let (panic_tx, raw) = create_throwing_mock_transaction_proxy(EXECUTOR.clone(), OOM_ERROR_CLASS);
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let mut fork = db.fork();
     let keypair = crypto::gen_keypair();
     let tx_context = create_transaction_context(&mut fork, raw, keypair);
@@ -88,7 +89,7 @@ fn execute_should_panic_if_java_error_occurred() {
 fn execute_should_panic_if_java_exception_occurred() {
     let (panic_tx, raw) =
         create_throwing_mock_transaction_proxy(EXECUTOR.clone(), ARITHMETIC_EXCEPTION_CLASS);
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let mut fork = db.fork();
     let keypair = crypto::gen_keypair();
     let tx_context = create_transaction_context(&mut fork, raw, keypair);
@@ -105,7 +106,7 @@ fn execute_should_return_err_if_tx_exec_exception_occurred() {
         err_code,
         Some(err_message),
     );
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let mut fork = db.fork();
     let keypair = crypto::gen_keypair();
     let tx_context = create_transaction_context(&mut fork, raw, keypair);
@@ -127,7 +128,7 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred() {
         err_code,
         Some(err_message),
     );
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let mut fork = db.fork();
     let keypair = crypto::gen_keypair();
     let tx_context = create_transaction_context(&mut fork, raw, keypair);
@@ -148,7 +149,7 @@ fn execute_should_return_err_if_tx_exec_exception_occurred_no_message() {
         err_code,
         None,
     );
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let mut fork = db.fork();
     let keypair = crypto::gen_keypair();
     let tx_context = create_transaction_context(&mut fork, raw, keypair);
@@ -169,7 +170,7 @@ fn execute_should_return_err_if_tx_exec_exception_subclass_occurred_no_message()
         err_code,
         None,
     );
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let mut fork = db.fork();
     let keypair = crypto::gen_keypair();
     let tx_context = create_transaction_context(&mut fork, raw, keypair);
@@ -207,7 +208,7 @@ fn json_serialize_should_return_err_if_java_exception_occurred() {
 
 #[test]
 fn passing_transaction_context() {
-    let db = MemoryDB::new();
+    let db = TemporaryDB::new();
     let keypair = crypto::gen_keypair();
     let author_pk = keypair.0;
     let tx_hash: Hash;
@@ -233,7 +234,7 @@ fn passing_transaction_context() {
 
 fn create_test_entry<V>(view: V) -> Entry<V, String>
 where
-    V: AsRef<Snapshot + 'static>,
+    V: IndexAccess,
 {
     Entry::new(TEST_ENTRY_NAME, view)
 }
@@ -245,5 +246,5 @@ fn create_transaction_context(
 ) -> TransactionContext {
     let (service_id, service_transaction) = (raw.service_id(), raw.service_transaction());
     let signed_transaction = Message::sign_transaction(service_transaction, service_id, pk, &sk);
-    TransactionContext::new(fork, &signed_transaction)
+    TransactionContext::new(fork, TEST_SERVICE_NAME, &signed_transaction)
 }
