@@ -16,8 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
@@ -91,14 +90,11 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
    */
   public static <E> ListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    checkIndexName(name);
-    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
-
+    IndexAddress address = IndexAddress.valueOf(name);
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle listNativeHandle = createNativeList(view,
-        () -> nativeCreate(name, viewNativeHandle));
+    LongSupplier nativeListConstructor = () -> nativeCreate(name, viewNativeHandle);
 
-    return new ListIndexProxy<>(listNativeHandle, name, view, s);
+    return getOrCreate(address, view, serializer, nativeListConstructor);
   }
 
   /**
@@ -119,15 +115,36 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
    */
   public static <E> ListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
                                                        View view, Serializer<E> serializer) {
-    checkIndexName(groupName);
-    checkIdInGroup(listId);
+    IndexAddress address = IndexAddress.valueOf(groupName, listId);
+    long viewNativeHandle = view.getViewNativeHandle();
+    LongSupplier nativeListConstructor =
+        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle);
+
+    return getOrCreate(address, view, serializer, nativeListConstructor);
+  }
+
+  private static <E> ListIndexProxy<E> getOrCreate(IndexAddress address, View view,
+      Serializer<E> serializer, LongSupplier nativeListConstructor) {
+    return view.findOpenIndex(address)
+        .map(ListIndexProxy::<E>checkCachedInstance)
+        .orElseGet(() -> newListIndexProxy(address, view, serializer, nativeListConstructor));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  private static <E> ListIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
+    checkIndexType(cachedIndex, ListIndexProxy.class);
+    return (ListIndexProxy<E>) cachedIndex;
+  }
+
+  private static <E> ListIndexProxy<E> newListIndexProxy(IndexAddress address, View view,
+      Serializer<E> serializer, LongSupplier nativeSetConstructor) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle listNativeHandle = createNativeList(view,
-        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle));
+    NativeHandle listNativeHandle = createNativeList(view, nativeSetConstructor);
 
-    return new ListIndexProxy<>(listNativeHandle, groupName, view, s);
+    ListIndexProxy<E> list = new ListIndexProxy<>(listNativeHandle, address, view, s);
+    view.registerIndex(list);
+    return list;
   }
 
   private static NativeHandle createNativeList(View view, LongSupplier nativeListConstructor) {
@@ -139,9 +156,9 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
     return listNativeHandle;
   }
 
-  private ListIndexProxy(NativeHandle nativeHandle, String name, View view,
+  private ListIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
                          CheckingSerializerDecorator<E> serializer) {
-    super(nativeHandle, name, view, serializer);
+    super(nativeHandle, address, view, serializer);
   }
 
   /**

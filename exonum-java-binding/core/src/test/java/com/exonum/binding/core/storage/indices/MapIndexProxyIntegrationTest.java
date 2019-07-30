@@ -501,8 +501,24 @@ class MapIndexProxyIntegrationTest
   }
 
   @Override
+  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return MapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string(),
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(MapIndexProxy<String, String> index) {
     return index.get(K1);
+  }
+
+  @Override
+  void update(MapIndexProxy<String, String> index) {
+    index.put(K1, V1);
   }
 
   private static MapIndexProxy<String, String> createMap(String name, View view) {

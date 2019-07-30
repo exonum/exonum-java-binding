@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -58,8 +57,24 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Override
+  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(AbstractListIndexProxy<String> index) {
     return index.get(0L);
+  }
+
+  @Override
+  void update(AbstractListIndexProxy<String> index) {
+    index.add(V1);
   }
 
   @Disabled //FIXME: Tests are disabled until proofs code fixed ECR-3319
