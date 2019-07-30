@@ -34,9 +34,9 @@ pub(crate) type Value = Vec<u8>;
 /// should be placed in the heap to prevent its movement after creating a reference to it.
 
 pub(crate) struct View {
-    // The `owned` field is used, but its value only needed for the drop stage,
-    // so `Box<Fork>`/`Box<Snapshot>` will be dropped when an instance of `View` leaves the scope.
-    _owned: Option<ViewOwned>,
+    /// Owned allows to drop owned view if needed
+    owned: Option<ViewOwned>,
+    /// Unsafe reference to the owned View (owned either by Rust or by Java)
     reference: ViewRef,
 }
 
@@ -55,7 +55,7 @@ impl View {
         View {
             // Make a "self-reference" to a value stored in the `owned` field.
             reference: unsafe { ViewRef::from_snapshot(&*snapshot) },
-            _owned: Some(ViewOwned::Snapshot(snapshot)),
+            owned: Some(ViewOwned::Snapshot(snapshot)),
         }
     }
 
@@ -66,7 +66,7 @@ impl View {
         View {
             // Make a "self-reference" to a value stored in the `owned` field.
             reference: unsafe { ViewRef::from_fork(&*fork) },
-            _owned: Some(ViewOwned::Fork(fork)),
+            owned: Some(ViewOwned::Fork(fork)),
         }
     }
 
@@ -75,7 +75,7 @@ impl View {
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
         View {
             reference: unsafe { ViewRef::from_snapshot(snapshot) },
-            _owned: None,
+            owned: None,
         }
     }
 
@@ -84,7 +84,7 @@ impl View {
     pub fn from_ref_fork(fork: &Fork) -> Self {
         View {
             reference: unsafe { ViewRef::from_fork(fork) },
-            _owned: None,
+            owned: None,
         }
     }
 
@@ -94,7 +94,7 @@ impl View {
 
     /// Unwraps the stored Fork from the View, panics if it's not possible.
     pub fn into_fork(self) -> Box<Fork> {
-        if let Some(view_owned) = self._owned {
+        if let Some(view_owned) = self.owned {
             match view_owned {
                 ViewOwned::Snapshot(_) => panic!("`into_fork` called on Snapshot"),
                 ViewOwned::Fork(fork) => fork,
@@ -106,7 +106,7 @@ impl View {
 
     /// Returns `true` iff `into_fork` conversion is possible.
     pub fn can_convert_into_fork(&self) -> bool {
-        match self._owned {
+        match self.owned {
             None => false,
             Some(ViewOwned::Snapshot(_)) => false,
             Some(ViewOwned::Fork(_)) => true,
@@ -167,7 +167,7 @@ mod tests {
         let fork = db.fork();
         let mut view = View::from_ref_fork(&fork);
         check_ref_fork(&mut view);
-        assert!(view._owned.is_none());
+        assert!(view.owned.is_none());
     }
 
     #[test]
@@ -176,7 +176,7 @@ mod tests {
         let snapshot = db.snapshot();
         let mut view = View::from_ref_snapshot(&*snapshot);
         check_ref_snapshot(&mut view);
-        assert!(view._owned.is_none());
+        assert!(view.owned.is_none());
     }
 
     // Creates database with a prepared state.
@@ -225,7 +225,7 @@ mod tests {
             ViewRef::Snapshot(ref s) => Ptr::Snapshot(&**s),
         };
 
-        let owned = match *view._owned.as_ref().unwrap() {
+        let owned = match *view.owned.as_ref().unwrap() {
             ViewOwned::Fork(ref f) => Ptr::Fork(&**f),
             ViewOwned::Snapshot(ref s) => Ptr::Snapshot(&**s),
         };
