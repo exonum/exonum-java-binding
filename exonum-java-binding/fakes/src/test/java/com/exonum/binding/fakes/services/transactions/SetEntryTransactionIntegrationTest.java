@@ -32,8 +32,8 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.MemoryDb;
 import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -46,8 +46,8 @@ class SetEntryTransactionIntegrationTest {
   @Disabled //FIXME: Disabled until ECR-3330
   @Test
   void executePutsTheValueIntoEntry() throws CloseFailuresException {
-    try (MemoryDb database = MemoryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
+    try (TemporaryDb database = TemporaryDb.newInstance();
+         Cleaner cleaner = new Cleaner()) {
       String value = "A value to set into entry";
       Fork fork = database.createFork(cleaner);
 
