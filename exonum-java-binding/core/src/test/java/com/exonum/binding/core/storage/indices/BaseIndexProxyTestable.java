@@ -23,9 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.Database;
-import com.exonum.binding.core.storage.database.MemoryDb;
 import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import org.junit.jupiter.api.AfterEach;
@@ -39,11 +38,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 @RequiresNativeLibrary
 abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
 
-  MemoryDb database;
+  TemporaryDb database;
 
   @BeforeEach
   void setUp() {
-    database = MemoryDb.newInstance();
+    database = TemporaryDb.newInstance();
   }
 
   @AfterEach
@@ -102,8 +101,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       //      "name-1",
   })
   void indexConstructorThrowsIfInvalidName(String name) throws Exception {
-    try (Cleaner cleaner = new Cleaner();
-        Database database = MemoryDb.newInstance()) {
+    try (Cleaner cleaner = new Cleaner()) {
       Snapshot view = database.createSnapshot(cleaner);
 
       assertThrows(Exception.class, () -> create(name, view));
