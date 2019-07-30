@@ -88,7 +88,7 @@ public final class Fork extends View {
    * @param forkCleaner a cleaner for objects depending on the fork
    */
   private Fork(NativeHandle nativeHandle, ProxyDestructor destructor, Cleaner forkCleaner) {
-    super(nativeHandle, forkCleaner, new IncrementalModificationCounter(), true);
+    super(nativeHandle, forkCleaner, true);
     this.destructor = destructor;
   }
 

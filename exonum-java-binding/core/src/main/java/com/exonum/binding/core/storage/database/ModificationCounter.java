@@ -49,4 +49,17 @@ public interface ModificationCounter {
    *     i.e., must reject any modification events
    */
   void notifyModified();
+
+  /**
+   * Creates a modification counter for the given view.
+   *
+   * @param view a database view
+   */
+  static ModificationCounter forView(View view) {
+    if (view.canModify()) {
+      return new IncrementalModificationCounter();
+    } else {
+      return ImmutableModificationCounter.INSTANCE;
+    }
+  }
 }

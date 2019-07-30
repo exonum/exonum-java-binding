@@ -37,10 +37,6 @@ import java.util.function.Consumer;
  *
  * @param <ElementT> the type of elements in the corresponding list this spliterator provides
  */
-/*
- * todo: Can’t we make a spliterator that is resilient to modifications of unrelated collections?
- *  I think we can as we use indices into list: ECR-2849
- */
 class ListSpliterator<ElementT> implements Spliterator<ElementT> {
 
   /** Characteristics of any list spliterator. */

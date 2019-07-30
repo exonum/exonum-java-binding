@@ -71,6 +71,6 @@ public final class Snapshot extends View {
   }
 
   private Snapshot(NativeHandle nativeHandle, Cleaner cleaner) {
-    super(nativeHandle, cleaner, ImmutableModificationCounter.INSTANCE, false);
+    super(nativeHandle, cleaner, false);
   }
 }
