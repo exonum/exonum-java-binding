@@ -85,7 +85,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb
     let res = panic::catch_unwind(|| {
         let db = handle::cast_handle::<TemporaryDB>(db_handle);
         let patch = handle::acquire_handle_ownership::<Patch>(patch_handle);
-        db.merge(*patch).expect("Unable to merge fork");
+        db.merge(*patch).expect("Unable to merge patch");
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
