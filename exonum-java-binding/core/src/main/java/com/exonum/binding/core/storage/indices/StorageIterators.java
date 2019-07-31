@@ -19,7 +19,6 @@ package com.exonum.binding.core.storage.indices;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import com.exonum.binding.core.storage.database.View;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;

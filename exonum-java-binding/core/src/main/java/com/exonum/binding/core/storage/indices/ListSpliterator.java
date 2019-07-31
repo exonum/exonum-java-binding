@@ -19,7 +19,6 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkPositionIndex;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ConcurrentModificationException;
 import java.util.Spliterator;

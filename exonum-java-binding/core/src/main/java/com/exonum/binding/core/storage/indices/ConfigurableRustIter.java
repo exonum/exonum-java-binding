@@ -18,7 +18,6 @@ package com.exonum.binding.core.storage.indices;
 
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.NativeHandle;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import java.util.ConcurrentModificationException;
 import java.util.Optional;
 import java.util.function.LongFunction;

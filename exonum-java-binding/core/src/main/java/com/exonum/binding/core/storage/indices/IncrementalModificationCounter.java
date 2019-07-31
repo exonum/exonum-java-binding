@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.storage.database;
+package com.exonum.binding.core.storage.indices;
 
-enum ImmutableModificationCounter implements ModificationCounter {
+public final class IncrementalModificationCounter implements ModificationCounter {
 
-  INSTANCE;
-
-  private static final int INITIAL_VALUE = 0;
+  private int counter = 0;
 
   @Override
   public boolean isModifiedSince(int lastValue) {
-    return false;
+    return counter != lastValue;
   }
 
   @Override
   public int getCurrentValue() {
-    return INITIAL_VALUE;
+    return counter;
   }
 
   @Override
   public void notifyModified() {
-    throw new IllegalStateException("Immutable counter cannot be modified");
+    counter++;
   }
 }

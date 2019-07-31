@@ -21,7 +21,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import com.exonum.binding.core.storage.database.View;
 
 /**

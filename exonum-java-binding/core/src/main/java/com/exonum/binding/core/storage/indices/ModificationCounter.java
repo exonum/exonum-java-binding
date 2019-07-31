@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.storage.database;
+package com.exonum.binding.core.storage.indices;
+
+import com.exonum.binding.core.storage.database.View;
 
 /**
  * A counter of modification events of some objects (e.g., a collection, or a database view).

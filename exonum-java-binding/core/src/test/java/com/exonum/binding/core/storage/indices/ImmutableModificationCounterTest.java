@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.storage.database;
+package com.exonum.binding.core.storage.indices;
 
-public final class IncrementalModificationCounter implements ModificationCounter {
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-  private int counter = 0;
+import org.junit.jupiter.api.Test;
 
-  @Override
-  public boolean isModifiedSince(int lastValue) {
-    return counter != lastValue;
-  }
+class ImmutableModificationCounterTest {
 
-  @Override
-  public int getCurrentValue() {
-    return counter;
-  }
+  private static final ImmutableModificationCounter COUNTER = ImmutableModificationCounter.INSTANCE;
 
-  @Override
-  public void notifyModified() {
-    counter++;
+  @Test
+  void forbidsModifications() {
+    assertThrows(IllegalStateException.class, COUNTER::notifyModified);
   }
 }
