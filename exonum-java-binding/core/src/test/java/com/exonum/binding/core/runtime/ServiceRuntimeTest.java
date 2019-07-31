@@ -33,6 +33,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,29 +72,52 @@ class ServiceRuntimeTest {
     }
 
     @Test
-    void loadArtifact() throws Exception {
-      String serviceArtifactLocation = "/tmp/foo-service.jar";
-      ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
+    void deployCorrectArtifact() throws Exception {
       ServiceArtifactId serviceId = ServiceArtifactId.of("com.acme", "foo-service", "1.0.0");
+      Path serviceArtifactLocation = Paths.get("/tmp/foo-service.jar");
+      ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
           .newInstance(serviceId, new ReflectiveModuleSupplier(TestServiceModule.class));
-      when(serviceLoader.loadService(Paths.get(serviceArtifactLocation)))
+      when(serviceLoader.loadService(serviceArtifactLocation))
           .thenReturn(serviceDefinition);
 
-      String artifactId = serviceRuntime.loadArtifact(serviceArtifactLocation);
-      assertThat(artifactId).isEqualTo(serviceId.toString());
+      serviceRuntime.deployArtifact(serviceId, serviceArtifactLocation);
+
+      verify(serviceLoader).loadService(serviceArtifactLocation);
     }
 
     @Test
-    void loadArtifactFailed() throws Exception {
-      String serviceArtifactLocation = "/tmp/foo-service.jar";
+    void deployArtifactWrongId() throws Exception {
+      ServiceArtifactId actualId = ServiceArtifactId.of("com.acme", "actual", "1.0.0");
+      Path serviceArtifactLocation = Paths.get("/tmp/foo-service.jar");
+      ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
+      LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+          .newInstance(actualId, new ReflectiveModuleSupplier(TestServiceModule.class));
+      when(serviceLoader.loadService(serviceArtifactLocation))
+          .thenReturn(serviceDefinition);
+
+      ServiceArtifactId expectedId = ServiceArtifactId.of("com.acme", "expected", "1.0.0");
+
+      Exception actual = assertThrows(ServiceLoadingException.class,
+          () -> serviceRuntime.deployArtifact(expectedId, serviceArtifactLocation));
+      assertThat(actual).hasMessageContainingAll(actualId.toString(), expectedId.toString(),
+          serviceArtifactLocation.toString());
+
+      // Check the service artifact is unloaded
+      verify(serviceLoader).unloadService(actualId);
+    }
+
+    @Test
+    void deployArtifactFailed() throws Exception {
+      ServiceArtifactId serviceId = ServiceArtifactId.of("com.acme", "foo-service", "1.0.0");
+      Path serviceArtifactLocation = Paths.get("/tmp/foo-service.jar");
       ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
       ServiceLoadingException exception = new ServiceLoadingException("Boom");
-      when(serviceLoader.loadService(Paths.get(serviceArtifactLocation)))
+      when(serviceLoader.loadService(serviceArtifactLocation))
           .thenThrow(exception);
 
       Exception actual = assertThrows(ServiceLoadingException.class,
-          () -> serviceRuntime.loadArtifact(serviceArtifactLocation));
+          () -> serviceRuntime.deployArtifact(serviceId, serviceArtifactLocation));
       assertThat(actual).isSameAs(exception);
     }
 

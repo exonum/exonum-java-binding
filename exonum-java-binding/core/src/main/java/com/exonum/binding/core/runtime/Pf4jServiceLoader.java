@@ -126,7 +126,8 @@ final class Pf4jServiceLoader implements ServiceLoader {
     return serviceDefinition;
   }
 
-  private static ServiceArtifactId extractServiceId(String pluginId) throws ServiceLoadingException {
+  private static ServiceArtifactId extractServiceId(String pluginId)
+      throws ServiceLoadingException {
     try {
       return ServiceArtifactId.parseFrom(pluginId);
     } catch (IllegalArgumentException e) {

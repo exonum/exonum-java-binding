@@ -29,7 +29,6 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,32 +82,35 @@ public final class ServiceRuntime {
   }
 
   /**
-   * Loads an artifact from the specified location. The loading involves verification of the
-   * artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
+   * Loads a Java service artifact from the specified location. The loading involves verification
+   * of the artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
    *
-   * @param serviceArtifactPath a {@linkplain java.nio.file.Path filesystem path} from which
-   *     to load the service artifact
-   * @return a unique service artifact identifier that must be specified in subsequent operations
-   *     with it
+   * @param id a service artifact identifier; artifacts with non-equal ids will be rejected
+   * @param location a filesystem path from which to load the service artifact
    * @throws ServiceLoadingException if it failed to load an artifact; or if the given artifact is
    *     already loaded
    */
-  public String loadArtifact(String serviceArtifactPath) throws ServiceLoadingException {
-    Path serviceArtifactLocation = Paths.get(serviceArtifactPath);
+  public void deployArtifact(ServiceArtifactId id, Path location)
+      throws ServiceLoadingException {
     try {
-      ServiceArtifactId serviceId;
       synchronized (lock) {
         LoadedServiceDefinition loadedServiceDefinition = serviceLoader
-            .loadService(serviceArtifactLocation);
-        serviceId = loadedServiceDefinition.getId();
+            .loadService(location);
+        ServiceArtifactId actualId = loadedServiceDefinition.getId();
+
+        // Check the artifact has the correct identifier in its metadata
+        if (!actualId.equals(id)) {
+          // Unload the artifact
+          serviceLoader.unloadService(actualId);
+          throw new ServiceLoadingException(
+              String.format("The artifact loaded from (%s) has wrong id (%s) in "
+                  + "metadata. Expected: %s", location, actualId, id));
+        }
       }
 
-      // Debug as 'loading' is an impl detail (until dynamic services)
-      logger.debug("Loaded an artifact ({}) from {}", serviceId, serviceArtifactPath);
-
-      return serviceId.toString();
+      logger.info("Loaded an artifact ({}) from {}", id, location);
     } catch (Throwable e) {
-      logger.error("Failed to load an artifact from {}", serviceArtifactPath, e);
+      logger.error("Failed to load an artifact {} from {}", id, location, e);
       throw e;
     }
   }

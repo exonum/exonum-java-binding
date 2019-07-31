@@ -18,6 +18,7 @@ package com.exonum.binding.fakes;
 
 import static org.mockito.Mockito.mock;
 
+import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.service.adapters.UserServiceAdapter;
 import com.exonum.binding.core.service.adapters.UserTransactionAdapter;
@@ -131,33 +132,38 @@ public final class NativeFacade {
    * Writes a valid service artifact to the specified location. A valid service artifact
    * can be loaded by the {@link ServiceRuntime} and
    * the service can be instantiated.
+   * @param artifactId the id of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
-  public static void createValidServiceArtifact(String path) throws IOException {
-    ServiceArtifacts.createValidArtifact(Paths.get(path));
+  public static void createValidServiceArtifact(String artifactId, String path) throws IOException {
+    ServiceArtifacts.createValidArtifact(ServiceArtifactId.parseFrom(artifactId), Paths.get(path));
   }
 
   /**
    * Writes a service artifact that cannot be loaded. Such artifact will cause an exception
    * during an attempt
-   * to {@linkplain ServiceRuntime#loadArtifact(String) load} it.
+   * to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, java.nio.file.Path) load} it.
+   * @param artifactId the id of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
-  public static void createUnloadableServiceArtifact(String path) throws IOException {
-    ServiceArtifacts.createUnloadableArtifact(Paths.get(path));
+  public static void createUnloadableServiceArtifact(String artifactId, String path)
+      throws IOException {
+    ServiceArtifacts.createUnloadableArtifact(artifactId, Paths.get(path));
   }
 
   /**
    * Writes a service artifact that can be loaded, but with a service that cannot be
    * {@linkplain ServiceRuntime#createService(String) instantiated}.
+   * @param artifactId the id of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
-  public static void createServiceArtifactWithNonInstantiableService(String path)
+  public static void createServiceArtifactWithNonInstantiableService(String artifactId, String path)
       throws IOException {
-    ServiceArtifacts.createWithUninstantiableService(Paths.get(path));
+    ServiceArtifacts.createWithUninstantiableService(ServiceArtifactId.parseFrom(artifactId),
+        Paths.get(path));
   }
 
   private NativeFacade() {}
