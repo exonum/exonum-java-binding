@@ -29,9 +29,9 @@ import java.util.function.Supplier;
 abstract class LoadedServiceDefinition {
 
   /**
-   * Returns the unique identifier of the service.
+   * Returns the unique identifier of the service artifact.
    */
-  public abstract ServiceId getId();
+  public abstract ServiceArtifactId getId();
 
   /**
    * Returns a supplier of {@linkplain ServiceModule service modules} configuring their bindings.
@@ -40,8 +40,8 @@ abstract class LoadedServiceDefinition {
    */
   public abstract Supplier<ServiceModule> getModuleSupplier();
 
-  static LoadedServiceDefinition newInstance(ServiceId serviceId,
+  static LoadedServiceDefinition newInstance(ServiceArtifactId artifactId,
       Supplier<ServiceModule> serviceModuleSupplier) {
-    return new AutoValue_LoadedServiceDefinition(serviceId, serviceModuleSupplier);
+    return new AutoValue_LoadedServiceDefinition(artifactId, serviceModuleSupplier);
   }
 }

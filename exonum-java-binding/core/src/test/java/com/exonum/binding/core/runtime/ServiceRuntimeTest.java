@@ -74,7 +74,7 @@ class ServiceRuntimeTest {
     void loadArtifact() throws Exception {
       String serviceArtifactLocation = "/tmp/foo-service.jar";
       ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
-      ServiceId serviceId = ServiceId.of("com.acme", "foo-service", "1.0.0");
+      ServiceArtifactId serviceId = ServiceArtifactId.of("com.acme", "foo-service", "1.0.0");
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
           .newInstance(serviceId, new ReflectiveModuleSupplier(TestServiceModule.class));
       when(serviceLoader.loadService(Paths.get(serviceArtifactLocation)))
@@ -102,9 +102,9 @@ class ServiceRuntimeTest {
       String serviceId = "com.acme:foo-service:1.0.0";
       ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-          .newInstance(ServiceId.parseFrom(serviceId),
+          .newInstance(ServiceArtifactId.parseFrom(serviceId),
               new ReflectiveModuleSupplier(TestServiceModule.class));
-      when(serviceLoader.findService(ServiceId.parseFrom(serviceId)))
+      when(serviceLoader.findService(ServiceArtifactId.parseFrom(serviceId)))
           .thenReturn(Optional.of(serviceDefinition));
 
       UserServiceAdapter service = serviceRuntime.createService(serviceId);
@@ -118,7 +118,7 @@ class ServiceRuntimeTest {
     void createServiceUnknownService() {
       String serviceId = "com.acme:foo-service:1.0.0";
       ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
-      when(serviceLoader.findService(ServiceId.parseFrom(serviceId)))
+      when(serviceLoader.findService(ServiceArtifactId.parseFrom(serviceId)))
           .thenReturn(Optional.empty());
 
       Exception e = assertThrows(IllegalArgumentException.class,

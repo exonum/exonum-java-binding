@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * <p>The extensions of this class must be immutable and hence thread-safe.
  */
 @AutoValue
-public abstract class ServiceId {
+public abstract class ServiceArtifactId {
 
   private static final String DELIMITER = ":";
   private static final Pattern FORBIDDEN_CHARS_PATTERN = Pattern.compile("[\\s:]");
@@ -53,15 +53,16 @@ public abstract class ServiceId {
   /**
    * Parses a service id in format "groupId:artifactId:version" as {@link #toString()} produces.
    *
-   * @param serviceId a string in format "groupId:artifactId:version". Whitespace characters,
+   * @param serviceArtifactId a string in format "groupId:artifactId:version". Whitespace characters,
    *     including preceding and trailing, are not allowed
-   * @return a ServiceId with the given coordinates
+   * @return a ServiceArtifactId with the given coordinates
    * @throws IllegalArgumentException if the format is not correct
    */
-  public static ServiceId parseFrom(String serviceId) {
-    String[] coordinates = serviceId.split(DELIMITER, KEEP_EMPTY);
+  public static ServiceArtifactId parseFrom(String serviceArtifactId) {
+    String[] coordinates = serviceArtifactId.split(DELIMITER, KEEP_EMPTY);
     checkArgument(coordinates.length == 3,
-        "Invalid serviceId (%s), must have 'groupId:artifactId:version' format", serviceId);
+        "Invalid serviceArtifactId (%s), must have 'groupId:artifactId:version' format",
+        serviceArtifactId);
     String groupId = coordinates[0];
     String artifactId = coordinates[1];
     String version = coordinates[2];
@@ -74,8 +75,8 @@ public abstract class ServiceId {
    * @throws IllegalArgumentException if any coordinate contains forbidden characters: whitespace,
    *     colon
    */
-  public static ServiceId of(String groupId, String artifactId, String version) {
-    return new AutoValue_ServiceId(checkNoForbiddenChars(groupId),
+  public static ServiceArtifactId of(String groupId, String artifactId, String version) {
+    return new AutoValue_ServiceArtifactId(checkNoForbiddenChars(groupId),
         checkNoForbiddenChars(artifactId),
         checkNoForbiddenChars(version));
   }
