@@ -25,6 +25,8 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
+import com.google.common.annotations.VisibleForTesting;
+
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -34,7 +36,14 @@ import java.util.TreeMap;
  *
  * @param <E> the type of elements in the corresponding list
  */
-final class ListProofRootHashCalculator<E> implements ListProofVisitor {
+final class ListMerkleRootCalculator<E> implements ListProofVisitor {
+
+  @VisibleForTesting
+  static final byte BLOB_PREFIX = 0x00;
+  @VisibleForTesting
+  static final byte LIST_BRANCH_PREFIX = 0x01;
+  @VisibleForTesting
+  static final byte LIST_ROOT_PREFIX = 0x02;
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -44,26 +53,36 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
   private long index;
 
-  private HashCode calculatedRootHash;
+  private HashCode merkleRoot;
+
+  private long length;
 
   /**
-   * Creates a new ListProofRootHashCalculator.
+   * Creates a new ListMerkleRootCalculator.
    *
    * @param serializer a serializer of list elements
    */
-  ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer) {
+  ListMerkleRootCalculator(ListProofNode listProof, Serializer<E> serializer) {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
-  private ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer,
-      HashFunction hashFunction) {
+  private ListMerkleRootCalculator(ListProofNode listProof, Serializer<E> serializer,
+                                   HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
     elements = new TreeMap<>();
     index = 0;
-    calculatedRootHash = null;
+    // TODO: fix (get length from native)
+    length = 1;
+    merkleRoot = null;
 
     listProof.accept(this);
+
+    merkleRoot = hashFunction.newHasher()
+        .putByte(LIST_ROOT_PREFIX)
+        .putLong(length)
+        .putObject(merkleRoot, hashCodeFunnel())
+        .hash();
   }
 
   @Override
@@ -72,7 +91,8 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
     HashCode leftHash = visitLeft(branch, branchIndex);
     Optional<HashCode> rightHash = visitRight(branch, branchIndex);
 
-    calculatedRootHash = hashFunction.newHasher()
+    merkleRoot = hashFunction.newHasher()
+        .putByte(LIST_BRANCH_PREFIX)
         .putObject(leftHash, hashCodeFunnel())
         .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
             from.ifPresent((hash) -> hashCodeFunnel().funnel(hash, into)))
@@ -81,7 +101,7 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
   @Override
   public void visit(ListProofHashNode listProofHashNode) {
-    this.calculatedRootHash = listProofHashNode.getHash();
+    this.merkleRoot = listProofHashNode.getHash();
   }
 
   @Override
@@ -92,20 +112,23 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
     E element = serializer.fromBytes(value.getElement().toByteArray());
     elements.put(index, element);
-    calculatedRootHash = hashFunction.hashObject(value, ListProofElement.funnel());
+    merkleRoot = hashFunction.newHasher()
+        .putByte(BLOB_PREFIX)
+        .putObject(value, ListProofElement.funnel())
+        .hash();
   }
 
   private HashCode visitLeft(ListProofBranch branch, long parentIndex) {
     index = 2 * parentIndex;
     branch.getLeft().accept(this);
-    return calculatedRootHash;
+    return merkleRoot;
   }
 
   private Optional<HashCode> visitRight(ListProofBranch branch, long parentIndex) {
     index = 2 * parentIndex + 1;
-    calculatedRootHash = null;
+    merkleRoot = null;
     branch.getRight().ifPresent((right) -> right.accept(this));
-    return Optional.ofNullable(calculatedRootHash);
+    return Optional.ofNullable(merkleRoot);
   }
 
   /**
@@ -120,14 +143,14 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
    *
    * @return hash code
    */
-  HashCode getCalculatedRootHash() {
-    return calculatedRootHash;
+  HashCode getMerkleRoot() {
+    return merkleRoot;
   }
 
   @Override
   public String toString() {
     return "ListProofStructureValidator{"
-        + "calculatedRootHash=" + calculatedRootHash
+        + "merkleRoot=" + merkleRoot
         + ", elements=" + elements
         + ", index=" + index
         + '}';
