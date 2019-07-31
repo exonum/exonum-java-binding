@@ -16,7 +16,10 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import static com.exonum.binding.common.proofs.list.ListProofUtils.*;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getBranchHashCode;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getMerkleRoot;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getNodeHashCode;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.leafOf;
 import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
