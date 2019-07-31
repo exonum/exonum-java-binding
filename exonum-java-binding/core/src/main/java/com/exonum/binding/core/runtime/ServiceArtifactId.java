@@ -53,8 +53,8 @@ public abstract class ServiceArtifactId {
   /**
    * Parses a service id in format "groupId:artifactId:version" as {@link #toString()} produces.
    *
-   * @param serviceArtifactId a string in format "groupId:artifactId:version". Whitespace characters,
-   *     including preceding and trailing, are not allowed
+   * @param serviceArtifactId a string in format "groupId:artifactId:version". Whitespace
+   *     characters, including preceding and trailing, are not allowed
    * @return a ServiceArtifactId with the given coordinates
    * @throws IllegalArgumentException if the format is not correct
    */

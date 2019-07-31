@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.app.ServiceRuntimeBootstrap;
+import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceLoadingException;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.service.adapters.UserServiceAdapter;
@@ -48,28 +49,33 @@ class ServiceArtifactsIntegrationTest {
 
   @Test
   void createValidArtifact() throws IOException, ServiceLoadingException {
-    ServiceArtifacts.createValidArtifact(artifactLocation);
+    ServiceArtifactId id =
+        ServiceArtifactId.parseFrom("com.exonum.binding:valid-test-service:1.0.0");
+    ServiceArtifacts.createValidArtifact(id, artifactLocation);
 
-    String artifactId = serviceRuntime.loadArtifact(artifactLocation.toString());
+    serviceRuntime.deployArtifact(id, artifactLocation);
 
-    UserServiceAdapter service = serviceRuntime.createService(artifactId);
+    UserServiceAdapter service = serviceRuntime.createService(id.toString());
 
     assertThat(service.getId(), equalTo(TestService.ID));
   }
 
   @Test
   void createUnloadableArtifact() throws IOException {
-    ServiceArtifacts.createUnloadableArtifact(artifactLocation);
+    String id = "com.exonum.binding:unloadable-test-service:1.0.0";
+    ServiceArtifacts.createUnloadableArtifact(id, artifactLocation);
     assertThrows(ServiceLoadingException.class,
-        () -> serviceRuntime.loadArtifact(artifactLocation.toString()));
+        () -> serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), artifactLocation));
   }
 
   @Test
   void createWithUninstantiableService() throws IOException, ServiceLoadingException {
-    ServiceArtifacts.createWithUninstantiableService(artifactLocation);
+    ServiceArtifactId id =
+        ServiceArtifactId.parseFrom("com.exonum.binding:uninstantiable-test-service:1.0.0");
+    ServiceArtifacts.createWithUninstantiableService(id, artifactLocation);
 
-    String artifactId = serviceRuntime.loadArtifact(artifactLocation.toString());
+    serviceRuntime.deployArtifact(id, artifactLocation);
 
-    assertThrows(RuntimeException.class, () -> serviceRuntime.createService(artifactId));
+    assertThrows(RuntimeException.class, () -> serviceRuntime.createService(id.toString()));
   }
 }
