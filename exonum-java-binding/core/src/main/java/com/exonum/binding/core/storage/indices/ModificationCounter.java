@@ -28,7 +28,7 @@ import com.exonum.binding.core.storage.database.View;
  *
  * <p>Implementations are not required to be thread-safe.
  */
-public interface ModificationCounter {
+interface ModificationCounter {
 
   /**
    * Returns true if the counter was modified since the given value (if {@link #notifyModified()}
