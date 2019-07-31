@@ -26,6 +26,7 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.V4;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -451,6 +452,15 @@ class MapIndexProxyIntegrationTest
         String storedValue = map.get(e.getKey());
         assertNull(storedValue);
       }
+    });
+  }
+
+  @Test
+  void getMapSize() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(K1, V1);
+
+      assertEquals(map.size(), 1);
     });
   }
 
