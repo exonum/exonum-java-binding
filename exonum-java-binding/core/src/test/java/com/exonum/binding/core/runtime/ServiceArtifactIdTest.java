@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class ServiceIdTest {
+class ServiceArtifactIdTest {
 
   @ParameterizedTest
   @ValueSource(strings = {
@@ -35,7 +35,7 @@ class ServiceIdTest {
       "::",
   })
   void parseFromRoundtrip(String serviceId) {
-    ServiceId parsedId = ServiceId.parseFrom(serviceId);
+    ServiceArtifactId parsedId = ServiceArtifactId.parseFrom(serviceId);
     String parsedAsString = parsedId.toString();
 
     assertThat(parsedAsString).isEqualTo(serviceId);
@@ -54,7 +54,7 @@ class ServiceIdTest {
       "com.acme:foo-service:1.0 ",
   })
   void parseFromInvalidInput(String serviceId) {
-    assertThrows(IllegalArgumentException.class, () -> ServiceId.parseFrom(serviceId));
+    assertThrows(IllegalArgumentException.class, () -> ServiceArtifactId.parseFrom(serviceId));
   }
 
   @Test
@@ -62,7 +62,7 @@ class ServiceIdTest {
     String groupId = "com.acme";
     String artifactId = "foo";
     String version = "1.0";
-    ServiceId id = ServiceId.of(groupId, artifactId, version);
+    ServiceArtifactId id = ServiceArtifactId.of(groupId, artifactId, version);
 
     assertThat(id.getGroupId()).isEqualTo(groupId);
     assertThat(id.getArtifactId()).isEqualTo(artifactId);
@@ -73,7 +73,7 @@ class ServiceIdTest {
   void ofRejectsNulls() {
     new NullPointerTester()
         .setDefault(String.class, "foo")
-        .testStaticMethods(ServiceId.class, Visibility.PACKAGE);
+        .testStaticMethods(ServiceArtifactId.class, Visibility.PACKAGE);
   }
 
   @ParameterizedTest
@@ -86,7 +86,8 @@ class ServiceIdTest {
       "com:acme,foo,1.0",
   })
   void ofInvalidComponents(String groupId, String artifactId, String version) {
-    assertThrows(IllegalArgumentException.class, () -> ServiceId.of(groupId, artifactId, version));
+    assertThrows(IllegalArgumentException.class, () -> ServiceArtifactId
+        .of(groupId, artifactId, version));
   }
 
   @Test
@@ -94,7 +95,7 @@ class ServiceIdTest {
     String groupId = "com.acme";
     String artifactId = "foo";
     String version = "1.0";
-    ServiceId id = ServiceId.of(groupId, artifactId, version);
+    ServiceArtifactId id = ServiceArtifactId.of(groupId, artifactId, version);
 
     assertThat(id.toString()).isEqualTo("com.acme:foo:1.0");
   }

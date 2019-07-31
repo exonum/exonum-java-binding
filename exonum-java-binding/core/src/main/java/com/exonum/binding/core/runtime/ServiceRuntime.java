@@ -96,7 +96,7 @@ public final class ServiceRuntime {
   public String loadArtifact(String serviceArtifactPath) throws ServiceLoadingException {
     Path serviceArtifactLocation = Paths.get(serviceArtifactPath);
     try {
-      ServiceId serviceId;
+      ServiceArtifactId serviceId;
       synchronized (lock) {
         LoadedServiceDefinition loadedServiceDefinition = serviceLoader
             .loadService(serviceArtifactLocation);
@@ -123,7 +123,7 @@ public final class ServiceRuntime {
    */
   public UserServiceAdapter createService(String artifactId) {
     try {
-      ServiceId serviceId = ServiceId.parseFrom(artifactId);
+      ServiceArtifactId serviceId = ServiceArtifactId.parseFrom(artifactId);
 
       UserServiceAdapter service;
       synchronized (lock) {
