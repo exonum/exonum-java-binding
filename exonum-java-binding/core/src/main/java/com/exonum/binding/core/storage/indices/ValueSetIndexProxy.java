@@ -227,9 +227,6 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    * Creates an iterator over the hashes of the elements in this set.
    * The hashes are ordered lexicographically.
    *
-   * <p>Any destructive operation on the same {@link Fork} this set uses
-   * (but not necessarily on <em>this set</em>) will invalidate the iterator.
-   *
    * @return an iterator over the hashes of the elements in this set
    * @throws IllegalStateException if this set is not valid
    */
@@ -246,9 +243,6 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   /**
    * Returns an iterator over the entries of this set. An entry is a hash-value pair.
    * The entries are ordered by keys lexicographically.
-   *
-   * <p>Any destructive operation on the same {@link Fork} this set uses
-   * (but not necessarily on <em>this set</em>) will invalidate the iterator.
    *
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
