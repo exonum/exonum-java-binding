@@ -25,7 +25,7 @@ import com.google.common.base.Preconditions;
  */
 public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
-  private final ListProofRoot listProofRoot;
+  private final ListProof listProof;
 
   private final ListProofStructureValidator listProofStructureValidator;
 
@@ -40,11 +40,11 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
    * @param listProof source list proof with index length
    * @param serializer proof elements serializer
    */
-  public UncheckedListProofAdapter(ListProofRoot listProof, Serializer<E> serializer) {
+  public UncheckedListProofAdapter(ListProof listProof, Serializer<E> serializer) {
     Preconditions.checkNotNull(listProof, "ListProof node must be not null");
     Preconditions.checkNotNull(serializer, "Serializer must be not null");
 
-    this.listProofRoot = listProof;
+    this.listProof = listProof;
     this.listProofStructureValidator = new ListProofStructureValidator(listProof.getRootNode());
     this.listMerkleRootCalculator = new ListMerkleRootCalculator<>(listProof, serializer);
   }
@@ -59,7 +59,7 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
   }
 
   @Override
-  public ListProofRoot getListProofRoot() {
-    return listProofRoot;
+  public ListProof getListProof() {
+    return listProof;
   }
 }

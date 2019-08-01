@@ -378,7 +378,7 @@ fn make_java_proof_root<'a>(
 ) -> Result<JObject<'a>> {
     let root = make_java_proof(env, proof)?;
     env.new_object(
-        "com/exonum/binding/common/proofs/list/ListProofRoot",
+        "com/exonum/binding/common/proofs/list/ListProof",
         "(Lcom/exonum/binding/common/proofs/list/ListProofNode;J)V",
         &[root.into(), (length as jlong).into()]
     )

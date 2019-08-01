@@ -60,11 +60,11 @@ final class ListMerkleRootCalculator<E> implements ListProofVisitor {
    *
    * @param serializer a serializer of list elements
    */
-  ListMerkleRootCalculator(ListProofRoot listProof, Serializer<E> serializer) {
+  ListMerkleRootCalculator(ListProof listProof, Serializer<E> serializer) {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
-  private ListMerkleRootCalculator(ListProofRoot listProof, Serializer<E> serializer,
+  private ListMerkleRootCalculator(ListProof listProof, Serializer<E> serializer,
                                    HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
