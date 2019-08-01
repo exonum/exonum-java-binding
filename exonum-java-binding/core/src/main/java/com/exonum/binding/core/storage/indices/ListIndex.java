@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import com.exonum.binding.core.storage.database.Fork;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
