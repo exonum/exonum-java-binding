@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-public final class IncrementalModificationCounter implements ModificationCounter {
+final class IncrementalModificationCounter implements ModificationCounter {
 
   private int counter = 0;
 
