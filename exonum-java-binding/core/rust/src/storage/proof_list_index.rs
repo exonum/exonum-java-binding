@@ -159,12 +159,16 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     list_handle: Handle,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.len(),
-            IndexType::ForkIndex(ref list) => list.len(),
-        } as jlong)
+        Ok(get_list_length(list_handle) as jlong)
     });
     utils::unwrap_exc_or_default(&env, res)
+}
+
+fn get_list_length(list_handle: Handle) -> u64 {
+   match *handle::cast_handle::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(ref list) => list.len(),
+        IndexType::ForkIndex(ref list) => list.len(),
+   }
 }
 
 /// Returns the height of the proof list.
@@ -215,7 +219,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
             IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
         };
-        make_java_proof(&env, &proof).map(|x| x.into_inner())
+        let length = get_list_length(list_handle);
+        make_java_proof_root(&env, &proof, length).map(|x| x.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -234,7 +239,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64..to as u64),
             IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64..to as u64),
         };
-        make_java_proof(&env, &proof).map(|x| x.into_inner())
+        let length = get_list_length(list_handle);
+        make_java_proof_root(&env, &proof, length).map(|x| x.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -363,6 +369,19 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     iter_handle: Handle,
 ) {
     handle::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
+}
+
+fn make_java_proof_root<'a>(
+    env:&JNIEnv<'a>,
+    proof: &ListProof<Value>,
+    length: u64
+) -> Result<JObject<'a>> {
+    let root = make_java_proof(env, proof)?;
+    env.new_object(
+        "com/exonum/binding/common/proofs/list/ListProofRoot",
+        "(Lcom/exonum/binding/common/proofs/list/ListProofNode;J)V",
+        &[root.into(), (length as jlong).into()]
+    )
 }
 
 fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JObject<'a>> {
