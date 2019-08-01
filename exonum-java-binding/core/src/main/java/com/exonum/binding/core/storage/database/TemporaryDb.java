@@ -81,8 +81,8 @@ public final class TemporaryDb extends AbstractCloseableNativeProxy implements D
    * are closed and cannot be used anymore. Any subsequent operations on these objects will result
    * in {@link IllegalStateException}.
    *
-   * <p>If the fork cannot be applied to the database {@link RuntimeException} is
-   * thrown and the provided fork is closed.
+   * @throws RuntimeException if the fork cannot be applied to the database state.
+   *    The provided fork will be closed
    *
    * @param fork a fork to get changes from
    */
