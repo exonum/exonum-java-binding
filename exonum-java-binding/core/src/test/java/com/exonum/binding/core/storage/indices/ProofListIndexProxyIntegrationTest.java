@@ -41,9 +41,6 @@ import org.junit.jupiter.api.Test;
  */
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
-  /**
-   * An empty list root hash: an all-zero hash code.
-   */
   private static final HashCode EMPTY_LIST_ROOT_HASH =
       HashCode.fromString("c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9");
 
