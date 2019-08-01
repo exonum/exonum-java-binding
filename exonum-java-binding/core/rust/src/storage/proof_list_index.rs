@@ -158,17 +158,15 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     _: JObject,
     list_handle: Handle,
 ) -> jlong {
-    let res = panic::catch_unwind(|| {
-        Ok(get_list_length(list_handle) as jlong)
-    });
+    let res = panic::catch_unwind(|| Ok(get_list_length(list_handle) as jlong));
     utils::unwrap_exc_or_default(&env, res)
 }
 
 fn get_list_length(list_handle: Handle) -> u64 {
-   match *handle::cast_handle::<IndexType>(list_handle) {
+    match *handle::cast_handle::<IndexType>(list_handle) {
         IndexType::SnapshotIndex(ref list) => list.len(),
         IndexType::ForkIndex(ref list) => list.len(),
-   }
+    }
 }
 
 /// Returns the height of the proof list.
@@ -372,15 +370,15 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
 }
 
 fn make_java_proof_root<'a>(
-    env:&JNIEnv<'a>,
+    env: &JNIEnv<'a>,
     proof: &ListProof<Value>,
-    length: u64
+    length: u64,
 ) -> Result<JObject<'a>> {
     let root = make_java_proof(env, proof)?;
     env.new_object(
         "com/exonum/binding/common/proofs/list/ListProof",
         "(Lcom/exonum/binding/common/proofs/list/ListProofNode;J)V",
-        &[root.into(), (length as jlong).into()]
+        &[root.into(), (length as jlong).into()],
     )
 }
 
