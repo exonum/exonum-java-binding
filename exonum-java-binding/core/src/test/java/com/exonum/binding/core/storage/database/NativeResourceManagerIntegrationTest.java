@@ -44,13 +44,13 @@ class NativeResourceManagerIntegrationTest {
 
   @Test
   void nativeResourceManagerShallThrowIfHandleUsedWithOtherType() throws Exception {
-    try (Database database = MemoryDb.newInstance();
+    try (Database database = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork f = database.createFork(cleaner);
       long viewNativeHandle = f.getViewNativeHandle();
 
       // Try to use a handle to fork to access a memory db.
-      MemoryDb db2 = new MemoryDb(viewNativeHandle);
+      TemporaryDb db2 = new TemporaryDb(viewNativeHandle);
 
       RuntimeException thrown = assertThrows(RuntimeException.class, db2::close);
       assertThat(thrown).hasMessageContaining("Wrong type id for");
@@ -60,7 +60,7 @@ class NativeResourceManagerIntegrationTest {
   @Test
   void nativeResourceManagerShallThrowIfHandleUsedAfterFree() throws Exception {
     long snapshotNativeHandle = 0;
-    try (Database database = MemoryDb.newInstance();
+    try (Database database = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Snapshot s = database.createSnapshot(cleaner);
       // Preserve the handle to the snapshot.

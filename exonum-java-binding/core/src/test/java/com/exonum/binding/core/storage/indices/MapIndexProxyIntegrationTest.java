@@ -26,6 +26,7 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.V4;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -455,6 +456,15 @@ class MapIndexProxyIntegrationTest
   }
 
   @Test
+  void getMapSize() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(K1, V1);
+
+      assertEquals(map.size(), 1);
+    });
+  }
+
+  @Test
   void isEmptyShouldReturnTrueForEmptyMap() {
     runTestWithView(database::createSnapshot, (map) -> assertTrue(map.isEmpty()));
   }
@@ -491,8 +501,24 @@ class MapIndexProxyIntegrationTest
   }
 
   @Override
+  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return MapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string(),
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(MapIndexProxy<String, String> index) {
     return index.get(K1);
+  }
+
+  @Override
+  void update(MapIndexProxy<String, String> index) {
+    index.put(K1, V1);
   }
 
   private static MapIndexProxy<String, String> createMap(String name, View view) {

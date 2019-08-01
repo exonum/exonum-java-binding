@@ -17,8 +17,7 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.collect.MapEntry;
@@ -85,16 +84,11 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInstance(
       String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
-    checkIndexName(name);
-    ProofMapKeyCheckingSerializerDecorator<K> ks =
-        ProofMapKeyCheckingSerializerDecorator.from(keySerializer);
-    CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
-
+    IndexAddress address = IndexAddress.valueOf(name);
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle mapNativeHandle = createNativeMap(view,
-        () -> nativeCreate(name, viewNativeHandle));
+    LongSupplier nativeMapConstructor = () -> nativeCreate(name, viewNativeHandle);
 
-    return new ProofMapIndexProxy<>(mapNativeHandle, name, view, ks, vs);
+    return getOrCreate(address, view, keySerializer, valueSerializer, nativeMapConstructor);
   }
 
   /**
@@ -120,17 +114,41 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
                                                                  View view,
                                                                  Serializer<K> keySerializer,
                                                                  Serializer<V> valueSerializer) {
-    checkIndexName(groupName);
-    checkIdInGroup(mapId);
+    IndexAddress address = IndexAddress.valueOf(groupName, mapId);
+    long viewNativeHandle = view.getViewNativeHandle();
+    LongSupplier nativeMapConstructor =
+        () -> nativeCreateInGroup(groupName, mapId, viewNativeHandle);
+
+    return getOrCreate(address, view, keySerializer, valueSerializer, nativeMapConstructor);
+  }
+
+  private static <K, V> ProofMapIndexProxy<K, V> getOrCreate(IndexAddress address, View view,
+      Serializer<K> keySerializer, Serializer<V> valueSerializer,
+      LongSupplier nativeMapConstructor) {
+    return view.findOpenIndex(address)
+        .map(ProofMapIndexProxy::<K, V>checkCachedInstance)
+        .orElseGet(() -> newMapIndexProxy(address, view, keySerializer, valueSerializer,
+            nativeMapConstructor));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  private static <K, V> ProofMapIndexProxy<K, V> checkCachedInstance(StorageIndex cachedIndex) {
+    checkIndexType(cachedIndex, ProofMapIndexProxy.class);
+    return (ProofMapIndexProxy<K, V>) cachedIndex;
+  }
+
+  private static <K, V> ProofMapIndexProxy<K, V> newMapIndexProxy(IndexAddress address, View view,
+      Serializer<K> keySerializer, Serializer<V> valueSerializer,
+      LongSupplier nativeMapConstructor) {
     ProofMapKeyCheckingSerializerDecorator<K> ks =
         ProofMapKeyCheckingSerializerDecorator.from(keySerializer);
     CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
 
-    long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle mapNativeHandle = createNativeMap(view,
-        () -> nativeCreateInGroup(groupName, mapId, viewNativeHandle));
+    NativeHandle mapNativeHandle = createNativeMap(view, nativeMapConstructor);
 
-    return new ProofMapIndexProxy<>(mapNativeHandle, groupName, view, ks, vs);
+    ProofMapIndexProxy<K, V> map = new ProofMapIndexProxy<>(mapNativeHandle, address, view, ks, vs);
+    view.registerIndex(map);
+    return map;
   }
 
   private static NativeHandle createNativeMap(View view, LongSupplier nativeMapConstructor) {
@@ -147,10 +165,10 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   private static native long nativeCreateInGroup(String groupName, byte[] mapId,
                                                  long viewNativeHandle);
 
-  private ProofMapIndexProxy(NativeHandle nativeHandle, String name, View view,
+  private ProofMapIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
                              ProofMapKeyCheckingSerializerDecorator<K> keySerializer,
                              CheckingSerializerDecorator<V> valueSerializer) {
-    super(nativeHandle, name, view);
+    super(nativeHandle, address, view);
     this.keySerializer = keySerializer;
     this.valueSerializer = valueSerializer;
   }
@@ -339,6 +357,20 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   private native MapEntryInternal nativeEntriesIterNext(long iterNativeHandle);
 
   private native void nativeEntriesIterFree(long iterNativeHandle);
+
+  @Override
+  public long size() {
+    return nativeSize(getNativeHandle());
+  }
+
+  private native long nativeSize(long nativeHandle);
+
+  @Override
+  public boolean isEmpty() {
+    return nativeIsEmpty(getNativeHandle());
+  }
+
+  private native boolean nativeIsEmpty(long nativeHandle);
 
   @Override
   public void clear() {

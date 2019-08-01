@@ -21,6 +21,7 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V9;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -238,6 +239,29 @@ class ValueSetIndexProxyIntegrationTest
     });
   }
 
+  @Test
+  void getSetSize() {
+    runTestWithView(database::createFork, (set) -> {
+      set.add(V1);
+
+      assertEquals(set.size(), 1);
+    });
+  }
+
+  @Test
+  void isEmptyShouldReturnTrueForEmptySet() {
+    runTestWithView(database::createSnapshot, (set) -> assertTrue(set.isEmpty()));
+  }
+
+  @Test
+  void isEmptyShouldReturnFalseForNonEmptySet() {
+    runTestWithView(database::createFork, (set) -> {
+      set.add(V1);
+
+      assertFalse(set.isEmpty());
+    });
+  }
+
   /**
    * Creates a view, a value set index and runs a test against the view and the set.
    * Automatically closes the view and the set.
@@ -281,7 +305,23 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Override
+  ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return ValueSetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(ValueSetIndexProxy<String> index) {
-    return index.contains("v1");
+    return index.contains(V1);
+  }
+
+  @Override
+  void update(ValueSetIndexProxy<String> index) {
+    index.add(V1);
   }
 }

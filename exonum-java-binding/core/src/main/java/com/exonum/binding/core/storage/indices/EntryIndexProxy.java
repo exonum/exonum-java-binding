@@ -16,8 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
-
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -93,13 +91,43 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
    */
   public static <E> EntryIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    checkIndexName(name);
+    IndexAddress address = IndexAddress.valueOf(name);
+    return view.findOpenIndex(address)
+        .map(EntryIndexProxy::<E>checkCachedInstance)
+        .orElseGet(() -> newEntryIndexProxy(address, view, serializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  private static <E> EntryIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
+    StoragePreconditions.checkIndexType(cachedIndex, EntryIndexProxy.class);
+
+    // todo (here and in each other checkedCachedInstance): how can we check the serializer?!
+    //  There are no reference `E`s; the type match is not a 100% guarantee; the equality is too
+    //  strong of a requirement (forbids instantiating fresh serializers).
+    //  On top of that, we put serializers in decorators,
+    //  hence care must be exercised to 'unpack' them (that, in turn, somewhat breaks
+    //  encapsulation of CheckingSerializerDecorator).
+
+    //    Class<?> cachedSerializerType = cachedIndex.serializer.getClass();
+    //    Class<?> requestedSerializerType = requestedSerializer.getClass();
+    //    checkArgument(cachedSerializerType.equals(requestedSerializerType),
+    //        "Cached instance of index (%s) has serializer of type (%s), but (%s) requested",
+    //        cachedIndex, cachedSerializerType, requestedSerializerType);
+
+    return (EntryIndexProxy<E>) cachedIndex;
+  }
+
+  private static <E> EntryIndexProxy<E> newEntryIndexProxy(IndexAddress address, View view,
+      Serializer<E> serializer) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle entryNativeHandle = createNativeEntry(name, view);
+    NativeHandle entryNativeHandle = createNativeEntry(address.getName(), view);
 
-    return new EntryIndexProxy<>(entryNativeHandle, name, view, s);
+    EntryIndexProxy<E> entry = new EntryIndexProxy<>(entryNativeHandle, address, view, s);
+    view.registerIndex(entry);
+    return entry;
   }
+
 
   private static NativeHandle createNativeEntry(String name, View view) {
     long viewNativeHandle = view.getViewNativeHandle();
@@ -111,9 +139,9 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
     return entryNativeHandle;
   }
 
-  private EntryIndexProxy(NativeHandle nativeHandle, String name, View view,
+  private EntryIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
       CheckingSerializerDecorator<T> serializer) {
-    super(nativeHandle, name, view);
+    super(nativeHandle, address, view);
     this.serializer = serializer;
   }
 
