@@ -25,7 +25,7 @@ import com.google.common.base.Preconditions;
  */
 public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
-  private final ListProofNode rootProofNode;
+  private final ListProofRoot listProofRoot;
 
   private final ListProofStructureValidator listProofStructureValidator;
 
@@ -37,16 +37,16 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
    * <p>UncheckedListProofAdapter {@link #check()} method will return CheckedListProof containing
    * results of list proof verification.
    *
-   * @param rootProofNode source list proof
+   * @param listProof source list proof with index length
    * @param serializer proof elements serializer
    */
-  public UncheckedListProofAdapter(ListProofNode rootProofNode, Serializer<E> serializer) {
-    Preconditions.checkNotNull(rootProofNode, "ListProof node must be not null");
+  public UncheckedListProofAdapter(ListProofRoot listProof, Serializer<E> serializer) {
+    Preconditions.checkNotNull(listProof, "ListProof node must be not null");
     Preconditions.checkNotNull(serializer, "Serializer must be not null");
 
-    this.rootProofNode = rootProofNode;
-    this.listProofStructureValidator = new ListProofStructureValidator(rootProofNode);
-    this.listMerkleRootCalculator = new ListMerkleRootCalculator<>(rootProofNode, serializer);
+    this.listProofRoot = listProof;
+    this.listProofStructureValidator = new ListProofStructureValidator(listProof.getRootNode());
+    this.listMerkleRootCalculator = new ListMerkleRootCalculator<>(listProof, serializer);
   }
 
   @Override
@@ -59,7 +59,7 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
   }
 
   @Override
-  public ListProofNode getRootProofNode() {
-    return rootProofNode;
+  public ListProofRoot getListProofRoot() {
+    return listProofRoot;
   }
 }

@@ -30,5 +30,5 @@ public interface UncheckedListProof {
   /**
    * Returns raw source proof of this UncheckedListProof.
    */
-  ListProofNode getRootProofNode();
+  ListProofRoot getListProofRoot();
 }

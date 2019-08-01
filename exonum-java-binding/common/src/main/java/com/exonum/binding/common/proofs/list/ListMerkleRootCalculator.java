@@ -55,28 +55,26 @@ final class ListMerkleRootCalculator<E> implements ListProofVisitor {
 
   private HashCode merkleRoot;
 
-  private long length;
-
   /**
    * Creates a new ListMerkleRootCalculator.
    *
    * @param serializer a serializer of list elements
    */
-  ListMerkleRootCalculator(ListProofNode listProof, Serializer<E> serializer) {
+  ListMerkleRootCalculator(ListProofRoot listProof, Serializer<E> serializer) {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
-  private ListMerkleRootCalculator(ListProofNode listProof, Serializer<E> serializer,
+  private ListMerkleRootCalculator(ListProofRoot listProof, Serializer<E> serializer,
                                    HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
     elements = new TreeMap<>();
     index = 0;
-    // TODO: fix (get length from native)
-    length = 1;
+    long length = listProof.getLength();
     merkleRoot = null;
 
-    listProof.accept(this);
+    ListProofNode rootNode = listProof.getRootNode();
+    rootNode.accept(this);
 
     merkleRoot = hashFunction.newHasher()
         .putByte(LIST_ROOT_PREFIX)

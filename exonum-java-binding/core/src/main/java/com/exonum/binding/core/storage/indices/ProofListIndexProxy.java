@@ -22,6 +22,7 @@ import static com.exonum.binding.core.storage.indices.StoragePreconditions.check
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.list.ListProofNode;
+import com.exonum.binding.common.proofs.list.ListProofRoot;
 import com.exonum.binding.common.proofs.list.UncheckedListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
@@ -182,11 +183,11 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   public UncheckedListProof getProof(long index) {
     checkElementIndex(index, size());
 
-    ListProofNode listProofNode = nativeGetProof(getNativeHandle(), index);
-    return new UncheckedListProofAdapter<>(listProofNode, this.serializer);
+    ListProofRoot listProofRoot = nativeGetProof(getNativeHandle(), index);
+    return new UncheckedListProofAdapter<>(listProofRoot, this.serializer);
   }
 
-  private native ListProofNode nativeGetProof(long nativeHandle, long index);
+  private native ListProofRoot nativeGetProof(long nativeHandle, long index);
 
   /**
    * Returns a proof that some elements exist in the specified range in this list.
@@ -198,14 +199,14 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    */
   public UncheckedListProof getRangeProof(long from, long to) {
     long size = size();
-    ListProofNode listProofNode = nativeGetRangeProof(getNativeHandle(),
+    ListProofRoot listProofRoot = nativeGetRangeProof(getNativeHandle(),
         checkElementIndex(from, size),
         checkPositionIndex(to, size));
 
-    return new UncheckedListProofAdapter<>(listProofNode, this.serializer);
+    return new UncheckedListProofAdapter<>(listProofRoot, this.serializer);
   }
 
-  private native ListProofNode nativeGetRangeProof(long nativeHandle, long from, long to);
+  private native ListProofRoot nativeGetRangeProof(long nativeHandle, long from, long to);
 
   /**
    * Returns the root hash of the proof list.
