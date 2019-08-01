@@ -53,9 +53,10 @@ interface ModificationCounter {
   void notifyModified();
 
   /**
-   * Creates a modification counter for the given view.
+   * Creates a modification counter for a collection using the given view.
    *
-   * @param view a database view
+   * @param view a database view on which the collection needing the modification counter
+   *     is based
    */
   static ModificationCounter forView(View view) {
     if (view.canModify()) {
