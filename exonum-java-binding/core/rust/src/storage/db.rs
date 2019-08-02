@@ -34,10 +34,10 @@ pub(crate) type Value = Vec<u8>;
 /// should be placed in the heap to prevent its movement after creating a reference to it.
 
 pub(crate) struct View {
-    /// Allows to drop owned view if needed
-    owned: Option<ViewOwned>,
     /// Unsafe reference to the owned View (owned either by Rust or by Java)
     reference: ViewRef,
+    /// Allows to drop owned view if needed
+    owned: Option<ViewOwned>,
 }
 
 enum ViewOwned {
@@ -53,9 +53,9 @@ pub(crate) enum ViewRef {
 impl View {
     pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
         View {
-            owned: Some(ViewOwned::Snapshot(snapshot)),
             // Make a "self-reference" to a value stored in the `owned` field.
             reference: unsafe { ViewRef::from_snapshot(&*snapshot) },
+            owned: Some(ViewOwned::Snapshot(snapshot)),
         }
     }
 
@@ -64,9 +64,9 @@ impl View {
         // and will not break the `reference` field.
         let fork = Box::new(fork);
         View {
-            owned: Some(ViewOwned::Fork(fork)),
             // Make a "self-reference" to a value stored in the `owned` field.
             reference: unsafe { ViewRef::from_fork(&*fork) },
+            owned: Some(ViewOwned::Fork(fork)),
         }
     }
 
@@ -74,8 +74,8 @@ impl View {
     #[allow(dead_code)]
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
         View {
-            owned: None,
             reference: unsafe { ViewRef::from_snapshot(snapshot) },
+            owned: None,
         }
     }
 
@@ -83,8 +83,8 @@ impl View {
     #[allow(dead_code)]
     pub fn from_ref_fork(fork: &Fork) -> Self {
         View {
-            owned: None,
             reference: unsafe { ViewRef::from_fork(fork) },
+            owned: None,
         }
     }
 
