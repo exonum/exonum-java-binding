@@ -17,14 +17,12 @@
 package com.exonum.binding.core.storage.database;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.proxy.CloseFailuresException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -65,16 +63,6 @@ class SnapshotTest {
 
       verifyStatic(Views.class);
       Views.nativeFree(nativeHandle);
-    }
-  }
-
-  @Test
-  void hasImmutableModificationCounter() throws CloseFailuresException {
-    try (Cleaner cleaner = new Cleaner()) {
-      Snapshot s = Snapshot.newInstance(0x0A, false, cleaner);
-
-      ModificationCounter c = s.getModificationCounter();
-      assertThrows(IllegalStateException.class, c::notifyModified);
     }
   }
 
