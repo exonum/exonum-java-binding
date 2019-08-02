@@ -19,7 +19,6 @@ package com.exonum.binding.core.storage.indices;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import com.exonum.binding.core.storage.database.View;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
@@ -39,7 +38,7 @@ final class StorageIterators {
    * @param nextFunction a function to call to get the next item
    * @param disposeOperation an operation to call to destroy the corresponding native iterator
    * @param collectionView a database view of the collection over which to iterate
-   * @param modificationCounter a view modification counter
+   * @param modificationCounter a modification counter of the collection
    * @param transformingFunction a function to apply to elements returned by native iterator
    *                             (usually, to an array of bytes)
    */

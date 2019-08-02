@@ -348,22 +348,6 @@ class MapIndexProxyIntegrationTest
   }
 
   @Test
-  void keysIterNextShouldFailIfOtherIndexModified() {
-    runTestWithView(database::createFork, (view, map) -> {
-      List<MapEntry<String, String>> entries = createMapEntries(3);
-      putAll(map, entries);
-
-      Iterator<String> iterator = map.keys();
-      iterator.next();
-
-      MapIndexProxy<String, String> otherMap = createMap("other_map", view);
-      otherMap.put("new key", "new value");
-
-      assertThrows(ConcurrentModificationException.class, iterator::next);
-    });
-  }
-
-  @Test
   void valuesShouldReturnEmptyIterIfNoEntries() {
     runTestWithView(database::createSnapshot, (map) -> {
       Iterator<String> iterator = map.values();

@@ -41,7 +41,6 @@ import java.util.Optional;
 public abstract class View extends AbstractNativeProxy {
 
   private final Cleaner cleaner;
-  private final ModificationCounter modCounter;
   private final OpenIndexRegistry indexRegistry = new OpenIndexRegistry();
   private final boolean canModify;
 
@@ -50,14 +49,11 @@ public abstract class View extends AbstractNativeProxy {
    *
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
    * @param cleaner a cleaner of resources
-   * @param modCounter a modification counter
    * @param canModify if the view allows modifications
    */
-  View(NativeHandle nativeHandle, Cleaner cleaner, ModificationCounter modCounter,
-      boolean canModify) {
+  View(NativeHandle nativeHandle, Cleaner cleaner, boolean canModify) {
     super(nativeHandle);
     this.cleaner = cleaner;
-    this.modCounter = modCounter;
     this.canModify = canModify;
   }
 
@@ -111,13 +107,5 @@ public abstract class View extends AbstractNativeProxy {
    */
   public Cleaner getCleaner() {
     return cleaner;
-  }
-
-  /**
-   * Returns a modification counter, corresponding to this view. The clients, trying to modify
-   * a collection using this view, must notify the counter first.
-   */
-  public ModificationCounter getModificationCounter() {
-    return modCounter;
   }
 }

@@ -18,7 +18,6 @@ package com.exonum.binding.core.storage.indices;
 
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.NativeHandle;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import java.util.ConcurrentModificationException;
 import java.util.Optional;
 import java.util.function.LongFunction;
@@ -39,7 +38,7 @@ final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustI
    *
    * @param nativeHandle nativeHandle of this iterator
    * @param nextFunction a function to call to get the next item
-   * @param modificationCounter a view modification counter
+   * @param modificationCounter a collection modification counter
    */
   ConfigurableRustIter(NativeHandle nativeHandle,
                        LongFunction<E> nextFunction,
@@ -58,8 +57,8 @@ final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustI
 
   private void checkNotModified() {
     if (modificationCounter.isModifiedSince(initialModCount)) {
-      throw new ConcurrentModificationException("Collection or the corresponding Fork "
-          + "were modified during iteration");
+      throw new ConcurrentModificationException("The source collection "
+          + "has been modified during iteration");
     }
   }
 }
