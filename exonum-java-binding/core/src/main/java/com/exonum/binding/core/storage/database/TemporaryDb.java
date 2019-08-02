@@ -81,9 +81,10 @@ public final class TemporaryDb extends AbstractCloseableNativeProxy implements D
    * are closed and cannot be used anymore. Any subsequent operations on these objects will result
    * in {@link IllegalStateException}.
    *
-   * <p>TODO(@bogdanov): If the fork cannot be applied to the database …
-   *
    * @param fork a fork to get changes from
+   *
+   * @throws RuntimeException if the fork cannot be applied to the database state.
+   *     The provided fork will be closed
    */
   public void merge(Fork fork) {
     NativeHandle patchHandle = fork.intoPatch();
@@ -101,7 +102,7 @@ public final class TemporaryDb extends AbstractCloseableNativeProxy implements D
 
   private native long nativeCreateFork(long dbNativeHandle);
 
-  private native void nativeMerge(long dbNativeHandle, long forkNativeHandle);
+  private native void nativeMerge(long dbNativeHandle, long patchNativeHandle);
 
   private static native void nativeFree(long dbNativeHandle);
 }

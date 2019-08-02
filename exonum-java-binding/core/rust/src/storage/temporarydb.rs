@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Database, TemporaryDB};
+use exonum_merkledb::{Database, Patch, TemporaryDB};
 use jni::{
     objects::{JClass, JObject},
     JNIEnv,
@@ -21,7 +21,7 @@ use jni::{
 use std::panic;
 
 use handle::{self, Handle};
-use storage::db::{View, ViewRef};
+use storage::db::View;
 use utils;
 
 /// Returns pointer to created `TemporaryDB` object.
@@ -72,23 +72,20 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Merges the given fork into the database.
+/// Merges the given patch into the database.
+/// The provided `patch_handle` is invalidated after the procedure and the
+/// Rust side is responsible for it.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb_nativeMerge(
     env: JNIEnv,
     _: JObject,
     db_handle: Handle,
-    view_handle: Handle,
+    patch_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
-        let _db = handle::cast_handle::<TemporaryDB>(db_handle);
-        let _fork = match *handle::cast_handle::<View>(view_handle).get() {
-            ViewRef::Snapshot(_) => panic!("Attempt to merge snapshot instead of fork."),
-            ViewRef::Fork(fork) => fork,
-        };
-        //FIXME: Implement merging via db.merge(fork.into_patch())
-        //        db.merge(fork.patch().clone())
-        //            .expect("Unable to merge fork");
+        let db = handle::cast_handle::<TemporaryDB>(db_handle);
+        let patch = handle::acquire_handle_ownership::<Patch>(patch_handle);
+        db.merge(*patch).expect("Unable to merge patch");
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)

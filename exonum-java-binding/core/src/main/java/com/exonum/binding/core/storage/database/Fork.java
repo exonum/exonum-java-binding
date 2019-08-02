@@ -124,15 +124,8 @@ public final class Fork extends View {
       // (including the responsibility to destroy it).
       destructor.cancel();
 
-      // Convert into patch
-      // TODO(@bogdanov): What if this operation fails? What are the possible failures?
-      //   Shall we transfer ownership:
-      //   - [current solution] before calling intoPatch, making the native code *always*
-      //     responsible for fork clean-up?
-      //   - after successful completion (= if it completes exceptionally, we must clean;
-      //     if successfully — native code cleans)
-      //   - in some successful and exceptional scenarios (= will result in a complex protocol
-      //     with custom exceptions, for, I think, no practical reason)?
+      // Convert into patch. This operation may throw RuntimeException.
+      // nativeHandle of the Fork can no longer be used after this operation.
       long patchNativeHandle = nativeIntoPatch(getNativeHandle());
 
       return new NativeHandle(patchNativeHandle);
@@ -151,7 +144,9 @@ public final class Fork extends View {
   /**
    * Converts this fork into patch, consuming the object, and returns the native handle
    * to the patch.
-   * TODO(@bogdanov) Document the clean-up guarantees of this method once ^ is clarified.
+   *
+   * <p>In case of failure RuntimeException is thrown and provided nativeHandle is
+   * invalidated.
    */
   private static native long nativeIntoPatch(long nativeHandle);
 }

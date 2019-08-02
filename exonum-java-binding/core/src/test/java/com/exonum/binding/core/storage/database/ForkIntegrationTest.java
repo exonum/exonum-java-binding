@@ -29,14 +29,12 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Iterator;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
 class ForkIntegrationTest {
 
   @Test
-  @Disabled("Depends on ECR-3330")
   void mergeInvalidatesForkAndDependencies() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner("parent")) {
@@ -64,7 +62,6 @@ class ForkIntegrationTest {
   }
 
   @Test
-  @Disabled("Depends on ECR-3330")
   void mergeAbortedIfCollectionsFailedToClose() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner("parent")) {
