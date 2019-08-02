@@ -93,6 +93,18 @@ pub fn cast_handle<T>(handle: Handle) -> &'static mut T {
     unsafe { &mut *ptr }
 }
 
+/// Converts a handle into an owned value.
+/// The ownership of the object is transferred from Java to Rust and Rust side is
+/// responsible for cleaning.
+///
+/// # Panics
+///
+/// Panics if the handle is not valid, or if it identifies a native-owned object.
+pub fn acquire_handle_ownership<T: 'static>(handle: Handle) -> Box<T> {
+    resource_manager::remove_handle::<T>(handle);
+    unsafe { Box::from_raw(handle as *mut T) }
+}
+
 /// Destroys the Java-owned native object identified by the given handle.
 ///
 /// # Panics

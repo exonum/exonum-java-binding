@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import com.exonum.binding.core.storage.database.Fork;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -115,9 +114,6 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
   /**
    * Returns an iterator over the elements of the list.
    *
-   * <p>Any destructive operation on the same {@link Fork} this list uses
-   * (but not necessarily on <em>this list</em>) will invalidate the iterator.
-   *
    * @throws IllegalStateException if this list is not valid
    */
   @Override
@@ -125,12 +121,8 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
 
   /**
    * Returns a stream of elements in this list.
-   * The returned stream is <em>fail-fast</em> and <em>late-binding</em>;
-   * the stream can be used as long as the source list is valid.
-   *
-   * <p>Any destructive operation on the same {@link Fork} this list uses
-   * (but not necessarily on <em>this list</em>) will invalidate the corresponding
-   * spliterator.
+   * The returned stream is <em>fail-fast</em> and <em>late-binding</em>.
+   * The stream can be used as long as the source list is valid.
    *
    * @throws IllegalStateException if this list is not valid
    */
