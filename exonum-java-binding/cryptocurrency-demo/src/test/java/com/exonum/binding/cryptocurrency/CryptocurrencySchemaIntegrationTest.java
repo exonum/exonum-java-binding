@@ -25,7 +25,6 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.google.common.collect.ImmutableList;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -40,7 +39,6 @@ class CryptocurrencySchemaIntegrationTest {
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
 
-  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   void getStateHashes(TestKit testKit) {
     Snapshot view = testKit.getSnapshot();
@@ -52,7 +50,6 @@ class CryptocurrencySchemaIntegrationTest {
     assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);
   }
 
-  @Disabled
   @Test
   void walletHistoryNoRecords(TestKit testKit) {
     Snapshot view = testKit.getSnapshot();
