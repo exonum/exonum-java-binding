@@ -73,7 +73,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ProofMapIndexProxyIntegrationTest
@@ -226,7 +225,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled  //FIXME: Tests here and below are disabled until ECR-3320
   @Test
   void getProof_EmptyMapDoesNotContainSingleKey() {
     runTestWithView(database::createSnapshot,
@@ -234,7 +232,6 @@ class ProofMapIndexProxyIntegrationTest
     );
   }
 
-  @Disabled
   @Test
   void getProof_SingletonMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -246,7 +243,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getProof_SingletonMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
@@ -256,7 +252,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
@@ -278,7 +273,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
@@ -299,7 +293,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -324,7 +317,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -348,7 +340,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getProof_MultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -361,7 +352,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getProof_MultiEntryMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
@@ -384,7 +374,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @CiOnly
   @Test
   /*
@@ -402,14 +391,12 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_EmptyMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createSnapshot, (map) ->
         assertThat(map, provesThatAbsent(PK1, PK2)));
   }
 
-  @Disabled
   @Test
   void getMultiProof_SingletonMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createFork, (map) -> {
@@ -419,7 +406,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_SingletonMapBothContainsAndDoesNot() {
     runTestWithView(database::createFork, (map) -> {
@@ -433,7 +419,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_TwoElementMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -448,7 +433,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
@@ -468,7 +452,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
@@ -487,7 +470,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -510,7 +492,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -532,7 +513,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_SortedMultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -543,7 +523,6 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
   @Test
   void getMultiProof_FourEntryMap_DoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
