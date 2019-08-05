@@ -310,6 +310,84 @@ abstract class BaseListIndexIntegrationTestable
   }
 
   @Test
+  void structuralModificationsInvalidateTheIterator() {
+    runTestWithView(database::createFork, l -> {
+      List<String> elements = TestStorageItems.values;
+
+      l.addAll(elements);
+
+      Iterator<String> iterator = l.iterator();
+      // Ensure the iterator is bound to the source
+      iterator.next();
+
+      // Modify the source list structurally
+      l.add("New element");
+
+      // Check the iterator detects the modification
+      assertThrows(ConcurrentModificationException.class, iterator::next);
+    });
+  }
+
+  /**
+   * Verifies that two indexes with the same name but created independently share
+   * the modification counter.
+   *
+   * <p>It exists on top of
+   * {@link BaseIndexProxyTestable#indexConstructorAllowsMultipleInstancesFromFork()}
+   * to verify that the iterator properties are preserved regardless of whether <em>index</em>
+   * de-duplication is performed.
+   */
+  @Test
+  void structuralModificationsInvalidateTheIteratorsOfIndexesWithSameName()
+      throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      Fork view = database.createFork(cleaner);
+      List<String> elements = TestStorageItems.values;
+      // Create two lists with the same name
+      String name = "Test_List";
+      ListIndex<String> l1 = create(name, view);
+      ListIndex<String> l2 = create(name, view);
+      l1.addAll(elements);
+
+      // Take the iterator from the first list index proxy
+      Iterator<String> it1 = l1.iterator();
+
+      // Ensure the iterator is bound to the source
+      it1.next();
+
+      // Modify structurally the list using the second index proxy
+      l2.add("New element");
+
+      // Check the iterator detects the modification made through the other proxy
+      assertThrows(ConcurrentModificationException.class, it1::next);
+    }
+  }
+
+  @Test
+  void indexModificationCountersOfIndyIndexesMustBeIndependent() throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      Fork view = database.createFork(cleaner);
+      List<String> elements = TestStorageItems.values;
+      // Create two independent lists
+      ListIndex<String> l1 = create("List1", view);
+      ListIndex<String> l2 = create("List123", view);
+      l1.addAll(elements);
+
+      // Take the iterator from the first list
+      Iterator<String> it1 = l1.iterator();
+
+      // Ensure the iterator is bound to the source
+      it1.next();
+
+      // Modify structurally the other list
+      l2.add("New element");
+
+      // Check the iterator from the first list is still functional
+      assertThat(it1.next(), equalTo(elements.get(1)));
+    }
+  }
+
+  @Test
   void testStream() {
     runTestWithView(database::createFork, (l) -> {
       List<String> elements = TestStorageItems.values;

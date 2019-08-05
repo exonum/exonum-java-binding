@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.storage.database;
+package com.exonum.binding.core.storage.indices;
+
+import com.exonum.binding.core.storage.database.View;
 
 /**
  * A counter of modification events of some objects (e.g., a collection, or a database view).
@@ -26,7 +28,7 @@ package com.exonum.binding.core.storage.database;
  *
  * <p>Implementations are not required to be thread-safe.
  */
-public interface ModificationCounter {
+interface ModificationCounter {
 
   /**
    * Returns true if the counter was modified since the given value (if {@link #notifyModified()}
@@ -49,4 +51,18 @@ public interface ModificationCounter {
    *     i.e., must reject any modification events
    */
   void notifyModified();
+
+  /**
+   * Creates a modification counter for a collection using the given view.
+   *
+   * @param view a database view on which the collection needing the modification counter
+   *     is based
+   */
+  static ModificationCounter forView(View view) {
+    if (view.canModify()) {
+      return new IncrementalModificationCounter();
+    } else {
+      return ImmutableModificationCounter.INSTANCE;
+    }
+  }
 }

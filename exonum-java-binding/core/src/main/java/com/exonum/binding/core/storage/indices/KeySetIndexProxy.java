@@ -24,7 +24,6 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
@@ -206,9 +205,6 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
 
   /**
    * Creates an iterator over the set elements. The elements are ordered lexicographically.
-   * 
-   * <p>Any destructive operation on the same {@link Fork} this set uses
-   * (but not necessarily on <em>this set</em>) will invalidate the iterator.
    * 
    * @return an iterator over the elements of this set
    * @throws IllegalStateException if this set is not valid 

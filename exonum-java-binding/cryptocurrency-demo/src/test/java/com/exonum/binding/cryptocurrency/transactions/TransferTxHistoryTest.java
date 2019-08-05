@@ -34,7 +34,6 @@ import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -49,7 +48,6 @@ class TransferTxHistoryTest {
   private static final KeyPair ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
 
-  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   @RequiresNativeLibrary
   void transfersHistoryBetweenTwoAccountsTest(TestKit testKit) {
