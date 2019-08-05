@@ -17,7 +17,7 @@
 package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.proofs.list.ListProofUtils.getBranchHashCode;
-import static com.exonum.binding.common.proofs.list.ListProofUtils.getMerkleRoot;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getProofListHash;
 import static com.exonum.binding.common.proofs.list.ListProofUtils.getNodeHashCode;
 import static com.exonum.binding.common.proofs.list.ListProofUtils.leafOf;
 import static com.google.common.collect.ImmutableMap.of;
@@ -29,7 +29,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import org.junit.jupiter.api.Test;
 
-class ListMerkleRootCalculatorTest {
+class ListProofHashCalculatorTest {
 
   private static final String V1 = "v1";
   private static final String V2 = "v2";
@@ -39,7 +39,7 @@ class ListMerkleRootCalculatorTest {
   private static final HashCode H1 = HashCode.fromString("a1");
   private static final HashCode H2 = HashCode.fromString("a2");
 
-  private ListMerkleRootCalculator<String> calculator;
+  private ListProofHashCalculator<String> calculator;
 
   @Test
   void visit_SingletonListProof() {
@@ -48,10 +48,10 @@ class ListMerkleRootCalculatorTest {
     ListProof listProof = new ListProof(root, 1);
     calculator = createListProofCalculator(listProof);
 
-    HashCode expectedMerkleRoot = getMerkleRoot(getNodeHashCode(V1), listProof.getLength());
+    HashCode expectedProofListHash = getProofListHash(getNodeHashCode(V1), listProof.getLength());
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1)));
-    assertEquals(expectedMerkleRoot, calculator.getMerkleRoot());
+    assertEquals(expectedProofListHash, calculator.getHash());
   }
 
   @Test
@@ -63,13 +63,13 @@ class ListMerkleRootCalculatorTest {
     ListProof listProof = new ListProof(root, 2);
     calculator = createListProofCalculator(listProof);
 
-    // Calculate expected merkle root
+    // Calculate expected proof list hash
     HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
-    HashCode expectedMerkleRoot = getMerkleRoot(expectedRootHash, listProof.getLength());
+    HashCode expectedProofListHash = getProofListHash(expectedRootHash, listProof.getLength());
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1,
         1L, V2)));
-    assertEquals(expectedMerkleRoot, calculator.getMerkleRoot());
+    assertEquals(expectedProofListHash, calculator.getHash());
   }
 
   @Test
@@ -88,11 +88,11 @@ class ListMerkleRootCalculatorTest {
     ListProof listProof = new ListProof(root, 4);
     calculator = createListProofCalculator(listProof);
 
-    // Calculate expected merkle root
+    // Calculate expected proof list hash
     HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
     HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), getNodeHashCode(V4));
     HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
-    HashCode expectedMerkleRoot = getMerkleRoot(expectedRootHash, listProof.getLength());
+    HashCode expectedProofListHash = getProofListHash(expectedRootHash, listProof.getLength());
 
 
     assertThat(calculator.getElements(),
@@ -100,7 +100,7 @@ class ListMerkleRootCalculatorTest {
             1L, V2,
             2L, V3,
             3L, V4)));
-    assertEquals(expectedMerkleRoot, calculator.getMerkleRoot());
+    assertEquals(expectedProofListHash, calculator.getHash());
   }
 
   @Test
@@ -113,11 +113,10 @@ class ListMerkleRootCalculatorTest {
     calculator = createListProofCalculator(listProof);
 
     HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), H2);
-    HashCode expectedMerkleRoot = getMerkleRoot(expectedRootHash, listProof.getLength());
-
+    HashCode expectedProofListHash = getProofListHash(expectedRootHash, listProof.getLength());
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1)));
-    assertEquals(expectedMerkleRoot, calculator.getMerkleRoot());
+    assertEquals(expectedProofListHash, calculator.getHash());
   }
 
   @Test
@@ -130,10 +129,10 @@ class ListMerkleRootCalculatorTest {
     calculator = createListProofCalculator(listProof);
 
     HashCode expectedRootHash = getBranchHashCode(H1, getNodeHashCode(V2));
-    HashCode expectedMerkleRoot = getMerkleRoot(expectedRootHash, listProof.getLength());
+    HashCode expectedProofListHash = getProofListHash(expectedRootHash, listProof.getLength());
 
     assertThat(calculator.getElements(), equalTo(of(1L, V2)));
-    assertEquals(expectedMerkleRoot, calculator.getMerkleRoot());
+    assertEquals(expectedProofListHash, calculator.getHash());
   }
 
   @Test
@@ -155,7 +154,7 @@ class ListMerkleRootCalculatorTest {
     HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
     HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), null);
     HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
-    HashCode expectedMerkleRoot = getMerkleRoot(expectedRootHash, listProof.getLength());
+    HashCode expectedProofListHash = getProofListHash(expectedRootHash, listProof.getLength());
 
     assertThat(calculator.getElements(),
         equalTo(of(
@@ -163,10 +162,10 @@ class ListMerkleRootCalculatorTest {
             1L, V2,
             2L, V3))
     );
-    assertEquals(expectedMerkleRoot, calculator.getMerkleRoot());
+    assertEquals(expectedProofListHash, calculator.getHash());
   }
 
-  private ListMerkleRootCalculator<String> createListProofCalculator(ListProof listProof) {
-    return new ListMerkleRootCalculator<>(listProof, StandardSerializers.string());
+  private ListProofHashCalculator<String> createListProofCalculator(ListProof listProof) {
+    return new ListProofHashCalculator<>(listProof, StandardSerializers.string());
   }
 }

@@ -32,11 +32,11 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 /**
- * List proof root hash calculator.
+ * List proof hash calculator.
  *
  * @param <E> the type of elements in the corresponding list
  */
-final class ListMerkleRootCalculator<E> implements ListProofVisitor {
+final class ListProofHashCalculator<E> implements ListProofVisitor {
 
   @VisibleForTesting
   static final byte BLOB_PREFIX = 0x00;
@@ -53,32 +53,32 @@ final class ListMerkleRootCalculator<E> implements ListProofVisitor {
 
   private long index;
 
-  private HashCode merkleRoot;
+  private HashCode hash;
 
   /**
-   * Creates a new ListMerkleRootCalculator.
+   * Creates a new ListProofHashCalculator.
    *
    * @param serializer a serializer of list elements
    */
-  ListMerkleRootCalculator(ListProof listProof, Serializer<E> serializer) {
+  ListProofHashCalculator(ListProof listProof, Serializer<E> serializer) {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
-  private ListMerkleRootCalculator(ListProof listProof, Serializer<E> serializer,
-      HashFunction hashFunction) {
+  private ListProofHashCalculator(ListProof listProof, Serializer<E> serializer,
+                                  HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
     elements = new TreeMap<>();
     index = 0;
-    merkleRoot = null;
+    hash = null;
 
     ListProofNode rootNode = listProof.getRootNode();
     rootNode.accept(this);
 
-    merkleRoot = hashFunction.newHasher()
+    hash = hashFunction.newHasher()
         .putByte(LIST_ROOT_PREFIX)
         .putLong(listProof.getLength())
-        .putObject(merkleRoot, hashCodeFunnel())
+        .putObject(hash, hashCodeFunnel())
         .hash();
   }
 
@@ -88,7 +88,7 @@ final class ListMerkleRootCalculator<E> implements ListProofVisitor {
     HashCode leftHash = visitLeft(branch, branchIndex);
     Optional<HashCode> rightHash = visitRight(branch, branchIndex);
 
-    merkleRoot = hashFunction.newHasher()
+    hash = hashFunction.newHasher()
         .putByte(LIST_BRANCH_PREFIX)
         .putObject(leftHash, hashCodeFunnel())
         .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
@@ -98,7 +98,7 @@ final class ListMerkleRootCalculator<E> implements ListProofVisitor {
 
   @Override
   public void visit(ListProofHashNode listProofHashNode) {
-    this.merkleRoot = listProofHashNode.getHash();
+    this.hash = listProofHashNode.getHash();
   }
 
   @Override
@@ -109,7 +109,7 @@ final class ListMerkleRootCalculator<E> implements ListProofVisitor {
 
     E element = serializer.fromBytes(value.getElement().toByteArray());
     elements.put(index, element);
-    merkleRoot = hashFunction.newHasher()
+    hash = hashFunction.newHasher()
         .putByte(BLOB_PREFIX)
         .putObject(value, ListProofElement.funnel())
         .hash();
@@ -118,14 +118,14 @@ final class ListMerkleRootCalculator<E> implements ListProofVisitor {
   private HashCode visitLeft(ListProofBranch branch, long parentIndex) {
     index = 2 * parentIndex;
     branch.getLeft().accept(this);
-    return merkleRoot;
+    return hash;
   }
 
   private Optional<HashCode> visitRight(ListProofBranch branch, long parentIndex) {
     index = 2 * parentIndex + 1;
-    merkleRoot = null;
+    hash = null;
     branch.getRight().ifPresent((right) -> right.accept(this));
-    return Optional.ofNullable(merkleRoot);
+    return Optional.ofNullable(hash);
   }
 
   /**
@@ -136,18 +136,16 @@ final class ListMerkleRootCalculator<E> implements ListProofVisitor {
   }
 
   /**
-   * Returns calculated root hash of a list proof tree.
-   *
-   * @return hash code
+   * Returns calculated hash of a list proof tree.
    */
-  HashCode getMerkleRoot() {
-    return merkleRoot;
+  HashCode getHash() {
+    return hash;
   }
 
   @Override
   public String toString() {
-    return "ListProofStructureValidator{"
-        + "merkleRoot=" + merkleRoot
+    return "ListProofHashCalculator{"
+        + "hash=" + hash
         + ", elements=" + elements
         + ", index=" + index
         + '}';

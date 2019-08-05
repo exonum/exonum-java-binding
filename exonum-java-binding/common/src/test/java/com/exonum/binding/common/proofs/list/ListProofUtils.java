@@ -17,9 +17,9 @@
 package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
-import static com.exonum.binding.common.proofs.list.ListMerkleRootCalculator.BLOB_PREFIX;
-import static com.exonum.binding.common.proofs.list.ListMerkleRootCalculator.LIST_BRANCH_PREFIX;
-import static com.exonum.binding.common.proofs.list.ListMerkleRootCalculator.LIST_ROOT_PREFIX;
+import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.BLOB_PREFIX;
+import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.LIST_BRANCH_PREFIX;
+import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.LIST_ROOT_PREFIX;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -81,7 +81,7 @@ final class ListProofUtils {
         .hash();
   }
 
-  static HashCode getMerkleRoot(HashCode rootHash, long length) {
+  static HashCode getProofListHash(HashCode rootHash, long length) {
     return Hashing.defaultHashFunction().newHasher()
         .putByte(LIST_ROOT_PREFIX)
         .putLong(length)

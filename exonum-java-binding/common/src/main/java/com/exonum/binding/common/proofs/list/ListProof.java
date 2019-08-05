@@ -6,7 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Represents a proof that some elements exist in a ProofList at certain positions and the length
  * of corresponding index.
  */
-public class ListProof {
+public final class ListProof {
 
   private final ListProofNode rootNode;
 

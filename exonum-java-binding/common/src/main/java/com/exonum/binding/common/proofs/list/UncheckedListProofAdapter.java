@@ -29,7 +29,7 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
   private final ListProofStructureValidator listProofStructureValidator;
 
-  private final ListMerkleRootCalculator<E> listMerkleRootCalculator;
+  private final ListProofHashCalculator<E> listProofHashCalculator;
 
   /**
    * Creates UncheckedListProofAdapter for convenient usage of ListProof interfaces.
@@ -46,16 +46,16 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
     this.listProof = listProof;
     this.listProofStructureValidator = new ListProofStructureValidator(listProof.getRootNode());
-    this.listMerkleRootCalculator = new ListMerkleRootCalculator<>(listProof, serializer);
+    this.listProofHashCalculator = new ListProofHashCalculator<>(listProof, serializer);
   }
 
   @Override
   public CheckedListProof check() {
     ListProofStatus structureCheckStatus = listProofStructureValidator.getProofStatus();
-    HashCode calculatedRootHash = listMerkleRootCalculator.getMerkleRoot();
+    HashCode calculatedRootHash = listProofHashCalculator.getHash();
 
     return new CheckedListProofImpl<>(
-        calculatedRootHash, listMerkleRootCalculator.getElements(), structureCheckStatus);
+        calculatedRootHash, listProofHashCalculator.getElements(), structureCheckStatus);
   }
 
   @Override
