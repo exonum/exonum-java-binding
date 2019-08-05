@@ -21,12 +21,9 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.core.transaction.Transaction;
 import io.vertx.ext.web.Router;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Properties;
 
 /**
  * An Exonum service.
@@ -37,64 +34,36 @@ import java.util.Optional;
 public interface Service {
 
   /**
-   * Returns the id of the service.
-   */
-  short getId();
-
-  /**
-   * Returns the name of the service.
-   */
-  String getName();
-
-  /**
-   * Initializes the service. This method is called once when a genesis block is created
-   * and is supposed to
-   * <ul>
-   *   <li>(a) initialize the database schema of this service, and</li>
-   *   <li>(b) provide an initial <a href="https://exonum.com/doc/version/0.11/architecture/services/#global-configuration">global configuration</a>
-   * of the service.</li>
-   * </ul>
-   *
-   * <p>The service configuration parameters must be provided as a JSON string.
-   * It is recorded in a table of global configuration parameters of each service deployed
-   * in the network.
+   * Configures the service instance. This method is called <em>once</em> after the service
+   * instance is added to the blockchain and allows to initialize some persistent data
+   * of the service.
    *
    * @param fork a database fork to apply changes to. Not valid after this method returns
-   * @return a global configuration of the service, or {@code Optional.empty()} if the service
-   *         does not have any configuration parameters.
-   * @see <a href="https://exonum.com/doc/version/0.11/architecture/services/#initialization-handler">Initialization handler</a>
+   * @param arguments the service configuration
    */
-  default Optional<String> initialize(Fork fork) {
-    return Optional.empty();
+  default void configure(Fork fork, Properties arguments) {
+    // No configuration
   }
 
   /**
-   * Converts an Exonum raw transaction to an executable transaction of <em>this</em> service.
+   * Returns a list of hashes representing the state of this service, as of the given snapshot
+   * of the blockchain state. Usually, it includes the root hashes of all Merkelized collections
+   * defined by this service.
    *
-   * @param rawTransaction a raw transaction to be converted
-   * @return an executable transaction
-   * @throws IllegalArgumentException if the raw transaction is malformed
-   *         or it doesn't belong to this service
-   * @throws NullPointerException if raw transaction is null
-   */
-  Transaction convertToTransaction(RawTransaction rawTransaction);
-
-  /**
-   * Returns a list of root hashes of all Merkelized tables defined by this service,
-   * as of the given snapshot of the blockchain state. If the service doesn't have any Merkelized
-   * tables, returns an empty list.
-   *
-   * <p>The core uses this list to aggregate hashes of tables defined by all services
-   * into a single Merkelized meta-map.  The hash of this meta-map is considered the hash
+   * <p>The core uses this list to verify that the service on each node in the network has the same
+   * database state. To do so efficiently, it aggregates state hashes of all services
+   * into a single Merkelized meta-map. The hash of this meta-map is considered the hash
    * of the entire blockchain state and is recorded as such in blocks and Precommit messages.
+   *
+   * <p>Please note that if this service does not provide any state hashes,
+   * the framework will not be able to verify that its transactions cause the same results
+   * on different nodes.
    *
    * @param snapshot a snapshot of the blockchain state. Not valid after this method returns
    * @see ProofListIndexProxy#getRootHash()
    * @see ProofMapIndexProxy#getRootHash()
    */
-  default List<HashCode> getStateHashes(Snapshot snapshot) {
-    return Collections.emptyList();
-  }
+  List<HashCode> getStateHashes(Snapshot snapshot);
 
   /**
    * Creates handlers that make up the public HTTP API of this service.

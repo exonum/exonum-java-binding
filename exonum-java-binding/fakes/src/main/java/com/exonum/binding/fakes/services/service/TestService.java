@@ -25,7 +25,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.util.Properties;
 
 /**
  * A test service for integration tests.
@@ -46,7 +46,8 @@ public final class TestService extends AbstractService {
   private static final SchemaFactory<TestSchema> SCHEMA_FACTORY = TestSchema::new;
 
   public TestService() {
-    super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, SCHEMA_FACTORY));
+    // todo: Shall we really remove convertTransaction?
+    // super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, SCHEMA_FACTORY));
   }
 
   @Override
@@ -58,11 +59,10 @@ public final class TestService extends AbstractService {
    * Always puts the same value identified by the same key and returns the same configuration.
    */
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public void configure(Fork fork, Properties configuration) {
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
-    return Optional.of(INITIAL_CONFIGURATION);
   }
 
   @Override

@@ -65,14 +65,6 @@ public class UserServiceAdapter {
     this.viewFactory = checkNotNull(viewFactory, "viewFactory");
   }
 
-  public short getId() {
-    return service.getId();
-  }
-
-  public String getName() {
-    return service.getName();
-  }
-
   public Service getService() {
     return service;
   }
@@ -149,7 +141,7 @@ public class UserServiceAdapter {
    *
    * @param forkHandle a handle to a native fork object
    * @return the service global configuration as a JSON string or null if it does not have any
-   * @see Service#initialize(Fork)
+   * @see Service#configure(Fork)
    */
   @Nullable
   public String initialize(long forkHandle) {
@@ -157,7 +149,7 @@ public class UserServiceAdapter {
 
     try (Cleaner cleaner = new Cleaner("UserServiceAdapter#initialize")) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
-      return service.initialize(fork)
+      return service.configure(fork)
           .orElse(null);
     } catch (CloseFailuresException e) {
       logger.error("Failed to close some resources at initialize", e);

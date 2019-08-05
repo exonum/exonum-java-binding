@@ -31,7 +31,6 @@ import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +45,7 @@ class TestServiceIntegrationTest {
       Fork fork = temporaryDb.createFork(cleaner);
       TestService service = new TestService();
 
-      Optional<String> initialConfig = service.initialize(fork);
+      Optional<String> initialConfig = service.configure(fork);
 
       Optional<String> expectedConfig = Optional.of(INITIAL_CONFIGURATION);
       assertThat(initialConfig, equalTo(expectedConfig));

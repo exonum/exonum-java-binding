@@ -29,7 +29,7 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.util.Properties;
 
 public final class TestService extends AbstractService {
 
@@ -38,23 +38,11 @@ public final class TestService extends AbstractService {
   static final String INITIAL_ENTRY_VALUE = "initial value";
   static final String INITIAL_CONFIGURATION = "{ \"version\": \"0.2.0\" }";
 
-  public static final short SERVICE_ID = 46;
-  static final String SERVICE_NAME = "Test service";
-
   private Node node;
 
   public TestService() {
-    super(SERVICE_ID, SERVICE_NAME, TestTransaction::from);
-  }
-
-  @Override
-  public short getId() {
-    return SERVICE_ID;
-  }
-
-  @Override
-  public String getName() {
-    return SERVICE_NAME;
+    // todo: Shall we remove the converter:
+    //  TestTransaction::from);
   }
 
   public Node getNode() {
@@ -67,11 +55,10 @@ public final class TestService extends AbstractService {
   }
 
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public void configure(Fork fork, Properties properties) {
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
-    return Optional.of(INITIAL_CONFIGURATION);
   }
 
   @Override
@@ -84,6 +71,8 @@ public final class TestService extends AbstractService {
   static RawTransaction constructAfterCommitTransaction(long height) {
     String payload = "Test message on height " + height;
     return RawTransaction.newBuilder()
+        // todo: Or keep getId() in the interface, and implement it in the AbstractService
+        //   for cases like this one (submitting a transaction to self)?
         .serviceId(SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
