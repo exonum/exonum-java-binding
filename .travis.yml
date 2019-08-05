@@ -14,7 +14,7 @@ branches:
 addons:
   apt:
     sources:
-      - sourceline: 'ppa:chris-lea/libsodium'
+      - sourceline: 'ppa:fsgmhoward/shadowsocks-libev'
       - sourceline: 'ppa:maarten-fonville/protobuf'
       - sourceline: 'ppa:exonum/rocksdb'
     packages:
