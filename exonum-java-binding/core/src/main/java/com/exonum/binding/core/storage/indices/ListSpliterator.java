@@ -19,7 +19,6 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkPositionIndex;
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ConcurrentModificationException;
 import java.util.Spliterator;
@@ -28,18 +27,12 @@ import java.util.function.Consumer;
 /**
  * A spliterator for list-like Exonum collections.
  *
- * <p>This spliterator is late-binding and fail-fast. It will fail if <em>any</em> collection
- * associated with a given {@link com.exonum.binding.core.storage.database.Fork} is modified;
- * not only the source list.
+ * <p>This spliterator is late-binding and fail-fast.
  *
  * <p>This spliterator does not support specializations (e.g., {@link Spliterator.OfInt}).
  * If they are ever needed, see the Spliterator in an archived "exonum-serialization" project.
  *
  * @param <ElementT> the type of elements in the corresponding list this spliterator provides
- */
-/*
- * todo: Can’t we make a spliterator that is resilient to modifications of unrelated collections?
- *  I think we can as we use indices into list: ECR-2849
  */
 class ListSpliterator<ElementT> implements Spliterator<ElementT> {
 

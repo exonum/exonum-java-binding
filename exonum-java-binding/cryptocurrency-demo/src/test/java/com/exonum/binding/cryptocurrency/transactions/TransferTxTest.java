@@ -47,7 +47,6 @@ import com.exonum.binding.testkit.TestKitExtension;
 import com.google.common.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -94,7 +93,6 @@ class TransferTxTest {
         .contains(Long.toString(transferAmount));
   }
 
-  @Disabled //FIXME: Tests are disabled until proofs code is fixed ECR-3320
   @Test
   @RequiresNativeLibrary
   void executeTransfer(TestKit testKit) {
@@ -133,7 +131,6 @@ class TransferTxTest {
         .containsExactly(messageHash);
   }
 
-  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeTransfer_NoSuchFromWallet(TestKit testKit) {
@@ -157,7 +154,6 @@ class TransferTxTest {
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
-  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeTransfer_NoSuchToWallet(TestKit testKit) {
@@ -181,7 +177,6 @@ class TransferTxTest {
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
-  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeTransfer_RejectsSameSenderAndReceiver(TestKit testKit) {
@@ -199,7 +194,6 @@ class TransferTxTest {
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
-  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeTransfer_InsufficientFunds(TestKit testKit) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.storage.database;
+package com.exonum.binding.core.storage.indices;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -34,7 +34,6 @@ import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.TestStorageItems;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -64,7 +63,6 @@ class TemporaryDbIntegrationTest {
     }
   }
 
-  @Disabled // FIXME: Tests are disabled until ECR-3330
   @Test
   void merge_singleList() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
@@ -87,7 +85,6 @@ class TemporaryDbIntegrationTest {
     }
   }
 
-  @Disabled
   @Test
   void merge_twoIndices() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
@@ -120,7 +117,6 @@ class TemporaryDbIntegrationTest {
     }
   }
 
-  @Disabled
   @Test
   void merge_multipleForks() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
@@ -150,7 +146,6 @@ class TemporaryDbIntegrationTest {
   }
 
   @Test
-  @Disabled("Depends on ECR-3330")
   void mergingAlreadyMergedForkFails() throws CloseFailuresException {
     try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
