@@ -20,10 +20,12 @@ import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
+import java.util.Properties;
 
 class TestService extends AbstractService {
 
@@ -33,6 +35,11 @@ class TestService extends AbstractService {
   @Inject
   TestService(TransactionConverter transactionConverter) {
     super(ID, NAME, transactionConverter);
+  }
+
+  @Override
+  public void configure(Fork fork, Properties arguments) {
+    // todo:
   }
 
   @Override

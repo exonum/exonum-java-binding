@@ -1,9 +1,7 @@
 package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.core.service.Node;
 import com.google.auto.value.AutoValue;
-import io.vertx.ext.web.Router;
 
 /**
  * A specification of a service instance.
@@ -30,4 +28,8 @@ public abstract class ServiceInstanceSpec {
    * Returns the service artifact id.
    */
   public abstract ServiceArtifactId getArtifactId();
+
+  public static ServiceInstanceSpec newInstance(String name, int id, ServiceArtifactId artifactId) {
+    return new AutoValue_ServiceInstanceSpec(name, id, artifactId);
+  }
 }
