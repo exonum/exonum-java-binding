@@ -107,15 +107,14 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   @ParameterizedTest
   @ValueSource(strings = {
       "",
-      //      " name", // FIXME: commented out until ECR-3345
-      //      "name ",
-      //      "name 1",
-      //      " name ",
-      //      "?name",
-      //      "name?",
-      //      "na?me",
-      //      "name#1",
-      //      "name-1",
+      " name",
+      "name ",
+      "name 1",
+      " name ",
+      "?name",
+      "name?",
+      "na?me",
+      "name#1",
   })
   void indexConstructorThrowsIfInvalidName(String name) throws Exception {
     try (Cleaner cleaner = new Cleaner()) {
@@ -180,7 +179,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
    * - Constructor of the other type checks it, preventing illegal access to the internals.
    */
   @Test
-  @Disabled("Needs working Database#merge from ECR-3330")
+  @Disabled("Fails for EntryIndexProxy ECR-3415")
   void indexConstructorPersistsIndexTypeInfo() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";

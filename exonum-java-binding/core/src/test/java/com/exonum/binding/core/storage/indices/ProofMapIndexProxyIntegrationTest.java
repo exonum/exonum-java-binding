@@ -226,7 +226,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled  //FIXME: Tests here and below are disabled until ECR-3320
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_EmptyMapDoesNotContainSingleKey() {
     runTestWithView(database::createSnapshot,
@@ -234,7 +234,7 @@ class ProofMapIndexProxyIntegrationTest
     );
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_SingletonMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -246,7 +246,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_SingletonMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
@@ -256,7 +256,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
@@ -278,7 +278,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
@@ -299,7 +299,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -324,7 +324,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -348,7 +348,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_MultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -361,7 +361,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getProof_MultiEntryMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
@@ -384,7 +384,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @CiOnly
   @Test
   /*
@@ -402,14 +402,14 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_EmptyMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createSnapshot, (map) ->
         assertThat(map, provesThatAbsent(PK1, PK2)));
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_SingletonMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createFork, (map) -> {
@@ -419,7 +419,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_SingletonMapBothContainsAndDoesNot() {
     runTestWithView(database::createFork, (map) -> {
@@ -433,7 +433,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_TwoElementMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -448,7 +448,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
@@ -468,7 +468,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
@@ -487,7 +487,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -510,7 +510,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
@@ -532,7 +532,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_SortedMultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
@@ -543,7 +543,7 @@ class ProofMapIndexProxyIntegrationTest
     });
   }
 
-  @Disabled
+  @Disabled("Fails on assertion, disabled until ECR-3416")
   @Test
   void getMultiProof_FourEntryMap_DoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
