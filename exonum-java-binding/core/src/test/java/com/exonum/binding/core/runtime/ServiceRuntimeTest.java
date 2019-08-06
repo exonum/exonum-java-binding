@@ -25,8 +25,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.core.service.adapters.UserServiceAdapter;
+import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.service.ServiceModule;
+import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.service.adapters.ViewFactory;
+import com.exonum.binding.core.storage.database.Database;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -36,6 +43,7 @@ import com.google.inject.Stage;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,6 +60,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ServiceRuntimeTest {
 
   static final int PORT = 25000;
+  static final String TEST_NAME = "test_service_name";
+  static final int TEST_ID = 17;
 
   @Nested
   class WithTestFrameworkModule {
@@ -77,7 +87,7 @@ class ServiceRuntimeTest {
       Path serviceArtifactLocation = Paths.get("/tmp/foo-service.jar");
       ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-          .newInstance(serviceId, new ReflectiveModuleSupplier(TestServiceModule.class));
+          .newInstance(serviceId, TestServiceModule::new);
       when(serviceLoader.loadService(serviceArtifactLocation))
           .thenReturn(serviceDefinition);
 
@@ -92,7 +102,7 @@ class ServiceRuntimeTest {
       Path serviceArtifactLocation = Paths.get("/tmp/foo-service.jar");
       ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-          .newInstance(actualId, new ReflectiveModuleSupplier(TestServiceModule.class));
+          .newInstance(actualId, TestServiceModule::new);
       when(serviceLoader.loadService(serviceArtifactLocation))
           .thenReturn(serviceDefinition);
 
@@ -122,33 +132,108 @@ class ServiceRuntimeTest {
     }
 
     @Test
-    void createService() throws Exception {
-      String serviceId = "com.acme:foo-service:1.0.0";
+    void createService() {
+      ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
       ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-          .newInstance(ServiceArtifactId.parseFrom(serviceId),
-              new ReflectiveModuleSupplier(TestServiceModule.class));
-      when(serviceLoader.findService(ServiceArtifactId.parseFrom(serviceId)))
+          .newInstance(artifactId, TestServiceModule::new);
+      when(serviceLoader.findService(artifactId))
           .thenReturn(Optional.of(serviceDefinition));
 
-      UserServiceAdapter service = serviceRuntime.createService(serviceId);
+      // Create the service from the artifact
+      ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+          TEST_ID, artifactId);
+      serviceRuntime.createService(instanceSpec);
 
-      assertThat(service).isNotNull();
-      assertThat(service.getId()).isEqualTo(TestService.ID);
-      assertThat(service.getName()).isEqualTo(TestService.NAME);
+      // Check it is present and has configured name
+      Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
+
+      assertThat(serviceOpt).isPresent();
+      ServiceWrapper serviceWrapper = serviceOpt.get();
+      assertThat(serviceWrapper.getName()).isEqualTo(TEST_NAME);
+    }
+
+    @Test
+    void createServiceDuplicate() {
+      ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+      ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
+      LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+          .newInstance(artifactId, TestServiceModule::new);
+      when(serviceLoader.findService(artifactId))
+          .thenReturn(Optional.of(serviceDefinition));
+
+      // Create the service from the artifact
+      ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+          TEST_ID, artifactId);
+      serviceRuntime.createService(instanceSpec);
+
+      // Try to create another service with the same service instance specification
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> serviceRuntime.createService(instanceSpec));
+
+      assertThat(e).hasMessageContaining("name");
+      assertThat(e).hasMessageContaining(TEST_NAME);
     }
 
     @Test
     void createServiceUnknownService() {
-      String serviceId = "com.acme:foo-service:1.0.0";
+      ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
       ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
-      when(serviceLoader.findService(ServiceArtifactId.parseFrom(serviceId)))
-          .thenReturn(Optional.empty());
+      when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
+
+      ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+          TEST_ID, artifactId);
 
       Exception e = assertThrows(IllegalArgumentException.class,
-          () -> serviceRuntime.createService(serviceId));
+          () -> serviceRuntime.createService(instanceSpec));
       assertThat(e).hasMessageFindingMatch("Unknown.+artifact");
-      assertThat(e).hasMessageContaining(serviceId);
+      assertThat(e).hasMessageContaining(String.valueOf(artifactId));
+    }
+
+    @Test
+    void configureService() throws CloseFailuresException {
+      // todo: Extract in some setup method as we have quite some tests requiring a service?
+      ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+      ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
+      LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+          .newInstance(artifactId, MockServiceModule::new);
+      when(serviceLoader.findService(artifactId))
+          .thenReturn(Optional.of(serviceDefinition));
+
+      // Create the service from the artifact
+      ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+          TEST_ID, artifactId);
+      serviceRuntime.createService(instanceSpec);
+
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Fork view = database.createFork(cleaner);
+        Properties properties = new Properties();
+
+        // Configure the service
+        serviceRuntime.configureService(TEST_NAME, view, properties);
+
+        // Check the service was configured
+        Service service = serviceRuntime.findService(TEST_NAME)
+            .map(ServiceWrapper::getService)
+            .get();
+        verify(service).configure(view, properties);
+      }
+    }
+
+    @Test
+    void configureNonExistingService() throws CloseFailuresException {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Fork view = database.createFork(cleaner);
+        Properties properties = new Properties();
+
+        // Configure the service
+        Exception e = assertThrows(IllegalArgumentException.class,
+            () -> serviceRuntime.configureService(TEST_NAME, view, properties));
+
+        assertThat(e).hasMessageContaining(TEST_NAME);
+      }
     }
   }
 
@@ -167,8 +252,15 @@ class ServiceRuntimeTest {
   }
 }
 
+abstract class AbstractMockingModule extends AbstractModule {
+  <T> void bindToSingletonMock(Class<T> type) {
+    bind(type).toProvider(() -> mock(type))
+        .in(Singleton.class);
+  }
+}
+
 /** A test framework module that will instantiate mocks-singletons on demand. */
-class TestFrameworkModule extends AbstractModule {
+class TestFrameworkModule extends AbstractMockingModule {
 
   @Override
   protected void configure() {
@@ -178,9 +270,16 @@ class TestFrameworkModule extends AbstractModule {
         .toInstance(PORT);
     bindToSingletonMock(ViewFactory.class);
   }
+}
 
-  private <T> void bindToSingletonMock(Class<T> type) {
-    bind(type).toProvider(() -> mock(type))
-        .in(Singleton.class);
+/**
+ * A service module providing mocks-singletons of {@link Service} and {@link TransactionConverter}.
+ */
+class MockServiceModule extends AbstractMockingModule implements ServiceModule {
+
+  @Override
+  protected void configure() {
+    bindToSingletonMock(Service.class);
+    bindToSingletonMock(TransactionConverter.class);
   }
 }
