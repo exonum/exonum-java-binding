@@ -136,7 +136,7 @@ final class ListProofHashCalculator<E> implements ListProofVisitor {
   }
 
   /**
-   * Returns calculated hash of a list proof tree.
+   * Returns calculated hash of the list proof.
    */
   HashCode getHash() {
     return hash;
