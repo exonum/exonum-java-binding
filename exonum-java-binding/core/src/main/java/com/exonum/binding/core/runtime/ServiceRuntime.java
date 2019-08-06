@@ -195,8 +195,7 @@ public final class ServiceRuntime {
     //   started service and only once)? It feels like an overkill for an implementation of
     //   a framework abstraction.
     synchronized (lock) {
-      checkArgument(findService(name).isPresent(), "No service with name %s in the Java runtime",
-          name);
+      checkService(name);
 
       try {
         ServiceWrapper service = services.get(name);
@@ -207,6 +206,35 @@ public final class ServiceRuntime {
         throw e;
       }
     }
+
+    logger.info("Configured service {} with parameters {}", name, configuration);
+  }
+
+  /**
+   * Stops a started service.
+   *
+   * <p><strong>The present implementation is rather limited, as the core uses it only
+   * if the service configuration failed, hence this operation is (a) blocking; (b) complete —
+   * there is no preceding notification that the service is about to be stopped, no guarantees
+   * on transaction processing; (c) no artifact unloading.</strong>
+   * @param name the name of the started service
+   */
+  public void stopService(String name) {
+    synchronized (lock) {
+      checkService(name);
+      // todo: disconnect from the API if it was connected
+
+      // Unregister the service
+      services.remove(name);
+    }
+
+    logger.info("Stopped service {}", name);
+  }
+
+  /** Checks that the service with the given name is started in this runtime. */
+  private void checkService(String name) {
+    checkArgument(findService(name).isPresent(), "No service with name %s in the Java runtime",
+        name);
   }
 
   @VisibleForTesting
