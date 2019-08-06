@@ -235,6 +235,33 @@ class ServiceRuntimeTest {
         assertThat(e).hasMessageContaining(TEST_NAME);
       }
     }
+
+    @Test
+    void stopService() {
+      ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+      ServiceLoader serviceLoader = rootInjector.getInstance(ServiceLoader.class);
+      LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+          .newInstance(artifactId, TestServiceModule::new);
+      when(serviceLoader.findService(artifactId))
+          .thenReturn(Optional.of(serviceDefinition));
+
+      // Create the service from the artifact
+      ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+          TEST_ID, artifactId);
+      serviceRuntime.createService(instanceSpec);
+
+      // Stop the service
+      serviceRuntime.stopService(TEST_NAME);
+
+      // Check no service with such name remains registered
+      Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
+      assertThat(serviceOpt).isEmpty();
+    }
+
+    @Test
+    void stopNonExistingService() {
+      assertThrows(IllegalArgumentException.class, () -> serviceRuntime.stopService(TEST_NAME));
+    }
   }
 
   @Test
