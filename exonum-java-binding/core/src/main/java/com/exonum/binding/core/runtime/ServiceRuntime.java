@@ -20,13 +20,10 @@ import static com.exonum.binding.core.runtime.FrameworkModule.SERVICE_WEB_SERVER
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.core.service.ServiceModule;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.transport.Server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
@@ -34,7 +31,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,8 +51,8 @@ public final class ServiceRuntime {
 
   private static final Logger logger = LogManager.getLogger(ServiceRuntime.class);
 
-  private final Injector frameworkInjector;
   private final ServiceLoader serviceLoader;
+  private final ServicesFactory servicesFactory;
   // todo: test the iteration order.
   /**
    * The list of services. It is stored in a sorted map that offers the same iteration order
@@ -70,28 +66,20 @@ public final class ServiceRuntime {
    * Creates a new runtime with the given framework injector. Starts the server on instantiation;
    * never stops it.
    *
-   * @param frameworkInjector the injector that has been configured with the Exonum framework
-   *     bindings. It serves as a parent for service injectors
    * @param serviceLoader a loader of service artifacts
+   * @param servicesFactory the factory of services
    * @param server a web server providing transport to Java services
    * @param serverPort a port for the web server providing transport to Java services
    */
   @Inject
-  public ServiceRuntime(Injector frameworkInjector, ServiceLoader serviceLoader, Server server,
+  public ServiceRuntime(ServiceLoader serviceLoader, ServicesFactory servicesFactory, Server server,
       @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
-    this.frameworkInjector = checkNotNull(frameworkInjector);
     this.serviceLoader = checkNotNull(serviceLoader);
+    this.servicesFactory = checkNotNull(servicesFactory);
     services = new TreeMap<>();
 
     // Start the server
-    checkServerIsSingleton(server, frameworkInjector);
     server.start(serverPort);
-  }
-
-  private void checkServerIsSingleton(Server s1, Injector frameworkInjector) {
-    Server s2 = frameworkInjector.getInstance(Server.class);
-    checkArgument(s1.equals(s2), "%s is not configured as singleton: s1=%s, s2=%s", Server.class,
-        s1, s2);
   }
 
   /**
@@ -150,15 +138,7 @@ public final class ServiceRuntime {
             .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
         // Instantiate the service
-        Supplier<ServiceModule> serviceModuleSupplier = serviceDefinition.getModuleSupplier();
-        Module serviceModule = serviceModuleSupplier.get();
-        Module serviceFrameworkModule = new ServiceFrameworkModule(instanceSpec);
-        // todo: Reconsider the relationships between the framework injector and the child.
-        //   Currently the child injector sees everything from the parent, but it does not
-        //   seem to need that, the service needs only a well-defined subset of dependencies.
-        Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule,
-            serviceFrameworkModule);
-        ServiceWrapper service = serviceInjector.getInstance(ServiceWrapper.class);
+        ServiceWrapper service = servicesFactory.createService(serviceDefinition, instanceSpec);
 
         // Connect it to the API
         // todo: Add this from UserServiceAdapter
