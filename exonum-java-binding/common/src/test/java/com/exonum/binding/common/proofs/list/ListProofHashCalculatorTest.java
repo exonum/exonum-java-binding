@@ -17,8 +17,8 @@
 package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.proofs.list.ListProofUtils.getBranchHashCode;
-import static com.exonum.binding.common.proofs.list.ListProofUtils.getProofListHash;
 import static com.exonum.binding.common.proofs.list.ListProofUtils.getNodeHashCode;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getProofListHash;
 import static com.exonum.binding.common.proofs.list.ListProofUtils.leafOf;
 import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.CoreMatchers.equalTo;
