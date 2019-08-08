@@ -28,8 +28,6 @@ addons:
       - pkg-config
       - protobuf-compiler
       - libprotobuf-dev
-      - liblz4-dev
-      - libzstd-dev
 
 env:
   global:
@@ -52,13 +50,12 @@ matrix:
       os: linux
       jdk: openjdk8
       env: CHECK_RUST=false
-#     FIXME: OSX support is temporary disabled ECR-3382
-#    - name: "OSX JDK 8 CHECK_RUST=false"
-#      os: osx
-#      # Specify the image containing JDK 8
-#      # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
-#      osx_image: xcode9.3
-#      env: CHECK_RUST=false
+    - name: "OSX JDK 8 CHECK_RUST=false"
+      os: osx
+      # Specify the image containing JDK 8
+      # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
+      osx_image: xcode9.3
+      env: CHECK_RUST=false
     - name: "Linux JDK 12 CHECK_RUST=false"
       os: linux
       jdk: openjdk12
