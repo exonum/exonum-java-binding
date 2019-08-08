@@ -21,12 +21,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transport.Server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.SortedMap;
@@ -60,6 +64,7 @@ public final class ServiceRuntime {
    * operation.
    */
   private final SortedMap<String, ServiceWrapper> services;
+  private final Map<Integer, ServiceWrapper> servicesById;
   private final Object lock = new Object();
 
   /**
@@ -77,6 +82,7 @@ public final class ServiceRuntime {
     this.serviceLoader = checkNotNull(serviceLoader);
     this.servicesFactory = checkNotNull(servicesFactory);
     services = new TreeMap<>();
+    servicesById = new HashMap<>();
 
     // Start the server
     server.start(serverPort);
@@ -146,7 +152,7 @@ public final class ServiceRuntime {
         //   to provide external access to service operations **before** configuration.
 
         // Register it in the runtime
-        services.put(name, service);
+        registerService(service);
       }
 
       // Log the instantiation event
@@ -157,6 +163,14 @@ public final class ServiceRuntime {
       logger.error("Failed to create a service {} instance", instanceSpec, e);
       throw e;
     }
+  }
+
+  private void registerService(ServiceWrapper service) {
+    String name = service.getName();
+    services.put(name, service);
+
+    int id = service.getId();
+    servicesById.put(id, service);
   }
 
   /**
@@ -205,10 +219,45 @@ public final class ServiceRuntime {
       // todo: disconnect from the API if it was connected
 
       // Unregister the service
-      services.remove(name);
+      unregisterService(name);
     }
 
     logger.info("Stopped service {}", name);
+  }
+
+  private void unregisterService(String name) {
+    ServiceWrapper removed = services.remove(name);
+    int id = removed.getId();
+    servicesById.remove(id);
+  }
+
+  /**
+   * Executes a transaction belonging to the given service.
+   *
+   * @param serviceId the numeric identifier of the service instance to which the transaction
+   *     belongs
+   * @param txId the transaction type identifier
+   * @param arguments the serialized transaction arguments
+   * @param context the transaction execution context
+   */
+  public void executeTransaction(int serviceId, int txId, byte[] arguments,
+      TransactionContext context) throws TransactionExecutionException {
+    synchronized (lock) {
+      ServiceWrapper service = getServiceById(serviceId);
+
+      try {
+        service.executeTransaction(txId, arguments, context);
+      } catch (Exception e) {
+        logger.info("Transaction execution failed (service={}, txId={}, txMessageHash={})",
+            service.getName(), txId, context.getTransactionMessageHash(), e);
+        throw e;
+      }
+    }
+  }
+
+  private ServiceWrapper getServiceById(int serviceId) {
+    checkArgument(servicesById.containsKey(serviceId), "No service with id=%s in the Java runtime", serviceId);
+    return servicesById.get(serviceId);
   }
 
   /** Checks that the service with the given name is started in this runtime. */

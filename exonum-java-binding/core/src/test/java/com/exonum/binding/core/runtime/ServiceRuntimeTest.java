@@ -16,23 +16,28 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
@@ -47,6 +52,8 @@ class ServiceRuntimeTest {
   static final int PORT = 25000;
   static final String TEST_NAME = "test_service_name";
   static final int TEST_ID = 17;
+  static final HashCode TEST_HASH = HashCode.fromBytes(bytes(1, 2, 3));
+  static final PublicKey TEST_PUBLIC_KEY = PublicKey.fromBytes(bytes(4, 5, 6));
 
   @Mock
   private ServiceLoader serviceLoader;
@@ -254,5 +261,66 @@ class ServiceRuntimeTest {
   @Test
   void stopNonExistingService() {
     assertThrows(IllegalArgumentException.class, () -> serviceRuntime.stopService(TEST_NAME));
+  }
+
+  @Nested
+  class WithSingleService {
+    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+    final ServiceInstanceSpec INSTANCE_SPEC = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, ARTIFACT_ID);
+
+    @Mock
+    ServiceWrapper serviceWrapper;
+
+    @BeforeEach
+    void addService() {
+      LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+          .newInstance(ARTIFACT_ID, TestServiceModule::new);
+      when(serviceLoader.findService(ARTIFACT_ID))
+          .thenReturn(Optional.of(serviceDefinition));
+      when(servicesFactory.createService(serviceDefinition, INSTANCE_SPEC))
+          .thenReturn(serviceWrapper);
+
+      // Create the service from the artifact
+      serviceRuntime.createService(INSTANCE_SPEC);
+    }
+
+    @Test
+    void executeTransaction() throws Exception {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        int txId = 1;
+        byte[] arguments = bytes(127);
+        TransactionContext context = TransactionContext.builder()
+            .fork(database.createFork(cleaner))
+            .txMessageHash(TEST_HASH)
+            .authorPk(TEST_PUBLIC_KEY)
+            .build();
+
+        serviceRuntime.executeTransaction(TEST_ID, txId, arguments, context);
+
+        verify(serviceWrapper).executeTransaction(txId, arguments, context);
+      }
+    }
+
+    @Test
+    void executeTransactionUnknownService() throws Exception {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        int serviceId = TEST_ID + 1;
+        int txId = 1;
+        byte[] arguments = bytes(127);
+        TransactionContext context = TransactionContext.builder()
+            .fork(database.createFork(cleaner))
+            .txMessageHash(TEST_HASH)
+            .authorPk(TEST_PUBLIC_KEY)
+            .build();
+
+        Exception e = assertThrows(IllegalArgumentException.class,
+            () -> serviceRuntime.executeTransaction(serviceId, txId, arguments, context));
+
+        assertThat(e).hasMessageContaining(String.valueOf(serviceId));
+      }
+    }
   }
 }

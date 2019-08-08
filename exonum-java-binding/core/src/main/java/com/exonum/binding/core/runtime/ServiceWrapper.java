@@ -1,8 +1,14 @@
 package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.BaseEncoding;
+import com.google.inject.Inject;
 import java.util.Properties;
 
 /**
@@ -13,10 +19,14 @@ import java.util.Properties;
 final class ServiceWrapper {
 
   private final Service service;
+  private final TransactionConverter txConverter;
   private final ServiceInstanceSpec instanceSpec;
 
-  ServiceWrapper(Service service, ServiceInstanceSpec instanceSpec) {
+  @Inject
+  ServiceWrapper(Service service, TransactionConverter txConverter,
+      ServiceInstanceSpec instanceSpec) {
     this.service = service;
+    this.txConverter = txConverter;
     this.instanceSpec = instanceSpec;
   }
 
@@ -24,8 +34,26 @@ final class ServiceWrapper {
     return instanceSpec.getName();
   }
 
+  int getId() {
+    return instanceSpec.getId();
+  }
+
   void configure(Fork view, Properties configuration) {
     service.configure(view, configuration);
+  }
+
+  void executeTransaction(int txId, byte[] arguments, TransactionContext context)
+      throws TransactionExecutionException {
+    // Decode the transaction data into an executable transaction
+    Transaction transaction = txConverter.toTransaction(txId, arguments);
+    if (transaction == null) {
+      throw new NullPointerException(String.format("Invalid service implementation: "
+          + "TransactionConverter#toTransaction must never return null.\n"
+          + "Throw an exception if your service does not recognize this message id (%s) "
+          + "or arguments (%s)", txId, BaseEncoding.base16().encode(arguments)));
+    }
+    // Execute it
+    transaction.execute(context);
   }
 
   @VisibleForTesting
