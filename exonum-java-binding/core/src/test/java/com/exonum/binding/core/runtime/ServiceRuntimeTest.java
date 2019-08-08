@@ -17,8 +17,11 @@
 package com.exonum.binding.core.runtime;
 
 import static com.exonum.binding.test.Bytes.bytes;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,11 +32,19 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
+import com.google.common.collect.Comparators;
+import com.google.common.collect.ImmutableMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
@@ -290,5 +301,79 @@ class ServiceRuntimeTest {
         assertThat(e).hasMessageContaining(String.valueOf(serviceId));
       }
     }
+
+    @Test
+    void getStateHashesSingleService() throws CloseFailuresException {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Snapshot s = database.createSnapshot(cleaner);
+        List<HashCode> serviceStateHashes = asList(HashCode.fromBytes(bytes(1, 2)),
+            HashCode.fromBytes(bytes(3, 4)));
+        when(serviceWrapper.getStateHashes(s)).thenReturn(serviceStateHashes);
+
+        List<List<HashCode>> runtimeStateHashes = serviceRuntime.getStateHashes(s);
+        assertThat(runtimeStateHashes).containsExactly(serviceStateHashes);
+      }
+    }
+  }
+
+  @Nested
+  class WithMultipleServices {
+    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+    final Map<ServiceInstanceSpec, ServiceWrapper> SERVICES = ImmutableMap.of(
+        ServiceInstanceSpec.newInstance("a", 1, ARTIFACT_ID), mock(ServiceWrapper.class),
+        ServiceInstanceSpec.newInstance("b", 2, ARTIFACT_ID), mock(ServiceWrapper.class),
+        ServiceInstanceSpec.newInstance("c", 3, ARTIFACT_ID), mock(ServiceWrapper.class)
+    );
+
+    @BeforeEach
+    void addServices() {
+      LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+          .newInstance(ARTIFACT_ID, TestServiceModule::new);
+      when(serviceLoader.findService(ARTIFACT_ID))
+          .thenReturn(Optional.of(serviceDefinition));
+      // Setup the factory
+      for (Entry<ServiceInstanceSpec, ServiceWrapper> entry : SERVICES.entrySet()) {
+        ServiceInstanceSpec instanceSpec = entry.getKey();
+        ServiceWrapper service = entry.getValue();
+        when(servicesFactory.createService(serviceDefinition, instanceSpec))
+            .thenReturn(service);
+      }
+
+      // Create the services
+      for (ServiceInstanceSpec instanceSpec : SERVICES.keySet()) {
+        serviceRuntime.createService(instanceSpec);
+      }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    @Test
+    void getStateHashesMultipleServices() throws CloseFailuresException {
+      // Check that test instances are ordered by name, as the test relies on that
+      assertTrue(Comparators.isInStrictOrder(SERVICES.keySet(),
+          Comparator.comparing(ServiceInstanceSpec::getName)), "Services must be ordered"
+          + "by name — the same order as used in the ServiceRuntime for iteration on services, "
+          + "as this test relies on that");
+
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Snapshot s = database.createSnapshot(cleaner);
+        // Setup the services
+        List<List<HashCode>> expectedRuntimeStateHashes = new ArrayList<>();
+        for (Entry<ServiceInstanceSpec, ServiceWrapper> entry : SERVICES.entrySet()) {
+          ServiceInstanceSpec instanceSpec = entry.getKey();
+          List<HashCode> serviceStateHashes =
+              singletonList(HashCode.fromBytes(bytes(instanceSpec.getId())));
+          expectedRuntimeStateHashes.add(serviceStateHashes);
+
+          ServiceWrapper serviceWrapper = entry.getValue();
+          when(serviceWrapper.getStateHashes(s)).thenReturn(serviceStateHashes);
+        }
+
+        List<List<HashCode>> runtimeStateHashes = serviceRuntime.getStateHashes(s);
+        assertThat(runtimeStateHashes).isEqualTo(expectedRuntimeStateHashes);
+      }
+    }
+
   }
 }
