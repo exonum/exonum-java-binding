@@ -30,6 +30,7 @@ import com.google.auto.value.AutoValue;
  * <p>A raw transaction is converted to an {@linkplain Transaction executable transaction}
  * by the framework using an implementation of {@link TransactionConverter}.
  */
+// todo: Reconsider (remove?)
 @AutoValue
 public abstract class RawTransaction {
 
