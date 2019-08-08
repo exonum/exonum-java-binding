@@ -188,37 +188,6 @@ class ServiceRuntimeTest {
   }
 
   @Test
-  void configureService() throws CloseFailuresException {
-    // todo: (here and elsewhere) Extract in some setup method as we have quite some tests
-    //  requiring a service? Or even make two nested tests: WithDeployed and WithStarted
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
-    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
-    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
-        TEST_ID, artifactId);
-    when(serviceLoader.findService(artifactId))
-        .thenReturn(Optional.of(serviceDefinition));
-
-    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec))
-        .thenReturn(serviceWrapper);
-
-    // Create the service from the artifact
-    serviceRuntime.createService(instanceSpec);
-
-    // Configure the service
-    try (Database database = TemporaryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = database.createFork(cleaner);
-      Properties properties = new Properties();
-      serviceRuntime.configureService(TEST_NAME, view, properties);
-
-      // Check the service was configured
-      verify(serviceWrapper).configure(view, properties);
-    }
-  }
-
-  @Test
   void configureNonExistingService() throws CloseFailuresException {
     try (Database database = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
@@ -231,31 +200,6 @@ class ServiceRuntimeTest {
 
       assertThat(e).hasMessageContaining(TEST_NAME);
     }
-  }
-
-  @Test
-  void stopService() {
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
-    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
-    when(serviceLoader.findService(artifactId))
-        .thenReturn(Optional.of(serviceDefinition));
-
-    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
-        TEST_ID, artifactId);
-    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec))
-        .thenReturn(serviceWrapper);
-
-    // Create the service from the artifact
-    serviceRuntime.createService(instanceSpec);
-
-    // Stop the service
-    serviceRuntime.stopService(TEST_NAME);
-
-    // Check no service with such name remains registered
-    Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
-    assertThat(serviceOpt).isEmpty();
   }
 
   @Test
@@ -283,6 +227,30 @@ class ServiceRuntimeTest {
 
       // Create the service from the artifact
       serviceRuntime.createService(INSTANCE_SPEC);
+    }
+
+    @Test
+    void configureService() throws CloseFailuresException {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Fork view = database.createFork(cleaner);
+        Properties properties = new Properties();
+        // Configure the service
+        serviceRuntime.configureService(TEST_NAME, view, properties);
+
+        // Check the service was configured
+        verify(serviceWrapper).configure(view, properties);
+      }
+    }
+
+    @Test
+    void stopService() {
+      // Stop the service
+      serviceRuntime.stopService(TEST_NAME);
+
+      // Check no service with such name remains registered
+      Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
+      assertThat(serviceOpt).isEmpty();
     }
 
     @Test
