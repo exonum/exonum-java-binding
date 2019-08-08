@@ -18,8 +18,6 @@ invocation = ["jni/invocation"]
 exonum = { version = "0.11", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
 exonum-time = "0.11"
 exonum-testkit = "0.11"
-# FIXME: Until merkedb is published to the `crates.io` the `exonum` repo should be cloned as `exonum` at the same level as EJB root.
-exonum-merkledb = { path = "../../../../exonum/components/merkledb", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
 chrono = "0.4.7"
 failure = "0.1.1"
 toml = "0.5"
@@ -40,6 +38,7 @@ rpath = true
 [profile.release]
 rpath = true
 
+# FIXME: Until merkedb is published to the `crates.io` the `exonum` repo should be cloned as `exonum` at the same level as EJB root.
 [patch.crates-io]
 exonum = { path = "../../../../exonum/exonum" }
 exonum-testkit = { path = "../../../../exonum/testkit" }

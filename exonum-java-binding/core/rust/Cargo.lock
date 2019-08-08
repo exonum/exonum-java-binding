@@ -1144,7 +1144,6 @@ version = "0.8.0-SNAPSHOT"
 dependencies = [
  "chrono 0.4.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum 0.11.0",
- "exonum-merkledb 0.11.0",
  "exonum-testkit 0.11.0",
  "exonum-time 0.11.0",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
