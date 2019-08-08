@@ -24,7 +24,7 @@ extern crate failure;
 use std::sync::Arc;
 
 use futures::{
-    sync::mpsc::{self, UnboundedReceiver},
+    sync::mpsc::{self, Receiver},
     Stream,
 };
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
@@ -90,10 +90,8 @@ fn create_raw_transaction(service_id: u16) -> RawTransaction {
     RawTransaction::new(service_id, service_transaction)
 }
 
-fn create_node(
-    keypair: (PublicKey, SecretKey),
-) -> (NodeContext, UnboundedReceiver<ExternalMessage>) {
-    let api_channel = mpsc::unbounded();
+fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<ExternalMessage>) {
+    let api_channel = mpsc::channel(128);
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     struct EmptyService;
