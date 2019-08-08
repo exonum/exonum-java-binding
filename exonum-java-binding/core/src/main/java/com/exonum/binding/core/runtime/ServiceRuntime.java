@@ -272,7 +272,8 @@ public final class ServiceRuntime {
   }
 
   private ServiceWrapper getServiceById(int serviceId) {
-    checkArgument(servicesById.containsKey(serviceId), "No service with id=%s in the Java runtime", serviceId);
+    checkArgument(servicesById.containsKey(serviceId),
+        "No service with id=%s in the Java runtime", serviceId);
     return servicesById.get(serviceId);
   }
 
