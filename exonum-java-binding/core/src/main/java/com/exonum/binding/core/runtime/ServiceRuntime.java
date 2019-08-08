@@ -19,8 +19,11 @@ package com.exonum.binding.core.runtime;
 import static com.exonum.binding.core.runtime.FrameworkModule.SERVICE_WEB_SERVER_PORT;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transport.Server;
@@ -30,6 +33,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -252,6 +256,18 @@ public final class ServiceRuntime {
             service.getName(), txId, context.getTransactionMessageHash(), e);
         throw e;
       }
+    }
+  }
+
+  /**
+   * Returns the state hashes for each service registered in this runtime.
+   * @param snapshot the snapshot of the current database state
+   */
+  public List<List<HashCode>> getStateHashes(Snapshot snapshot) {
+    synchronized (lock) {
+      return services.values().stream()
+          .map(service -> service.getStateHashes(snapshot))
+          .collect(toList());
     }
   }
 

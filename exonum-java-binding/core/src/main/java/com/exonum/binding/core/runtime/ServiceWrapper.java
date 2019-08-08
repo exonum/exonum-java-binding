@@ -1,14 +1,17 @@
 package com.exonum.binding.core.runtime;
 
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import com.google.inject.Inject;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -54,6 +57,10 @@ final class ServiceWrapper {
     }
     // Execute it
     transaction.execute(context);
+  }
+
+  List<HashCode> getStateHashes(Snapshot snapshot) {
+    return service.getStateHashes(snapshot);
   }
 
   @VisibleForTesting
