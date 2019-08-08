@@ -44,11 +44,10 @@ function build-exonum-java-for-platform() {
 }
 
 function build-exonum-java-macos() {
-    # We use static linkage for RocksDB on Mac because dynamic linking
-    # on Mac does not work: the resulting app has a dependency on a _particular_
+    # We use static linkage for RocksDB on Mac because in case of dynamic linking
+    # the resulting app has a dependency on a _particular_
     # version of the RocksDB library, hence, is incompatible with any updates
-    # to the library, even the patch ones. It is believed to be a Cargo issue
-    # or RocksDB build configuration issue, see ECR-3324.
+    # to the library, even the patch ones.
     export ROCKSDB_STATIC=1
     # Check if ROCKSDB_LIB_DIR is set
     if [ -z "${ROCKSDB_LIB_DIR:-}" ]; then
