@@ -46,12 +46,12 @@ function build-exonum-java-for-platform() {
 function build-exonum-java-macos() {
     # We use static linkage for RocksDB on Mac because in case of dynamic linking
     # the resulting app has a dependency on a _particular_
-    # `install_name` of the RocksDB library. `install_name` usually corresponds
-    # to the minor version of the library in terms of Semantic Versioning and is
-    # updated for every breaking change. Because `install_name` is stored inside
-    # Exonum Java binary, every update of RocksDB packages in the
-    # system package managers requires new release of the Exonum Java with updated
-    # `install_name`.
+    # `install_name` of the RocksDB library. In case of RocksDB, `install_name`
+    # corresponds to the minor version of the library in terms of Semantic Versioning
+    # and is updated for every breaking change. As `install_name` is stored inside
+    # Exonum Java binary, even minor updates of RocksDB package in the system
+    # package managers would prevent the application from linking against
+    # it and require a new release of the Exonum Java with updated `install_name`.
     export ROCKSDB_STATIC=1
     # Check if ROCKSDB_LIB_DIR is set
     if [ -z "${ROCKSDB_LIB_DIR:-}" ]; then
