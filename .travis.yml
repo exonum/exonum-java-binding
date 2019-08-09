@@ -86,6 +86,5 @@ install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
 
 script:
-  - git clone https://github.com/exonum/exonum.git "$TRAVIS_BUILD_DIR/../exonum" # FIXME: Temporary step until merkledb is released.
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
