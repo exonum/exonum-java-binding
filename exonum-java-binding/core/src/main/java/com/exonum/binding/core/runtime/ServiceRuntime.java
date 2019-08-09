@@ -280,9 +280,8 @@ public final class ServiceRuntime {
       for (ServiceWrapper service: services.values()) {
         try {
           // todo: BCE carries a Snapshot which is based on a cleaner, which gets
-          //   re-used by all services. If the number of services in the runtime times
-          //   the number of native proxies they create is large, that may result in excessive
-          //   memory usage. Some ways to solve this:
+          //   re-used by all services. If the total number of native proxies they create is large,
+          //   that may result in excessive memory usage. Some ways to solve this:
           //   1. Take a handle, create a fresh snapshot for each service — but will need hacks
           //   to destroy the native peer once.
           //   2. Support Snapshot copying with new cleaners — but that breaks index de-duplication
