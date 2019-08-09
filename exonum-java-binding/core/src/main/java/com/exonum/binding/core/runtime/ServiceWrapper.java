@@ -1,6 +1,7 @@
 package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
@@ -61,6 +62,10 @@ final class ServiceWrapper {
 
   List<HashCode> getStateHashes(Snapshot snapshot) {
     return service.getStateHashes(snapshot);
+  }
+
+  void afterCommit(BlockCommittedEvent event) {
+    service.afterCommit(event);
   }
 
   @VisibleForTesting

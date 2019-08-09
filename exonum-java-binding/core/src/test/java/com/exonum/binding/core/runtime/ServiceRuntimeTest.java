@@ -17,11 +17,14 @@
 package com.exonum.binding.core.runtime;
 
 import static com.exonum.binding.test.Bytes.bytes;
+import static com.google.common.collect.Comparators.isInStrictOrder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,18 +33,18 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
-import com.google.common.collect.Comparators;
 import com.google.common.collect.ImmutableMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,7 +56,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -315,16 +320,47 @@ class ServiceRuntimeTest {
         assertThat(runtimeStateHashes).containsExactly(serviceStateHashes);
       }
     }
+
+    @Test
+    void afterCommitSingleService() {
+      BlockCommittedEvent event = mock(BlockCommittedEvent.class);
+
+      serviceRuntime.afterCommit(event);
+
+      verify(serviceWrapper).afterCommit(event);
+    }
+
+    @Test
+    void afterCommitSingleServiceThrowingException() {
+      BlockCommittedEvent event = mock(BlockCommittedEvent.class);
+      doThrow(RuntimeException.class).when(serviceWrapper)
+          .afterCommit(event);
+
+      // Notify of block commit event — the service runtime must swallow the exception
+      serviceRuntime.afterCommit(event);
+
+      verify(serviceWrapper).afterCommit(event);
+    }
   }
 
   @Nested
   class WithMultipleServices {
     final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
     final Map<ServiceInstanceSpec, ServiceWrapper> SERVICES = ImmutableMap.of(
-        ServiceInstanceSpec.newInstance("a", 1, ARTIFACT_ID), mock(ServiceWrapper.class),
-        ServiceInstanceSpec.newInstance("b", 2, ARTIFACT_ID), mock(ServiceWrapper.class),
-        ServiceInstanceSpec.newInstance("c", 3, ARTIFACT_ID), mock(ServiceWrapper.class)
+        ServiceInstanceSpec.newInstance("a", 1, ARTIFACT_ID), mock(ServiceWrapper.class, "a"),
+        ServiceInstanceSpec.newInstance("b", 2, ARTIFACT_ID), mock(ServiceWrapper.class, "b"),
+        ServiceInstanceSpec.newInstance("c", 3, ARTIFACT_ID), mock(ServiceWrapper.class, "c")
     );
+
+    @BeforeEach
+    @SuppressWarnings("UnstableApiUsage")
+    void checkTestData() {
+      // Check the test data correctness: check that test instances are ordered by name,
+      // as some tests rely on that
+      assertTrue(isInStrictOrder(SERVICES.keySet(), comparing(ServiceInstanceSpec::getName)),
+          "Services must be ordered by name — the same order as used in "
+              + "the ServiceRuntime for iteration on services, as this test relies on that");
+    }
 
     @BeforeEach
     void addServices() {
@@ -346,15 +382,8 @@ class ServiceRuntimeTest {
       }
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Test
     void getStateHashesMultipleServices() throws CloseFailuresException {
-      // Check that test instances are ordered by name, as the test relies on that
-      assertTrue(Comparators.isInStrictOrder(SERVICES.keySet(),
-          Comparator.comparing(ServiceInstanceSpec::getName)), "Services must be ordered"
-          + "by name — the same order as used in the ServiceRuntime for iteration on services, "
-          + "as this test relies on that");
-
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
         Snapshot s = database.createSnapshot(cleaner);
@@ -370,10 +399,32 @@ class ServiceRuntimeTest {
           when(serviceWrapper.getStateHashes(s)).thenReturn(serviceStateHashes);
         }
 
+        // Request the state hashes
         List<List<HashCode>> runtimeStateHashes = serviceRuntime.getStateHashes(s);
         assertThat(runtimeStateHashes).isEqualTo(expectedRuntimeStateHashes);
       }
     }
 
+    @Test
+    void afterCommitMultipleServicesWithFirstThrowing() {
+      Collection<ServiceWrapper> services = SERVICES.values();
+
+      // Setup the first service to throw exception in its after commit handler
+      ServiceWrapper service1 = services
+          .iterator()
+          .next();
+      BlockCommittedEvent event = mock(BlockCommittedEvent.class);
+      doThrow(RuntimeException.class).when(service1).afterCommit(event);
+
+      // Notify the runtime of the block commit
+      serviceRuntime.afterCommit(event);
+
+      // Verify that each service got the notifications, i.e., the first service
+      // throwing an exception has not disrupted the notification process
+      InOrder inOrder = Mockito.inOrder(services.toArray(new Object[0]));
+      for (ServiceWrapper service: services) {
+        inOrder.verify(service).afterCommit(event);
+      }
+    }
   }
 }

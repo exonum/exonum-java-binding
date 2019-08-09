@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -268,6 +269,36 @@ public final class ServiceRuntime {
       return services.values().stream()
           .map(service -> service.getStateHashes(snapshot))
           .collect(toList());
+    }
+  }
+
+  /**
+   * Notifies the services in the runtime of the block commit event.
+   */
+  public void afterCommit(BlockCommittedEvent event) {
+    synchronized (lock) {
+      for (ServiceWrapper service: services.values()) {
+        try {
+          // todo: BCE carries a Snapshot which is based on a cleaner, which gets
+          //   re-used by all services. If the number of services in the runtime times
+          //   the number of native proxies they create is large, that may result in excessive
+          //   memory usage. Some ways to solve this:
+          //   1. Take a handle, create a fresh snapshot for each service — but will need hacks
+          //   to destroy the native peer once.
+          //   2. Support Snapshot copying with new cleaners — but that breaks index de-duplication
+          //   (though for snapshots that mustn't be an issue).
+          //   -
+          //   As a side note, 'excessive memory usage' may occur in any *single* transaction/
+          //   read request/service life-cycle method, it just has higher probability when
+          //   we invoke a number of such 'foreign' (to framework) methods with no intermediate
+          //   clean-up.
+          service.afterCommit(event);
+        } catch (Exception e) {
+          // Log, but do not re-throw immediately or later
+          logger.error("Service {} threw an exception in its afterCommit handler of {}",
+              service.getName(), event, e);
+        }
+      }
     }
   }
 
