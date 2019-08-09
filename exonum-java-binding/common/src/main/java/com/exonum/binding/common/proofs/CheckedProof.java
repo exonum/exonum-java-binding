@@ -34,7 +34,7 @@ public interface CheckedProof {
 
   /**
    * Returns the calculated index hash of the proof.
-   * Must be equal to th index hash of the collection, providing this proof.
+   * Must be equal to the index hash of the collection, providing this proof.
    * @throws IllegalStateException if the proof is not valid
    */
   HashCode getIndexHash();
