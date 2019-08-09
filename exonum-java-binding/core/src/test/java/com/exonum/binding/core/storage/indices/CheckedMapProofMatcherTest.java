@@ -82,9 +82,9 @@ class CheckedMapProofMatcherTest {
     ByteString actualValue = ByteString.copyFromUtf8("hello");
     MapEntry<ByteString, ByteString> entry = MapEntry.valueOf(toByteString(presentKey),
         actualValue);
-    HashCode rootHash = HashCode.fromString("123456ef");
+    HashCode indexHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
-        rootHash,
+        indexHash,
         Collections.singleton(entry),
         Collections.singleton(toByteString(absentKey)));
 
@@ -92,7 +92,7 @@ class CheckedMapProofMatcherTest {
     matcher.describeMismatchSafely(proof, d);
 
     assertThat(d.toString(), equalTo("was a valid proof, entries=[(ab -> hello)], "
-        + "missing keys=[cd], Merkle root=<123456ef>"));
+        + "missing keys=[cd], index hash=<123456ef>"));
   }
 
   @Test

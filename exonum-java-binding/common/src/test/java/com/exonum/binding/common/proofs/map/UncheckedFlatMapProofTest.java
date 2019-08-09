@@ -135,7 +135,7 @@ class UncheckedFlatMapProofTest {
             emptyList());
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
-    assertThat(checkedMapProof.getRootHash(), equalTo(expectedRootHash));
+    assertThat(checkedMapProof.getIndexHash(), equalTo(expectedRootHash));
 
     assertThat(checkedMapProof.getEntries(), equalTo(singleton(mapEntry)));
     assertTrue(checkedMapProof.containsKey(key));
@@ -169,7 +169,7 @@ class UncheckedFlatMapProofTest {
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.CORRECT));
-    assertThat(checkedMapProof.getRootHash(), equalTo(expectedRootHash));
+    assertThat(checkedMapProof.getIndexHash(), equalTo(expectedRootHash));
   }
 
   @Test

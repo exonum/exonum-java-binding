@@ -47,7 +47,7 @@ class QaSchemaIntegrationTest {
 
     assertThat(stateHashes).hasSize(1);
 
-    HashCode countersRootHash = schema.counters().getRootHash();
+    HashCode countersRootHash = schema.counters().getIndexHash();
     assertThat(stateHashes.get(0)).isEqualTo(countersRootHash);
   }
 }

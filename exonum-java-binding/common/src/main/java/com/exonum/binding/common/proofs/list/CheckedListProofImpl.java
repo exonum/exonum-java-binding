@@ -62,7 +62,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
   }
 
   @Override
-  public HashCode getRootHash() {
+  public HashCode getIndexHash() {
     checkValid();
     return calculatedRootHash;
   }

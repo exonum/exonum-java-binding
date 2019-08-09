@@ -46,7 +46,7 @@ public final class CryptocurrencySchema implements Schema {
 
   @Override
   public List<HashCode> getStateHashes() {
-    return ImmutableList.of(wallets().getRootHash());
+    return ImmutableList.of(wallets().getIndexHash());
   }
 
   /**

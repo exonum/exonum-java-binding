@@ -208,20 +208,20 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   @Test
-  void getRootHash_EmptyMap() {
+  void getIndexHash_EmptyMap() {
     runTestWithView(database::createSnapshot,
-        (map) -> assertThat(map.getRootHash(), equalTo(EMPTY_MAP_ROOT_HASH)));
+        (map) -> assertThat(map.getIndexHash(), equalTo(EMPTY_MAP_ROOT_HASH)));
   }
 
   @Test
-  void getRootHash_NonEmptyMap() {
+  void getIndexHash_NonEmptyMap() {
     runTestWithView(database::createFork, (map) -> {
       map.put(PK1, V1);
 
-      HashCode rootHash = map.getRootHash();
-      assertThat(rootHash, notNullValue());
-      assertThat(rootHash.bits(), equalTo(Hashing.DEFAULT_HASH_SIZE_BITS));
-      assertThat(rootHash, not(equalTo(EMPTY_MAP_ROOT_HASH)));
+      HashCode indexHash = map.getIndexHash();
+      assertThat(indexHash, notNullValue());
+      assertThat(indexHash.bits(), equalTo(Hashing.DEFAULT_HASH_SIZE_BITS));
+      assertThat(indexHash, not(equalTo(EMPTY_MAP_ROOT_HASH)));
     });
   }
 
