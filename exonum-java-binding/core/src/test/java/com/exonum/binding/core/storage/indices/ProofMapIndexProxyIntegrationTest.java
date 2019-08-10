@@ -107,7 +107,7 @@ class ProofMapIndexProxyIntegrationTest
 
   private static final HashCode INVALID_PROOF_KEY = HashCode.fromString("1234");
 
-  private static final HashCode EMPTY_MAP_ROOT_HASH = HashCode.fromString(
+  private static final HashCode EMPTY_MAP_INDEX_HASH = HashCode.fromString(
           "7324b5c72b51bb5d4c180f1109cfd347b60473882145841c39f3e584576296f9");
 
   @Test
@@ -210,7 +210,7 @@ class ProofMapIndexProxyIntegrationTest
   @Test
   void getIndexHash_EmptyMap() {
     runTestWithView(database::createSnapshot,
-        (map) -> assertThat(map.getIndexHash(), equalTo(EMPTY_MAP_ROOT_HASH)));
+        (map) -> assertThat(map.getIndexHash(), equalTo(EMPTY_MAP_INDEX_HASH)));
   }
 
   @Test
@@ -221,7 +221,7 @@ class ProofMapIndexProxyIntegrationTest
       HashCode indexHash = map.getIndexHash();
       assertThat(indexHash, notNullValue());
       assertThat(indexHash.bits(), equalTo(Hashing.DEFAULT_HASH_SIZE_BITS));
-      assertThat(indexHash, not(equalTo(EMPTY_MAP_ROOT_HASH)));
+      assertThat(indexHash, not(equalTo(EMPTY_MAP_INDEX_HASH)));
     });
   }
 

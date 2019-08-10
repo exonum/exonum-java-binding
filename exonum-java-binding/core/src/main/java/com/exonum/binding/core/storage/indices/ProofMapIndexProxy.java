@@ -285,9 +285,10 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
 
   /**
-   * Returns the index hash of this map.
+   * Returns the index hash which represents the complete state of this map.
+   * Any modifications to the stored entries affect the index hash.
    *
-   * @throws IllegalStateException  if this map is not valid
+   * @throws IllegalStateException if this map is not valid
    */
   public HashCode getIndexHash() {
     return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
