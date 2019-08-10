@@ -84,9 +84,9 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
-      HashCode rootHash = list.getIndexHash();
-      assertThat(rootHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
-      assertThat(rootHash, not(equalTo(EMPTY_LIST_INDEX_HASH)));
+      HashCode indexHash = list.getIndexHash();
+      assertThat(indexHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
+      assertThat(indexHash, not(equalTo(EMPTY_LIST_INDEX_HASH)));
     });
   }
 
