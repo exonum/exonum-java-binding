@@ -208,15 +208,16 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   private native ListProof nativeGetRangeProof(long nativeHandle, long from, long to);
 
   /**
-   * Returns the root hash of the proof list.
+   * Returns the index hash which represents the complete state of this list.
+   * Any modifications to the stored entries affect the index hash.
    *
    * @throws IllegalStateException if this list is not valid
    */
-  public HashCode getRootHash() {
-    return HashCode.fromBytes(nativeGetRootHash(getNativeHandle()));
+  public HashCode getIndexHash() {
+    return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
 
-  private native byte[] nativeGetRootHash(long nativeHandle);
+  private native byte[] nativeGetIndexHash(long nativeHandle);
 
   private static native void nativeFree(long nativeHandle);
 

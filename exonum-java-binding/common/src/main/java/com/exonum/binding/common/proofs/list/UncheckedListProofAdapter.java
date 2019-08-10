@@ -52,10 +52,10 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
   @Override
   public CheckedListProof check() {
     ListProofStatus structureCheckStatus = listProofStructureValidator.getProofStatus();
-    HashCode calculatedRootHash = listProofHashCalculator.getHash();
+    HashCode calculatedIndexHash = listProofHashCalculator.getHash();
 
     return new CheckedListProofImpl<>(
-        calculatedRootHash, listProofHashCalculator.getElements(), structureCheckStatus);
+        calculatedIndexHash, listProofHashCalculator.getElements(), structureCheckStatus);
   }
 
   @Override

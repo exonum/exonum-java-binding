@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
  */
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
-  private static final HashCode EMPTY_LIST_ROOT_HASH =
+  private static final HashCode EMPTY_LIST_INDEX_HASH =
       HashCode.fromString("c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9");
 
   private static final String LIST_NAME = "test_proof_list";
@@ -73,20 +73,20 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
-  void getRootHashEmptyList() {
+  void getIndexHashEmptyList() {
     runTestWithView(database::createSnapshot, (list) -> {
-      assertThat(list.getRootHash(), equalTo(EMPTY_LIST_ROOT_HASH));
+      assertThat(list.getIndexHash(), equalTo(EMPTY_LIST_INDEX_HASH));
     });
   }
 
   @Test
-  void getRootHashSingletonList() {
+  void getIndexHashSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
-      HashCode rootHash = list.getRootHash();
+      HashCode rootHash = list.getIndexHash();
       assertThat(rootHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
-      assertThat(rootHash, not(equalTo(EMPTY_LIST_ROOT_HASH)));
+      assertThat(rootHash, not(equalTo(EMPTY_LIST_INDEX_HASH)));
     });
   }
 

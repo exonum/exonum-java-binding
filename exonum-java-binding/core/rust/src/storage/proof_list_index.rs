@@ -187,9 +187,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns the root hash of the proof list or default hash value if it is empty.
+/// Returns the object hash of the proof list or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRootHash(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetIndexHash(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
