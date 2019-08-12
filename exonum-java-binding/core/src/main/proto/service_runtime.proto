@@ -25,6 +25,8 @@ message ServiceRuntimeStateHashes {
   // internal indexes).
   repeated bytes runtimeStateHashes = 1;
   // State hashes of each active service in the runtime.
+  //
+  // Note that we don't use a map to preserve the order of entries.
   repeated ServiceStateHashes serviceStateHashes = 2;
 }
 
