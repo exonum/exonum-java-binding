@@ -139,7 +139,7 @@ fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMe
         .ok()
 }
 
-fn check_cache_initalized() {
+fn check_cache_initialized() {
     if !INIT.state().done() {
         panic!("JNI cache is not initialized")
     }
@@ -151,13 +151,13 @@ pub mod transaction_adapter {
 
     /// Returns cached `JMethodID` for `UserTransactionAdapter.execute()`.
     pub fn execute_id() -> JMethodID<'static> {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { TRANSACTION_ADAPTER_EXECUTE.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `UserTransactionAdapter.info()`.
     pub fn info_id() -> JMethodID<'static> {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { TRANSACTION_ADAPTER_INFO.unwrap() }
     }
 }
@@ -168,13 +168,13 @@ pub mod service_adapter {
 
     /// Returns cached `JMethodID` for `UserServiceAdapter.getStateHashes()`.
     pub fn state_hashes_id() -> JMethodID<'static> {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { SERVICE_ADAPTER_STATE_HASHES.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `UserServiceAdapter.convertTransaction()`.
     pub fn convert_transaction_id() -> JMethodID<'static> {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { SERVICE_ADAPTER_CONVERT_TRANSACTION.unwrap() }
     }
 }
@@ -185,7 +185,7 @@ pub mod object {
 
     /// Returns cached `JMethodID` for `java.lang.Object.getClass()`.
     pub fn get_class_id() -> JMethodID<'static> {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { OBJECT_GET_CLASS.unwrap() }
     }
 }
@@ -196,7 +196,7 @@ pub mod class {
 
     /// Returns cached `JMethodID` for `java.lang.Class.getName()`.
     pub fn get_name_id() -> JMethodID<'static> {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { CLASS_GET_NAME.unwrap() }
     }
 }
@@ -207,7 +207,7 @@ pub mod throwable {
 
     /// Returns cached `JMethodID` for `java.lang.Throwable.getMessage()`.
     pub fn get_message_id() -> JMethodID<'static> {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { THROWABLE_GET_MESSAGE.unwrap() }
     }
 }
@@ -218,19 +218,19 @@ pub mod classes_refs {
 
     /// Returns cached `JClass` for `java/lang/Error` as a `GlobalRef`.
     pub fn java_lang_error() -> GlobalRef {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { JAVA_LANG_ERROR.clone().unwrap() }
     }
 
     /// Returns cached `JClass` for `java/lang/RuntimeException` as a `GlobalRef`.
     pub fn java_lang_runtime_exception() -> GlobalRef {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { JAVA_LANG_RUNTIME_EXCEPTION.clone().unwrap() }
     }
 
     /// Returns cached `JClass` for `TransactionExecutionException` as a `GlobalRef`.
     pub fn transaction_execution_exception() -> GlobalRef {
-        check_cache_initalized();
+        check_cache_initialized();
         unsafe { TRANSACTION_EXECUTION_EXCEPTION.clone().unwrap() }
     }
 }
