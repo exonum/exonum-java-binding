@@ -1,9 +1,26 @@
+/*
+ * Copyright 2019 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
 import com.exonum.binding.core.service.adapters.ViewFactory;
@@ -11,10 +28,8 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
-import com.google.common.annotations.VisibleForTesting;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.OptionalInt;
 import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
@@ -131,32 +146,24 @@ class ServiceRuntimeAdapter {
   }
 
   /**
-   * Returns the state hashes of the services deployed in this runtime.
+   * Returns the state hashes of this runtime. The state hashes are serialized in protobuf,
+   * see {@link ServiceRuntimeStateHashes} for message specification.
    *
    * @param snapshotHandle a handle to the native snapshot object
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#getStateHashes(Snapshot)
+   * @see ServiceRuntimeStateHashes
    */
-  byte[][][] getStateHashes(long snapshotHandle) throws CloseFailuresException {
+  byte[] getStateHashes(long snapshotHandle) throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("getStateHashes")) {
       Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
-      List<List<HashCode>> stateHashes = serviceRuntime.getStateHashes(snapshot);
-      // todo: consider if a custom protobuf is a better alternative to working with 3D arrays
-      //  in native. Even movies are rarely better in 3D
-      return convertStateHashes(stateHashes);
+      ServiceRuntimeStateHashes stateHashes = serviceRuntime.getStateHashes(snapshot);
+      return stateHashes.toByteArray();
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
       // unreachable, ^ throws
       return null;
     }
-  }
-
-  @VisibleForTesting static byte[][][] convertStateHashes(List<List<HashCode>> stateHashes) {
-    return stateHashes.stream()
-        .map(serviceStateHashes -> serviceStateHashes.stream()
-            .map(HashCode::asBytes)
-            .toArray(byte[][]::new))
-        .toArray(byte[][][]::new);
   }
 
   /**

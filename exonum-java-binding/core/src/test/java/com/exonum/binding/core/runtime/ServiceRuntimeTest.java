@@ -21,10 +21,12 @@ import static com.google.common.collect.Comparators.isInStrictOrder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,6 +35,8 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
+import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
@@ -41,9 +45,9 @@ import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.ByteString;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -234,10 +238,14 @@ class ServiceRuntimeTest {
 
     @BeforeEach
     void addService() {
+      // Setup the service
+      lenient().when(serviceWrapper.getId()).thenReturn(TEST_ID);
+      // Setup the loader
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
           .newInstance(ARTIFACT_ID, TestServiceModule::new);
       when(serviceLoader.findService(ARTIFACT_ID))
           .thenReturn(Optional.of(serviceDefinition));
+      // Setup the factory
       when(servicesFactory.createService(serviceDefinition, INSTANCE_SPEC))
           .thenReturn(serviceWrapper);
 
@@ -316,8 +324,17 @@ class ServiceRuntimeTest {
             HashCode.fromBytes(bytes(3, 4)));
         when(serviceWrapper.getStateHashes(s)).thenReturn(serviceStateHashes);
 
-        List<List<HashCode>> runtimeStateHashes = serviceRuntime.getStateHashes(s);
-        assertThat(runtimeStateHashes).containsExactly(serviceStateHashes);
+        List<ByteString> serviceStateHashesAsBytes = serviceStateHashes.stream()
+            .map(hash -> ByteString.copyFrom(hash.asBytes()))
+            .collect(toList());
+        ServiceRuntimeStateHashes expected = ServiceRuntimeStateHashes.newBuilder()
+            .addServiceStateHashes(ServiceStateHashes.newBuilder()
+                .setInstanceId(TEST_ID)
+                .addAllStateHashes(serviceStateHashesAsBytes))
+            .build();
+
+        ServiceRuntimeStateHashes runtimeStateHashes = serviceRuntime.getStateHashes(s);
+        assertThat(runtimeStateHashes).isEqualTo(expected);
       }
     }
 
@@ -388,20 +405,27 @@ class ServiceRuntimeTest {
           Cleaner cleaner = new Cleaner()) {
         Snapshot s = database.createSnapshot(cleaner);
         // Setup the services
-        List<List<HashCode>> expectedRuntimeStateHashes = new ArrayList<>();
+        ServiceRuntimeStateHashes.Builder expectedBuilder = ServiceRuntimeStateHashes.newBuilder();
         for (Entry<ServiceInstanceSpec, ServiceWrapper> entry : SERVICES.entrySet()) {
           ServiceInstanceSpec instanceSpec = entry.getKey();
-          List<HashCode> serviceStateHashes =
-              singletonList(HashCode.fromBytes(bytes(instanceSpec.getId())));
-          expectedRuntimeStateHashes.add(serviceStateHashes);
+          byte[] serviceStateHash = bytes(instanceSpec.getId());
+          List<HashCode> serviceStateHashes = singletonList(HashCode.fromBytes(serviceStateHash));
 
+          // Setup the service
           ServiceWrapper serviceWrapper = entry.getValue();
           when(serviceWrapper.getStateHashes(s)).thenReturn(serviceStateHashes);
+
+          // Add to the expected state hashes
+          expectedBuilder.addServiceStateHashes(ServiceStateHashes.newBuilder()
+              .setInstanceId(serviceWrapper.getId())
+              .addStateHashes(ByteString.copyFrom(serviceStateHash))
+          );
         }
 
         // Request the state hashes
-        List<List<HashCode>> runtimeStateHashes = serviceRuntime.getStateHashes(s);
-        assertThat(runtimeStateHashes).isEqualTo(expectedRuntimeStateHashes);
+        ServiceRuntimeStateHashes runtimeStateHashes = serviceRuntime.getStateHashes(s);
+        ServiceRuntimeStateHashes expectedStateHashes = expectedBuilder.build();
+        assertThat(runtimeStateHashes).isEqualTo(expectedStateHashes);
       }
     }
 
