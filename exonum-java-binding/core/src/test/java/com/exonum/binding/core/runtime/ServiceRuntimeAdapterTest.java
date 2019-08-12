@@ -1,22 +1,33 @@
+/*
+ * Copyright 2019 The Exonum Team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.adapters.ViewFactory;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
@@ -32,86 +43,53 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
 class ServiceRuntimeAdapterTest {
 
-  @Test
-  void convertStateHashesEmpty() {
-    List<List<HashCode>> runtimeStateHashes = ImmutableList.of();
-    byte[][][] expectedStateHashes = new byte[][][] {};
+  private static final long SNAPSHOT_HANDLE = 0x0A;
+  private static final long HEIGHT = 1;
+  private static final int VALIDATOR_ID = 1;
 
-    assertThat(ServiceRuntimeAdapter.convertStateHashes(runtimeStateHashes))
-        .isEqualTo(expectedStateHashes);
+  @Mock
+  private ServiceRuntime serviceRuntime;
+  @Mock
+  private ViewFactory viewFactory;
+  private ServiceRuntimeAdapter serviceRuntimeAdapter;
+  @Mock
+  private Snapshot snapshot;
+
+  @BeforeEach
+  void setUp() {
+    serviceRuntimeAdapter = new ServiceRuntimeAdapter(serviceRuntime, viewFactory);
   }
 
   @Test
-  void convertStateHashes() {
-    HashCode h1 = HashCode.fromBytes(bytes(1, 2));
-    HashCode h2 = HashCode.fromBytes(bytes(3, 4));
-    HashCode h3 = HashCode.fromBytes(bytes(5, 6));
-    List<List<HashCode>> runtimeStateHashes = ImmutableList.of(
-        ImmutableList.of(),
-        ImmutableList.of(h1),
-        ImmutableList.of(h2, h3)
-    );
-    byte[][][] expectedStateHashes = new byte[][][] {
-        new byte[][] {},
-        new byte[][] {h1.asBytes()},
-        new byte[][] {h2.asBytes(), h3.asBytes()},
-    };
+  void afterCommit_ValidatorNode() throws CloseFailuresException {
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+        .thenReturn(snapshot);
+    serviceRuntimeAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
 
-    // todo: Replace with Arrays.deepEquals if needed
-    assertThat(ServiceRuntimeAdapter.convertStateHashes(runtimeStateHashes))
-        .isEqualTo(expectedStateHashes);
+    ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
+    verify(serviceRuntime).afterCommit(ac.capture());
+
+    BlockCommittedEvent event = ac.getValue();
+
+    assertThat(event.getHeight()).isEqualTo(HEIGHT);
+    assertThat(event.getValidatorId()).hasValue(VALIDATOR_ID);
+    assertThat(event.getSnapshot()).isEqualTo(snapshot);
   }
 
-  @Nested
-  class WithServiceRuntime {
-    private static final long SNAPSHOT_HANDLE = 0x0A;
-    private static final long HEIGHT = 1;
-    private static final int VALIDATOR_ID = 1;
+  @Test
+  void afterCommit_AuditorNode() throws CloseFailuresException {
+    // For auditor nodes (which do not have validatorId) negative validatorId is passed
+    int validatorId = -1;
+    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+        .thenReturn(snapshot);
+    serviceRuntimeAdapter.afterCommit(SNAPSHOT_HANDLE, validatorId, HEIGHT);
 
-    @Mock
-    private ServiceRuntime serviceRuntime;
-    @Mock
-    private ViewFactory viewFactory;
-    private ServiceRuntimeAdapter serviceRuntimeAdapter;
-    @Mock
-    private Snapshot snapshot;
+    ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
+    verify(serviceRuntime).afterCommit(ac.capture());
 
-    @BeforeEach
-    void setUp() {
-      serviceRuntimeAdapter = new ServiceRuntimeAdapter(serviceRuntime, viewFactory);
-    }
+    BlockCommittedEvent event = ac.getValue();
 
-    @Test
-    void afterCommit_ValidatorNode() throws CloseFailuresException {
-      when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
-          .thenReturn(snapshot);
-      serviceRuntimeAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
-
-      ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
-      verify(serviceRuntime).afterCommit(ac.capture());
-
-      BlockCommittedEvent event = ac.getValue();
-
-      assertThat(event.getHeight()).isEqualTo(HEIGHT);
-      assertThat(event.getValidatorId()).hasValue(VALIDATOR_ID);
-      assertThat(event.getSnapshot()).isEqualTo(snapshot);
-    }
-
-    @Test
-    void afterCommit_AuditorNode() throws CloseFailuresException {
-      // For auditor nodes (which do not have validatorId) negative validatorId is passed
-      int validatorId = -1;
-      when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
-          .thenReturn(snapshot);
-      serviceRuntimeAdapter.afterCommit(SNAPSHOT_HANDLE, validatorId, HEIGHT);
-
-      ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
-      verify(serviceRuntime).afterCommit(ac.capture());
-
-      BlockCommittedEvent event = ac.getValue();
-
-      assertThat(event.getHeight()).isEqualTo(HEIGHT);
-      assertThat(event.getValidatorId()).isEmpty();
-    }
+    assertThat(event.getHeight()).isEqualTo(HEIGHT);
+    assertThat(event.getValidatorId()).isEmpty();
   }
 }
