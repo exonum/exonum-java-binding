@@ -17,7 +17,7 @@
 package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.google.auto.value.AutoValue;
 
@@ -30,13 +30,14 @@ import com.google.auto.value.AutoValue;
  * <p>A raw transaction is converted to an {@linkplain Transaction executable transaction}
  * by the framework using an implementation of {@link TransactionConverter}.
  */
-// todo: Reconsider (remove?)
+// todo: Reconsider (split into CallInfo and the payload)? It is currently used
+//  in Node#submitTransaction. Will it make #submitTransaction easier or harder to use?
 @AutoValue
 public abstract class RawTransaction {
 
   /**
    * Returns a service identifier which the transaction belongs to.
-   * @see Service#getId()
+   * @see ServiceInstanceSpec#getId()
    */
   public abstract short getServiceId();
 
@@ -48,6 +49,7 @@ public abstract class RawTransaction {
 
   /**
    * Returns the transaction payload which contains actual transaction data.
+   * @see TransactionMessage#getPayload()
    */
   public abstract byte[] getPayload();
 
