@@ -1637,11 +1637,6 @@ version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "percent-encoding"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-
-[[package]]
 name = "phf"
 version = "0.7.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
