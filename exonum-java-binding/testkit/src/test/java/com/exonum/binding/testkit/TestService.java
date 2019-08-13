@@ -43,7 +43,7 @@ final class TestService extends AbstractService {
   private Node node;
 
   public TestService() {
-    // todo: TestTransaction::from);
+    // todo: [testkit] bind TestTransaction::from in the TestServiceModule
   }
 
   Node getNode() {

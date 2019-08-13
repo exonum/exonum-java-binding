@@ -33,7 +33,7 @@ final class GuiceServicesFactory implements ServicesFactory {
     // Create a framework-supplied module with per-service bindings
     Module serviceFrameworkModule = new ServiceFrameworkModule(instanceSpec);
     // Create a new service
-    // todo: Reconsider the relationships between the framework injector and the child.
+    // todo: [ECR-3433] Reconsider the relationships between the framework injector and the child.
     //   Currently the child injector sees everything from the parent, but it does not
     //   seem to need that, the service needs only a well-defined subset of dependencies.
     Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule,

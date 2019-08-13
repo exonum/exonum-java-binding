@@ -30,7 +30,7 @@ import com.google.auto.value.AutoValue;
  * <p>A raw transaction is converted to an {@linkplain Transaction executable transaction}
  * by the framework using an implementation of {@link TransactionConverter}.
  */
-// todo: Reconsider (split into CallInfo and the payload)? It is currently used
+// todo: [ECR-3438] Reconsider (split into CallInfo and the payload)? It is currently used
 //  in Node#submitTransaction. Will it make #submitTransaction easier or harder to use?
 @AutoValue
 public abstract class RawTransaction {

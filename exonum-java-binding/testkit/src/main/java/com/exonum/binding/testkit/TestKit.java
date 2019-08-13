@@ -141,7 +141,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     List<UserServiceAdapter> services = serviceModules.stream()
         .map(s -> createUserServiceAdapter(s, frameworkInjector))
         .collect(toList());
-    // todo: UserServiceAdapters are to be removed, so this usage is a false signal for getId()
+    // UserServiceAdapters are removed, so this usage is a false signal for keeping getId()
     return Maps.uniqueIndex(services, UserServiceAdapter::getId);
   }
 

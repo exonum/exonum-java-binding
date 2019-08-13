@@ -71,8 +71,8 @@ public final class TestService extends AbstractService {
   static RawTransaction constructAfterCommitTransaction(long height) {
     String payload = "Test message on height " + height;
     return RawTransaction.newBuilder()
-        // todo: Or keep getId() in the interface, and implement it in the AbstractService
-        //   for cases like this one (submitting a transaction to self)?
+        // todo: [ECR-3439] Or keep getId() in the interface, and implement it
+        //   in the AbstractService for cases like this one (submitting a transaction to self)?
         .serviceId(SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
