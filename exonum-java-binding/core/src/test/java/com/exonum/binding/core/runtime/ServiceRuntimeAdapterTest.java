@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.BlockCommittedEvent;
-import com.exonum.binding.core.service.adapters.ViewFactory;
 import com.exonum.binding.core.storage.database.Snapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

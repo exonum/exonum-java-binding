@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.service.adapters;
+package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.Fork;

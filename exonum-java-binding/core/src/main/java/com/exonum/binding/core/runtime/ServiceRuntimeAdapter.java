@@ -23,7 +23,6 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
-import com.exonum.binding.core.service.adapters.ViewFactory;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;

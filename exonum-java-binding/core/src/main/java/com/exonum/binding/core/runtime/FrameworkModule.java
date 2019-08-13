@@ -18,8 +18,6 @@ package com.exonum.binding.core.runtime;
 
 import static com.google.inject.name.Names.named;
 
-import com.exonum.binding.core.service.adapters.ViewFactory;
-import com.exonum.binding.core.service.adapters.ViewProxyFactory;
 import com.exonum.binding.core.transport.Server;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
