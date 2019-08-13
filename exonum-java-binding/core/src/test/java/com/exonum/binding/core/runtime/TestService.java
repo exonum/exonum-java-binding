@@ -19,23 +19,13 @@ package com.exonum.binding.core.runtime;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
-import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
 import java.util.Properties;
 
 class TestService extends AbstractService {
-
-  static final short ID = 2;
-  static final String NAME = "test-user-service";
-
-  @Inject
-  TestService(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
-  }
 
   @Override
   public void configure(Fork fork, Properties arguments) {
