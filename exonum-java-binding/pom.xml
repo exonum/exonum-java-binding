@@ -562,6 +562,7 @@
                 <exclude>**/TxMessageProtos*</exclude>
                 <exclude>**/WalletProtos*</exclude>
                 <exclude>**/CoreProtos*</exclude>
+                <exclude>**/ServiceRuntimeProtos*</exclude>
               </excludes>
             </configuration>
             <executions>
