@@ -36,7 +36,7 @@ class GuiceServicesFactoryTest {
 
   @BeforeEach
   void setUp() {
-    // todo: if we designate some abstraction as 'provided' by the framework, test
+    // todo: [ECR-3438] if we designate some abstraction as 'provided' by the framework, test
     //   that they can be injected into the service instance
     Injector frameworkInjector = Guice.createInjector();
     factory = new GuiceServicesFactory(frameworkInjector);

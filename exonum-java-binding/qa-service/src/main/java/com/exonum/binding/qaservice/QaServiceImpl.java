@@ -100,7 +100,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // Add an afterCommit counter that will be incremented after each block committed event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
 
-    // todo: Use the configuration.
+    // todo [QA-service updates]: Use the configuration.
   }
 
   private void createCounter(String name, Fork fork) {

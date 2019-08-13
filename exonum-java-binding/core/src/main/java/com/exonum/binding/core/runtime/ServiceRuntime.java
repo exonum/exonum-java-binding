@@ -65,7 +65,6 @@ public final class ServiceRuntime {
 
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
-  // todo: test the iteration order.
   /**
    * The list of services. It is stored in a sorted map that offers the same iteration order
    * on all nodes with the same services, which is required for correct beforeCommit
@@ -154,10 +153,7 @@ public final class ServiceRuntime {
         // Instantiate the service
         ServiceWrapper service = servicesFactory.createService(serviceDefinition, instanceSpec);
 
-        // Connect it to the API
-        // todo: Add this from UserServiceAdapter
-        // todo: reconsider once the core decides on the interface. It does not seem correct at all
-        //   to provide external access to service operations **before** configuration.
+        // todo: [ECR-3434] Connect it to the API
 
         // Register it in the runtime
         registerService(service);
@@ -188,8 +184,9 @@ public final class ServiceRuntime {
    * @param view a database view to apply configuration
    * @param configuration service instance configuration parameters
    */
-  // todo: Shall we use a more strict (and opaque) type for service id? E.g., to be able to change
-  //   it later (though the runtime is an internal API that we can change at any time)?
+  // todo: [ECR-3435] Shall we use a more strict (and opaque) type for service id? E.g.,
+  //   to be able to change it later (though the runtime is an internal API that we can change
+  //   at any time)?
   //   Also, shall we use the numeric id for performance reasons (= the native won't have to
   //   convert the Rust string into the Java string, but pass an int).
   public void configureService(String name, Fork view, Properties configuration) {
@@ -224,7 +221,7 @@ public final class ServiceRuntime {
   public void stopService(String name) {
     synchronized (lock) {
       checkService(name);
-      // todo: disconnect from the API if it was connected
+      // todo: [ECR-3434] disconnect from the API if it was connected
 
       // Unregister the service
       unregisterService(name);
@@ -301,7 +298,7 @@ public final class ServiceRuntime {
     synchronized (lock) {
       for (ServiceWrapper service: services.values()) {
         try {
-          // todo: BCE carries a Snapshot which is based on a cleaner, which gets
+          // todo: [ECR-3436] BCE carries a Snapshot which is based on a cleaner, which gets
           //   re-used by all services. If the total number of native proxies they create is large,
           //   that may result in excessive memory usage. Some ways to solve this:
           //   1. Take a handle, create a fresh snapshot for each service — but will need hacks
@@ -315,7 +312,7 @@ public final class ServiceRuntime {
           //   clean-up.
           service.afterCommit(event);
         } catch (Exception e) {
-          // Log, but do not re-throw immediately or later
+          // Log, but do not re-throw either immediately or later
           logger.error("Service {} threw an exception in its afterCommit handler of {}",
               service.getName(), event, e);
         }

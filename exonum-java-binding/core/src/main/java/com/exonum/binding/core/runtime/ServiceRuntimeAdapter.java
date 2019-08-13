@@ -89,8 +89,8 @@ class ServiceRuntimeAdapter {
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#configureService(String, Fork, Properties)
    */
-  // todo: when configuration options are clarified, update the signature
-  // todo: probably, name -> id
+  // todo: [ECR-3437] when configuration options are clarified, update the signature
+  // todo: [ECR-3435] probably, name -> id
   void configureService(String name, long forkHandle, Properties configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {

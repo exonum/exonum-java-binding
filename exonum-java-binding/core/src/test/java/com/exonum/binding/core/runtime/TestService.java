@@ -29,7 +29,6 @@ class TestService extends AbstractService {
 
   @Override
   public void configure(Fork fork, Properties arguments) {
-    // todo:
   }
 
   @Override

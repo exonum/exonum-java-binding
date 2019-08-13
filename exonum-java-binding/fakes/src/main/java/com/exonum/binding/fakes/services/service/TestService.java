@@ -45,11 +45,6 @@ public final class TestService extends AbstractService {
 
   private static final SchemaFactory<TestSchema> SCHEMA_FACTORY = TestSchema::new;
 
-  public TestService() {
-    // todo: Shall we really remove convertTransaction?
-    // super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, SCHEMA_FACTORY));
-  }
-
   @Override
   protected TestSchema createDataSchema(View view) {
     return SCHEMA_FACTORY.from(view);
