@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,7 +66,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
-class ServiceRuntimeTest {
+class ServiceRuntimeIntegrationTest {
 
   static final int PORT = 25000;
   static final String TEST_NAME = "test_service_name";
@@ -151,6 +150,8 @@ class ServiceRuntimeTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
     when(servicesFactory.createService(serviceDefinition, instanceSpec))
         .thenReturn(serviceWrapper);
 
@@ -176,6 +177,8 @@ class ServiceRuntimeTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
     when(servicesFactory.createService(serviceDefinition, instanceSpec))
         .thenReturn(serviceWrapper);
 
@@ -239,7 +242,8 @@ class ServiceRuntimeTest {
     @BeforeEach
     void addService() {
       // Setup the service
-      lenient().when(serviceWrapper.getId()).thenReturn(TEST_ID);
+      when(serviceWrapper.getId()).thenReturn(TEST_ID);
+      when(serviceWrapper.getName()).thenReturn(TEST_NAME);
       // Setup the loader
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
           .newInstance(ARTIFACT_ID, TestServiceModule::new);
@@ -389,6 +393,8 @@ class ServiceRuntimeTest {
       for (Entry<ServiceInstanceSpec, ServiceWrapper> entry : SERVICES.entrySet()) {
         ServiceInstanceSpec instanceSpec = entry.getKey();
         ServiceWrapper service = entry.getValue();
+        when(service.getId()).thenReturn(instanceSpec.getId());
+        when(service.getName()).thenReturn(instanceSpec.getName());
         when(servicesFactory.createService(serviceDefinition, instanceSpec))
             .thenReturn(service);
       }

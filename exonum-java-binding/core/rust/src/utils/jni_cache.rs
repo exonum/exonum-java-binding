@@ -37,6 +37,7 @@ static mut OBJECT_GET_CLASS: Option<JMethodID> = None;
 static mut CLASS_GET_NAME: Option<JMethodID> = None;
 static mut THROWABLE_GET_MESSAGE: Option<JMethodID> = None;
 
+// todo: Remove transaction and service adapter items when native JavaServiceRuntime is implemented
 static mut TRANSACTION_ADAPTER_EXECUTE: Option<JMethodID> = None;
 static mut TRANSACTION_ADAPTER_INFO: Option<JMethodID> = None;
 
@@ -76,30 +77,6 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "getMessage",
         "()Ljava/lang/String;",
     );
-    TRANSACTION_ADAPTER_EXECUTE = get_method_id(
-        &env,
-        "com/exonum/binding/core/service/adapters/UserTransactionAdapter",
-        "execute",
-        "(J[B[B)V",
-    );
-    TRANSACTION_ADAPTER_INFO = get_method_id(
-        &env,
-        "com/exonum/binding/core/service/adapters/UserTransactionAdapter",
-        "info",
-        "()Ljava/lang/String;",
-    );
-    SERVICE_ADAPTER_STATE_HASHES = get_method_id(
-        &env,
-        "com/exonum/binding/core/service/adapters/UserServiceAdapter",
-        "getStateHashes",
-        "(J)[[B",
-    );
-    SERVICE_ADAPTER_CONVERT_TRANSACTION = get_method_id(
-        &env,
-        "com/exonum/binding/core/service/adapters/UserServiceAdapter",
-        "convertTransaction",
-        "(S[B)Lcom/exonum/binding/core/service/adapters/UserTransactionAdapter;",
-    );
     JAVA_LANG_ERROR = env
         .new_global_ref(env.find_class("java/lang/Error").unwrap().into())
         .ok();
@@ -118,10 +95,6 @@ unsafe fn cache_methods(env: &JNIEnv) {
         OBJECT_GET_CLASS.is_some()
             && JAVA_LANG_ERROR.is_some()
             && THROWABLE_GET_MESSAGE.is_some()
-            && TRANSACTION_ADAPTER_EXECUTE.is_some()
-            && TRANSACTION_ADAPTER_INFO.is_some()
-            && SERVICE_ADAPTER_STATE_HASHES.is_some()
-            && SERVICE_ADAPTER_CONVERT_TRANSACTION.is_some()
             && JAVA_LANG_ERROR.is_some()
             && JAVA_LANG_RUNTIME_EXCEPTION.is_some()
             && TRANSACTION_EXECUTION_EXCEPTION.is_some(),
