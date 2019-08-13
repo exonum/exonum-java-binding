@@ -16,8 +16,8 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.core.service.adapters.ViewFactory;
-import com.exonum.binding.core.service.adapters.ViewProxyFactory;
+import com.exonum.binding.core.runtime.ViewFactory;
+import com.exonum.binding.core.runtime.ViewProxyFactory;
 import com.exonum.binding.core.transport.Server;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;

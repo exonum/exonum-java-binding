@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.service.adapters;
+package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.Fork;
@@ -23,8 +23,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 /**
  * A factory of views.
  *
- * <p>Enables easier testing of service and transaction adapters: {@link UserServiceAdapter}
- * and {@link UserTransactionAdapter}.
+ * <p>Enables easier testing of the service runtime adapter.
  */
 public interface ViewFactory {
 
