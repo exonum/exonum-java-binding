@@ -15,11 +15,9 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-exonum = "0.11"
+exonum = { version = "0.11", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
 exonum-time = "0.11"
 exonum-testkit = "0.11"
-# FIXME: Until merkedb is published to the `crates.io` the `exonum` repo should be cloned as `exonum` at the same level as EJB root.
-exonum-merkledb = { path = "../../../../exonum/components/merkledb" }
 chrono = "0.4.7"
 failure = "0.1.1"
 toml = "0.5"
@@ -40,8 +38,9 @@ rpath = true
 [profile.release]
 rpath = true
 
+# FIXME: using git dependency until new Exonum with MerkleDB will be released
 [patch.crates-io]
-exonum = { path = "../../../../exonum/exonum" }
-exonum-testkit = { path = "../../../../exonum/testkit" }
-exonum-time = { path = "../../../../exonum/services/time" }
-exonum-configuration = { path = "../../../../exonum/services/configuration" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "7daf2dadfab6f7a289046fd28aca7f210a693383" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "7daf2dadfab6f7a289046fd28aca7f210a693383" }
+exonum-configuration = { git = "https://github.com/exonum/exonum", rev = "7daf2dadfab6f7a289046fd28aca7f210a693383" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "7daf2dadfab6f7a289046fd28aca7f210a693383" }
