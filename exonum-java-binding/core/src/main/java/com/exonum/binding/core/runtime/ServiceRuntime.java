@@ -70,8 +70,12 @@ public final class ServiceRuntime {
    * the same iteration order on all nodes with the same services, which is required
    * for correct operation of beforeCommit and {@link #getStateHashes(Snapshot)}.
    */
-  private final SortedMap<String, ServiceWrapper> services;
-  private final Map<Integer, ServiceWrapper> servicesById;
+  private final SortedMap<String, ServiceWrapper> services = new TreeMap<>();
+  /**
+   * Same active services, indexed by their numeric identifier.
+   * @see ServiceInstanceSpec#getId()
+   */
+  private final Map<Integer, ServiceWrapper> servicesById = new HashMap<>();
   private final Object lock = new Object();
 
   /**
@@ -88,8 +92,6 @@ public final class ServiceRuntime {
       @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
     this.serviceLoader = checkNotNull(serviceLoader);
     this.servicesFactory = checkNotNull(servicesFactory);
-    services = new TreeMap<>();
-    servicesById = new HashMap<>();
 
     // Start the server
     server.start(serverPort);
