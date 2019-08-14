@@ -15,9 +15,9 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-exonum = { version = "0.11", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
-exonum-time = "0.11"
-exonum-testkit = "0.11"
+exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
+exonum-time = "0.12"
+exonum-testkit = "0.12"
 chrono = "0.4.7"
 failure = "0.1.1"
 toml = "0.5"
@@ -37,10 +37,3 @@ rpath = true
 
 [profile.release]
 rpath = true
-
-# FIXME: using git dependency until new Exonum with MerkleDB will be released
-[patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
-exonum-configuration = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
