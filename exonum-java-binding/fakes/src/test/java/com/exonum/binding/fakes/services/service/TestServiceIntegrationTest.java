@@ -32,12 +32,10 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class TestServiceIntegrationTest {
 
-  @Disabled // FIXME: disabled until ECR-3359.
   @Test
   @RequiresNativeLibrary
   void initialize() throws CloseFailuresException {

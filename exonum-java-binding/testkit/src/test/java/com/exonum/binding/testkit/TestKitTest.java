@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -72,7 +71,6 @@ class TestKitTest {
   private static final ZonedDateTime TIME =
       ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
-  @Disabled
   @Test
   void createTestKitForSingleService() {
     TestService service;
@@ -82,7 +80,6 @@ class TestKitTest {
     }
   }
 
-  @Disabled
   @Test
   void createTestKitWithBuilderForSingleService() {
     try (TestKit testKit = TestKit.builder()
@@ -103,7 +100,6 @@ class TestKitTest {
     assertThrows(exceptionType, testKitBuilder::build);
   }
 
-  @Disabled
   @Test
   void createTestKitWithBuilderForMultipleDifferentServices() {
     try (TestKit testKit = TestKit.builder()
@@ -117,7 +113,6 @@ class TestKitTest {
     }
   }
 
-  @Disabled
   @Test
   void createTestKitWithBuilderForMultipleDifferentServicesVarargs() {
     try (TestKit testKit = TestKit.builder()
@@ -130,7 +125,6 @@ class TestKitTest {
     }
   }
 
-  @Disabled
   @Test
   void createTestKitWithTimeService() {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
@@ -185,7 +179,6 @@ class TestKitTest {
     assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
-  @Disabled
   @Test
   void createTestKitWithSeveralValidators() {
     short validatorCount = 2;
@@ -200,7 +193,6 @@ class TestKitTest {
     }
   }
 
-  @Disabled
   @Test
   void createTestKitWithAuditorAndAdditionalValidators() {
     short validatorCount = 2;
@@ -225,7 +217,6 @@ class TestKitTest {
     assertThrows(exceptionType, () -> testKitBuilder.withValidators(invalidValidatorCount));
   }
 
-  @Disabled
   @Test
   void requestWrongServiceClass() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
@@ -237,7 +228,6 @@ class TestKitTest {
     }
   }
 
-  @Disabled
   @Test
   void requestWrongServiceId() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
@@ -265,7 +255,6 @@ class TestKitTest {
     assertThrows(exceptionType, testKitBuilder::build);
   }
 
-  @Disabled
   @Test
   void createEmptyBlock(TestKit testKit) {
     Block block = testKit.createBlock();
@@ -277,7 +266,6 @@ class TestKitTest {
     assertThat(block).isEqualTo(blockchain.getBlock(1));
   }
 
-  @Disabled
   @Test
   void afterCommitSubmitsTransaction(TestKit testKit) {
     // Create a block so that afterCommit transaction is submitted
@@ -299,7 +287,6 @@ class TestKitTest {
     assertThat(nextBlock.getHeight()).isEqualTo(2);
   }
 
-  @Disabled
   @Test
   void createBlockWithTransactionIgnoresInPoolTransactions(TestKit testKit) {
     // Create a block so that afterCommit transaction is submitted
@@ -314,7 +301,6 @@ class TestKitTest {
     assertThat(inPoolTransactions).hasSize(2);
   }
 
-  @Disabled
   @Test
   void createBlockWithSingleTransaction(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
@@ -331,7 +317,6 @@ class TestKitTest {
     assertThat(transactionResult).isEqualTo(TransactionResult.successful());
   }
 
-  @Disabled
   @Test
   void createBlockWithTransactions(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
@@ -344,7 +329,6 @@ class TestKitTest {
         view, block, message, message2));
   }
 
-  @Disabled
   @Test
   void nodeSubmittedTransactionsArePlacedInPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
@@ -358,7 +342,6 @@ class TestKitTest {
     assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
   }
 
-  @Disabled
   @Test
   void getTransactionPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
@@ -375,7 +358,6 @@ class TestKitTest {
     assertThat(transactionsInPool).containsExactlyInAnyOrder(message, message2);
   }
 
-  @Disabled
   @Test
   void findTransactionsInPool(TestKit testKit) {
     TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
@@ -393,7 +375,6 @@ class TestKitTest {
     assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
   }
 
-  @Disabled
   @Test
   void createBlockWithTransactionsVarargs(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
@@ -438,7 +419,6 @@ class TestKitTest {
     assertThat(transactionResult2).isEqualTo(TransactionResult.successful());
   }
 
-  @Disabled
   @Test
   void createBlockWithTransactionWithWrongServiceId(TestKit testKit) {
     short wrongServiceId = (short) (TestService.SERVICE_ID + 1);
@@ -453,7 +433,6 @@ class TestKitTest {
         .contains("Unknown service id", Integer.toString(wrongServiceId), message.toString());
   }
 
-  @Disabled
   @Test
   void createBlockWithTransactionWithWrongTransactionId(TestKit testKit) {
     short wrongTransactionId = (short) (TestTransaction.ID + 1);
@@ -469,7 +448,6 @@ class TestKitTest {
             Integer.toString(TestService.SERVICE_ID), message.toString());
   }
 
-  @Disabled
   @Test
   void getValidatorEmulatedNode(TestKit testKit) {
     EmulatedNode node = testKit.getEmulatedNode();
@@ -478,7 +456,6 @@ class TestKitTest {
     assertThat(node.getServiceKeyPair()).isNotNull();
   }
 
-  @Disabled
   @Test
   void getAuditorEmulatedNode() {
     try (TestKit testKit = TestKit.builder()
@@ -492,7 +469,6 @@ class TestKitTest {
     }
   }
 
-  @Disabled
   @Test
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
@@ -547,7 +523,6 @@ class TestKitTest {
     assertThat(thrownException).hasMessageContaining(expectedMessage);
   }
 
-  @Disabled
   @Test
   void getSnapshot(TestKit testKit) {
     Class<IllegalStateException> exceptionType = IllegalStateException.class;

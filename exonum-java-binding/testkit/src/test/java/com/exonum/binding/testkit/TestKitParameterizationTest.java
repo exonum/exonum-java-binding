@@ -22,11 +22,9 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-@Disabled
 class TestKitParameterizationTest {
 
   private static final short TEMPLATE_VALIDATOR_COUNT = 1;

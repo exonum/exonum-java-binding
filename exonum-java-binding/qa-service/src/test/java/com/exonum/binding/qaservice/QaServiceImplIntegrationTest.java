@@ -52,12 +52,10 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-@Disabled //FIXME: Tests are disabled until native Fork limitations are fixed ECR-3359
 @RequiresNativeLibrary
 class QaServiceImplIntegrationTest {
 
