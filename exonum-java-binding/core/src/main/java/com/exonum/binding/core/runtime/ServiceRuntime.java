@@ -66,9 +66,9 @@ public final class ServiceRuntime {
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
   /**
-   * The list of services. It is stored in a sorted map that offers the same iteration order
-   * on all nodes with the same services, which is required for correct beforeCommit
-   * operation.
+   * The active services indexed by their name. It is stored in a sorted map that offers
+   * the same iteration order on all nodes with the same services, which is required
+   * for correct operation of beforeCommit and {@link #getStateHashes(Snapshot)}.
    */
   private final SortedMap<String, ServiceWrapper> services;
   private final Map<Integer, ServiceWrapper> servicesById;
