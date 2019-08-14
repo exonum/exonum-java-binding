@@ -219,15 +219,15 @@ class ServiceRuntimeIntegrationTest {
 
       // Configure the service
       Exception e = assertThrows(IllegalArgumentException.class,
-          () -> serviceRuntime.configureService(TEST_NAME, view, properties));
+          () -> serviceRuntime.configureService(TEST_ID, view, properties));
 
-      assertThat(e).hasMessageContaining(TEST_NAME);
+      assertThat(e).hasMessageContaining(String.valueOf(TEST_ID));
     }
   }
 
   @Test
   void stopNonExistingService() {
-    assertThrows(IllegalArgumentException.class, () -> serviceRuntime.stopService(TEST_NAME));
+    assertThrows(IllegalArgumentException.class, () -> serviceRuntime.stopService(TEST_ID));
   }
 
   @Nested
@@ -264,7 +264,7 @@ class ServiceRuntimeIntegrationTest {
         Fork view = database.createFork(cleaner);
         Properties properties = new Properties();
         // Configure the service
-        serviceRuntime.configureService(TEST_NAME, view, properties);
+        serviceRuntime.configureService(TEST_ID, view, properties);
 
         // Check the service was configured
         verify(serviceWrapper).configure(view, properties);
@@ -274,7 +274,7 @@ class ServiceRuntimeIntegrationTest {
     @Test
     void stopService() {
       // Stop the service
-      serviceRuntime.stopService(TEST_NAME);
+      serviceRuntime.stopService(TEST_ID);
 
       // Check no service with such name remains registered
       Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
