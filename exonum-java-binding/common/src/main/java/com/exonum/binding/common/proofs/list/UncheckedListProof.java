@@ -18,7 +18,7 @@ package com.exonum.binding.common.proofs.list;
 
 /**
  * A proof that some elements exist in a proof list. You must
- * {@link #check} its structure and root hash before accessing the elements.
+ * {@link #check} its structure and index hash before accessing the elements.
  */
 public interface UncheckedListProof {
 
@@ -30,5 +30,5 @@ public interface UncheckedListProof {
   /**
    * Returns raw source proof of this UncheckedListProof.
    */
-  ListProofNode getRootProofNode();
+  ListProof getListProof();
 }

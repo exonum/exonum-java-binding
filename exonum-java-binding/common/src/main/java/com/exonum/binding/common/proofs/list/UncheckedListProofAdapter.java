@@ -25,11 +25,11 @@ import com.google.common.base.Preconditions;
  */
 public class UncheckedListProofAdapter<E> implements UncheckedListProof {
 
-  private final ListProofNode rootProofNode;
+  private final ListProof listProof;
 
   private final ListProofStructureValidator listProofStructureValidator;
 
-  private final ListProofRootHashCalculator<E> listProofRootHashCalculator;
+  private final ListProofHashCalculator<E> listProofHashCalculator;
 
   /**
    * Creates UncheckedListProofAdapter for convenient usage of ListProof interfaces.
@@ -37,29 +37,29 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
    * <p>UncheckedListProofAdapter {@link #check()} method will return CheckedListProof containing
    * results of list proof verification.
    *
-   * @param rootProofNode source list proof
+   * @param listProof source list proof with index length
    * @param serializer proof elements serializer
    */
-  public UncheckedListProofAdapter(ListProofNode rootProofNode, Serializer<E> serializer) {
-    Preconditions.checkNotNull(rootProofNode, "ListProof node must be not null");
+  public UncheckedListProofAdapter(ListProof listProof, Serializer<E> serializer) {
+    Preconditions.checkNotNull(listProof, "ListProof node must be not null");
     Preconditions.checkNotNull(serializer, "Serializer must be not null");
 
-    this.rootProofNode = rootProofNode;
-    this.listProofStructureValidator = new ListProofStructureValidator(rootProofNode);
-    this.listProofRootHashCalculator = new ListProofRootHashCalculator<>(rootProofNode, serializer);
+    this.listProof = listProof;
+    this.listProofStructureValidator = new ListProofStructureValidator(listProof.getRootNode());
+    this.listProofHashCalculator = new ListProofHashCalculator<>(listProof, serializer);
   }
 
   @Override
   public CheckedListProof check() {
     ListProofStatus structureCheckStatus = listProofStructureValidator.getProofStatus();
-    HashCode calculatedRootHash = listProofRootHashCalculator.getCalculatedRootHash();
+    HashCode calculatedIndexHash = listProofHashCalculator.getHash();
 
     return new CheckedListProofImpl<>(
-        calculatedRootHash, listProofRootHashCalculator.getElements(), structureCheckStatus);
+        calculatedIndexHash, listProofHashCalculator.getElements(), structureCheckStatus);
   }
 
   @Override
-  public ListProofNode getRootProofNode() {
-    return rootProofNode;
+  public ListProof getListProof() {
+    return listProof;
   }
 }
