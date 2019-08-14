@@ -182,33 +182,26 @@ public final class ServiceRuntime {
   /**
    * Configures the service instance.
    *
-   * @param name the name of the started service
+   * @param id the id of the started service
    * @param view a database view to apply configuration
    * @param configuration service instance configuration parameters
    */
-  // todo: [ECR-3435] Shall we use a more strict (and opaque) type for service id? E.g.,
-  //   to be able to change it later (though the runtime is an internal API that we can change
-  //   at any time)?
-  //   Also, shall we use the numeric id for performance reasons (= the native won't have to
-  //   convert the Rust string into the Java string, but pass an int).
-  public void configureService(String name, Fork view, Properties configuration) {
+  public void configureService(Integer id, Fork view, Properties configuration) {
     // todo: Shall we control the state transitions (e.g., that one can configure only the
     //   started service and only once)? It feels like an overkill for an implementation of
     //   a framework abstraction.
     synchronized (lock) {
-      checkService(name);
-
+      ServiceWrapper service = getServiceById(id);
       try {
-        ServiceWrapper service = services.get(name);
         service.configure(view, configuration);
       } catch (Exception e) {
+        String name = service.getName();
         logger.error("Service {} configuration with parameters {} failed",
             name, configuration, e);
         throw e;
       }
+      logger.info("Configured service {} with parameters {}", service.getName(), configuration);
     }
-
-    logger.info("Configured service {} with parameters {}", name, configuration);
   }
 
   /**
@@ -218,24 +211,23 @@ public final class ServiceRuntime {
    * if the service configuration failed, hence this operation is (a) blocking; (b) complete —
    * there is no preceding notification that the service is about to be stopped, no guarantees
    * on transaction processing; (c) no artifact unloading.</strong>
-   * @param name the name of the started service
+   * @param id the id of the started service
    */
-  public void stopService(String name) {
+  public void stopService(Integer id) {
     synchronized (lock) {
-      checkService(name);
+      ServiceWrapper service = getServiceById(id);
       // todo: [ECR-3434] disconnect from the API if it was connected
 
       // Unregister the service
-      unregisterService(name);
-    }
+      unregisterService(service);
 
-    logger.info("Stopped service {}", name);
+      logger.info("Stopped service {}", service.getName());
+    }
   }
 
-  private void unregisterService(String name) {
-    ServiceWrapper removed = services.remove(name);
-    int id = removed.getId();
-    servicesById.remove(id);
+  private void unregisterService(ServiceWrapper service) {
+    services.remove(service.getName());
+    servicesById.remove(service.getId());
   }
 
   /**
@@ -247,7 +239,7 @@ public final class ServiceRuntime {
    * @param arguments the serialized transaction arguments
    * @param context the transaction execution context
    */
-  public void executeTransaction(int serviceId, int txId, byte[] arguments,
+  public void executeTransaction(Integer serviceId, int txId, byte[] arguments,
       TransactionContext context) throws TransactionExecutionException {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
@@ -322,16 +314,15 @@ public final class ServiceRuntime {
     }
   }
 
-  private ServiceWrapper getServiceById(int serviceId) {
-    checkArgument(servicesById.containsKey(serviceId),
-        "No service with id=%s in the Java runtime", serviceId);
+  private ServiceWrapper getServiceById(Integer serviceId) {
+    checkService(serviceId);
     return servicesById.get(serviceId);
   }
 
-  /** Checks that the service with the given name is started in this runtime. */
-  private void checkService(String name) {
-    checkArgument(findService(name).isPresent(), "No service with name %s in the Java runtime",
-        name);
+  /** Checks that the service with the given id is started in this runtime. */
+  private void checkService(Integer serviceId) {
+    checkArgument(servicesById.containsKey(serviceId),
+        "No service with id=%s in the Java runtime", serviceId);
   }
 
   @VisibleForTesting
