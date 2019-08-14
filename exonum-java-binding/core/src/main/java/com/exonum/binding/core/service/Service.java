@@ -89,7 +89,7 @@ public interface Service {
    * of the entire blockchain state and is recorded as such in blocks and Precommit messages.
    *
    * @param snapshot a snapshot of the blockchain state. Not valid after this method returns
-   * @see ProofListIndexProxy#getRootHash()
+   * @see ProofListIndexProxy#getIndexHash()
    * @see ProofMapIndexProxy#getRootHash()
    */
   default List<HashCode> getStateHashes(Snapshot snapshot) {

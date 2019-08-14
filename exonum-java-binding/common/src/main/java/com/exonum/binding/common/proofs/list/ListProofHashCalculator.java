@@ -25,16 +25,25 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
+import com.google.common.annotations.VisibleForTesting;
+
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.TreeMap;
 
 /**
- * List proof root hash calculator.
+ * List proof hash calculator.
  *
  * @param <E> the type of elements in the corresponding list
  */
-final class ListProofRootHashCalculator<E> implements ListProofVisitor {
+final class ListProofHashCalculator<E> implements ListProofVisitor {
+
+  @VisibleForTesting
+  static final byte BLOB_PREFIX = 0x00;
+  @VisibleForTesting
+  static final byte LIST_BRANCH_PREFIX = 0x01;
+  @VisibleForTesting
+  static final byte LIST_ROOT_PREFIX = 0x02;
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -44,26 +53,33 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
   private long index;
 
-  private HashCode calculatedRootHash;
+  private HashCode hash;
 
   /**
-   * Creates a new ListProofRootHashCalculator.
+   * Creates a new ListProofHashCalculator.
    *
    * @param serializer a serializer of list elements
    */
-  ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer) {
+  ListProofHashCalculator(ListProof listProof, Serializer<E> serializer) {
     this(listProof, serializer, Hashing.defaultHashFunction());
   }
 
-  private ListProofRootHashCalculator(ListProofNode listProof, Serializer<E> serializer,
-      HashFunction hashFunction) {
+  private ListProofHashCalculator(ListProof listProof, Serializer<E> serializer,
+                                  HashFunction hashFunction) {
     this.serializer = CheckingSerializerDecorator.from(serializer);
     this.hashFunction = checkNotNull(hashFunction);
     elements = new TreeMap<>();
     index = 0;
-    calculatedRootHash = null;
+    hash = null;
 
-    listProof.accept(this);
+    ListProofNode rootNode = listProof.getRootNode();
+    rootNode.accept(this);
+
+    hash = hashFunction.newHasher()
+        .putByte(LIST_ROOT_PREFIX)
+        .putLong(listProof.getLength())
+        .putObject(hash, hashCodeFunnel())
+        .hash();
   }
 
   @Override
@@ -72,7 +88,8 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
     HashCode leftHash = visitLeft(branch, branchIndex);
     Optional<HashCode> rightHash = visitRight(branch, branchIndex);
 
-    calculatedRootHash = hashFunction.newHasher()
+    hash = hashFunction.newHasher()
+        .putByte(LIST_BRANCH_PREFIX)
         .putObject(leftHash, hashCodeFunnel())
         .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
             from.ifPresent((hash) -> hashCodeFunnel().funnel(hash, into)))
@@ -81,7 +98,7 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
   @Override
   public void visit(ListProofHashNode listProofHashNode) {
-    this.calculatedRootHash = listProofHashNode.getHash();
+    this.hash = listProofHashNode.getHash();
   }
 
   @Override
@@ -92,20 +109,23 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
 
     E element = serializer.fromBytes(value.getElement().toByteArray());
     elements.put(index, element);
-    calculatedRootHash = hashFunction.hashObject(value, ListProofElement.funnel());
+    hash = hashFunction.newHasher()
+        .putByte(BLOB_PREFIX)
+        .putObject(value, ListProofElement.funnel())
+        .hash();
   }
 
   private HashCode visitLeft(ListProofBranch branch, long parentIndex) {
     index = 2 * parentIndex;
     branch.getLeft().accept(this);
-    return calculatedRootHash;
+    return hash;
   }
 
   private Optional<HashCode> visitRight(ListProofBranch branch, long parentIndex) {
     index = 2 * parentIndex + 1;
-    calculatedRootHash = null;
+    hash = null;
     branch.getRight().ifPresent((right) -> right.accept(this));
-    return Optional.ofNullable(calculatedRootHash);
+    return Optional.ofNullable(hash);
   }
 
   /**
@@ -116,18 +136,16 @@ final class ListProofRootHashCalculator<E> implements ListProofVisitor {
   }
 
   /**
-   * Returns calculated root hash of a list proof tree.
-   *
-   * @return hash code
+   * Returns calculated hash of the list proof.
    */
-  HashCode getCalculatedRootHash() {
-    return calculatedRootHash;
+  HashCode getHash() {
+    return hash;
   }
 
   @Override
   public String toString() {
-    return "ListProofStructureValidator{"
-        + "calculatedRootHash=" + calculatedRootHash
+    return "ListProofHashCalculator{"
+        + "hash=" + hash
         + ", elements=" + elements
         + ", index=" + index
         + '}';

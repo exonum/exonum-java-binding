@@ -17,6 +17,9 @@
 package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
+import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.BLOB_PREFIX;
+import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.LIST_BRANCH_PREFIX;
+import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.LIST_ROOT_PREFIX;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -63,6 +66,7 @@ final class ListProofUtils {
 
   static HashCode getNodeHashCode(String v1) {
     return Hashing.defaultHashFunction().newHasher()
+        .putByte(BLOB_PREFIX)
         .putString(v1, StandardCharsets.UTF_8)
         .hash();
   }
@@ -70,9 +74,18 @@ final class ListProofUtils {
   static HashCode getBranchHashCode(HashCode leftHash, @Nullable HashCode rightHashSource) {
     Optional<HashCode> rightHash = Optional.ofNullable(rightHashSource);
     return Hashing.defaultHashFunction().newHasher()
+        .putByte(LIST_BRANCH_PREFIX)
         .putObject(leftHash, hashCodeFunnel())
         .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
             from.ifPresent((hash) -> hashCodeFunnel().funnel(hash, into)))
+        .hash();
+  }
+
+  static HashCode getProofListHash(HashCode rootHash, long length) {
+    return Hashing.defaultHashFunction().newHasher()
+        .putByte(LIST_ROOT_PREFIX)
+        .putLong(length)
+        .putObject(rootHash, hashCodeFunnel())
         .hash();
   }
 }
