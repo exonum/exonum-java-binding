@@ -21,7 +21,6 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.K9;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -141,29 +140,6 @@ class KeySetIndexProxyIntegrationTest
     runTestWithView(database::createSnapshot,
         (set) -> assertThrows(UnsupportedOperationException.class, () -> set.remove(
             K1)));
-  }
-
-  @Test
-  void getSetSize() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(K1);
-
-      assertEquals(set.size(), 1);
-    });
-  }
-
-  @Test
-  void isEmptyShouldReturnTrueForEmptySet() {
-    runTestWithView(database::createSnapshot, (set) -> assertTrue(set.isEmpty()));
-  }
-
-  @Test
-  void isEmptyShouldReturnFalseForNonEmptySet() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(K1);
-
-      assertFalse(set.isEmpty());
-    });
   }
 
   /**
