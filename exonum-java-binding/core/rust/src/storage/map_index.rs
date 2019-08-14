@@ -18,7 +18,7 @@ use exonum_merkledb::{
 };
 use jni::{
     objects::{JClass, JObject, JString},
-    sys::{jboolean, jbyteArray, jlong, jobject},
+    sys::{jboolean, jbyteArray, jobject},
     JNIEnv,
 };
 
@@ -312,38 +312,6 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProx
             map.clear();
             Ok(())
         }
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns `true` if the map has no entries.
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProxy_nativeIsEmpty(
-    env: JNIEnv,
-    _: JObject,
-    map_handle: Handle,
-) -> jboolean {
-    let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.is_empty(),
-            IndexType::ForkIndex(ref map) => map.is_empty(),
-        } as jboolean)
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns the number of entries in the map.
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProxy_nativeSize(
-    env: JNIEnv,
-    _: JObject,
-    map_handle: Handle,
-) -> jlong {
-    let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.len(),
-            IndexType::ForkIndex(ref map) => map.len(),
-        } as jlong)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
