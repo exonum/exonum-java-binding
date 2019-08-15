@@ -15,7 +15,7 @@
 use exonum_merkledb::{key_set_index::KeySetIndexIter, Fork, KeySetIndex, Snapshot};
 use jni::{
     objects::{JClass, JObject, JString},
-    sys::{jboolean, jbyteArray, jlong},
+    sys::{jboolean, jbyteArray},
     JNIEnv,
 };
 
@@ -183,38 +183,6 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
             set.remove(&value);
             Ok(())
         }
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns `true` if the set has no elements.
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeIsEmpty(
-    env: JNIEnv,
-    _: JObject,
-    set_handle: Handle,
-) -> jboolean {
-    let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.is_empty(),
-            IndexType::ForkIndex(ref set) => set.is_empty(),
-        } as jboolean)
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns the number of elements in the set.
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexProxy_nativeSize(
-    env: JNIEnv,
-    _: JObject,
-    set_handle: Handle,
-) -> jlong {
-    let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.len(),
-            IndexType::ForkIndex(ref set) => set.len(),
-        } as jlong)
     });
     utils::unwrap_exc_or_default(&env, res)
 }

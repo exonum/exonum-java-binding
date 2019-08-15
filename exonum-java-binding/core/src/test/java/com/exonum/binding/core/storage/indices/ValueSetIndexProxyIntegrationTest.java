@@ -21,7 +21,6 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V9;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -236,29 +235,6 @@ class ValueSetIndexProxyIntegrationTest
   void removeByHashFailsIfSnapshot() {
     runTestWithView(database::createSnapshot, (set) -> {
       assertThrows(UnsupportedOperationException.class, () -> set.removeByHash(getHashOf(V1)));
-    });
-  }
-
-  @Test
-  void getSetSize() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
-
-      assertEquals(set.size(), 1);
-    });
-  }
-
-  @Test
-  void isEmptyShouldReturnTrueForEmptySet() {
-    runTestWithView(database::createSnapshot, (set) -> assertTrue(set.isEmpty()));
-  }
-
-  @Test
-  void isEmptyShouldReturnFalseForNonEmptySet() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
-
-      assertFalse(set.isEmpty());
     });
   }
 
