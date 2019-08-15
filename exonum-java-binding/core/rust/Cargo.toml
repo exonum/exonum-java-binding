@@ -40,7 +40,7 @@ rpath = true
 
 # FIXME: using git dependency until new Exonum with MerkleDB will be released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "7daf2dadfab6f7a289046fd28aca7f210a693383" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "7daf2dadfab6f7a289046fd28aca7f210a693383" }
-exonum-configuration = { git = "https://github.com/exonum/exonum", rev = "7daf2dadfab6f7a289046fd28aca7f210a693383" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "7daf2dadfab6f7a289046fd28aca7f210a693383" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
+exonum-configuration = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
