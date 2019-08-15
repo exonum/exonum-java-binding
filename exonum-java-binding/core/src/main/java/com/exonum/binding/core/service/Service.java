@@ -47,7 +47,7 @@ public interface Service {
 
   /**
    * Returns a list of hashes representing the state of this service, as of the given snapshot
-   * of the blockchain state. Usually, it includes the root hashes of all Merkelized collections
+   * of the blockchain state. Usually, it includes the hashes of all Merkelized collections
    * defined by this service.
    *
    * <p>The core uses this list to verify that the service on each node in the network has the same
