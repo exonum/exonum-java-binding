@@ -34,6 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -41,8 +43,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
 class ServiceWrapperTest {
 
+  private static final ServiceArtifactId TEST_ARTIFACT_ID =
+      ServiceArtifactId.of("com.acme", "foo", "1.2.3");
   final ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance("test-service",
-      1, ServiceArtifactId.of("com.acme", "foo", "1.2.3"));
+      1, TEST_ARTIFACT_ID);
 
   @Mock
   Service service;
@@ -105,5 +109,20 @@ class ServiceWrapperTest {
         () -> serviceWrapper.executeTransaction(txId, arguments, context));
 
     assertThat(actual).isSameAs(e);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "foo, foo",
+      "foo-1, foo-1",
+      "'foo 1', 'foo%201'",
+      "foo/bar, foo%2Fbar",
+      "foo/a/b, foo%2Fa%2Fb",
+  })
+  void serviceApiPath(String serviceName, String expectedPathFragment) {
+    ServiceInstanceSpec spec = ServiceInstanceSpec.newInstance(serviceName, 1, TEST_ARTIFACT_ID);
+    serviceWrapper = new ServiceWrapper(service, txConverter, spec);
+
+    assertThat(serviceWrapper.getPublicApiRelativePath()).isEqualTo(expectedPathFragment);
   }
 }
