@@ -23,6 +23,8 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
+import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -187,6 +189,17 @@ class ServiceRuntimeAdapter {
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
+  }
+
+  /**
+   * Mounts the APIs of services with the given ids to the Java web-server.
+   *
+   * @param serviceIds the numeric ids of services to connect; must not be empty
+   * @param nodeNativeHandle the native handle to the Node object
+   */
+  void connectServiceApis(int[] serviceIds, long nodeNativeHandle) {
+    Node node = new NodeProxy(nodeNativeHandle);
+    serviceRuntime.connectServiceApis(serviceIds, node);
   }
 
   private static void handleCloseFailure(CloseFailuresException e) throws CloseFailuresException {
