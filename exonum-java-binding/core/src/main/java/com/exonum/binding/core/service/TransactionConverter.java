@@ -39,8 +39,9 @@ public interface TransactionConverter {
    * @param arguments the {@linkplain TransactionMessage#getPayload() serialized transaction
    *     arguments}
    * @return an executable transaction of the service
-   * @throws IllegalArgumentException if the raw transaction is malformed or not known
-   *     to the service
+   * @throws IllegalArgumentException if the transaction is not known to the service,
+   *     or the arguments are not valid: e.g., cannot be deserialized, or do not meet
+   *     the preconditions
    */
   Transaction toTransaction(int txId, byte[] arguments);
 }
