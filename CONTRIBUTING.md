@@ -19,7 +19,8 @@ You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
   * [JDK 1.8+](https://jdk.java.net/12/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
-  * [Stable Rust](https://www.rust-lang.org/tools/install).
+  * [Rust 1.36.0](https://www.rust-lang.org/).
+  To install a specific Rust version, use `rustup install 1.36.0` command.
   * The [system dependencies](https://exonum.com/doc/version/0.11/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
   __Important__: On Mac OS it is necessary to install RocksDB

@@ -21,7 +21,8 @@
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <rust.compiler.version>stable</rust.compiler.version>
+    <!-- TODO: stable does not work well until ECR-3459 is resolved. -->
+    <rust.compiler.version>1.36.0</rust.compiler.version>
     <!-- Features for integration testing. At least "resource-manager" is required by Java integration tests. Ideally,
      keeping them in sync with the ones that `integration_tests` crate require from the `java_bindings` crate allows
      the native integration tests to avoid recompilation of the `java_binding` library. -->
