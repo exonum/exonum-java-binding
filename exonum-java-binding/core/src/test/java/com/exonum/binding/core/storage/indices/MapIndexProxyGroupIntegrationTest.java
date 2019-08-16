@@ -22,20 +22,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.test.CiOnly;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String> {
 
   private static final String GROUP_NAME = "map_group_IT";
 
-  @Disabled("Fails until Lobster Nice is done, see the requirement #3")
   @Test
+  @CiOnly
   void mapsInGroupWithPrefixIdsAreIndependent() {
     View view = db.createFork(cleaner);
 
@@ -43,9 +43,9 @@ class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String
     // in the same database key. Lengths of index ids are in range [1, N-1],
     // each user key has length 'N - length(id)', where N is the length of the string below.
     //
-    // In the current implementation, Exonum uses the id as a prefix of a user key to make
-    // a database key: database-key = prefix + user-key.
-    // Therefore, seemingly isolated collections will have their entries overwritten through
+    // In the pre-MerkleDB implementation, Exonum used to use the group id as a prefix of a user key
+    // to make a database key: database_key = prefix + user_key.
+    // Therefore, seemingly isolated collections could have their entries overwritten through
     // other collections.
     String idKeyPrototype = "a collection id and key";
 
