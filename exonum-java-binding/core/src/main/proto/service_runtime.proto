@@ -16,6 +16,8 @@
 
 syntax = "proto3";
 
+package exonum.java.runtime;
+
 option java_package = "com.exonum.binding.core.runtime";
 option java_outer_classname = "ServiceRuntimeProtos";
 
@@ -23,11 +25,11 @@ option java_outer_classname = "ServiceRuntimeProtos";
 message ServiceRuntimeStateHashes {
   // Hashes representing the state of the runtime itself (e.g., its
   // internal indexes).
-  repeated bytes runtimeStateHashes = 1;
+  repeated bytes runtime_state_hashes = 1;
   // State hashes of each active service in the runtime.
   //
   // Note that we don't use a map to preserve the order of entries.
-  repeated ServiceStateHashes serviceStateHashes = 2;
+  repeated ServiceStateHashes service_state_hashes = 2;
 }
 
 // State hashes of a single service.
@@ -35,5 +37,15 @@ message ServiceStateHashes {
   // Service instance numeric identifier.
   uint32 instance_id = 1;
   // Service state hashes.
-  repeated bytes stateHashes = 2;
+  repeated bytes state_hashes = 2;
+}
+
+/* Java ServiceRuntime deploy arguments, specified in the deploy request
+ * transaction. Currently only a single protocol is supported:
+ * loading an artifact from a file. */
+message DeployArguments {
+
+  /* A name of the service artifact file located in the directory
+   * for storing Java service artifacts. */
+  string artifact_filename = 1;
 }

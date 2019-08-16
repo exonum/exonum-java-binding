@@ -16,10 +16,13 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
@@ -29,8 +32,8 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
 import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +45,7 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>For more detailed documentation on the operations, see the {@link ServiceRuntime}.
  */
-@SuppressWarnings("unused") // Native API
+@SuppressWarnings({"unused", "SameParameterValue"}) // Native API
 class ServiceRuntimeAdapter {
 
   private final ServiceRuntime serviceRuntime;
@@ -58,12 +61,30 @@ class ServiceRuntimeAdapter {
    * Deploys the Java service artifact.
    *
    * @param id the service artifact id in format "groupId:artifactId:version"
-   * @param location the artifact location on the accessible filesystem
+   * @param deploySpec the deploy specification as a serialized {@link com.google.protobuf.Any}
+   *     protobuf message
+   *     with {@link com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments}
+   * @throws IllegalArgumentException if the deploy specification or id are not valid
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
-   * @see ServiceRuntime#deployArtifact(ServiceArtifactId, Path)
+   * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
    */
-  void deployArtifact(String id, String location) throws ServiceLoadingException {
-    serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), Paths.get(location));
+  void deployArtifact(String id, byte[] deploySpec) throws ServiceLoadingException {
+    DeployArguments deployArguments = unpackDeployArgs(id, deploySpec);
+    String artifactFilename = deployArguments.getArtifactFilename();
+
+    serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), artifactFilename);
+  }
+
+  private static DeployArguments unpackDeployArgs(String id, byte[] deploySpec) {
+    try {
+      Any anyDeploySpec = Any.parseFrom(deploySpec);
+      checkArgument(anyDeploySpec.is(DeployArguments.class), "Deploy specification "
+              + "for %s contains message of unexpected type inside Any (%s), must be %s",
+          id, anyDeploySpec.getTypeUrl(), DeployArguments.getDescriptor().getFullName());
+      return anyDeploySpec.unpack(DeployArguments.class);
+    } catch (InvalidProtocolBufferException e) {
+      throw new IllegalArgumentException("Invalid deploy specification for " + id, e);
+    }
   }
 
   /**

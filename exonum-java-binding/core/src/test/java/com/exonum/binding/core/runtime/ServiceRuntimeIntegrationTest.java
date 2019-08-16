@@ -76,6 +76,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ServiceRuntimeIntegrationTest {
 
   static final int PORT = 25000;
+  // [ECR-587] Replace with a temp directory obtained from a TempDir JUnit extension so that
+  //   the check of its existence passes.
+  static final Path ARTIFACTS_DIR = Paths.get("/tmp/");
   static final String TEST_NAME = "test_service_name";
   static final int TEST_ID = 17;
   static final HashCode TEST_HASH = HashCode.fromBytes(bytes(1, 2, 3));
@@ -91,7 +94,8 @@ class ServiceRuntimeIntegrationTest {
 
   @BeforeEach
   void setUp() {
-    serviceRuntime = new ServiceRuntime(serviceLoader, servicesFactory, server, PORT);
+    serviceRuntime = new ServiceRuntime(serviceLoader, servicesFactory, server, ARTIFACTS_DIR,
+        PORT);
   }
 
   @Test
@@ -102,13 +106,14 @@ class ServiceRuntimeIntegrationTest {
   @Test
   void deployCorrectArtifact() throws Exception {
     ServiceArtifactId serviceId = ServiceArtifactId.of("com.acme", "foo-service", "1.0.0");
-    Path serviceArtifactLocation = Paths.get("/tmp/foo-service.jar");
+    String artifactFilename = "foo-service.jar";
+    Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(serviceId, TestServiceModule::new);
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenReturn(serviceDefinition);
 
-    serviceRuntime.deployArtifact(serviceId, serviceArtifactLocation);
+    serviceRuntime.deployArtifact(serviceId, artifactFilename);
 
     verify(serviceLoader).loadService(serviceArtifactLocation);
   }
@@ -116,7 +121,8 @@ class ServiceRuntimeIntegrationTest {
   @Test
   void deployArtifactWrongId() throws Exception {
     ServiceArtifactId actualId = ServiceArtifactId.of("com.acme", "actual", "1.0.0");
-    Path serviceArtifactLocation = Paths.get("/tmp/foo-service.jar");
+    String artifactFilename = "foo-service.jar";
+    Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(actualId, TestServiceModule::new);
     when(serviceLoader.loadService(serviceArtifactLocation))
@@ -125,9 +131,9 @@ class ServiceRuntimeIntegrationTest {
     ServiceArtifactId expectedId = ServiceArtifactId.of("com.acme", "expected", "1.0.0");
 
     Exception actual = assertThrows(ServiceLoadingException.class,
-        () -> serviceRuntime.deployArtifact(expectedId, serviceArtifactLocation));
+        () -> serviceRuntime.deployArtifact(expectedId, artifactFilename));
     assertThat(actual).hasMessageContainingAll(actualId.toString(), expectedId.toString(),
-        serviceArtifactLocation.toString());
+        artifactFilename);
 
     // Check the service artifact is unloaded
     verify(serviceLoader).unloadService(actualId);
@@ -136,13 +142,14 @@ class ServiceRuntimeIntegrationTest {
   @Test
   void deployArtifactFailed() throws Exception {
     ServiceArtifactId serviceId = ServiceArtifactId.of("com.acme", "foo-service", "1.0.0");
-    Path serviceArtifactLocation = Paths.get("/tmp/foo-service.jar");
+    String artifactFilename = "foo-service.jar";
+    Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     ServiceLoadingException exception = new ServiceLoadingException("Boom");
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenThrow(exception);
 
     Exception actual = assertThrows(ServiceLoadingException.class,
-        () -> serviceRuntime.deployArtifact(serviceId, serviceArtifactLocation));
+        () -> serviceRuntime.deployArtifact(serviceId, artifactFilename));
     assertThat(actual).isSameAs(exception);
   }
 

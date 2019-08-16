@@ -52,7 +52,7 @@ public final class NativeFacade {
   /**
    * Writes a service artifact that cannot be loaded. Such artifact will cause an exception
    * during an attempt
-   * to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, java.nio.file.Path) load} it.
+   * to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, String) load} it.
    * @param artifactId the id of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location

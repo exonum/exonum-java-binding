@@ -22,6 +22,7 @@ import com.exonum.binding.core.transport.Server;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -29,20 +30,25 @@ import java.util.Map;
  */
 public final class FrameworkModule extends AbstractModule {
 
+  static final String SERVICE_RUNTIME_ARTIFACTS_DIRECTORY = "ServiceRuntime artifacts dir";
   static final String SERVICE_WEB_SERVER_PORT = "Service web server port";
 
+  private final Path serviceArtifactsDir;
   private final int serviceWebServerPort;
   private final ImmutableMap<String, Class<?>> dependencyReferenceClasses;
 
   /**
    * Creates a framework module with the given configuration.
    *
+   * @param serviceArtifactsDir the directory in which administrators place and from which
+   *     the service runtime loads service artifacts
    * @param serviceWebServerPort the port for the web server on which endpoints of Exonum services
    *     will be mounted
    * @param dependencyReferenceClasses the reference classes from framework-provided dependencies
    */
-  public FrameworkModule(int serviceWebServerPort,
+  public FrameworkModule(Path serviceArtifactsDir, int serviceWebServerPort,
       Map<String, Class<?>> dependencyReferenceClasses) {
+    this.serviceArtifactsDir = serviceArtifactsDir;
     this.serviceWebServerPort = serviceWebServerPort;
     this.dependencyReferenceClasses = ImmutableMap.copyOf(dependencyReferenceClasses);
   }
@@ -55,6 +61,8 @@ public final class FrameworkModule extends AbstractModule {
     // Specify framework-wide bindings
     bind(Server.class).toProvider(Server::create)
         .in(Singleton.class);
+    bind(Path.class).annotatedWith(named(SERVICE_RUNTIME_ARTIFACTS_DIRECTORY))
+        .toInstance(serviceArtifactsDir);
     bind(Integer.class).annotatedWith(named(SERVICE_WEB_SERVER_PORT))
         .toInstance(serviceWebServerPort);
 

@@ -16,7 +16,9 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -24,8 +26,11 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
+import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Snapshot;
+import com.google.protobuf.Any;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,6 +62,46 @@ class ServiceRuntimeAdapterTest {
   @BeforeEach
   void setUp() {
     serviceRuntimeAdapter = new ServiceRuntimeAdapter(serviceRuntime, viewFactory);
+  }
+
+  @Test
+  void deployArtifact() throws ServiceLoadingException {
+    String artifactFilename = "foo-1.2.3.jar";
+    DeployArguments deployArguments = DeployArguments.newBuilder()
+        .setArtifactFilename(artifactFilename)
+        .build();
+    byte[] deploySpec = Any.pack(deployArguments).toByteArray();
+
+    serviceRuntimeAdapter.deployArtifact("com.acme:foo:1.2.3", deploySpec);
+
+    ServiceArtifactId expectedId = ServiceArtifactId.of("com.acme", "foo", "1.2.3");
+    verify(serviceRuntime).deployArtifact(expectedId, artifactFilename);
+  }
+
+  @Test
+  void deployArtifactWrongType() {
+    String id = "com.acme:foo:1.2.3";
+    ServiceStateHashes wrongMessage = ServiceStateHashes.newBuilder().build();
+    byte[] deploySpec = Any.pack(wrongMessage).toByteArray();
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntimeAdapter.deployArtifact(id, deploySpec));
+
+    assertThat(e).hasMessageContainingAll(
+        id,
+        ServiceStateHashes.class.getSimpleName(),
+        DeployArguments.class.getSimpleName());
+  }
+
+  @Test
+  void deployArtifactWrongSpec() {
+    String id = "com.acme:foo:1.2.3";
+    byte[] deploySpec = bytes("Some rubbish");
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntimeAdapter.deployArtifact(id, deploySpec));
+
+    assertThat(e).hasMessageContaining(id);
   }
 
   @Test
