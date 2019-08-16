@@ -56,7 +56,7 @@ public final class ServiceArtifacts {
   /**
    * Writes a service artifact that cannot be loaded. Such artifact will cause an exception
    * during an attempt
-   * to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, Path) load} it.
+   * to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, String) load} it.
    * @param artifactId the artifact id
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location

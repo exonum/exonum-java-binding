@@ -31,6 +31,7 @@ import com.google.inject.Stage;
 import io.vertx.core.Vertx;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -67,10 +68,13 @@ public final class ServiceRuntimeBootstrap {
   /**
    * Bootstraps a Java service runtime.
    *
+   * @param serviceArtifactsDir the directory in which administrators place and from which
+   *     the service runtime loads service artifacts
    * @param serverPort a port for the web server providing transport to Java services
    * @return a new service runtime
    */
-  public static ServiceRuntime createServiceRuntime(int serverPort) {
+  public static ServiceRuntime createServiceRuntime(String serviceArtifactsDir,
+      int serverPort) {
     try {
       // Log the information about the runtime and environment
       logRuntimeInfo();
@@ -79,7 +83,8 @@ public final class ServiceRuntimeBootstrap {
       LibraryLoader.load();
 
       // Create the framework injector
-      Module frameworkModule = new FrameworkModule(serverPort, DEPENDENCY_REFERENCE_CLASSES);
+      Module frameworkModule = new FrameworkModule(Paths.get(serviceArtifactsDir), serverPort,
+          DEPENDENCY_REFERENCE_CLASSES);
       Injector frameworkInjector = Guice.createInjector(APP_STAGE, frameworkModule);
 
       return frameworkInjector.getInstance(ServiceRuntime.class);

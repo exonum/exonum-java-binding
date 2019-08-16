@@ -19,6 +19,7 @@ package com.exonum.binding.core.runtime;
 import static com.exonum.binding.core.runtime.FrameworkModule.SERVICE_WEB_SERVER_PORT;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -38,6 +39,7 @@ import com.google.inject.name.Named;
 import com.google.protobuf.ByteString;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +74,7 @@ public final class ServiceRuntime {
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
   private final Server server;
+  private final Path artifactsDir;
   /**
    * The active services indexed by their name. It is stored in a sorted map that offers
    * the same iteration order on all nodes with the same services, which is required
@@ -92,49 +95,59 @@ public final class ServiceRuntime {
    * @param serviceLoader a loader of service artifacts
    * @param servicesFactory the factory of services
    * @param server a web server providing transport to Java services
+   * @param artifactsDir the directory in which administrators place and from which
+   *     the service runtime loads service artifacts; may not exist at instantiation time
    * @param serverPort a port for the web server providing transport to Java services
    */
   @Inject
   public ServiceRuntime(ServiceLoader serviceLoader, ServicesFactory servicesFactory, Server server,
+      @Named(FrameworkModule.SERVICE_RUNTIME_ARTIFACTS_DIRECTORY) Path artifactsDir,
       @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
     this.serviceLoader = checkNotNull(serviceLoader);
     this.servicesFactory = checkNotNull(servicesFactory);
     this.server = checkNotNull(server);
+    this.artifactsDir = checkNotNull(artifactsDir);
 
     // Start the server
     server.start(serverPort);
   }
 
   /**
-   * Loads a Java service artifact from the specified location. The loading involves verification
+   * Loads a Java service artifact from the specified file. The loading involves verification
    * of the artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
    *
    * @param id a service artifact identifier; artifacts with non-equal ids will be rejected
-   * @param location a filesystem path from which to load the service artifact
+   * @param filename a filename of the service artifact in the directory for artifacts
    * @throws ServiceLoadingException if it failed to load an artifact; or if the given artifact is
    *     already loaded
    */
-  public void deployArtifact(ServiceArtifactId id, Path location)
+  public void deployArtifact(ServiceArtifactId id, String filename)
       throws ServiceLoadingException {
     try {
       synchronized (lock) {
+        // Check the artifacts dir exists
+        checkState(Files.isDirectory(artifactsDir), "Artifacts dir (%s) does not exist or is not "
+                + "a directory: check the runtime configuration", artifactsDir);
+        Path artifactLocation = artifactsDir.resolve(filename);
+
+        // Load the service artifact
         LoadedServiceDefinition loadedServiceDefinition = serviceLoader
-            .loadService(location);
-        ServiceArtifactId actualId = loadedServiceDefinition.getId();
+            .loadService(artifactLocation);
 
         // Check the artifact has the correct identifier in its metadata
+        ServiceArtifactId actualId = loadedServiceDefinition.getId();
         if (!actualId.equals(id)) {
           // Unload the artifact
           serviceLoader.unloadService(actualId);
           throw new ServiceLoadingException(
               String.format("The artifact loaded from (%s) has wrong id (%s) in "
-                  + "metadata. Expected: %s", location, actualId, id));
+                  + "metadata. Expected id: %s", filename, actualId, id));
         }
       }
 
-      logger.info("Loaded an artifact ({}) from {}", id, location);
+      logger.info("Loaded an artifact ({}) from {}", id, filename);
     } catch (Throwable e) {
-      logger.error("Failed to load an artifact {} from {}", id, location, e);
+      logger.error("Failed to load an artifact {} from {}", id, filename, e);
       throw e;
     }
   }
