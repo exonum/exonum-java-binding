@@ -299,14 +299,69 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {
+    byte[] leftChildKey = compress(leftChild.getDbKey());
+    byte[] rightChildKey = compress(rightChild.getDbKey());
     return HASH_FUNCTION
         .newHasher()
         .putByte(MAP_NODE_PREFIX)
         .putObject(leftChild.getHash(), hashCodeFunnel())
         .putObject(rightChild.getHash(), hashCodeFunnel())
-        .putObject(leftChild.getDbKey(), dbKeyFunnel())
-        .putObject(rightChild.getDbKey(), dbKeyFunnel())
+        .putBytes(leftChildKey)
+        .putBytes(rightChildKey)
         .hash();
+  }
+
+  /**
+   * Returns a LEB128 compressed binary representation of the given db key.
+   */
+  public static byte[] compress(DbKey dbKey) {
+    byte[] buffer = new byte[Hashing.DEFAULT_HASH_SIZE_BYTES * 2];
+    int bytesWritten = writeCompressed(buffer, dbKey);
+    byte[] result = new byte[bytesWritten];
+    System.arraycopy(buffer, 0, result, 0, bytesWritten);
+
+    return result;
+  }
+
+  /**
+   * Returns a number of bytes written into buffer which contains LEB128 compressed binary
+   * representation of the given db key.
+   */
+  private static int writeCompressed(byte[] buffer, DbKey dbKey) {
+    int bitsLength = dbKey.getNumSignificantBits();
+    int wholeBytesLength = (int) Math.ceil(bitsLength / (double) Byte.SIZE);
+    byte[] key = dbKey.getKeySlice();
+
+    int bytesWritten = writeUnsignedLeb128(buffer, bitsLength);
+    System.arraycopy(key, 0, buffer, bytesWritten, key.length);
+    bytesWritten += wholeBytesLength;
+    int bitsInLastByte = bitsLength % Byte.SIZE;
+    if (wholeBytesLength > 0 && bitsInLastByte != 0) {
+      resetBits(buffer, bytesWritten, bitsInLastByte);
+    }
+    return bytesWritten;
+  }
+
+  /**
+   * Resets bits of given buffer that are higher than the given position.
+   */
+  private static void resetBits(byte[] buffer, int bytesWritten, int bitsInLastByte) {
+    byte resetBitsMask = (byte) ~(255 << bitsInLastByte);
+    buffer[bytesWritten - 1] &= resetBitsMask;
+  }
+
+  private static int writeUnsignedLeb128(byte[] out, int value) {
+    int remaining = value >>> 7;
+    int bytesWritten = 0;
+    while (remaining != 0) {
+      out[bytesWritten++] = ((byte) ((value & 0x7f) | 0x80));
+      value = remaining;
+      remaining >>>= 7;
+    }
+
+    out[bytesWritten++] = ((byte) (value & 0x7f));
+
+    return bytesWritten;
   }
 
   private <T> Set<T> toSet(List<T> list) {
