@@ -19,6 +19,7 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
@@ -36,7 +37,6 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -107,15 +107,14 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   @ParameterizedTest
   @ValueSource(strings = {
       "",
-      //      " name", // FIXME: commented out until ECR-3345
-      //      "name ",
-      //      "name 1",
-      //      " name ",
-      //      "?name",
-      //      "name?",
-      //      "na?me",
-      //      "name#1",
-      //      "name-1",
+      " name",
+      "name ",
+      "name 1",
+      " name ",
+      "?name",
+      "name?",
+      "na?me",
+      "name#1",
   })
   void indexConstructorThrowsIfInvalidName(String name) throws Exception {
     try (Cleaner cleaner = new Cleaner()) {
@@ -180,7 +179,6 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
    * - Constructor of the other type checks it, preventing illegal access to the internals.
    */
   @Test
-  @Disabled("Needs working Database#merge from ECR-3330")
   void indexConstructorPersistsIndexTypeInfo() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
@@ -198,7 +196,8 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       Exception e = assertThrows(RuntimeException.class, () -> createOfOtherType(name, snapshot));
 
       // TODO: Change message after https://jira.bf.local/browse/ECR-3354
-      assertThat(e, hasMessage(containsString("Index type doesn't match specified")));
+      assertThat(e, hasMessage(containsStringIgnoringCase(
+              "Index type does not match specified one")));
     }
   }
 

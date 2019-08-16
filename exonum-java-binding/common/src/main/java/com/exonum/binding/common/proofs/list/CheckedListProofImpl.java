@@ -27,7 +27,7 @@ import java.util.NavigableMap;
  *
  * <p>If it is {@linkplain #isValid() correct} you may access:
  * <ul>
- *   <li>a calculated Merkle root hash
+ *   <li>a calculated index hash of corresponding collection
  *   <li>proof elements
  * </ul>
  * If the proof is not valid, you may get the verification status using
@@ -36,7 +36,7 @@ import java.util.NavigableMap;
  */
 public class CheckedListProofImpl<E> implements CheckedListProof {
 
-  private final HashCode calculatedRootHash;
+  private final HashCode calculatedIndexHash;
 
   private final NavigableMap<Long, E> elements;
 
@@ -44,13 +44,13 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
 
   /**
    * Creates checked list proof.
-   * @param calculatedRootHash calculated root hash of the proof
+   * @param calculatedIndexHash calculated index hash of the proof
    * @param elements proof elements collection
    * @param proofStatus a status of proof verification
    */
-  public CheckedListProofImpl(HashCode calculatedRootHash,
+  public CheckedListProofImpl(HashCode calculatedIndexHash,
       NavigableMap<Long, E> elements, ListProofStatus proofStatus) {
-    this.calculatedRootHash = checkNotNull(calculatedRootHash);
+    this.calculatedIndexHash = checkNotNull(calculatedIndexHash);
     this.elements = checkNotNull(elements);
     this.proofStatus = checkNotNull(proofStatus);
   }
@@ -64,7 +64,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
   @Override
   public HashCode getIndexHash() {
     checkValid();
-    return calculatedRootHash;
+    return calculatedIndexHash;
   }
 
   @Override

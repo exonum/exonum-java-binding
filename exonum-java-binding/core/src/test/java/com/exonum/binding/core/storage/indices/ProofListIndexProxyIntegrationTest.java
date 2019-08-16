@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
-import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static java.util.Collections.singletonList;
@@ -34,7 +33,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -43,11 +41,8 @@ import org.junit.jupiter.api.Test;
  */
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
-  /**
-   * An empty list root hash: an all-zero hash code.
-   */
-  private static final HashCode EMPTY_LIST_ROOT_HASH =
-      HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
+  private static final HashCode EMPTY_LIST_INDEX_HASH =
+      HashCode.fromString("c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9");
 
   private static final String LIST_NAME = "test_proof_list";
 
@@ -77,23 +72,21 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     index.add(V1);
   }
 
-  @Disabled //FIXME: Tests are disabled until proofs code fixed ECR-3319
   @Test
-  void getRootHashEmptyList() {
+  void getIndexHashEmptyList() {
     runTestWithView(database::createSnapshot, (list) -> {
-      assertThat(list.getRootHash(), equalTo(EMPTY_LIST_ROOT_HASH));
+      assertThat(list.getIndexHash(), equalTo(EMPTY_LIST_INDEX_HASH));
     });
   }
 
-  @Disabled
   @Test
-  void getRootHashSingletonList() {
+  void getIndexHashSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
-      HashCode rootHash = list.getRootHash();
-      assertThat(rootHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
-      assertThat(rootHash, not(equalTo(EMPTY_LIST_ROOT_HASH)));
+      HashCode indexHash = list.getIndexHash();
+      assertThat(indexHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
+      assertThat(indexHash, not(equalTo(EMPTY_LIST_INDEX_HASH)));
     });
   }
 
@@ -103,7 +96,6 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
         (list) -> assertThrows(IndexOutOfBoundsException.class, () -> list.getProof(0)));
   }
 
-  @Disabled
   @Test
   void getProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
@@ -113,7 +105,6 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  @Disabled
   @Test
   void getRangeProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
@@ -123,7 +114,6 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  @Disabled
   @Test
   void getProofMultipleItemList() {
     runTestWithView(database::createFork, (list) -> {
@@ -137,7 +127,6 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  @Disabled
   @Test
   void getRangeProofMultipleItemList_FullRange() {
     runTestWithView(database::createFork, (list) -> {
@@ -148,7 +137,6 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  @Disabled
   @Test
   void getRangeProofMultipleItemList_1stHalf() {
     runTestWithView(database::createFork, (list) -> {
@@ -161,7 +149,6 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  @Disabled
   @Test
   void getRangeProofMultipleItemList_2ndHalf() {
     runTestWithView(database::createFork, (list) -> {

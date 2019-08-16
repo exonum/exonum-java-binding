@@ -21,7 +21,7 @@ import static com.exonum.binding.core.storage.indices.StoragePreconditions.check
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkPositionIndex;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.list.ListProofNode;
+import com.exonum.binding.common.proofs.list.ListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
@@ -182,11 +182,11 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   public UncheckedListProof getProof(long index) {
     checkElementIndex(index, size());
 
-    ListProofNode listProofNode = nativeGetProof(getNativeHandle(), index);
-    return new UncheckedListProofAdapter<>(listProofNode, this.serializer);
+    ListProof listProof = nativeGetProof(getNativeHandle(), index);
+    return new UncheckedListProofAdapter<>(listProof, this.serializer);
   }
 
-  private native ListProofNode nativeGetProof(long nativeHandle, long index);
+  private native ListProof nativeGetProof(long nativeHandle, long index);
 
   /**
    * Returns a proof that some elements exist in the specified range in this list.
@@ -198,25 +198,26 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    */
   public UncheckedListProof getRangeProof(long from, long to) {
     long size = size();
-    ListProofNode listProofNode = nativeGetRangeProof(getNativeHandle(),
+    ListProof listProof = nativeGetRangeProof(getNativeHandle(),
         checkElementIndex(from, size),
         checkPositionIndex(to, size));
 
-    return new UncheckedListProofAdapter<>(listProofNode, this.serializer);
+    return new UncheckedListProofAdapter<>(listProof, this.serializer);
   }
 
-  private native ListProofNode nativeGetRangeProof(long nativeHandle, long from, long to);
+  private native ListProof nativeGetRangeProof(long nativeHandle, long from, long to);
 
   /**
-   * Returns the root hash of the proof list.
+   * Returns the index hash which represents the complete state of this list.
+   * Any modifications to the stored entries affect the index hash.
    *
    * @throws IllegalStateException if this list is not valid
    */
-  public HashCode getRootHash() {
-    return HashCode.fromBytes(nativeGetRootHash(getNativeHandle()));
+  public HashCode getIndexHash() {
+    return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
 
-  private native byte[] nativeGetRootHash(long nativeHandle);
+  private native byte[] nativeGetIndexHash(long nativeHandle);
 
   private static native void nativeFree(long nativeHandle);
 

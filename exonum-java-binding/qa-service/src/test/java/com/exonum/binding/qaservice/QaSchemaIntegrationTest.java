@@ -25,11 +25,9 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-@Disabled //FIXME: Tests are disabled until native Fork limitations are fixed ECR-3359
 @RequiresNativeLibrary
 class QaSchemaIntegrationTest {
 

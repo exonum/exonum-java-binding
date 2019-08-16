@@ -233,20 +233,6 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
     nativeRemove(getNativeHandle(), dbElement);
   }
 
-  /**
-   * Returns the number of elements in this set.
-   */
-  public long size() {
-    return nativeSize(getNativeHandle());
-  }
-
-  /**
-   * Returns true if this set has no elements.
-   */
-  public boolean isEmpty() {
-    return nativeIsEmpty(getNativeHandle());
-  }
-
   private static native long nativeCreate(String setName, long viewNativeHandle);
 
   private static native long nativeCreateInGroup(String groupName, byte[] setId,
@@ -267,8 +253,4 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
   private native void nativeRemove(long nativeHandle, byte[] e);
 
   private static native void nativeFree(long nativeHandle);
-
-  private native long nativeSize(long nativeHandle);
-
-  private native boolean nativeIsEmpty(long nativeHandle);
 }

@@ -343,20 +343,6 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     nativeRemoveByHash(getNativeHandle(), elementHash.asBytes());
   }
 
-  /**
-   * Returns the number of elements in this set.
-   */
-  public long size() {
-    return nativeSize(getNativeHandle());
-  }
-
-  /**
-   * Returns true if this set has no elements.
-   */
-  public boolean isEmpty() {
-    return nativeIsEmpty(getNativeHandle());
-  }
-
   private static native long nativeCreate(String setName, long viewNativeHandle);
 
   private static native long nativeCreateInGroup(String familyName, byte[] setId,
@@ -382,8 +368,4 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   private native void nativeRemoveByHash(long nativeHandle, byte[] elementHash);
 
   private static native void nativeFree(long nativeHandle);
-
-  private native long nativeSize(long nativeHandle);
-
-  private native boolean nativeIsEmpty(long nativeHandle);
 }

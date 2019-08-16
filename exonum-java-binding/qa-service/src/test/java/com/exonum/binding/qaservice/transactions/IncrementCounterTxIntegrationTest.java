@@ -45,7 +45,6 @@ import com.exonum.binding.testkit.TestKitExtension;
 import com.google.gson.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -88,7 +87,6 @@ class IncrementCounterTxIntegrationTest {
     assertThat(txFromRaw).isEqualTo(tx);
   }
 
-  @Disabled //FIXME: Tests are disabled until native Fork limitations are fixed ECR-3359
   @Test
   @RequiresNativeLibrary
   void executeIncrementsCounter(TestKit testKit) {
@@ -114,7 +112,6 @@ class IncrementCounterTxIntegrationTest {
     assertThat(counters.get(counterId)).isEqualTo(expectedValue);
   }
 
-  @Disabled
   @Test
   @RequiresNativeLibrary
   void executeNoSuchCounter(TestKit testKit) {

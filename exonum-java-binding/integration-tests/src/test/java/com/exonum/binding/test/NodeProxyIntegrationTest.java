@@ -23,10 +23,8 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.TransactionSubmissionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.testkit.TestKit;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled
 class NodeProxyIntegrationTest {
 
   @Test
