@@ -42,22 +42,28 @@ mkdir testnet
 export RUST_LOG="${RUST_LOG-error,exonum=info,exonum-java=info,java_bindings=info}"
 
 header "GENERATE COMMON CONFIG"
-${EXONUM_JAVA_APP} generate-template --validators-count=1 testnet/common.toml
+${EXONUM_JAVA_APP} generate-template \
+    --validators-count=1 \
+    testnet/common.toml
 
 header "GENERATE CONFIG"
-${EXONUM_JAVA_APP} generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
- --no-password \
- --consensus-path testnet/consensus.toml \
- --service-path testnet/service.toml \
- --peer-address 127.0.0.1:5400
+${EXONUM_JAVA_APP} generate-config \
+    testnet/common.toml \
+    testnet \
+    --no-password \
+    --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
-${EXONUM_JAVA_APP} finalize testnet/sec.toml testnet/node.toml \
- --public-configs testnet/pub.toml
+${EXONUM_JAVA_APP} finalize \
+    testnet/sec.toml \
+    testnet/node.toml \
+    --public-configs testnet/pub.toml
 
 header "START TESTNET"
-${EXONUM_JAVA_APP} run -d testnet/db -c testnet/node.toml \
- --consensus-key-pass pass \
- --service-key-pass pass \
- --public-api-address 127.0.0.1:3000 \
- --ejb-port 7000
+${EXONUM_JAVA_APP} run \
+    --node-config testnet/node.toml \
+    --db-path testnet/db \
+    --consensus-key-pass pass \
+    --service-key-pass pass \
+    --public-api-address 127.0.0.1:3000 \
+    --ejb-port 7000

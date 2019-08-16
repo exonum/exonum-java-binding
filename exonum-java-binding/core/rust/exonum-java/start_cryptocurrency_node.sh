@@ -57,24 +57,30 @@ mkdir testnet
 export RUST_LOG="${RUST_LOG-warn,exonum=info,exonum-java=info,java_bindings=info,jni=error}"
 
 header "GENERATE COMMON CONFIG"
-cargo +$RUST_COMPILER_VERSION run -- generate-template --validators-count=1 testnet/common.toml
+cargo +$RUST_COMPILER_VERSION run -- generate-template \
+    --validators-count=1 \
+    testnet/common.toml
 
 header "GENERATE CONFIG"
-cargo +$RUST_COMPILER_VERSION run -- generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
- --no-password \
- --consensus-path testnet/consensus.toml \
- --service-path testnet/service.toml \
- --peer-address 127.0.0.1:5400
+cargo +$RUST_COMPILER_VERSION run -- generate-config \
+    testnet/common.toml \
+    testnet \
+    --no-password \
+    --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
-cargo +$RUST_COMPILER_VERSION run -- finalize testnet/sec.toml testnet/node.toml \
- --public-configs testnet/pub.toml
+cargo +$RUST_COMPILER_VERSION run -- finalize \
+    testnet/sec.toml \
+    testnet/node.toml \
+    --public-configs testnet/pub.toml
 
 header "START TESTNET"
-cargo +$RUST_COMPILER_VERSION run -- run -d testnet/db -c testnet/node.toml \
- --consensus-key-pass pass \
- --service-key-pass pass \
- --public-api-address 127.0.0.1:3000 \
- --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
- --ejb-port 7000 \
- --ejb-override-java-library-path $JAVA_LIBRARY_PATH
+cargo +$RUST_COMPILER_VERSION run -- run \
+    --node-config testnet/node.toml \
+    --db-path testnet/db \
+    --consensus-key-pass pass \
+    --service-key-pass pass \
+    --public-api-address 127.0.0.1:3000 \
+    --ejb-log-config-path $EJB_LOG_CONFIG_PATH \
+    --ejb-port 7000 \
+    --ejb-override-java-library-path $JAVA_LIBRARY_PATH
