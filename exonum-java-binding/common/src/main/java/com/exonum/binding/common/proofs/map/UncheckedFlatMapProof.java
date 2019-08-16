@@ -329,7 +329,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
    */
   private static int writeCompressed(byte[] buffer, DbKey dbKey) {
     int bitsLength = dbKey.getNumSignificantBits();
-    int wholeBytesLength = (int) Math.ceil(bitsLength / (double) Byte.SIZE);
+    // Perform division, rounding the result up
+    int wholeBytesLength = (bitsLength + Byte.SIZE - 1) / Byte.SIZE;
     byte[] key = dbKey.getKeySlice();
 
     int bytesWritten = writeUnsignedLeb128(buffer, bitsLength);
