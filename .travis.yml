@@ -30,7 +30,7 @@ addons:
 
 env:
   global:
-    - RUST_COMPILER_VERSION=stable
+    - RUST_COMPILER_VERSION=1.36.0
     - OSX_PACKAGES="libsodium rocksdb pkg-config protobuf"
     - ROCKSDB_LIB_DIR=/usr/lib
     # REPO_TOKEN used for integration with coveralls is encoded here
