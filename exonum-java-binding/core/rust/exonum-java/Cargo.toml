@@ -10,7 +10,7 @@ authors = ["Exonum team <exonum@bitfury.com>"]
 # because some public APIs in Java permit passing arbitrary pointers (e.g., Snapshot#newInstance).
 java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
 exonum-configuration = "0.12"
-exonum-btc-anchoring = "0.12"
+#exonum-btc-anchoring = "0.12"
 exonum-time = "0.12"
 env_logger = "0.6.1"
 log = "0.4"
