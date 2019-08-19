@@ -107,16 +107,16 @@
     <!-- Empty for all JDKs but 11 -->
     <maven.javadoc.joption></maven.javadoc.joption>
 
-    <assertj.version>3.12.2</assertj.version>
+    <assertj.version>3.13.2</assertj.version>
     <checkstyle.configLocation>${project.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.2</guice.version>
-    <log4j.version>2.12.0</log4j.version>
+    <log4j.version>2.12.1</log4j.version>
     <hamcrest.version>2.1</hamcrest.version>
     <junit.version>4.12</junit.version>
     <junit.jupiter.version>5.5.1</junit.jupiter.version>
     <powermock.version>2.0.2</powermock.version>
-    <protobuf.version>3.9.0</protobuf.version>
+    <protobuf.version>3.9.1</protobuf.version>
     <mockito-core.version>3.0.0</mockito-core.version>
     <guava.version>28.0-jre</guava.version>
     <vertx.version>3.8.0</vertx.version>
@@ -406,7 +406,7 @@
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
-          <version>3.1.12.1</version>
+          <version>3.1.12.2</version>
         </plugin>
 
         <plugin>

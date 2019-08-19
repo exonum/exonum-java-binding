@@ -186,7 +186,7 @@ Rust code follows the [Rust style guide](https://github.com/rust-lang-nursery/fm
 After installation, you can run it with
 ```$sh
 $ cd exonum-java-binding/core/rust
-$ cargo fmt --all -- --write-mode=check
+$ cargo fmt --all -- --check
 ```
 
 ## Submitting Issues
