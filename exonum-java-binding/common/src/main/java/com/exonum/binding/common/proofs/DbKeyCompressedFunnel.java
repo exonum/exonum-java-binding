@@ -30,11 +30,11 @@ public enum DbKeyCompressedFunnel implements Funnel<DbKey> {
   @Override
   public void funnel(DbKey from, PrimitiveSink into) {
     int bitsLength = from.getNumSignificantBits();
+    writeUnsignedLeb128(into, bitsLength);
+
     // Perform division, rounding the result up
     int wholeBytesLength = (bitsLength + Byte.SIZE - 1) / Byte.SIZE;
     byte[] key = from.getKeySlice();
-
-    writeUnsignedLeb128(into, bitsLength);
     into.putBytes(key, 0, wholeBytesLength);
   }
 
