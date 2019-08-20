@@ -55,7 +55,6 @@ class DbKeyCompressedFunnelTest {
         Arguments.of(DbKey.newBranchKey(keyFromString("0001"), 8), new byte[]{8}),
         Arguments.of(DbKey.newBranchKey(keyFromString("1111"), 127), new byte[]{127}),
         Arguments.of(DbKey.newBranchKey(keyFromString("1001 1001"), 128), new byte[]{-128, 1}),
-        Arguments.of(DbKey.newBranchKey(keyFromString("1111 1111"), 255), new byte[]{-1, 1}),
         Arguments.of(DbKey.newLeafKey(keyFromString("1111 1111")), new byte[]{-128, 2}));
   }
 }
