@@ -37,7 +37,8 @@ class DbKeyCompressedFunnelTest {
     DbKeyCompressedFunnel.dbKeyCompressedFunnel().funnel(dbKey, primitiveSink);
     int wholeBytesKeyLength = getWholeBytesKeyLength(dbKey.getNumSignificantBits());
     byte[] encodedSignificantBitsNum = new byte[3];
-    int bytesWritten = writeUnsignedLeb128(encodedSignificantBitsNum, dbKey.getNumSignificantBits());
+    int bytesWritten = writeUnsignedLeb128(encodedSignificantBitsNum,
+        dbKey.getNumSignificantBits());
     byte[] key = dbKey.getKeySlice();
 
     verify(primitiveSink).putBytes(encodedSignificantBitsNum, 0, bytesWritten);
