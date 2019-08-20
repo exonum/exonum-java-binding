@@ -19,6 +19,7 @@ package com.exonum.binding.core.storage.database;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.core.storage.indices.IndexAddress;
+import com.exonum.binding.core.storage.indices.StorageIndex;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,16 +32,16 @@ import java.util.Optional;
  */
 class OpenIndexRegistry {
 
-  private final Map<IndexAddress, Object> indexes = new HashMap<>();
+  private final Map<IndexAddress, StorageIndex> indexes = new HashMap<>();
 
-  void registerIndex(IndexAddress address, Object index) {
+  void registerIndex(StorageIndex index) {
+    IndexAddress address = index.getAddress();
     Object present = indexes.putIfAbsent(address, index);
     checkArgument(present == null, "Cannot register index (%s): the address (%s) is already "
         + "associated with index (%s): ", index, address, present);
   }
 
-  <T> Optional<T> findIndex(IndexAddress address, Class<T> type) {
-    return Optional.ofNullable(indexes.get(address))
-        .map(type::cast);
+  Optional<StorageIndex> findIndex(IndexAddress address) {
+    return Optional.ofNullable(indexes.get(address));
   }
 }
