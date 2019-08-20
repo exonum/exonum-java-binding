@@ -19,17 +19,11 @@ package com.exonum.binding.core.runtime;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
-import java.util.Properties;
 
 class TestService extends AbstractService {
-
-  @Override
-  public void configure(Fork fork, Properties arguments) {
-  }
 
   @Override
   protected Schema createDataSchema(View view) {

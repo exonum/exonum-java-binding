@@ -22,6 +22,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
@@ -29,7 +30,6 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 
 public final class TestService extends AbstractService {
 
@@ -55,7 +55,7 @@ public final class TestService extends AbstractService {
   }
 
   @Override
-  public void configure(Fork fork, Properties properties) {
+  public void configure(Fork fork, Configuration properties) {
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);

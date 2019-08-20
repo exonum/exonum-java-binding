@@ -23,7 +23,6 @@ import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import io.vertx.ext.web.Router;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * An Exonum service.
@@ -35,13 +34,23 @@ public interface Service {
 
   /**
    * Configures the service instance. This method is called <em>once</em> after the service
-   * instance is added to the blockchain and allows to initialize some persistent data
+   * instance is added to the blockchain and allows initializing some persistent data
    * of the service.
    *
+   * <p>As Exonum passes the configuration parameters only once and does not persist them for
+   * later access, this service method must make any needed changes to the database based
+   * on these parameters. For example, it may initialize some collections in its schema
+   * (including one-off initialization that does not depend on the parameters);
+   * or save all or some configuration parameters as is for later retrieval in transactions
+   * and/or read requests.
+   *
    * @param fork a database fork to apply changes to. Not valid after this method returns
-   * @param arguments the service configuration
+   * @param configuration the service configuration parameters
+   * @throws IllegalArgumentException if the configuration parameters are not valid (e.g.,
+   *     malformed, or do not meet the preconditions). Exonum will stop the service if
+   *     its configuration fails
    */
-  default void configure(Fork fork, Properties arguments) {
+  default void configure(Fork fork, Configuration configuration) {
     // No configuration
   }
 

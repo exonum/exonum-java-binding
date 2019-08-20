@@ -18,6 +18,7 @@ package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
@@ -32,7 +33,6 @@ import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * The service wrapper represents an Exonum service as a whole and allows the service runtime
@@ -61,7 +61,7 @@ final class ServiceWrapper {
     return instanceSpec.getId();
   }
 
-  void configure(Fork view, Properties configuration) {
+  void configure(Fork view, Configuration configuration) {
     service.configure(view, configuration);
   }
 
