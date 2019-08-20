@@ -18,6 +18,7 @@ package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
@@ -27,7 +28,9 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
+import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
+import io.vertx.ext.web.Router;
 import java.util.List;
 import java.util.Properties;
 
@@ -84,6 +87,23 @@ final class ServiceWrapper {
 
   void afterCommit(BlockCommittedEvent event) {
     service.afterCommit(event);
+  }
+
+  void createPublicApiHandlers(Node node, Router router) {
+    service.createPublicApiHandlers(node, router);
+  }
+
+  /**
+   * Returns the relative path fragment on which to mount the API of this service.
+   * The path fragment is already escaped and can be combined with other URL path fragments.
+   */
+  String getPublicApiRelativePath() {
+    // At the moment, we treat the service name as a single path segment (i.e., our path
+    // fragment consists of a single segment — all slashes will be escaped).
+    // todo: [ECR-3448] make this user-configurable? If so, is it one of predefined keys
+    //  in the normal service configuration, or a separate configuration?
+    return UrlEscapers.urlPathSegmentEscaper()
+        .escape(getName());
   }
 
   @VisibleForTesting

@@ -25,6 +25,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -35,10 +36,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.protobuf.ByteString;
+import io.vertx.ext.web.Route;
+import io.vertx.ext.web.Router;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.SortedMap;
@@ -61,10 +65,13 @@ import org.apache.logging.log4j.Logger;
 @Singleton
 public final class ServiceRuntime {
 
+  @VisibleForTesting
+  static final String API_ROOT_PATH = "/api/services";
   private static final Logger logger = LogManager.getLogger(ServiceRuntime.class);
 
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
+  private final Server server;
   /**
    * The active services indexed by their name. It is stored in a sorted map that offers
    * the same iteration order on all nodes with the same services, which is required
@@ -92,6 +99,7 @@ public final class ServiceRuntime {
       @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
     this.serviceLoader = checkNotNull(serviceLoader);
     this.servicesFactory = checkNotNull(servicesFactory);
+    this.server = checkNotNull(server);
 
     // Start the server
     server.start(serverPort);
@@ -155,8 +163,6 @@ public final class ServiceRuntime {
         // Instantiate the service
         ServiceWrapper service = servicesFactory.createService(serviceDefinition, instanceSpec);
 
-        // todo: [ECR-3434] Connect it to the API
-
         // Register it in the runtime
         registerService(service);
       }
@@ -216,7 +222,6 @@ public final class ServiceRuntime {
   public void stopService(Integer id) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(id);
-      // todo: [ECR-3434] disconnect from the API if it was connected
 
       // Unregister the service
       unregisterService(service);
@@ -312,6 +317,75 @@ public final class ServiceRuntime {
         }
       }
     }
+  }
+
+  /**
+   * Connects the API of successfully started and configured services to the web-server.
+   *
+   * @param serviceIds the ids of the services to connect; must not be empty
+   * @param node a node allowing to access the database state and submit transactions
+   */
+  public void connectServiceApis(int[] serviceIds, Node node) {
+    checkArgument(serviceIds.length != 0, "ServiceRuntime native proxy must not invoke this "
+        + "method each block as that would result in <blockchain height> nodes and, eventually, "
+        + "an OutOfMemoryError");
+    // todo: [ECR-2334] Ensure the Node is properly destroyed when each service is stopped
+    synchronized (lock) {
+      for (Integer serviceId : serviceIds) {
+        connectServiceApi(serviceId, node);
+      }
+    }
+  }
+
+  private void connectServiceApi(Integer serviceId, Node node) {
+    ServiceWrapper service = getServiceById(serviceId);
+
+    try {
+      // Create the service API handlers
+      Router router = server.createRouter();
+      service.createPublicApiHandlers(node, router);
+
+      // Mount the service handlers
+      String serviceApiPath = createServiceApiPath(service);
+      server.mountSubRouter(serviceApiPath, router);
+
+      // Log the endpoints
+      logApiMountEvent(service, serviceApiPath, router);
+    } catch (Exception e) {
+      // The core currently requires not to propagate the exception to it, but handle it
+      // in the runtime. Such behaviour is user-hostile as we hide the error in logs instead
+      // of communicating it immediately and prominently (by stopping the service).
+      // It is to be reconsidered when service termination is implemented.
+      logger.error("Failed to connect service {} public API. "
+          + "Its HTTP handlers will likely be inaccessible", service.getName(), e);
+    }
+  }
+
+  private static String createServiceApiPath(ServiceWrapper service) {
+    String servicePathFragment = service.getPublicApiRelativePath();
+    return API_ROOT_PATH + "/" + servicePathFragment;
+  }
+
+  private void logApiMountEvent(ServiceWrapper service, String serviceApiPath, Router router) {
+    List<Route> serviceRoutes = router.getRoutes();
+    if (serviceRoutes.isEmpty()) {
+      // The service has no API: nothing to log
+      return;
+    }
+
+    String serviceName = service.getName();
+    int port = server.getActualPort().orElse(0);
+    // Currently the API is mounted on *all* interfaces, see VertxServer#start
+    logger.info("Service {} API is mounted at :{}{}", serviceName, port, serviceApiPath);
+
+    // Log the full path to one of the service endpoint
+    serviceRoutes.stream()
+        .map(Route::getPath)
+        .filter(Objects::nonNull) // null routes are possible in failure handlers, for instance
+        .findAny()
+        .ifPresent(someRoute ->
+            logger.info("    E.g.: http://127.0.0.1:{}{}", port, serviceApiPath + someRoute)
+        );
   }
 
   private ServiceWrapper getServiceById(Integer serviceId) {

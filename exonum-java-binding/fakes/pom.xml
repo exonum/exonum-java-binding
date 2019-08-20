@@ -51,7 +51,9 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- todo: Remove when https://jira.bf.local/browse/ECR-521 (Java 10 migration) is resolved -->
+    <!-- todo: A workaround for a bug in JDK 8, preventing Mockito from mocking Vertx classes.
+           See: https://github.com/mockito/mockito/issues/366
+           Remove when ECR-521 (Java 10 migration) is resolved -->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-codegen</artifactId>

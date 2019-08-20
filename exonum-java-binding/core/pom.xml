@@ -145,6 +145,16 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- todo: A workaround for a bug in JDK 8, preventing Mockito from mocking Vertx classes.
+           See: https://github.com/mockito/mockito/issues/366
+           Remove when ECR-521 (Java 10 migration) is resolved -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <version>${vertx.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-java-testing</artifactId>

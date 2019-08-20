@@ -16,15 +16,18 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.ServiceRuntime.API_ROOT_PATH;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.collect.Comparators.isInStrictOrder;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,6 +40,7 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -45,9 +49,12 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
+import io.vertx.ext.web.Router;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -230,6 +237,15 @@ class ServiceRuntimeIntegrationTest {
     assertThrows(IllegalArgumentException.class, () -> serviceRuntime.stopService(TEST_ID));
   }
 
+  @Test
+  void connectServicesWithEmptyListIsDisallowed() {
+    int[] emptyServiceIds = new int[0];
+    Node node = mock(Node.class);
+
+    assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.connectServiceApis(emptyServiceIds, node));
+  }
+
   @Nested
   class WithSingleService {
     final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
@@ -362,6 +378,21 @@ class ServiceRuntimeIntegrationTest {
 
       verify(serviceWrapper).afterCommit(event);
     }
+
+    @Test
+    void connectServiceApisSingleService() {
+      Router serviceRouter = mock(Router.class);
+      when(serviceRouter.getRoutes()).thenReturn(emptyList());
+      when(server.createRouter()).thenReturn(serviceRouter);
+      String serviceApiPath = "test-service";
+      when(serviceWrapper.getPublicApiRelativePath()).thenReturn(serviceApiPath);
+
+      Node node = mock(Node.class);
+      serviceRuntime.connectServiceApis(new int[] {TEST_ID}, node);
+
+      verify(serviceWrapper).createPublicApiHandlers(node, serviceRouter);
+      verify(server).mountSubRouter(API_ROOT_PATH + "/" + serviceApiPath, serviceRouter);
+    }
   }
 
   @Nested
@@ -454,6 +485,61 @@ class ServiceRuntimeIntegrationTest {
       InOrder inOrder = Mockito.inOrder(services.toArray(new Object[0]));
       for (ServiceWrapper service: services) {
         inOrder.verify(service).afterCommit(event);
+      }
+    }
+
+    @Test
+    void connectServiceApisMultipleServicesWithFirstThrowing() {
+      // Setup the first service to throw exception in its createApiHandlers
+      Collection<ServiceWrapper> services = SERVICES.values();
+      ServiceWrapper service1 = services
+          .iterator()
+          .next();
+      doThrow(RuntimeException.class)
+          .when(service1).createPublicApiHandlers(any(Node.class), any(Router.class));
+
+      // Setup the normal services
+      Collection<ServiceWrapper> otherServices = new ArrayList<>(services)
+          .subList(1, services.size());
+      for (ServiceWrapper service : otherServices) {
+        String apiPath = service.getName();
+        when(service.getPublicApiRelativePath()).thenReturn(apiPath);
+      }
+
+      // Setup the routers
+      Map<ServiceWrapper, Router> routers = new LinkedHashMap<>();
+      for (ServiceWrapper service : services) {
+        Router serviceRouter = mock(Router.class);
+        routers.put(service, serviceRouter);
+      }
+
+      // Setup the server to return appropriate routers
+      Router firstRouter = routers.values()
+          .iterator()
+          .next();
+      Collection<Router> otherRouters = new ArrayList<>(routers.values())
+          .subList(1, routers.size());
+      when(server.createRouter()).thenReturn(firstRouter, otherRouters.toArray(new Router[0]));
+
+      // Connect the APIs
+      int[] ids = SERVICES.keySet().stream()
+          .mapToInt(ServiceInstanceSpec::getId)
+          .toArray();
+      Node node = mock(Node.class);
+      serviceRuntime.connectServiceApis(ids, node);
+
+      // Check that each service was connected, i.e., the first throwing an exception
+      // has not disrupted the process
+      for (ServiceWrapper service : services) {
+        Router serviceRouter = routers.get(service);
+        verify(service).createPublicApiHandlers(node, serviceRouter);
+      }
+
+      // Verify the routers of normal services got connected to the server
+      for (ServiceWrapper service : otherServices) {
+        String mountPoint = API_ROOT_PATH + "/" + service.getName();
+        Router serviceRouter = routers.get(service);
+        verify(server).mountSubRouter(mountPoint, serviceRouter);
       }
     }
   }
