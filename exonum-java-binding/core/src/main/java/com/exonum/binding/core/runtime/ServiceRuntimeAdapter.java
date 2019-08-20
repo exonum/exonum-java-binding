@@ -83,32 +83,31 @@ class ServiceRuntimeAdapter {
   /**
    * Configures a started service instance.
    *
-   * @param name the name of the service
+   * @param id the id of the service
    * @param forkHandle a handle to a native fork object
    * @param configuration the service configuration properties
    * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#configureService(String, Fork, Properties)
+   * @see ServiceRuntime#configureService(Integer, Fork, Properties)
    */
   // todo: [ECR-3437] when configuration options are clarified, update the signature
-  // todo: [ECR-3435] probably, name -> id
-  void configureService(String name, long forkHandle, Properties configuration)
+  void configureService(int id, long forkHandle, Properties configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
-      serviceRuntime.configureService(name, fork, configuration);
+      serviceRuntime.configureService(id, fork, configuration);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
   }
 
   /**
-   * Stops a service instance with the given name.
+   * Stops a service instance with the given id.
    *
-   * @param name the name of the service
-   * @see ServiceRuntime#stopService(String) 
+   * @param id the id of the service
+   * @see ServiceRuntime#stopService(Integer)
    */
-  void stopService(String name) {
-    serviceRuntime.stopService(name);
+  void stopService(int id) {
+    serviceRuntime.stopService(id);
   }
 
   /**
@@ -121,7 +120,7 @@ class ServiceRuntimeAdapter {
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    * @throws TransactionExecutionException if the transaction execution failed
-   * @see ServiceRuntime#executeTransaction(int, int, byte[], TransactionContext)
+   * @see ServiceRuntime#executeTransaction(Integer, int, byte[], TransactionContext)
    * @see com.exonum.binding.core.transaction.Transaction#execute(TransactionContext)
    */
   void executeTransaction(int serviceId, int txId, byte[] arguments,
