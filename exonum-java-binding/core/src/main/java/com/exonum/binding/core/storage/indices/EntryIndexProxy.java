@@ -100,20 +100,6 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   private static <E> EntryIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
     StoragePreconditions.checkIndexType(cachedIndex, EntryIndexProxy.class);
-
-    // todo (here and in each other checkedCachedInstance): how can we check the serializer?!
-    //  There are no reference `E`s; the type match is not a 100% guarantee; the equality is too
-    //  strong of a requirement (forbids instantiating fresh serializers).
-    //  On top of that, we put serializers in decorators,
-    //  hence care must be exercised to 'unpack' them (that, in turn, somewhat breaks
-    //  encapsulation of CheckingSerializerDecorator).
-
-    //    Class<?> cachedSerializerType = cachedIndex.serializer.getClass();
-    //    Class<?> requestedSerializerType = requestedSerializer.getClass();
-    //    checkArgument(cachedSerializerType.equals(requestedSerializerType),
-    //        "Cached instance of index (%s) has serializer of type (%s), but (%s) requested",
-    //        cachedIndex, cachedSerializerType, requestedSerializerType);
-
     return (EntryIndexProxy<E>) cachedIndex;
   }
 
