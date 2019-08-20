@@ -489,10 +489,6 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
-    // fixme: The setup of this test is too long:
-    //   - Keep only two services?
-    //   - Don't test it (make an operation on a single service @VisibleForTesting and test it
-    //   instead)?
     void connectServiceApisMultipleServicesWithFirstThrowing() {
       // Setup the first service to throw exception in its createApiHandlers
       Collection<ServiceWrapper> services = SERVICES.values();
