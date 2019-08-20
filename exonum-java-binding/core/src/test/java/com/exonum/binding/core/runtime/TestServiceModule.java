@@ -28,6 +28,6 @@ class TestServiceModule extends AbstractServiceModule {
         .to(TestService.class);
 
     bind(TransactionConverter.class)
-        .toInstance((m) -> (context) -> System.out.println("Transaction#execute"));
+        .toInstance((txId, payload) -> (context) -> System.out.println("Transaction#execute"));
   }
 }

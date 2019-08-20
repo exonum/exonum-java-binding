@@ -29,7 +29,6 @@ import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
@@ -44,13 +43,13 @@ import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,9 +70,6 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   private static final Logger logger = LogManager.getLogger(QaService.class);
 
   @VisibleForTesting
-  static final String INITIAL_SERVICE_CONFIGURATION = "{ \"version\": 0.1 }";
-
-  @VisibleForTesting
   static final String DEFAULT_COUNTER_NAME = "default";
 
   @VisibleForTesting
@@ -81,11 +77,6 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Nullable
   private Node node;
-
-  @Inject
-  public QaServiceImpl(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
-  }
 
   @Override
   protected Schema createDataSchema(View view) {
@@ -102,14 +93,14 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public void configure(Fork fork, Properties configuration) {
     // Add a default counter to the blockchain.
     createCounter(DEFAULT_COUNTER_NAME, fork);
 
     // Add an afterCommit counter that will be incremented after each block committed event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
 
-    return Optional.of(INITIAL_SERVICE_CONFIGURATION);
+    // todo [QA-service updates]: Use the configuration.
   }
 
   private void createCounter(String name, Fork fork) {

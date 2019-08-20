@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.service;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -27,36 +26,14 @@ import org.junit.jupiter.api.Test;
 
 class AbstractServiceTest {
 
-  @Test
-  void constructorDiscardsEmptyName() {
-    assertThrows(IllegalArgumentException.class,
-        () -> new ServiceUnderTest((short) 1, "", mock(TransactionConverter.class)));
-  }
-
-  @Test
-  void constructorDiscardsNullName() {
-    assertThrows(NullPointerException.class,
-        () -> new ServiceUnderTest((short) 1, null, mock(TransactionConverter.class)));
-  }
-
-  @Test
-  void constructorDiscardsNullConverter() {
-    assertThrows(NullPointerException.class,
-        () -> new ServiceUnderTest((short) 1, "service#1", null));
-  }
-
+  // todo: Remove this test or re-write?
   @Test
   void getStateHashes_EmptySchema() {
-    Service service = new ServiceUnderTest((short) 1, "s1", mock(TransactionConverter.class));
+    Service service = new ServiceUnderTest();
     assertTrue(service.getStateHashes(mock(Snapshot.class)).isEmpty());
   }
 
   static class ServiceUnderTest extends AbstractService {
-
-    ServiceUnderTest(short id, String name,
-        TransactionConverter transactionConverter) {
-      super(id, name, transactionConverter);
-    }
 
     @Override
     protected Schema createDataSchema(View view) {

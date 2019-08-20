@@ -44,7 +44,7 @@ class TestServiceIntegrationTest {
       Fork fork = temporaryDb.createFork(cleaner);
       TestService service = new TestService();
 
-      Optional<String> initialConfig = service.initialize(fork);
+      Optional<String> initialConfig = service.configure(fork);
 
       Optional<String> expectedConfig = Optional.of(INITIAL_CONFIGURATION);
       assertThat(initialConfig, equalTo(expectedConfig));

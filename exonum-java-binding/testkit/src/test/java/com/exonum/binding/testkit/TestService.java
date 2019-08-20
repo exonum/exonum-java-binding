@@ -29,14 +29,13 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.util.Properties;
 
 final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("initial key", StandardCharsets.UTF_8);
   static final String INITIAL_ENTRY_VALUE = "initial value";
-  static final String INITIAL_CONFIGURATION = "{ \"version\": \"0.2.0\" }";
 
   static final short SERVICE_ID = 46;
   static final String SERVICE_NAME = "Test service";
@@ -44,17 +43,7 @@ final class TestService extends AbstractService {
   private Node node;
 
   public TestService() {
-    super(SERVICE_ID, SERVICE_NAME, TestTransaction::from);
-  }
-
-  @Override
-  public short getId() {
-    return SERVICE_ID;
-  }
-
-  @Override
-  public String getName() {
-    return SERVICE_NAME;
+    // todo: [testkit] bind TestTransaction::from in the TestServiceModule
   }
 
   Node getNode() {
@@ -67,11 +56,10 @@ final class TestService extends AbstractService {
   }
 
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public void configure(Fork fork, Properties configuration) {
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
-    return Optional.of(INITIAL_CONFIGURATION);
   }
 
   @Override

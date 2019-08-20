@@ -16,28 +16,24 @@
 
 package com.exonum.binding.core.runtime;
 
-import com.exonum.binding.core.service.AbstractService;
-import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.View;
-import io.vertx.ext.web.Router;
-import java.util.Collections;
-import java.util.Properties;
+import com.google.inject.AbstractModule;
 
-class TestService extends AbstractService {
+/**
+ * A framework module providing per-service bindings. These bindings are supplied
+ * by the framework.
+ */
+class ServiceFrameworkModule extends AbstractModule {
 
-  @Override
-  public void configure(Fork fork, Properties arguments) {
+  private final ServiceInstanceSpec instanceSpec;
+
+  ServiceFrameworkModule(ServiceInstanceSpec instanceSpec) {
+    this.instanceSpec = instanceSpec;
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
-    return Collections::emptyList;
-  }
-
-  @Override
-  public void createPublicApiHandlers(Node node, Router router) {
-    // no-op
+  protected void configure() {
+    // todo: consider named bindings for the name and id — they will require publicly
+    //   accessible key names.
+    bind(ServiceInstanceSpec.class).toInstance(instanceSpec);
   }
 }

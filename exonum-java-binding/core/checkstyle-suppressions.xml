@@ -24,4 +24,7 @@
 
     <!-- Suppress indentation as there is a bug with lambdas -->
     <suppress files="UserServiceAdapter.java" checks="Indentation"/>
+
+    <!-- Allow constant names in inner classes (they can't have static final members) -->
+    <suppress files="ServiceRuntimeIntegrationTest\.java" checks="(AbbreviationAsWordInName)|(MemberName)"/>
 </suppressions>

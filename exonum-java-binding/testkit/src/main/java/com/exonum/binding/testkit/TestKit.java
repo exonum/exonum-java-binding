@@ -75,7 +75,7 @@ import javax.annotation.Nullable;
  * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized — service instances are
- * {@linkplain Service#initialize(Fork) initialized} and genesis block is committed.
+ * {@linkplain Service#configure(Fork) initialized} and genesis block is committed.
  * Then the {@linkplain Service#createPublicApiHandlers(Node, Router) public API handlers} are
  * created.
  *
@@ -141,6 +141,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     List<UserServiceAdapter> services = serviceModules.stream()
         .map(s -> createUserServiceAdapter(s, frameworkInjector))
         .collect(toList());
+    // UserServiceAdapters are removed, so this usage is a false signal for keeping getId()
     return Maps.uniqueIndex(services, UserServiceAdapter::getId);
   }
 
