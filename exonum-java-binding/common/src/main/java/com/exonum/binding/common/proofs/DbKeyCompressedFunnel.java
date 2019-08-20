@@ -49,25 +49,13 @@ public enum DbKeyCompressedFunnel implements Funnel<DbKey> {
   }
 
   private static void writeUnsignedLeb128(PrimitiveSink into, int value) {
-    // As we encode number of significant bits in a database key which is [0; 256], three bytes
-    // are needed
-    byte[] buffer = new byte[3];
-    int bytesWritten = writeUnsignedLeb128(buffer, value);
-    into.putBytes(buffer, 0, bytesWritten);
-  }
-
-  @VisibleForTesting
-  static int writeUnsignedLeb128(byte[] out, int value) {
     int remaining = value >>> 7;
-    int bytesWritten = 0;
     while (remaining != 0) {
-      out[bytesWritten++] = ((byte) ((value & 0x7f) | 0x80));
+      into.putByte((byte) ((value & 0x7f) | 0x80));
       value = remaining;
       remaining >>>= 7;
     }
 
-    out[bytesWritten++] = ((byte) (value & 0x7f));
-
-    return bytesWritten;
+    into.putByte((byte) (value & 0x7f));
   }
 }
