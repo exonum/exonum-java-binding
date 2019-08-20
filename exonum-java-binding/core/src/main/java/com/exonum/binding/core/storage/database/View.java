@@ -85,7 +85,7 @@ public abstract class View extends AbstractNativeProxy {
    *     with such address was open in this view
    */
   public Optional<StorageIndex> findOpenIndex(IndexAddress address) {
-    return indexRegistry.findIndex(address, StorageIndex.class);
+    return indexRegistry.findIndex(address);
   }
 
   /**
@@ -99,7 +99,7 @@ public abstract class View extends AbstractNativeProxy {
    * @see #findOpenIndex(IndexAddress)
    */
   public void registerIndex(StorageIndex index) {
-    indexRegistry.registerIndex(index.getAddress(), index);
+    indexRegistry.registerIndex(index);
   }
 
   /**

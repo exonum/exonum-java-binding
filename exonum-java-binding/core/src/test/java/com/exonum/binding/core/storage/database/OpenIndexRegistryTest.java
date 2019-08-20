@@ -18,9 +18,11 @@ package com.exonum.binding.core.storage.database;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.exonum.binding.core.storage.indices.IndexAddress;
-import java.util.List;
+import com.exonum.binding.core.storage.indices.StorageIndex;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -34,50 +36,41 @@ class OpenIndexRegistryTest {
   class WithSingleIndex {
 
     private final IndexAddress address = IndexAddress.valueOf("name");
-    private final String entry = "John";
+    private final StorageIndex index = mock(StorageIndex.class, "index 1");
 
     @BeforeEach
     void registerIndex() {
-      registry.registerIndex(address, entry);
+      when(index.getAddress()).thenReturn(address);
+
+      registry.registerIndex(index);
     }
 
     @Test
     void canFindRegisteredIndex() {
-      Optional<String> index = registry.findIndex(address, String.class);
+      Optional<StorageIndex> actual = registry.findIndex(address);
 
-      assertThat(index).hasValue(entry);
+      assertThat(actual).hasValue(index);
     }
 
     @Test
-    void findThrowsIfWrongType() {
-      // todo: Shall we really do this in the registry, or in View?
-      Class<?> requestedType = List.class;
-      Exception e = assertThrows(ClassCastException.class,
-          () -> registry.findIndex(address, requestedType));
+    void registerThrowsIfAlreadyRegisteredSameAddress() {
+      StorageIndex otherIndex = mock(StorageIndex.class, "other index");
+      when(otherIndex.getAddress()).thenReturn(address);
 
-      String message = e.getMessage();
-      assertThat(message).contains(requestedType.getSimpleName())
-          .contains("String");
-    }
-
-    @Test
-    void registerThrowsIfAlreadyRegistered() {
-      String otherEntry = "Daniel";
-      Exception e = assertThrows(
-          IllegalArgumentException.class,
-          () -> registry.registerIndex(address, otherEntry));
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> registry.registerIndex(otherIndex));
 
       String message = e.getMessage();
       assertThat(message).contains(String.valueOf(address))
-          .contains(entry)
-          .contains(otherEntry);
+          .contains(String.valueOf(index))
+          .contains(String.valueOf(otherIndex));
     }
   }
 
   @Test
   void findUnknownIndex() {
     IndexAddress unknownAddress = IndexAddress.valueOf("Unknown");
-    Optional<String> index = registry.findIndex(unknownAddress, String.class);
+    Optional<StorageIndex> index = registry.findIndex(unknownAddress);
 
     assertThat(index).isEmpty();
   }
