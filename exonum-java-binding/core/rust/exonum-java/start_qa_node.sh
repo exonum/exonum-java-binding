@@ -67,25 +67,29 @@ do
 done
 
 header "GENERATE COMMON CONFIG"
-cargo +$RUST_COMPILER_VERSION run -- generate-template --validators-count $node_count testnet/common.toml
+cargo +$RUST_COMPILER_VERSION run -- generate-template \
+    --validators-count $node_count \
+    testnet/common.toml
 
 header "GENERATE CONFIG"
 for i in $(seq 0 $((node_count - 1)))
 do
     peer_port=$((5400 + i))
     log_config_path="$EJB_APP_DIR/testnet/log4j_$i.xml"
-    cargo +$RUST_COMPILER_VERSION run -- generate-config testnet/common.toml testnet/pub_$i.toml testnet/sec_$i.toml \
-     --no-password \
-     --consensus-path testnet/consensus${i}.toml \
-     --service-path testnet/service${i}.toml \
-     --peer-address 127.0.0.1:$peer_port
+    cargo +$RUST_COMPILER_VERSION run -- generate-config \
+        testnet/common.toml \
+        testnet/$i \
+        --no-password \
+        --peer-address 127.0.0.1:$peer_port
 done
 
 header "FINALIZE"
 for i in $(seq 0 $((node_count - 1)))
 do
-    cargo +$RUST_COMPILER_VERSION run -- finalize testnet/sec_$i.toml testnet/node_$i.toml \
-     --public-configs testnet/pub_*.toml
+    cargo +$RUST_COMPILER_VERSION run -- finalize \
+        testnet/$i/sec.toml \
+        testnet/$i/node.toml \
+        --public-configs testnet/*/pub.toml
 done
 
 header "START TESTNET"
@@ -96,15 +100,15 @@ do
     private_port=$((port + 100))
     ejb_port=$((7000 + i))
     cargo +$RUST_COMPILER_VERSION run -- run \
-     -c testnet/node_$i.toml \
-     -d testnet/db/$i \
-     --ejb-port ${ejb_port} \
-     --ejb-log-config-path $log_config_path \
-     --consensus-key-pass pass \
-     --service-key-pass pass \
-     --public-api-address 0.0.0.0:${port} \
-     --private-api-address 0.0.0.0:${private_port} \
-     --ejb-override-java-library-path ${java_library_path} &
+        --node-config testnet/$i/node.toml \
+        --db-path testnet/$i/db \
+        --ejb-port ${ejb_port} \
+        --ejb-log-config-path $log_config_path \
+        --consensus-key-pass pass \
+        --service-key-pass pass \
+        --public-api-address 0.0.0.0:${port} \
+        --private-api-address 0.0.0.0:${private_port} \
+        --ejb-override-java-library-path ${java_library_path} &
 
     echo "new node with ports: $port (public) and $private_port (private)"
 done
