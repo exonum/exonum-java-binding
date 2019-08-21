@@ -347,22 +347,6 @@ class MapIndexProxyIntegrationTest
   }
 
   @Test
-  void keysIterNextShouldFailIfOtherIndexModified() {
-    runTestWithView(database::createFork, (view, map) -> {
-      List<MapEntry<String, String>> entries = createMapEntries(3);
-      putAll(map, entries);
-
-      Iterator<String> iterator = map.keys();
-      iterator.next();
-
-      MapIndexProxy<String, String> otherMap = createMap("other_map", view);
-      otherMap.put("new key", "new value");
-
-      assertThrows(ConcurrentModificationException.class, iterator::next);
-    });
-  }
-
-  @Test
   void valuesShouldReturnEmptyIterIfNoEntries() {
     runTestWithView(database::createSnapshot, (map) -> {
       Iterator<String> iterator = map.values();
@@ -491,8 +475,24 @@ class MapIndexProxyIntegrationTest
   }
 
   @Override
+  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return MapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string(),
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(MapIndexProxy<String, String> index) {
     return index.get(K1);
+  }
+
+  @Override
+  void update(MapIndexProxy<String, String> index) {
+    index.put(K1, V1);
   }
 
   private static MapIndexProxy<String, String> createMap(String name, View view) {

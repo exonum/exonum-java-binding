@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 import com.exonum.binding.common.collect.MapEntry;
-import com.exonum.binding.core.storage.database.Fork;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -97,18 +96,12 @@ public interface MapIndex<K, V> extends StorageIndex {
   /**
    * Returns an iterator over the map keys in lexicographical order.
    *
-   * <p>Any destructive operation on the same {@link Fork} this map uses
-   * (but not necessarily on <em>this map</em>) will invalidate the iterator.
-   *
    * @throws IllegalStateException if this map is not valid
    */
   Iterator<K> keys();
 
   /**
    * Returns an iterator over the map values in lexicographical order of <em>keys</em>.
-   *
-   * <p>Any destructive operation on the same {@link Fork} this map uses
-   * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid
    */
@@ -117,9 +110,6 @@ public interface MapIndex<K, V> extends StorageIndex {
   /**
    * Returns an iterator over the map entries.
    * The entries are ordered by keys in lexicographical order.
-   *
-   * <p>Any destructive operation on the same {@link Fork} this map uses
-   * (but not necessarily on <em>this map</em>) will invalidate the iterator.
    *
    * @throws IllegalStateException if this map is not valid
    */

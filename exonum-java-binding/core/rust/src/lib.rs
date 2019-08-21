@@ -43,6 +43,8 @@ extern crate exonum_time;
 #[cfg(test)]
 extern crate tempfile;
 
+pub use exonum::exonum_merkledb;
+
 pub mod handle;
 mod proxy;
 mod runtime;

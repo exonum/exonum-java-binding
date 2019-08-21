@@ -34,8 +34,8 @@ use java_bindings::{
         crypto::{gen_keypair, Hash, PublicKey, SecretKey},
         messages::{RawTransaction, ServiceTransaction},
         node::{ApiSender, ExternalMessage},
-        storage::{MemoryDB, Snapshot},
     },
+    exonum_merkledb::{Snapshot, TemporaryDB},
     jni::JavaVM,
     Executor, NodeContext,
 };
@@ -114,7 +114,7 @@ fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<Extern
         }
     }
 
-    let storage = MemoryDB::new();
+    let storage = TemporaryDB::new();
     let blockchain = Blockchain::new(
         storage,
         vec![Box::new(EmptyService)],

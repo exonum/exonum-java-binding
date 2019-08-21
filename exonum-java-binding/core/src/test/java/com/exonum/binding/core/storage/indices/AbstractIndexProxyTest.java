@@ -19,14 +19,12 @@ package com.exonum.binding.core.storage.indices;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import java.util.regex.Pattern;
@@ -35,7 +33,6 @@ import org.junit.jupiter.api.Test;
 class AbstractIndexProxyTest {
 
   private static final String INDEX_NAME = "index_name";
-
 
   private AbstractIndexProxy proxy;
 
@@ -57,8 +54,6 @@ class AbstractIndexProxyTest {
   @Test
   void notifyModifiedThrowsIfSnapshotPassed() {
     Snapshot dbView = createSnapshot();
-    ModificationCounter counter = dbView.getModificationCounter();
-    int initialValue = counter.getCurrentValue();
 
     proxy = new IndexProxyImpl(dbView);
 
@@ -67,21 +62,16 @@ class AbstractIndexProxyTest {
 
     Pattern pattern = Pattern.compile("Cannot modify the view: .*[Ss]napshot.*"
         + "\\nUse a Fork to modify any collection\\.", Pattern.MULTILINE);
-    assertThat(thrown.getMessage(), matchesPattern(pattern));
-
-    assertFalse(counter.isModifiedSince(initialValue));
+    assertThat(thrown, hasMessage(matchesPattern(pattern)));
   }
 
   @Test
   void notifyModifiedAcceptsFork() {
     Fork dbView = createFork();
-    ModificationCounter counter = dbView.getModificationCounter();
-    int initialValue = counter.getCurrentValue();
 
     proxy = new IndexProxyImpl(dbView);
+    // Check the notifications does not cause exceptions
     proxy.notifyModified();
-
-    assertTrue(counter.isModifiedSince(initialValue));
   }
 
   @Test
@@ -111,7 +101,7 @@ class AbstractIndexProxyTest {
     private static final long NATIVE_HANDLE = 0x11L;
 
     IndexProxyImpl(View view) {
-      super(new NativeHandle(NATIVE_HANDLE), INDEX_NAME, view);
+      super(new NativeHandle(NATIVE_HANDLE), IndexAddress.valueOf(INDEX_NAME), view);
     }
   }
 

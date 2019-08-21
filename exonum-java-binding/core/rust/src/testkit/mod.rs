@@ -21,9 +21,9 @@ use exonum::{
     blockchain::Block,
     crypto::{PublicKey, SecretKey},
     helpers::ValidatorId,
-    messages::{BinaryForm, RawTransaction, Signed},
-    storage::StorageValue,
+    messages::{RawTransaction, Signed},
 };
+use exonum_merkledb::BinaryValue;
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeService};
 use handle::{cast_handle, drop_handle, to_handle, Handle};
@@ -157,7 +157,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
             let serialized_tx: jbyteArray = serialized_tx_object.as_obj().into_inner();
             let serialized_tx = env.convert_byte_array(serialized_tx)?;
             let transaction: Signed<RawTransaction> =
-                StorageValue::from_bytes(serialized_tx.into());
+                BinaryValue::from_bytes(serialized_tx.into()).unwrap();
             raw_transactions.push(transaction);
         }
         let block = testkit
@@ -196,7 +196,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeGetEmulated
 }
 
 fn serialize_block(env: &JNIEnv, block: Block) -> jni::errors::Result<jbyteArray> {
-    let serialized_block = block.encode().unwrap();
+    let serialized_block = block.into_bytes();
     env.byte_array_from_slice(&serialized_block)
 }
 

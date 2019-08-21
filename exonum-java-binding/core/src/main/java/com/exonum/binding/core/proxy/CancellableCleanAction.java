@@ -11,29 +11,20 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License. 
  */
 
-package com.exonum.binding.core.storage.database;
+package com.exonum.binding.core.proxy;
 
-enum ImmutableModificationCounter implements ModificationCounter {
+/**
+ * A cancellable clean action can be cancelled. That is useful, for instance, when
+ * a Java native proxy transfers ownership over the native peer back to the native code.
+ */
+public interface CancellableCleanAction<ResourceDescriptionT>
+    extends CleanAction<ResourceDescriptionT> {
 
-  INSTANCE;
-
-  private static final int INITIAL_VALUE = 0;
-
-  @Override
-  public boolean isModifiedSince(int lastValue) {
-    return false;
-  }
-
-  @Override
-  public int getCurrentValue() {
-    return INITIAL_VALUE;
-  }
-
-  @Override
-  public void notifyModified() {
-    throw new IllegalStateException("Immutable counter cannot be modified");
-  }
+  /**
+   * Cancels this clean action, making {@link #clean()} a no-op. This operation cannot be reversed.
+   */
+  void cancel();
 }

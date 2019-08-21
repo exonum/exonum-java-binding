@@ -26,8 +26,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.core.storage.database.IncrementalModificationCounter;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.List;

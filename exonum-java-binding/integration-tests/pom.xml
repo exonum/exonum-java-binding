@@ -15,7 +15,7 @@
   <name>Exonum Java Binding: Integration Tests</name>
   <description>
     A module providing integration tests for Core and Time Oracle modules that require
-    a node running a service. Such tests cannot be written using plain MemoryDb, hence use
+    a node running a service. Such tests cannot be written using plain TemporaryDb, hence use
     the TestKit.
     This module is not supposed to have sources and produce a jar file; it's created for
     integration tests execution during the project build.

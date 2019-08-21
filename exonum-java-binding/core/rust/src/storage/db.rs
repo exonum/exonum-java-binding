@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::storage::{Fork, Snapshot};
-use jni::objects::JClass;
-use jni::JNIEnv;
+use exonum_merkledb::{Fork, Snapshot};
+use jni::{objects::JClass, JNIEnv};
 
 use handle::{self, Handle};
 
@@ -35,10 +34,10 @@ pub(crate) type Value = Vec<u8>;
 /// should be placed in the heap to prevent its movement after creating a reference to it.
 
 pub(crate) struct View {
-    // The `owned` field is used, but its value only needed for the drop stage,
-    // so `Box<Fork>`/`Box<Snapshot>` will be dropped when an instance of `View` leaves the scope.
-    _owned: Option<ViewOwned>,
+    /// Unsafe reference to the owned View (owned either by Rust or by Java)
     reference: ViewRef,
+    /// Allows to drop owned view if needed
+    owned: Option<ViewOwned>,
 }
 
 enum ViewOwned {
@@ -48,7 +47,7 @@ enum ViewOwned {
 
 pub(crate) enum ViewRef {
     Snapshot(&'static Snapshot),
-    Fork(&'static mut Fork),
+    Fork(&'static Fork),
 }
 
 impl View {
@@ -56,18 +55,18 @@ impl View {
         View {
             // Make a "self-reference" to a value stored in the `owned` field.
             reference: unsafe { ViewRef::from_snapshot(&*snapshot) },
-            _owned: Some(ViewOwned::Snapshot(snapshot)),
+            owned: Some(ViewOwned::Snapshot(snapshot)),
         }
     }
 
     pub fn from_owned_fork(fork: Fork) -> Self {
         // Box a `Fork` value to make sure it will not be moved later
         // and will not break the `reference` field.
-        let mut fork = Box::new(fork);
+        let fork = Box::new(fork);
         View {
             // Make a "self-reference" to a value stored in the `owned` field.
-            reference: unsafe { ViewRef::from_fork(&mut *fork) },
-            _owned: Some(ViewOwned::Fork(fork)),
+            reference: unsafe { ViewRef::from_fork(&*fork) },
+            owned: Some(ViewOwned::Fork(fork)),
         }
     }
 
@@ -76,28 +75,49 @@ impl View {
     pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
         View {
             reference: unsafe { ViewRef::from_snapshot(snapshot) },
-            _owned: None,
+            owned: None,
         }
     }
 
     // Will be used in #ECR-242
     #[allow(dead_code)]
-    pub fn from_ref_fork(fork: &mut Fork) -> Self {
+    pub fn from_ref_fork(fork: &Fork) -> Self {
         View {
             reference: unsafe { ViewRef::from_fork(fork) },
-            _owned: None,
+            owned: None,
         }
     }
 
     pub fn get(&mut self) -> &mut ViewRef {
         &mut self.reference
     }
+
+    /// Unwraps the stored Fork from the View, panics if it's not possible.
+    pub fn into_fork(self) -> Box<Fork> {
+        if let Some(view_owned) = self.owned {
+            match view_owned {
+                ViewOwned::Snapshot(_) => panic!("`into_fork` called on Snapshot"),
+                ViewOwned::Fork(fork) => fork,
+            }
+        } else {
+            panic!("`into_fork` called on non-owning View");
+        }
+    }
+
+    /// Returns `true` iff `into_fork` conversion is possible.
+    pub fn can_convert_into_fork(&self) -> bool {
+        match self.owned {
+            None => false,
+            Some(ViewOwned::Snapshot(_)) => false,
+            Some(ViewOwned::Fork(_)) => true,
+        }
+    }
 }
 
 impl ViewRef {
-    unsafe fn from_fork(fork: &mut Fork) -> Self {
+    unsafe fn from_fork(fork: &Fork) -> Self {
         // Make a provided reference `'static`.
-        ViewRef::Fork(&mut *(fork as *mut Fork))
+        ViewRef::Fork(&*(fork as *const Fork))
     }
 
     unsafe fn from_snapshot(snapshot: &Snapshot) -> Self {
@@ -118,11 +138,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 
 #[cfg(test)]
 mod tests {
-    use exonum::storage::{Database, Entry, MemoryDB};
-
-    use std::convert::AsRef;
-
     use super::*;
+    use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
 
     const TEST_VALUE: i32 = 42;
 
@@ -147,10 +164,10 @@ mod tests {
     #[test]
     fn create_view_with_ref_fork() {
         let db = setup_database();
-        let mut fork = db.fork();
-        let mut view = View::from_ref_fork(&mut fork);
+        let fork = db.fork();
+        let mut view = View::from_ref_fork(&fork);
         check_ref_fork(&mut view);
-        assert!(view._owned.is_none());
+        assert!(view.owned.is_none());
     }
 
     #[test]
@@ -159,28 +176,28 @@ mod tests {
         let snapshot = db.snapshot();
         let mut view = View::from_ref_snapshot(&*snapshot);
         check_ref_snapshot(&mut view);
-        assert!(view._owned.is_none());
+        assert!(view.owned.is_none());
     }
 
     // Creates database with a prepared state.
-    fn setup_database() -> MemoryDB {
-        let db = MemoryDB::new();
-        let mut fork = db.fork();
-        entry(&mut fork).set(TEST_VALUE);
+    fn setup_database() -> TemporaryDB {
+        let db = TemporaryDB::new();
+        let fork = db.fork();
+        entry(&fork).set(TEST_VALUE);
         db.merge(fork.into_patch()).unwrap();
         db
     }
 
     fn entry<T>(view: T) -> Entry<T, i32>
     where
-        T: AsRef<Snapshot + 'static>,
+        T: IndexAccess,
     {
         Entry::new("test", view)
     }
 
     fn check_ref_fork(view: &mut View) {
         match *view.get() {
-            ViewRef::Fork(ref fork) => check_value(fork),
+            ViewRef::Fork(fork) => check_value(fork),
             _ => panic!("View::reference expected to be Fork"),
         }
     }
@@ -192,7 +209,7 @@ mod tests {
         }
     }
 
-    fn check_value<T: AsRef<Snapshot + 'static>>(view: T) {
+    fn check_value<T: IndexAccess>(view: T) {
         assert_eq!(Some(TEST_VALUE), entry(view).get())
     }
 
@@ -208,7 +225,7 @@ mod tests {
             ViewRef::Snapshot(ref s) => Ptr::Snapshot(&**s),
         };
 
-        let owned = match *view._owned.as_ref().unwrap() {
+        let owned = match *view.owned.as_ref().unwrap() {
             ViewOwned::Fork(ref f) => Ptr::Fork(&**f),
             ViewOwned::Snapshot(ref s) => Ptr::Snapshot(&**s),
         };

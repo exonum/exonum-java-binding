@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.storage.database;
+package com.exonum.binding.core.storage.indices;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
-class ImmutableModificationCounterTest {
-
-  private static final ImmutableModificationCounter COUNTER = ImmutableModificationCounter.INSTANCE;
+class IndexAddressTest {
 
   @Test
-  void forbidsModifications() {
-    assertThrows(IllegalStateException.class, COUNTER::notifyModified);
+  void verifyEquals() {
+    EqualsVerifier.forClass(IndexAddress.class)
+        .withNonnullFields("name")
+        .verify();
   }
 }

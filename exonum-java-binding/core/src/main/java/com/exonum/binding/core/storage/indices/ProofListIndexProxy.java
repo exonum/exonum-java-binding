@@ -17,12 +17,11 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkElementIndex;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkPositionIndex;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.list.ListProofNode;
+import com.exonum.binding.common.proofs.list.ListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
@@ -97,14 +96,11 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    */
   public static <E> ProofListIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    checkIndexName(name);
-    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
-
+    IndexAddress address = IndexAddress.valueOf(name);
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle listNativeHandle = createNativeList(view,
-        () -> nativeCreate(name, viewNativeHandle));
+    LongSupplier nativeListConstructor = () -> nativeCreate(name, viewNativeHandle);
 
-    return new ProofListIndexProxy<>(listNativeHandle, name, view, s);
+    return getOrCreate(address, view, serializer, nativeListConstructor);
   }
 
   private static native long nativeCreate(String listName, long viewNativeHandle);
@@ -127,19 +123,40 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    */
   public static <E> ProofListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
                                                             View view, Serializer<E> serializer) {
-    checkIndexName(groupName);
-    checkIdInGroup(listId);
-    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
-
+    IndexAddress address = IndexAddress.valueOf(groupName, listId);
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle setNativeHandle = createNativeList(view,
-        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle));
+    LongSupplier nativeListConstructor =
+        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle);
 
-    return new ProofListIndexProxy<>(setNativeHandle, groupName, view, s);
+    return getOrCreate(address, view, serializer, nativeListConstructor);
   }
 
   private static native long nativeCreateInGroup(String groupName, byte[] listId,
                                                  long viewNativeHandle);
+
+  private static <E> ProofListIndexProxy<E> getOrCreate(IndexAddress address, View view,
+      Serializer<E> serializer, LongSupplier nativeListConstructor) {
+    return view.findOpenIndex(address)
+        .map(ProofListIndexProxy::<E>checkCachedInstance)
+        .orElseGet(() -> newListIndexProxy(address, view, serializer, nativeListConstructor));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  private static <E> ProofListIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
+    checkIndexType(cachedIndex, ProofListIndexProxy.class);
+    return (ProofListIndexProxy<E>) cachedIndex;
+  }
+
+  private static <E> ProofListIndexProxy<E> newListIndexProxy(IndexAddress address, View view,
+      Serializer<E> serializer, LongSupplier nativeListConstructor) {
+    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
+
+    NativeHandle listNativeHandle = createNativeList(view, nativeListConstructor);
+
+    ProofListIndexProxy<E> list = new ProofListIndexProxy<>(listNativeHandle, address, view, s);
+    view.registerIndex(list);
+    return list;
+  }
 
   private static NativeHandle createNativeList(View view, LongSupplier nativeListConstructor) {
     NativeHandle listNativeHandle = new NativeHandle(nativeListConstructor.getAsLong());
@@ -150,9 +167,9 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
     return listNativeHandle;
   }
 
-  private ProofListIndexProxy(NativeHandle nativeHandle, String name, View view,
+  private ProofListIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
                               CheckingSerializerDecorator<E> serializer) {
-    super(nativeHandle, name, view, serializer);
+    super(nativeHandle, address, view, serializer);
   }
 
   /**
@@ -165,11 +182,11 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   public UncheckedListProof getProof(long index) {
     checkElementIndex(index, size());
 
-    ListProofNode listProofNode = nativeGetProof(getNativeHandle(), index);
-    return new UncheckedListProofAdapter<>(listProofNode, this.serializer);
+    ListProof listProof = nativeGetProof(getNativeHandle(), index);
+    return new UncheckedListProofAdapter<>(listProof, this.serializer);
   }
 
-  private native ListProofNode nativeGetProof(long nativeHandle, long index);
+  private native ListProof nativeGetProof(long nativeHandle, long index);
 
   /**
    * Returns a proof that some elements exist in the specified range in this list.
@@ -181,25 +198,26 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    */
   public UncheckedListProof getRangeProof(long from, long to) {
     long size = size();
-    ListProofNode listProofNode = nativeGetRangeProof(getNativeHandle(),
+    ListProof listProof = nativeGetRangeProof(getNativeHandle(),
         checkElementIndex(from, size),
         checkPositionIndex(to, size));
 
-    return new UncheckedListProofAdapter<>(listProofNode, this.serializer);
+    return new UncheckedListProofAdapter<>(listProof, this.serializer);
   }
 
-  private native ListProofNode nativeGetRangeProof(long nativeHandle, long from, long to);
+  private native ListProof nativeGetRangeProof(long nativeHandle, long from, long to);
 
   /**
-   * Returns the root hash of the proof list.
+   * Returns the index hash which represents the complete state of this list.
+   * Any modifications to the stored entries affect the index hash.
    *
    * @throws IllegalStateException if this list is not valid
    */
-  public HashCode getRootHash() {
-    return HashCode.fromBytes(nativeGetRootHash(getNativeHandle()));
+  public HashCode getIndexHash() {
+    return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
 
-  private native byte[] nativeGetRootHash(long nativeHandle);
+  private native byte[] nativeGetIndexHash(long nativeHandle);
 
   private static native void nativeFree(long nativeHandle);
 

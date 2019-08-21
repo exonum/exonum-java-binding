@@ -16,31 +16,29 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import com.exonum.binding.core.storage.database.View;
 
 /**
  * An abstract super class for proxies of all indices.
  *
  * <p>Each index is created with a database view, either an immutable Snapshot or a read-write Fork.
- * An index has a modification counter to detect when it or the corresponding view is modified.
+ * An index has a modification counter to detect when it is modified.
  */
 abstract class AbstractIndexProxy extends AbstractNativeProxy implements StorageIndex {
 
   final View dbView;
 
   /**
-   * Needed to detect modifications of this index during iteration over this (or other) indices.
+   * Needed to detect modifications of this index during iteration over this index.
    */
   final ModificationCounter modCounter;
 
-  private final String name;
+  private final IndexAddress address;
 
   /**
    * Creates a new index.
@@ -48,21 +46,20 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    * <p>Subclasses shall create a native object and pass a native handle to this constructor.
    *
    * @param nativeHandle a native handle of the created index
-   * @param name a name of this index
+   * @param address the address of this index
    * @param view a database view from which the index has been created
    * @throws NullPointerException if any parameter is null
    */
-  AbstractIndexProxy(NativeHandle nativeHandle, String name, View view) {
+  AbstractIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view) {
     super(nativeHandle);
-    this.name = checkIndexName(name);
-    this.dbView = checkNotNull(view);
-    this.modCounter = view.getModificationCounter();
+    this.address = checkNotNull(address);
+    this.dbView = view;
+    this.modCounter = ModificationCounter.forView(view);
   }
 
-  /** Returns the name of this index. */
   @Override
-  public final String getName() {
-    return name;
+  public IndexAddress getAddress() {
+    return address;
   }
 
   /**
@@ -90,6 +87,6 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
   @Override
   public String toString() {
     // test_map: ProofMap
-    return name + ": " + getClass().getName();
+    return getName() + ": " + getClass().getName();
   }
 }

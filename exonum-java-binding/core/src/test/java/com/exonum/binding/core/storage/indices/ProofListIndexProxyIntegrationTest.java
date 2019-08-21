@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
-import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static java.util.Collections.singletonList;
@@ -42,11 +41,8 @@ import org.junit.jupiter.api.Test;
  */
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
-  /**
-   * An empty list root hash: an all-zero hash code.
-   */
-  private static final HashCode EMPTY_LIST_ROOT_HASH =
-      HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
+  private static final HashCode EMPTY_LIST_INDEX_HASH =
+      HashCode.fromString("c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9");
 
   private static final String LIST_NAME = "test_proof_list";
 
@@ -56,25 +52,41 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Override
+  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+        StandardSerializers.string());
+  }
+
+  @Override
+  StorageIndex createOfOtherType(String name, View view) {
+    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  @Override
   Object getAnyElement(AbstractListIndexProxy<String> index) {
     return index.get(0L);
   }
 
+  @Override
+  void update(AbstractListIndexProxy<String> index) {
+    index.add(V1);
+  }
+
   @Test
-  void getRootHashEmptyList() {
+  void getIndexHashEmptyList() {
     runTestWithView(database::createSnapshot, (list) -> {
-      assertThat(list.getRootHash(), equalTo(EMPTY_LIST_ROOT_HASH));
+      assertThat(list.getIndexHash(), equalTo(EMPTY_LIST_INDEX_HASH));
     });
   }
 
   @Test
-  void getRootHashSingletonList() {
+  void getIndexHashSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
-      HashCode rootHash = list.getRootHash();
-      assertThat(rootHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
-      assertThat(rootHash, not(equalTo(EMPTY_LIST_ROOT_HASH)));
+      HashCode indexHash = list.getIndexHash();
+      assertThat(indexHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
+      assertThat(indexHash, not(equalTo(EMPTY_LIST_INDEX_HASH)));
     });
   }
 

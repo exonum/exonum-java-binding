@@ -16,8 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
@@ -25,7 +24,6 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
@@ -98,14 +96,11 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    */
   public static <E> KeySetIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
-    checkIndexName(name);
-    CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
-
+    IndexAddress address = IndexAddress.valueOf(name);
     long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle setNativeHandle = createNativeSet(view,
-        () -> nativeCreate(name, viewNativeHandle));
+    LongSupplier nativeSetConstructor = () -> nativeCreate(name, viewNativeHandle);
 
-    return new KeySetIndexProxy<>(setNativeHandle, name, view, s);
+    return getOrCreate(address, view, serializer, nativeSetConstructor);
   }
 
   /**
@@ -125,16 +120,37 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    * @see StandardSerializers
    */
   public static <E> KeySetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
-                                                         View view, Serializer<E> serializer) {
-    checkIndexName(groupName);
-    checkIdInGroup(indexId);
+      View view, Serializer<E> serializer) {
+    IndexAddress address = IndexAddress.valueOf(groupName, indexId);
+    long viewNativeHandle = view.getViewNativeHandle();
+    LongSupplier nativeSetConstructor =
+        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle);
+
+    return getOrCreate(address, view, serializer, nativeSetConstructor);
+  }
+
+  private static <E> KeySetIndexProxy<E> getOrCreate(IndexAddress address, View view,
+      Serializer<E> serializer, LongSupplier nativeSetConstructor) {
+    return view.findOpenIndex(address)
+        .map(KeySetIndexProxy::<E>checkCachedInstance)
+        .orElseGet(() -> newKeySetProxy(address, view, serializer, nativeSetConstructor));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  private static <E> KeySetIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
+    checkIndexType(cachedIndex, KeySetIndexProxy.class);
+    return (KeySetIndexProxy<E>) cachedIndex;
+  }
+
+  private static <E> KeySetIndexProxy<E> newKeySetProxy(IndexAddress address, View view,
+      Serializer<E> serializer, LongSupplier nativeSetConstructor) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle setNativeHandle = createNativeSet(view,
-        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle));
+    NativeHandle setNativeHandle = createNativeSet(view, nativeSetConstructor);
 
-    return new KeySetIndexProxy<>(setNativeHandle, groupName, view, s);
+    KeySetIndexProxy<E> set = new KeySetIndexProxy<>(setNativeHandle, address, view, s);
+    view.registerIndex(set);
+    return set;
   }
 
   private static NativeHandle createNativeSet(View view, LongSupplier nativeSetConstructor) {
@@ -145,9 +161,9 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
     return setNativeHandle;
   }
 
-  private KeySetIndexProxy(NativeHandle nativeHandle, String name, View view,
+  private KeySetIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
                            CheckingSerializerDecorator<E> serializer) {
-    super(nativeHandle, name, view);
+    super(nativeHandle, address, view);
     this.serializer = serializer;
   }
 
@@ -189,9 +205,6 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
 
   /**
    * Creates an iterator over the set elements. The elements are ordered lexicographically.
-   * 
-   * <p>Any destructive operation on the same {@link Fork} this set uses
-   * (but not necessarily on <em>this set</em>) will invalidate the iterator.
    * 
    * @return an iterator over the elements of this set
    * @throws IllegalStateException if this set is not valid 

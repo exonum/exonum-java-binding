@@ -31,6 +31,7 @@ import com.google.common.collect.SetMultimap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 
 class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {

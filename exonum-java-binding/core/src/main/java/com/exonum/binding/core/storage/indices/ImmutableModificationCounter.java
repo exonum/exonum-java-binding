@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.binding.core.storage.indices;
 
-/**
- * A proof that some elements exist in a proof list. You must
- * {@link #check} its structure and index hash before accessing the elements.
- */
-public interface UncheckedListProof {
+enum ImmutableModificationCounter implements ModificationCounter {
 
-  /**
-   * Checks that a proof has either correct or incorrect structure and returns a CheckedListProof.
-   */
-  CheckedListProof check();
+  INSTANCE;
 
-  /**
-   * Returns raw source proof of this UncheckedListProof.
-   */
-  ListProof getListProof();
+  private static final int INITIAL_VALUE = 0;
+
+  @Override
+  public boolean isModifiedSince(int lastValue) {
+    return false;
+  }
+
+  @Override
+  public int getCurrentValue() {
+    return INITIAL_VALUE;
+  }
+
+  @Override
+  public void notifyModified() {
+    throw new IllegalStateException("Immutable counter cannot be modified");
+  }
 }

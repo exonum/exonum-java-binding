@@ -17,8 +17,10 @@
 package com.exonum.binding.core.storage.database;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 
@@ -34,6 +36,12 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  * (i.e. committed) to the database and change the database state.
  */
 public final class Fork extends View {
+
+  /**
+   * A destructor of the native fork object. This class keeps a destructor to be able
+   * to cancel it on peer ownership transfer, happening in {@link #intoPatch()}.
+   */
+  private final ProxyDestructor destructor;
 
   /**
    * Creates a new owning Fork proxy.
@@ -58,21 +66,87 @@ public final class Fork extends View {
 
     NativeHandle h = new NativeHandle(nativeHandle);
     // Add an action destroying the native peer if necessary.
-    ProxyDestructor.newRegistered(cleaner, h, Fork.class, nh -> {
+    ProxyDestructor destructor = ProxyDestructor.newRegistered(cleaner, h, Fork.class, nh -> {
       if (owningHandle) {
         Views.nativeFree(nh);
       }
     });
 
-    return new Fork(h, cleaner);
+    // Create a cleaner for collections. A separate cleaner is needed to be able to destroy
+    // the objects depending on the fork when it is converted into patch and invalidated
+    Cleaner forkCleaner = new Cleaner();
+    cleaner.add(forkCleaner::close);
+
+    return new Fork(h, destructor, forkCleaner);
   }
 
   /**
    * Create a new owning Fork.
    *
    * @param nativeHandle a handle of the native Fork object
+   * @param destructor a destructor of the native peer, registered with the parent cleaner
+   * @param forkCleaner a cleaner for objects depending on the fork
    */
-  private Fork(NativeHandle nativeHandle, Cleaner cleaner) {
-    super(nativeHandle, cleaner, new IncrementalModificationCounter(), true);
+  private Fork(NativeHandle nativeHandle, ProxyDestructor destructor, Cleaner forkCleaner) {
+    super(nativeHandle, forkCleaner, true);
+    this.destructor = destructor;
   }
+
+  /**
+   * Converts this fork into a patch that can be merged into the database.
+   * This method will close any resources registered with {@linkplain #getCleaner() its cleaner}
+   * (typically, indexes, iterators), convert this fork into a patch, invalidate this fork,
+   * and return a handle to the patch. The caller is responsible for properly destroying
+   * the returned patch.
+   *
+   * <p>Subsequent operations with the fork are prohibited.
+   *
+   * @return a handle to the patch obtained from this fork
+   * @see <a href="https://exonum.com/doc/version/0.12/architecture/merkledb/#patches">
+   *   MerkleDB Patches</a>
+   */
+  NativeHandle intoPatch() {
+    checkState(nativeCanConvertIntoPatch(getNativeHandle()),
+        "This fork cannot be converted into patch");
+
+    // Close all resources depending on this fork
+    try {
+      getCleaner().close();
+    } catch (CloseFailuresException e) {
+      // Destroy this fork and abort the operation if there are any failures
+      destructor.clean();
+      throw new IllegalStateException("intoPatch aborted because some dependent resources "
+          + "did not close properly", e);
+    }
+
+    try {
+      // Cancel the destructor, transferring the ownership of this object to the native code
+      // (including the responsibility to destroy it).
+      destructor.cancel();
+
+      // Convert into patch. This operation may throw RuntimeException.
+      // nativeHandle of the Fork can no longer be used after this operation.
+      long patchNativeHandle = nativeIntoPatch(getNativeHandle());
+
+      return new NativeHandle(patchNativeHandle);
+    } finally {
+      // Invalidate the native handle to make the fork proxy inaccessible.
+      // Done manually as we cancelled the proxy destructor.
+      nativeHandle.close();
+    }
+  }
+
+  /**
+   * Returns true if this fork can be converted into patch.
+   */
+  private static native boolean nativeCanConvertIntoPatch(long nativeHandle);
+
+  /**
+   * Converts this fork into patch, consuming the object, and returns the native handle
+   * to the patch.
+   *
+   * <p>In case of failure RuntimeException is thrown and provided nativeHandle is
+   * invalidated.
+   */
+  private static native long nativeIntoPatch(long nativeHandle);
 }

@@ -19,6 +19,9 @@ package com.exonum.binding.core.storage.database;
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
+import com.exonum.binding.core.storage.indices.IndexAddress;
+import com.exonum.binding.core.storage.indices.StorageIndex;
+import java.util.Optional;
 
 /**
  * Represents a view of the database.
@@ -38,7 +41,7 @@ import com.exonum.binding.core.proxy.NativeHandle;
 public abstract class View extends AbstractNativeProxy {
 
   private final Cleaner cleaner;
-  private final ModificationCounter modCounter;
+  private final OpenIndexRegistry indexRegistry = new OpenIndexRegistry();
   private final boolean canModify;
 
   /**
@@ -46,14 +49,11 @@ public abstract class View extends AbstractNativeProxy {
    *
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
    * @param cleaner a cleaner of resources
-   * @param modCounter a modification counter
    * @param canModify if the view allows modifications
    */
-  View(NativeHandle nativeHandle, Cleaner cleaner, ModificationCounter modCounter,
-      boolean canModify) {
+  View(NativeHandle nativeHandle, Cleaner cleaner, boolean canModify) {
     super(nativeHandle);
     this.cleaner = cleaner;
-    this.modCounter = modCounter;
     this.canModify = canModify;
   }
 
@@ -75,17 +75,37 @@ public abstract class View extends AbstractNativeProxy {
   }
 
   /**
+   * Finds an open index by the given address.
+   *
+   * <p><em>This method is for internal use. It is not designed to be used by services,
+   * rather by index factories.</em>
+   *
+   * @param address the index address
+   * @return an index with the given address; or {@code Optional.empty()} if no index
+   *     with such address was open in this view
+   */
+  public Optional<StorageIndex> findOpenIndex(IndexAddress address) {
+    return indexRegistry.findIndex(address);
+  }
+
+  /**
+   * Registers a new index created with this view.
+   *
+   * <p><em>This method is for internal use. It is not designed to be used by services,
+   * rather by index factories.</em>
+   *
+   * @param index a new index to register
+   * @throws IllegalArgumentException if the index is already registered
+   * @see #findOpenIndex(IndexAddress)
+   */
+  public void registerIndex(StorageIndex index) {
+    indexRegistry.registerIndex(index);
+  }
+
+  /**
    * Returns the cleaner of this view.
    */
   public Cleaner getCleaner() {
     return cleaner;
-  }
-
-  /**
-   * Returns a modification counter, corresponding to this view. The clients, trying to modify
-   * a collection using this view, must notify the counter first.
-   */
-  public ModificationCounter getModificationCounter() {
-    return modCounter;
   }
 }

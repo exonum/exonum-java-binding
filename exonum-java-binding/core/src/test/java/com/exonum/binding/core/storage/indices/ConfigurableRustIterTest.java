@@ -26,7 +26,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.core.proxy.NativeHandle;
-import com.exonum.binding.core.storage.database.ModificationCounter;
 import com.google.common.collect.ImmutableList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;

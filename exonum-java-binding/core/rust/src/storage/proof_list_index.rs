@@ -13,15 +13,18 @@
 // limitations under the License.
 
 use exonum::crypto::Hash;
-use exonum::storage::proof_list_index::{ListProof, ProofListIndexIter};
-use exonum::storage::{Fork, ProofListIndex, Snapshot};
-use jni::errors::Result;
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jint, jlong, jobject};
-use jni::JNIEnv;
+use exonum_merkledb::{
+    proof_list_index::{ListProof, ProofListIndexIter},
+    Fork, ObjectHash, ProofListIndex, Snapshot,
+};
+use jni::{
+    errors::Result,
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray, jint, jlong, jobject},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
@@ -31,7 +34,7 @@ type Index<T> = ProofListIndex<T, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
-    ForkIndex(Index<&'static mut Fork>),
+    ForkIndex(Index<&'static Fork>),
 }
 
 /// Returns pointer to the created `ProofListIndex` object.
@@ -49,7 +52,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
-                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });
@@ -73,7 +76,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
             }
-            ViewRef::Fork(ref mut fork) => {
+            ViewRef::Fork(fork) => {
                 IndexType::ForkIndex(Index::new_in_family(group_name, &list_id, fork))
             }
         }))
@@ -155,13 +158,15 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     _: JObject,
     list_handle: Handle,
 ) -> jlong {
-    let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.len(),
-            IndexType::ForkIndex(ref list) => list.len(),
-        } as jlong)
-    });
+    let res = panic::catch_unwind(|| Ok(get_list_length(list_handle) as jlong));
     utils::unwrap_exc_or_default(&env, res)
+}
+
+fn get_list_length(list_handle: Handle) -> u64 {
+    match *handle::cast_handle::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(ref list) => list.len(),
+        IndexType::ForkIndex(ref list) => list.len(),
+    }
 }
 
 /// Returns the height of the proof list.
@@ -182,17 +187,17 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns the root hash of the proof list or default hash value if it is empty.
+/// Returns the object hash of the proof list or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRootHash(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetIndexHash(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let hash = match *handle::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.merkle_root(),
-            IndexType::ForkIndex(ref list) => list.merkle_root(),
+            IndexType::SnapshotIndex(ref list) => list.object_hash(),
+            IndexType::ForkIndex(ref list) => list.object_hash(),
         };
         utils::convert_hash(&env, &hash)
     });
@@ -212,7 +217,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
             IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
         };
-        make_java_proof(&env, &proof).map(|x| x.into_inner())
+        let length = get_list_length(list_handle);
+        make_java_proof_root(&env, &proof, length).map(|x| x.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -228,10 +234,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
 ) -> jobject {
     let res = panic::catch_unwind(|| {
         let proof = match *handle::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64, to as u64),
-            IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64, to as u64),
+            IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64..to as u64),
+            IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64..to as u64),
         };
-        make_java_proof(&env, &proof).map(|x| x.into_inner())
+        let length = get_list_length(list_handle);
+        make_java_proof_root(&env, &proof, length).map(|x| x.into_inner())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -362,6 +369,19 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     handle::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
 }
 
+fn make_java_proof_root<'a>(
+    env: &JNIEnv<'a>,
+    proof: &ListProof<Value>,
+    length: u64,
+) -> Result<JObject<'a>> {
+    let root = make_java_proof(env, proof)?;
+    env.new_object(
+        "com/exonum/binding/common/proofs/list/ListProof",
+        "(Lcom/exonum/binding/common/proofs/list/ListProofNode;J)V",
+        &[root.into(), (length as jlong).into()],
+    )
+}
+
 fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JObject<'a>> {
     match *proof {
         ListProof::Full(ref left, ref right) => {
@@ -382,6 +402,9 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
             make_java_proof_branch(env, left, right)
         }
         ListProof::Leaf(ref value) => make_java_proof_element(env, value),
+        ListProof::Absent(_) => {
+            unimplemented!("The ProofOfAbsence structure is not public for the moment")
+        }
     }
 }
 

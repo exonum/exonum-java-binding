@@ -12,23 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jboolean, jbyteArray, jobject, jsize};
-use jni::JNIEnv;
+use jni::{
+    objects::{JClass, JObject, JString},
+    sys::{jboolean, jbyteArray, jobject, jsize},
+    JNIEnv,
+};
 
-use std::panic;
-use std::ptr;
+use std::{panic, ptr};
 
 use exonum::crypto::Hash;
-use exonum::storage::proof_map_index::{
-    MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
-    PROOF_MAP_KEY_SIZE,
+use exonum_merkledb::{
+    proof_map_index::{
+        MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
+        PROOF_MAP_KEY_SIZE,
+    },
+    Fork, ObjectHash, ProofMapIndex, Snapshot,
 };
-use exonum::storage::{Fork, ProofMapIndex, Snapshot};
 
 use handle::{self, Handle};
-use storage::db::{Value, View, ViewRef};
-use storage::PairIter;
+use storage::{
+    db::{Value, View, ViewRef},
+    PairIter,
+};
 use utils;
 use JniResult;
 
@@ -45,7 +50,7 @@ const BYTE_ARRAY: &str = "[B";
 
 enum IndexType {
     SnapshotIndex(Index<&'static Snapshot>),
-    ForkIndex(Index<&'static mut Fork>),
+    ForkIndex(Index<&'static Fork>),
 }
 
 type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
@@ -65,7 +70,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
-                ViewRef::Fork(ref mut fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
             },
         ))
     });
@@ -89,7 +94,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &map_id, &*snapshot))
             }
-            ViewRef::Fork(ref mut fork) => {
+            ViewRef::Fork(fork) => {
                 IndexType::ForkIndex(Index::new_in_family(group_name, &map_id, fork))
             }
         }))
@@ -107,7 +112,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     handle::drop_handle::<IndexType>(&env, map_handle);
 }
 
-/// Returns the root hash of the proof map or default hash value if it is empty.
+/// Returns the object hash of the proof map or default hash value if it is empty.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetRootHash(
     env: JNIEnv,
@@ -116,8 +121,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let hash = match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.merkle_root(),
-            IndexType::ForkIndex(ref map) => map.merkle_root(),
+            IndexType::SnapshotIndex(ref map) => map.object_hash(),
+            IndexType::ForkIndex(ref map) => map.object_hash(),
         };
         utils::convert_hash(&env, &hash)
     });
