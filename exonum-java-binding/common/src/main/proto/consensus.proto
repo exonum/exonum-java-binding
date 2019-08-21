@@ -18,6 +18,8 @@ syntax = "proto3";
 
 package exonum.consensus;
 
+option java_package = "com.exonum.binding.messages";
+
 import "helpers.proto";
 import "blockchain.proto";
 import "runtime.proto";

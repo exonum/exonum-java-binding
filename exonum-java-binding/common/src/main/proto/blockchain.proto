@@ -18,6 +18,8 @@ package exonum;
 
 import "helpers.proto";
 
+option java_package = "com.exonum.binding.messages";
+
 message Block {
   uint32 proposer_id = 1;
   uint64 height = 2;

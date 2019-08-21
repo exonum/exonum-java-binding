@@ -16,6 +16,8 @@ syntax = "proto3";
 
 package exonum.runtime;
 
+option java_package = "com.exonum.binding.messages";
+
 import "google/protobuf/empty.proto";
 
 // Unique service transaction identifier.
