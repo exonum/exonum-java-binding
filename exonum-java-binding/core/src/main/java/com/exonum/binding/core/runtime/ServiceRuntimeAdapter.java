@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.io.BaseEncoding.base16;
 
 import com.exonum.binding.common.crypto.PublicKey;
