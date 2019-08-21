@@ -110,6 +110,11 @@ class ServiceRuntimeAdapterTest {
   void configureService() throws CloseFailuresException {
     int serviceId = 1;
     long forkHandle = 0x110b;
+    Cleaner cleaner = new Cleaner();
+    Fork fork = Fork.newInstance(forkHandle, false, cleaner);
+    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+        .thenReturn(fork);
+
     Any configFromTx = Any.getDefaultInstance();
     byte[] configuration = configFromTx.toByteArray();
 
@@ -117,8 +122,7 @@ class ServiceRuntimeAdapterTest {
     serviceRuntimeAdapter.configureService(serviceId, forkHandle, configuration);
 
     // Check the runtime was invoked with correct config
-    verify(serviceRuntime).configureService(eq(serviceId), any(Fork.class), eq(configFromTx));
-    verify(viewFactory).createFork(eq(forkHandle), any(Cleaner.class));
+    verify(serviceRuntime).configureService(serviceId, fork, configFromTx);
   }
 
   @Test
