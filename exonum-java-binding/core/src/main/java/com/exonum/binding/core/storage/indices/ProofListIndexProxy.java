@@ -16,6 +16,9 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkRange;
+
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.list.ListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProof;
@@ -30,8 +33,6 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
 import java.util.function.LongSupplier;
-
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.*;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing

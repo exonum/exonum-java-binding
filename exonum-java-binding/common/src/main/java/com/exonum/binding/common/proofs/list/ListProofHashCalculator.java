@@ -117,7 +117,6 @@ final class ListProofHashCalculator<E> implements ListProofVisitor {
 
   @Override
   public void visit(ListProofOfAbsence listProofOfAbsence) {
-    // TODO
     hash = listProofOfAbsence.getHash();
   }
 
