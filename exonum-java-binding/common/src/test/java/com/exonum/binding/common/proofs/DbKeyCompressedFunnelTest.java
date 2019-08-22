@@ -39,7 +39,7 @@ class DbKeyCompressedFunnelTest {
     byte[] key = dbKey.getKeySlice();
 
     InOrder inOrder = inOrder(primitiveSink);
-    for(byte encodedByte: encodedSignificantBitsNum) {
+    for (byte encodedByte : encodedSignificantBitsNum) {
       inOrder.verify(primitiveSink).putByte(encodedByte);
     }
     inOrder.verify(primitiveSink).putBytes(key, 0, expectedWholeBytesKeyLength);
