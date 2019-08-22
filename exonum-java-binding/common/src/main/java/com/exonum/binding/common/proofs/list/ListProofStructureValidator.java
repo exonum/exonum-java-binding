@@ -241,4 +241,3 @@ final class ListProofStructureValidator implements ListProofVisitor {
     BRANCH, ELEMENT, HASHNODE, NONE
   }
 }
-

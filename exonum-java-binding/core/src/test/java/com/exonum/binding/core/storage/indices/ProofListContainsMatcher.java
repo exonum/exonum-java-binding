@@ -54,7 +54,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
 
     return checkedProof.isValid()
         && elementsMatcher.matches(checkedProof.getElements())
-        && list.getIndexHash().equals(checkedProof.getRootHash());
+        && list.getIndexHash().equals(checkedProof.getIndexHash());
   }
 
   @Override
@@ -75,9 +75,9 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
       return;
     }
 
-    if (!list.getIndexHash().equals(checkedProof.getRootHash())) {
+    if (!list.getIndexHash().equals(checkedProof.getIndexHash())) {
       mismatchDescription.appendText("calculated index hash doesn't match: ")
-          .appendValue(checkedProof.getRootHash())
+          .appendValue(checkedProof.getIndexHash())
           .appendText("expected index hash: ")
           .appendValue(list.getIndexHash());
       return;

@@ -214,7 +214,6 @@ class DbKeyTest {
   void numSignificantBitsLowerThanZeroShouldThrow() {
     int numSignificantBits = -1;
 
-
     assertThrows(IllegalArgumentException.class, () -> {
       DbKey dbKey = branchDbKey(bytes(0xFF, 0xFF, 0x01), numSignificantBits);
     });
@@ -224,7 +223,6 @@ class DbKeyTest {
   @Test
   void numSignificantBitsEqualToKeySizeBitsInBranchShouldThrow() {
     int numSignificantBits = DbKey.KEY_SIZE_BITS;
-
 
     assertThrows(IllegalArgumentException.class, () -> {
       DbKey dbKey = branchDbKey(bytes(0xFF, 0xFF, 0x01), numSignificantBits);

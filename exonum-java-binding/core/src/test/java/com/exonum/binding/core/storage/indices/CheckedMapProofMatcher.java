@@ -84,7 +84,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
       description.appendText("a valid proof, entries=").appendText(entries)
           .appendText(", missing keys=").appendText(missingKeys)
-          .appendText(", Merkle root=").appendValue(proof.getRootHash());
+          .appendText(", index hash=").appendValue(proof.getIndexHash());
     } else {
       description.appendText("an invalid proof, status=")
           .appendValue(proof.getProofStatus());

@@ -50,7 +50,7 @@ class UncheckedListProofAdapterTest {
     assertThat(uncheckedProof.getListProof(), equalTo(listProof));
     assertThat(checkedProof.getProofStatus(), is(ListProofStatus.VALID));
     assertThat(checkedProof.getElements(), equalTo(of(0L, V1)));
-    assertThat(checkedProof.getRootHash(), notNullValue());
+    assertThat(checkedProof.getIndexHash(), notNullValue());
   }
 
   @Test
@@ -68,7 +68,7 @@ class UncheckedListProofAdapterTest {
     assertThat(checkedProof.getProofStatus(), is(ListProofStatus.INVALID_TREE_NO_ELEMENTS));
 
     assertThrows(IllegalStateException.class, checkedProof::getElements);
-    assertThrows(IllegalStateException.class, checkedProof::getRootHash);
+    assertThrows(IllegalStateException.class, checkedProof::getIndexHash);
   }
 
   private UncheckedListProofAdapter<String> createUncheckedProof(ListProof listProof) {

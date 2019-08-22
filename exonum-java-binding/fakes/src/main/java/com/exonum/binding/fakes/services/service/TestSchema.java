@@ -41,7 +41,7 @@ public final class TestSchema implements Schema {
 
   @Override
   public List<HashCode> getStateHashes() {
-    HashCode rootHash = testMap().getRootHash();
+    HashCode rootHash = testMap().getIndexHash();
     return Collections.singletonList(rootHash);
   }
 }

@@ -17,6 +17,7 @@
 package com.exonum.binding.common.proofs.map;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
+import static com.exonum.binding.common.proofs.DbKeyCompressedFunnel.dbKeyCompressedFunnel;
 import static com.exonum.binding.common.proofs.DbKeyFunnel.dbKeyFunnel;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
@@ -26,6 +27,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.proofs.map.DbKey.Type;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ByteString;
 import java.util.ArrayDeque;
@@ -50,6 +52,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   private final List<MapEntry<ByteString, ByteString>> entries;
 
   private final List<ByteString> missingKeys;
+
+  @VisibleForTesting
+  static final byte BLOB_PREFIX = 0x00;
+  @VisibleForTesting
+  static final byte MAP_ROOT_PREFIX = 0x03;
+  @VisibleForTesting
+  static final byte MAP_NODE_PREFIX = 0x04;
 
   UncheckedFlatMapProof(
       List<MapProofEntry> proof,
@@ -155,7 +164,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private CheckedMapProof checkEmptyProof() {
-    return CheckedFlatMapProof.correct(getEmptyProofListHash(), emptySet(), toSet(missingKeys));
+    return CheckedFlatMapProof.correct(getEmptyProofIndexHash(), emptySet(), toSet(missingKeys));
   }
 
   private boolean isSingletonProof() {
@@ -170,14 +179,14 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       if (nodeType == Type.BRANCH) {
         return CheckedFlatMapProof.invalid(MapProofStatus.NON_TERMINAL_NODE);
       } else {
-        HashCode rootHash = getSingleEntryRootHash(entry);
-        return CheckedFlatMapProof.correct(rootHash, toSet(entries), toSet(missingKeys));
+        HashCode indexHash = getSingleEntryProofIndexHash(entry);
+        return CheckedFlatMapProof.correct(indexHash, toSet(entries), toSet(missingKeys));
       }
     } else {
       // The proof consists of a single leaf with a required key
       MapEntry<ByteString, ByteString> entry = entries.get(0);
-      HashCode rootHash = getSingleEntryRootHash(entry);
-      return CheckedFlatMapProof.correct(rootHash, toSet(entries), toSet(missingKeys));
+      HashCode indexHash = getSingleEntryProofIndexHash(entry);
+      return CheckedFlatMapProof.correct(indexHash, toSet(entries), toSet(missingKeys));
     }
   }
 
@@ -202,8 +211,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     while (contour.size() > 1) {
       lastPrefix = fold(contour, lastPrefix).orElse(lastPrefix);
     }
-    return CheckedFlatMapProof.correct(
-        contour.peek().getHash(), toSet(entries), toSet(missingKeys));
+    HashCode indexHash = getIndexHash(contour.peek().getHash());
+    return CheckedFlatMapProof.correct(indexHash, toSet(entries), toSet(missingKeys));
   }
 
   /**
@@ -220,7 +229,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     proofContour.addAll(proof);
     entries
         .stream()
-        .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getMapEntryHash(e)))
+        .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getLeafEntryHash(e.getValue())))
         .forEach(proofContour::add);
 
     proofContour.sort(Comparator.comparing(MapProofEntry::getDbKey));
@@ -249,39 +258,55 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return commonPrefix;
   }
 
-  private static HashCode getEmptyProofListHash() {
-    return HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
+  private static HashCode getEmptyProofIndexHash() {
+    HashCode merkleRoot = HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
+    return getIndexHash(merkleRoot);
   }
 
-  private static HashCode getSingleEntryRootHash(MapProofEntry entry) {
-    return getSingleEntryRootHash(entry.getDbKey(), entry.getHash());
+  private static HashCode getSingleEntryProofIndexHash(MapProofEntry proofEntry) {
+    HashCode merkleRoot = getSingleEntryMerkleRoot(proofEntry.getDbKey(),
+        proofEntry.getHash());
+    return getIndexHash(merkleRoot);
   }
 
-  private static HashCode getSingleEntryRootHash(MapEntry<ByteString, ByteString> entry) {
-    DbKey dbKey = DbKey.newLeafKey(entry.getKey());
-    HashCode valueHash = HASH_FUNCTION.hashByteString(entry.getValue());
-    return getSingleEntryRootHash(dbKey, valueHash);
+  private static HashCode getSingleEntryProofIndexHash(MapEntry<ByteString, ByteString> mapEntry) {
+    DbKey dbKey = DbKey.newLeafKey(mapEntry.getKey());
+    HashCode valueHash = getLeafEntryHash(mapEntry.getValue());
+    HashCode merkleRoot = getSingleEntryMerkleRoot(dbKey, valueHash);
+    return getIndexHash(merkleRoot);
   }
 
-  private static HashCode getSingleEntryRootHash(DbKey key, HashCode valueHash) {
+  private static HashCode getIndexHash(HashCode merkleRoot) {
+    return HASH_FUNCTION.newHasher()
+        .putByte(MAP_ROOT_PREFIX)
+        .putObject(merkleRoot, hashCodeFunnel())
+        .hash();
+  }
+
+  private static HashCode getSingleEntryMerkleRoot(DbKey key, HashCode valueHash) {
     assert key.getNodeType() == Type.LEAF;
     return HASH_FUNCTION.newHasher()
+        .putByte(MAP_NODE_PREFIX)
         .putObject(key, dbKeyFunnel())
         .putObject(valueHash, hashCodeFunnel())
         .hash();
   }
 
-  private static HashCode getMapEntryHash(MapEntry<ByteString, ByteString> entry) {
-    return HASH_FUNCTION.hashByteString(entry.getValue());
+  private static HashCode getLeafEntryHash(ByteString entryValue) {
+    return HASH_FUNCTION.newHasher()
+        .putByte(BLOB_PREFIX)
+        .putBytes(entryValue.toByteArray())
+        .hash();
   }
 
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {
     return HASH_FUNCTION
         .newHasher()
+        .putByte(MAP_NODE_PREFIX)
         .putObject(leftChild.getHash(), hashCodeFunnel())
         .putObject(rightChild.getHash(), hashCodeFunnel())
-        .putObject(leftChild.getDbKey(), dbKeyFunnel())
-        .putObject(rightChild.getDbKey(), dbKeyFunnel())
+        .putObject(leftChild.getDbKey(), dbKeyCompressedFunnel())
+        .putObject(rightChild.getDbKey(), dbKeyCompressedFunnel())
         .hash();
   }
 
