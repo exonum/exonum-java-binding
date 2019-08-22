@@ -39,13 +39,13 @@ public abstract class RawTransaction {
    * Returns a service identifier which the transaction belongs to.
    * @see ServiceInstanceSpec#getId()
    */
-  public abstract short getServiceId();
+  public abstract int getServiceId();
 
   /**
    * Returns the type of this transaction within a service. Unique within the service.
    * @see TransactionMessage#getTransactionId
    */
-  public abstract short getTransactionId();
+  public abstract int getTransactionId();
 
   /**
    * Returns the transaction payload which contains actual transaction data.
@@ -69,7 +69,7 @@ public abstract class RawTransaction {
     return newBuilder()
         .serviceId(txMessage.getServiceId())
         .transactionId(txMessage.getTransactionId())
-        .payload(txMessage.getPayload())
+        .payload(txMessage.getPayload().toByteArray())
         .build();
   }
 
@@ -79,12 +79,12 @@ public abstract class RawTransaction {
     /**
      * Sets the identifier of the service this transaction belongs to.
      */
-    public abstract Builder serviceId(short serviceId);
+    public abstract Builder serviceId(int serviceId);
 
     /**
      * Sets the identifier of the transaction within a service.
      */
-    public abstract Builder transactionId(short transactionId);
+    public abstract Builder transactionId(int transactionId);
 
     /**
      * Sets the payload of the transaction.

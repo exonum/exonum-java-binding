@@ -19,15 +19,18 @@ package com.exonum.binding.common.serialization.json;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.test.Bytes.bytes;
-import static com.exonum.binding.test.Bytes.fromHex;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.test.Bytes;
 import org.junit.jupiter.api.Test;
 
 class JsonSerializerTest {
@@ -61,18 +64,26 @@ class JsonSerializerTest {
 
   @Test
   void transactionMessageSerializesAsValue() {
-    String hex = "87095f09d413633626a4a5b903d7e8dbb7a9f54baa92eb77965c5ad0417d8d65000"
-        + "000007f0000010292a0d0ed9368a70984098519cef6bde555e85eaf8105c561a6c0b9599fae"
-        + "f4eb7b02155160f0c2598c97c42bc294599a2be34ce9ce66ba7baa11bfdaf06e5e0c";
-    TransactionMessage value = TransactionMessage.fromBytes(fromHex(hex));
+    TransactionMessage value = aMessage();
 
     String json = json().toJson(new Wrapper<>(value));
 
-    assertJsonValue(json, hex);
+    String expectedValue = Bytes.toHexString(value.toBytes());
+    assertJsonValue(json, expectedValue);
   }
 
   private static void assertJsonValue(String json, Object expectedValue) {
     assertThat(json, isJson(withJsonPath("$.value", equalTo(expectedValue))));
+  }
+
+  private static TransactionMessage aMessage() {
+    CryptoFunction cryptoFunction = CryptoFunctions.ed25519();
+    KeyPair keyPair = cryptoFunction.generateKeyPair();
+    return TransactionMessage.builder()
+        .serviceId(1)
+        .transactionId(2)
+        .payload(bytes())
+        .sign(keyPair, cryptoFunction);
   }
 
   private static class Wrapper<T> {

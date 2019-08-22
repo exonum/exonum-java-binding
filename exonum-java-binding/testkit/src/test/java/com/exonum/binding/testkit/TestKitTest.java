@@ -51,11 +51,9 @@ import io.vertx.ext.web.Router;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -371,8 +369,8 @@ class TestKitTest {
 
     List<TransactionMessage> transactionsInPool =
         testKit.findTransactionsInPool(
-            tx -> Arrays.equals(tx.getPayload(), message.getPayload()));
-    assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
+            tx -> tx.getPayload().equals(message.getPayload()));
+    assertThat(transactionsInPool).containsExactly(message);
   }
 
   @Test

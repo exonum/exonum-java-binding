@@ -556,13 +556,14 @@
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.4</version>
             <configuration>
-              <!-- Generated files are excluded. -->
+              <!-- Exclude the generated files from the coverage collection. -->
               <excludes>
                 <exclude>**/*AutoValue*</exclude>
                 <exclude>**/TxMessageProtos*</exclude>
                 <exclude>**/WalletProtos*</exclude>
                 <exclude>**/CoreProtos*</exclude>
                 <exclude>**/ServiceRuntimeProtos*</exclude>
+                <exclude>com/exonum/binding/messages/*</exclude>
               </excludes>
             </configuration>
             <executions>
