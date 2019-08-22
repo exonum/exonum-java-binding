@@ -19,6 +19,8 @@ package com.exonum.binding.common.crypto;
 import static com.exonum.binding.common.crypto.CryptoUtils.byteArrayToHex;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.common.hash.Funnel;
+import com.exonum.binding.common.hash.PrimitiveSink;
 import java.util.Arrays;
 
 /**
@@ -77,5 +79,21 @@ public abstract class AbstractKey {
   @Override
   public String toString() {
     return byteArrayToHex(rawKey);
+  }
+
+  /**
+   * Returns a funnel for any key.
+   */
+  public static Funnel<AbstractKey> keyFunnel() {
+    return KeyFunnel.INSTANCE;
+  }
+
+  private enum KeyFunnel implements Funnel<AbstractKey> {
+    INSTANCE;
+
+    @Override
+    public void funnel(AbstractKey from, PrimitiveSink into) {
+      into.putBytes(from.toBytesNoCopy());
+    }
   }
 }

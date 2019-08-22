@@ -70,7 +70,7 @@ public final class ListProofElement implements ListProofNode {
     INSTANCE {
       @Override
       public void funnel(ListProofElement from, PrimitiveSink into) {
-        into.putBytes(from.element.toByteArray());
+        into.putBytes(from.element.asReadOnlyByteBuffer());
       }
     }
   }
