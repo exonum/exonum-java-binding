@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use super::{paths::executable_directory, EjbRunConfig, JvmConfig, RuntimeConfig};
+use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
 use exonum_parameters::{ExonumCommand, Run as StandardRun, StandardResult};
 use failure::{self, format_err};
 use serde::{Deserialize, Serialize};
@@ -66,7 +66,7 @@ pub struct Run {
 
 pub enum EjbCommandResult {
     Standard(StandardResult),
-    EjbRun(EjbRunConfig),
+    EjbRun(Config),
 }
 
 pub trait EjbCommand {
@@ -92,7 +92,7 @@ impl EjbCommand for Run {
                     .map(|p| p.to_string_lossy().into_owned()),
             };
 
-            let config = EjbRunConfig {
+            let config = Config {
                 standard_config: node_run_config,
                 jvm_config,
                 runtime_config,

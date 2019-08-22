@@ -107,17 +107,3 @@ fn is_first_instance_created() -> bool {
     FIRST_INSTANCE_CREATED.call_once(|| is_first = true);
     is_first
 }
-
-// Extracts EJB and JVM configuration from Context
-fn extract_config(context: &Context) -> Config {
-    use exonum::helpers::fabric::keys;
-    context
-        .get(keys::NODE_CONFIG)
-        .expect("Unable to read node configuration.")
-        .services_configs
-        .get(super::cmd::EJB_CONFIG_SECTION_NAME)
-        .expect("Unable to read EJB configuration.")
-        .clone()
-        .try_into()
-        .expect("Invalid EJB configuration format.")
-}

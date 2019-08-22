@@ -19,10 +19,10 @@ use std::fmt;
 use std::path::PathBuf;
 
 /// Full configuration of the EJB runtime and JVM.
-pub struct EjbRunConfig {
-    standard_config: NodeRunConfig,
-    jvm_config: JvmConfig,
-    runtime_config: RuntimeConfig,
+pub struct Config {
+    pub standard_config: NodeRunConfig,
+    pub jvm_config: JvmConfig,
+    pub runtime_config: RuntimeConfig,
 }
 
 /// JVM-specific configuration parameters.
