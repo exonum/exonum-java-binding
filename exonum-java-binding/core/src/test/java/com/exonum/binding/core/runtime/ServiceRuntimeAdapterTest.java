@@ -17,6 +17,7 @@
 package com.exonum.binding.core.runtime;
 
 import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.test.Bytes.toHexString;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +30,7 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.google.protobuf.Any;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,6 +104,38 @@ class ServiceRuntimeAdapterTest {
         () -> serviceRuntimeAdapter.deployArtifact(id, deploySpec));
 
     assertThat(e).hasMessageContaining(id);
+  }
+
+  @Test
+  void configureService() throws CloseFailuresException {
+    int serviceId = 1;
+    long forkHandle = 0x110b;
+    Cleaner cleaner = new Cleaner();
+    Fork fork = Fork.newInstance(forkHandle, false, cleaner);
+    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+        .thenReturn(fork);
+
+    Any configFromTx = Any.getDefaultInstance();
+    byte[] configuration = configFromTx.toByteArray();
+
+    // Configure the service
+    serviceRuntimeAdapter.configureService(serviceId, forkHandle, configuration);
+
+    // Check the runtime was invoked with correct config
+    verify(serviceRuntime).configureService(serviceId, fork, configFromTx);
+  }
+
+  @Test
+  void configureServiceNotAny() {
+    int serviceId = 1;
+    long forkHandle = 0x110b;
+    byte[] invalidConfig = bytes("rubbish");
+
+    // Configure the service
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntimeAdapter.configureService(serviceId, forkHandle, invalidConfig));
+
+    assertThat(e).hasMessageContainingAll("Any", toHexString(invalidConfig));
   }
 
   @Test

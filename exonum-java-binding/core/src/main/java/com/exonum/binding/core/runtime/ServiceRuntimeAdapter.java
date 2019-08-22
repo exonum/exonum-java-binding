@@ -17,6 +17,7 @@
 package com.exonum.binding.core.runtime;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.io.BaseEncoding.base16;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -35,7 +36,6 @@ import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
-import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -108,18 +108,30 @@ class ServiceRuntimeAdapter {
    *
    * @param id the id of the service
    * @param forkHandle a handle to a native fork object
-   * @param configuration the service configuration properties
+   * @param configuration the service configuration parameters as serialized protobuf Any
    * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#configureService(Integer, Fork, Properties)
+   * @see ServiceRuntime#configureService(Integer, Fork, Any)
    */
-  // todo: [ECR-3437] when configuration options are clarified, update the signature
-  void configureService(int id, long forkHandle, Properties configuration)
+  void configureService(int id, long forkHandle, byte[] configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
-      serviceRuntime.configureService(id, fork, configuration);
+      Any parsedConfig = decodeConfiguration(configuration);
+
+      serviceRuntime.configureService(id, fork, parsedConfig);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
+    }
+  }
+
+  private static Any decodeConfiguration(byte[] configuration) {
+    try {
+      return Any.parseFrom(configuration);
+    } catch (InvalidProtocolBufferException e) {
+      String message = String.format("Could not parse the config (%s) as Any",
+          base16().encode(configuration));
+      logger.error(message, e);
+      throw new IllegalArgumentException(message, e);
     }
   }
 

@@ -40,6 +40,7 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
@@ -48,6 +49,7 @@ import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import io.vertx.ext.web.Router;
 import java.nio.file.Path;
@@ -59,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Properties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -229,11 +230,11 @@ class ServiceRuntimeIntegrationTest {
     try (Database database = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = database.createFork(cleaner);
-      Properties properties = new Properties();
+      Any config = anyConfiguration();
 
       // Configure the service
       Exception e = assertThrows(IllegalArgumentException.class,
-          () -> serviceRuntime.configureService(TEST_ID, view, properties));
+          () -> serviceRuntime.configureService(TEST_ID, view, config));
 
       assertThat(e).hasMessageContaining(String.valueOf(TEST_ID));
     }
@@ -285,12 +286,13 @@ class ServiceRuntimeIntegrationTest {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
         Fork view = database.createFork(cleaner);
-        Properties properties = new Properties();
+        Any configuration = anyConfiguration();
         // Configure the service
-        serviceRuntime.configureService(TEST_ID, view, properties);
+        serviceRuntime.configureService(TEST_ID, view, configuration);
 
         // Check the service was configured
-        verify(serviceWrapper).configure(view, properties);
+        Configuration expectedConfig = new ServiceConfiguration(configuration);
+        verify(serviceWrapper).configure(view, expectedConfig);
       }
     }
 
@@ -400,6 +402,10 @@ class ServiceRuntimeIntegrationTest {
       verify(serviceWrapper).createPublicApiHandlers(node, serviceRouter);
       verify(server).mountSubRouter(API_ROOT_PATH + "/" + serviceApiPath, serviceRouter);
     }
+  }
+
+  private static Any anyConfiguration() {
+    return Any.getDefaultInstance();
   }
 
   @Nested

@@ -26,6 +26,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -36,6 +37,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
@@ -46,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.logging.log4j.LogManager;
@@ -205,14 +206,12 @@ public final class ServiceRuntime {
    * @param view a database view to apply configuration
    * @param configuration service instance configuration parameters
    */
-  public void configureService(Integer id, Fork view, Properties configuration) {
-    // todo: Shall we control the state transitions (e.g., that one can configure only the
-    //   started service and only once)? It feels like an overkill for an implementation of
-    //   a framework abstraction.
+  public void configureService(Integer id, Fork view, Any configuration) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(id);
       try {
-        service.configure(view, configuration);
+        Configuration config = new ServiceConfiguration(configuration);
+        service.configure(view, config);
       } catch (Exception e) {
         String name = service.getName();
         logger.error("Service {} configuration with parameters {} failed",
