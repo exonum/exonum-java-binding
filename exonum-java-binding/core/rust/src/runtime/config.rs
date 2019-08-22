@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+use exonum_parameters::NodeRunConfig;
 use std::fmt;
+use std::path::PathBuf;
 
 /// Full configuration of the EJB runtime and JVM.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct Config {
-    /// JVM-specific configuration parameters.
-    pub jvm_config: JvmConfig,
-    /// EJB runtime-specific configuration parameters.
-    pub runtime_config: RuntimeConfig,
+pub struct EjbRunConfig {
+    standard_config: NodeRunConfig,
+    jvm_config: JvmConfig,
+    runtime_config: RuntimeConfig,
 }
 
 /// JVM-specific configuration parameters.
@@ -51,7 +51,7 @@ pub struct JvmConfig {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RuntimeConfig {
     /// Path to `log4j` configuration file.
-    pub log_config_path: String,
+    pub log_config_path: PathBuf,
     /// A port of the HTTP server for Java services.
     /// Must be distinct from the ports used by Exonum.
     pub port: i32,

@@ -23,6 +23,8 @@
 
 extern crate chrono;
 pub extern crate exonum;
+extern crate exonum_parameters;
+extern crate structopt; // TODO: remove
 #[macro_use]
 extern crate failure;
 pub extern crate jni;

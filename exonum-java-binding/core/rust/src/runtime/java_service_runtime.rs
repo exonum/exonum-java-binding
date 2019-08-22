@@ -220,7 +220,7 @@ impl JavaServiceRuntime {
             ))
             .option(&format!(
                 "-Dlog4j.configurationFile={}",
-                runtime_config.log_config_path
+                runtime_config.log_config_path.to_string_lossy()
             ))
     }
 
