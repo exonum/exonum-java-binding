@@ -15,17 +15,36 @@
  */
 
 use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
-use exonum_parameters::{ExonumCommand, Run as StandardRun, StandardResult};
+use exonum_parameters::{ExonumCommand, Run as StandardRun, StandardResult, GenerateTemplate, GenerateConfig, Finalize};
 use failure::{self, format_err};
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
 use std::path::PathBuf;
 
-/// Encapsulates processing of extensions of the `run` command. At this step we gather additional
-/// private parameters for service configuration and optional parameters for JVM configuration and
-/// produce the complete EJB configuration that gets stored to the `Context` for further processing
-/// during the service initialization.
+/// All possible Exonum Java App commands.
+///
+/// Includes standard Exonum Core commands and modified `Run` command.
+pub enum Command {
+    GenerateTemplate(GenerateTemplate),
+    GenerateConfig(GenerateConfig),
+    Finalize(Finalize),
+    Run(Run),
+}
+
+impl EjbCommand for Command {
+    fn execute(self) -> Result<EjbCommandResult, failure::Error> {
+        match self {
+            Command::GenerateTemplate(c) => c.execute().map(|c| c.into()),
+            Command::GenerateConfig(c) => c.execute().map(|c| c.into()),
+            Command::Finalize(c) => c.execute().map(|c| c.into()),
+            Command::Run(c) => c.execute(),
+        }
+    }
+}
+
+/// EJB-specific `run` command which collects standard Exonum Core parameters and
+/// also additional Java runtime and JVM configuration parameters.
 #[derive(Debug, StructOpt, Serialize, Deserialize)]
 #[structopt(rename_all = "kebab-case")]
 pub struct Run {
@@ -67,6 +86,12 @@ pub struct Run {
 pub enum EjbCommandResult {
     Standard(StandardResult),
     EjbRun(Config),
+}
+
+impl From<StandardResult> for EjbCommandResult {
+    fn from(result: StandardResult) -> Self {
+        EjbCommandResult::Standard(result)
+    }
 }
 
 pub trait EjbCommand {
