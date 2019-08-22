@@ -36,13 +36,15 @@ class DbKeyCompressedFunnelTest {
   @MethodSource("testSource")
   void funnelTest(DbKey dbKey, byte[] encodedSignificantBitsNum, int expectedWholeBytesKeyLength) {
     PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
+
     DbKeyCompressedFunnel.dbKeyCompressedFunnel().funnel(dbKey, primitiveSink);
-    byte[] key = dbKey.getKeySlice();
 
     InOrder inOrder = inOrder(primitiveSink);
     for (byte encodedByte : encodedSignificantBitsNum) {
       inOrder.verify(primitiveSink).putByte(encodedByte);
     }
+
+    byte[] key = dbKey.getKeySlice();
     inOrder.verify(primitiveSink).putBytes(key, 0, expectedWholeBytesKeyLength);
     Mockito.verifyNoMoreInteractions(primitiveSink);
   }
