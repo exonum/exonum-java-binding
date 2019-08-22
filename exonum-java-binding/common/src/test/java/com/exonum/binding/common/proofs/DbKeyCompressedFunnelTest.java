@@ -49,25 +49,25 @@ class DbKeyCompressedFunnelTest {
   private static Stream<Arguments> testSource() {
     return Stream.of(
         Arguments.of(DbKey.newBranchKey(keyFromString(""), 0b0_0000000),
-            new byte[]{(byte) 0b0_0000000},
+            new byte[]{0b0_0000000},
             0),
         Arguments.of(DbKey.newBranchKey(keyFromString("1"), 0b0_0000001),
-            new byte[]{(byte) 0b0_0000001},
+            new byte[]{0b0_0000001},
             1),
         Arguments.of(DbKey.newBranchKey(keyFromString("111"), 0b0_0000111),
-            new byte[]{(byte) 0b0_0000111},
+            new byte[]{0b0_0000111},
             1),
         Arguments.of(DbKey.newBranchKey(keyFromString("0001"), 0b0_0001000),
-            new byte[]{(byte) 0b0_0001000},
+            new byte[]{0b0_0001000},
             1),
         Arguments.of(DbKey.newBranchKey(keyFromString("1111"), 0b0_1111111),
-            new byte[]{(byte) 0b0_1111111},
+            new byte[]{0b0_1111111},
             16),
         Arguments.of(DbKey.newBranchKey(keyFromString("1001 1001"), 0b1_0000000),
-            new byte[]{(byte) 0b1_0000000, (byte) 0b0_0000001},
+            new byte[]{(byte) 0b1_0000000, 0b0_0000001},
             16),
         Arguments.of(DbKey.newLeafKey(keyFromString("1111 1111")),
-            new byte[]{(byte) 0b1_0000000, (byte) 0b0_0000010},
+            new byte[]{(byte) 0b1_0000000, 0b0_0000010},
             32));
   }
 }
