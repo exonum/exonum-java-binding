@@ -39,14 +39,6 @@ public enum DbKeyCompressedFunnel implements Funnel<DbKey> {
     into.putBytes(key, 0, wholeBytesLength);
   }
 
-  public static Funnel<DbKey> dbKeyCompressedFunnel() {
-    return INSTANCE;
-  }
-
-  private static int getWholeBytesKeyLength(int bitsLength) {
-    return (bitsLength + Byte.SIZE - 1) / Byte.SIZE;
-  }
-
   private static void writeUnsignedLeb128(PrimitiveSink into, int value) {
     int remaining = value >>> 7;
     while (remaining != 0) {
@@ -56,5 +48,13 @@ public enum DbKeyCompressedFunnel implements Funnel<DbKey> {
     }
 
     into.putByte((byte) (value & 0x7f));
+  }
+
+  private static int getWholeBytesKeyLength(int bitsLength) {
+    return (bitsLength + Byte.SIZE - 1) / Byte.SIZE;
+  }
+
+  public static Funnel<DbKey> dbKeyCompressedFunnel() {
+    return INSTANCE;
   }
 }
