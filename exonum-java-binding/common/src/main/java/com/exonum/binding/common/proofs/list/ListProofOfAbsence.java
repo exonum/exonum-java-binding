@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,29 @@
 
 package com.exonum.binding.common.proofs.list;
 
-public interface ListProofVisitor {
+import com.exonum.binding.common.hash.HashCode;
 
-  void visit(ListProofBranch branch);
+/**
+ * Represents the proof of absence of an element.
+ */
+public final class ListProofOfAbsence implements ListProofNode {
 
-  void visit(ListProofHashNode listProofHashNode);
+  private final HashCode hash;
 
-  void visit(ListProofElement value);
+  @SuppressWarnings("unused")  // Native API
+  ListProofOfAbsence(byte[] hash) {
+    this.hash = HashCode.fromBytes(hash);
+  }
 
-  void visit(ListProofOfAbsence listProofOfAbsence);
+  @Override
+  public void accept(ListProofVisitor visitor) {
+    visitor.visit(this);
+  }
+
+  /**
+   * Returns the hash of this proof of absence.
+   */
+  public HashCode getHash() {
+    return hash;
+  }
 }

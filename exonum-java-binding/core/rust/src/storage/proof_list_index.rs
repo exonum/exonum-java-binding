@@ -14,7 +14,7 @@
 
 use exonum::crypto::Hash;
 use exonum_merkledb::{
-    proof_list_index::{ListProof, ProofListIndexIter},
+    proof_list_index::{ListProof, ProofListIndexIter, ProofOfAbsence},
     Fork, ObjectHash, ProofListIndex, Snapshot,
 };
 use jni::{
@@ -402,8 +402,8 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
             make_java_proof_branch(env, left, right)
         }
         ListProof::Leaf(ref value) => make_java_proof_element(env, value),
-        ListProof::Absent(_) => {
-            unimplemented!("The ProofOfAbsence structure is not public for the moment")
+        ListProof::Absent(ref proof_of_absence) => {
+            make_java_proof_of_absence(env, proof_of_absence)
         }
     }
 }
@@ -438,6 +438,15 @@ fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>>
     let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
     env.new_object(
         "com/exonum/binding/common/proofs/list/ListProofHashNode",
+        "([B)V",
+        &[hash.as_obj().into()],
+    )
+}
+
+fn make_java_proof_of_absence<'a>(env: &JNIEnv<'a>, proof_of_absence: &ProofOfAbsence) -> Result<JObject<'a>> {
+    let hash = env.auto_local(utils::convert_hash(env, &proof_of_absence.merkle_root())?.into());
+    env.new_object(
+        "com/exonum/binding/common/proofs/list/ListProofOfAbsence",
         "([B)V",
         &[hash.as_obj().into()],
     )

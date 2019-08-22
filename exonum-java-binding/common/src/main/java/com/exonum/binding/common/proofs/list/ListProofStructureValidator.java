@@ -77,6 +77,9 @@ final class ListProofStructureValidator implements ListProofVisitor {
     listProofElementsInfo.add(new NodeInfo(element, depth));
   }
 
+  @Override
+  public void visit(ListProofOfAbsence listProofOfAbsence) {}
+
   private void visitLeft(ListProofBranch branch, int branchDepth) {
     depth = getChildDepth(branchDepth);
     branch.getLeft().accept(this);
