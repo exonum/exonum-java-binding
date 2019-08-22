@@ -16,12 +16,9 @@
 
 package com.exonum.binding.common.proofs;
 
-import static com.exonum.binding.common.proofs.DbKeyCompressedFunnel.getWholeBytesKeyLength;
 import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.keyFromString;
-import static org.mockito.Mockito.anyByte;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.proofs.map.DbKey;
@@ -29,32 +26,48 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 class DbKeyCompressedFunnelTest {
 
   @ParameterizedTest
   @MethodSource("testSource")
-  void funnelTest(DbKey dbKey, byte[] encodedSignificantBitsNum) {
+  void funnelTest(DbKey dbKey, byte[] encodedSignificantBitsNum, int expectedWholeBytesKeyLength) {
     PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
     DbKeyCompressedFunnel.dbKeyCompressedFunnel().funnel(dbKey, primitiveSink);
-    int wholeBytesKeyLength = getWholeBytesKeyLength(dbKey.getNumSignificantBits());
     byte[] key = dbKey.getKeySlice();
 
-    verify(primitiveSink, times(encodedSignificantBitsNum.length)).putByte(anyByte());
+    InOrder inOrder = inOrder(primitiveSink);
     for(byte encodedByte: encodedSignificantBitsNum) {
-      verify(primitiveSink).putByte(encodedByte);
+      inOrder.verify(primitiveSink).putByte(encodedByte);
     }
-    verify(primitiveSink).putBytes(key, 0, wholeBytesKeyLength);
+    inOrder.verify(primitiveSink).putBytes(key, 0, expectedWholeBytesKeyLength);
+    Mockito.verifyNoMoreInteractions(primitiveSink);
   }
 
   private static Stream<Arguments> testSource() {
     return Stream.of(
-        Arguments.of(DbKey.newBranchKey(keyFromString(""), 0), new byte[]{0}),
-        Arguments.of(DbKey.newBranchKey(keyFromString("1"), 1), new byte[]{1}),
-        Arguments.of(DbKey.newBranchKey(keyFromString("111"), 7), new byte[]{7}),
-        Arguments.of(DbKey.newBranchKey(keyFromString("0001"), 8), new byte[]{8}),
-        Arguments.of(DbKey.newBranchKey(keyFromString("1111"), 127), new byte[]{127}),
-        Arguments.of(DbKey.newBranchKey(keyFromString("1001 1001"), 128), new byte[]{-128, 1}),
-        Arguments.of(DbKey.newLeafKey(keyFromString("1111 1111")), new byte[]{-128, 2}));
+        Arguments.of(DbKey.newBranchKey(keyFromString(""), 0b0_0000000),
+            new byte[]{(byte) 0b0_0000000},
+            0),
+        Arguments.of(DbKey.newBranchKey(keyFromString("1"), 0b0_0000001),
+            new byte[]{(byte) 0b0_0000001},
+            1),
+        Arguments.of(DbKey.newBranchKey(keyFromString("111"), 0b0_0000111),
+            new byte[]{(byte) 0b0_0000111},
+            1),
+        Arguments.of(DbKey.newBranchKey(keyFromString("0001"), 0b0_0001000),
+            new byte[]{(byte) 0b0_0001000},
+            1),
+        Arguments.of(DbKey.newBranchKey(keyFromString("1111"), 0b0_1111111),
+            new byte[]{(byte) 0b0_1111111},
+            16),
+        Arguments.of(DbKey.newBranchKey(keyFromString("1001 1001"), 0b1_0000000),
+            new byte[]{(byte) 0b1_0000000, (byte) 0b0_0000001},
+            16),
+        Arguments.of(DbKey.newLeafKey(keyFromString("1111 1111")),
+            new byte[]{(byte) 0b1_0000000, (byte) 0b0_0000010},
+            32));
   }
 }

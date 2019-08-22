@@ -19,7 +19,6 @@ package com.exonum.binding.common.proofs;
 import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.proofs.map.DbKey;
-import com.google.common.annotations.VisibleForTesting;
 
 /**
  * A funnel for a database key. Puts the LEB128 compressed binary representation of the given
@@ -43,8 +42,7 @@ public enum DbKeyCompressedFunnel implements Funnel<DbKey> {
     return INSTANCE;
   }
 
-  @VisibleForTesting
-  static int getWholeBytesKeyLength(int bitsLength) {
+  private static int getWholeBytesKeyLength(int bitsLength) {
     return (bitsLength + Byte.SIZE - 1) / Byte.SIZE;
   }
 
