@@ -17,13 +17,13 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
+import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesAbsence;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -91,17 +91,43 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
-  void getProofFailsIfEmptyList() {
-    runTestWithView(database::createSnapshot,
-        (list) -> assertThrows(IndexOutOfBoundsException.class, () -> list.getProof(0)));
-  }
-
-  @Test
   void getProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
       assertThat(list, provesThatContains(0, V1));
+    });
+  }
+
+  @Test
+  void getProofOfAbsenceEmptyList() {
+    runTestWithView(database::createFork, (list) -> {
+      assertThat(list, provesAbsence(0));
+    });
+  }
+
+  @Test
+  void getProofOfAbsenceSingletonList() {
+    runTestWithView(database::createFork, (list) -> {
+      list.add(V1);
+
+      assertThat(list, provesAbsence(1));
+    });
+  }
+
+  @Test
+  void getRangeProofOfAbsenceEmptyList() {
+    runTestWithView(database::createFork, (list) -> {
+      assertThat(list, provesAbsence(0, 1));
+    });
+  }
+
+  @Test
+  void getRangeProofOfAbsenceSingletonList() {
+    runTestWithView(database::createFork, (list) -> {
+      list.add(V1);
+
+      assertThat(list, provesAbsence(0, 2));
     });
   }
 
@@ -162,12 +188,12 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      Consumer<ProofListIndexProxy<String>> listTest) {
+                                      Consumer<ProofListIndexProxy<String>> listTest) {
     runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, ProofListIndexProxy<String>> listTest) {
+                                      BiConsumer<View, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         LIST_NAME,

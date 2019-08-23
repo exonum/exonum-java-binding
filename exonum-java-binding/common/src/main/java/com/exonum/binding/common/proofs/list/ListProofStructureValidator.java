@@ -18,6 +18,7 @@ package com.exonum.binding.common.proofs.list;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -108,6 +109,8 @@ final class ListProofStructureValidator implements ListProofVisitor {
       proofStatus = ListProofStatus.INVALID_TREE_NO_ELEMENTS;
     } else if (hashNodesLimitExceeded(listProofBranchesInfo)) {
       proofStatus = ListProofStatus.INVALID_HASH_NODES_COUNT;
+    } else if (proofOfAbsenceIsNotARootNode(listProofBranchesInfo)) {
+      proofStatus = ListProofStatus.INVALID_PROOF_OF_ABSENCE;
     }
   }
 
@@ -123,6 +126,8 @@ final class ListProofStructureValidator implements ListProofVisitor {
       return NodeType.ELEMENT;
     } else if (node instanceof ListProofHashNode) {
       return NodeType.HASHNODE;
+    } else if (node instanceof ListProofOfAbsence) {
+      return NodeType.ABSENCE;
     } else {
       throw new RuntimeException("Unknown tree node type: " + node);
     }
@@ -185,6 +190,18 @@ final class ListProofStructureValidator implements ListProofVisitor {
   }
 
   /**
+   * Returns true if proof of absence node is not a root node in a proof tree.
+   *
+   * @param branches collection of branches info
+   */
+  private boolean proofOfAbsenceIsNotARootNode(List<NodeInfo> branches) {
+    return branches.stream()
+        .map(NodeInfo::getChildElementsTypes)
+        .flatMap(Collection::stream)
+        .anyMatch(node -> node == NodeType.ABSENCE);
+  }
+
+  /**
    * Returns proof status.
    */
   ListProofStatus getProofStatus() {
@@ -241,7 +258,6 @@ final class ListProofStructureValidator implements ListProofVisitor {
    * Enum used to identify tree node type.
    */
   private enum NodeType {
-    BRANCH, ELEMENT, HASHNODE, NONE
+    BRANCH, ELEMENT, HASHNODE, ABSENCE, NONE
   }
 }
-

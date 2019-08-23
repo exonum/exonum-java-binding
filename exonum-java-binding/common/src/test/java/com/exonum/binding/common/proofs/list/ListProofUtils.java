@@ -64,6 +64,13 @@ final class ListProofUtils {
     return root;
   }
 
+  /**
+   * Creates ListProof absence node with given Merkle root.
+   */
+  static ListProofOfAbsence proofOfAbsence(HashCode merkleRoot) {
+    return new ListProofOfAbsence(merkleRoot.asBytes());
+  }
+
   static HashCode getNodeHashCode(String v1) {
     return Hashing.defaultHashFunction().newHasher()
         .putByte(BLOB_PREFIX)

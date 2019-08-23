@@ -139,8 +139,8 @@ final class StoragePreconditions {
   }
 
   /**
-   * Checks that the first element index of the range is less than or equal
-   * to the index after the last element.
+   * Checks that the first element index of the range is less than the index after
+   * the last element.
    *
    * @param from the index of the first element
    * @param to the index after the last element
@@ -148,7 +148,7 @@ final class StoragePreconditions {
   static void checkRange(long from, long to) {
     if (from < 0 || from >= to) {
       throw new IndexOutOfBoundsException("Proof range first element index " + from
-          + " is greater than or equal to the index after the last element " + to);
+          + " must be in range [0, " + to + ")");
     }
   }
 

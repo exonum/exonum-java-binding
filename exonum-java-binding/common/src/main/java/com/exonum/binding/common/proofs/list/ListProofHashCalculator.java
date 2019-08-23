@@ -117,7 +117,7 @@ final class ListProofHashCalculator<E> implements ListProofVisitor {
 
   @Override
   public void visit(ListProofOfAbsence listProofOfAbsence) {
-    hash = listProofOfAbsence.getHash();
+    hash = listProofOfAbsence.getMerkleRoot();
   }
 
   private HashCode visitLeft(ListProofBranch branch, long parentIndex) {

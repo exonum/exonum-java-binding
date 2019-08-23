@@ -18,6 +18,7 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptyMap;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.common.proofs.list.CheckedListProof;
@@ -136,5 +137,42 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
       expectedProofElements.put(i, expectedValues.get(Math.toIntExact(i - from)));
     }
     return new ProofListContainsMatcher(proofFunction, expectedProofElements);
+  }
+
+  /**
+   * Creates a matcher for a proof list that will match iff the list provides a <em>valid</em>
+   * cryptographic proof of absence of an element at the specified position.
+   *
+   * <p>The proof is obtained via {@link ProofListIndexProxy#getProof(long)}.
+   *
+   * @param index an index of the element to prove absence of
+   */
+  public static ProofListContainsMatcher provesAbsence(long index) {
+    checkArgument(0 <= index);
+
+    Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction =
+        (list) -> list.getProof(index);
+
+    return new ProofListContainsMatcher(proofFunction, emptyMap());
+  }
+
+  /**
+   * Creates a matcher for a proof list that will match iff the list provides a <em>valid</em>
+   * cryptographic proof of absence of values in given range.
+   *
+   * <p>The proof is obtained via {@link ProofListIndexProxy#getRangeProof(long, long)}.
+   * The value of {@code to} parameter is inferred from the size of the list of expected values.
+   *
+   * @param from an index of the first element of the range
+   * @param to an index of the last element of the range
+   * @throws IllegalArgumentException if from is negative
+   */
+  public static ProofListContainsMatcher provesAbsence(long from, long to) {
+    checkArgument(0 <= from, "Range start index (%s) is negative", from);
+
+    Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction =
+        (list) -> list.getRangeProof(from, to);
+
+    return new ProofListContainsMatcher(proofFunction, emptyMap());
   }
 }
