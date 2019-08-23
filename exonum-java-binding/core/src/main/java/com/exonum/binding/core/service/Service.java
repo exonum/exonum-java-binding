@@ -90,7 +90,7 @@ public interface Service {
    *
    * @param snapshot a snapshot of the blockchain state. Not valid after this method returns
    * @see ProofListIndexProxy#getIndexHash()
-   * @see ProofMapIndexProxy#getRootHash()
+   * @see ProofMapIndexProxy#getIndexHash()
    */
   default List<HashCode> getStateHashes(Snapshot snapshot) {
     return Collections.emptyList();

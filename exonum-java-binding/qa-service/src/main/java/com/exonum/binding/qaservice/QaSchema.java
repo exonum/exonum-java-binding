@@ -48,7 +48,7 @@ public final class QaSchema implements Schema {
 
   @Override
   public List<HashCode> getStateHashes() {
-    return Collections.singletonList(counters().getRootHash());
+    return Collections.singletonList(counters().getIndexHash());
   }
 
   /**

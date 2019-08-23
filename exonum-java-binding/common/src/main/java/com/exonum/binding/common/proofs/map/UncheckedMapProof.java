@@ -22,12 +22,12 @@ package com.exonum.binding.common.proofs.map;
  * Example usage:
  * <pre><code>
  * byte[] key = "The key for which I want a proved value".getBytes();
- * HashCode expectedRootHash = // get a known root hash from block proof //
+ * HashCode expectedIndexHash = // get a known index hash from block proof //
  * UncheckedMapProof proof = requestProofForKey(key);
  * // Convert to checked
  * CheckedMapProof checkedProof = proof.check();
- * // Check the root hash
- * if (checkedProof.compareWithRootHash(expectedRootHash)) {
+ * // Check the index hash
+ * if (checkedProof.getIndexHash().equals(expectedIndexHash)) {
  *   // Get and use the value(s)
  *   byte[] value = checked.get(key);
  * }

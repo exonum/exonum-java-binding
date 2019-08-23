@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   it will load the bundled library. (#991)
 - `Ed25519CryptoFunction` is made package-private. It remains accessible via 
   `CryptoFunctions#ed25519`.
+- After the introduction of MerkleDB the hash of the index is not equal to the root hash of the
+  corresponding proof tree anymore. Therefore `CheckedProof#getRootHash`,
+  `ProofListIndexProxy#getRootHash` and `ProofMapIndexProxy#getRootHash` are replaced with
+  `CheckedProof#getIndexHash`, `ProofListIndexProxy#getIndexHash` and
+  `ProofMapIndexProxy#getIndexHash` accordingly.
 
 ## [0.7.0] - 2019-07-17
 
