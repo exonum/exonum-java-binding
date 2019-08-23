@@ -20,6 +20,7 @@ import static com.exonum.binding.core.transport.VertxServer.State.IDLE;
 import static com.exonum.binding.core.transport.VertxServer.State.STARTED;
 import static com.exonum.binding.core.transport.VertxServer.State.STOPPED;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
@@ -97,8 +98,18 @@ final class VertxServer implements Server {
         throw new IllegalStateException("Cannot start a server when its state is " + state);
       }
       state = STARTED;
-      server.listen(port);
+      server.listen(port, ar -> logServerStartEvent(ar, port));
+    }
+  }
+
+  private void logServerStartEvent(AsyncResult<HttpServer> startResult, int requestedPort) {
+    if (startResult.succeeded()) {
+      HttpServer server = startResult.result();
       logger.info("Java server is listening at port {}", server.actualPort());
+    } else {
+      Throwable failureCause = startResult.cause();
+      logger.error("Java server failed to start listening at port {}", requestedPort,
+          failureCause);
     }
   }
 
