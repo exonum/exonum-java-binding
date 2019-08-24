@@ -18,7 +18,6 @@ package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.proofs.list.ListProofUtils.generateRightLeaningProofTree;
 import static com.exonum.binding.common.proofs.list.ListProofUtils.leafOf;
-import static com.exonum.binding.common.proofs.list.ListProofUtils.proofOfAbsence;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -103,7 +102,7 @@ class ListProofStructureValidatorTest {
 
   @Test
   void visit_ProofOfAbsence() {
-    ListProofNode root = proofOfAbsence(H1);
+    ListProofNode root = new ListProofOfAbsence(H1);
 
     validator = createListProofStructureValidator(root);
 
@@ -233,7 +232,7 @@ class ListProofStructureValidatorTest {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(
             leafOf(V1),
-            proofOfAbsence(H1) // Having proof of absence not as a proof tree root is not allowed
+            new ListProofOfAbsence(H1) // Having proof of absence not as a proof tree root is not allowed
         ),
         new ListProofHashNode(H2)
     );

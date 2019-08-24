@@ -18,7 +18,6 @@ package com.exonum.binding.common.proofs.list;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,6 +37,8 @@ final class ListProofStructureValidator implements ListProofVisitor {
 
   private int depth;
 
+  private boolean absentNode;
+
   private ListProofStatus proofStatus;
 
   /**
@@ -45,6 +46,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
    */
   ListProofStructureValidator(ListProofNode listProof) {
     depth = 0;
+    absentNode = false;
     proofStatus = ListProofStatus.VALID;
     listProofBranchesInfo = new ArrayList<>();
     listProofElementsInfo = new ArrayList<>();
@@ -60,6 +62,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
 
     NodeType leftElementType = getNodeType(branch.getLeft());
     NodeType rightElementType = branch.getRight().map(this::getNodeType).orElse(NodeType.NONE);
+    checkForAbsentNodes(leftElementType, rightElementType);
     listProofBranchesInfo.add(
         new NodeInfo(branch, depth, Arrays.asList(leftElementType, rightElementType))
     );
@@ -80,6 +83,13 @@ final class ListProofStructureValidator implements ListProofVisitor {
 
   @Override
   public void visit(ListProofOfAbsence listProofOfAbsence) {}
+
+
+  private void checkForAbsentNodes(NodeType leftElementType, NodeType rightElementType) {
+    if (leftElementType == NodeType.ABSENCE || rightElementType == NodeType.ABSENCE) {
+      absentNode = true;
+    }
+  }
 
   private void visitLeft(ListProofBranch branch, int branchDepth) {
     depth = getChildDepth(branchDepth);
@@ -109,7 +119,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
       proofStatus = ListProofStatus.INVALID_TREE_NO_ELEMENTS;
     } else if (hashNodesLimitExceeded(listProofBranchesInfo)) {
       proofStatus = ListProofStatus.INVALID_HASH_NODES_COUNT;
-    } else if (proofOfAbsenceIsNotARootNode(listProofBranchesInfo)) {
+    } else if (absentNode) {
       proofStatus = ListProofStatus.INVALID_PROOF_OF_ABSENCE;
     }
   }
@@ -187,18 +197,6 @@ final class ListProofStructureValidator implements ListProofVisitor {
     }
     return children.stream()
         .allMatch(nodeType -> (nodeType == NodeType.HASHNODE) || (nodeType == NodeType.NONE));
-  }
-
-  /**
-   * Returns true if proof of absence node is not a root node in a proof tree.
-   *
-   * @param branches collection of branches info
-   */
-  private boolean proofOfAbsenceIsNotARootNode(List<NodeInfo> branches) {
-    return branches.stream()
-        .map(NodeInfo::getChildElementsTypes)
-        .flatMap(Collection::stream)
-        .anyMatch(node -> node == NodeType.ABSENCE);
   }
 
   /**

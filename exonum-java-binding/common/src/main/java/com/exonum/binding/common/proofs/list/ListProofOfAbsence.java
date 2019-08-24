@@ -28,7 +28,14 @@ public final class ListProofOfAbsence implements ListProofNode {
 
   @SuppressWarnings("unused")  // Native API
   ListProofOfAbsence(byte[] merkleRoot) {
-    this.merkleRoot = HashCode.fromBytes(merkleRoot);
+    this(HashCode.fromBytes(merkleRoot));
+  }
+
+  /**
+   * Creates ListProof absence node with given Merkle root.
+   */
+  public ListProofOfAbsence(HashCode merkleRoot) {
+    this.merkleRoot = merkleRoot;
   }
 
   @Override
