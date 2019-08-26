@@ -445,7 +445,7 @@ fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>>
 
 fn make_java_proof_of_absence<'a>(
     env: &JNIEnv<'a>,
-    proof_of_absence: &ProofOfAbsence
+    proof_of_absence: &ProofOfAbsence,
 ) -> Result<JObject<'a>> {
     let hash = env.auto_local(utils::convert_hash(env, &proof_of_absence.merkle_root())?.into());
     env.new_object(
