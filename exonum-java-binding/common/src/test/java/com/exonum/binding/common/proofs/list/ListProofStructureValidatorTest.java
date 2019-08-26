@@ -232,7 +232,8 @@ class ListProofStructureValidatorTest {
     ListProofBranch root = new ListProofBranch(
         new ListProofBranch(
             leafOf(V1),
-            new ListProofOfAbsence(H1) // Having proof of absence not as a proof tree root is not allowed
+            // Having proof of absence not as a proof tree root is not allowed
+            new ListProofOfAbsence(H1)
         ),
         new ListProofHashNode(H2)
     );
