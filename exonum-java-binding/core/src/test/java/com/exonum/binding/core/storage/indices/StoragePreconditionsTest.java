@@ -299,7 +299,8 @@ class StoragePreconditionsTest {
     IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
         () -> checkRange(Long.MAX_VALUE, 2));
     assertThat(thrown.getLocalizedMessage(),
-        containsString("Proof range first element index " + Long.MAX_VALUE + " must be in range [0, 2)"));
+        containsString("Proof range first element index "
+            + Long.MAX_VALUE + " must be in range [0, 2)"));
   }
 
   @Test
