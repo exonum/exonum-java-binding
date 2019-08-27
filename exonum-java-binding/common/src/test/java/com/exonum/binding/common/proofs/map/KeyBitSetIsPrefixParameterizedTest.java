@@ -20,6 +20,7 @@ import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,42 +74,41 @@ class KeyBitSetIsPrefixParameterizedTest {
         // TODO: Consider using bitstrings (e.g, DbKeyTestUtils#keyFromString) to simplify
         //    these parameters: (1) get rid of explicit length; (2) use sane order.
         //    With that these parameters could be specified as a @CsvSource: ECR-2744
-        Arguments.of(bytes(), 0, bytes(), 0, true, "[] <- []"),
-        Arguments.of(bytes(), 0, bytes(), 2, true, "[] <- [00]"),
-        Arguments.of(bytes(), 0, bytes(0xE), 4, true, "[] <- [1110]"),
+        arguments(bytes(), 0, bytes(), 0, true, "[] <- []"),
+        arguments(bytes(), 0, bytes(), 2, true, "[] <- [00]"),
+        arguments(bytes(), 0, bytes(0xE), 4, true, "[] <- [1110]"),
 
-        Arguments.of(bytes(), 2, bytes(), 2, true, "[00] <- [00]"),
-        Arguments.of(bytes(), 2, bytes(), 3, true, "[00] <- [000]"),
-        Arguments.of(bytes(), 2, bytes(0b100), 3, true, "[00] <- [100]"),
-        Arguments.of(bytes(), 2, bytes(0x10), 5, true, "[00] <- [1 0000]"),
-        Arguments.of(bytes(), 2, bytes(), 1, false, "![00] <- [0]"),
-        Arguments.of(bytes(), 2, bytes(0x1), 1, false, "![00] <- [01]"),
-        Arguments.of(bytes(), 2, bytes(0x2), 2, false, "![00] <- [10]"),
-        Arguments.of(bytes(), 2, bytes(0x3), 2, false, "![00] <- [11]"),
+        arguments(bytes(), 2, bytes(), 2, true, "[00] <- [00]"),
+        arguments(bytes(), 2, bytes(), 3, true, "[00] <- [000]"),
+        arguments(bytes(), 2, bytes(0b100), 3, true, "[00] <- [100]"),
+        arguments(bytes(), 2, bytes(0x10), 5, true, "[00] <- [1 0000]"),
+        arguments(bytes(), 2, bytes(), 1, false, "![00] <- [0]"),
+        arguments(bytes(), 2, bytes(0x1), 1, false, "![00] <- [01]"),
+        arguments(bytes(), 2, bytes(0x2), 2, false, "![00] <- [10]"),
+        arguments(bytes(), 2, bytes(0x3), 2, false, "![00] <- [11]"),
 
-        Arguments.of(bytes(0x0F), 4, bytes(0x0F), 4, true, "[1111] <- [1111]"),
-        Arguments.of(bytes(0x0F), 4, bytes(0x0F), 5, true, "[1111] <- [0 1111]"),
-        Arguments.of(bytes(0x0F), 4, bytes(0x1F), 5, true, "[1111] <- [1 1111]"),
-        Arguments.of(bytes(0x0F), 4, bytes(0x1F), 8, true, "[1111] <- [0001 1111]"),
-        Arguments.of(bytes(0x0F), 4, bytes(0x8F), 8, true, "[1111] <- [1000 1111]"),
-        Arguments.of(bytes(0x0F), 4, bytes(0x7), 3, false, "![1111] <- [111]"),
-        Arguments.of(bytes(0x0F), 4, bytes(0x7), 4, false, "![1111] <- [0111]"),
-        Arguments.of(bytes(0x0F), 4, bytes(0x8), 4, false, "![1111] <- [1000]"),
-        Arguments.of(bytes(0x0F), 4, bytes(0x10), 5, false, "![1111] <- [10000]"),
+        arguments(bytes(0x0F), 4, bytes(0x0F), 4, true, "[1111] <- [1111]"),
+        arguments(bytes(0x0F), 4, bytes(0x0F), 5, true, "[1111] <- [0 1111]"),
+        arguments(bytes(0x0F), 4, bytes(0x1F), 5, true, "[1111] <- [1 1111]"),
+        arguments(bytes(0x0F), 4, bytes(0x1F), 8, true, "[1111] <- [0001 1111]"),
+        arguments(bytes(0x0F), 4, bytes(0x8F), 8, true, "[1111] <- [1000 1111]"),
+        arguments(bytes(0x0F), 4, bytes(0x7), 3, false, "![1111] <- [111]"),
+        arguments(bytes(0x0F), 4, bytes(0x7), 4, false, "![1111] <- [0111]"),
+        arguments(bytes(0x0F), 4, bytes(0x8), 4, false, "![1111] <- [1000]"),
+        arguments(bytes(0x0F), 4, bytes(0x10), 5, false, "![1111] <- [10000]"),
 
-        Arguments.of(bytes(0x0F), 5, bytes(0x0F), 5, true, "[0 1111] <- [0 1111]"),
-        Arguments.of(bytes(0x0F), 5, bytes(0x0F), 6, true, "[0 1111] <- [00 1111]"),
-        Arguments.of(bytes(0x0F), 5, bytes(0x2F), 6, true, "[0 1111] <- [10 1111]"),
-        Arguments.of(bytes(0x0F), 5, bytes(0x8F), 8, true, "[0 1111] <- [1000 1111]"),
-        Arguments.of(bytes(0x0F), 5, bytes(0x0F), 4, false, "![0 1111] <- [1111]"),
-        Arguments.of(bytes(0x0F), 5, bytes(0x0E), 5, false, "![0 1111] <- [0 1110]"),
-        Arguments.of(bytes(0x0F), 5, bytes(0x1F), 5, false, "![0 1111] <- [1 1111]"),
-        Arguments.of(bytes(0x0F), 5, bytes(0x0B), 5, false, "![0 1111] <- [0 1011]"),
-        Arguments.of(bytes(0x00, 0xFF), 2 * Byte.SIZE, bytes(0x00, 0xFF, 0x11), 3 * Byte.SIZE, true,
+        arguments(bytes(0x0F), 5, bytes(0x0F), 5, true, "[0 1111] <- [0 1111]"),
+        arguments(bytes(0x0F), 5, bytes(0x0F), 6, true, "[0 1111] <- [00 1111]"),
+        arguments(bytes(0x0F), 5, bytes(0x2F), 6, true, "[0 1111] <- [10 1111]"),
+        arguments(bytes(0x0F), 5, bytes(0x8F), 8, true, "[0 1111] <- [1000 1111]"),
+        arguments(bytes(0x0F), 5, bytes(0x0F), 4, false, "![0 1111] <- [1111]"),
+        arguments(bytes(0x0F), 5, bytes(0x0E), 5, false, "![0 1111] <- [0 1110]"),
+        arguments(bytes(0x0F), 5, bytes(0x1F), 5, false, "![0 1111] <- [1 1111]"),
+        arguments(bytes(0x0F), 5, bytes(0x0B), 5, false, "![0 1111] <- [0 1011]"),
+        arguments(bytes(0x00, 0xFF), 2 * Byte.SIZE, bytes(0x00, 0xFF, 0x11), 3 * Byte.SIZE, true,
             "[FF 00] <- [11 FF 00]"),
-        Arguments
-            .of(bytes(0x00, 0xFF), 2 * Byte.SIZE, bytes(0x01, 0xFF, 0x11), 3 * Byte.SIZE, false,
-                "![FF 00] <- [11 FF 01]")
+        arguments(bytes(0x00, 0xFF), 2 * Byte.SIZE, bytes(0x01, 0xFF, 0x11), 3 * Byte.SIZE, false,
+            "![FF 00] <- [11 FF 01]")
     );
   }
 }

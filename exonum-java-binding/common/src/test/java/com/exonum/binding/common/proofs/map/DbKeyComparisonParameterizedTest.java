@@ -23,6 +23,7 @@ import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.branchKeyFromP
 import static com.exonum.binding.common.proofs.map.DbKeyTestUtils.leafKeyFromPrefix;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,32 +55,32 @@ class DbKeyComparisonParameterizedTest {
   private static List<Arguments> testData() {
     return Arrays.asList(
         // "A > B" reads "Key A is bigger than key B"
-        Arguments.of(
+        arguments(
             branchKeyFromPrefix("1100"),
             branchKeyFromPrefix("0"),
             GREATER,
             "[1100] > [0]"),
-        Arguments.of(
+        arguments(
             branchKeyFromPrefix("1100"),
             branchKeyFromPrefix("001101"),
             GREATER,
             "[1100] > [001101]"),
-        Arguments.of(
+        arguments(
             branchKeyFromPrefix("001101"),
             branchKeyFromPrefix("00110101"),
             LESS,
             "[001101] < [00110101]"),
-        Arguments.of(
+        arguments(
             branchKeyFromPrefix("101"),
             branchKeyFromPrefix("110"),
             LESS,
             "[101] < [110]"),
-        Arguments.of(
+        arguments(
             branchKeyFromPrefix("1"),
             branchKeyFromPrefix("1"),
             EQUAL,
             "[1] = [1] (branches)"),
-        Arguments.of(
+        arguments(
             leafKeyFromPrefix("0"),
             leafKeyFromPrefix("0"),
             EQUAL,
