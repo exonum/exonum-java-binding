@@ -21,7 +21,7 @@ use jni::{
     Executor, InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use proxy::ServiceProxy;
+//use proxy::ServiceProxy;
 use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
 use std::{path::Path, sync::Arc};
 use utils::{convert_to_string, panic_on_exception, unwrap_jni};
@@ -80,26 +80,26 @@ impl JavaServiceRuntime {
     /// Creates a new service instance using the given artifact id.
     ///
     /// Panics if there are errors on Java side.
-    pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
-        unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_id_obj: JObject = env.new_string(artifact_id)?.into();
-            let service = panic_on_exception(
-                env,
-                env.call_method(
-                    self.service_runtime.as_obj(),
-                    "createService",
-                    CREATE_SERVICE_SIGNATURE,
-                    &[artifact_id_obj.into()],
-                ),
-            )
-            .l()?;
-            let service = env.new_global_ref(service)?;
-            Ok(ServiceProxy::from_global_ref(
-                self.executor.clone(),
-                service,
-            ))
-        }))
-    }
+//    pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
+//        unwrap_jni(self.executor.with_attached(|env| {
+//            let artifact_id_obj: JObject = env.new_string(artifact_id)?.into();
+//            let service = panic_on_exception(
+//                env,
+//                env.call_method(
+//                    self.service_runtime.as_obj(),
+//                    "createService",
+//                    CREATE_SERVICE_SIGNATURE,
+//                    &[artifact_id_obj.into()],
+//                ),
+//            )
+//            .l()?;
+//            let service = env.new_global_ref(service)?;
+//            Ok(ServiceProxy::from_global_ref(
+//                self.executor.clone(),
+//                service,
+//            ))
+//        }))
+//    }
 
     /// Loads an artifact from the specified location involving verification of the artifact.
     /// Returns an unique service artifact identifier that must be specified in subsequent

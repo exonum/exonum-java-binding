@@ -13,8 +13,8 @@
 // limitations under the License.
 
 use exonum::{
-    blockchain::Service,
-    helpers::fabric::{Command, CommandExtension, Context, ServiceFactory},
+    /* blockchain::Service, */
+    helpers::fabric::{Command, CommandExtension, Context, /* ServiceFactory */},
 };
 use runtime::{
     cmd::Run,
@@ -73,9 +73,9 @@ impl JavaServiceFactoryAdapter {
             JAVA_SERVICE_RUNTIME = Some(runtime);
         }
     }
-}
+/*}
 
-impl ServiceFactory for JavaServiceFactoryAdapter {
+impl ServiceFactory for JavaServiceFactoryAdapter { */
     fn service_name(&self) -> &str {
         &self.name
     }
@@ -91,6 +91,7 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
         None
     }
 
+    /*
     fn make_service(&mut self, context: &Context) -> Box<dyn Service> {
         let runtime = Self::get_or_create_java_service_runtime(extract_config(context));
 
@@ -99,6 +100,7 @@ impl ServiceFactory for JavaServiceFactoryAdapter {
         let service_proxy = runtime.create_service(&artifact_id);
         Box::new(service_proxy)
     }
+    */
 }
 
 // Returns `true` for the very first call, `false` otherwise.
