@@ -16,7 +16,6 @@
 
 package com.exonum.binding.common.proofs.list;
 
-import static com.exonum.binding.common.proofs.list.ListProofUtils.leafOf;
 import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -25,29 +24,28 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.StandardSerializers;
+import com.google.protobuf.ByteString;
 import org.junit.jupiter.api.Test;
 
 class UncheckedListProofAdapterTest {
 
-  private static final String V1 = "v1";
+  private static final ByteString V1 = ByteString.copyFromUtf8("v1");
 
   private static final HashCode H1 = HashCode.fromString("a1");
   private static final HashCode H2 = HashCode.fromString("a2");
 
   @Test
   void check_validProof() {
-    ListProofNode left = leafOf(V1);
+    ListProofNode left = new ListProofElement(V1);
     ListProofNode right = new ListProofHashNode(H1);
     ListProofBranch root = new ListProofBranch(left, right);
 
     long length = 2;
-    ListProof listProof = new ListProof(root, length);
-    UncheckedListProofAdapter<String> uncheckedProof = createUncheckedProof(listProof);
+    UncheckedListProofAdapter uncheckedProof = createUncheckedProof(root, length);
 
     CheckedListProof checkedProof = uncheckedProof.check();
 
-    assertThat(uncheckedProof.getListProof(), equalTo(listProof));
+    assertThat(uncheckedProof.getListProofRootNode(), equalTo(root));
     assertThat(checkedProof.getProofStatus(), is(ListProofStatus.VALID));
     assertThat(checkedProof.getElements(), equalTo(of(0L, V1)));
     assertThat(checkedProof.getIndexHash(), notNullValue());
@@ -60,8 +58,7 @@ class UncheckedListProofAdapterTest {
     ListProofBranch root = new ListProofBranch(left, right);
 
     long length = 2;
-    ListProof listProof = new ListProof(root, length);
-    UncheckedListProofAdapter<String> uncheckedProof = createUncheckedProof(listProof);
+    UncheckedListProofAdapter uncheckedProof = createUncheckedProof(root, length);
 
     CheckedListProof checkedProof = uncheckedProof.check();
 
@@ -71,7 +68,7 @@ class UncheckedListProofAdapterTest {
     assertThrows(IllegalStateException.class, checkedProof::getIndexHash);
   }
 
-  private UncheckedListProofAdapter<String> createUncheckedProof(ListProof listProof) {
-    return new UncheckedListProofAdapter<>(listProof, StandardSerializers.string());
+  private UncheckedListProofAdapter createUncheckedProof(ListProofBranch root, long length) {
+    return new UncheckedListProofAdapter(root, length);
   }
 }
