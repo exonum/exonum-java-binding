@@ -24,6 +24,8 @@
 extern crate chrono;
 pub extern crate exonum;
 #[macro_use]
+extern crate exonum_derive;
+extern crate exonum_merkledb;
 extern crate failure;
 pub extern crate jni;
 extern crate toml;
