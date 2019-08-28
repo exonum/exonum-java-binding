@@ -33,7 +33,11 @@ import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.MessageLite;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.LongSupplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 
 /**
@@ -67,6 +71,10 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   static {
     LibraryLoader.load();
   }
+  // Note that we do *not* specify Spliterator.DISTINCT because it is documented in terms
+  // of Object#equals which this set does not use.
+  private static final int BASE_SPLITERATOR_CHARACTERISTICS =
+      Spliterator.NONNULL | Spliterator.ORDERED;
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -241,7 +249,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
 
   /**
    * Returns an iterator over the entries of this set. An entry is a hash-value pair.
-   * The entries are ordered by keys lexicographically.
+   * The entries are ordered by hashes lexicographically.
    *
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
@@ -262,6 +270,27 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   private native EntryInternal nativeIteratorNext(long iterNativeHandle);
 
   private native void nativeIteratorFree(long iterNativeHandle);
+
+  /**
+   * Returns a stream of the entries in this set. An entry is a hash-value pair.
+   * The entries are ordered by hashes lexicographically.
+   *
+   * @throws IllegalStateException if this set is not valid
+   */
+  public Stream<Entry<E>> stream() {
+    return StreamSupport.stream(
+        Spliterators.spliteratorUnknownSize(iterator(), streamCharacteristics()),
+        false
+    );
+  }
+
+  private int streamCharacteristics() {
+    if (dbView.canModify()) {
+      return BASE_SPLITERATOR_CHARACTERISTICS;
+    } else {
+      return BASE_SPLITERATOR_CHARACTERISTICS | Spliterator.IMMUTABLE;
+    }
+  }
 
   /**
    * An entry of a value set index: a hash-value pair.

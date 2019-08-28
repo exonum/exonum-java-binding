@@ -28,7 +28,11 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.LongSupplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A key set is an index that contains no duplicate elements (keys).
@@ -60,6 +64,11 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
   static {
     LibraryLoader.load();
   }
+
+  // Note that we do *not* specify Spliterator.DISTINCT because it is documented in terms
+  // of Object#equals which this set does not use.
+  private static final int BASE_SPLITERATOR_CHARACTERISTICS =
+      Spliterator.NONNULL | Spliterator.ORDERED;
 
   private final CheckingSerializerDecorator<E> serializer;
 
@@ -218,6 +227,25 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
         dbView,
         modCounter,
         serializer::fromBytes);
+  }
+
+  /**
+   * Returns a stream of the set elements. The elements are ordered lexicographically.
+   *
+   * @throws IllegalStateException if this set is not valid
+   */
+  public Stream<E> stream() {
+    return StreamSupport.stream(
+        Spliterators.spliteratorUnknownSize(iterator(), streamCharacteristics()),
+        false);
+  }
+
+  private int streamCharacteristics() {
+    if (dbView.canModify()) {
+      return BASE_SPLITERATOR_CHARACTERISTICS;
+    } else {
+      return BASE_SPLITERATOR_CHARACTERISTICS | Spliterator.IMMUTABLE;
+    }
   }
 
   /**

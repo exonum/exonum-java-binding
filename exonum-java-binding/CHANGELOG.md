@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `CheckedProof#getIndexHash`, `ProofListIndexProxy#getIndexHash` and
   `ProofMapIndexProxy#getIndexHash` accordingly.
 
+### Added
+- `stream` for sets: KeySetIndex and ValueSetIndex.
+
 ## [0.7.0] - 2019-07-17
 
 ### Overview
