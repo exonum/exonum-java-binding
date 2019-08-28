@@ -71,6 +71,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   static {
     LibraryLoader.load();
   }
+
   // Note that we do *not* specify Spliterator.DISTINCT because it is documented in terms
   // of Object#equals which this set does not use.
   private static final int BASE_SPLITERATOR_CHARACTERISTICS =
