@@ -201,7 +201,8 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
         checkPositionIndex(to, size));
   }
 
-  private native UncheckedListProofAdapter nativeGetRangeProof(long nativeHandle, long from, long to);
+  private native UncheckedListProofAdapter nativeGetRangeProof(
+      long nativeHandle, long from, long to);
 
   /**
    * Returns the index hash which represents the complete state of this list.
