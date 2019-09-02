@@ -15,9 +15,11 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-exonum = { version = "0.11", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
-exonum-time = "0.11"
-exonum-testkit = "0.11"
+exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
+exonum-derive = "0.12"
+exonum-merkledb = "0.12"
+exonum-time = "0.12"
+exonum-testkit = "0.12"
 chrono = "0.4.7"
 failure = "0.1.1"
 toml = "0.5"
@@ -25,12 +27,16 @@ jni = { version = "0.13.0", features = ["invocation"] }
 lazy_static = "1.3.0"
 log = "0.4.8"
 parking_lot = "0.6"
+protobuf = { version = "2.8.0", features = ["with-serde"] }
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0.40"
 
 [dev-dependencies]
 tempfile = "3"
+
+[build-dependencies]
+exonum-build = { version = "0.12" }
 
 [profile.dev]
 rpath = true
@@ -40,7 +46,10 @@ rpath = true
 
 # FIXME: using git dependency until new Exonum with MerkleDB will be released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
-exonum-configuration = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "2868b8b" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "b542dae" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "b542dae" }
+#exonum-configuration = { git = "https://github.com/exonum/exonum", rev = "b542dae" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "b542dae" }
+exonum-build = { git = "https://github.com/exonum/exonum", rev = "b542dae" }
+exonum-derive = { git = "https://github.com/exonum/exonum", rev = "b542dae" }
+exonum-merkledb = { git = "https://github.com/exonum/exonum", rev = "b542dae" }

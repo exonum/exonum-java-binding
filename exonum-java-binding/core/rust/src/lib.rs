@@ -32,6 +32,7 @@ extern crate toml;
 #[macro_use]
 extern crate log;
 extern crate parking_lot;
+extern crate protobuf;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -49,6 +50,7 @@ pub use exonum::exonum_merkledb;
 
 pub mod handle;
 mod proxy;
+mod proto;
 mod runtime;
 mod storage;
 mod testkit;
