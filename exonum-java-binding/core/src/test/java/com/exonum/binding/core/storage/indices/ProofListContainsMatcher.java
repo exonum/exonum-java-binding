@@ -18,18 +18,18 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.proofs.list.CheckedListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProof;
-
-import java.util.*;
-import java.util.function.Function;
-
 import com.google.protobuf.ByteString;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Function;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
