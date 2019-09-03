@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
@@ -217,7 +218,7 @@ class BinaryTransactionMessageTest {
                 toDirectBuffer(message),
                 toByteBufferWithCustomPositions(message)
             )
-                .map(buffer -> Arguments.of(message, buffer))
+                .map(buffer -> arguments(message, buffer))
         );
   }
 
