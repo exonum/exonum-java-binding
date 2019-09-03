@@ -104,7 +104,8 @@ final class ListProofStructureValidator implements ListProofVisitor {
       proofStatus = ListProofStatus.INVALID_HASH_NODE_DEPTH;
     } else if (hasInvalidNodesDepth(listProofInfo.get(NodeType.ELEMENT))) {
       proofStatus = ListProofStatus.INVALID_NODE_DEPTH;
-    } else if (hasNoElementNodes(listProofInfo.get(NodeType.BRANCH), listProofInfo.get(NodeType.ELEMENT))) {
+    } else if (hasNoElementNodes(listProofInfo.get(NodeType.BRANCH),
+        listProofInfo.get(NodeType.ELEMENT))) {
       proofStatus = ListProofStatus.INVALID_TREE_NO_ELEMENTS;
     } else if (hashNodesLimitExceeded(listProofInfo.get(NodeType.BRANCH))) {
       proofStatus = ListProofStatus.INVALID_HASH_NODES_COUNT;
