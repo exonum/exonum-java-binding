@@ -196,12 +196,16 @@ final class ListProofStructureValidator implements ListProofVisitor {
    */
   private boolean hasInvalidAbsentNodes() {
     Collection<NodeInfo> absentNodes = listProofInfo.get(NodeType.ABSENCE);
-    boolean singleNodeTree = listProofInfo.get(NodeType.BRANCH).isEmpty()
-        && listProofInfo.get(NodeType.HASHNODE).isEmpty()
-        && listProofInfo.get(NodeType.ELEMENT).isEmpty();
-    return absentNodes.size() > 1
-        || !singleNodeTree
-        || absentNodes.stream().allMatch(node -> node.getDepth() != 0);
+    if (absentNodes.size() > 1) {
+      return true;
+    } else if (absentNodes.size() == 1) {
+      boolean singleNodeTree = listProofInfo.get(NodeType.BRANCH).isEmpty()
+          && listProofInfo.get(NodeType.HASHNODE).isEmpty()
+          && listProofInfo.get(NodeType.ELEMENT).isEmpty();
+      return !singleNodeTree || absentNodes.stream().allMatch(node -> node.getDepth() != 0);
+    } else {
+      return false;
+    }
   }
 
   /**
