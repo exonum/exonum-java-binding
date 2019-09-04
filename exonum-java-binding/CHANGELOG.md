@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `ProofMapIndexProxy#getIndexHash` accordingly.
 
 ### Added
+- `stream` for sets: `KeySetIndex` and `ValueSetIndex`. (#1088)
 - Proofs of absence of an element with the specified index for `ProofListIndexProxy`. (#1081)
 
 ## [0.7.0] - 2019-07-17
