@@ -448,22 +448,6 @@
             </configuration>
             <executions>
               <execution>
-                <id>build-rust-lib</id>
-                <phase>prepare-package</phase>
-                <configuration>
-                  <arguments>
-                    <argument>+${rust.compiler.version}</argument>
-                    <argument>build</argument>
-                    <argument>${build.cargoFlag}</argument>
-                    <argument>--color</argument>
-                    <argument>always</argument>
-                  </arguments>
-                </configuration>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-              </execution>
-              <execution>
                 <id>build-exonum-java</id>
                 <phase>prepare-package</phase>
                 <configuration>
