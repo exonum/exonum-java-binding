@@ -115,6 +115,11 @@ final class ListProofHashCalculator<E> implements ListProofVisitor {
         .hash();
   }
 
+  @Override
+  public void visit(ListProofOfAbsence listProofOfAbsence) {
+    hash = listProofOfAbsence.getMerkleRoot();
+  }
+
   private HashCode visitLeft(ListProofBranch branch, long parentIndex) {
     index = 2 * parentIndex;
     branch.getLeft().accept(this);
