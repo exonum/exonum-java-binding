@@ -51,7 +51,7 @@ JAVA_LIBRARY_PATH="${EJB_ROOT}/core/rust/target/debug/deps"
 rm -rf testnet
 mkdir testnet
 
-# Delete the java_bindings library from the target/debug if any
+# Delete the java_bindings library from the target/debug if any to prevent ambiguity in dynamic linking (ECR-3468)
 rm -f "${EJB_ROOT}/core/rust/target/debug/libjava_bindings.*"
 
 # Enable predefined native logging configuration,
