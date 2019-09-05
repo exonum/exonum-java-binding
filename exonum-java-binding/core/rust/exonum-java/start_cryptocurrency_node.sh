@@ -45,11 +45,14 @@ echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
 header "PREPARE PATHS"
 
 EJB_LOG_CONFIG_PATH="${EJB_APP_DIR}/log4j-fallback.xml"
-JAVA_LIBRARY_PATH="${EJB_ROOT}/core/rust/target/debug"
+JAVA_LIBRARY_PATH="${EJB_ROOT}/core/rust/target/debug/deps"
 
 # Clear test dir
 rm -rf testnet
 mkdir testnet
+
+# Delete the java_bindings library from the target/debug if any to prevent ambiguity in dynamic linking (ECR-3468)
+rm -f "${EJB_ROOT}/core/rust/target/debug/libjava_bindings.*"
 
 # Enable predefined native logging configuration,
 # unless it is already set to any value (incl. null)

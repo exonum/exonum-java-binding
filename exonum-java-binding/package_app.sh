@@ -39,7 +39,7 @@ function build-exonum-java-for-platform() {
 
     export RUSTFLAGS="-C link-arg=-Wl,-rpath,${path_lib_from_exe} -C link-arg=-Wl,-rpath,${path_lib_from_lib}"
     echo "Setting new RUSTFLAGS=${RUSTFLAGS}"
-    export RUST_LIBRARY_PATH="${PACKAGING_BASE_DIR}/${full_lib_name}"
+    export RUST_LIBRARY_PATH="${PACKAGING_BASE_DIR}/deps/${full_lib_name}"
     build-exonum-java
 }
 
