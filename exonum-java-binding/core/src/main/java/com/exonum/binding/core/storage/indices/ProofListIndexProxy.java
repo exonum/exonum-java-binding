@@ -16,9 +16,8 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkPositionIndex;
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkRange;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.proofs.list.UncheckedListProof;
@@ -172,22 +171,23 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   }
 
   /**
-   * Returns a proof that an element exists at the specified index in this list.
+   * Returns a proof of either existence or absence of an element at the specified index
+   * in this list.
    *
    * @param index the element index
    * @throws IndexOutOfBoundsException if the index is invalid
    * @throws IllegalStateException if this list is not valid
    */
   public UncheckedListProof getProof(long index) {
-    checkElementIndex(index, size());
-
     return nativeGetProof(getNativeHandle(), index);
   }
 
   private native UncheckedListProofAdapter nativeGetProof(long nativeHandle, long index);
 
   /**
-   * Returns a proof that some elements exist in the specified range in this list.
+   * Returns a proof of either existence or absence of some elements in the specified range
+   * in this list. If some elements are present in the list, but some — are not (i.e., the
+   * requested range exceeds its size), a proof of absence is returned.
    *
    * @param from the index of the first element
    * @param to the index after the last element
@@ -195,10 +195,8 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @throws IllegalStateException if this list is not valid
    */
   public UncheckedListProof getRangeProof(long from, long to) {
-    long size = size();
-    return nativeGetRangeProof(getNativeHandle(),
-        checkElementIndex(from, size),
-        checkPositionIndex(to, size));
+    checkRange(from, to);
+    return nativeGetRangeProof(getNativeHandle(), from, to);
   }
 
   private native UncheckedListProofAdapter nativeGetRangeProof(

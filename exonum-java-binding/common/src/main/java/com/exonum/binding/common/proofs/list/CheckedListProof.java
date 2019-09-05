@@ -36,7 +36,9 @@ import java.util.NavigableMap;
  */
 public interface CheckedListProof<E> extends CheckedProof {
   /**
-   * Get all list elements. There might be several consecutive ranges.
+   * Get all list proof elements. There might be several consecutive ranges.
+   *
+   * @return list proof elements. Empty if the proof is a proof of absence
    * @throws IllegalStateException if the proof is not valid
    */
   NavigableMap<Long, E> getElements();

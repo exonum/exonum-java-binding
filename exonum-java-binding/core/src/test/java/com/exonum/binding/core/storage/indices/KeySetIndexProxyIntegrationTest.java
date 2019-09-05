@@ -19,6 +19,7 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K9;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -109,6 +110,22 @@ class KeySetIndexProxyIntegrationTest
       // Check that iterator includes all the elements added
       // and that they appear in lexicographical order (the order of TestStorageItems.keys).
       assertThat(iterElements, equalTo(elements));
+    });
+  }
+
+  @Test
+  void testStream() {
+    runTestWithView(database::createFork, (set) -> {
+      List<String> elements = TestStorageItems.keys;
+
+      elements.forEach(set::add);
+
+      List<String> streamElements = set.stream()
+          .collect(toList());
+
+      // Check that the stream includes all the elements added
+      // and that they appear in lexicographical order (the order of TestStorageItems.keys).
+      assertThat(streamElements, equalTo(elements));
     });
   }
 

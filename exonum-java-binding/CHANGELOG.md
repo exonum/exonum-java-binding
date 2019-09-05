@@ -26,9 +26,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `CheckedProof#getIndexHash`, `ProofListIndexProxy#getIndexHash` and
   `ProofMapIndexProxy#getIndexHash` accordingly.
 
-### Removed
-- Internal list proof representation abstraction `ListProof` is replaced with
-  `UncheckedListProofAdapter`. (#1089)
+### Added
+- `stream` for sets: `KeySetIndex` and `ValueSetIndex`. (#1088)
+- Proofs of absence of an element with the specified index for `ProofListIndexProxy`. (#1081)
 
 ## [0.7.0] - 2019-07-17
 

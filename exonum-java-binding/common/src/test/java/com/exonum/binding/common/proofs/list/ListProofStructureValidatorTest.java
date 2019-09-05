@@ -101,6 +101,15 @@ class ListProofStructureValidatorTest {
   }
 
   @Test
+  void visit_ProofOfAbsence() {
+    ListProofNode root = new ListProofOfAbsence(H1);
+
+    validator = createListProofStructureValidator(root);
+
+    assertTrue(validator.isValid());
+  }
+
+  @Test
   void visit_InvalidTreeHasNoElements() {
     ListProofNode left = new ListProofHashNode(H1);
     ListProofBranch root = new ListProofBranch(left, null);
@@ -218,4 +227,23 @@ class ListProofStructureValidatorTest {
     assertFalse(validator.isValid());
   }
 
+  @Test
+  void visit_InvalidProofOfAbsence() {
+    ListProofBranch root = new ListProofBranch(
+        new ListProofBranch(
+            new ListProofElement(V1),
+            // Having proof of absence not as a proof tree root is not allowed
+            new ListProofOfAbsence(H1)
+        ),
+        new ListProofHashNode(H2)
+    );
+
+    validator = createListProofStructureValidator(root);
+
+    assertThat(validator.getProofStatus(), is(ListProofStatus.INVALID_PROOF_OF_ABSENCE));
+  }
+
+  private ListProofStructureValidator createListProofStructureValidator(ListProofNode listProof) {
+    return new ListProofStructureValidator(listProof);
+  }
 }
