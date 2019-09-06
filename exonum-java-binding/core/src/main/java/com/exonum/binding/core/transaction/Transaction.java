@@ -19,8 +19,8 @@ package com.exonum.binding.core.transaction;
 /**
  * An Exonum transaction.
  *
- * @see <a href="https://exonum.com/doc/version/0.11/architecture/transactions">Exonum Transactions</a>
- * @see <a href="https://exonum.com/doc/version/0.11/architecture/services">Exonum Services</a>
+ * @see <a href="https://exonum.com/doc/version/0.12/architecture/transactions">Exonum Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.12/architecture/services">Exonum Services</a>
  */
 @FunctionalInterface
 public interface Transaction {
@@ -43,7 +43,7 @@ public interface Transaction {
   /**
    * Returns the information about this transaction in JSON format.
    * For example, it is included in the blockchain explorer response to
-   * a <a href="https://exonum.com/doc/version/0.11/advanced/node-management/#transaction">
+   * a <a href="https://exonum.com/doc/version/0.12/advanced/node-management/#transaction">
    *   transaction</a> request as 'content.debug'.
    *
    * <p>By default, no information is provided. If needed, it can be easily implemented

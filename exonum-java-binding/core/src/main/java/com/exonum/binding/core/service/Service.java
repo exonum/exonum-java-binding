@@ -51,7 +51,7 @@ public interface Service {
    * and is supposed to
    * <ul>
    *   <li>(a) initialize the database schema of this service, and</li>
-   *   <li>(b) provide an initial <a href="https://exonum.com/doc/version/0.11/architecture/services/#global-configuration">global configuration</a>
+   *   <li>(b) provide an initial <a href="https://exonum.com/doc/version/0.12/architecture/services/#global-configuration">global configuration</a>
    * of the service.</li>
    * </ul>
    *
@@ -62,7 +62,7 @@ public interface Service {
    * @param fork a database fork to apply changes to. Not valid after this method returns
    * @return a global configuration of the service, or {@code Optional.empty()} if the service
    *         does not have any configuration parameters.
-   * @see <a href="https://exonum.com/doc/version/0.11/architecture/services/#initialization-handler">Initialization handler</a>
+   * @see <a href="https://exonum.com/doc/version/0.12/architecture/services/#initialization-handler">Initialization handler</a>
    */
   default Optional<String> initialize(Fork fork) {
     return Optional.empty();
@@ -115,7 +115,7 @@ public interface Service {
    * @param node a set-up Exonum node, providing an interface to access
    *             the current blockchain state and submit transactions
    * @param router a router responsible for handling requests to this service
-   * @see <a href="https://exonum.com/doc/version/0.11/get-started/java-binding/#external-service-api">
+   * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>
    */
   void createPublicApiHandlers(Node node, Router router);
