@@ -10,7 +10,7 @@ location.
 You also need a ready-to-use Exonum Java service. You can use 
 [cryptocurrency-demo][cryptocurrency-demo] as an example, and find information about 
 implementing your own Exonum service 
-in the [user guide](https://exonum.com/doc/version/0.11/get-started/java-binding/).
+in the [user guide](https://exonum.com/doc/version/0.12/get-started/java-binding/).
 
 [how-to-build]: https://github.com/exonum/exonum-java-binding/blob/master/CONTRIBUTING.md#how-to-build
 [cryptocurrency-demo]: https://github.com/exonum/exonum-java-binding/tree/master/exonum-java-binding/cryptocurrency-demo
@@ -58,9 +58,7 @@ $ exonum-java generate-template testnet/common.toml \
 Please consult Exonum documentation for the secure way of the node configuration.
 
 ```$sh
-$ exonum-java generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
-    --consensus-key-path testnet/consensus1.toml \
-    --service-key-path testnet/service1.toml \
+$ exonum-java generate-config testnet/common.toml testnet \
     --no-password \
     --peer-address 127.0.0.1:5400
 ```
