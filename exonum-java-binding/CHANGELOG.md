@@ -55,7 +55,7 @@ the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.
 - `RawTransaction#fromMessage(TransactionMessage)`, which is mostly useful in tests,
   where you might have a message but need it as a `RawTransaction` in some assertions.
 
-[testkit-documentation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#testing
+[testkit-documentation]: https://exonum.com/doc/version/0.12/get-started/java-binding/#testing
 
 ### Changed
 - Improved the throughput of transaction processing twofold. Java services on Exonum Java 0.7.0 
@@ -116,7 +116,7 @@ The release is based on Exonum 0.11.
 - `toOptional()` method to `EntryIndexProxy`. (#790)
 - `getTransactionPool()` method to `Blockchain`. (#850)
 
-[installation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#installation
+[installation]: https://exonum.com/doc/version/0.12/get-started/java-binding/#installation
 
 ### Changed
 - Service HTTP APIs provided with `Service#createPublicApiHandlers` are now mounted

@@ -41,7 +41,7 @@ public final class CryptocurrencyServiceModule extends AbstractServiceModule {
 </details>
 
 [abstract-service-module-javadoc]: https://exonum.com/doc/api/java-binding-core/0.6.0/com/exonum/binding/service/AbstractServiceModule.html
-[dep-management-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding/#dependencies-management
+[dep-management-docs]: https://exonum.com/doc/version/0.12/get-started/java-binding/#dependencies-management
 
 ### Service Packaging Requirements
  
@@ -137,8 +137,8 @@ Highlights of the project build definition from the cryptocurrency demo
 
 </details>
 
-[using-libraries-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding/#using-libraries
-[how-to-build-docs]: https://exonum.com/doc/version/0.11/get-started/java-binding/#how-to-build-a-service-artifact
+[using-libraries-docs]: https://exonum.com/doc/version/0.12/get-started/java-binding/#using-libraries
+[how-to-build-docs]: https://exonum.com/doc/version/0.12/get-started/java-binding/#how-to-build-a-service-artifact
 
 ### Use Example
 
