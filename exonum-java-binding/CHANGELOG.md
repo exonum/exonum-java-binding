@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.8.0] - 2019-09-09
+
+### Overview
+
+This release brings mainly internal fixes and improvements. It is based on Exonum 0.12.
+
 ### Changed
 - `Ed25519CryptoFunction` to use the system libsodium by default. If libsodium is not installed,
   it will load the bundled library. (#991)
@@ -25,6 +31,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `ProofListIndexProxy#getRootHash` and `ProofMapIndexProxy#getRootHash` are replaced with
   `CheckedProof#getIndexHash`, `ProofListIndexProxy#getIndexHash` and
   `ProofMapIndexProxy#getIndexHash` accordingly.
+- Network configuration workflow. `generate-config` subcommand now accepts a single parameter -
+  output directory instead of separate parameters for private and public node configs. See
+  [Tutorial](./core/rust/exonum-java/TUTORIAL.md) for updated instructions.
 
 ### Added
 - `stream` for sets: `KeySetIndex` and `ValueSetIndex`. (#1088)
