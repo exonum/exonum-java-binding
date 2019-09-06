@@ -58,9 +58,7 @@ $ exonum-java generate-template testnet/common.toml \
 Please consult Exonum documentation for the secure way of the node configuration.
 
 ```$sh
-$ exonum-java generate-config testnet/common.toml testnet/pub.toml testnet/sec.toml \
-    --consensus-key-path testnet/consensus1.toml \
-    --service-key-path testnet/service1.toml \
+$ exonum-java generate-config testnet/common.toml testnet \
     --no-password \
     --peer-address 127.0.0.1:5400
 ```
