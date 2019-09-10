@@ -19,13 +19,16 @@ package com.exonum.binding.core.storage.indices;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.common.proofs.list.CheckedListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProof;
+import com.google.protobuf.ByteString;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 import org.hamcrest.Description;
@@ -53,8 +56,12 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     UncheckedListProof proof = proofFunction.apply(list);
     CheckedListProof checkedProof = proof.check();
 
+    Set<Map.Entry<Long, ByteString>> entrySet = checkedProof.getElements().entrySet();
+    Map<Long, String> actualElements = entrySet.stream()
+        .collect(toMap(Map.Entry::getKey, e -> e.getValue().toStringUtf8()));
+
     return checkedProof.isValid()
-        && elementsMatcher.matches(checkedProof.getElements())
+        && elementsMatcher.matches(actualElements)
         && list.getIndexHash().equals(checkedProof.getIndexHash());
   }
 
