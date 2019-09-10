@@ -28,7 +28,7 @@ use utils;
 type Index<T> = Entry<T, Value>;
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Snapshot>),
+    SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 

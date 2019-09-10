@@ -41,17 +41,17 @@ pub(crate) struct View {
 }
 
 enum ViewOwned {
-    Snapshot(Box<Snapshot>),
+    Snapshot(Box<dyn Snapshot>),
     Fork(Box<Fork>),
 }
 
 pub(crate) enum ViewRef {
-    Snapshot(&'static Snapshot),
+    Snapshot(&'static dyn Snapshot),
     Fork(&'static Fork),
 }
 
 impl View {
-    pub fn from_owned_snapshot(snapshot: Box<Snapshot>) -> Self {
+    pub fn from_owned_snapshot(snapshot: Box<dyn Snapshot>) -> Self {
         View {
             // Make a "self-reference" to a value stored in the `owned` field.
             reference: unsafe { ViewRef::from_snapshot(&*snapshot) },
@@ -72,7 +72,7 @@ impl View {
 
     // Will be used in #ECR-242
     #[allow(dead_code)]
-    pub fn from_ref_snapshot(snapshot: &Snapshot) -> Self {
+    pub fn from_ref_snapshot(snapshot: &dyn Snapshot) -> Self {
         View {
             reference: unsafe { ViewRef::from_snapshot(snapshot) },
             owned: None,
@@ -120,9 +120,9 @@ impl ViewRef {
         ViewRef::Fork(&*(fork as *const Fork))
     }
 
-    unsafe fn from_snapshot(snapshot: &Snapshot) -> Self {
+    unsafe fn from_snapshot(snapshot: &dyn Snapshot) -> Self {
         // Make a provided reference `'static`.
-        ViewRef::Snapshot(&*(snapshot as *const Snapshot))
+        ViewRef::Snapshot(&*(snapshot as *const dyn Snapshot))
     }
 }
 
