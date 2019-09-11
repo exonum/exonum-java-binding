@@ -90,7 +90,7 @@ impl Service for ServiceProxy {
         &self.name
     }
 
-    fn state_hash(&self, snapshot: &Snapshot) -> Vec<Hash> {
+    fn state_hash(&self, snapshot: &dyn Snapshot) -> Vec<Hash> {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
             let java_service_hashes = panic_on_exception(
@@ -134,7 +134,7 @@ impl Service for ServiceProxy {
                         self.exec.clone(),
                         env.new_global_ref(java_transaction.l()?)?,
                     );
-                    Ok(Box::new(java_transaction_proxy) as Box<Transaction>)
+                    Ok(Box::new(java_transaction_proxy) as Box<dyn Transaction>)
                 }
                 Err(error_message) => Err(format_err!("{}", error_message)),
             })

@@ -77,7 +77,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
             if !time_provider.is_null() {
                 let provider = JavaTimeProvider::new(executor.clone(), time_provider);
                 builder = builder.with_service(TimeService::with_provider(
-                    Box::new(provider) as Box<TimeProvider>
+                    Box::new(provider) as Box<dyn TimeProvider>
                 ));
             }
 

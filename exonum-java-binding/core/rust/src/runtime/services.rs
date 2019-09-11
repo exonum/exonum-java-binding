@@ -42,7 +42,7 @@ pub struct EjbAppServices {
     pub user_services: HashMap<String, String>,
 }
 
-type Result<T> = std::result::Result<T, Box<std::error::Error>>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 /// Loads services definition from a specific TOML configuration file.
 pub fn load_services_definition<P: AsRef<Path>>(path: P) -> Result<EjbAppServices> {

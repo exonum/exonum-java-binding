@@ -28,7 +28,7 @@ use utils;
 type CoreSchema<T> = Schema<T>;
 
 enum SchemaType {
-    SnapshotSchema(CoreSchema<&'static Snapshot>),
+    SnapshotSchema(CoreSchema<&'static dyn Snapshot>),
     ForkSchema(CoreSchema<&'static Fork>),
 }
 
