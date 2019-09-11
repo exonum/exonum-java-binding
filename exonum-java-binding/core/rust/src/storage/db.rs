@@ -92,6 +92,30 @@ impl View {
         &mut self.reference
     }
 
+    /// Creates checkpoint for the owned Fork instance.
+    ///
+    /// Is a no-op for Snapshots and non-owned Fork.
+    pub fn create_checkpoint(&mut self) {
+        match self.owned {
+            Some(ViewOwned::Fork(ref mut fork)) => fork.flush(),
+            _ => {}
+        }
+    }
+
+    /// Rollbacks owned Fork to the latest checkpoint.
+    /// If no checkpoint was created (`create_checkpoint` method was never called),
+    /// rollbacks all changes in Fork.
+    ///
+    /// Does not affect database, but only a specific Fork instance.
+    ///
+    /// Is a no-op for Snapshots and non-owned Fork.
+    pub fn rollback(&mut self) {
+        match self.owned {
+            Some(ViewOwned::Fork(ref mut fork)) => fork.rollback(),
+            _ => {}
+        }
+    }
+
     /// Unwraps the stored Fork from the View, panics if it's not possible.
     pub fn into_fork(self) -> Box<Fork> {
         if let Some(view_owned) = self.owned {
