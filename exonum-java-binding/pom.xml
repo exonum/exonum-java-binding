@@ -114,7 +114,7 @@
     <log4j.version>2.12.1</log4j.version>
     <hamcrest.version>2.1</hamcrest.version>
     <junit.version>4.12</junit.version>
-    <junit.jupiter.version>5.5.1</junit.jupiter.version>
+    <junit.jupiter.version>5.5.2</junit.jupiter.version>
     <powermock.version>2.0.2</powermock.version>
     <protobuf.version>3.9.1</protobuf.version>
     <mockito-core.version>3.0.0</mockito-core.version>
@@ -130,7 +130,7 @@
     <jacoco.it.args></jacoco.it.args>
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
-    <pf4j.version>3.0.1</pf4j.version>
+    <pf4j.version>3.1.0</pf4j.version>
     <!-- Default build mode is `debug`, can also be `release`. Usually controlled
          by the packaging script (package_app.sh), but can also be set from the CLI -->
     <build.mode>debug</build.mode>
