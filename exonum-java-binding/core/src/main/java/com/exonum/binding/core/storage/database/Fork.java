@@ -106,7 +106,7 @@ public final class Fork extends View {
    *   MerkleDB Patches</a>
    */
   NativeHandle intoPatch() {
-    checkState(nativeCanConvertIntoPatch(getNativeHandle()),
+    checkState(nativeIsValidOwnedFork(getNativeHandle()),
         "This fork cannot be converted into patch");
 
     // Close all resources depending on this fork
@@ -140,7 +140,7 @@ public final class Fork extends View {
    * Creates in-memory checkpoint that can be used to rollback changes.
    */
   void createCheckpoint() {
-    checkState(nativeCanConvertIntoPatch(getNativeHandle()),
+    checkState(nativeIsValidOwnedFork(getNativeHandle()),
         "This fork does not support checkpoints");
 
     // TODO: Invalidate all indexes created with the fork or the Core won't let us
@@ -156,7 +156,7 @@ public final class Fork extends View {
    * <p>If no checkpoints was created, rollbacks all changes made by this fork.
    */
   void rollback() {
-    checkState(nativeCanConvertIntoPatch(getNativeHandle()),
+    checkState(nativeIsValidOwnedFork(getNativeHandle()),
         "This fork does not support rollbacks");
 
     // TODO: Invalidate all indexes created with the fork or the Core won't let us
@@ -177,9 +177,9 @@ public final class Fork extends View {
   private static native void nativeRollback(long nativeHandle);
 
   /**
-   * Returns true if this fork can be converted into patch.
+   * Returns true if this fork can be converted into patch and supports rollbacks.
    */
-  private static native boolean nativeCanConvertIntoPatch(long nativeHandle);
+  private static native boolean nativeIsValidOwnedFork(long nativeHandle);
 
   /**
    * Converts this fork into patch, consuming the object, and returns the native handle

@@ -54,9 +54,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_native
     utils::unwrap_exc_or(&env, res, ())
 }
 
-/// Returns true if this View can be converted into patch.
+/// Returns true if this View can be converted into patch and supports rollbacks.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeCanConvertIntoPatch(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeIsValidOwnedFork(
     env: JNIEnv,
     _: JObject,
     view_handle: Handle,
