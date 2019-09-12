@@ -28,7 +28,7 @@ use utils;
 type Index<T> = KeySetIndex<T, Key>;
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Snapshot>),
+    SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 

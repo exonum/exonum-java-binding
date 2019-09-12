@@ -49,7 +49,7 @@ const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
 const BYTE_ARRAY: &str = "[B";
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Snapshot>),
+    SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 

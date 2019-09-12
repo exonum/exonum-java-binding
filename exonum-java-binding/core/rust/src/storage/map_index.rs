@@ -34,7 +34,7 @@ use utils;
 type Index<T> = MapIndex<T, Key, Value>;
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Snapshot>),
+    SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 

@@ -54,7 +54,7 @@ mkdir testnet
 trap "killall exonum-java" SIGINT SIGTERM EXIT
 
 # Delete the java_bindings library from the target/debug if any to prevent ambiguity in dynamic linking (ECR-3468)
-rm -f "${EJB_ROOT}/core/rust/target/debug/libjava_bindings.*"
+rm -f ${EJB_ROOT}/core/rust/target/debug/libjava_bindings.*
 
 # Configure and run nodes
 node_count=$1

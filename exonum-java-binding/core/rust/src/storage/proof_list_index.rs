@@ -33,7 +33,7 @@ use utils;
 type Index<T> = ProofListIndex<T, Value>;
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Snapshot>),
+    SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 
@@ -376,7 +376,7 @@ fn make_java_proof_root<'a>(
 ) -> Result<JObject<'a>> {
     let root = make_java_proof(env, proof)?;
     env.new_object(
-        "com/exonum/binding/common/proofs/list/ListProof",
+        "com/exonum/binding/common/proofs/list/UncheckedListProofAdapter",
         "(Lcom/exonum/binding/common/proofs/list/ListProofNode;J)V",
         &[root.into(), (length as jlong).into()],
     )

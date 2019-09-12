@@ -25,7 +25,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.google.protobuf.ByteString;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -35,15 +34,6 @@ import javax.annotation.Nullable;
 final class ListProofUtils {
 
   private ListProofUtils() {
-  }
-
-  /**
-   * Creates ListProof element node that contains the given value,
-   * encoded in UTF 8.
-   */
-  static ListProofElement leafOf(String element) {
-    ByteString dbElement = ByteString.copyFromUtf8(element);
-    return new ListProofElement(dbElement);
   }
 
   /**
@@ -64,10 +54,10 @@ final class ListProofUtils {
     return root;
   }
 
-  static HashCode getNodeHashCode(String v1) {
+  static HashCode getNodeHashCode(ByteString v) {
     return Hashing.defaultHashFunction().newHasher()
         .putByte(BLOB_PREFIX)
-        .putString(v1, StandardCharsets.UTF_8)
+        .putBytes(v.toByteArray())
         .hash();
   }
 

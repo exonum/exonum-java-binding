@@ -20,7 +20,6 @@ import static com.exonum.binding.core.storage.indices.StoragePreconditions.check
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkRange;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.list.ListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProof;
 import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
@@ -180,11 +179,10 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @throws IllegalStateException if this list is not valid
    */
   public UncheckedListProof getProof(long index) {
-    ListProof listProof = nativeGetProof(getNativeHandle(), index);
-    return new UncheckedListProofAdapter<>(listProof, this.serializer);
+    return nativeGetProof(getNativeHandle(), index);
   }
 
-  private native ListProof nativeGetProof(long nativeHandle, long index);
+  private native UncheckedListProofAdapter nativeGetProof(long nativeHandle, long index);
 
   /**
    * Returns a proof of either existence or absence of some elements in the specified range
@@ -198,12 +196,11 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    */
   public UncheckedListProof getRangeProof(long from, long to) {
     checkRange(from, to);
-    ListProof listProof = nativeGetRangeProof(getNativeHandle(), from, to);
-
-    return new UncheckedListProofAdapter<>(listProof, this.serializer);
+    return nativeGetRangeProof(getNativeHandle(), from, to);
   }
 
-  private native ListProof nativeGetRangeProof(long nativeHandle, long from, long to);
+  private native UncheckedListProofAdapter nativeGetRangeProof(
+      long nativeHandle, long from, long to);
 
   /**
    * Returns the index hash which represents the complete state of this list.
