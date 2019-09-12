@@ -96,9 +96,8 @@ impl View {
     ///
     /// Is a no-op for Snapshots and non-owned Fork.
     pub fn create_checkpoint(&mut self) {
-        match self.owned {
-            Some(ViewOwned::Fork(ref mut fork)) => fork.flush(),
-            _ => {}
+        if let Some(ViewOwned::Fork(ref mut fork)) = self.owned {
+            fork.flush()
         }
     }
 
@@ -110,9 +109,8 @@ impl View {
     ///
     /// Is a no-op for Snapshots and non-owned Fork.
     pub fn rollback(&mut self) {
-        match self.owned {
-            Some(ViewOwned::Fork(ref mut fork)) => fork.rollback(),
-            _ => {}
+        if let Some(ViewOwned::Fork(ref mut fork)) = self.owned {
+            fork.rollback()
         }
     }
 
