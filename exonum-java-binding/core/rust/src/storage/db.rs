@@ -49,9 +49,9 @@ pub(crate) enum ViewOwned {
 }
 
 #[derive(Clone)]
-pub(crate) enum ViewRef {
-    Snapshot(&'static dyn Snapshot),
-    Fork(&'static Fork),
+pub(crate) enum ViewRef<'a> {
+    Snapshot(&'a dyn Snapshot),
+    Fork(&'a Fork),
 }
 
 impl View {
@@ -75,7 +75,8 @@ impl View {
         View::RefFork(NonOwnedHandle::new_mut(fork))
     }
 
-    pub fn get(&self) -> ViewRef {
+    /// Returns temporary reference to the
+    pub fn get(&self) -> ViewRef<'_> {
         match self {
             View::RefFork(handle) => {
                 let fork = cast_handle::<Fork>(handle.as_handle());
@@ -109,13 +110,13 @@ impl View {
     }
 }
 
-impl ViewRef {
-    unsafe fn from_fork(fork: &Fork) -> Self {
+impl<'a> ViewRef<'a> {
+    unsafe fn from_fork(fork: &'a Fork) -> Self {
         // Make a provided reference `'static`.
         ViewRef::Fork(&*(fork as *const Fork))
     }
 
-    unsafe fn from_snapshot(snapshot: &dyn Snapshot) -> Self {
+    unsafe fn from_snapshot(snapshot: &'a dyn Snapshot) -> Self {
         // Make a provided reference `'static`.
         ViewRef::Snapshot(&*(snapshot as *const dyn Snapshot))
     }
