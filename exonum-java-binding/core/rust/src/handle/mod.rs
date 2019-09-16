@@ -17,8 +17,6 @@
 //! Wrappers and helper functions around Java pointers. Used for memory management
 //! between native and Java.
 
-// FIXME Close ECR-910 as non-owned handles are actually useful
-
 use jni::sys::jlong;
 use jni::JNIEnv;
 
@@ -31,8 +29,11 @@ use super::utils::unwrap_exc_or_default;
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
 
-/// Wrapper for a non-owned handle. Calls `handle.resource_manager::unregister_handle` in the `Drop`
-/// implementation.
+/// Wrapper for a non-owned handle.
+///
+/// Created handle must not outlive the reference it was created with.
+///
+/// Calls `handle.resource_manager::unregister_handle` in the `Drop` implementation.
 pub struct NonOwnedHandle<T: 'static> {
     handle: Handle,
     is_mutable: bool,
@@ -40,8 +41,10 @@ pub struct NonOwnedHandle<T: 'static> {
 }
 
 impl<T> NonOwnedHandle<T> {
-    /// TODO
-    pub fn new(value: &T) -> Self {
+    /// Converts reference to a new immutable `NonOwnedHandle`.
+    ///
+    /// Created `NonOwnedHandle` must not outlive provided reference.
+    pub fn new(reference: &T) -> Self {
         let handle = value as *const T as Handle;
         resource_manager::register_handle::<T>(handle);
         Self {
@@ -51,7 +54,9 @@ impl<T> NonOwnedHandle<T> {
         }
     }
 
-    /// TODO
+    /// Converts reference to a new mutable `NonOwnedHandle`.
+    ///
+    /// Created `NonOwnedHandle` must not outlive provided reference.
     pub fn new_mut(value: &mut T) -> Self {
         let handle = value as *mut T as Handle;
         resource_manager::register_handle::<T>(handle);
@@ -62,7 +67,14 @@ impl<T> NonOwnedHandle<T> {
         }
     }
 
-    /// TODO
+    /// Returns a reference which was used to construct a handle.
+    pub fn get(&self) -> &T {
+        cast_handle(self.handle)
+    }
+
+    /// Returns a mutable reference which was used to construct a handle.
+    ///
+    /// Panics if `NonOwnedHandle` was created from immutable reference.
     pub fn get_mut(&mut self) -> &mut T {
         if !self.is_mutable {
             panic!("Attempt to access mutable reference from immutable non-owned handle");
@@ -70,7 +82,7 @@ impl<T> NonOwnedHandle<T> {
         cast_handle(self.handle)
     }
 
-    /// Returns `Handle` value.
+    /// Returns underlying `Handle` value.
     pub fn as_handle(&self) -> Handle {
         self.handle
     }

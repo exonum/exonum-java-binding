@@ -29,17 +29,25 @@ pub(crate) type Value = Vec<u8>;
 ///    in the case when the java side creates and owns it;
 /// - it just holds a reference, when one is provided from the rust side.
 ///
-/// For storage API we need a reference, so we create it to the owned part. But since there is no
-/// way in Rust to make a `View` value not movable. Furthermore, it have to be moved from the stack
-/// to the heap in order to be converted into `Handle` for the java side. So a `Fork` value
-/// should be placed in the heap to prevent its movement after creating a reference to it.
-
+/// As `View` does not have a lifetime, nothing protects us from dereferencing a freed reference,
+/// the extreme caution must be taken in places where `View` is constructed and send to Java.
+/// Java code must never store a `View` handle beyond the scope it was initially acquired
+/// (except for `View::Owned`).
 pub(crate) enum View {
-    /// TODO
+    /// Special case for both `&Fork` and `&mut Fork`.
+    ///
+    /// Created `View` must never outlive the reference it was created with,
+    /// or `SIGINT` will occur.
     RefFork(NonOwnedHandle<Fork>),
-    /// TODO
+    /// As `Snapshot` is a trait-object, we can not use `NonOwnedHandle<Snapshot>` here.
+    ///
+    /// `View::from_ref_snapshot` makes any reference `&'static`, but the created `View`
+    /// must never outlive the reference it was constructed with, or `SIGINT` will occur.
     RefSnapshot(&'static dyn Snapshot),
-    /// TODO
+    /// Covers both `Snapshot` and `Fork` cases. Rust uses move semantic and single-ownership
+    /// rule to guarantee that the `View` will be valid for the whole execution.
+    ///
+    /// This is the most safe `View` variant, no special care is needed when working with.
     Owned(ViewOwned),
 }
 
@@ -48,34 +56,67 @@ pub(crate) enum ViewOwned {
     Fork(Box<Fork>),
 }
 
+/// Hides the differences between owning and non-owning `View` variants
+/// and simplifies the use indexes API.
 #[derive(Clone)]
 pub(crate) enum ViewRef<'a> {
     Snapshot(&'a dyn Snapshot),
     Fork(&'a Fork),
 }
 
+impl<'a> ViewRef<'a> {
+    unsafe fn from_fork(fork: &'a Fork) -> Self {
+        // Make a provided reference `'static`.
+        ViewRef::Fork(&*(fork as *const Fork))
+    }
+
+    unsafe fn from_snapshot(snapshot: &'a dyn Snapshot) -> Self {
+        // Make a provided reference `'static`.
+        ViewRef::Snapshot(&*(snapshot as *const Snapshot))
+    }
+}
+
 impl View {
+    /// Creates `View::Owned(Snapshot)` variant. No special care needed.
     pub fn from_owned_snapshot(snapshot: Box<dyn Snapshot>) -> Self {
         View::Owned(ViewOwned::Snapshot(snapshot))
     }
 
+    /// Creates `View::Owned(Fork)` variant. No special care needed.
     pub fn from_owned_fork(fork: Fork) -> Self {
         View::Owned(ViewOwned::Fork(Box::new(fork)))
     }
 
+    /// Creates `View::RefSnapshot` variant.
+    ///
+    /// Created `View` must never outlive provided `snapshot` reference, or
+    /// SIGINT will occur.
     pub fn from_ref_snapshot(snapshot: &dyn Snapshot) -> Self {
         View::RefSnapshot(unsafe { std::mem::transmute(snapshot) })
     }
 
+    /// Creates `View::RefFork` variant.
+    ///
+    /// Created `View` must never outlive provided `fork` reference, or
+    /// SIGINT will occur.
+    ///
+    /// Mutable indexes available, but not `&mut self` methods of `Fork`.
     pub fn from_ref_fork(fork: &Fork) -> Self {
         View::RefFork(NonOwnedHandle::new(fork))
     }
 
+    /// Creates `View::RefFork` variant.
+    ///
+    /// Created `View` must never outlive provided `fork` reference, or
+    /// SIGINT will occur.
+    ///
+    /// Both indexes mutability and `&mut self` methods of `Fork` available.
     pub fn from_ref_mut_fork(fork: &mut Fork) -> Self {
         View::RefFork(NonOwnedHandle::new_mut(fork))
     }
 
-    /// Returns temporary reference to the
+    /// Returns temporary reference to the underlying `Fork` / `Snapshot` to simplify use
+    /// in indexes operations.
     pub fn get(&self) -> ViewRef<'_> {
         match self {
             View::RefFork(handle) => {
@@ -107,18 +148,6 @@ impl View {
             View::Owned(ViewOwned::Fork(_)) => true,
             _ => false,
         }
-    }
-}
-
-impl<'a> ViewRef<'a> {
-    unsafe fn from_fork(fork: &'a Fork) -> Self {
-        // Make a provided reference `'static`.
-        ViewRef::Fork(&*(fork as *const Fork))
-    }
-
-    unsafe fn from_snapshot(snapshot: &'a dyn Snapshot) -> Self {
-        // Make a provided reference `'static`.
-        ViewRef::Snapshot(&*(snapshot as *const dyn Snapshot))
     }
 }
 
