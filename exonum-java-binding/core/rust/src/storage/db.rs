@@ -164,14 +164,16 @@ mod tests {
     use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
     use handle::{cast_handle, to_handle};
 
-    const TEST_VALUE: i32 = 42;
+    const FIRST_TEST_VALUE: i32 = 42;
+    const SECOND_TEST_VALUE: i32 = 57;
 
     #[test]
     fn snapshot_ref_view() {
         let db = setup_database();
         let snapshot = db.snapshot();
         let view = View::from_ref_snapshot(&*snapshot);
-        check_snapshot(view.get())
+        check_snapshot(view.get());
+        assert!(!view.can_convert_into_fork());
     }
 
     #[test]
@@ -179,7 +181,8 @@ mod tests {
         let db = setup_database();
         let snapshot = db.snapshot();
         let view = View::from_owned_snapshot(snapshot);
-        check_snapshot(view.get())
+        check_snapshot(view.get());
+        assert!(!view.can_convert_into_fork());
     }
 
     #[test]
@@ -187,7 +190,17 @@ mod tests {
         let db = setup_database();
         let fork = db.fork();
         let view = View::from_ref_fork(&fork);
-        check_fork(view.get())
+        check_fork(view.get());
+        assert!(!view.can_convert_into_fork());
+    }
+
+    #[test]
+    fn fork_mut_ref_view() {
+        let db = setup_database();
+        let mut fork = db.fork();
+        let view = View::from_ref_mut_fork(&mut fork);
+        check_fork(view.get());
+        assert!(!view.can_convert_into_fork());
     }
 
     #[test]
@@ -195,35 +208,16 @@ mod tests {
         let db = setup_database();
         let fork = db.fork();
         let view = View::from_owned_fork(fork);
-        check_fork(view.get())
+        check_fork(view.get());
+        assert!(view.can_convert_into_fork());
     }
 
     #[test]
-    fn convert_fork_into_fork() {
+    fn convert_fork_into_patch() {
         let db = TemporaryDB::new();
         let fork = db.fork();
-        {
-            let view = View::from_ref_fork(&fork);
-            assert!(!view.can_convert_into_fork());
-        }
         let view = View::from_owned_fork(fork);
-        assert!(view.can_convert_into_fork());
         let _patch = view.into_fork().into_patch();
-    }
-
-    #[test]
-    fn convert_snapshot_into_fork_forbidden() {
-        let db = TemporaryDB::new();
-        {
-            let snapshot = db.snapshot();
-            let view = View::from_owned_snapshot(snapshot);
-            assert!(!view.can_convert_into_fork());
-        }
-        {
-            let snapshot = db.snapshot();
-            let view = View::from_ref_snapshot(&*snapshot);
-            assert!(!view.can_convert_into_fork());
-        }
     }
 
     #[test]
@@ -261,7 +255,7 @@ mod tests {
 
     fn check_snapshot(view_ref: ViewRef) {
         match view_ref {
-            ViewRef::Snapshot(snapshot) => check_value(snapshot, TEST_VALUE),
+            ViewRef::Snapshot(_) => check_value(&view_ref, FIRST_TEST_VALUE),
             _ => panic!(),
         }
     }
@@ -269,16 +263,12 @@ mod tests {
     fn check_fork(view_ref: ViewRef) {
         match view_ref {
             ViewRef::Fork(fork) => {
-                check_value(fork, TEST_VALUE);
+                check_value(&view_ref, FIRST_TEST_VALUE);
                 {
                     let mut index = entry(fork);
-                    index.set(0);
+                    index.set(SECOND_TEST_VALUE);
                 }
-                // Recreate index because changes might not be included in fork
-                {
-                    let index = entry(fork);
-                    assert_eq!(Some(0), index.get())
-                }
+                check_value(&view_ref, SECOND_TEST_VALUE);
             }
             _ => panic!(),
         }
@@ -288,13 +278,17 @@ mod tests {
     fn setup_database() -> TemporaryDB {
         let db = TemporaryDB::new();
         let fork = db.fork();
-        entry(&fork).set(TEST_VALUE);
+        entry(&fork).set(FIRST_TEST_VALUE);
         db.merge(fork.into_patch()).unwrap();
         db
     }
 
-    fn check_value<T: IndexAccess>(view: T, value: i32) {
-        assert_eq!(Some(value), entry(view).get())
+    fn check_value(view_ref: &ViewRef, expected: i32) {
+        let value = match *view_ref {
+            ViewRef::Snapshot(snapshot) => entry(&*snapshot).get(),
+            ViewRef::Fork(fork) => entry(&*fork).get(),
+        };
+        assert_eq!(Some(expected), value);
     }
 
     fn entry<T>(view: T) -> Entry<T, i32>
