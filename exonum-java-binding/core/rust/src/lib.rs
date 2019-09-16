@@ -38,6 +38,7 @@ pub extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
 
+extern crate core;
 extern crate exonum_testkit;
 extern crate exonum_time;
 #[cfg(test)]
@@ -52,7 +53,7 @@ mod storage;
 mod testkit;
 pub mod utils;
 
-pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
+pub use self::handle::{cast_handle, drop_handle, to_handle, Handle};
 pub use handle::resource_manager::*;
 pub use proxy::*;
 pub use runtime::services;

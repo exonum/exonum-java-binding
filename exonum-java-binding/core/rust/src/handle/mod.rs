@@ -17,8 +17,7 @@
 //! Wrappers and helper functions around Java pointers. Used for memory management
 //! between native and Java.
 
-// TODO Remove `allow(dead_code)` after [https://jira.bf.local/browse/ECR-910].
-#![allow(dead_code)]
+// FIXME Close ECR-910 as non-owned handles are actually useful
 
 use jni::sys::jlong;
 use jni::JNIEnv;
@@ -40,7 +39,19 @@ pub struct NonOwnedHandle<T: 'static> {
 }
 
 impl<T> NonOwnedHandle<T> {
-    fn new(handle: Handle) -> Self {
+    /// TODO
+    pub fn new(value: &T) -> Self {
+        let handle = value as *const T as *mut T as Handle;
+        resource_manager::register_handle::<T>(handle);
+        Self {
+            handle,
+            handle_type: PhantomData,
+        }
+    }
+
+    /// TODO
+    pub fn new_mut(value: &mut T) -> Self {
+        let handle = value as *mut T as Handle;
         resource_manager::register_handle::<T>(handle);
         Self {
             handle,
@@ -66,13 +77,6 @@ pub fn to_handle<T: 'static>(val: T) -> Handle {
     let handle = Box::into_raw(Box::new(val)) as Handle;
     resource_manager::add_handle::<T>(handle);
     handle
-}
-
-/// Returns a handle (a raw pointer) to the given native-owned object. This handle should not be
-/// freed manually.
-pub fn as_handle<T>(val: &mut T) -> NonOwnedHandle<T> {
-    let ptr = val as *mut T;
-    NonOwnedHandle::new(ptr as Handle)
 }
 
 /// "Converts" a handle to the object reference.

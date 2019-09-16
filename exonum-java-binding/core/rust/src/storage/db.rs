@@ -15,7 +15,8 @@
 use exonum_merkledb::{Fork, Snapshot};
 use jni::{objects::JClass, JNIEnv};
 
-use handle::{self, Handle};
+use cast_handle;
+use handle::{self, Handle, NonOwnedHandle};
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
@@ -33,18 +34,21 @@ pub(crate) type Value = Vec<u8>;
 /// to the heap in order to be converted into `Handle` for the java side. So a `Fork` value
 /// should be placed in the heap to prevent its movement after creating a reference to it.
 
-pub(crate) struct View {
-    /// Unsafe reference to the owned View (owned either by Rust or by Java)
-    reference: ViewRef,
-    /// Allows to drop owned view if needed
-    owned: Option<ViewOwned>,
+pub(crate) enum View {
+    /// TODO
+    RefFork(NonOwnedHandle<Fork>),
+    /// TODO
+    RefSnapshot(ViewRef),
+    /// TODO
+    Owned(ViewOwned),
 }
 
-enum ViewOwned {
+pub(crate) enum ViewOwned {
     Snapshot(Box<dyn Snapshot>),
     Fork(Box<Fork>),
 }
 
+#[derive(Clone)]
 pub(crate) enum ViewRef {
     Snapshot(&'static dyn Snapshot),
     Fork(&'static Fork),
@@ -52,64 +56,49 @@ pub(crate) enum ViewRef {
 
 impl View {
     pub fn from_owned_snapshot(snapshot: Box<dyn Snapshot>) -> Self {
-        View {
-            // Make a "self-reference" to a value stored in the `owned` field.
-            reference: unsafe { ViewRef::from_snapshot(&*snapshot) },
-            owned: Some(ViewOwned::Snapshot(snapshot)),
-        }
+        View::Owned(ViewOwned::Snapshot(snapshot))
     }
 
     pub fn from_owned_fork(fork: Fork) -> Self {
-        // Box a `Fork` value to make sure it will not be moved later
-        // and will not break the `reference` field.
-        let fork = Box::new(fork);
-        View {
-            // Make a "self-reference" to a value stored in the `owned` field.
-            reference: unsafe { ViewRef::from_fork(&*fork) },
-            owned: Some(ViewOwned::Fork(fork)),
-        }
+        View::Owned(ViewOwned::Fork(Box::new(fork)))
     }
 
-    // Will be used in #ECR-242
-    #[allow(dead_code)]
     pub fn from_ref_snapshot(snapshot: &dyn Snapshot) -> Self {
-        View {
-            reference: unsafe { ViewRef::from_snapshot(snapshot) },
-            owned: None,
-        }
+        View::RefSnapshot(unsafe { ViewRef::from_snapshot(snapshot) })
     }
 
-    // Will be used in #ECR-242
-    #[allow(dead_code)]
     pub fn from_ref_fork(fork: &Fork) -> Self {
-        View {
-            reference: unsafe { ViewRef::from_fork(fork) },
-            owned: None,
-        }
+        View::RefFork(NonOwnedHandle::new(fork))
     }
 
-    pub fn get(&mut self) -> &mut ViewRef {
-        &mut self.reference
+    pub fn get(&self) -> ViewRef {
+        match self {
+            View::RefFork(handle) => {
+                let fork = cast_handle::<Fork>(handle.get());
+                ViewRef::Fork(fork)
+            }
+            View::RefSnapshot(view_ref) => view_ref.clone(),
+            View::Owned(owned) => match owned {
+                ViewOwned::Fork(fork) => unsafe { ViewRef::from_fork(&fork) },
+                ViewOwned::Snapshot(snapshot) => unsafe { ViewRef::from_snapshot(&**snapshot) },
+            },
+        }
     }
 
     /// Unwraps the stored Fork from the View, panics if it's not possible.
     pub fn into_fork(self) -> Box<Fork> {
-        if let Some(view_owned) = self.owned {
-            match view_owned {
-                ViewOwned::Snapshot(_) => panic!("`into_fork` called on Snapshot"),
-                ViewOwned::Fork(fork) => fork,
-            }
+        if let View::Owned(ViewOwned::Fork(fork)) = self {
+            fork
         } else {
-            panic!("`into_fork` called on non-owning View");
+            panic!("`into_fork` called on non-owning View or Snapshot");
         }
     }
 
     /// Returns `true` iff `into_fork` conversion is possible.
     pub fn can_convert_into_fork(&self) -> bool {
-        match self.owned {
-            None => false,
-            Some(ViewOwned::Snapshot(_)) => false,
-            Some(ViewOwned::Fork(_)) => true,
+        match self {
+            View::Owned(ViewOwned::Fork(_)) => true,
+            _ => false,
         }
     }
 }
@@ -144,39 +133,88 @@ mod tests {
     const TEST_VALUE: i32 = 42;
 
     #[test]
-    fn create_view_with_owned_fork() {
-        let db = setup_database();
-        let fork = db.fork();
-        let mut view = View::from_owned_fork(fork);
-        check_ref_fork(&mut view);
-        check_owned_ref(&mut view);
-    }
-
-    #[test]
-    fn create_view_with_owned_snapshot() {
+    fn snapshot_ref_view() {
         let db = setup_database();
         let snapshot = db.snapshot();
-        let mut view = View::from_owned_snapshot(snapshot);
-        check_ref_snapshot(&mut view);
-        check_owned_ref(&mut view);
+        let view = View::from_ref_snapshot(&*snapshot);
+        check_snapshot(view.get())
     }
 
     #[test]
-    fn create_view_with_ref_fork() {
-        let db = setup_database();
-        let fork = db.fork();
-        let mut view = View::from_ref_fork(&fork);
-        check_ref_fork(&mut view);
-        assert!(view.owned.is_none());
-    }
-
-    #[test]
-    fn create_view_with_ref_snapshot() {
+    fn snapshot_owned_view() {
         let db = setup_database();
         let snapshot = db.snapshot();
-        let mut view = View::from_ref_snapshot(&*snapshot);
-        check_ref_snapshot(&mut view);
-        assert!(view.owned.is_none());
+        let view = View::from_owned_snapshot(snapshot);
+        check_snapshot(view.get())
+    }
+
+    #[test]
+    fn fork_ref_view() {
+        let db = setup_database();
+        let fork = db.fork();
+        let view = View::from_ref_fork(&fork);
+        check_fork(view.get())
+    }
+
+    #[test]
+    fn fork_owned_view() {
+        let db = setup_database();
+        let fork = db.fork();
+        let view = View::from_owned_fork(fork);
+        check_fork(view.get())
+    }
+
+    #[test]
+    fn convert_fork_into_fork() {
+        let db = TemporaryDB::new();
+        let fork = db.fork();
+        {
+            let view = View::from_ref_fork(&fork);
+            assert!(!view.can_convert_into_fork());
+        }
+        let view = View::from_owned_fork(fork);
+        assert!(view.can_convert_into_fork());
+        let _patch = view.into_fork().into_patch();
+    }
+
+    #[test]
+    fn convert_snapshot_into_fork_forbidden() {
+        let db = TemporaryDB::new();
+        {
+            let snapshot = db.snapshot();
+            let view = View::from_owned_snapshot(snapshot);
+            assert!(!view.can_convert_into_fork());
+        }
+        {
+            let snapshot = db.snapshot();
+            let view = View::from_ref_snapshot(&*snapshot);
+            assert!(!view.can_convert_into_fork());
+        }
+    }
+
+    fn check_snapshot(view_ref: ViewRef) {
+        match view_ref {
+            ViewRef::Snapshot(snapshot) => check_value(snapshot, TEST_VALUE),
+            _ => panic!(),
+        }
+    }
+
+    fn check_fork(view_ref: ViewRef) {
+        match view_ref {
+            ViewRef::Fork(fork) => {
+                check_value(fork, TEST_VALUE);
+                {
+                    let mut index = entry(fork);
+                    index.set(0);
+                }
+                // Recreate index because changes might not be included in fork
+                {
+                    let index = entry(fork);
+                    assert_eq!(Some(0), index.get())
+                }
+            }
+            _ => panic!(),
+        }
     }
 
     // Creates database with a prepared state.
@@ -188,48 +226,14 @@ mod tests {
         db
     }
 
+    fn check_value<T: IndexAccess>(view: T, value: i32) {
+        assert_eq!(Some(value), entry(view).get())
+    }
+
     fn entry<T>(view: T) -> Entry<T, i32>
     where
         T: IndexAccess,
     {
         Entry::new("test", view)
-    }
-
-    fn check_ref_fork(view: &mut View) {
-        match *view.get() {
-            ViewRef::Fork(fork) => check_value(fork),
-            _ => panic!("View::reference expected to be Fork"),
-        }
-    }
-
-    fn check_ref_snapshot(view: &mut View) {
-        match *view.get() {
-            ViewRef::Snapshot(snapshot) => check_value(snapshot),
-            _ => panic!("View::reference expected to be Snapshot"),
-        }
-    }
-
-    fn check_value<T: IndexAccess>(view: T) {
-        assert_eq!(Some(TEST_VALUE), entry(view).get())
-    }
-
-    fn check_owned_ref(view: &mut View) {
-        #[derive(Eq, PartialEq, Debug)]
-        enum Ptr {
-            Fork(*const Fork),
-            Snapshot(*const Snapshot),
-        }
-
-        let reference = match *view.get() {
-            ViewRef::Fork(ref f) => Ptr::Fork(&**f),
-            ViewRef::Snapshot(ref s) => Ptr::Snapshot(&**s),
-        };
-
-        let owned = match *view.owned.as_ref().unwrap() {
-            ViewOwned::Fork(ref f) => Ptr::Fork(&**f),
-            ViewOwned::Snapshot(ref s) => Ptr::Snapshot(&**s),
-        };
-
-        assert_eq!(owned, reference);
     }
 }
