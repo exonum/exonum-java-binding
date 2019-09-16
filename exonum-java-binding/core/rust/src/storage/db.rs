@@ -133,6 +133,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 mod tests {
     use super::*;
     use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
+    use to_handle;
 
     const TEST_VALUE: i32 = 42;
 
@@ -208,6 +209,24 @@ mod tests {
                 mock_method(fork);
             }
             _ => panic!(),
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "Attempt to access mutable reference from immutable")]
+    fn mutable_fork_from_immutable_throws_error() {
+        let db = TemporaryDB::new();
+        let fork = db.fork();
+        // Simulate handles transfer to-from Java
+        let handle = {
+            let view = View::from_ref_fork(&fork);
+            to_handle(view)
+        };
+        let view = cast_handle::<View>(handle);
+        if let View::RefFork(fork_ref) = view {
+            let _ = fork_ref.get_mut();
+        } else {
+            panic!()
         }
     }
 
