@@ -15,7 +15,6 @@
 use exonum_merkledb::{Fork, Snapshot};
 use jni::{objects::JClass, JNIEnv};
 
-use cast_handle;
 use handle::{self, Handle, NonOwnedHandle};
 
 pub(crate) type Key = Vec<u8>;
@@ -57,13 +56,14 @@ pub(crate) enum ViewOwned {
 }
 
 /// Hides the differences between owning and non-owning `View` variants
-/// and simplifies the use indexes API.
+/// and simplifies the use of the indexes API.
 #[derive(Clone)]
 pub(crate) enum ViewRef<'a> {
     Snapshot(&'a dyn Snapshot),
     Fork(&'a Fork),
 }
 
+#[allow(clippy::useless_transmute)]
 impl<'a> ViewRef<'a> {
     unsafe fn from_fork(fork: &'a Fork) -> Self {
         // Make a provided reference `'static`.
@@ -111,6 +111,8 @@ impl View {
     /// SIGINT will occur.
     ///
     /// Both indexes mutability and `&mut self` methods of `Fork` available.
+    // TODO: remove dead_code after ECR-3519
+    #[allow(dead_code)]
     pub fn from_ref_mut_fork(fork: &mut Fork) -> Self {
         View::RefFork(NonOwnedHandle::new_mut(fork))
     }
@@ -119,12 +121,8 @@ impl View {
     /// in indexes operations.
     pub fn get(&self) -> ViewRef<'_> {
         match self {
-            View::RefFork(handle) => {
-                ViewRef::Fork(handle.get())
-            }
-            View::RefSnapshot(snapshot_ref) => {
-                ViewRef::Snapshot(*snapshot_ref)
-            },
+            View::RefFork(handle) => ViewRef::Fork(handle.get()),
+            View::RefSnapshot(snapshot_ref) => ViewRef::Snapshot(*snapshot_ref),
             View::Owned(owned) => match owned {
                 ViewOwned::Fork(fork) => unsafe { ViewRef::from_fork(&fork) },
                 ViewOwned::Snapshot(snapshot) => unsafe { ViewRef::from_snapshot(&**snapshot) },
@@ -164,7 +162,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 mod tests {
     use super::*;
     use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
-    use to_handle;
+    use handle::{cast_handle, to_handle};
 
     const TEST_VALUE: i32 = 42;
 
