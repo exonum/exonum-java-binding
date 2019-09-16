@@ -86,6 +86,11 @@ impl<T> NonOwnedHandle<T> {
     pub fn as_handle(&self) -> Handle {
         self.handle
     }
+
+    /// Returns `true` if the handle is created from mutable reference.
+    pub fn is_mutable(&self) -> bool {
+        self.is_mutable
+    }
 }
 
 impl<T> Drop for NonOwnedHandle<T> {
@@ -173,6 +178,7 @@ mod tests {
         let i = &mut 0;
         let mut handle = NonOwnedHandle::new(i);
 
+        assert!(!handle.is_mutable());
         let _ = handle.get_mut();
     }
 }
