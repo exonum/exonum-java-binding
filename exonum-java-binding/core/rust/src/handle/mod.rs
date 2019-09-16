@@ -35,6 +35,7 @@ pub type Handle = jlong;
 /// implementation.
 pub struct NonOwnedHandle<T: 'static> {
     handle: Handle,
+    is_mutable: bool,
     handle_type: PhantomData<T>,
 }
 
@@ -45,6 +46,7 @@ impl<T> NonOwnedHandle<T> {
         resource_manager::register_handle::<T>(handle);
         Self {
             handle,
+            is_mutable: false,
             handle_type: PhantomData,
         }
     }
@@ -55,12 +57,16 @@ impl<T> NonOwnedHandle<T> {
         resource_manager::register_handle::<T>(handle);
         Self {
             handle,
+            is_mutable: true,
             handle_type: PhantomData,
         }
     }
 
     /// TODO
     pub fn get_mut(&self) -> &mut T {
+        if !self.is_mutable {
+            panic!("Attempt to access mutable reference from immutable non-owned handle");
+        }
         cast_handle(self.handle)
     }
 
@@ -147,5 +153,14 @@ mod tests {
     #[should_panic(expected = "Invalid handle value")]
     fn cast_zero_object() {
         let _ = cast_handle::<i32>(0);
+    }
+
+    #[test]
+    #[should_panic(expected = "Attempt to access mutable reference from immutable")]
+    fn mutable_ref_from_immutable_throws_error() {
+        let i = &mut 0;
+        let handle = NonOwnedHandle::new(i);
+
+        let _ = handle.get_mut();
     }
 }
