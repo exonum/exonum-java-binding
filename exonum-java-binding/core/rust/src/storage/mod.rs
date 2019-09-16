@@ -15,7 +15,7 @@
 mod core_schema;
 mod db;
 mod entry;
-//mod fork;
+mod fork;
 mod key_set_index;
 mod list_index;
 mod map_index;
