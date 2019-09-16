@@ -67,12 +67,12 @@ pub(crate) enum ViewRef<'a> {
 impl<'a> ViewRef<'a> {
     unsafe fn from_fork(fork: &'a Fork) -> Self {
         // Make a provided reference `'static`.
-        ViewRef::Fork(&*(fork as *const Fork))
+        ViewRef::Fork(std::mem::transmute(fork))
     }
 
     unsafe fn from_snapshot(snapshot: &'a dyn Snapshot) -> Self {
         // Make a provided reference `'static`.
-        ViewRef::Snapshot(&*(snapshot as *const Snapshot))
+        ViewRef::Snapshot(std::mem::transmute(snapshot))
     }
 }
 
