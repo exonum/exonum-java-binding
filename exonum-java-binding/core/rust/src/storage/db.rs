@@ -38,7 +38,7 @@ pub(crate) enum View {
     /// TODO
     RefFork(NonOwnedHandle<Fork>),
     /// TODO
-    RefSnapshot(ViewRef),
+    RefSnapshot(&'static dyn Snapshot),
     /// TODO
     Owned(ViewOwned),
 }
@@ -64,7 +64,7 @@ impl View {
     }
 
     pub fn from_ref_snapshot(snapshot: &dyn Snapshot) -> Self {
-        View::RefSnapshot(unsafe { ViewRef::from_snapshot(snapshot) })
+        View::RefSnapshot(unsafe { std::mem::transmute(snapshot) })
     }
 
     pub fn from_ref_fork(fork: &Fork) -> Self {
@@ -81,7 +81,9 @@ impl View {
                 let fork = cast_handle::<Fork>(handle.as_handle());
                 ViewRef::Fork(fork)
             }
-            View::RefSnapshot(view_ref) => view_ref.clone(),
+            View::RefSnapshot(snapshot_ref) => {
+                ViewRef::Snapshot(*snapshot_ref)
+            },
             View::Owned(owned) => match owned {
                 ViewOwned::Fork(fork) => unsafe { ViewRef::from_fork(&fork) },
                 ViewOwned::Snapshot(snapshot) => unsafe { ViewRef::from_snapshot(&**snapshot) },
