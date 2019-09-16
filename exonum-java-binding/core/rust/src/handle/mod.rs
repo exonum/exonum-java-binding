@@ -63,7 +63,7 @@ impl<T> NonOwnedHandle<T> {
     }
 
     /// TODO
-    pub fn get_mut(&self) -> &mut T {
+    pub fn get_mut(&mut self) -> &mut T {
         if !self.is_mutable {
             panic!("Attempt to access mutable reference from immutable non-owned handle");
         }
@@ -159,7 +159,7 @@ mod tests {
     #[should_panic(expected = "Attempt to access mutable reference from immutable")]
     fn mutable_ref_from_immutable_throws_error() {
         let i = &mut 0;
-        let handle = NonOwnedHandle::new(i);
+        let mut handle = NonOwnedHandle::new(i);
 
         let _ = handle.get_mut();
     }

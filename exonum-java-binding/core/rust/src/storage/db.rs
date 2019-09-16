@@ -204,7 +204,7 @@ mod tests {
         let view = View::from_ref_mut_fork(&mut fork);
         let mock_method = |_: &mut Fork| {};
         match view {
-            View::RefFork(handle) => {
+            View::RefFork(mut handle) => {
                 let fork = handle.get_mut();
                 mock_method(fork);
             }
