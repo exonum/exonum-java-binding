@@ -41,7 +41,7 @@ pub struct NonOwnedHandle<T: 'static> {
 impl<T> NonOwnedHandle<T> {
     /// TODO
     pub fn new(value: &T) -> Self {
-        let handle = value as *const T as *mut T as Handle;
+        let handle = value as *const T as Handle;
         resource_manager::register_handle::<T>(handle);
         Self {
             handle,
