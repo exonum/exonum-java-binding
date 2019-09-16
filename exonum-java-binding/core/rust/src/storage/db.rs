@@ -71,6 +71,10 @@ impl View {
         View::RefFork(NonOwnedHandle::new(fork))
     }
 
+    pub fn from_ref_mut_fork(fork: &mut Fork) -> Self {
+        View::RefFork(NonOwnedHandle::new_mut(fork))
+    }
+
     pub fn get(&self) -> ViewRef {
         match self {
             View::RefFork(handle) => {
@@ -189,6 +193,21 @@ mod tests {
             let snapshot = db.snapshot();
             let view = View::from_ref_snapshot(&*snapshot);
             assert!(!view.can_convert_into_fork());
+        }
+    }
+
+    #[test]
+    fn get_mut_fork() {
+        let db = TemporaryDB::new();
+        let mut fork = db.fork();
+        let view = View::from_ref_mut_fork(&mut fork);
+        let mock_method = |_: &mut Fork| {};
+        match view {
+            View::RefFork(handle) => {
+                let fork = handle.get_mut();
+                mock_method(fork);
+            }
+            _ => panic!(),
         }
     }
 

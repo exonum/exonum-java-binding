@@ -59,6 +59,11 @@ impl<T> NonOwnedHandle<T> {
         }
     }
 
+    /// TODO
+    pub fn get_mut(&self) -> &mut T {
+        cast_handle(self.handle)
+    }
+
     /// Returns `Handle` value.
     pub fn get(&self) -> Handle {
         self.handle
