@@ -120,8 +120,7 @@ impl View {
     pub fn get(&self) -> ViewRef<'_> {
         match self {
             View::RefFork(handle) => {
-                let fork = cast_handle::<Fork>(handle.as_handle());
-                ViewRef::Fork(fork)
+                ViewRef::Fork(handle.get())
             }
             View::RefSnapshot(snapshot_ref) => {
                 ViewRef::Snapshot(*snapshot_ref)

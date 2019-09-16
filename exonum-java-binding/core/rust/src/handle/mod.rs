@@ -45,7 +45,7 @@ impl<T> NonOwnedHandle<T> {
     ///
     /// Created `NonOwnedHandle` must not outlive provided reference.
     pub fn new(reference: &T) -> Self {
-        let handle = value as *const T as Handle;
+        let handle = reference as *const T as Handle;
         resource_manager::register_handle::<T>(handle);
         Self {
             handle,
@@ -57,8 +57,8 @@ impl<T> NonOwnedHandle<T> {
     /// Converts reference to a new mutable `NonOwnedHandle`.
     ///
     /// Created `NonOwnedHandle` must not outlive provided reference.
-    pub fn new_mut(value: &mut T) -> Self {
-        let handle = value as *mut T as Handle;
+    pub fn new_mut(reference: &mut T) -> Self {
+        let handle = reference as *mut T as Handle;
         resource_manager::register_handle::<T>(handle);
         Self {
             handle,
