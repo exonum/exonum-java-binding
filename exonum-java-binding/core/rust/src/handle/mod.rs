@@ -65,7 +65,7 @@ impl<T> NonOwnedHandle<T> {
     }
 
     /// Returns `Handle` value.
-    pub fn get(&self) -> Handle {
+    pub fn as_handle(&self) -> Handle {
         self.handle
     }
 }
