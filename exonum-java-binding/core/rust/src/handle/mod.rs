@@ -17,6 +17,9 @@
 //! Wrappers and helper functions around Java pointers. Used for memory management
 //! between native and Java.
 
+// TODO Remove `allow(dead_code)` after [https://jira.bf.local/browse/ECR-910].
+#![allow(dead_code)]
+
 use jni::sys::jlong;
 use jni::JNIEnv;
 
@@ -29,67 +32,25 @@ use super::utils::unwrap_exc_or_default;
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
 
-/// Wrapper for a non-owned handle.
-///
-/// Created handle must not outlive the reference it was created with.
-///
-/// Calls `handle.resource_manager::unregister_handle` in the `Drop` implementation.
+/// Wrapper for a non-owned handle. Calls `handle.resource_manager::unregister_handle` in the `Drop`
+/// implementation.
 pub struct NonOwnedHandle<T: 'static> {
     handle: Handle,
-    is_mutable: bool,
     handle_type: PhantomData<T>,
 }
 
 impl<T> NonOwnedHandle<T> {
-    /// Converts reference to a new immutable `NonOwnedHandle`.
-    ///
-    /// Created `NonOwnedHandle` must not outlive provided reference.
-    pub fn new(reference: &T) -> Self {
-        let handle = reference as *const T as Handle;
+    fn new(handle: Handle) -> Self {
         resource_manager::register_handle::<T>(handle);
         Self {
             handle,
-            is_mutable: false,
             handle_type: PhantomData,
         }
     }
 
-    /// Converts reference to a new mutable `NonOwnedHandle`.
-    ///
-    /// Created `NonOwnedHandle` must not outlive provided reference.
-    pub fn new_mut(reference: &mut T) -> Self {
-        let handle = reference as *mut T as Handle;
-        resource_manager::register_handle::<T>(handle);
-        Self {
-            handle,
-            is_mutable: true,
-            handle_type: PhantomData,
-        }
-    }
-
-    /// Returns a reference which was used to construct a handle.
-    pub fn get(&self) -> &T {
-        cast_handle(self.handle)
-    }
-
-    /// Returns a mutable reference which was used to construct a handle.
-    ///
-    /// Panics if `NonOwnedHandle` was created from immutable reference.
-    pub fn get_mut(&mut self) -> &mut T {
-        if !self.is_mutable {
-            panic!("Attempt to access mutable reference from immutable non-owned handle");
-        }
-        cast_handle(self.handle)
-    }
-
-    /// Returns underlying `Handle` value.
-    pub fn as_handle(&self) -> Handle {
+    /// Returns `Handle` value.
+    pub fn get(&self) -> Handle {
         self.handle
-    }
-
-    /// Returns `true` if the handle is created from mutable reference.
-    pub fn is_mutable(&self) -> bool {
-        self.is_mutable
     }
 }
 
@@ -105,6 +66,13 @@ pub fn to_handle<T: 'static>(val: T) -> Handle {
     let handle = Box::into_raw(Box::new(val)) as Handle;
     resource_manager::add_handle::<T>(handle);
     handle
+}
+
+/// Returns a handle (a raw pointer) to the given native-owned object. This handle should not be
+/// freed manually.
+pub fn as_handle<T>(val: &mut T) -> NonOwnedHandle<T> {
+    let ptr = val as *mut T;
+    NonOwnedHandle::new(ptr as Handle)
 }
 
 /// "Converts" a handle to the object reference.
@@ -170,15 +138,5 @@ mod tests {
     #[should_panic(expected = "Invalid handle value")]
     fn cast_zero_object() {
         let _ = cast_handle::<i32>(0);
-    }
-
-    #[test]
-    #[should_panic(expected = "Attempt to access mutable reference from immutable")]
-    fn mutable_ref_from_immutable_throws_error() {
-        let i = &mut 0;
-        let mut handle = NonOwnedHandle::new(i);
-
-        assert!(!handle.is_mutable());
-        let _ = handle.get_mut();
     }
 }
