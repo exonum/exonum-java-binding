@@ -15,7 +15,7 @@
 use exonum_merkledb::{Fork, Snapshot};
 use jni::{objects::JClass, JNIEnv};
 
-use handle::{self, Handle, NonOwnedHandle};
+use handle::{self, Handle};
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
@@ -33,15 +33,21 @@ pub(crate) type Value = Vec<u8>;
 /// Java code must never store a `View` handle beyond the scope it was initially acquired
 /// (except for `View::Owned`).
 pub(crate) enum View {
-    /// Special case for both `&Fork` and `&mut Fork`.
+    /// Immutable Fork view, constructed from `&Fork`.
     ///
     /// Created `View` must never outlive the reference it was created with,
     /// or `SIGINT` will occur.
-    RefFork(NonOwnedHandle<Fork>),
-    /// As `Snapshot` is a trait-object, we can not use `NonOwnedHandle<Snapshot>` here.
+    RefFork(&'static Fork),
+    /// Mutable Fork view, constructed from `&mut Fork`.
     ///
-    /// `View::from_ref_snapshot` makes any reference `&'static`, but the created `View`
-    /// must never outlive the reference it was constructed with, or `SIGINT` will occur.
+    /// Created `View` must never outlive the reference it was created with,
+    /// or `SIGINT` will occur.
+    RefMutFork(&'static mut Fork),
+    /// Immutable Snapshot view, constructed from `&Snapshot`. There is no need in mutable
+    /// variant.
+    ///
+    /// Created `View` must never outlive the reference it was constructed with,
+    /// or `SIGINT` will occur.
     RefSnapshot(&'static dyn Snapshot),
     /// Covers both `Snapshot` and `Fork` cases. Rust uses move semantic and single-ownership
     /// rule to guarantee that the `View` will be valid for the whole execution.
@@ -61,19 +67,6 @@ pub(crate) enum ViewOwned {
 pub(crate) enum ViewRef<'a> {
     Snapshot(&'a dyn Snapshot),
     Fork(&'a Fork),
-}
-
-#[allow(clippy::useless_transmute)]
-impl<'a> ViewRef<'a> {
-    unsafe fn from_fork(fork: &'a Fork) -> Self {
-        // Make a provided reference `'static`.
-        ViewRef::Fork(std::mem::transmute(fork))
-    }
-
-    unsafe fn from_snapshot(snapshot: &'a dyn Snapshot) -> Self {
-        // Make a provided reference `'static`.
-        ViewRef::Snapshot(std::mem::transmute(snapshot))
-    }
 }
 
 impl View {
@@ -102,7 +95,7 @@ impl View {
     ///
     /// Mutable indexes available, but not `&mut self` methods of `Fork`.
     pub fn from_ref_fork(fork: &Fork) -> Self {
-        View::RefFork(NonOwnedHandle::new(fork))
+        View::RefFork(unsafe { std::mem::transmute(fork) })
     }
 
     /// Creates `View::RefFork` variant.
@@ -114,18 +107,19 @@ impl View {
     // TODO: remove dead_code after ECR-3519
     #[allow(dead_code)]
     pub fn from_ref_mut_fork(fork: &mut Fork) -> Self {
-        View::RefFork(NonOwnedHandle::new_mut(fork))
+        View::RefMutFork(unsafe { std::mem::transmute(fork) })
     }
 
     /// Returns temporary reference to the underlying `Fork` / `Snapshot` to simplify use
     /// in indexes operations.
     pub fn get(&self) -> ViewRef<'_> {
         match self {
-            View::RefFork(handle) => ViewRef::Fork(handle.get()),
+            View::RefFork(fork_ref) => ViewRef::Fork(*fork_ref),
+            View::RefMutFork(fork_ref) => ViewRef::Fork(*fork_ref),
             View::RefSnapshot(snapshot_ref) => ViewRef::Snapshot(*snapshot_ref),
             View::Owned(owned) => match owned {
-                ViewOwned::Fork(fork) => unsafe { ViewRef::from_fork(&fork) },
-                ViewOwned::Snapshot(snapshot) => unsafe { ViewRef::from_snapshot(&**snapshot) },
+                ViewOwned::Fork(fork) => ViewRef::Fork(&*fork),
+                ViewOwned::Snapshot(snapshot) => ViewRef::Snapshot(&**snapshot),
             },
         }
     }
@@ -162,7 +156,6 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 mod tests {
     use super::*;
     use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
-    use handle::{cast_handle, to_handle};
 
     const FIRST_TEST_VALUE: i32 = 42;
     const SECOND_TEST_VALUE: i32 = 57;
@@ -227,29 +220,10 @@ mod tests {
         let view = View::from_ref_mut_fork(&mut fork);
         let mock_method = |_: &mut Fork| {};
         match view {
-            View::RefFork(mut handle) => {
-                let fork = handle.get_mut();
-                mock_method(fork);
+            View::RefMutFork(fork_ref) => {
+                mock_method(fork_ref);
             }
             _ => panic!(),
-        }
-    }
-
-    #[test]
-    #[should_panic(expected = "Attempt to access mutable reference from immutable")]
-    fn mutable_fork_from_immutable_throws_error() {
-        let db = TemporaryDB::new();
-        let fork = db.fork();
-        // Simulate handles transfer to-from Java
-        let handle = {
-            let view = View::from_ref_fork(&fork);
-            to_handle(view)
-        };
-        let view = cast_handle::<View>(handle);
-        if let View::RefFork(fork_ref) = view {
-            let _ = fork_ref.get_mut();
-        } else {
-            panic!()
         }
     }
 
