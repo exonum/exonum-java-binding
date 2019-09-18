@@ -223,14 +223,14 @@ mod tests {
             View::RefMutFork(fork_ref) => {
                 mock_method(fork_ref);
             }
-            _ => panic!(),
+            _ => unreachable!("Invalid variant of View, expected RefMutFork"),
         }
     }
 
     fn check_snapshot(view_ref: ViewRef) {
         match view_ref {
             ViewRef::Snapshot(_) => check_value(&view_ref, FIRST_TEST_VALUE),
-            _ => panic!(),
+            _ => unreachable!("Invalid variant of ViewRef, expected Snapshot"),
         }
     }
 
@@ -244,7 +244,7 @@ mod tests {
                 }
                 check_value(&view_ref, SECOND_TEST_VALUE);
             }
-            _ => panic!(),
+            _ => unreachable!("Invalid variant of ViewRef, expected Fork"),
         }
     }
 
