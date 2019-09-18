@@ -28,10 +28,14 @@ pub(crate) type Value = Vec<u8>;
 ///    in the case when the java side creates and owns it;
 /// - it just holds a reference, when one is provided from the rust side.
 ///
-/// As `View` does not have a lifetime, nothing protects us from dereferencing a freed reference,
-/// the extreme caution must be taken in places where `View` is constructed and send to Java.
-/// Java code must never store a `View` handle beyond the scope it was initially acquired
-/// (except for `View::Owned`).
+/// The View does not have a lifetime, so we use `unsafe` to prolong the lifetime of the reference
+/// it was constructed with to 'static. If this original reference is destroyed (leaves the scope),
+/// our prolonged reference stored inside View is no longer valid and will lead to SIGINT if we
+/// use it. So we must carefully review all the places where View is constructed from references
+/// to make sure View never outlives the original reference.
+///
+/// Java code must never store a handle to the `View::Ref*` variants for longer than
+/// the method invocation.
 pub(crate) enum View {
     /// Immutable Fork view, constructed from `&Fork`.
     ///
