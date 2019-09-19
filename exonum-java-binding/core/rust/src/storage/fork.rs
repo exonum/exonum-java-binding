@@ -22,7 +22,7 @@ use {to_handle, utils};
 
 /// Creates checkpoint for `Fork`.
 ///
-/// Returns error if the provided handle is not owned `Fork`.
+/// Throws RuntimeException if the View behind the provided handle does not support checkpoints.
 ///
 /// See `View::create_checkpoint`.
 #[no_mangle]
@@ -41,7 +41,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_native
 
 /// Rollbacks `Fork`.
 ///
-/// Returns error if provided handle is not owned `Fork`.
+/// Throws RuntimeException if the View behind the provided handle does not support rollbacks.
 ///
 /// See `View::rollback`.
 #[no_mangle]
