@@ -254,16 +254,14 @@ mod tests {
         let db = setup_database();
         let mut fork = db.fork();
         let mut view = View::from_ref_mut_fork(&mut fork);
+        // create checkpoint that will be used later to restore Fork's state
         view.create_checkpoint();
-        {
-            let mut index = match view.get() {
-                ViewRef::Fork(fork) => entry(fork),
-                _ => unreachable!("Invalid variant of ViewRef, expected Fork"),
-            };
-            index.set(SECOND_TEST_VALUE);
-        }
+        // change stored value to SECOND_TEST_VALUE
+        check_fork(view.get());
         check_value(&view.get(), SECOND_TEST_VALUE);
+
         view.rollback();
+        // Fork's state restored to the checkpoint
         check_value(&view.get(), FIRST_TEST_VALUE);
     }
 
