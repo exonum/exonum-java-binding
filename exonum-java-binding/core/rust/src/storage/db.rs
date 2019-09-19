@@ -36,6 +36,7 @@ pub(crate) type Value = Vec<u8>;
 ///
 /// Java code must never store a handle to the `View::Ref*` variants for longer than
 /// the method invocation.
+#[derive(Debug)]
 pub(crate) enum View {
     /// Immutable Fork view, constructed from `&Fork`.
     ///
@@ -60,6 +61,7 @@ pub(crate) enum View {
     Owned(ViewOwned),
 }
 
+#[derive(Debug)]
 pub(crate) enum ViewOwned {
     Snapshot(Box<dyn Snapshot>),
     Fork(Box<Fork>),
@@ -67,7 +69,7 @@ pub(crate) enum ViewOwned {
 
 /// Hides the differences between owning and non-owning `View` variants
 /// and simplifies the use of the indexes API.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum ViewRef<'a> {
     Snapshot(&'a dyn Snapshot),
     Fork(&'a Fork),
@@ -135,7 +137,10 @@ impl View {
         match self {
             View::Owned(ViewOwned::Fork(fork)) => fork.flush(),
             View::RefMutFork(fork) => fork.flush(),
-            _ => panic!("Cannot create checkpoint because this View does not support it"),
+            _ => panic!(
+                "Cannot create checkpoint because this View does not support it: {:?}",
+                self
+            ),
         }
     }
 
@@ -150,7 +155,10 @@ impl View {
         match self {
             View::Owned(ViewOwned::Fork(fork)) => fork.rollback(),
             View::RefMutFork(fork) => fork.rollback(),
-            _ => panic!("Cannot rollback because this View does not support it"),
+            _ => panic!(
+                "Cannot rollback because this View does not support it: {:?}",
+                self
+            ),
         }
     }
 
@@ -159,7 +167,10 @@ impl View {
         if let View::Owned(ViewOwned::Fork(fork)) = self {
             fork
         } else {
-            panic!("`into_fork` called on non-owning View or Snapshot");
+            panic!(
+                "`into_fork` called on non-owning View or Snapshot: {:?}",
+                self
+            );
         }
     }
 
