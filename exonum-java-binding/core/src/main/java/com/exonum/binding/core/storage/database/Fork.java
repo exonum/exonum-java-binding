@@ -166,6 +166,20 @@ public final class Fork extends View {
   }
 
   /**
+   * Returns true if this fork can be converted into patch.
+   */
+  private static native boolean nativeCanConvertIntoPatch(long nativeHandle);
+
+  /**
+   * Converts this fork into patch, consuming the object, and returns the native handle
+   * to the patch.
+   *
+   * <p>In case of failure RuntimeException is thrown and provided nativeHandle is
+   * invalidated.
+   */
+  private static native long nativeIntoPatch(long nativeHandle);
+
+  /**
    * Creates in-memory checkpoint that can be used to rollback changes.
    */
   private static native void nativeCreateCheckpoint(long nativeHandle);
@@ -184,18 +198,4 @@ public final class Fork extends View {
    * @see #rollback()
    */
   private static native boolean nativeCanRollback(long nativeHandle);
-
-  /**
-   * Returns true if this fork can be converted into patch.
-   */
-  private static native boolean nativeCanConvertIntoPatch(long nativeHandle);
-
-  /**
-   * Converts this fork into patch, consuming the object, and returns the native handle
-   * to the patch.
-   *
-   * <p>In case of failure RuntimeException is thrown and provided nativeHandle is
-   * invalidated.
-   */
-  private static native long nativeIntoPatch(long nativeHandle);
 }
