@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkRange;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -267,5 +268,62 @@ class StoragePreconditionsTest {
     IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
         () -> StoragePreconditions.checkPositionIndex(index, size));
     assertThat(thrown.getLocalizedMessage(), containsString("size (-1) is negative"));
+  }
+
+  @Test
+  void checkRangeFromNegative() {
+    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
+        () -> checkRange(-1, 2));
+    assertThat(thrown.getLocalizedMessage(),
+        containsString("Proof range first element index -1 must be in range [0, 2)"));
+  }
+
+  @Test
+  void checkRangeFromEqualToTo() {
+    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
+        () -> checkRange(2, 2));
+    assertThat(thrown.getLocalizedMessage(),
+        containsString("Proof range first element index 2 must be in range [0, 2)"));
+  }
+
+  @Test
+  void checkRangeFromGreaterThanTo() {
+    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
+        () -> checkRange(3, 2));
+    assertThat(thrown.getLocalizedMessage(),
+        containsString("Proof range first element index 3 must be in range [0, 2)"));
+  }
+
+  @Test
+  void checkRangeFromMaxLong() {
+    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
+        () -> checkRange(Long.MAX_VALUE, 2));
+    assertThat(thrown.getLocalizedMessage(),
+        containsString("Proof range first element index "
+            + Long.MAX_VALUE + " must be in range [0, 2)"));
+  }
+
+  @Test
+  void checkRangeFrom0MinValid() {
+    long from = 0;
+    long to = 3;
+
+    checkRange(from, to);
+  }
+
+  @Test
+  void checkRangeFrom1() {
+    long from = 1;
+    long to = 3;
+
+    checkRange(from, to);
+  }
+
+  @Test
+  void checkRangeFrom2MaxValid() {
+    long from = 2;
+    long to = 3;
+
+    checkRange(from, to);
   }
 }

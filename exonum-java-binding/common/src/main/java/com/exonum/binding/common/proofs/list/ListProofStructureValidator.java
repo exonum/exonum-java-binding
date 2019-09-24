@@ -16,9 +16,13 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 
 /**
@@ -29,11 +33,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
   static final int MAX_NODE_DEPTH = 63;
 
   // TODO: optimize data storage and algorithms of validity checks, https://jira.bf.local/browse/ECR-2443
-  private final List<NodeInfo> listProofBranchesInfo;
-
-  private final List<NodeInfo> listProofElementsInfo;
-
-  private final List<NodeInfo> listProofHashNodesInfo;
+  private final Multimap<NodeType, NodeInfo> listProofInfo;
 
   private int depth;
 
@@ -45,9 +45,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
   ListProofStructureValidator(ListProofNode listProof) {
     depth = 0;
     proofStatus = ListProofStatus.VALID;
-    listProofBranchesInfo = new ArrayList<>();
-    listProofElementsInfo = new ArrayList<>();
-    listProofHashNodesInfo = new ArrayList<>();
+    listProofInfo = Multimaps.newListMultimap(new EnumMap<>(NodeType.class), ArrayList::new);
 
     listProof.accept(this);
     this.check();
@@ -59,7 +57,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
 
     NodeType leftElementType = getNodeType(branch.getLeft());
     NodeType rightElementType = branch.getRight().map(this::getNodeType).orElse(NodeType.NONE);
-    listProofBranchesInfo.add(
+    listProofInfo.get(NodeType.BRANCH).add(
         new NodeInfo(branch, depth, Arrays.asList(leftElementType, rightElementType))
     );
 
@@ -69,12 +67,17 @@ final class ListProofStructureValidator implements ListProofVisitor {
 
   @Override
   public void visit(ListProofHashNode hashNode) {
-    listProofHashNodesInfo.add(new NodeInfo(hashNode, depth));
+    listProofInfo.get(NodeType.HASHNODE).add(new NodeInfo(hashNode, depth));
   }
 
   @Override
   public void visit(ListProofElement element) {
-    listProofElementsInfo.add(new NodeInfo(element, depth));
+    listProofInfo.get(NodeType.ELEMENT).add(new NodeInfo(element, depth));
+  }
+
+  @Override
+  public void visit(ListProofOfAbsence listProofOfAbsence) {
+    listProofInfo.get(NodeType.ABSENCE).add(new NodeInfo(listProofOfAbsence, depth));
   }
 
   private void visitLeft(ListProofBranch branch, int branchDepth) {
@@ -95,16 +98,19 @@ final class ListProofStructureValidator implements ListProofVisitor {
    * Performs list proof structure checks and assigns proofStatus based on results of these checks.
    */
   private void check() {
-    if (exceedsMaxDepth(listProofElementsInfo)) {
+    if (exceedsMaxDepth(listProofInfo.get(NodeType.ELEMENT))) {
       proofStatus = ListProofStatus.INVALID_ELEMENT_NODE_DEPTH;
-    } else if (exceedsMaxDepth(listProofHashNodesInfo)) {
+    } else if (exceedsMaxDepth(listProofInfo.get(NodeType.HASHNODE))) {
       proofStatus = ListProofStatus.INVALID_HASH_NODE_DEPTH;
-    } else if (hasInvalidNodesDepth(listProofElementsInfo)) {
+    } else if (hasInvalidNodesDepth(listProofInfo.get(NodeType.ELEMENT))) {
       proofStatus = ListProofStatus.INVALID_NODE_DEPTH;
-    } else if (hasNoElementNodes(listProofBranchesInfo, listProofElementsInfo)) {
+    } else if (hasNoElementNodes(listProofInfo.get(NodeType.BRANCH),
+        listProofInfo.get(NodeType.ELEMENT))) {
       proofStatus = ListProofStatus.INVALID_TREE_NO_ELEMENTS;
-    } else if (hashNodesLimitExceeded(listProofBranchesInfo)) {
+    } else if (hashNodesLimitExceeded(listProofInfo.get(NodeType.BRANCH))) {
       proofStatus = ListProofStatus.INVALID_HASH_NODES_COUNT;
+    } else if (hasInvalidAbsentNodes()) {
+      proofStatus = ListProofStatus.INVALID_PROOF_OF_ABSENCE;
     }
   }
 
@@ -120,6 +126,8 @@ final class ListProofStructureValidator implements ListProofVisitor {
       return NodeType.ELEMENT;
     } else if (node instanceof ListProofHashNode) {
       return NodeType.HASHNODE;
+    } else if (node instanceof ListProofOfAbsence) {
+      return NodeType.ABSENCE;
     } else {
       throw new RuntimeException("Unknown tree node type: " + node);
     }
@@ -131,7 +139,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
    * @param nodes collection of node info
    * @return true if node depth is invalid
    */
-  private boolean exceedsMaxDepth(List<NodeInfo> nodes) {
+  private boolean exceedsMaxDepth(Collection<NodeInfo> nodes) {
     return nodes.stream()
         .anyMatch(nodeInfo -> nodeInfo.getDepth() > MAX_NODE_DEPTH);
   }
@@ -142,7 +150,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
    * @param nodes collection of node info
    * @return true if node depths vary
    */
-  private boolean hasInvalidNodesDepth(List<NodeInfo> nodes) {
+  private boolean hasInvalidNodesDepth(Collection<NodeInfo> nodes) {
     long depthsCount = nodes.stream()
         .map(NodeInfo::getDepth)
         .distinct()
@@ -157,7 +165,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
    * @param nodes collection of node info
    * @return true if node depths vary
    */
-  private boolean hasNoElementNodes(List<NodeInfo> branches, List<NodeInfo> nodes) {
+  private boolean hasNoElementNodes(Collection<NodeInfo> branches, Collection<NodeInfo> nodes) {
     return branches.size() > 0 && nodes.size() == 0;
   }
 
@@ -167,7 +175,7 @@ final class ListProofStructureValidator implements ListProofVisitor {
    * @param branches collection of branches info
    * @return true if branch contains only hash nodes.
    */
-  private boolean hashNodesLimitExceeded(List<NodeInfo> branches) {
+  private boolean hashNodesLimitExceeded(Collection<NodeInfo> branches) {
     return branches.stream()
         .anyMatch(this::invalidBranch);
   }
@@ -179,6 +187,26 @@ final class ListProofStructureValidator implements ListProofVisitor {
     }
     return children.stream()
         .allMatch(nodeType -> (nodeType == NodeType.HASHNODE) || (nodeType == NodeType.NONE));
+  }
+
+  /**
+   * Returns true if this proof is a proof of absence and doesn't have a valid structure:
+   * contains more than one node of absence, or contains any nodes other than a node of absence,
+   * or the node of absence has non-zero depth.
+   */
+  private boolean hasInvalidAbsentNodes() {
+    Collection<NodeInfo> absentNodes = listProofInfo.get(NodeType.ABSENCE);
+    int absentNodesSize = absentNodes.size();
+    if (absentNodesSize > 1) {
+      return true;
+    } else if (absentNodesSize == 1) {
+      boolean singleNodeTree = listProofInfo.get(NodeType.BRANCH).isEmpty()
+          && listProofInfo.get(NodeType.HASHNODE).isEmpty()
+          && listProofInfo.get(NodeType.ELEMENT).isEmpty();
+      return !singleNodeTree || absentNodes.stream().allMatch(node -> node.getDepth() != 0);
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -238,7 +266,6 @@ final class ListProofStructureValidator implements ListProofVisitor {
    * Enum used to identify tree node type.
    */
   private enum NodeType {
-    BRANCH, ELEMENT, HASHNODE, NONE
+    BRANCH, ELEMENT, HASHNODE, ABSENCE, NONE
   }
 }
-

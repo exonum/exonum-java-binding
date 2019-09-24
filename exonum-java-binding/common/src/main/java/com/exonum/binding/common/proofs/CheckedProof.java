@@ -33,11 +33,11 @@ public interface CheckedProof {
   ProofStatus getProofStatus();
 
   /**
-   * Returns the calculated root hash of the proof.
-   * Must be equal to the Merkle root hash of the collection, providing this proof.
+   * Returns the calculated index hash of the proof.
+   * Must be equal to the index hash of the collection, providing this proof.
    * @throws IllegalStateException if the proof is not valid
    */
-  HashCode getRootHash();
+  HashCode getIndexHash();
 
   /**
    * Returns true if proof status is valid, false otherwise.

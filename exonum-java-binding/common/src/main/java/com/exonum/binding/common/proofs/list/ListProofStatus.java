@@ -27,7 +27,8 @@ public enum ListProofStatus implements ProofStatus {
   INVALID_HASH_NODE_DEPTH("Hash node appears below the maximum allowed depth"),
   INVALID_TREE_NO_ELEMENTS("Tree does not contain any element nodes"),
   INVALID_NODE_DEPTH("Value node appears at the wrong level"),
-  INVALID_HASH_NODES_COUNT("A branch node in a proof tree has only hash nodes as children");
+  INVALID_HASH_NODES_COUNT("A branch node in a proof tree has only hash nodes as children"),
+  INVALID_PROOF_OF_ABSENCE("Proof of absence is not a root node of a proof tree");
 
   private final String description;
 

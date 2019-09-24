@@ -38,10 +38,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+// Execute the tests sequentially, as each of them creates a Vertx instance with its
+// own thread pool, which drives the delays up.
+@Execution(ExecutionMode.SAME_THREAD)
 class VertxServerIntegrationTest {
 
   private static final int ANY_PORT = 0;
+  private static final int DEFAULT_TIMEOUT = 5;
 
   private VertxServer server;
 
@@ -85,7 +91,7 @@ class VertxServerIntegrationTest {
   void stop_properlyStops() throws Exception {
     server.start(ANY_PORT);
     CompletableFuture<Void> f = server.stop();
-    f.get(4, TimeUnit.SECONDS);
+    f.get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
     assertTrue(f.isDone());
   }
 
@@ -93,7 +99,7 @@ class VertxServerIntegrationTest {
   void stop_subsequentStopsHaveNoEffect() throws Exception {
     server.start(ANY_PORT);
     CompletableFuture<Void> f = server.stop();
-    f.get(5, TimeUnit.SECONDS);
+    f.get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
     CompletableFuture<Void> f2 = server.stop();
     assertTrue(f2.isDone());
@@ -138,9 +144,7 @@ class VertxServerIntegrationTest {
       client.get(port, "localhost", "/s1/foo")
           .send(futureResponse::complete);
 
-      int timeout = 3;
-      AsyncResult<HttpResponse<Buffer>> ar = futureResponse.get(timeout, TimeUnit.SECONDS);
-      assertTrue(futureResponse.isDone(), "Did not receive response in " + timeout + " seconds");
+      AsyncResult<HttpResponse<Buffer>> ar = futureResponse.get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
       if (ar.succeeded()) {
         // Check the result.
         HttpResponse<Buffer> response = ar.result();
@@ -163,8 +167,7 @@ class VertxServerIntegrationTest {
    */
   private void blockingStop() throws InterruptedException, ExecutionException, TimeoutException {
     Future<Void> f = server.stop();
-    int stopTimeout = 3;
-    f.get(stopTimeout, TimeUnit.SECONDS);
+    f.get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
   }
 
   /**

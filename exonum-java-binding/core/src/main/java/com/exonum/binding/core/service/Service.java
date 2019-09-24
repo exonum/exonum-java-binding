@@ -70,7 +70,7 @@ public interface Service {
    *
    * @param snapshot a snapshot of the blockchain state. Not valid after this method returns
    * @see ProofListIndexProxy#getIndexHash()
-   * @see ProofMapIndexProxy#getRootHash()
+   * @see ProofMapIndexProxy#getIndexHash()
    */
   List<HashCode> getStateHashes(Snapshot snapshot);
 
@@ -93,7 +93,7 @@ public interface Service {
    * @param node a set-up Exonum node, providing an interface to access
    *             the current blockchain state and submit transactions
    * @param router a router responsible for handling requests to this service
-   * @see <a href="https://exonum.com/doc/version/0.11/get-started/java-binding/#external-service-api">
+   * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>
    */
   void createPublicApiHandlers(Node node, Router router);

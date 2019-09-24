@@ -68,7 +68,7 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn create_snapshot(&self) -> Box<Snapshot> {
+    pub fn create_snapshot(&self) -> Box<dyn Snapshot> {
         self.blockchain.snapshot()
     }
 

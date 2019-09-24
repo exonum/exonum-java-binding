@@ -67,6 +67,6 @@ This release brings:
 - Support of sending transactions to Exonum blockchain nodes.
 - Support of Exonum Java Binding Commons library.
 
-[system-api-public]: https://exonum.com/doc/version/0.11/advanced/node-management/#public-endpoints
-[explorer-api]: https://exonum.com/doc/version/0.11/advanced/node-management/#explorer-api-endpoints
+[system-api-public]: https://exonum.com/doc/version/0.12/advanced/node-management/#public-endpoints
+[explorer-api]: https://exonum.com/doc/version/0.12/advanced/node-management/#explorer-api-endpoints
 

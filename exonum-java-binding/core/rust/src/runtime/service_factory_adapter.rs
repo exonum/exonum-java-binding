@@ -22,12 +22,12 @@ use runtime::{
     java_service_runtime::JavaServiceRuntime,
     paths::{absolute_library_path, system_classpath},
 };
-use std::sync::{Once, ONCE_INIT};
+use std::sync::Once;
 use InternalConfig;
 
 static mut JAVA_SERVICE_RUNTIME: Option<JavaServiceRuntime> = None;
-static JAVA_SERVICE_RUNTIME_INIT: Once = ONCE_INIT;
-static FIRST_INSTANCE_CREATED: Once = ONCE_INIT;
+static JAVA_SERVICE_RUNTIME_INIT: Once = Once::new();
+static FIRST_INSTANCE_CREATED: Once = Once::new();
 
 /// Adapts current single-service interface of Exonum to multiple EJB services until dynamic
 /// services are implemented. Tracks the `JavaServiceRuntime` instantiation and command extension

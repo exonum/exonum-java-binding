@@ -16,20 +16,20 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.Serializer;
-import com.google.common.base.Preconditions;
 
 /**
  * An Adapter class used to simplify work with ListProof interfaces.
  */
-public class UncheckedListProofAdapter<E> implements UncheckedListProof {
+public class UncheckedListProofAdapter implements UncheckedListProof {
 
-  private final ListProof listProof;
+  private final ListProofNode rootNode;
 
   private final ListProofStructureValidator listProofStructureValidator;
 
-  private final ListProofHashCalculator<E> listProofHashCalculator;
+  private final ListProofHashCalculator listProofHashCalculator;
 
   /**
    * Creates UncheckedListProofAdapter for convenient usage of ListProof interfaces.
@@ -37,16 +37,13 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
    * <p>UncheckedListProofAdapter {@link #check()} method will return CheckedListProof containing
    * results of list proof verification.
    *
-   * @param listProof source list proof with index length
-   * @param serializer proof elements serializer
+   * @param rootNode the root node of the proof tree
+   * @param length the length of the corresponding index (needed for index hash calculation)
    */
-  public UncheckedListProofAdapter(ListProof listProof, Serializer<E> serializer) {
-    Preconditions.checkNotNull(listProof, "ListProof node must be not null");
-    Preconditions.checkNotNull(serializer, "Serializer must be not null");
-
-    this.listProof = listProof;
-    this.listProofStructureValidator = new ListProofStructureValidator(listProof.getRootNode());
-    this.listProofHashCalculator = new ListProofHashCalculator<>(listProof, serializer);
+  public UncheckedListProofAdapter(ListProofNode rootNode, long length) {
+    this.rootNode = checkNotNull(rootNode);
+    this.listProofStructureValidator = new ListProofStructureValidator(rootNode);
+    this.listProofHashCalculator = new ListProofHashCalculator(rootNode, length);
   }
 
   @Override
@@ -59,7 +56,7 @@ public class UncheckedListProofAdapter<E> implements UncheckedListProof {
   }
 
   @Override
-  public ListProof getListProof() {
-    return listProof;
+  public ListProofNode getListProofRootNode() {
+    return rootNode;
   }
 }

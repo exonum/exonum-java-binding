@@ -49,7 +49,7 @@ const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
 const BYTE_ARRAY: &str = "[B";
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Snapshot>),
+    SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 
@@ -66,7 +66,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
         Ok(handle::to_handle(
-            match *handle::cast_handle::<View>(view_handle).get() {
+            match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
@@ -90,7 +90,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         let group_name = utils::convert_to_string(&env, group_name)?;
         let map_id = env.convert_byte_array(map_id)?;
         let view_ref = handle::cast_handle::<View>(view_handle).get();
-        Ok(handle::to_handle(match *view_ref {
+        Ok(handle::to_handle(match view_ref {
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &map_id, &*snapshot))
             }
@@ -114,7 +114,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 
 /// Returns the object hash of the proof map or default hash value if it is empty.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetRootHash(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetIndexHash(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,

@@ -20,6 +20,7 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -29,6 +30,8 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Iterator;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -116,6 +119,77 @@ class ForkIntegrationTest {
         () -> assertThrows(IllegalStateException.class, list2::size),
         () -> assertThrows(IllegalStateException.class, it::next)
     );
+  }
+
+  // TODO: Fix this test
+  @Disabled
+  @Test
+  void rollbacksChangesMadeSinceLastCheckpoint() throws Exception {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner("parent")) {
+      Fork fork = db.createFork(cleaner);
+
+      ListIndex<String> list = newList("list", fork);
+      list.add("string1");
+
+      fork.createCheckpoint();
+
+      list.add("string2");
+      assertEquals(2, list.size());
+
+      fork.rollback();
+
+      assertEquals(1, list.size());
+      assertEquals("string1", list.get(0));
+    }
+  }
+
+  // TODO: Fix this test
+  @Disabled
+  @Test
+  void rollbackDoesNotAffectDatabase() throws Exception {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+         Cleaner cleaner = new Cleaner("cleaner")) {
+      final String indexName = "list";
+
+      Fork fork1 = db.createFork(cleaner);
+      ListIndex<String> list1 = newList(indexName, fork1);
+      list1.add("string1");
+      db.merge(fork1);
+
+      Fork fork2 = db.createFork(cleaner);
+      ListIndex<String> list2 = newList(indexName, fork2);
+      assertEquals(1, list2.size());
+      assertEquals("string1", list2.get(0));
+      list2.add("string2");
+      list2.add("string3");
+      assertEquals(3, list2.size());
+
+      fork2.rollback();
+
+      // Only changes from first fork persist in the database, because
+      // second fork was rolled back.
+      assertEquals(1, list2.size());
+      assertEquals("string1", list2.get(0));
+    }
+  }
+
+  // TODO: Fix this test
+  @Disabled
+  @Test
+  void rollbacksAllChangesIfNoCheckpointWasCreated() throws Exception {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+         Cleaner cleaner = new Cleaner("parent")) {
+      Fork fork = db.createFork(cleaner);
+
+      ListIndex<String> list = newList("list", fork);
+      list.add("string1");
+
+      fork.rollback();
+
+      ListIndex<String> list2 = newList("list", fork);
+      assertEquals(0, list2.size());
+    }
   }
 
   private static ListIndex<String> newList(String name, View view) {

@@ -28,7 +28,7 @@ public interface UncheckedListProof {
   CheckedListProof check();
 
   /**
-   * Returns raw source proof of this UncheckedListProof.
+   * Returns the root node of the corresponding proof tree of this UncheckedListProof.
    */
-  ListProof getListProof();
+  ListProofNode getListProofRootNode();
 }

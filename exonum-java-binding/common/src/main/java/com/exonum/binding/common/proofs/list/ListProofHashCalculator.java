@@ -23,9 +23,8 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.hash.PrimitiveSink;
-import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
-import com.exonum.binding.common.serialization.Serializer;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.ByteString;
 
 import java.util.NavigableMap;
 import java.util.Optional;
@@ -33,10 +32,8 @@ import java.util.TreeMap;
 
 /**
  * List proof hash calculator.
- *
- * @param <E> the type of elements in the corresponding list
  */
-final class ListProofHashCalculator<E> implements ListProofVisitor {
+final class ListProofHashCalculator implements ListProofVisitor {
 
   @VisibleForTesting
   static final byte BLOB_PREFIX = 0x00;
@@ -45,11 +42,9 @@ final class ListProofHashCalculator<E> implements ListProofVisitor {
   @VisibleForTesting
   static final byte LIST_ROOT_PREFIX = 0x02;
 
-  private final CheckingSerializerDecorator<E> serializer;
-
   private final HashFunction hashFunction;
 
-  private final NavigableMap<Long, E> elements;
+  private final NavigableMap<Long, ByteString> elements;
 
   private long index;
 
@@ -58,26 +53,24 @@ final class ListProofHashCalculator<E> implements ListProofVisitor {
   /**
    * Creates a new ListProofHashCalculator.
    *
-   * @param serializer a serializer of list elements
+   * @param rootNode the root node of the proof tree
+   * @param length the length of the corresponding index
    */
-  ListProofHashCalculator(ListProof listProof, Serializer<E> serializer) {
-    this(listProof, serializer, Hashing.defaultHashFunction());
+  ListProofHashCalculator(ListProofNode rootNode, long length) {
+    this(rootNode, length, Hashing.defaultHashFunction());
   }
 
-  private ListProofHashCalculator(ListProof listProof, Serializer<E> serializer,
-                                  HashFunction hashFunction) {
-    this.serializer = CheckingSerializerDecorator.from(serializer);
+  private ListProofHashCalculator(ListProofNode rootNode, long length, HashFunction hashFunction) {
     this.hashFunction = checkNotNull(hashFunction);
     elements = new TreeMap<>();
     index = 0;
     hash = null;
 
-    ListProofNode rootNode = listProof.getRootNode();
     rootNode.accept(this);
 
     hash = hashFunction.newHasher()
         .putByte(LIST_ROOT_PREFIX)
-        .putLong(listProof.getLength())
+        .putLong(length)
         .putObject(hash, hashCodeFunnel())
         .hash();
   }
@@ -107,12 +100,17 @@ final class ListProofHashCalculator<E> implements ListProofVisitor {
         "Error: already an element by such index in the map: i=" + index
             + ", e=" + elements.get(index);
 
-    E element = serializer.fromBytes(value.getElement().toByteArray());
+    ByteString element = value.getElement();
     elements.put(index, element);
     hash = hashFunction.newHasher()
         .putByte(BLOB_PREFIX)
         .putObject(value, ListProofElement.funnel())
         .hash();
+  }
+
+  @Override
+  public void visit(ListProofOfAbsence listProofOfAbsence) {
+    hash = listProofOfAbsence.getMerkleRoot();
   }
 
   private HashCode visitLeft(ListProofBranch branch, long parentIndex) {
@@ -131,7 +129,7 @@ final class ListProofHashCalculator<E> implements ListProofVisitor {
   /**
    * Returns a collection of list entries: index-element pairs, ordered by indices.
    */
-  NavigableMap<Long, E> getElements() {
+  NavigableMap<Long, ByteString> getElements() {
     return elements;
   }
 

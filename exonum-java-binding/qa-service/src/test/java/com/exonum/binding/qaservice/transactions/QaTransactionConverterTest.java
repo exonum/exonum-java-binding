@@ -22,6 +22,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
@@ -89,17 +90,17 @@ class QaTransactionConverterTest {
 
   private static Collection<Arguments> transactions() {
     List<Arguments> transactionTemplates = asList(
-        Arguments.of(CreateCounterTx.class,
+        arguments(CreateCounterTx.class,
             new CreateCounterTx("name").toRawTransaction()),
 
-        Arguments.of(IncrementCounterTx.class,
+        arguments(IncrementCounterTx.class,
             new IncrementCounterTx(10L, defaultHashFunction().hashString("name", UTF_8))
                 .toRawTransaction()),
 
-        Arguments.of(ThrowingTx.class,
+        arguments(ThrowingTx.class,
             new ThrowingTx(10L).toRawTransaction()),
 
-        Arguments.of(ErrorTx.class,
+        arguments(ErrorTx.class,
             new ErrorTx(10L, (byte) 1, "some error").toRawTransaction())
     );
 

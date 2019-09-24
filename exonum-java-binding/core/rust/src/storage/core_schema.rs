@@ -28,7 +28,7 @@ use utils;
 type CoreSchema<T> = Schema<T>;
 
 enum SchemaType {
-    SnapshotSchema(CoreSchema<&'static Snapshot>),
+    SnapshotSchema(CoreSchema<&'static dyn Snapshot>),
     ForkSchema(CoreSchema<&'static Fork>),
 }
 
@@ -40,7 +40,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_n
     view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let schema_type = match *handle::cast_handle::<View>(view_handle).get() {
+        let schema_type = match handle::cast_handle::<View>(view_handle).get() {
             ViewRef::Snapshot(snapshot) => SchemaType::SnapshotSchema(Schema::new(snapshot)),
             ViewRef::Fork(fork) => SchemaType::ForkSchema(Schema::new(fork)),
         };

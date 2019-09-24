@@ -28,7 +28,7 @@ use utils;
 type Index<T> = Entry<T, Value>;
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Snapshot>),
+    SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 
@@ -43,7 +43,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
         Ok(handle::to_handle(
-            match *handle::cast_handle::<View>(view_handle).get() {
+            match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }

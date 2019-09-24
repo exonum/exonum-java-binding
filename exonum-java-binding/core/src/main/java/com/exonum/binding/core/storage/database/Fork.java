@@ -137,6 +137,35 @@ public final class Fork extends View {
   }
 
   /**
+   * Creates in-memory checkpoint that can be used to rollback changes.
+   */
+  void createCheckpoint() {
+    checkState(nativeCanRollback(getNativeHandle()),
+        "This fork does not support checkpoints");
+
+    // TODO: Invalidate all indexes created with the fork or the Core won't let us
+    //  do anything.
+
+    nativeCreateCheckpoint(getNativeHandle());
+  }
+
+  /**
+   * Rollbacks changes to the latest checkpoint. Affects only changes made with
+   * this particular Fork instance.
+   *
+   * <p>If no checkpoints was created, rollbacks all changes made by this fork.
+   */
+  void rollback() {
+    checkState(nativeCanRollback(getNativeHandle()),
+        "This fork does not support rollbacks");
+
+    // TODO: Invalidate all indexes created with the fork or the Core won't let us
+    //  do anything.
+
+    nativeRollback(getNativeHandle());
+  }
+
+  /**
    * Returns true if this fork can be converted into patch.
    */
   private static native boolean nativeCanConvertIntoPatch(long nativeHandle);
@@ -149,4 +178,24 @@ public final class Fork extends View {
    * invalidated.
    */
   private static native long nativeIntoPatch(long nativeHandle);
+
+  /**
+   * Creates in-memory checkpoint that can be used to rollback changes.
+   */
+  private static native void nativeCreateCheckpoint(long nativeHandle);
+
+  /**
+   * Rollback changes to the latest checkpoint. Affects only changes made with
+   * this particular Fork instance.
+   */
+  private static native void nativeRollback(long nativeHandle);
+
+  /**
+   * Returns true if creating checkpoints and performing rollbacks is
+   * possible with this particular Fork instance.
+   *
+   * @see #createCheckpoint()
+   * @see #rollback()
+   */
+  private static native boolean nativeCanRollback(long nativeHandle);
 }
