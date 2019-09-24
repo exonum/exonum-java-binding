@@ -20,6 +20,58 @@ use handle::{self, acquire_handle_ownership, Handle};
 use storage::db::View;
 use {to_handle, utils};
 
+/// Creates checkpoint for `Fork`.
+///
+/// Throws RuntimeException if the View behind the provided handle does not support checkpoints.
+///
+/// See `View::create_checkpoint`.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeCreateCheckpoint(
+    env: JNIEnv,
+    _: JObject,
+    view_handle: Handle,
+) {
+    let res = panic::catch_unwind(|| {
+        let view = handle::cast_handle::<View>(view_handle);
+        view.create_checkpoint();
+        Ok(())
+    });
+    utils::unwrap_exc_or(&env, res, ())
+}
+
+/// Rollbacks `Fork`.
+///
+/// Throws RuntimeException if the View behind the provided handle does not support rollbacks.
+///
+/// See `View::rollback`.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeRollback(
+    env: JNIEnv,
+    _: JObject,
+    view_handle: Handle,
+) {
+    let res = panic::catch_unwind(|| {
+        let view = handle::cast_handle::<View>(view_handle);
+        view.rollback();
+        Ok(())
+    });
+    utils::unwrap_exc_or(&env, res, ())
+}
+
+/// Returns true if this View supports creating checkpoints and rollback.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeCanRollback(
+    env: JNIEnv,
+    _: JObject,
+    view_handle: Handle,
+) -> jboolean {
+    let res = panic::catch_unwind(|| {
+        let view = handle::cast_handle::<View>(view_handle);
+        Ok(view.can_rollback() as jboolean)
+    });
+    utils::unwrap_exc_or(&env, res, false as jboolean)
+}
+
 /// Returns true if this View can be converted into patch.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeCanConvertIntoPatch(

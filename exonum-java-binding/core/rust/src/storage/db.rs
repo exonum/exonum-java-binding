@@ -36,6 +36,7 @@ pub(crate) type Value = Vec<u8>;
 ///
 /// Java code must never store a handle to the `View::Ref*` variants for longer than
 /// the method invocation.
+#[derive(Debug)]
 pub(crate) enum View {
     /// Immutable Fork view, constructed from `&Fork`.
     ///
@@ -60,6 +61,7 @@ pub(crate) enum View {
     Owned(ViewOwned),
 }
 
+#[derive(Debug)]
 pub(crate) enum ViewOwned {
     Snapshot(Box<dyn Snapshot>),
     Fork(Box<Fork>),
@@ -67,7 +69,7 @@ pub(crate) enum ViewOwned {
 
 /// Hides the differences between owning and non-owning `View` variants
 /// and simplifies the use of the indexes API.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum ViewRef<'a> {
     Snapshot(&'a dyn Snapshot),
     Fork(&'a Fork),
@@ -108,7 +110,7 @@ impl View {
     /// SIGINT will occur.
     ///
     /// Both indexes mutability and `&mut self` methods of `Fork` available.
-    // TODO: remove dead_code after ECR-3519
+    // TODO: remove dead_code after implementing beforeCommit
     #[allow(dead_code)]
     pub fn from_ref_mut_fork(fork: &mut Fork) -> Self {
         View::RefMutFork(unsafe { std::mem::transmute(fork) })
@@ -128,12 +130,47 @@ impl View {
         }
     }
 
+    /// Creates checkpoint for the owned Fork instance.
+    ///
+    /// Panics if it is not possible (`View::can_rollback` returns false).
+    pub fn create_checkpoint(&mut self) {
+        match self {
+            View::Owned(ViewOwned::Fork(fork)) => fork.flush(),
+            View::RefMutFork(fork) => fork.flush(),
+            _ => panic!(
+                "Cannot create checkpoint because this View does not support it: {:?}",
+                self
+            ),
+        }
+    }
+
+    /// Rollbacks owned Fork to the latest checkpoint.
+    /// If no checkpoint was created (`create_checkpoint` method was never called),
+    /// rollbacks all changes in Fork.
+    ///
+    /// Does not affect database, but only a specific Fork instance.
+    ///
+    /// Panics if it is not possible (`View::can_rollback` returns false).
+    pub fn rollback(&mut self) {
+        match self {
+            View::Owned(ViewOwned::Fork(fork)) => fork.rollback(),
+            View::RefMutFork(fork) => fork.rollback(),
+            _ => panic!(
+                "Cannot rollback because this View does not support it: {:?}",
+                self
+            ),
+        }
+    }
+
     /// Unwraps the stored Fork from the View, panics if it's not possible.
     pub fn into_fork(self) -> Box<Fork> {
         if let View::Owned(ViewOwned::Fork(fork)) = self {
             fork
         } else {
-            panic!("`into_fork` called on non-owning View or Snapshot");
+            panic!(
+                "`into_fork` called on non-owning View or Snapshot: {:?}",
+                self
+            );
         }
     }
 
@@ -141,6 +178,15 @@ impl View {
     pub fn can_convert_into_fork(&self) -> bool {
         match self {
             View::Owned(ViewOwned::Fork(_)) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns `true` iff `create_checkpoint` and `rollback` methods available.
+    pub fn can_rollback(&self) -> bool {
+        match self {
+            View::Owned(ViewOwned::Fork(_)) => true,
+            View::RefMutFork(_) => true,
             _ => false,
         }
     }
@@ -171,6 +217,7 @@ mod tests {
         let view = View::from_ref_snapshot(&*snapshot);
         check_snapshot(view.get());
         assert!(!view.can_convert_into_fork());
+        assert!(!view.can_rollback());
     }
 
     #[test]
@@ -180,6 +227,7 @@ mod tests {
         let view = View::from_owned_snapshot(snapshot);
         check_snapshot(view.get());
         assert!(!view.can_convert_into_fork());
+        assert!(!view.can_rollback());
     }
 
     #[test]
@@ -189,6 +237,7 @@ mod tests {
         let view = View::from_ref_fork(&fork);
         check_fork(view.get());
         assert!(!view.can_convert_into_fork());
+        assert!(!view.can_rollback());
     }
 
     #[test]
@@ -198,6 +247,7 @@ mod tests {
         let view = View::from_ref_mut_fork(&mut fork);
         check_fork(view.get());
         assert!(!view.can_convert_into_fork());
+        assert!(view.can_rollback());
     }
 
     #[test]
@@ -207,6 +257,23 @@ mod tests {
         let view = View::from_owned_fork(fork);
         check_fork(view.get());
         assert!(view.can_convert_into_fork());
+        assert!(view.can_rollback());
+    }
+
+    #[test]
+    fn rollback() {
+        let db = setup_database();
+        let mut fork = db.fork();
+        let mut view = View::from_ref_mut_fork(&mut fork);
+        // create checkpoint that will be used later to restore Fork's state
+        view.create_checkpoint();
+        // change stored value to SECOND_TEST_VALUE
+        check_fork(view.get());
+        check_value(&view.get(), SECOND_TEST_VALUE);
+
+        view.rollback();
+        // Fork's state restored to the checkpoint
+        check_value(&view.get(), FIRST_TEST_VALUE);
     }
 
     #[test]
