@@ -65,6 +65,15 @@ class OpenIndexRegistryTest {
           .contains(String.valueOf(index))
           .contains(String.valueOf(otherIndex));
     }
+
+    @Test
+    void clearRemovesTheIndex() {
+      registry.clear();
+
+      Optional<StorageIndex> actual = registry.findIndex(address);
+
+      assertThat(actual).isEmpty();
+    }
   }
 
   @Test
