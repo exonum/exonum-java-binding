@@ -45,6 +45,8 @@ extern crate exonum_testkit;
 extern crate exonum_time;
 #[cfg(test)]
 extern crate tempfile;
+extern crate semver;
+extern crate futures;
 
 pub use exonum::exonum_merkledb;
 
