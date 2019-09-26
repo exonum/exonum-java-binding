@@ -14,45 +14,42 @@
  * limitations under the License.
  */
 
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::fmt;
-use std::str::FromStr;
 use exonum::{
     api::ApiContext,
     blockchain::Schema as CoreSchema,
     crypto::{Hash, PublicKey, SecretKey},
     helpers::{Height, ValidatorId},
+    messages::BinaryValue,
     node::ApiSender,
     proto::Any,
     runtime::{
         api::ServiceApiBuilder,
-        ArtifactId, ArtifactProtobufSpec, CallInfo,
         dispatcher::{Dispatcher, DispatcherSender},
-        ErrorKind, ExecutionContext, ExecutionError, InstanceDescriptor, InstanceId, InstanceSpec,
-        Runtime, RuntimeIdentifier, StateHashAggregator
+        ArtifactId, ArtifactProtobufSpec, CallInfo, ErrorKind, ExecutionContext, ExecutionError,
+        InstanceDescriptor, InstanceId, InstanceSpec, Runtime, RuntimeIdentifier,
+        StateHashAggregator,
     },
-    messages::BinaryValue,
 };
 use exonum_merkledb::{Fork, Snapshot};
 use futures::{Future, IntoFuture};
 use jni::{
-    Executor,
-    objects::{GlobalRef, JValue, JObject},
+    objects::{GlobalRef, JObject, JValue},
     signature::JavaType,
+    Executor,
 };
-use JniErrorKind;
-use JniResult;
-use Handle;
-use proxy::node::NodeContext;
 use proto;
+use proxy::node::NodeContext;
 use semver::Version;
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::fmt;
+use std::str::FromStr;
 use storage::View;
 use to_handle;
-use utils::{
-    jni_cache::runtime_adapter,
-    panic_on_exception, unwrap_jni,
-};
+use utils::{jni_cache::runtime_adapter, panic_on_exception, unwrap_jni};
+use Handle;
+use JniErrorKind;
+use JniResult;
 
 /// A proxy for `ServiceRuntimeAdapter`s.
 #[derive(Clone)]
@@ -173,7 +170,7 @@ impl From<Error> for ExecutionError {
     fn from(value: Error) -> ExecutionError {
         ExecutionError::new(
             ErrorKind::runtime(value as u8),
-            format!("{:?}", value.clone())
+            format!("{:?}", value.clone()),
         )
     }
 }
@@ -182,7 +179,7 @@ impl Runtime for JavaRuntimeProxy {
     fn deploy_artifact(
         &mut self,
         artifact: ArtifactId,
-        deploy_spec: Any
+        deploy_spec: Any,
     ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
 
         let id = match self.parse_artifact(&artifact) {
@@ -191,12 +188,8 @@ impl Runtime for JavaRuntimeProxy {
         };
 
         let execution_res = Self::parse_jni(self.exec.with_attached(|env| {
-            let artifact_id = JObject::from(
-                env.new_string(id.to_string())?
-            );
-            let spec = JObject::from(env.byte_array_from_slice(
-                &deploy_spec.into_bytes())?
-            );
+            let artifact_id = JObject::from(env.new_string(id.to_string())?);
+            let spec = JObject::from(env.byte_array_from_slice(&deploy_spec.into_bytes())?);
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
@@ -210,6 +203,7 @@ impl Runtime for JavaRuntimeProxy {
             Ok(())
         }));
 
+        git
         self.deployed_artifacts.insert(id);
 
         Box::new(execution_res.into_future())
@@ -245,7 +239,8 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(id as i32),
                     JValue::from(artifact_id),
                 ],
-            ).map(|_| ())
+            )
+            .map(|_| ())
         }))?;
 
         self.add_started_service(Instance::new(spec.id, spec.name.clone()));
@@ -256,7 +251,7 @@ impl Runtime for JavaRuntimeProxy {
         &self,
         fork: &Fork,
         descriptor: InstanceDescriptor,
-        parameters: Any
+        parameters: Any,
     ) -> Result<(), ExecutionError> {
 
         Self::parse_jni(self.exec.with_attached(|env| {
@@ -292,7 +287,8 @@ impl Runtime for JavaRuntimeProxy {
                 &[
                     JValue::from(id),
                 ],
-            ).map(|_| ())
+            )
+            .map(|_| ())
         }))?;
 
         self.remove_started_service(&descriptor.id);
@@ -304,10 +300,11 @@ impl Runtime for JavaRuntimeProxy {
         _dispatcher: &Dispatcher,
         context: &mut ExecutionContext,
         call_info: CallInfo,
-        arguments: &[u8]
+        arguments: &[u8],
     ) -> Result<(), ExecutionError> {
-        let tx = if let (Some(key), Some(hash))
-                = (context.caller.author(), context.caller.transaction_hash()) {
+        let tx = if let (Some(key), Some(hash)) =
+            (context.caller.author(), context.caller.transaction_hash())
+        {
             (key, hash)
         } else {
             // TODO: caller is Blockchain (not Transaction) is not supported  yet
@@ -357,7 +354,9 @@ impl Runtime for JavaRuntimeProxy {
             Ok(data)
         }));
 
-        ServiceRuntimeStateHashes::from_bytes(bytes.into()).unwrap().into()
+        ServiceRuntimeStateHashes::from_bytes(bytes.into())
+            .unwrap()
+            .into()
     }
 
     fn before_commit(&self, _dispatcher: &Dispatcher, _fork: &mut Fork) {
@@ -369,7 +368,7 @@ impl Runtime for JavaRuntimeProxy {
         dispatcher: &DispatcherSender,
         snapshot: &Snapshot,
         service_keypair: &(PublicKey, SecretKey),
-        tx_sender: &ApiSender
+        tx_sender: &ApiSender,
     ) {
         let context = AfterCommitContext::new(dispatcher, snapshot, service_keypair, tx_sender);
 
@@ -396,14 +395,12 @@ impl Runtime for JavaRuntimeProxy {
     }
 
     fn api_endpoints(&self, context: &ApiContext) -> Vec<(String, ServiceApiBuilder)> {
-        let started_ids: Vec<i32> = self.started_services
+        let started_ids: Vec<i32> = self
+            .started_services
             .values()
             .map(|instance| instance.id as i32)
             .collect();
-        let node = NodeContext::new(
-            self.exec.clone(),
-            context.clone(),
-        );
+        let node = NodeContext::new(self.exec.clone(), context.clone());
 
         unwrap_jni(self.exec.with_attached(|env| {
             let node_handle = to_handle(node);
@@ -526,8 +523,7 @@ impl<'a> AfterCommitContext<'a> {
 
     /// If the current node is a validator, return its identifier, for other nodes return `default`.
     pub fn validator_id_or(&self, default: i32) -> i32 {
-        self.validator_id()
-            .map_or(default, |id| i32::from(id.0))
+        self.validator_id().map_or(default, |id| i32::from(id.0))
     }
 
     /// Returns the public key of the current node.
@@ -562,7 +558,8 @@ impl<'a> AfterCommitContext<'a> {
 
 impl From<&ServiceStateHashes> for (InstanceId, Vec<Hash>) {
     fn from(value: &ServiceStateHashes) -> Self {
-        let hashes: Vec<Hash> = value.state_hashes
+        let hashes: Vec<Hash> = value
+            .state_hashes
             .iter()
             .map(|bytes| Hash::from_bytes(bytes.into()).unwrap())
             .collect();
@@ -590,7 +587,7 @@ impl From<ServiceRuntimeStateHashes> for StateHashAggregator {
     fn from(value: ServiceRuntimeStateHashes) -> Self {
         StateHashAggregator {
             runtime: value.runtime(),
-            instances: value.instances()
+            instances: value.instances(),
         }
     }
 }
