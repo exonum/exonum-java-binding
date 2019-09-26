@@ -1160,7 +1160,6 @@ dependencies = [
  "exonum 0.12.0 (git+https://github.com/exonum/exonum?rev=b542dae)",
  "exonum-build 0.12.0 (git+https://github.com/exonum/exonum?rev=b542dae)",
  "exonum-derive 0.12.0 (git+https://github.com/exonum/exonum?rev=b542dae)",
- "exonum-merkledb 0.12.0 (git+https://github.com/exonum/exonum?rev=b542dae)",
  "exonum-testkit 0.12.0 (git+https://github.com/exonum/exonum?rev=b542dae)",
  "exonum-time 0.12.0 (git+https://github.com/exonum/exonum?rev=b542dae)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -20,6 +20,7 @@ use exonum::{
     crypto::{Hash, PublicKey, SecretKey},
     helpers::{Height, ValidatorId},
     messages::BinaryValue,
+    exonum_merkledb::{self, Fork, Snapshot},
     node::ApiSender,
     proto::Any,
     runtime::{
@@ -30,7 +31,6 @@ use exonum::{
         StateHashAggregator,
     },
 };
-use exonum_merkledb::{Fork, Snapshot};
 use futures::{Future, IntoFuture};
 use jni::{
     objects::{GlobalRef, JObject, JValue},
