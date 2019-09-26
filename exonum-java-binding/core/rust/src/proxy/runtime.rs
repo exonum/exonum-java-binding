@@ -92,12 +92,16 @@ struct AfterCommitContext<'a> {
 pub enum Error {
     /// Unable to parse artifact identifier or specified artifact has non-empty spec.
     IncorrectArtifactId = 0,
+    /// Artifact already deployed
+    AlreadyDeployed = 1,
+    /// Service already started
+    AlreadyStarted = 2,
     /// Checked java exception is occurred
-    JavaException = 2,
+    JavaException = 3,
     /// Unspecified error
-    UnspecifiedError = 3,
+    UnspecifiedError = 4,
     /// Not supported operation
-    NotSupportedOperation = 4,
+    NotSupportedOperation = 5,
 }
 
 #[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
@@ -131,12 +135,33 @@ impl JavaRuntimeProxy {
 
     fn parse_artifact(&self, artifact: &ArtifactId) -> Result<JavaArtifactId, ExecutionError> {
         if artifact.runtime_id != Self::RUNTIME_ID as u32 {
-            return Err(Error::IncorrectArtifactId.into());
+            Err(Error::IncorrectArtifactId.into())
+        } else {
+            artifact
+                .name
+                .parse()
+                .map_err(|_| Error::IncorrectArtifactId.into())
         }
-        artifact
-            .name
-            .parse()
-            .map_err(|_| Error::IncorrectArtifactId.into())
+    }
+
+    fn can_deploy_artifact(&self, id: &JavaArtifactId) -> Result<(), ExecutionError> {
+        if self.deployed_artifacts.contains(id) {
+            Err(Error::AlreadyDeployed.into())
+        } else {
+            Ok(())
+        }
+    }
+
+    fn add_deployed_artifact(&mut self, id: JavaArtifactId) {
+        self.deployed_artifacts.insert(id);
+    }
+
+    fn can_start_service(&self, instance: &Instance) -> Result<(), ExecutionError> {
+        if self.started_services.contains_key(&instance.id) {
+            Err(Error::AlreadyStarted.into())
+        } else {
+            Ok(())
+        }
     }
 
     fn add_started_service(&mut self, instance: Instance) {
@@ -187,7 +212,11 @@ impl Runtime for JavaRuntimeProxy {
             Err(err) => return Box::new(Err(err).into_future()),
         };
 
-        let execution_res = Self::parse_jni(self.exec.with_attached(|env| {
+        if let Err(err) = self.can_deploy_artifact(&id) {
+            return Box::new(Err(err).into_future());
+        }
+
+        Box::new(Self::parse_jni(self.exec.with_attached(|env| {
             let artifact_id = JObject::from(env.new_string(id.to_string())?);
             let spec = JObject::from(env.byte_array_from_slice(&deploy_spec.into_bytes())?);
 
@@ -201,12 +230,11 @@ impl Runtime for JavaRuntimeProxy {
                 ],
             )?;
             Ok(())
-        }));
-
-        git
-        self.deployed_artifacts.insert(id);
-
-        Box::new(execution_res.into_future())
+        })).map(|result| {
+            self.add_deployed_artifact(id);
+            result
+        })
+        .into_future())
     }
 
     fn artifact_protobuf_spec(&self, id: &ArtifactId) -> Option<ArtifactProtobufSpec> {
@@ -226,6 +254,9 @@ impl Runtime for JavaRuntimeProxy {
         let id = spec.id;
         let artifact = self.parse_artifact(&spec.artifact)?;
 
+        let instance = Instance::new(spec.id, spec.name.clone());
+        self.can_start_service(&instance)?;
+
         Self::parse_jni(self.exec.with_attached(|env| {
             let name = JObject::from(env.new_string(service_name)?);
             let artifact_id = JObject::from(env.new_string(artifact.to_string())?);
@@ -243,7 +274,7 @@ impl Runtime for JavaRuntimeProxy {
             .map(|_| ())
         }))?;
 
-        self.add_started_service(Instance::new(spec.id, spec.name.clone()));
+        self.add_started_service(instance);
         Ok(())
     }
 
