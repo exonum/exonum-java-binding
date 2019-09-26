@@ -34,7 +34,7 @@ use exonum::{
 use futures::{Future, IntoFuture};
 use jni::{
     objects::{GlobalRef, JObject, JValue},
-    signature::JavaType,
+    signature::{JavaType, Primitive},
     Executor,
 };
 use proto;
@@ -223,7 +223,7 @@ impl Runtime for JavaRuntimeProxy {
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::deploy_artifact_id(),
-                JavaType::from_str("V").unwrap(),
+                JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(artifact_id),
                     JValue::from(spec),
@@ -264,7 +264,7 @@ impl Runtime for JavaRuntimeProxy {
             env.call_method_unchecked(
                 adapter,
                 runtime_adapter::create_service_id(),
-                JavaType::from_str("V").unwrap(),
+                JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(name),
                     JValue::from(id as i32),
@@ -293,7 +293,7 @@ impl Runtime for JavaRuntimeProxy {
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::configure_service_id(),
-                JavaType::from_str("V").unwrap(),
+                JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(id),
                     JValue::from(view_handle),
@@ -314,7 +314,7 @@ impl Runtime for JavaRuntimeProxy {
             env.call_method_unchecked(
                 adapter,
                 runtime_adapter::stop_service_id(),
-                JavaType::from_str("V").unwrap(),
+                JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(id),
                 ],
@@ -353,7 +353,7 @@ impl Runtime for JavaRuntimeProxy {
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::execute_tx_id(),
-                JavaType::from_str("V").unwrap(),
+                JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(service_id),
                     JValue::from(tx_id),
@@ -375,7 +375,7 @@ impl Runtime for JavaRuntimeProxy {
                 env.call_method_unchecked(
                     self.runtime_adapter.as_obj(),
                     runtime_adapter::state_hashes_id(),
-                    JavaType::from_str("[B").unwrap(),
+                    JavaType::Array(Box::new(JavaType::Primitive(Primitive::Byte))),
                     &[JValue::from(view_handle)],
                 ),
             );
@@ -413,7 +413,7 @@ impl Runtime for JavaRuntimeProxy {
                 env.call_method_unchecked(
                     self.runtime_adapter.as_obj(),
                     runtime_adapter::after_commit_id(),
-                    JavaType::from_str("V").unwrap(),
+                    JavaType::Primitive(Primitive::Void),
                     &[
                         JValue::from(view_handle),
                         JValue::from(validator_id),
@@ -444,7 +444,7 @@ impl Runtime for JavaRuntimeProxy {
                 env.call_method_unchecked(
                     self.runtime_adapter.as_obj(),
                     runtime_adapter::connect_apis_id(),
-                    JavaType::from_str("V").unwrap(),
+                    JavaType::Primitive(Primitive::Void),
                     &[
                         JValue::from(service_ids),
                         JValue::from(node_handle),
