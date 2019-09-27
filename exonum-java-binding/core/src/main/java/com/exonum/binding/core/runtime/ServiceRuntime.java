@@ -214,7 +214,8 @@ public final class ServiceRuntime {
    *
    * @param id the id of the started service
    * @param view a database view to apply configuration
-   * @param configuration service instance configuration parameters
+   * @param configuration service instance configuration parameters as a serialized protobuf
+   *     message
    */
   public void initializeService(Integer id, Fork view, byte[] configuration) {
     synchronized (lock) {

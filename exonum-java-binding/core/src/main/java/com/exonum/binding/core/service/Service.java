@@ -48,7 +48,7 @@ public interface Service {
    * @param configuration the service configuration parameters
    * @throws IllegalArgumentException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
-   *     its configuration fails
+   *     its initialization fails
    */
   default void initialize(Fork fork, Configuration configuration) {
     // No configuration
