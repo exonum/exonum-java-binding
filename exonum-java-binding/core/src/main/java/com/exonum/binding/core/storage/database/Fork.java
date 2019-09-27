@@ -153,8 +153,15 @@ public final class Fork extends View {
 
   /**
    * Creates in-memory checkpoint that can be used to rollback changes.
+   *
+   * <p>Creating a checkpoint will invalidate all collections that were instantiated with this fork.
    */
-  void createCheckpoint() {
+  public void createCheckpoint() {
+    // todo: (1) Are nested rollbacks supported, or is the existing checkpoint lost when a new one
+    //   is created?
+    //   (2) If it is, then these methods being public will allow the broken services
+    //   to rollback the changes made by *all the previous services*!
+    //   Shall we prevent that?
     checkState(nativeCanRollback(getNativeHandle()),
         "This fork does not support checkpoints");
 
@@ -168,8 +175,10 @@ public final class Fork extends View {
    * this particular Fork instance.
    *
    * <p>If no checkpoints was created, rollbacks all changes made by this fork.
+   *
+   * <p>Rollback will invalidate all collections that were created with this fork.
    */
-  void rollback() {
+  public void rollback() {
     checkState(nativeCanRollback(getNativeHandle()),
         "This fork does not support rollbacks");
 

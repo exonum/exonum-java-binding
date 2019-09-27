@@ -22,6 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -136,6 +137,18 @@ class ServiceRuntimeAdapterTest {
         () -> serviceRuntimeAdapter.configureService(serviceId, forkHandle, invalidConfig));
 
     assertThat(e).hasMessageContainingAll("Any", toHexString(invalidConfig));
+  }
+
+  @Test
+  void beforeCommit() throws CloseFailuresException {
+    long forkHandle = 0x110b;
+    Fork fork = mock(Fork.class);
+    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+        .thenReturn(fork);
+
+    serviceRuntimeAdapter.beforeCommit(forkHandle);
+
+    verify(serviceRuntime).beforeCommit(fork);
   }
 
   @Test
