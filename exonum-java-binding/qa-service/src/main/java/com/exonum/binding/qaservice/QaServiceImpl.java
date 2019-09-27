@@ -93,7 +93,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public void configure(Fork fork, Configuration configuration) {
+  public void initialize(Fork fork, Configuration configuration) {
     // Add a default counter to the blockchain.
     createCounter(DEFAULT_COUNTER_NAME, fork);
 
