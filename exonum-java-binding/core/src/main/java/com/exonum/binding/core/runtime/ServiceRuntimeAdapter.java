@@ -71,6 +71,15 @@ class ServiceRuntimeAdapter {
     serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), artifactFilename);
   }
 
+  /**
+   * Returns true if the artifact with the given id is deployed in this runtime; false — otherwise.
+   * @param id the service artifact id in format "groupId:artifactId:version"
+   */
+  boolean isArtifactDeployed(String id) {
+    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom(id);
+    return serviceRuntime.isArtifactDeployed(artifactId);
+  }
+
   private static DeployArguments unpackDeployArgs(String id, byte[] deploySpec) {
     try {
       return DeployArguments.parseFrom(deploySpec);

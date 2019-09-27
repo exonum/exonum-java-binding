@@ -153,6 +153,17 @@ public final class ServiceRuntime {
   }
 
   /**
+   * Returns true if an artifact with the given id is currently deployed in this runtime.
+   * @param id a service artifact identifier
+   */
+  public boolean isArtifactDeployed(ServiceArtifactId id) {
+    synchronized (lock) {
+      return serviceLoader.findService(id)
+          .isPresent();
+    }
+  }
+
+  /**
    * Creates a new service instance with the given specification. This method registers
    * the service API.
    *

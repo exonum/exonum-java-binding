@@ -25,6 +25,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -112,9 +113,12 @@ class ServiceRuntimeIntegrationTest {
         .newInstance(serviceId, TestServiceModule::new);
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenReturn(serviceDefinition);
+    when(serviceLoader.findService(serviceId))
+        .thenReturn(Optional.of(serviceDefinition));
 
     serviceRuntime.deployArtifact(serviceId, artifactFilename);
 
+    assertTrue(serviceRuntime.isArtifactDeployed(serviceId));
     verify(serviceLoader).loadService(serviceArtifactLocation);
   }
 
@@ -147,10 +151,13 @@ class ServiceRuntimeIntegrationTest {
     ServiceLoadingException exception = new ServiceLoadingException("Boom");
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenThrow(exception);
+    when(serviceLoader.findService(serviceId))
+        .thenReturn(Optional.empty());
 
     Exception actual = assertThrows(ServiceLoadingException.class,
         () -> serviceRuntime.deployArtifact(serviceId, artifactFilename));
     assertThat(actual).isSameAs(exception);
+    assertFalse(serviceRuntime.isArtifactDeployed(serviceId));
   }
 
   @Test

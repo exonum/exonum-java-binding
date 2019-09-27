@@ -19,6 +19,7 @@ package com.exonum.binding.core.runtime;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -75,6 +76,16 @@ class ServiceRuntimeAdapterTest {
 
     ServiceArtifactId expectedId = ServiceArtifactId.of("com.acme", "foo", "1.2.3");
     verify(serviceRuntime).deployArtifact(expectedId, artifactFilename);
+  }
+
+  @Test
+  void isArtifactDeployed() {
+    String artifactId = "com.acme:foo:1.3.2";
+
+    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.parseFrom(artifactId)))
+        .thenReturn(true);
+
+    assertTrue(serviceRuntimeAdapter.isArtifactDeployed(artifactId));
   }
 
   @Test
