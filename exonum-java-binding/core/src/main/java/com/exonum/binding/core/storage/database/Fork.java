@@ -99,7 +99,7 @@ public final class Fork extends View {
     super(nativeHandle, true);
     this.destructor = destructor;
     this.forkCleaner = parentCleaner;
-    createNewCleaner();
+    replaceIndexCleaner();
   }
 
   @Override
@@ -194,12 +194,12 @@ public final class Fork extends View {
           "Operation aborted due to some objects that had failed to close", e);
     }
 
-    // Create a new cleaner
-    createNewCleaner();
+    // Create a new cleaner for indexes instead of the recently closed
+    replaceIndexCleaner();
   }
 
-  private void createNewCleaner() {
-    // Create a cleaner for collections
+  private void replaceIndexCleaner() {
+    // Create a new cleaner for collections
     indexCleaner = new Cleaner();
     // Register in the parent cleaner
     forkCleaner.add(indexCleaner::close);
