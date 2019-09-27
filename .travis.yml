@@ -55,9 +55,9 @@ matrix:
       - ROCKSDB_STATIC=1
       - SNAPPY_LIB_DIR=/usr/local/lib
       - SNAPPY_STATIC=1
-    - name: "Linux JDK 12 CHECK_RUST=false"
+    - name: "Linux JDK 13 CHECK_RUST=false"
       os: linux
-      jdk: openjdk12
+      jdk: openjdk13
       env: CHECK_RUST=false
 
 cache:
