@@ -84,7 +84,9 @@ class ServiceRuntimeAdapter {
     try {
       return DeployArguments.parseFrom(deploySpec);
     } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException("Invalid deploy specification for " + id, e);
+      String message = "Invalid deploy specification for " + id;
+      logger.error(message, e);
+      throw new IllegalArgumentException(message, e);
     }
   }
 
