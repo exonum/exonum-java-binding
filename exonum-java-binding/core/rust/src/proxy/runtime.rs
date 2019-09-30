@@ -18,7 +18,7 @@ use exonum::{
     api::ApiContext,
     blockchain::Schema as CoreSchema,
     crypto::{Hash, PublicKey, SecretKey},
-    helpers::{Height, ValidatorId},
+    helpers::ValidatorId,
     messages::BinaryValue,
     exonum_merkledb::{self, Fork, Snapshot},
     node::ApiSender,
@@ -39,15 +39,11 @@ use jni::{
 };
 use proto;
 use proxy::node::NodeContext;
-use semver::Version;
-use std::collections::HashMap;
-use std::collections::HashSet;
 use std::fmt;
 use std::str::FromStr;
 use storage::View;
 use to_handle;
 use utils::{jni_cache::runtime_adapter, panic_on_exception, unwrap_jni};
-use Handle;
 use JniErrorKind;
 use JniResult;
 
@@ -56,35 +52,11 @@ use JniResult;
 pub struct JavaRuntimeProxy {
     exec: Executor,
     runtime_adapter: GlobalRef,
-    deployed_artifacts: HashSet<JavaArtifactId>,
-    started_services: HashMap<InstanceId, Instance>,
-    started_services_by_name: HashMap<String, InstanceId>,
-}
-
-/// Service identification properties within `JavaRuntimeProxy`
-#[derive(Debug, Clone)]
-struct Instance {
-    id: InstanceId,
-    name: String,
 }
 
 /// Artifact identification properties within `JavaRuntimeProxy`
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct JavaArtifactId {
-    /// `groupId` maven property
-    pub group: String,
-    /// `artifactId` maven property
-    pub artifact: String,
-    /// `version` maven property in format {major.}{minor}.{patch}
-    pub version: Version,
-}
-
-struct AfterCommitContext<'a> {
-    dispatcher: &'a DispatcherSender,
-    snapshot: &'a dyn Snapshot,
-    service_keypair: &'a (PublicKey, SecretKey),
-    tx_sender: &'a ApiSender,
-}
+pub struct JavaArtifactId(String);
 
 /// List of possible Java runtime errors.
 #[derive(Debug, Copy, Clone)]
@@ -92,16 +64,12 @@ struct AfterCommitContext<'a> {
 pub enum Error {
     /// Unable to parse artifact identifier or specified artifact has non-empty spec.
     IncorrectArtifactId = 0,
-    /// Artifact already deployed
-    AlreadyDeployed = 1,
-    /// Service already started
-    AlreadyStarted = 2,
     /// Checked java exception is occurred
-    JavaException = 3,
+    JavaException = 1,
     /// Unspecified error
-    UnspecifiedError = 4,
+    UnspecifiedError = 2,
     /// Not supported operation
-    NotSupportedOperation = 5,
+    NotSupportedOperation = 3,
 }
 
 #[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
@@ -127,9 +95,6 @@ impl JavaRuntimeProxy {
         JavaRuntimeProxy {
             exec: executor,
             runtime_adapter: adapter,
-            deployed_artifacts: HashSet::new(),
-            started_services: HashMap::new(),
-            started_services_by_name: HashMap::new(),
         }
     }
 
@@ -144,44 +109,31 @@ impl JavaRuntimeProxy {
         }
     }
 
-    fn can_deploy_artifact(&self, id: &JavaArtifactId) -> Result<(), ExecutionError> {
-        if self.deployed_artifacts.contains(id) {
-            Err(Error::AlreadyDeployed.into())
-        } else {
-            Ok(())
-        }
-    }
-
-    fn add_deployed_artifact(&mut self, id: JavaArtifactId) {
-        self.deployed_artifacts.insert(id);
-    }
-
-    fn can_start_service(&self, instance: &Instance) -> Result<(), ExecutionError> {
-        if self.started_services.contains_key(&instance.id) {
-            Err(Error::AlreadyStarted.into())
-        } else {
-            Ok(())
-        }
-    }
-
-    fn add_started_service(&mut self, instance: Instance) {
-        self.started_services_by_name
-            .insert(instance.name.clone(), instance.id);
-        self.started_services.insert(instance.id, instance);
-    }
-
-    fn remove_started_service(&mut self, id: &InstanceId) {
-        let service = self.started_services.remove(id);
-        if let Some(instance) = service {
-            self.started_services_by_name.remove(&instance.name);
-        }
-    }
-
     fn parse_jni<T>(res: JniResult<T>) -> Result<T, ExecutionError> {
         res.map_err(|err| match err.0 {
             JniErrorKind::JavaException => Error::JavaException.into(),
             _ => Error::UnspecifiedError.into(),
         })
+    }
+
+    /// If the current node is a validator, returns `Some(validator_id)`, for other nodes return `None`.
+    fn validator_id(snapshot: &Snapshot, service_keypair: &(PublicKey, SecretKey)) -> Option<ValidatorId> {
+        CoreSchema::new(snapshot)
+            .actual_configuration()
+            .validator_keys
+            .iter()
+            .position(|validator| service_keypair.0 == validator.service_key)
+            .map(|id| ValidatorId(id as u16))
+    }
+
+    /// If the current node is a validator, return its identifier, for other nodes return `default`.
+    fn validator_id_or(
+        snapshot: &Snapshot,
+        service_keypair: &(PublicKey, SecretKey),
+        default: i32
+    ) -> i32 {
+        Self::validator_id(snapshot, service_keypair)
+            .map_or(default, |id| i32::from(id.0))
     }
 }
 
@@ -212,10 +164,6 @@ impl Runtime for JavaRuntimeProxy {
             Err(err) => return Box::new(Err(err).into_future()),
         };
 
-        if let Err(err) = self.can_deploy_artifact(&id) {
-            return Box::new(Err(err).into_future());
-        }
-
         Box::new(Self::parse_jni(self.exec.with_attached(|env| {
             let artifact_id = JObject::from(env.new_string(id.to_string())?);
             let spec = JObject::from(env.byte_array_from_slice(&deploy_spec.into_bytes())?);
@@ -230,22 +178,12 @@ impl Runtime for JavaRuntimeProxy {
                 ],
             )?;
             Ok(())
-        })).map(|result| {
-            self.add_deployed_artifact(id);
-            result
-        })
+        }))
         .into_future())
     }
 
-    fn artifact_protobuf_spec(&self, id: &ArtifactId) -> Option<ArtifactProtobufSpec> {
-        let id = self.parse_artifact(id).ok()?;
-
-        if self.deployed_artifacts.contains(&id) {
-            // TODO: call `ServiceRuntimeAdapter`
-            Some(ArtifactProtobufSpec::default())
-        } else {
-            None
-        }
+    fn artifact_protobuf_spec(&self, _id: &ArtifactId) -> Option<ArtifactProtobufSpec> {
+        Some(ArtifactProtobufSpec::default())
     }
 
     fn start_service(&mut self, spec: &InstanceSpec) -> Result<(), ExecutionError> {
@@ -253,9 +191,6 @@ impl Runtime for JavaRuntimeProxy {
         let service_name = spec.name.clone();
         let id = spec.id;
         let artifact = self.parse_artifact(&spec.artifact)?;
-
-        let instance = Instance::new(spec.id, spec.name.clone());
-        self.can_start_service(&instance)?;
 
         Self::parse_jni(self.exec.with_attached(|env| {
             let name = JObject::from(env.new_string(service_name)?);
@@ -272,10 +207,7 @@ impl Runtime for JavaRuntimeProxy {
                 ],
             )
             .map(|_| ())
-        }))?;
-
-        self.add_started_service(instance);
-        Ok(())
+        }))
     }
 
     fn configure_service(
@@ -320,10 +252,7 @@ impl Runtime for JavaRuntimeProxy {
                 ],
             )
             .map(|_| ())
-        }))?;
-
-        self.remove_started_service(&descriptor.id);
-        Ok(())
+        }))
     }
 
     fn execute(
@@ -396,17 +325,15 @@ impl Runtime for JavaRuntimeProxy {
 
     fn after_commit(
         &self,
-        dispatcher: &DispatcherSender,
+        _dispatcher: &DispatcherSender,
         snapshot: &Snapshot,
         service_keypair: &(PublicKey, SecretKey),
-        tx_sender: &ApiSender,
+        _tx_sender: &ApiSender,
     ) {
-        let context = AfterCommitContext::new(dispatcher, snapshot, service_keypair, tx_sender);
-
         unwrap_jni(self.exec.with_attached(|env| {
-            let view_handle = context.view_handle();
-            let validator_id = context.validator_id_or(-1);
-            let height = context.height().0 as i64;
+            let view_handle = to_handle(View::from_ref_snapshot(snapshot));
+            let validator_id = Self::validator_id_or(snapshot, service_keypair, -1);
+            let height:u64 = CoreSchema::new(snapshot).height().into();
 
             panic_on_exception(
                 env,
@@ -417,7 +344,7 @@ impl Runtime for JavaRuntimeProxy {
                     &[
                         JValue::from(view_handle),
                         JValue::from(validator_id),
-                        JValue::from(height),
+                        JValue::from(height as i64),
                     ],
                 ),
             );
@@ -425,12 +352,10 @@ impl Runtime for JavaRuntimeProxy {
         }));
     }
 
+    // TODO: consider connecting api during the service start due to warning:
+    // "It is a temporary method which retains the existing `RustRuntime` code"
     fn api_endpoints(&self, context: &ApiContext) -> Vec<(String, ServiceApiBuilder)> {
-        let started_ids: Vec<i32> = self
-            .started_services
-            .values()
-            .map(|instance| instance.id as i32)
-            .collect();
+        let started_ids = Vec::<i32>::new();
         let node = NodeContext::new(self.exec.clone(), context.clone());
 
         unwrap_jni(self.exec.with_attached(|env| {
@@ -454,51 +379,7 @@ impl Runtime for JavaRuntimeProxy {
             Ok(())
         }));
 
-        self.started_services
-            .values()
-            .map(|instance| {
-                let builder = ServiceApiBuilder::new(
-                    context.clone(),
-                    InstanceDescriptor {
-                        id: instance.id,
-                        name: instance.name.as_ref(),
-                    },
-                );
-                (["services/", &instance.name].concat(), builder)
-            })
-            .collect()
-    }
-}
-
-impl Instance {
-    fn new(id: InstanceId, name: String) -> Self {
-        Self { id, name }
-    }
-}
-
-impl JavaArtifactId {
-    /// Creates new artifact description
-    pub fn new(group: &str, artifact: &str, major: u64, minor: u64, patch: u64) -> Self {
-        Self {
-            group: group.to_owned(),
-            artifact: artifact.to_owned(),
-            version: Version::new(major, minor, patch),
-        }
-    }
-}
-
-impl From<JavaArtifactId> for ArtifactId {
-    fn from(inner: JavaArtifactId) -> Self {
-        Self {
-            runtime_id: JavaRuntimeProxy::RUNTIME_ID as u32,
-            name: inner.to_string(),
-        }
-    }
-}
-
-impl fmt::Display for JavaArtifactId {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:{}:{}", self.group, self.artifact, self.version)
+        Vec::<(String, ServiceApiBuilder)>::new()
     }
 }
 
@@ -506,84 +387,13 @@ impl FromStr for JavaArtifactId {
     type Err = failure::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let split = s.split(':').take(3).collect::<Vec<_>>();
-        match &split[..] {
-            [group, artifact, version] => {
-                Ok(Self {
-                    group: group.to_string(),
-                    artifact: artifact.to_string(),
-                    version: Version::parse(version)?,
-                })
-            },
-            _ => Err(failure::format_err!("Wrong java artifact name format, it should be in form \"groupId:artifactId:version\""))
-        }
+        Ok(Self(s.to_string()))
     }
 }
 
-impl<'a> AfterCommitContext<'a> {
-    /// Create context for the `after_commit` method.
-    pub(crate) fn new(
-        dispatcher: &'a DispatcherSender,
-        snapshot: &'a dyn Snapshot,
-        service_keypair: &'a (PublicKey, SecretKey),
-        tx_sender: &'a ApiSender,
-    ) -> Self {
-        Self {
-            dispatcher,
-            snapshot,
-            service_keypair,
-            tx_sender,
-        }
-    }
-
-    /// Returns the current database snapshot. This snapshot is used to
-    /// retrieve schema information from the database.
-    pub fn snapshot(&self) -> &dyn Snapshot {
-        self.snapshot
-    }
-
-    /// If the current node is a validator, return its identifier, for other nodes return `None`.
-    pub fn validator_id(&self) -> Option<ValidatorId> {
-        CoreSchema::new(self.snapshot)
-            .actual_configuration()
-            .validator_keys
-            .iter()
-            .position(|validator| self.service_keypair.0 == validator.service_key)
-            .map(|id| ValidatorId(id as u16))
-    }
-
-    /// If the current node is a validator, return its identifier, for other nodes return `default`.
-    pub fn validator_id_or(&self, default: i32) -> i32 {
-        self.validator_id().map_or(default, |id| i32::from(id.0))
-    }
-
-    /// Returns the public key of the current node.
-    pub fn public_key(&self) -> &PublicKey {
-        &self.service_keypair.0
-    }
-
-    /// Returns the secret key of the current node.
-    pub fn secret_key(&self) -> &SecretKey {
-        &self.service_keypair.1
-    }
-
-    /// Returns the current blockchain height. This height is "height of the last committed block".
-    pub fn height(&self) -> Height {
-        CoreSchema::new(self.snapshot).height()
-    }
-
-    /// Returns reference to communication channel with dispatcher.
-    pub(crate) fn dispatcher_channel(&self) -> &DispatcherSender {
-        self.dispatcher
-    }
-
-    /// Returns a transaction broadcaster.
-    pub fn transaction_broadcaster(&self) -> ApiSender {
-        self.tx_sender.clone()
-    }
-
-    pub fn view_handle(&self) -> Handle {
-        to_handle(View::from_ref_snapshot(self.snapshot))
+impl ToString for JavaArtifactId {
+    fn to_string(&self) -> String {
+        self.0.to_owned()
     }
 }
 
