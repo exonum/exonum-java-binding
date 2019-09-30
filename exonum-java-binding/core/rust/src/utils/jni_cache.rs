@@ -30,6 +30,7 @@ use std::{os::raw::c_void, panic::catch_unwind};
 
 /// Invalid JNI version constant, signifying JNI_OnLoad failure.
 const INVALID_JNI_VERSION: jint = 0;
+const SERVICE_RUNTIME_ADAPTER_CLASS: &str = "com/exonum/binding/core/runtime/ServiceRuntimeAdapter";
 
 static INIT: Once = ONCE_INIT;
 
@@ -88,49 +89,49 @@ unsafe fn cache_methods(env: &JNIEnv) {
     );
     RUNTIME_ADAPTER_DEPLOY_ARTIFACT = get_method_id(
         &env,
-        "com/exonum/binding/core/runtime/ServiceRuntimeAdapter",
+        SERVICE_RUNTIME_ADAPTER_CLASS,
         "deployArtifact",
         "(Ljava/lang/String;[B)V",
     );
     RUNTIME_ADAPTER_CREATE_SERVICE = get_method_id(
         &env,
-        "com/exonum/binding/core/runtime/ServiceRuntimeAdapter",
+        SERVICE_RUNTIME_ADAPTER_CLASS,
         "createService",
         "(Ljava/lang/String;ILjava/lang/String;)V",
     );
     RUNTIME_ADAPTER_CONFIGURE_SERVICE = get_method_id(
         &env,
-        "com/exonum/binding/core/runtime/ServiceRuntimeAdapter",
+        SERVICE_RUNTIME_ADAPTER_CLASS,
         "configureService",
         "(IJ[B)V",
     );
     RUNTIME_ADAPTER_STOP_SERVICE = get_method_id(
         &env,
-        "com/exonum/binding/core/runtime/ServiceRuntimeAdapter",
+        SERVICE_RUNTIME_ADAPTER_CLASS,
         "stopService",
         "(I)V",
     );
     RUNTIME_ADAPTER_EXECUTE_TX = get_method_id(
         &env,
-        "com/exonum/binding/core/runtime/ServiceRuntimeAdapter",
+        SERVICE_RUNTIME_ADAPTER_CLASS,
         "executeTransaction",
         "(II[BJ[B[B)V",
     );
     RUNTIME_ADAPTER_STATE_HASHES = get_method_id(
         &env,
-        "com/exonum/binding/core/runtime/ServiceRuntimeAdapter",
+        SERVICE_RUNTIME_ADAPTER_CLASS,
         "getStateHashes",
         "(J)[B",
     );
     RUNTIME_ADAPTER_AFTER_COMMIT = get_method_id(
         &env,
-        "com/exonum/binding/core/runtime/ServiceRuntimeAdapter",
+        SERVICE_RUNTIME_ADAPTER_CLASS,
         "afterCommit",
         "(JIJ)V",
     );
     RUNTIME_ADAPTER_MOUNT_API = get_method_id(
         &env,
-        "com/exonum/binding/core/runtime/ServiceRuntimeAdapter",
+        SERVICE_RUNTIME_ADAPTER_CLASS,
         "connectServiceApis",
         "([IJ)V",
     );
