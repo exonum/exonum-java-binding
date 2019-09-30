@@ -25,7 +25,7 @@ use integration_tests::{
     fake_service::*,
     vm::{create_vm_for_tests_with_fake_classes, fake_service_artifact_path},
 };
-use java_bindings::{jni::JavaVM, utils::any_to_string, JavaServiceRuntime};
+use java_bindings::{jni::JavaVM, utils::any_to_string, JavaRuntimeFactory};
 use std::{panic, sync::Arc};
 
 lazy_static! {
@@ -124,8 +124,8 @@ fn create_service_for_unknown_artifact() {
 }
 
 // Creates a new instance of JavaServiceRuntime for same JVM.
-fn get_runtime() -> JavaServiceRuntime {
-    JavaServiceRuntime::create_with_jvm(VM.clone(), 0)
+fn get_runtime() -> JavaRuntimeFactory {
+    JavaRuntimeFactory::create_with_jvm(VM.clone(), 0)
 }
 
 // Asserts that given closure panics while executed and error message contains given substring.
