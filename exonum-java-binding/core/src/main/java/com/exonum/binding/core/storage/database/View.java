@@ -32,15 +32,11 @@ import java.util.Optional;
  *   <li>A fork, which is a <em>read-write</em> view.</li>
  * </ul>
  *
- * <p>As in some cases the clients need to detect any changes made to a database, a view also
- * holds a modification counter, which any clients changing the database state must notify.
- *
  * @see Snapshot
  * @see Fork
  */
 public abstract class View extends AbstractNativeProxy {
 
-  private final Cleaner cleaner;
   private final OpenIndexRegistry indexRegistry = new OpenIndexRegistry();
   private final boolean canModify;
 
@@ -48,12 +44,10 @@ public abstract class View extends AbstractNativeProxy {
    * Create a new view proxy.
    *
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
-   * @param cleaner a cleaner of resources
    * @param canModify if the view allows modifications
    */
-  View(NativeHandle nativeHandle, Cleaner cleaner, boolean canModify) {
+  View(NativeHandle nativeHandle, boolean canModify) {
     super(nativeHandle);
-    this.cleaner = cleaner;
     this.canModify = canModify;
   }
 
@@ -103,9 +97,18 @@ public abstract class View extends AbstractNativeProxy {
   }
 
   /**
-   * Returns the cleaner of this view.
+   * Clears the registry of open indexes.
+   *
+   * <p>This operation does not destroy the indexes in the registry, therefore,
+   * if it might be needed to access them again, they must be destroyed separately.
    */
-  public Cleaner getCleaner() {
-    return cleaner;
+  void clearOpenIndexes() {
+    indexRegistry.clear();
   }
+
+  /**
+   * Returns the cleaner of this view. It is supposed to be used with collections and other objects
+   * depending on this view.
+   */
+  public abstract Cleaner getCleaner();
 }
