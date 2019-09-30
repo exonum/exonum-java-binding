@@ -101,20 +101,20 @@ class ExonumHttpClientIntegrationTest {
   @Test
   void getUnconfirmedTransactions() throws InterruptedException {
     // Mock response
-    int mockCount = 10;
-    String mockResponse = "{\"size\": " + mockCount + " }";
+    int txPoolSize = 10;
+    String mockResponse = "{\"tx_pool_size\": " + txPoolSize + ", \"tx_count\": 1 }";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
     int actualCount = exonumClient.getUnconfirmedTransactionsCount();
 
     // Assert response
-    assertThat(actualCount, is(mockCount));
+    assertThat(actualCount, is(txPoolSize));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/mempool"));
+    assertThat(recordedRequest, hasPath("api/system/v1/stats"));
   }
 
   @Test

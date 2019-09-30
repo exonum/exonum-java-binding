@@ -22,7 +22,7 @@ import static com.exonum.client.ExonumIterables.indexOf;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
-import static com.exonum.client.ExonumUrls.MEMORY_POOL;
+import static com.exonum.client.ExonumUrls.STATS;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
 import static com.exonum.client.HttpUrlHelper.getFullUrl;
@@ -46,6 +46,7 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.SystemStatistics;
 import com.exonum.client.response.TransactionResponse;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -93,9 +94,13 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public int getUnconfirmedTransactionsCount() {
-    Request request = get(url(MEMORY_POOL));
+    SystemStatistics systemStatistics = getSystemStats();
+    return systemStatistics.getNumUnconfirmedTransactions();
+  }
 
-    return blockingExecuteAndParse(request, SystemApiHelper::parseMemoryPoolJson);
+  private SystemStatistics getSystemStats() {
+    Request request = get(url(STATS));
+    return blockingExecuteAndParse(request, SystemApiHelper::parseStatsJson);
   }
 
   @Override
