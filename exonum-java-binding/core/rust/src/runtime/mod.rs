@@ -20,7 +20,6 @@ mod java_runtime_factory;
 mod library_loader;
 mod paths;
 pub mod services;
-mod time_service;
 
 pub use self::config::*;
 pub use self::java_runtime_factory::JavaRuntimeFactory;
