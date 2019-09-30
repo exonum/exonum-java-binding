@@ -18,16 +18,16 @@ package com.exonum.client;
 
 import static com.exonum.client.Blocks.BLOCK_1;
 import static com.exonum.client.Blocks.BLOCK_1_JSON;
-import static com.exonum.client.Blocks.BLOCK_1_TIME;
-import static com.exonum.client.Blocks.BLOCK_1_WITHOUT_TIME;
+import static com.exonum.client.Blocks.BLOCK_1_JSON_NO_TIME;
+import static com.exonum.client.Blocks.BLOCK_1_NO_TIME;
 import static com.exonum.client.Blocks.BLOCK_2;
 import static com.exonum.client.Blocks.BLOCK_2_JSON;
-import static com.exonum.client.Blocks.BLOCK_2_TIME;
-import static com.exonum.client.Blocks.BLOCK_2_WITHOUT_TIME;
+import static com.exonum.client.Blocks.BLOCK_2_JSON_NO_TIME;
+import static com.exonum.client.Blocks.BLOCK_2_NO_TIME;
 import static com.exonum.client.Blocks.BLOCK_3;
 import static com.exonum.client.Blocks.BLOCK_3_JSON;
-import static com.exonum.client.Blocks.BLOCK_3_TIME;
-import static com.exonum.client.Blocks.BLOCK_3_WITHOUT_TIME;
+import static com.exonum.client.Blocks.BLOCK_3_JSON_NO_TIME;
+import static com.exonum.client.Blocks.BLOCK_3_NO_TIME;
 import static com.exonum.client.Blocks.aBlock;
 import static com.exonum.client.ExonumApi.JSON;
 import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
@@ -56,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.client.ExplorerApiHelper.GetBlockResponseBlock;
 import com.exonum.client.request.BlockFilteringOption;
 import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
@@ -110,8 +109,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     String mockResponse = "{\n"
         + "    'block': " + BLOCK_1_JSON + ",\n"
         + "    'precommits': ['a410964c2c21199b48e2'],\n"
-        + "    'txs': ['" + tx1 + "'],\n"
-        + "    'time': '" + BLOCK_1_TIME + "'\n"
+        + "    'txs': ['" + tx1 + "']\n"
         + "}";
     enqueueResponse(mockResponse);
 
@@ -145,8 +143,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': " + fromHeight + ",\n"
         + "        'end': " + toHeight + 1 + "\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
-        + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
+        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -213,8 +210,8 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': " + fromHeight + ",\n"
         + "        'end': " + toHeight + 1 + "\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
-        + "    'times': null\n"
+        + "    'blocks': [ " + BLOCK_3_JSON_NO_TIME + "," + BLOCK_2_JSON_NO_TIME + ","
+        + BLOCK_1_JSON_NO_TIME + "]"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -224,7 +221,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     List<Block> blocks = exonumClient.getBlocks(fromHeight, toHeight, blockFilter, timeOption);
 
     // Assert response
-    List<Block> expected = of(BLOCK_1_WITHOUT_TIME, BLOCK_2_WITHOUT_TIME, BLOCK_3_WITHOUT_TIME);
+    List<Block> expected = of(BLOCK_1_NO_TIME, BLOCK_2_NO_TIME, BLOCK_3_NO_TIME);
     assertThat(blocks, equalTo(expected));
 
     // Assert request params
@@ -384,8 +381,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': " + start + ",\n"
         + "        'end': " + end + "\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
-        + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
+        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -418,8 +414,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': 0,\n"
         + "        'end': " + end + "\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
-        + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
+        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -501,8 +496,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': " + start + ",\n"
         + "        'end': " + end + "\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
-        + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
+        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -535,8 +529,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': " + start + ",\n"
         + "        'end': " + end + "\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "],\n"
-        + "    'times': ['" + BLOCK_3_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_1_TIME + "']\n"
+        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -616,28 +609,14 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Self-check the blocks to be in ascending order by height
     assertTrue(isInStrictOrder(blocks, comparing(Block::getHeight)));
 
-    List<GetBlockResponseBlock> responseBlocks = blocks.stream()
-        .map(b -> toResponseBlock(b))
-        .collect(toList());
-    String blocksResponse = JSON.toJson(Lists.reverse(responseBlocks));
+    String blocksResponse = JSON.toJson(Lists.reverse(blocks));
     return "{\n"
         + "    'range': {\n"
         + "        'start': " + start + ",\n"
         + "        'end': " + end + "\n"
         + "    },\n"
-        + "    'blocks': " + blocksResponse + ",\n"
-        + "    'times': null\n"
+        + "    'blocks': " + blocksResponse + "\n"
         + "}\n";
-  }
-
-  private static GetBlockResponseBlock toResponseBlock(Block b) {
-    return new GetBlockResponseBlock(
-        b.getProposerId(),
-        b.getHeight(),
-        b.getNumTransactions(),
-        b.getPreviousBlockHash(),
-        b.getTxRootHash(),
-        b.getStateHash());
   }
 
   @Test
@@ -647,8 +626,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': 6,\n"
         + "        'end': 7\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_1_JSON + "],\n"
-        + "    'times': null\n"
+        + "    'blocks': [ " + BLOCK_1_JSON_NO_TIME + "]\n"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -656,7 +634,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     Block block = exonumClient.getLastBlock();
 
     // Assert response
-    assertThat(block, is(BLOCK_1_WITHOUT_TIME));
+    assertThat(block, is(BLOCK_1_NO_TIME));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
@@ -672,8 +650,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': 6,\n"
         + "        'end': 7\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_1_JSON + "],\n"
-        + "    'times': null\n"
+        + "    'blocks': [ " + BLOCK_1_JSON_NO_TIME + "]\n"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -682,7 +659,7 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Assert response
     assertTrue(block.isPresent());
-    assertThat(block.get(), is(BLOCK_1_WITHOUT_TIME));
+    assertThat(block.get(), is(BLOCK_1_NO_TIME));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
@@ -698,8 +675,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "        'start': 6,\n"
         + "        'end': 7\n"
         + "    },\n"
-        + "    'blocks': [],\n"
-        + "    'times': null\n"
+        + "    'blocks': []\n"
         + "}\n";
     enqueueResponse(mockResponse);
 
@@ -726,8 +702,7 @@ class ExonumHttpClientBlocksIntegrationTest {
         + "    'start': 0,\n"
         + "    'end': " + heightExclusive + "\n"
         + "  },\n"
-        + "  'blocks': [],\n"
-        + "  'times': null\n"
+        + "  'blocks': []\n"
         + "}\n";
     enqueueResponse(json);
 

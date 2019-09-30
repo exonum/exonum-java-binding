@@ -19,13 +19,12 @@ package com.exonum.client;
 
 import static com.exonum.client.Blocks.BLOCK_1;
 import static com.exonum.client.Blocks.BLOCK_1_JSON;
-import static com.exonum.client.Blocks.BLOCK_1_TIME;
+import static com.exonum.client.Blocks.BLOCK_1_JSON_NO_TIME;
+import static com.exonum.client.Blocks.BLOCK_1_NO_TIME;
 import static com.exonum.client.Blocks.BLOCK_2;
 import static com.exonum.client.Blocks.BLOCK_2_JSON;
-import static com.exonum.client.Blocks.BLOCK_2_TIME;
 import static com.exonum.client.Blocks.BLOCK_3;
 import static com.exonum.client.Blocks.BLOCK_3_JSON;
-import static com.exonum.client.Blocks.BLOCK_3_TIME;
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -189,13 +188,27 @@ class ExplorerApiHelperTest {
     String json = "{\n"
         + "    'block': " + BLOCK_1_JSON + ",\n"
         + "    'precommits': ['a410964c2c21199b48e2'],\n"
-        + "    'txs': ['" + tx1 + "'],\n"
-        + "    'time': '" + BLOCK_1_TIME + "'\n"
+        + "    'txs': ['" + tx1 + "']\n"
         + "}";
 
     BlockResponse response = ExplorerApiHelper.parseGetBlockResponse(json);
 
     assertThat(response.getBlock(), is(BLOCK_1));
+    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
+  }
+
+  @Test
+  void parseGetBlockResponseNoTime() {
+    String tx1 = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
+    String json = "{\n"
+        + "    'block': " + BLOCK_1_JSON_NO_TIME + ",\n"
+        + "    'precommits': ['a410964c2c21199b48e2'],\n"
+        + "    'txs': ['" + tx1 + "']\n"
+        + "}";
+
+    BlockResponse response = ExplorerApiHelper.parseGetBlockResponse(json);
+
+    assertThat(response.getBlock(), is(BLOCK_1_NO_TIME));
     assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
   }
 
@@ -206,9 +219,7 @@ class ExplorerApiHelperTest {
         + "        'start': 6,\n"
         + "        'end': 288\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "],\n"
-        + "    'times': ['" + BLOCK_1_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_3_TIME
-        + "']\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "]\n"
         + "}\n";
 
     BlocksResponse response = ExplorerApiHelper.parseGetBlocksResponse(json);
