@@ -59,6 +59,10 @@ class TimeSchemaProxyIntegrationTest {
     testKit.close();
   }
 
+  // todo: Add tests [ECR-3597]:
+  //   - no service with the requested name
+  //   - a service with the given name is not a time oracle
+
   @Test
   void getTime() {
     setUpConsolidatedTime();
@@ -98,7 +102,8 @@ class TimeSchemaProxyIntegrationTest {
 
   private void testKitTest(Consumer<TimeSchema> test) {
     Snapshot view = testKit.getSnapshot();
-    TimeSchema timeSchema = TimeSchema.newInstance(view);
+    // Fixme: specify name [ECR-3597]
+    TimeSchema timeSchema = TimeSchema.newInstance(view, "");
     test.accept(timeSchema);
   }
 

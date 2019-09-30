@@ -16,74 +16,74 @@
 
 package com.exonum.binding.time;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.util.LibraryLoader;
+import com.exonum.binding.messages.Runtime.ArtifactId;
+import com.exonum.binding.messages.Runtime.InstanceSpec;
 import java.time.ZonedDateTime;
 
 class TimeSchemaProxy implements TimeSchema {
 
-  static {
-    LibraryLoader.load();
-  }
+  private static final int RUST_RUNTIME_ID = 0;
+  private static final String EXONUM_TIME_ARTIFACT_NAME_PREFIX = "exonum-time:";
 
   private static final Serializer<PublicKey> PUBLIC_KEY_SERIALIZER =
       StandardSerializers.publicKey();
   private static final Serializer<ZonedDateTime> ZONED_DATE_TIME_SERIALIZER =
       UtcZonedDateTimeSerializer.INSTANCE;
 
-  private final View dbView;
+  private final View view;
+  private final String name;
 
-  TimeSchemaProxy(View dbView) {
+  TimeSchemaProxy(View view, String name) {
+    this.name = name;
+    this.view = view;
     checkIfEnabled();
-    this.dbView = dbView;
+  }
+
+  private void checkIfEnabled() {
+    MapIndex<String, InstanceSpec> serviceInstances = new RuntimeSchema(view).serviceInstances();
+    checkArgument(serviceInstances.containsKey(name), "No service instance "
+        + "with the given name (%s) started.");
+
+    InstanceSpec serviceSpec = serviceInstances.get(name);
+    ArtifactId artifactId = serviceSpec.getArtifact();
+    checkArgument(isTimeOracleInstance(artifactId), "Service with the given name (%s) is not "
+        + "an Exonum time oracle, but %s.", name, artifactId);
+  }
+
+  private static boolean isTimeOracleInstance(ArtifactId artifactId) {
+    return artifactId.getRuntimeId() == RUST_RUNTIME_ID
+        && artifactId.getName().startsWith(EXONUM_TIME_ARTIFACT_NAME_PREFIX);
   }
 
   @Override
   public EntryIndexProxy<ZonedDateTime> getTime() {
-    return EntryIndexProxy.newInstance(TimeIndex.TIME, dbView, ZONED_DATE_TIME_SERIALIZER);
+    return EntryIndexProxy.newInstance(indexName(TimeIndex.TIME), view, ZONED_DATE_TIME_SERIALIZER);
   }
 
   @Override
   public ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes() {
-    return ProofMapIndexProxy.newInstance(TimeIndex.VALIDATORS_TIMES, dbView, PUBLIC_KEY_SERIALIZER,
-        ZONED_DATE_TIME_SERIALIZER);
+    return ProofMapIndexProxy.newInstance(indexName(TimeIndex.VALIDATORS_TIMES), view,
+        PUBLIC_KEY_SERIALIZER, ZONED_DATE_TIME_SERIALIZER);
   }
 
-  private void checkIfEnabled() {
-    // Skip if invoked in tests because the check relies on the state unavailable
-    // in integration tests. To be removed in ECR-2970 (Java Testkit)
-    if (!runningUnitTests()) {
-      checkState(isTimeServiceEnabled(), "Time service is not enabled. To enable it, put 'time' "
-          + "into 'services.toml' file.\n"
-          + "See https://exonum.com/doc/version/0.12/get-started/java-binding/#built-in-services "
-          + "for details.");
-    }
+  private String indexName(String simpleName) {
+    return name + "." + simpleName;
   }
-
-  private static boolean runningUnitTests() {
-    try {
-      Class.forName("org.junit.jupiter.api.Test");
-      return true;
-    } catch (ClassNotFoundException e) {
-      return false;
-    }
-  }
-
-  private static native boolean isTimeServiceEnabled();
 
   /**
    * Mapping for Exonum time indexes by name.
    */
   private static final class TimeIndex {
-    private static final String PREFIX = "exonum_time.";
-    private static final String VALIDATORS_TIMES = PREFIX + "validators_times";
-    private static final String TIME = PREFIX + "time";
+    private static final String VALIDATORS_TIMES = "validators_times";
+    private static final String TIME = "time";
   }
 }

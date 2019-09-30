@@ -21,7 +21,6 @@ mod library_loader;
 mod paths;
 mod service_factory_adapter;
 pub mod services;
-mod time_service;
 
 pub use self::config::*;
 pub use self::java_service_runtime::JavaServiceRuntime;
