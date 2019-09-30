@@ -55,7 +55,7 @@ final class SystemApiHelper {
    * Json object wrapper for health check response.
    */
   @Value
-  private class HealthCheckResponse {
+  private static class HealthCheckResponse {
     String consensusStatus;
     int connectedPeers;
   }
