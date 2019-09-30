@@ -187,8 +187,10 @@ public final class Fork extends View {
     try {
       indexCleaner.close();
     } catch (CloseFailuresException e) {
-      // todo: Such situation must not normally happen. Shall we really abort rollback in this case?
-      //   Or shall we proceed with the rollback?
+      // Close failures must not normally happen and usually indicate a serious framework error,
+      // hence we abort the operation. However, it is not always caused by an error
+      // in the framework, as the client code can register its own operations in the Cleaner,
+      // provided by this fork.
       destructor.clean();
       throw new IllegalStateException(
           "Operation aborted due to some objects that had failed to close", e);
