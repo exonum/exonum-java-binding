@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+The new release of the light client brings support for Exonum 0.12
+and Exonum Java 0.8.
+
 ## 0.3.0 - 2019-07-22
 
 The third release of Exonum Java Light Client which improves
