@@ -17,7 +17,7 @@
 use exonum::{
     api::ApiContext,
     crypto::{Hash, PublicKey},
-    messages::{AnyTx, Verified},
+    messages::{AnyTx, Verified, BinaryValue},
 };
 use exonum_merkledb::{Snapshot, ObjectHash};
 use failure;
@@ -72,9 +72,9 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn submit(&self, transaction: AnyTx) -> Result<Hash, failure::Error> {
+    pub fn submit(&self, transaction: Verified<AnyTx>) -> Result<Hash, failure::Error> {
         // TODO: check service is active
-        let _service_id = transaction.call_info.instance_id;
+        let _service_id = transaction.payload().call_info.instance_id;
 //        if !self.blockchain.service_map().contains_key(&service_id) {
 //            return Err(format_err!(
 //                "Unable to broadcast transaction: service(ID={}) not found",
@@ -82,15 +82,9 @@ impl NodeContext {
 //            ));
 //        }
 
-        let key_pair = self.api_context.service_keypair();
-        let verified = Verified::from_value(
-            transaction,
-            key_pair.0.to_owned(),
-            key_pair.1,
-        );
-        let tx_hash = verified.object_hash();
+        let tx_hash = transaction.object_hash();
 
-        self.api_context.sender().broadcast_transaction(verified)?;
+        self.api_context.sender().broadcast_transaction(transaction)?;
         Ok(tx_hash)
     }
 }
@@ -119,16 +113,17 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
             &env,
             || -> JniResult<jbyteArray> {
                 let payload = env.convert_byte_array(payload)?;
-                //  todo: [ECR-3438]
-                let any_tx = AnyTx {
-                    call_info: CallInfo {
-                        instance_id: service_id as u32,
-                        method_id: transaction_id as u32,
-                    },
-                    arguments: payload,
+                let tx = match Verified::from_bytes(payload.into()) {
+                    Ok(tx) => tx,
+                    Err(err) => {
+                        let error_class = TX_SUBMISSION_EXCEPTION;
+                        let error_description = err.to_string();
+                        env.throw_new(error_class, error_description)?;
+                        return Ok(ptr::null_mut());
+                    }
                 };
 
-                match node.submit(any_tx) {
+                match node.submit(tx) {
                     Ok(tx_hash) => convert_hash(&env, &tx_hash),
                     Err(err) => {
                         // node#submit can fail for two reasons: unknown transaction id and
