@@ -19,6 +19,7 @@
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug
     </ejb-core.nativeLibPath>
     <junit-platform-testkit.version>1.5.2</junit-platform-testkit.version>
+    <auto-value.version>1.6.6</auto-value.version>
   </properties>
 
   <dependencies>
@@ -32,6 +33,19 @@
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-time-oracle</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value-annotations</artifactId>
+      <version>${auto-value.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.auto.value</groupId>
+      <artifactId>auto-value</artifactId>
+      <version>${auto-value.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
