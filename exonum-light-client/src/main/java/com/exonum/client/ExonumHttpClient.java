@@ -150,7 +150,16 @@ class ExonumHttpClient implements ExonumClient {
     Map<String, String> query = ImmutableMap.of("height", String.valueOf(height));
     Request request = get(url(BLOCK, query));
 
-    return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlockResponse);
+    return blockingExecute(request, response -> {
+      if (response.code() == HTTP_NOT_FOUND) {
+        String message = readBody(response);
+        throw new IllegalArgumentException(message);
+      } else if (!response.isSuccessful()) {
+        throw new RuntimeException("Execution wasn't successful: " + response.toString());
+      } else {
+        return ExplorerApiHelper.parseGetBlockResponse(readBody(response));
+      }
+    });
   }
 
   @Override
@@ -288,7 +297,16 @@ class ExonumHttpClient implements ExonumClient {
     }
     Request request = get(url(BLOCKS, query));
 
-    return blockingExecuteAndParse(request, ExplorerApiHelper::parseGetBlocksResponse);
+    return blockingExecute(request, response -> {
+      if (response.code() == HTTP_NOT_FOUND) {
+        String message = readBody(response);
+        throw new IllegalArgumentException(message);
+      } else if (!response.isSuccessful()) {
+        throw new RuntimeException("Execution wasn't successful: " + response);
+      } else {
+        return ExplorerApiHelper.parseGetBlocksResponse(readBody(response));
+      }
+    });
   }
 
   private static Request get(HttpUrl url) {

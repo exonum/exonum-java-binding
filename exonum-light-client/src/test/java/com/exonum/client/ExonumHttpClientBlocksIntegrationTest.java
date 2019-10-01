@@ -43,11 +43,13 @@ import static com.google.common.collect.Comparators.isInStrictOrder;
 import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static java.lang.Math.min;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -126,6 +128,21 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest, hasPath("api/explorer/v1/block"));
     assertThat(recordedRequest, hasQueryParam("height", height));
+  }
+
+  @Test
+  void getBlockByHeightExceedingBlockchainHeight() {
+    // Mock response
+    long height = 100;
+    String message = "Requested block height (100) exceeds the blockchain height (2)";
+    server.enqueue(new MockResponse()
+        .setResponseCode(HTTP_NOT_FOUND)
+        .setBody(message));
+
+    // Call
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> exonumClient.getBlockByHeight(height));
+    assertThat(e.getMessage(), containsString(message));
   }
 
   @ParameterizedTest
@@ -348,6 +365,24 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     RecordedRequest secondRequest = server.takeRequest();
     assertBlockRequestParams(secondRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toP2, timeOption);
+  }
+
+  @Test
+  void getBlocksExceedingBlockchainHeight() {
+    String errorMessage = "Requested latest height 10 is greater than the current "
+        + "blockchain height 2";
+    server.enqueue(new MockResponse()
+        .setResponseCode(HTTP_NOT_FOUND)
+        .setBody(errorMessage));
+
+    // Call
+    long fromHeight = 1;
+    long toHeight = 10;
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> exonumClient.getBlocks(fromHeight, toHeight, INCLUDE_EMPTY, INCLUDE_COMMIT_TIME));
+
+    // Assert response
+    assertThat(e.getMessage(), containsString(errorMessage));
   }
 
   @ParameterizedTest
