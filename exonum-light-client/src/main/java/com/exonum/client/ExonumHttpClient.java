@@ -98,6 +98,7 @@ class ExonumHttpClient implements ExonumClient {
     return systemStatistics.getNumUnconfirmedTransactions();
   }
 
+  // todo: [ECR-3601] Replace the ^ with this one
   private SystemStatistics getSystemStats() {
     Request request = get(url(STATS));
     return blockingExecuteAndParse(request, SystemApiHelper::parseStatsJson);

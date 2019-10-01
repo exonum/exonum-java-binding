@@ -18,12 +18,10 @@ package com.exonum.client.response;
 
 import lombok.Value;
 
-// todo: I don't like that this class is vaguely defined (just as the endpoint) as SystemStatistics,
-//    because it is unclear what kind of things a user can find inside unless they look here.
-//    A related consideration is if we shall keep ExonumClient#getNumUnconfirmedTransactions
-//    or replace it with ExonumClient#getSystemStats — which does not tell what kind of stats
-//    a user can find there, but allows to add new statistics if needed without increasing the
-//    direct size of ExonumClient API.
+
+/**
+ * Some statistics about the blockchain system.
+ */
 @Value
 public class SystemStatistics {
   /**
