@@ -22,7 +22,7 @@ For more information see the relevant documentation on the tool:
   - [Code of Conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
 
 If you are using Exonum in your project and want to be listed on our website and
-GitHub list — write us a line to <exonum@bitfury.com>.
+GitHub list — write us a line to <contact@exonum.com>.
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
