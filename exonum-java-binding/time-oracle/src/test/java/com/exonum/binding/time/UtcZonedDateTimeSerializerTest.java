@@ -23,17 +23,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.test.Bytes;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class UtcZonedDateTimeSerializerTest {
 
-  private final Serializer<ZonedDateTime> SERIALIZER = UtcZonedDateTimeSerializer.INSTANCE;
+  private static final Serializer<ZonedDateTime> SERIALIZER = UtcZonedDateTimeSerializer.INSTANCE;
 
   @ParameterizedTest
   @MethodSource("testSource")
