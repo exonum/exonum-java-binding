@@ -47,13 +47,6 @@ static mut RUNTIME_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_MOUNT_API: Option<JMethodID> = None;
 
-// todo: Remove transaction and service adapter items when native JavaServiceRuntime is implemented
-static mut TRANSACTION_ADAPTER_EXECUTE: Option<JMethodID> = None;
-static mut TRANSACTION_ADAPTER_INFO: Option<JMethodID> = None;
-
-static mut SERVICE_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
-static mut SERVICE_ADAPTER_CONVERT_TRANSACTION: Option<JMethodID> = None;
-
 static mut JAVA_LANG_ERROR: Option<GlobalRef> = None;
 static mut JAVA_LANG_RUNTIME_EXCEPTION: Option<GlobalRef> = None;
 static mut TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
@@ -181,40 +174,6 @@ fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMe
 fn check_cache_initialized() {
     if !INIT.state().done() {
         panic!("JNI cache is not initialized")
-    }
-}
-
-/// Refers to the cached methods of the `UserTransactionAdapter` class.
-pub mod transaction_adapter {
-    use super::*;
-
-    /// Returns cached `JMethodID` for `UserTransactionAdapter.execute()`.
-    pub fn execute_id() -> JMethodID<'static> {
-        check_cache_initialized();
-        unsafe { TRANSACTION_ADAPTER_EXECUTE.unwrap() }
-    }
-
-    /// Returns cached `JMethodID` for `UserTransactionAdapter.info()`.
-    pub fn info_id() -> JMethodID<'static> {
-        check_cache_initialized();
-        unsafe { TRANSACTION_ADAPTER_INFO.unwrap() }
-    }
-}
-
-/// Refers to the cached methods of the `UserServiceAdapter` class.
-pub mod service_adapter {
-    use super::*;
-
-    /// Returns cached `JMethodID` for `UserServiceAdapter.getStateHashes()`.
-    pub fn state_hashes_id() -> JMethodID<'static> {
-        check_cache_initialized();
-        unsafe { SERVICE_ADAPTER_STATE_HASHES.unwrap() }
-    }
-
-    /// Returns cached `JMethodID` for `UserServiceAdapter.convertTransaction()`.
-    pub fn convert_transaction_id() -> JMethodID<'static> {
-        check_cache_initialized();
-        unsafe { SERVICE_ADAPTER_CONVERT_TRANSACTION.unwrap() }
     }
 }
 
