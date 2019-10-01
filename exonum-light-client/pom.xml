@@ -342,6 +342,7 @@
                 <exclude>com/exonum/client/response/BlocksRange.class</exclude>
                 <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
                 <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
+                <exclude>com/exonum/client/response/SystemStatistics.class</exclude>
                 <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
               </excludes>
             </configuration>
