@@ -16,41 +16,29 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Configuration;
-import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Message;
-import java.util.Objects;
+import com.google.protobuf.MessageLite;
+import java.util.Arrays;
 
 final class ServiceConfiguration implements Configuration {
 
-  private final Any configuration;
+  private final byte[] configuration;
 
-  ServiceConfiguration(Any configuration) {
-    this.configuration = checkNotNull(configuration);
+  ServiceConfiguration(byte[] configuration) {
+    this.configuration = configuration.clone();
   }
 
   @Override
-  public <MessageT extends Message> MessageT getAsMessage(Class<MessageT> parametersType) {
-    checkArgument(configuration.is(parametersType), "Actual type of the configuration message "
-            + "specified by the network administrators (%s) does not match requested (%s)",
-        configuration.getTypeUrl(), parametersType.getTypeName());
-
-    try {
-      return configuration.unpack(parametersType);
-    } catch (InvalidProtocolBufferException e) {
-      String message = String.format("Cannot unpack Any into %s message",
-          parametersType.getTypeName());
-      throw new IllegalArgumentException(message, e);
-    }
+  public <MessageT extends MessageLite> MessageT getAsMessage(Class<MessageT> parametersType) {
+    Serializer<MessageT> serializer = StandardSerializers.protobuf(parametersType);
+    return serializer.fromBytes(configuration);
   }
 
   @Override
   public String toString() {
-    return "ServiceConfiguration{" + configuration + '}';
+    return "ServiceConfiguration{" + Arrays.toString(configuration) + '}';
   }
 
   @Override
@@ -62,11 +50,11 @@ final class ServiceConfiguration implements Configuration {
       return false;
     }
     ServiceConfiguration that = (ServiceConfiguration) o;
-    return Objects.equals(configuration, that.configuration);
+    return Arrays.equals(configuration, that.configuration);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(configuration);
+    return Arrays.hashCode(configuration);
   }
 }

@@ -33,9 +33,9 @@ import java.util.List;
 public interface Service {
 
   /**
-   * Configures the service instance. This method is called <em>once</em> after the service
-   * instance is added to the blockchain and allows initializing some persistent data
-   * of the service.
+   * Performs an initial configuration of the service instance. This method is called <em>once</em>
+   * after the service instance is added to the blockchain and allows initializing
+   * some persistent data of the service.
    *
    * <p>As Exonum passes the configuration parameters only once and does not persist them for
    * later access, this service method must make any needed changes to the database based
@@ -48,9 +48,9 @@ public interface Service {
    * @param configuration the service configuration parameters
    * @throws IllegalArgumentException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
-   *     its configuration fails
+   *     its initialization fails
    */
-  default void configure(Fork fork, Configuration configuration) {
+  default void initialize(Fork fork, Configuration configuration) {
     // No configuration
   }
 

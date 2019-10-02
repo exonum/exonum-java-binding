@@ -53,7 +53,7 @@ public final class TestService extends AbstractService {
    * Always puts the same value identified by the same key.
    */
   @Override
-  public void configure(Fork fork, Configuration configuration) {
+  public void initialize(Fork fork, Configuration configuration) {
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
