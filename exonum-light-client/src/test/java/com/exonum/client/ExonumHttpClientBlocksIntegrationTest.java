@@ -44,6 +44,7 @@ import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static java.lang.Math.min;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -58,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.client.ExplorerApiHelper.GetBlockResponse;
 import com.exonum.client.request.BlockFilteringOption;
 import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
@@ -107,12 +109,8 @@ class ExonumHttpClientBlocksIntegrationTest {
   @Test
   void getBlockByHeight() throws InterruptedException {
     // Mock response
-    String tx1 = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
-    String mockResponse = "{\n"
-        + "    'block': " + BLOCK_1_JSON + ",\n"
-        + "    'precommits': ['a410964c2c21199b48e2'],\n"
-        + "    'txs': ['" + tx1 + "']\n"
-        + "}";
+    HashCode tx1 = HashCode.fromString("336a4acb");
+    String mockResponse = JSON.toJson(new GetBlockResponse(BLOCK_1, singletonList(tx1)));
     enqueueResponse(mockResponse);
 
     // Call
@@ -121,7 +119,7 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Assert response
     assertThat(response.getBlock(), is(BLOCK_1));
-    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
+    assertThat(response.getTransactionHashes(), contains(tx1));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();

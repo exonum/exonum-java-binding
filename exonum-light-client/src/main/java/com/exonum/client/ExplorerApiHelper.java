@@ -28,10 +28,14 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import java.time.ZonedDateTime;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -65,7 +69,7 @@ final class ExplorerApiHelper {
   static BlockResponse parseGetBlockResponse(String json) {
     GetBlockResponse response = JSON.fromJson(json, GetBlockResponse.class);
 
-    return new BlockResponse(response.getBlock(), response.getTxs());
+    return new BlockResponse(response.getAsBlock(), response.getTxs());
   }
 
   static BlocksResponse parseGetBlocksResponse(String json) {
@@ -163,14 +167,36 @@ final class ExplorerApiHelper {
   }
 
   @Value
-  private static class GetBlockResponse {
-    // todo: (to discuss): Shall we really remove the intermediate class?
-    //   If we remove it, then a change in the JSON representation of a block _might_ affect
-    //   the LC consumers even if the object representation of the block may remain the same
-    //   (a change in serialized field names, another change in how datetime is provided, etc).
-    Block block;
+  @AllArgsConstructor
+  static class GetBlockResponse {
+    int proposerId;
+    long height;
+    int txCount;
+    HashCode prevHash;
+    HashCode txHash;
+    HashCode stateHash;
     JsonElement precommits; //TODO: in scope of LC P3
     List<HashCode> txs;
+    ZonedDateTime time;
+
+    GetBlockResponse(Block block, List<HashCode> txs) {
+      this(block.getProposerId(), block.getHeight(),
+          block.getNumTransactions(), block.getPreviousBlockHash(), block.getTxRootHash(),
+          block.getStateHash(), new JsonArray(), ImmutableList.copyOf(txs),
+          block.getCommitTime().orElse(null));
+    }
+
+    Block getAsBlock() {
+      return Block.builder()
+          .proposerId(proposerId)
+          .height(height)
+          .numTransactions(txCount)
+          .previousBlockHash(prevHash)
+          .txRootHash(txHash)
+          .stateHash(stateHash)
+          .commitTime(time)
+          .build();
+    }
   }
 
   @Value
