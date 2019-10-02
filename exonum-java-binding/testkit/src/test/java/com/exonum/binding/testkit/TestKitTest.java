@@ -436,7 +436,7 @@ class TestKitTest extends TestKitWithTestArtifact {
     IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
         () -> testKit.createBlockWithTransactions(message));
     assertThat(thrownException.getMessage())
-        .contains("Unknown service id", Integer.toString(wrongServiceId), message.toString());
+        .contains("No service with id", Integer.toString(wrongServiceId));
   }
 
   @Test
