@@ -16,33 +16,40 @@
 
 package com.exonum.binding.testkit;
 
-import com.google.auto.value.AutoValue;
-
 /**
  * Specifications of service instances to be deployed and created by TestKit.
  */
-@AutoValue
-abstract class TestKitServiceInstances {
+@SuppressWarnings("unused") // Native API
+class TestKitServiceInstances {
+
+  private String artifactId;
+  private String artifactFilename;
+  private ServiceSpec[] serviceSpecs;
+
+  public TestKitServiceInstances(String artifactId, String artifactFilename, ServiceSpec[] serviceSpecs) {
+    this.artifactId = artifactId;
+    this.artifactFilename = artifactFilename;
+    this.serviceSpecs = serviceSpecs;
+  }
 
   /**
    * Returns the service artifact id.
    */
-  abstract String getArtifactId();
+  public String getArtifactId() {
+    return artifactId;
+  }
 
   /**
    * Returns a filename of the service artifact.
    */
-  abstract String getArtifactFilename();
+  public String getArtifactFilename() {
+    return artifactFilename;
+  }
 
   /**
    * Returns a service instance specification - its service name, service id and configuration.
    */
-  abstract ServiceSpec[] getServiceSpecs();
-
-  // TODO: AutoValue doesn't support array-valued properties unless it is a primitive
-  //  array - should we use a Collection here or don't use AutoValue for this class?
-  static TestKitServiceInstances newInstance(
-      String artifactId, String artifactFilename, ServiceSpec[] serviceSpecs) {
-    return new AutoValue_TestKitServiceInstances(artifactId, artifactFilename, serviceSpecs);
+  public ServiceSpec[] getServiceSpecs() {
+    return serviceSpecs;
   }
 }

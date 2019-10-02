@@ -21,7 +21,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import java.nio.ByteBuffer;
@@ -39,17 +38,16 @@ public final class TestTransaction implements Transaction {
 
   private final String value;
 
-  static TestTransaction from(RawTransaction rawTransaction) {
-    checkArgument(rawTransaction.getServiceId() == TestService.SERVICE_ID);
-    checkArgument(rawTransaction.getTransactionId() == TestTransaction.ID);
-    String value = getValue(rawTransaction);
+  static TestTransaction from(int txId, byte[] arguments) {
+    checkArgument(txId == ID);
+    String value = getValue(arguments);
     return new TestTransaction(value);
   }
 
-  private static String getValue(RawTransaction rawTransaction) {
+  private static String getValue(byte[] payload) {
     try {
       CharsetDecoder utf8Decoder = createUtf8Decoder();
-      ByteBuffer body = ByteBuffer.wrap(rawTransaction.getPayload());
+      ByteBuffer body = ByteBuffer.wrap(payload);
       CharBuffer result = utf8Decoder.decode(body);
       return result.toString();
     } catch (CharacterCodingException e) {

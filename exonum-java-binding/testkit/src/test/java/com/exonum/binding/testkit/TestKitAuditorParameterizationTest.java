@@ -18,16 +18,19 @@ package com.exonum.binding.testkit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.protobuf.Any;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class TestKitAuditorParameterizationTest {
+class TestKitAuditorParameterizationTest extends TestKitWithTestArtifact {
 
   @RegisterExtension
   TestKitExtension testKitAuditorExtension = new TestKitExtension(
       TestKit.builder()
           .withNodeType(EmulatedNodeType.AUDITOR)
-          .withService(TestServiceModule.class));
+          .withDeployedService(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID,
+              Any.getDefaultInstance()));
 
   @Test
   void testTestKitValidator(@Validator TestKit testKit) {

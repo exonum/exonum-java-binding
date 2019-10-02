@@ -21,11 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import java.util.function.Consumer;
-
+import com.google.protobuf.Any;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class TestKitParameterizationTest {
+class TestKitParameterizationTest extends TestKitWithTestArtifact {
 
   private static final short TEMPLATE_VALIDATOR_COUNT = 1;
   private static final EmulatedNodeType TEMPLATE_NODE_TYPE = EmulatedNodeType.VALIDATOR;
@@ -35,7 +35,9 @@ class TestKitParameterizationTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withNodeType(TEMPLATE_NODE_TYPE)
-          .withService(TestServiceModule.class)
+          .withDeployedService(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID,
+              Any.getDefaultInstance())
           .withValidators(TEMPLATE_VALIDATOR_COUNT));
 
   @Test

@@ -19,6 +19,8 @@ package com.exonum.binding.testkit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
+import com.exonum.binding.core.runtime.ServiceWrapper;
+import com.google.protobuf.Any;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,10 +34,12 @@ import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
 
-class TestKitExtensionTest {
+class TestKitExtensionTest extends TestKitWithTestArtifact {
 
   private static final TestKit.Builder defaultBuilder = TestKit.builder()
-      .withService(TestServiceModule.class);
+      .withDeployedService(ARTIFACT_ID, ARTIFACT_FILENAME)
+      .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID,
+          Any.getDefaultInstance());
 
   @Test
   void testKitInstantiationTestCase() {
@@ -119,8 +123,9 @@ class TestKitExtensionTest {
       instantiatedTestKit = testKit;
 
       // Check that TestKit was instantiated with a correct service
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      assertThat(service.getName()).isEqualTo(TestService.SERVICE_NAME);
+      ServiceWrapper serviceWrapper = testKit.getServiceWrapper(SERVICE_NAME);
+      assertThat(serviceWrapper.getId()).isEqualTo(SERVICE_ID);
+      assertThat(serviceWrapper.getName()).isEqualTo(SERVICE_NAME);
 
       // Check that main TestKit node is a validator
       assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);

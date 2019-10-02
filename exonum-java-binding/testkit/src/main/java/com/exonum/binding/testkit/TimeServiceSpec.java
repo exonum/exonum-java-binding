@@ -21,6 +21,7 @@ import com.google.auto.value.AutoValue;
 /**
  * A specification of a time service instance used by TestKit for service creation.
  */
+@SuppressWarnings("unused") // Native API
 @AutoValue
 abstract class TimeServiceSpec {
 

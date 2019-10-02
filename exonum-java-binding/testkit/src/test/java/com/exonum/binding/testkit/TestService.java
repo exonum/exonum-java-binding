@@ -37,14 +37,9 @@ final class TestService extends AbstractService {
       .hashString("initial key", StandardCharsets.UTF_8);
   static final String INITIAL_ENTRY_VALUE = "initial value";
 
-  static final short SERVICE_ID = 46;
-  static final String SERVICE_NAME = "Test service";
-
   private Node node;
 
-  public TestService() {
-    // todo: [testkit] bind TestTransaction::from in the TestServiceModule
-  }
+  public TestService() {}
 
   Node getNode() {
     return node;
@@ -72,7 +67,7 @@ final class TestService extends AbstractService {
   static RawTransaction constructAfterCommitTransaction(long height) {
     String payload = "Test message on height " + height;
     return RawTransaction.newBuilder()
-        .serviceId(SERVICE_ID)
+        .serviceId(TestKitWithTestArtifact.SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
         .build();

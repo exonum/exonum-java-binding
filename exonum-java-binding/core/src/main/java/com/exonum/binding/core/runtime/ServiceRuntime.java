@@ -400,7 +400,10 @@ public final class ServiceRuntime {
         );
   }
 
-  private ServiceWrapper getServiceById(Integer serviceId) {
+  /**
+   * Finds service instance by its id.
+   */
+  public ServiceWrapper getServiceById(Integer serviceId) {
     checkService(serviceId);
     return servicesById.get(serviceId);
   }
@@ -411,8 +414,10 @@ public final class ServiceRuntime {
         "No service with id=%s in the Java runtime", serviceId);
   }
 
-  @VisibleForTesting
-  Optional<ServiceWrapper> findService(String name) {
+  /**
+   * Finds service instance by its name.
+   */
+  public Optional<ServiceWrapper> findService(String name) {
     return Optional.ofNullable(services.get(name));
   }
 

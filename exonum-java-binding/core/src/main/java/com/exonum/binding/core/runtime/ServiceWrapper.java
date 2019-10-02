@@ -27,7 +27,6 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
@@ -39,7 +38,7 @@ import java.util.List;
  * to operate on them conveniently. It separates the <em>extension</em>,
  * user-facing, interface from the <em>runtime</em>, internal, interface.
  */
-final class ServiceWrapper {
+public final class ServiceWrapper {
 
   private final Service service;
   private final TransactionConverter txConverter;
@@ -53,11 +52,31 @@ final class ServiceWrapper {
     this.instanceSpec = instanceSpec;
   }
 
-  String getName() {
+  /**
+   * Returns the service instance.
+   */
+  public Service getService() {
+    return service;
+  }
+
+  /**
+   * Returns the transaction converter of this service.
+   */
+  public TransactionConverter getTxConverter() {
+    return txConverter;
+  }
+
+  /**
+   * Returns the name of this service instance.
+   */
+  public String getName() {
     return instanceSpec.getName();
   }
 
-  int getId() {
+  /**
+   * Returns id of this service instance.
+   */
+  public int getId() {
     return instanceSpec.getId();
   }
 
@@ -104,10 +123,5 @@ final class ServiceWrapper {
     //  in the normal service configuration, or a separate configuration?
     return UrlEscapers.urlPathSegmentEscaper()
         .escape(getName());
-  }
-
-  @VisibleForTesting
-  Service getService() {
-    return service;
   }
 }

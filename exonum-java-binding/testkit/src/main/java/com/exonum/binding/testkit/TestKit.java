@@ -32,9 +32,11 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.runtime.ServiceWrapper;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
@@ -47,11 +49,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.ext.web.Router;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -95,13 +96,17 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   @VisibleForTesting
   static final short MAX_SERVICE_NUMBER = 256;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
-  private static final short TIME_SERVICE_ID = 4;
+  private Integer timeServiceId;
 
   @VisibleForTesting
   final Cleaner snapshotCleaner = new Cleaner("TestKit#getSnapshot");
 
-  private TestKit(long nativeHandle) {
+  private TestKit(long nativeHandle,
+                  @Nullable TimeServiceSpec timeServiceSpec) {
     super(nativeHandle, true);
+    if (timeServiceSpec != null) {
+      timeServiceId = timeServiceSpec.getServiceId();
+    }
   }
 
   private static TestKit newInstance(List<TestKitServiceInstances> serviceInstances,
@@ -111,7 +116,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     long nativeHandle = nativeCreateTestKit(
         serviceInstances.toArray(new TestKitServiceInstances[0]), isAuditorNode, validatorCount,
         timeServiceSpec);
-    return new TestKit(nativeHandle);
+    return new TestKit(nativeHandle, timeServiceSpec);
   }
 
   /**
@@ -129,7 +134,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       int serviceId, Any configuration) {
     ServiceSpec serviceSpec =
         ServiceSpec.newInstance(serviceName, serviceId, configuration.toByteArray());
-    TestKitServiceInstances testKitServiceInstances = TestKitServiceInstances.newInstance(
+    TestKitServiceInstances testKitServiceInstances = new TestKitServiceInstances(
         artifactId.toString(), artifactFilename, new ServiceSpec[] {serviceSpec});
     return singletonList(testKitServiceInstances);
   }
@@ -144,14 +149,19 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    *     cast to given class
    */
   public <T extends Service> T getService(String serviceName, Class<T> serviceClass) {
-    // TODO: retrieve it from ServiceRuntime
-//    Service service = serviceRuntime.findService(serviceName);
-//    checkArgument(service != null, "Service with given name=%s was not found", serviceName);
-//    checkArgument(service.getClass().equals(serviceClass),
-//        "Service (name=%s, class=%s) cannot be cast to %s",
-//        serviceName, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
-//    return serviceClass.cast(service);
-    return null;
+    Service service = getServiceWrapper(serviceName).getService();
+    checkArgument(service.getClass().equals(serviceClass),
+        "Service (name=%s, class=%s) cannot be cast to %s",
+        serviceName, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
+    return serviceClass.cast(service);
+  }
+
+  @VisibleForTesting
+  ServiceWrapper getServiceWrapper(String serviceName) {
+    Optional<ServiceWrapper> serviceWrapper = getServiceRuntime().findService(serviceName);
+    checkArgument(serviceWrapper.isPresent(),
+        "Service with given name=%s was not found", serviceName);
+    return serviceWrapper.get();
   }
 
   /**
@@ -204,29 +214,24 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   private void checkTransaction(TransactionMessage transactionMessage) {
-    int serviceId = transactionMessage.getServiceId();
+    Integer serviceId = transactionMessage.getServiceId();
     // As transactions of time service might be submitted in TestKit that has that service
     // activated, those transactions should be considered valid, even though time service is not
     // contained in 'services'
-    if (serviceId == TIME_SERVICE_ID) {
+    if (serviceId.equals(timeServiceId)) {
       return;
     }
-//    if (!services.containsKey(serviceId)) {
-//      String message = String.format("Unknown service id (%s) in transaction (%s)",
-//          serviceId, transactionMessage);
-//      throw new IllegalArgumentException(message);
-//    }
-//    Service service = services.get(serviceId);
-//    RawTransaction rawTransaction = RawTransaction.fromMessage(transactionMessage);
+    ServiceWrapper serviceWrapper = getServiceRuntime().getServiceById(serviceId);
+    TransactionConverter txConverter = serviceWrapper.getTxConverter();
     try {
-      // TODO: retrieve TransactionConverter from ServiceWrapper of a corresponding service?
-//      service.convertToTransaction(rawTransaction);
+      txConverter.toTransaction(
+          transactionMessage.getTransactionId(), transactionMessage.getPayload().toByteArray());
     } catch (Throwable conversionError) {
-//      String message = String.format("Service (%s) with id=%s failed to convert transaction (%s)."
-//          + " Make sure that the submitted transaction is correctly serialized, and the service's"
-//          + " TransactionConverter implementation is correct and handles this transaction as"
-//          + " expected.", serviceName, serviceId, transactionMessage);
-//      throw new IllegalArgumentException(message, conversionError);
+      String message = String.format("Service (%s) with id=%s failed to convert transaction (%s)."
+          + " Make sure that the submitted transaction is correctly serialized, and the service's"
+          + " TransactionConverter implementation is correct and handles this transaction as"
+          + " expected.", serviceWrapper.getName(), serviceId, transactionMessage);
+      throw new IllegalArgumentException(message, conversionError);
     }
   }
 
@@ -255,6 +260,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private static <T> Stream<T> stream(KeySetIndexProxy<T> setIndex) {
     return Streams.stream(setIndex);
+  }
+
+  private ServiceRuntime getServiceRuntime() {
+    // TODO: TBD where should we create ServiceRuntime instance
+    return nativeGetServiceRuntime(nativeHandle.get());
   }
 
   /**
@@ -371,12 +381,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     private EmulatedNodeType nodeType = EmulatedNodeType.VALIDATOR;
     private short validatorCount = 1;
-    private final Multimap<ServiceArtifactId, ServiceSpec> services = ArrayListMultimap.create();
-    private final HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
+    private Multimap<ServiceArtifactId, ServiceSpec> services = ArrayListMultimap.create();
+    private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
     private TimeServiceSpec timeServiceSpec;
 
-    private Builder() {
-    }
+    private Builder() {}
 
     /**
      * Returns a copy of this TestKit builder.
@@ -384,21 +393,10 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     public Builder copy() {
       Builder builder = new Builder()
           .withNodeType(nodeType)
-          .withValidators(validatorCount)
-          .withTimeService(timeServiceSpec);
-      for (Map.Entry<ServiceArtifactId, String> entry: serviceArtifactFilenames.entrySet()) {
-        builder.withDeployedService(entry.getKey(), entry.getValue());
-      }
-      for (Map.Entry<ServiceArtifactId, ServiceSpec> entry: services.entries()) {
-        try {
-          ServiceSpec serviceSpec = entry.getValue();
-          builder.withService(entry.getKey(), serviceSpec.getServiceName(),
-              serviceSpec.getServiceId(), Any.parseFrom(serviceSpec.getConfiguration()));
-        } catch (InvalidProtocolBufferException e) {
-          throw new IllegalArgumentException(
-              "Invalid deploy configuration for service " + entry.getKey(), e);
-        }
-      }
+          .withValidators(validatorCount);
+      builder.timeServiceSpec = timeServiceSpec;
+      builder.services = services;
+      builder.serviceArtifactFilenames = serviceArtifactFilenames;
       return builder;
     }
 
@@ -471,20 +469,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
 
     /**
-     * If called, will create a TestKit with time service enabled. The time service will be created
-     * with given {@linkplain TimeServiceSpec} as a specification.
-     *
-     * <p>Used in {@linkplain #copy()} method.
-     *
-     * <p>Note that validator count should be
-     * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
-     */
-    private Builder withTimeService(TimeServiceSpec timeServiceSpec) {
-      this.timeServiceSpec = timeServiceSpec;
-      return this;
-    }
-
-    /**
      * Creates the TestKit instance.
      *
      * @throws IllegalArgumentException if validator count is invalid
@@ -493,7 +477,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     public TestKit build() {
       checkCorrectServiceNumber(services.size());
       checkCorrectValidatorNumber();
-      List<TestKitServiceInstances> testKitServiceInstances = mergeServiceSpec();
+      List<TestKitServiceInstances> testKitServiceInstances = mergeServiceSpecs();
       return newInstance(testKitServiceInstances, nodeType, validatorCount, timeServiceSpec);
     }
 
@@ -501,9 +485,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * Turn collection of service instances into a list of
      * {@linkplain TestKitServiceInstances} objects for native to work with.
      */
-    private List<TestKitServiceInstances> mergeServiceSpec() {
+    private List<TestKitServiceInstances> mergeServiceSpecs() {
       Set<ServiceArtifactId> serviceArtifactIds = services.keySet();
-      // TODO: better error message?
       checkArgument(serviceArtifactIds.containsAll(serviceArtifactFilenames.keySet()),
           "All service instances that are deployed should also be instantiated"
               + " and vice versa.");
@@ -519,8 +502,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     private TestKitServiceInstances aggregateServiceSpecs(ServiceArtifactId artifactId) {
       String artifactFilename = serviceArtifactFilenames.get(artifactId);
       ServiceSpec[] serviceSpecs = services.get(artifactId).toArray(new ServiceSpec[0]);
-      return TestKitServiceInstances.newInstance(
-          artifactId.toString(), artifactFilename, serviceSpecs);
+      return new TestKitServiceInstances(artifactId.toString(), artifactFilename, serviceSpecs);
     }
 
     private void checkCorrectValidatorNumber() {
