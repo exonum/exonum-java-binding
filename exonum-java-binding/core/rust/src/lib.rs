@@ -23,8 +23,8 @@
 
 extern crate chrono;
 pub extern crate exonum;
-extern crate exonum_parameters;
-extern crate structopt; // TODO: remove
+extern crate exonum_cli;
+extern crate structopt;
 #[macro_use]
 extern crate failure;
 pub extern crate jni;
@@ -51,7 +51,7 @@ pub mod handle;
 mod proxy;
 mod runtime;
 mod storage;
-mod testkit;
+//mod testkit;
 pub mod utils;
 
 pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
@@ -60,7 +60,7 @@ pub use proxy::*;
 pub use runtime::services;
 pub use runtime::*;
 pub use storage::*;
-pub use testkit::*;
+//pub use testkit::*;
 
 pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};
 pub use jni::Executor;

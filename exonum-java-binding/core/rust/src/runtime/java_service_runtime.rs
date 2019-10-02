@@ -25,7 +25,6 @@ use proxy::ServiceProxy;
 use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
 use std::{path::Path, sync::Arc};
 use utils::{convert_to_string, panic_on_exception, unwrap_jni};
-use Config;
 
 const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_SIGNATURE: &str = "(I)Lcom/exonum/binding/core/runtime/ServiceRuntime;";

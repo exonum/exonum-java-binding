@@ -15,7 +15,12 @@
  */
 
 use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
-use exonum_parameters::{ExonumCommand, Run as StandardRun, StandardResult, GenerateTemplate, GenerateConfig, Finalize};
+use exonum_cli::{
+    command::{
+        finalize::Finalize, generate_config::GenerateConfig, generate_template::GenerateTemplate,
+        run::Run as StandardRun, ExonumCommand, StandardResult,
+    },
+};
 use failure::{self, format_err};
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;

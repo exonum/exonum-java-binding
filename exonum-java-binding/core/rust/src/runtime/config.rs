@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-use exonum_parameters::NodeRunConfig;
+use exonum_cli::command::run::NodeRunConfig;
 use std::fmt;
 use std::path::PathBuf;
 
 /// Full configuration of the EJB runtime and JVM.
 pub struct Config {
+    /// TODO
     pub standard_config: NodeRunConfig,
+    /// TODO
     pub jvm_config: JvmConfig,
+    /// TODO
     pub runtime_config: RuntimeConfig,
 }
 
