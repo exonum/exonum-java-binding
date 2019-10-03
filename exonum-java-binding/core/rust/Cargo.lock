@@ -1214,6 +1214,7 @@ dependencies = [
  "exonum-testkit 0.12.0 (git+https://github.com/exonum/exonum?rev=270def3)",
  "exonum-time 0.12.0 (git+https://github.com/exonum/exonum?rev=270def3)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "jni 0.13.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",

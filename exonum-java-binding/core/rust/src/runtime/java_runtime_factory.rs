@@ -21,7 +21,6 @@ use jni::{
     Executor, InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use proxy::ServiceProxy;
 use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
 use std::{path::Path, sync::Arc};
 use utils::{convert_to_string, panic_on_exception, unwrap_jni};

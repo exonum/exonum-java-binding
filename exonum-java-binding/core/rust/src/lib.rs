@@ -42,6 +42,7 @@ extern crate lazy_static;
 
 extern crate exonum_testkit;
 extern crate exonum_time;
+extern crate futures;
 #[cfg(test)]
 extern crate tempfile;
 

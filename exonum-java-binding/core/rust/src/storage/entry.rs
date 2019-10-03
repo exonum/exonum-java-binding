@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Entry, Fork, Snapshot, ObjectHash};
+use exonum_merkledb::{Entry, Fork, ObjectHash, Snapshot};
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray},
