@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
-use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
+//use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
     exonum::helpers::fabric::{self, ServiceFactory},
@@ -52,12 +51,7 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
         panic!("At least one user service should be defined in the \"services.toml\" file");
     }
 
-    // Check whether we have system services defined or insert the configuration service otherwise.
-    let system_services = system_services.unwrap_or_else(|| {
-        let mut services = HashSet::new();
-        services.insert(CONFIGURATION_SERVICE.to_owned());
-        services
-    });
+    let system_services = system_services.unwrap_or_default();
 
     // Prepare list of service factories from system and user services
     let mut resulting_factories = Vec::new();
@@ -81,8 +75,7 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
 
 fn system_service_factory_for_name(name: &str) -> Box<dyn ServiceFactory> {
     match name {
-        CONFIGURATION_SERVICE => Box::new(ConfigurationServiceFactory) as Box<dyn ServiceFactory>,
-        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<dyn ServiceFactory>,
+//        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<dyn ServiceFactory>,
         TIME_SERVICE => Box::new(TimeServiceFactory) as Box<dyn ServiceFactory>,
         _ => panic!("Unknown system service name \"{}\" has been found", name),
     }
