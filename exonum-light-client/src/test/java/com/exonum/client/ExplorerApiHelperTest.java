@@ -28,6 +28,7 @@ import static com.exonum.client.TestUtils.toHex;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -235,4 +236,54 @@ class ExplorerApiHelperTest {
     assertThat(response.getBlocksRangeEnd(), is(288L));
   }
 
+  @Test
+  void name() {
+    String json = "{\n"
+        + "    \"range\": {\n"
+        + "        \"start\": 89,\n"
+        + "        \"end\": 91\n"
+        + "    },\n"
+        + "    \"blocks\": [\n"
+        + "        {\n"
+        + "            \"proposer_id\": 0,\n"
+        + "            \"height\": 90,\n"
+        + "            \"tx_count\": 0,\n"
+        + "            \"prev_hash\": \"fd54ca9fe9f99fa40d6ad2cd34007c391bd27db6423f278b0fbc65d16e08e12b\",\n"
+        + "            \"tx_hash\": \"c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9\",\n"
+        + "            \"state_hash\": \"e27636da3f03bc8193d81047415d7ac92bbfc2579675ba3e84feb1d3040366be\",\n"
+        + "            \"time\": \"2019-10-03T11:27:54.473943Z\"\n"
+        + "        },\n"
+        + "        {\n"
+        + "            \"proposer_id\": 0,\n"
+        + "            \"height\": 89,\n"
+        + "            \"tx_count\": 0,\n"
+        + "            \"prev_hash\": \"8702e797a951fe387ae6762ed35d4d3b8af2d1a1628a157a621f713a4b516990\",\n"
+        + "            \"tx_hash\": \"c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9\",\n"
+        + "            \"state_hash\": \"e27636da3f03bc8193d81047415d7ac92bbfc2579675ba3e84feb1d3040366be\",\n"
+        + "            \"time\": \"2019-10-03T11:27:54.258649Z\"\n"
+        + "        }\n"
+        + "    ]\n"
+        + "}";
+
+    BlocksResponse blocksResponse = ExplorerApiHelper.parseGetBlocksResponse(json);
+
+    assertThat(blocksResponse.getBlocks(), hasSize(2));
+  }
+
+  @Test
+  void name2() {
+    ExplorerApiHelper.parseGetBlockResponse("{\n"
+        + "    \"proposer_id\": 0,\n"
+        + "    \"height\": 1,\n"
+        + "    \"tx_count\": 0,\n"
+        + "    \"prev_hash\": \"fa066008880b19831f70807552ae92f53f4769e3684172e75cb7f2cdee92a809\",\n"
+        + "    \"tx_hash\": \"c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9\",\n"
+        + "    \"state_hash\": \"d525e530f6cd26e31444dc73fe8880c776ab4bed202d8cdb2c23b5137bd9d6a0\",\n"
+        + "    \"precommits\": [\n"
+        + "        \"2785e9b30bdba7388f3a214de9c871e58674ad80158542b894cb04da48e9e5b001001001180222220a20c12c74e064bba5adfda114e4074092231ac953b0104cecf5f6283ed20f8f0e2e2a220a20b96e9c01796ca6b812b4965df5ad676b845d3276423e557fbe47464fe7bc66e8320c08c2bad7ec0510b8e39dda010fae966ae48bd35a6d01a20cc8d027d495af2ffd3fce06318fb9b66ef2f2c1047cd0d4fa30a26fddc245def145b12c49205a66508cc19e99def8bea94294fb0e\"\n"
+        + "    ],\n"
+        + "    \"txs\": [],\n"
+        + "    \"time\": \"2019-10-03T11:36:34.457667Z\"\n"
+        + "}");
+  }
 }
