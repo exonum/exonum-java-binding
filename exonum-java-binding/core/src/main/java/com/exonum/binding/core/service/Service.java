@@ -99,6 +99,21 @@ public interface Service {
   void createPublicApiHandlers(Node node, Router router);
 
   /**
+   * Handles the changes made by all transactions included in the upcoming block.
+   * This handler is an optional callback method invoked by the blockchain after all transactions
+   * in a block are executed, but before it is committed. The service can modify its state
+   * in this handler, therefore, implementations must be deterministic and use only the current
+   * database state as their input.
+   *
+   * <p>This method is invoked synchronously from the thread that commits the block, therefore,
+   * implementations of this method must not perform any blocking or long-running operations.
+   *
+   * <p>Any exceptions in this method will revert any changes made to the database by it,
+   * but will not affect the processing of this block.
+   */
+  default void beforeCommit(Fork fork) {}
+
+  /**
    * Handles read-only block commit event. This handler is an optional callback method which is
    * invoked by the blockchain after each block commit. For example, a service can create one or
    * more transactions if a specific condition has occurred.

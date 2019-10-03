@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -115,6 +116,18 @@ class ServiceRuntimeAdapterTest {
 
     // Check the runtime was invoked with correct config
     verify(serviceRuntime).initializeService(serviceId, fork, configuration);
+  }
+
+  @Test
+  void beforeCommit() throws CloseFailuresException {
+    long forkHandle = 0x110b;
+    Fork fork = mock(Fork.class);
+    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+        .thenReturn(fork);
+
+    serviceRuntimeAdapter.beforeCommit(forkHandle);
+
+    verify(serviceRuntime).beforeCommit(fork);
   }
 
   @Test
