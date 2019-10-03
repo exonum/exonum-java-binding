@@ -133,12 +133,12 @@ impl Runtime for JavaRuntimeProxy {
     ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
 
         let id = match self.parse_artifact(&artifact) {
-            Ok(id) => id,
+            Ok(id) => id.to_string(),
             Err(err) => return Box::new(Err(err).into_future()),
         };
 
         Box::new(Self::parse_jni(self.exec.with_attached(|env| {
-            let artifact_id = JObject::from(env.new_string(id.to_string())?);
+            let artifact_id = JObject::from(env.new_string(id)?);
             let spec = JObject::from(env.byte_array_from_slice(&deploy_spec)?);
 
             env.call_method_unchecked(
@@ -156,8 +156,26 @@ impl Runtime for JavaRuntimeProxy {
     }
 
     fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
-        // TODO: is not supported by ServiceRuntimeAdapter
-        true
+        let artifact = match self.parse_artifact(id) {
+            Ok(id) => id.to_string(),
+            Err(err) => {
+                return false;
+            },
+        };
+
+        unwrap_jni(self.exec.with_attached(|env| {
+            let artifact_id = JObject::from(env.new_string(artifact)?);
+
+            panic_on_exception(
+                env,
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::is_artifact_deployed_id(),
+                    JavaType::Primitive(Primitive::Boolean),
+                    &[JValue::from(artifact_id)],
+                ),
+            ).z()
+        }))
     }
 
     fn artifact_protobuf_spec(&self, _id: &ArtifactId) -> Option<ArtifactProtobufSpec> {
@@ -202,7 +220,7 @@ impl Runtime for JavaRuntimeProxy {
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::configure_service_id(),
+                runtime_adapter::initialize_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(id),
