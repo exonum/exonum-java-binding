@@ -1,7 +1,7 @@
 [package]
 name = "exonum-java"
 version = "0.9.0-SNAPSHOT"
-authors = ["Exonum team <exonum@bitfury.com>"]
+authors = ["Exonum team <contact@exonum.com>"]
 
 [dependencies]
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).
@@ -12,7 +12,7 @@ java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
 exonum-configuration = "0.12"
 exonum-btc-anchoring = "0.12"
 exonum-time = "0.12"
-env_logger = "0.6.1"
+env_logger = "0.7.0"
 log = "0.4"
 toml = "0.5"
 serde = "1.0"
