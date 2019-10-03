@@ -22,10 +22,9 @@ use exonum::{
     messages::BinaryValue,
     exonum_merkledb::{self, Fork, Snapshot},
     node::ApiSender,
-    proto::Any,
     runtime::{
         api::ServiceApiBuilder,
-        dispatcher::{Dispatcher, DispatcherSender},
+        dispatcher::{Dispatcher, DispatcherRef, DispatcherSender},
         ArtifactId, ArtifactProtobufSpec, CallInfo, ErrorKind, ExecutionContext, ExecutionError,
         InstanceDescriptor, InstanceId, InstanceSpec, Runtime, RuntimeIdentifier,
         StateHashAggregator,
@@ -40,7 +39,6 @@ use jni::{
 use proto;
 use proxy::node::NodeContext;
 use std::fmt;
-use std::str::FromStr;
 use storage::View;
 use to_handle;
 use utils::{jni_cache::runtime_adapter, panic_on_exception, unwrap_jni};
@@ -102,10 +100,7 @@ impl JavaRuntimeProxy {
         if artifact.runtime_id != Self::RUNTIME_ID as u32 {
             Err(Error::IncorrectArtifactId.into())
         } else {
-            artifact
-                .name
-                .parse()
-                .map_err(|_| Error::IncorrectArtifactId.into())
+            Ok(JavaArtifactId(artifact.name.to_string()))
         }
     }
 
@@ -117,22 +112,19 @@ impl JavaRuntimeProxy {
     }
 
     /// If the current node is a validator, returns `Some(validator_id)`, for other nodes return `None`.
-    fn validator_id(snapshot: &Snapshot, service_keypair: &(PublicKey, SecretKey)) -> Option<ValidatorId> {
+    fn validator_id(snapshot: &dyn Snapshot, pub_key: &PublicKey) -> Option<ValidatorId> {
         CoreSchema::new(snapshot)
-            .actual_configuration()
-            .validator_keys
-            .iter()
-            .position(|validator| service_keypair.0 == validator.service_key)
-            .map(|id| ValidatorId(id as u16))
+            .consensus_config()
+            .find_validator(|validator_keys| *pub_key == validator_keys.service_key)
     }
 
     /// If the current node is a validator, return its identifier, for other nodes return `default`.
     fn validator_id_or(
-        snapshot: &Snapshot,
-        service_keypair: &(PublicKey, SecretKey),
+        snapshot: &dyn Snapshot,
+        pub_key: &PublicKey,
         default: i32
     ) -> i32 {
-        Self::validator_id(snapshot, service_keypair)
+        Self::validator_id(snapshot, pub_key)
             .map_or(default, |id| i32::from(id.0))
     }
 }
@@ -156,7 +148,7 @@ impl Runtime for JavaRuntimeProxy {
     fn deploy_artifact(
         &mut self,
         artifact: ArtifactId,
-        deploy_spec: Any,
+        deploy_spec: Vec<u8>,
     ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
 
         let id = match self.parse_artifact(&artifact) {
@@ -166,7 +158,7 @@ impl Runtime for JavaRuntimeProxy {
 
         Box::new(Self::parse_jni(self.exec.with_attached(|env| {
             let artifact_id = JObject::from(env.new_string(id.to_string())?);
-            let spec = JObject::from(env.byte_array_from_slice(&deploy_spec.into_bytes())?);
+            let spec = JObject::from(env.byte_array_from_slice(&deploy_spec)?);
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
@@ -180,6 +172,10 @@ impl Runtime for JavaRuntimeProxy {
             Ok(())
         }))
         .into_future())
+    }
+
+    fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
+        true
     }
 
     fn artifact_protobuf_spec(&self, _id: &ArtifactId) -> Option<ArtifactProtobufSpec> {
@@ -210,17 +206,17 @@ impl Runtime for JavaRuntimeProxy {
         }))
     }
 
-    fn configure_service(
+    fn initialize_service(
         &self,
         fork: &Fork,
         descriptor: InstanceDescriptor,
-        parameters: Any,
+        parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
 
         Self::parse_jni(self.exec.with_attached(|env| {
             let id = descriptor.id as i32;
             let view_handle = to_handle(View::from_ref_fork(fork));
-            let params = JObject::from(env.byte_array_from_slice(&parameters.into_bytes())?);
+            let params = JObject::from(env.byte_array_from_slice(&parameters)?);
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
@@ -257,9 +253,8 @@ impl Runtime for JavaRuntimeProxy {
 
     fn execute(
         &self,
-        _dispatcher: &Dispatcher,
-        context: &mut ExecutionContext,
-        call_info: CallInfo,
+        context: &ExecutionContext,
+        call_info: &CallInfo,
         arguments: &[u8],
     ) -> Result<(), ExecutionError> {
         let tx = if let (Some(key), Some(hash)) =
@@ -296,7 +291,7 @@ impl Runtime for JavaRuntimeProxy {
         }))
     }
 
-    fn state_hashes(&self, snapshot: &Snapshot) -> StateHashAggregator {
+    fn state_hashes(&self, snapshot: &dyn Snapshot) -> StateHashAggregator {
         let bytes = unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
             let java_runtime_hashes = panic_on_exception(
@@ -319,7 +314,7 @@ impl Runtime for JavaRuntimeProxy {
             .into()
     }
 
-    fn before_commit(&self, _dispatcher: &Dispatcher, _fork: &mut Fork) {
+    fn before_commit(&self, _dispatcher: &DispatcherRef, _fork: &mut Fork) {
         // TODO: is not supported by ServiceRuntimeAdapter
     }
 
@@ -332,7 +327,7 @@ impl Runtime for JavaRuntimeProxy {
     ) {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
-            let validator_id = Self::validator_id_or(snapshot, service_keypair, -1);
+            let validator_id = Self::validator_id_or(snapshot, &service_keypair.0, -1);
             let height:u64 = CoreSchema::new(snapshot).height().into();
 
             panic_on_exception(
@@ -383,28 +378,19 @@ impl Runtime for JavaRuntimeProxy {
     }
 }
 
-impl FromStr for JavaArtifactId {
-    type Err = failure::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self(s.to_string()))
-    }
-}
-
 impl ToString for JavaArtifactId {
     fn to_string(&self) -> String {
         self.0.to_owned()
     }
 }
 
-impl From<&ServiceStateHashes> for (InstanceId, Vec<Hash>) {
-    fn from(value: &ServiceStateHashes) -> Self {
-        let hashes: Vec<Hash> = value
-            .state_hashes
+impl ServiceStateHashes {
+    fn to_hashes(&self) -> (InstanceId, Vec<Hash>) {
+        let hashes = self.state_hashes
             .iter()
             .map(|bytes| Hash::from_bytes(bytes.into()).unwrap())
             .collect();
-        (value.instance_id, hashes)
+        (self.instance_id, hashes)
     }
 }
 
@@ -419,7 +405,7 @@ impl ServiceRuntimeStateHashes {
     fn instances(&self) -> Vec<(InstanceId, Vec<Hash>)> {
         self.service_state_hashes
             .iter()
-            .map(|service| service.into())
+            .map(ServiceStateHashes::to_hashes)
             .collect()
     }
 }

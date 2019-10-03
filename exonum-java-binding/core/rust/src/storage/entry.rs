@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Entry, Fork, Snapshot};
+use exonum_merkledb::{Entry, Fork, ObjectHash, Snapshot};
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray},
@@ -111,8 +111,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
         utils::convert_hash(
             &env,
             &match *handle::cast_handle::<IndexType>(entry_handle) {
-                IndexType::SnapshotIndex(ref entry) => entry.hash(),
-                IndexType::ForkIndex(ref entry) => entry.hash(),
+                IndexType::SnapshotIndex(ref entry) => entry.object_hash(),
+                IndexType::ForkIndex(ref entry) => entry.object_hash(),
             },
         )
     });

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-mod cmd;
+//todo: disabled until ECR-3458
+//mod cmd;
 mod config;
 mod java_runtime_factory;
 mod library_loader;
