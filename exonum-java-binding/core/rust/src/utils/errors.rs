@@ -102,7 +102,7 @@ pub fn unwrap_jni_verbose<T>(env: &JNIEnv, res: JniResult<T>) -> T {
                         let message = describe_java_exception(env, exception);
                         in_recursion.set(false);
                         panic!(message);
-                    }
+                    },
                     _ => unwrap_jni(Err(jni_error)),
                 }
             }

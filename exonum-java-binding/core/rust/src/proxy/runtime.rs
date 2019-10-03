@@ -38,6 +38,7 @@ use jni::{
 };
 use proto;
 use proxy::node::NodeContext;
+use runtime::Error;
 use std::fmt;
 use storage::View;
 use to_handle;
@@ -55,20 +56,6 @@ pub struct JavaRuntimeProxy {
 /// Artifact identification properties within `JavaRuntimeProxy`
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct JavaArtifactId(String);
-
-/// List of possible Java runtime errors.
-#[derive(Debug, Copy, Clone)]
-#[repr(u8)]
-pub enum Error {
-    /// Unable to parse artifact identifier or specified artifact has non-empty spec.
-    IncorrectArtifactId = 0,
-    /// Checked java exception is occurred
-    JavaException = 1,
-    /// Unspecified error
-    UnspecifiedError = 2,
-    /// Not supported operation
-    NotSupportedOperation = 3,
-}
 
 #[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
 #[exonum(pb = "proto::ServiceStateHashes")]
@@ -105,9 +92,12 @@ impl JavaRuntimeProxy {
     }
 
     fn parse_jni<T>(res: JniResult<T>) -> Result<T, ExecutionError> {
-        res.map_err(|err| match err.0 {
-            JniErrorKind::JavaException => Error::JavaException.into(),
-            _ => Error::UnspecifiedError.into(),
+        res.map_err(|err| {
+            let kind: ErrorKind = match err.kind() {
+                JniErrorKind::JavaException => Error::JavaException.into(),
+                _ => Error::UnspecifiedError.into(),
+            };
+            (kind, err).into()
         })
     }
 
@@ -132,15 +122,6 @@ impl JavaRuntimeProxy {
 impl fmt::Debug for JavaRuntimeProxy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "JavaRuntimeProxy()")
-    }
-}
-
-impl From<Error> for ExecutionError {
-    fn from(value: Error) -> ExecutionError {
-        ExecutionError::new(
-            ErrorKind::runtime(value as u8),
-            format!("{:?}", value.clone()),
-        )
     }
 }
 
@@ -175,6 +156,7 @@ impl Runtime for JavaRuntimeProxy {
     }
 
     fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
+        // TODO: is not supported by ServiceRuntimeAdapter
         true
     }
 
@@ -257,10 +239,9 @@ impl Runtime for JavaRuntimeProxy {
         call_info: &CallInfo,
         arguments: &[u8],
     ) -> Result<(), ExecutionError> {
-        let tx = if let (Some(key), Some(hash)) =
-            (context.caller.author(), context.caller.transaction_hash())
+        let tx = if let Some((hash, pub_key)) = context.caller.as_transaction()
         {
-            (key, hash)
+            (hash.to_bytes(), pub_key.to_bytes())
         } else {
             // TODO: caller is Blockchain (not Transaction) is not supported  yet
             return Err(Error::NotSupportedOperation.into());
@@ -271,8 +252,8 @@ impl Runtime for JavaRuntimeProxy {
             let tx_id = call_info.method_id as i32;
             let args = JObject::from(env.byte_array_from_slice(arguments)?);
             let view_handle = to_handle(View::from_ref_fork(context.fork));
-            let pub_key = JObject::from(env.byte_array_from_slice(&tx.0.to_bytes())?);
-            let hash = JObject::from(env.byte_array_from_slice(&tx.1.to_bytes())?);
+            let pub_key = JObject::from(env.byte_array_from_slice(&tx.0)?);
+            let hash = JObject::from(env.byte_array_from_slice(&tx.1)?);
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
@@ -315,7 +296,7 @@ impl Runtime for JavaRuntimeProxy {
     }
 
     fn before_commit(&self, _dispatcher: &DispatcherRef, _fork: &mut Fork) {
-        // TODO: is not supported by ServiceRuntimeAdapter
+        // TODO: ECR-3585
     }
 
     fn after_commit(
