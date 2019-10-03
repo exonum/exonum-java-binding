@@ -30,6 +30,8 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -57,6 +59,7 @@ class CoreSchemaProxyIntegrationTest {
   }
 
   @Test
+  @Disabled
   void getActiveConfigurationBeforeGenesisBlock() {
     assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getActualConfiguration));
   }

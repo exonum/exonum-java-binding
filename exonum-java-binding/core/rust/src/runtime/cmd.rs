@@ -110,14 +110,18 @@ impl EjbCommand for Run {
                 jvm_debug_socket: self.jvm_debug,
             };
 
+            let log_config_path = self
+                .ejb_log_config_path
+                .unwrap_or_else(|| get_path_to_default_log_config());
+
+            let override_system_lib_path = self
+                .ejb_override_java_library_path
+                .map(|p| p.to_string_lossy().into_owned());
+
             let runtime_config = RuntimeConfig {
-                log_config_path: self
-                    .ejb_log_config_path
-                    .unwrap_or_else(|| get_path_to_default_log_config()),
+                log_config_path,
                 port: self.ejb_port,
-                override_system_lib_path: self
-                    .ejb_override_java_library_path
-                    .map(|p| p.to_string_lossy().into_owned()),
+                override_system_lib_path,
             };
 
             let config = Config {
