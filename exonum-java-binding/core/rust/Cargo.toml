@@ -1,7 +1,7 @@
 [package]
 name = "java_bindings"
 version = "0.9.0-SNAPSHOT"
-authors = ["Exonum Team <exonum@bitfury.com>"]
+authors = ["Exonum Team <contact@exonum.com>"]
 
 [workspace]
 members = ["integration_tests", "exonum-java"]
@@ -18,7 +18,7 @@ invocation = ["jni/invocation"]
 exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
 exonum-time = "0.12"
 exonum-testkit = "0.12"
-chrono = "0.4.8"
+chrono = "0.4.9"
 failure = "0.1.1"
 toml = "0.5"
 jni = { version = "0.13.1", features = ["invocation"] }
