@@ -35,12 +35,12 @@ const CREATE_SERVICE_SIGNATURE: &str =
 /// Controls JVM and java service.
 #[allow(dead_code)]
 #[derive(Clone)]
-pub struct JavaServiceRuntime {
+pub struct JavaRuntimeFactory {
     executor: Executor,
     service_runtime: GlobalRef,
 }
 
-impl JavaServiceRuntime {
+impl JavaRuntimeFactory {
     /// Creates new runtime from provided config.
     ///
     /// There can be only one `JavaServiceRuntime` instance at a time.
@@ -56,7 +56,7 @@ impl JavaServiceRuntime {
     pub fn create_with_jvm(java_vm: Arc<JavaVM>, port: i32) -> Self {
         let executor = Executor::new(java_vm.clone());
         let service_runtime = Self::create_service_runtime_java(port, executor.clone());
-        JavaServiceRuntime {
+        JavaRuntimeFactory {
             executor,
             service_runtime,
         }
@@ -74,53 +74,6 @@ impl JavaServiceRuntime {
                 )?
                 .l()?;
             env.new_global_ref(serviceRuntime)
-        }))
-    }
-
-    /// Creates a new service instance using the given artifact id.
-    ///
-    /// Panics if there are errors on Java side.
-    pub fn create_service(&self, artifact_id: &str) -> ServiceProxy {
-        unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_id_obj: JObject = env.new_string(artifact_id)?.into();
-            let service = panic_on_exception(
-                env,
-                env.call_method(
-                    self.service_runtime.as_obj(),
-                    "createService",
-                    CREATE_SERVICE_SIGNATURE,
-                    &[artifact_id_obj.into()],
-                ),
-            )
-            .l()?;
-            let service = env.new_global_ref(service)?;
-            Ok(ServiceProxy::from_global_ref(
-                self.executor.clone(),
-                service,
-            ))
-        }))
-    }
-
-    /// Loads an artifact from the specified location involving verification of the artifact.
-    /// Returns an unique service artifact identifier that must be specified in subsequent
-    /// operations with it.
-    ///
-    /// Panics if there are errors on Java side.
-    pub fn load_artifact<P: AsRef<Path>>(&self, artifact_path: P) -> String {
-        unwrap_jni(self.executor.with_attached(|env| {
-            let artifact_path = artifact_path.as_ref().to_str().unwrap();
-            let artifact_path_obj: JObject = env.new_string(artifact_path)?.into();
-            let artifact_id = panic_on_exception(
-                env,
-                env.call_method(
-                    self.service_runtime.as_obj(),
-                    "loadArtifact",
-                    LOAD_ARTIFACT_SIGNATURE,
-                    &[artifact_path_obj.into()],
-                ),
-            )
-            .l()?;
-            convert_to_string(env, artifact_id)
         }))
     }
 
@@ -263,7 +216,7 @@ mod tests {
         let error = Error::from(ErrorKind::Other(jni::sys::JNI_EINVAL));
         assert_eq!(
             "Invalid arguments",
-            JavaServiceRuntime::transform_jni_error(error).description()
+            JavaRuntimeFactory::transform_jni_error(error).description()
         );
     }
 
@@ -272,7 +225,7 @@ mod tests {
         let error_detached = Error::from(ErrorKind::ThreadDetached);
         assert_eq!(
             "Current thread is not attached to the java VM",
-            JavaServiceRuntime::transform_jni_error(error_detached).description()
+            JavaRuntimeFactory::transform_jni_error(error_detached).description()
         );
     }
 
@@ -281,7 +234,7 @@ mod tests {
         let error = Error::from(ErrorKind::Other(-42));
         assert_eq!(
             "JNI error",
-            JavaServiceRuntime::transform_jni_error(error).description()
+            JavaRuntimeFactory::transform_jni_error(error).description()
         );
     }
 }
