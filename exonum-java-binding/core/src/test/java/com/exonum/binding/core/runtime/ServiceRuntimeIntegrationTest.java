@@ -25,6 +25,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,7 +52,6 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import io.vertx.ext.web.Router;
 import java.nio.file.Path;
@@ -115,9 +115,12 @@ class ServiceRuntimeIntegrationTest {
         .newInstance(serviceId, TestServiceModule::new);
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenReturn(serviceDefinition);
+    when(serviceLoader.findService(serviceId))
+        .thenReturn(Optional.of(serviceDefinition));
 
     serviceRuntime.deployArtifact(serviceId, artifactFilename);
 
+    assertTrue(serviceRuntime.isArtifactDeployed(serviceId));
     verify(serviceLoader).loadService(serviceArtifactLocation);
   }
 
@@ -150,10 +153,13 @@ class ServiceRuntimeIntegrationTest {
     ServiceLoadingException exception = new ServiceLoadingException("Boom");
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenThrow(exception);
+    when(serviceLoader.findService(serviceId))
+        .thenReturn(Optional.empty());
 
     Exception actual = assertThrows(ServiceLoadingException.class,
         () -> serviceRuntime.deployArtifact(serviceId, artifactFilename));
     assertThat(actual).isSameAs(exception);
+    assertFalse(serviceRuntime.isArtifactDeployed(serviceId));
   }
 
   @Test
@@ -232,11 +238,11 @@ class ServiceRuntimeIntegrationTest {
     try (Database database = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       Fork view = database.createFork(cleaner);
-      Any config = anyConfiguration();
+      byte[] config = anyConfiguration();
 
       // Configure the service
       Exception e = assertThrows(IllegalArgumentException.class,
-          () -> serviceRuntime.configureService(TEST_ID, view, config));
+          () -> serviceRuntime.initializeService(TEST_ID, view, config));
 
       assertThat(e).hasMessageContaining(String.valueOf(TEST_ID));
     }
@@ -288,13 +294,13 @@ class ServiceRuntimeIntegrationTest {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
         Fork view = database.createFork(cleaner);
-        Any configuration = anyConfiguration();
+        byte[] configuration = anyConfiguration();
         // Configure the service
-        serviceRuntime.configureService(TEST_ID, view, configuration);
+        serviceRuntime.initializeService(TEST_ID, view, configuration);
 
         // Check the service was configured
         Configuration expectedConfig = new ServiceConfiguration(configuration);
-        verify(serviceWrapper).configure(view, expectedConfig);
+        verify(serviceWrapper).initialize(view, expectedConfig);
       }
     }
 
@@ -434,8 +440,8 @@ class ServiceRuntimeIntegrationTest {
     }
   }
 
-  private static Any anyConfiguration() {
-    return Any.getDefaultInstance();
+  private static byte[] anyConfiguration() {
+    return bytes(1, 2, 3, 4);
   }
 
   @Nested

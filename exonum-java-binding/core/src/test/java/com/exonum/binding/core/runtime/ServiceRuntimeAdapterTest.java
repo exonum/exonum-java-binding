@@ -17,9 +17,9 @@
 package com.exonum.binding.core.runtime;
 
 import static com.exonum.binding.test.Bytes.bytes;
-import static com.exonum.binding.test.Bytes.toHexString;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -29,11 +29,9 @@ import static org.mockito.Mockito.when;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.google.protobuf.Any;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,7 +71,7 @@ class ServiceRuntimeAdapterTest {
     DeployArguments deployArguments = DeployArguments.newBuilder()
         .setArtifactFilename(artifactFilename)
         .build();
-    byte[] deploySpec = Any.pack(deployArguments).toByteArray();
+    byte[] deploySpec = deployArguments.toByteArray();
 
     serviceRuntimeAdapter.deployArtifact("com.acme:foo:1.2.3", deploySpec);
 
@@ -82,18 +80,13 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
-  void deployArtifactWrongType() {
-    String id = "com.acme:foo:1.2.3";
-    ServiceStateHashes wrongMessage = ServiceStateHashes.newBuilder().build();
-    byte[] deploySpec = Any.pack(wrongMessage).toByteArray();
+  void isArtifactDeployed() {
+    String artifactId = "com.acme:foo:1.3.2";
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntimeAdapter.deployArtifact(id, deploySpec));
+    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.parseFrom(artifactId)))
+        .thenReturn(true);
 
-    assertThat(e).hasMessageContainingAll(
-        id,
-        ServiceStateHashes.class.getSimpleName(),
-        DeployArguments.class.getSimpleName());
+    assertTrue(serviceRuntimeAdapter.isArtifactDeployed(artifactId));
   }
 
   @Test
@@ -108,7 +101,7 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
-  void configureService() throws CloseFailuresException {
+  void initializeService() throws CloseFailuresException {
     int serviceId = 1;
     long forkHandle = 0x110b;
     Cleaner cleaner = new Cleaner();
@@ -116,27 +109,13 @@ class ServiceRuntimeAdapterTest {
     when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
-    Any configFromTx = Any.getDefaultInstance();
-    byte[] configuration = configFromTx.toByteArray();
+    byte[] configuration = bytes(1, 2);
 
-    // Configure the service
-    serviceRuntimeAdapter.configureService(serviceId, forkHandle, configuration);
+    // Initialize the service
+    serviceRuntimeAdapter.initializeService(serviceId, forkHandle, configuration);
 
     // Check the runtime was invoked with correct config
-    verify(serviceRuntime).configureService(serviceId, fork, configFromTx);
-  }
-
-  @Test
-  void configureServiceNotAny() {
-    int serviceId = 1;
-    long forkHandle = 0x110b;
-    byte[] invalidConfig = bytes("rubbish");
-
-    // Configure the service
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntimeAdapter.configureService(serviceId, forkHandle, invalidConfig));
-
-    assertThat(e).hasMessageContainingAll("Any", toHexString(invalidConfig));
+    verify(serviceRuntime).initializeService(serviceId, fork, configuration);
   }
 
   @Test
