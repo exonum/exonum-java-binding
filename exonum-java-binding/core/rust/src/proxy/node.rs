@@ -31,7 +31,6 @@ use handle::{cast_handle, drop_handle, to_handle, Handle};
 use storage::View;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
 use JniResult;
-use exonum::runtime::CallInfo;
 
 const TX_SUBMISSION_EXCEPTION: &str =
     "com/exonum/binding/core/service/TransactionSubmissionException";
@@ -62,7 +61,7 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn create_snapshot(&self) -> Box<Snapshot> {
+    pub fn create_snapshot(&self) -> Box<dyn Snapshot> {
         self.api_context.snapshot()
     }
 
