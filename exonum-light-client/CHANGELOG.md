@@ -25,7 +25,10 @@ and Exonum Java 0.8.
 ### Changed
 - `ExonumClient#getBlockByHeight` and `#getBlocks` to throw
   `IllegalArgumentException` when blocks with heights exceeding
-  the current blockchain height are requested (#1137) 
+  the current blockchain height are requested (#1137)
+- `Block` JSON representation to be compatible with the one used 
+  for blocks by the core. Applied `@SerializedName` annotation
+  to most fields. (#1137)
 
 ## 0.3.0 - 2019-07-22
 

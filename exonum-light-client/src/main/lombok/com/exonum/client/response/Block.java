@@ -33,6 +33,8 @@ import lombok.Value;
  *
  * <p>This structure only contains the amount of transactions and the transactions root hash as well
  * as other information, but not the transactions themselves.
+ *
+ * <p>The JSON representation of this class is compatible with the format used by Exonum.
  */
 @Value
 @Builder
@@ -41,6 +43,7 @@ public class Block {
   /**
    * Identifier of the leader node which has proposed the block.
    */
+  @SerializedName("proposer_id")
   int proposerId;
 
   /**
@@ -50,15 +53,12 @@ public class Block {
    *
    * <p>The height also identifies each block in the blockchain.
    */
+  @SerializedName("height")
   long height;
 
   /**
    * Number of transactions in this block.
    */
-  // todo: If we use the Block for JSON serialization, then it makes sense to apply SerializedName
-  //    to each field so that their names do not depend on the 'naming policy' (we currently use
-  //    underscores, but it has no effects on SerializedName, and downstream projects might have
-  //    different policies enabled globally).
   @SerializedName("tx_count")
   int numTransactions;
 
@@ -80,6 +80,7 @@ public class Block {
    * Hash of the blockchain state after applying transactions in the block.
    */
   @NonNull
+  @SerializedName("state_hash")
   HashCode stateHash;
 
   /**

@@ -23,7 +23,7 @@ import java.time.ZonedDateTime;
 public final class Blocks {
 
   private static final String BLOCK_1_TIME = "2019-02-10T10:00:00.037255Z";
-  static final String BLOCK_1_JSON = "{\n"
+  public static final String BLOCK_1_JSON = "{\n"
       + "        'proposer_id': 1,\n"
       + "        'height': 10,\n"
       + "        'tx_count': 1,\n"
@@ -40,7 +40,7 @@ public final class Blocks {
       + "        'tx_hash': 'cd5a',\n"
       + "        'state_hash': 'efa2'\n"
       + "    }";
-  static final Block BLOCK_1 = Block.builder()
+  public static final Block BLOCK_1 = Block.builder()
       .proposerId(1)
       .height(10)
       .numTransactions(1)
