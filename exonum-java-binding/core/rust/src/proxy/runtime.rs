@@ -42,7 +42,7 @@ use runtime::Error;
 use std::fmt;
 use storage::View;
 use to_handle;
-use utils::{jni_cache::runtime_adapter, panic_on_exception, unwrap_jni};
+use utils::{jni_cache::runtime_adapter, log_jni_error_or_exception, panic_on_exception, unwrap_jni};
 use JniErrorKind;
 use JniResult;
 
@@ -141,16 +141,18 @@ impl Runtime for JavaRuntimeProxy {
             let artifact_id = JObject::from(env.new_string(id)?);
             let spec = JObject::from(env.byte_array_from_slice(&deploy_spec)?);
 
-            env.call_method_unchecked(
-                self.runtime_adapter.as_obj(),
-                runtime_adapter::deploy_artifact_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(artifact_id),
-                    JValue::from(spec),
-                ],
-            )?;
-            Ok(())
+            log_jni_error_or_exception(
+                env,
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::deploy_artifact_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[
+                        JValue::from(artifact_id),
+                        JValue::from(spec),
+                    ],
+                )
+            ).map(|_| ())
         }))
         .into_future())
     }
@@ -192,17 +194,19 @@ impl Runtime for JavaRuntimeProxy {
             let name = JObject::from(env.new_string(service_name)?);
             let artifact_id = JObject::from(env.new_string(artifact.to_string())?);
 
-            env.call_method_unchecked(
-                adapter,
-                runtime_adapter::create_service_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(name),
-                    JValue::from(id as i32),
-                    JValue::from(artifact_id),
-                ],
-            )
-            .map(|_| ())
+            log_jni_error_or_exception(
+                env,
+                env.call_method_unchecked(
+                    adapter,
+                    runtime_adapter::create_service_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[
+                        JValue::from(name),
+                        JValue::from(id as i32),
+                        JValue::from(artifact_id),
+                    ],
+                )
+            ).map(|_| ())
         }))
     }
 
@@ -218,18 +222,20 @@ impl Runtime for JavaRuntimeProxy {
             let view_handle = to_handle(View::from_ref_fork(fork));
             let params = JObject::from(env.byte_array_from_slice(&parameters)?);
 
-            env.call_method_unchecked(
-                self.runtime_adapter.as_obj(),
-                runtime_adapter::initialize_service_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(id),
-                    JValue::from(view_handle),
-                    JValue::from(params),
-                ],
-            )?;
-
-            Ok(())
+            log_jni_error_or_exception(
+                env,
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::initialize_service_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[
+                        JValue::from(id),
+                        JValue::from(view_handle),
+                        JValue::from(params),
+                    ],
+                )
+            )
+                .map(|_| ())
         }))
     }
 
@@ -239,15 +245,17 @@ impl Runtime for JavaRuntimeProxy {
         Self::parse_jni(self.exec.with_attached(|env| {
             let id = descriptor.id as i32;
 
-            env.call_method_unchecked(
-                adapter,
-                runtime_adapter::stop_service_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(id),
-                ],
-            )
-            .map(|_| ())
+            log_jni_error_or_exception(
+                env,
+                env.call_method_unchecked(
+                    adapter,
+                    runtime_adapter::stop_service_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[
+                        JValue::from(id),
+                    ],
+                )
+            ).map(|_| ())
         }))
     }
 
@@ -273,20 +281,22 @@ impl Runtime for JavaRuntimeProxy {
             let pub_key = JObject::from(env.byte_array_from_slice(&tx.0)?);
             let hash = JObject::from(env.byte_array_from_slice(&tx.1)?);
 
-            env.call_method_unchecked(
-                self.runtime_adapter.as_obj(),
-                runtime_adapter::execute_tx_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(service_id),
-                    JValue::from(tx_id),
-                    JValue::from(args),
-                    JValue::from(view_handle),
-                    JValue::from(pub_key),
-                    JValue::from(hash),
-                ],
-            )?;
-            Ok(())
+            log_jni_error_or_exception(
+                env,
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::execute_tx_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[
+                        JValue::from(service_id),
+                        JValue::from(tx_id),
+                        JValue::from(args),
+                        JValue::from(view_handle),
+                        JValue::from(pub_key),
+                        JValue::from(hash),
+                    ],
+                )
+            ).map(|_| ())
         }))
     }
 

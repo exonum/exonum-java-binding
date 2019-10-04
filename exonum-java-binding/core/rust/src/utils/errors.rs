@@ -70,6 +70,30 @@ pub fn check_error_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> Result
     })
 }
 
+/// Handles and clears any Java exceptions.
+///
+/// Any JNI errors are logged with their descriptions,  for JNI errors
+/// like `JniErrorKind::JavaException` it gets (and clears) any exception
+/// that is currently being thrown.
+///
+/// Panics:
+/// - Panics if JNI error is `JniErrorKind::JavaException` but couldn't get (and clear) exception
+///   object and describe it.
+pub fn log_jni_error_or_exception<T>(env: &JNIEnv, result: JniResult<T>) -> JniResult<T> {
+    result.map_err(|jni_error| match jni_error.0 {
+        JniErrorKind::JavaException => {
+            let exception = get_and_clear_java_exception(env);
+            let message = describe_java_exception(env, exception);
+            error!("{}", message);
+            jni_error
+        }
+        _ => {
+            error!("JNI error: {:?}", jni_error);
+            jni_error
+        },
+    })
+}
+
 /// Unwraps `jni::Result`
 ///
 /// Panics if there is some JNI error.
