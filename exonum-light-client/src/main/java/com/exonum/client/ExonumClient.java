@@ -33,9 +33,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Main interface for Exonum Light client.
@@ -197,17 +194,7 @@ public interface ExonumClient {
    * Builder class for the Exonum client.
    */
   class Builder {
-
-    private static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient.Builder()
-        .addInterceptor(createLoggingInterceptor())
-        .build();
-
-    @NotNull
-    private static HttpLoggingInterceptor createLoggingInterceptor() {
-      HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-      interceptor.level(Level.BODY);
-      return interceptor;
-    }
+    private static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient();
 
     private URL exonumHost;
     private OkHttpClient httpClient = DEFAULT_CLIENT;
