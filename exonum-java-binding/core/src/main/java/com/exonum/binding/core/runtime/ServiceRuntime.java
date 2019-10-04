@@ -40,7 +40,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
@@ -157,6 +156,17 @@ public final class ServiceRuntime {
   }
 
   /**
+   * Returns true if an artifact with the given id is currently deployed in this runtime.
+   * @param id a service artifact identifier
+   */
+  public boolean isArtifactDeployed(ServiceArtifactId id) {
+    synchronized (lock) {
+      return serviceLoader.findService(id)
+          .isPresent();
+    }
+  }
+
+  /**
    * Creates a new service instance with the given specification. This method registers
    * the service API.
    *
@@ -203,18 +213,19 @@ public final class ServiceRuntime {
   }
 
   /**
-   * Configures the service instance.
+   * Performs an initial configuration of the service instance.
    *
    * @param id the id of the started service
    * @param view a database view to apply configuration
-   * @param configuration service instance configuration parameters
+   * @param configuration service instance configuration parameters as a serialized protobuf
+   *     message
    */
-  public void configureService(Integer id, Fork view, Any configuration) {
+  public void initializeService(Integer id, Fork view, byte[] configuration) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(id);
       try {
         Configuration config = new ServiceConfiguration(configuration);
-        service.configure(view, config);
+        service.initialize(view, config);
       } catch (Exception e) {
         String name = service.getName();
         logger.error("Service {} configuration with parameters {} failed",
@@ -303,6 +314,32 @@ public final class ServiceRuntime {
         .setInstanceId(service.getId())
         .addAllStateHashes(stateHashesAsBytes)
         .build();
+  }
+
+  /**
+   * Performs the before commit operation for all services in the runtime.
+   *
+   * @param fork a fork allowing the runtime and the service to modify the database state.
+   *             Must allow checkpoints and rollbacks.
+   */
+  public void beforeCommit(Fork fork) {
+    synchronized (lock) {
+      try {
+        for (ServiceWrapper service : services.values()) {
+          fork.createCheckpoint();
+          try {
+            service.beforeCommit(fork);
+          } catch (Exception e) {
+            logger.error("Service {} threw exception in beforeCommit. Any changes are rolled-back",
+                service.getName(), e);
+            fork.rollback();
+          }
+        }
+      } catch (Exception e) {
+        logger.error("Unexpected exception in beforeCommit", e);
+        throw e;
+      }
+    }
   }
 
   /**

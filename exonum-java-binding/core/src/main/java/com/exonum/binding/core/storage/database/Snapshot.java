@@ -37,6 +37,8 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  */
 public final class Snapshot extends View {
 
+  private final Cleaner cleaner;
+
   /**
    * Creates a new owning Snapshot proxy.
    *
@@ -71,6 +73,12 @@ public final class Snapshot extends View {
   }
 
   private Snapshot(NativeHandle nativeHandle, Cleaner cleaner) {
-    super(nativeHandle, cleaner, false);
+    super(nativeHandle, false);
+    this.cleaner = cleaner;
+  }
+
+  @Override
+  public Cleaner getCleaner() {
+    return cleaner;
   }
 }

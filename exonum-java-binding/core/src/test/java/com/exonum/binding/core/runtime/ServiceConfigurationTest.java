@@ -16,12 +16,12 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.core.storage.indices.TestProtoMessages.Id;
-import com.exonum.binding.core.storage.indices.TestProtoMessages.Point;
-import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -29,11 +29,10 @@ class ServiceConfigurationTest {
 
   @Test
   void getAsMessage() {
-    // Pack the config in Any as core does
-    Id config = id("1");
-    Any configInTx = Any.pack(config);
+    Id config = anyId();
+    byte[] serializedConfig = config.toByteArray();
 
-    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(configInTx);
+    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(serializedConfig);
 
     // Decode the config
     Id unpackedConfig = serviceConfiguration.getAsMessage(Id.class);
@@ -42,31 +41,28 @@ class ServiceConfigurationTest {
   }
 
   @Test
-  void getAsMessageWrongType() {
-    // Pack the config in Any as core does
-    Id config = id("1");
-    Any configInTx = Any.pack(config);
+  void getAsMessageNotMessage() {
+    // Not a valid serialized Id
+    byte[] serializedConfig = bytes(1, 2, 3, 4);
 
-    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(configInTx);
+    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(serializedConfig);
 
     // Try to decode the config
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceConfiguration.getAsMessage(Point.class));
+        () -> serviceConfiguration.getAsMessage(Id.class));
 
-    assertThat(e).hasMessageContainingAll(Id.getDescriptor().getName(),
-        Point.getDescriptor().getName());
+    assertThat(e).hasCauseInstanceOf(InvalidProtocolBufferException.class);
   }
 
   @Test
   void verifyEquals() {
     EqualsVerifier.forClass(ServiceConfiguration.class)
-        .withPrefabValues(Any.class, Any.pack(id("Red")), Any.pack(id("Black")))
         .verify();
   }
 
-  private static Id id(String id) {
+  private static Id anyId() {
     return Id.newBuilder()
-        .setId(id)
+        .setId("12ab")
         .build();
   }
 }

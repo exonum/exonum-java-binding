@@ -80,8 +80,8 @@ final class ServiceWrapper {
     return instanceSpec.getId();
   }
 
-  void configure(Fork view, Configuration configuration) {
-    service.configure(view, configuration);
+  void initialize(Fork view, Configuration configuration) {
+    service.initialize(view, configuration);
   }
 
   void executeTransaction(int txId, byte[] arguments, TransactionContext context)
@@ -102,6 +102,10 @@ final class ServiceWrapper {
 
   List<HashCode> getStateHashes(Snapshot snapshot) {
     return service.getStateHashes(snapshot);
+  }
+
+  void beforeCommit(Fork fork) {
+    service.beforeCommit(fork);
   }
 
   void afterCommit(BlockCommittedEvent event) {

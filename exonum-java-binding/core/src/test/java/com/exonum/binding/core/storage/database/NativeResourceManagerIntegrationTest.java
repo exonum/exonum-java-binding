@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.database;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.serialization.StandardSerializers;

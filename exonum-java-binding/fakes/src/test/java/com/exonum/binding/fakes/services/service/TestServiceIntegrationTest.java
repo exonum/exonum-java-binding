@@ -43,7 +43,7 @@ class TestServiceIntegrationTest {
       Fork fork = temporaryDb.createFork(cleaner);
       TestService service = new TestService();
 
-      Optional<String> initialConfig = service.configure(fork);
+      Optional<String> initialConfig = service.initialize(fork);
 
       ProofMapIndexProxy<HashCode, String> testMap = new TestSchema(fork).testMap();
 

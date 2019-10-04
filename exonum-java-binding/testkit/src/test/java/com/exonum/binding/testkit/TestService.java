@@ -57,7 +57,7 @@ final class TestService extends AbstractService {
   }
 
   @Override
-  public void configure(Fork fork, Configuration configuration) {
+  public void initialize(Fork fork, Configuration configuration) {
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
