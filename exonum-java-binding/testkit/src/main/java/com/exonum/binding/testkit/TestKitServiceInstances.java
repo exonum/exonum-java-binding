@@ -19,37 +19,16 @@ package com.exonum.binding.testkit;
 /**
  * Specifications of service instances to be deployed and created by TestKit.
  */
-@SuppressWarnings("unused") // Native API
+@SuppressWarnings({"unused", "WeakerAccess"}) // Native API
 class TestKitServiceInstances {
 
-  private String artifactId;
-  private String artifactFilename;
-  private ServiceSpec[] serviceSpecs;
+  final String artifactId;
+  final String artifactFilename;
+  final ServiceSpec[] serviceSpecs;
 
-  public TestKitServiceInstances(String artifactId, String artifactFilename, ServiceSpec[] serviceSpecs) {
+  TestKitServiceInstances(String artifactId, String artifactFilename, ServiceSpec[] serviceSpecs) {
     this.artifactId = artifactId;
     this.artifactFilename = artifactFilename;
     this.serviceSpecs = serviceSpecs;
-  }
-
-  /**
-   * Returns the service artifact id.
-   */
-  public String getArtifactId() {
-    return artifactId;
-  }
-
-  /**
-   * Returns a filename of the service artifact.
-   */
-  public String getArtifactFilename() {
-    return artifactFilename;
-  }
-
-  /**
-   * Returns a service instance specification - its service name, service id and configuration.
-   */
-  public ServiceSpec[] getServiceSpecs() {
-    return serviceSpecs;
   }
 }

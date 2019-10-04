@@ -38,7 +38,7 @@ import java.util.List;
  * to operate on them conveniently. It separates the <em>extension</em>,
  * user-facing, interface from the <em>runtime</em>, internal, interface.
  */
-public final class ServiceWrapper {
+final class ServiceWrapper {
 
   private final Service service;
   private final TransactionConverter txConverter;
@@ -55,28 +55,28 @@ public final class ServiceWrapper {
   /**
    * Returns the service instance.
    */
-  public Service getService() {
+  Service getService() {
     return service;
   }
 
   /**
    * Returns the transaction converter of this service.
    */
-  public TransactionConverter getTxConverter() {
+  TransactionConverter getTxConverter() {
     return txConverter;
   }
 
   /**
    * Returns the name of this service instance.
    */
-  public String getName() {
+  String getName() {
     return instanceSpec.getName();
   }
 
   /**
    * Returns id of this service instance.
    */
-  public int getId() {
+  int getId() {
     return instanceSpec.getId();
   }
 

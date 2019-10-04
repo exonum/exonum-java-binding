@@ -16,31 +16,19 @@
 
 package com.exonum.binding.testkit;
 
-import com.google.auto.value.AutoValue;
-
 /**
  * A specification of a time service instance used by TestKit for service creation.
  */
-@SuppressWarnings("unused") // Native API
-@AutoValue
-abstract class TimeServiceSpec {
+@SuppressWarnings({"unused", "WeakerAccess"}) // Native API
+class TimeServiceSpec {
 
-  /**
-   * Returns {@linkplain TimeProviderAdapter} used by time service as a time source.
-   */
-  abstract TimeProviderAdapter getTimeProvider();
+  final TimeProviderAdapter getTimeProvider;
+  final String getServiceName;
+  final int getServiceId;
 
-  /**
-   * Returns the name of this time service instance.
-   */
-  abstract String getServiceName();
-
-  /**
-   * Returns the numeric id of this time service instance.
-   */
-  abstract int getServiceId();
-
-  static TimeServiceSpec newInstance(TimeProviderAdapter timeProvider, String serviceName, int serviceId) {
-    return new AutoValue_TimeServiceSpec(timeProvider, serviceName, serviceId);
+  public TimeServiceSpec(String getServiceName, int getServiceId, TimeProviderAdapter getTimeProvider) {
+    this.getServiceName = getServiceName;
+    this.getServiceId = getServiceId;
+    this.getTimeProvider = getTimeProvider;
   }
 }

@@ -16,31 +16,19 @@
 
 package com.exonum.binding.testkit;
 
-import com.google.auto.value.AutoValue;
-
 /**
  * A specification of a service instance used by TestKit for service creation.
  */
-@AutoValue
-abstract class ServiceSpec {
+@SuppressWarnings({"unused", "WeakerAccess"}) // Native API
+class ServiceSpec {
 
-  /**
-   * Returns the name of the service instance. It serves as the primary identifier of this service
-   * in most operations.
-   */
-  abstract String getServiceName();
+  final String getServiceName;
+  final int getServiceId;
+  final byte[] getConfiguration;
 
-  /**
-   * Returns the numeric id of the service instance.
-   */
-  abstract int getServiceId();
-
-  /**
-   * Returns the configuration of the service instance.
-   */
-  abstract byte[] getConfiguration();
-
-  static ServiceSpec newInstance(String name, int id, byte[] configuration) {
-    return new AutoValue_ServiceSpec(name, id, configuration);
+  public ServiceSpec(String getServiceName, int getServiceId, byte[] getConfiguration) {
+    this.getServiceName = getServiceName;
+    this.getServiceId = getServiceId;
+    this.getConfiguration = getConfiguration;
   }
 }

@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 import com.exonum.binding.core.runtime.ServiceWrapper;
-import com.google.protobuf.Any;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,9 +36,8 @@ import org.junit.platform.testkit.engine.Events;
 class TestKitExtensionTest extends TestKitWithTestArtifact {
 
   private static final TestKit.Builder defaultBuilder = TestKit.builder()
-      .withDeployedService(ARTIFACT_ID, ARTIFACT_FILENAME)
-      .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID,
-          Any.getDefaultInstance());
+      .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+      .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID);
 
   @Test
   void testKitInstantiationTestCase() {

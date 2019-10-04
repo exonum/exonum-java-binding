@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import java.util.function.Consumer;
-import com.google.protobuf.Any;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -35,9 +34,8 @@ class TestKitParameterizationTest extends TestKitWithTestArtifact {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withNodeType(TEMPLATE_NODE_TYPE)
-          .withDeployedService(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID,
-              Any.getDefaultInstance())
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
           .withValidators(TEMPLATE_VALIDATOR_COUNT));
 
   @Test

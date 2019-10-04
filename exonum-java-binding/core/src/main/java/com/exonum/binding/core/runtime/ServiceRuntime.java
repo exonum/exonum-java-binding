@@ -23,13 +23,16 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transport.Server;
@@ -349,6 +352,38 @@ public final class ServiceRuntime {
     }
   }
 
+  /**
+   * Get service instance by its name.
+   *
+   * @throws IllegalArgumentException if there is no service with such name
+   */
+  public Service getServiceInstanceByName(String serviceName) {
+    return findService(serviceName)
+        .map(ServiceWrapper::getService)
+        .orElseThrow(() ->
+            new IllegalArgumentException("No service with such name in the Java runtime "
+                + serviceName));
+  }
+
+
+  /**
+   * Converts an Exonum raw transaction to an executable transaction of given service.
+   *
+   * @param serviceId the id of the service
+   * @param txId the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}
+   *     within the service
+   * @param arguments the {@linkplain TransactionMessage#getPayload() serialized transaction
+   *     arguments}
+   * @return an executable transaction of the service
+   * @throws IllegalArgumentException of there is no service with such name in this runtime, or if
+   *     the transaction is not known to the service, or the arguments are not valid: e.g., cannot
+   *     be deserialized, or do not meet the preconditions
+   */
+  public Transaction convertTransaction(int serviceId, int txId, byte[] arguments) {
+    ServiceWrapper service = getServiceById(serviceId);
+    return service.getTxConverter().toTransaction(txId, arguments);
+  }
+
   private void connectServiceApi(Integer serviceId, Node node) {
     ServiceWrapper service = getServiceById(serviceId);
 
@@ -400,10 +435,7 @@ public final class ServiceRuntime {
         );
   }
 
-  /**
-   * Finds service instance by its id.
-   */
-  public ServiceWrapper getServiceById(Integer serviceId) {
+  private ServiceWrapper getServiceById(Integer serviceId) {
     checkService(serviceId);
     return servicesById.get(serviceId);
   }
@@ -414,10 +446,8 @@ public final class ServiceRuntime {
         "No service with id=%s in the Java runtime", serviceId);
   }
 
-  /**
-   * Finds service instance by its name.
-   */
-  public Optional<ServiceWrapper> findService(String name) {
+  @VisibleForTesting
+  Optional<ServiceWrapper> findService(String name) {
     return Optional.ofNullable(services.get(name));
   }
 
