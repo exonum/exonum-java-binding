@@ -76,7 +76,6 @@ public final class Blocks {
       + "        'tx_hash': 'dcb0',\n"
       + "        'state_hash': 'e4ea'\n"
       + "    }";
-  // TODO: Block template with a placeholder for extra 'time' field + String.format?
   static final Block BLOCK_2 = Block.builder()
       .proposerId(2)
       .height(25)
