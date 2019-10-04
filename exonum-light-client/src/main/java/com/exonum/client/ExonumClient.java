@@ -226,7 +226,8 @@ public interface ExonumClient {
      *
      * <p>This method provides a flexibility for the Exonum client configuration.
      * Can be helpful, for example, in case a network proxy configuration is needed
-     * or request/response logging.
+     * or <a href="https://github.com/square/okhttp/tree/master/okhttp-logging-interceptor">
+     *   request/response logging.</a>
      */
     public Builder setHttpClient(OkHttpClient client) {
       this.httpClient = checkNotNull(client);
