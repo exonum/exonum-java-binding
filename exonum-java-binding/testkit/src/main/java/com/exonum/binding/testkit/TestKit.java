@@ -48,6 +48,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Any;
+import com.google.protobuf.MessageLite;
 import io.vertx.ext.web.Router;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -123,7 +124,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * Deploys and creates a single service with a single validator node in this TestKit network.
    */
   public static TestKit forService(ServiceArtifactId artifactId, String artifactFilename,
-                                   String serviceName, int serviceId, Any configuration) {
+                                   String serviceName, int serviceId, MessageLite configuration) {
     checkServiceId(serviceId);
     TestKitServiceInstances[] testKitServiceInstances = createTestKitSingleServiceInstance(
         artifactId, artifactFilename, serviceName, serviceId, configuration);
@@ -143,7 +144,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private static TestKitServiceInstances[] createTestKitSingleServiceInstance(
       ServiceArtifactId artifactId, String artifactFilename, String serviceName,
-      int serviceId, Any configuration) {
+      int serviceId, MessageLite configuration) {
     ServiceSpec serviceSpec = new ServiceSpec(serviceName, serviceId, configuration.toByteArray());
     TestKitServiceInstances testKitServiceInstances = new TestKitServiceInstances(
         artifactId.toString(), artifactFilename, new ServiceSpec[] {serviceSpec});
@@ -436,7 +437,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * can be added.
      *
      * <p>Once the service artifact is deployed, the service instances can be added with
-     * {@link #withService(ServiceArtifactId, String, int, Any)}.
+     * {@link #withService(ServiceArtifactId, String, int, MessageLite)}.
      */
     public Builder withDeployedArtifact(ServiceArtifactId serviceArtifactId, String artifactFilename) {
       serviceArtifactFilenames.put(serviceArtifactId, artifactFilename);
@@ -452,7 +453,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * deployed with {@link #withDeployedArtifact(ServiceArtifactId, String)}.
      */
     public Builder withService(ServiceArtifactId serviceArtifactId, String serviceName,
-                               int serviceId, Any configuration) {
+                               int serviceId, MessageLite configuration) {
       checkServiceId(serviceId);
       checkServiceArtifactIsDeployed(serviceArtifactId);
       ServiceSpec serviceSpec = new ServiceSpec(serviceName, serviceId,
