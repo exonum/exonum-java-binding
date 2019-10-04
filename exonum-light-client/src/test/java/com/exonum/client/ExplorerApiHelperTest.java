@@ -189,6 +189,7 @@ class ExplorerApiHelperTest {
     String txHash = "c6c0aa07";
     String stateHash = "2eab5971";
     String tx1 = "336a4acb";
+    String tx2 = "12345678";
     String commitTime = "2019-10-01T17:07:45.663021Z";
     String json = "{\n"
         + "    \"proposer_id\": 0,\n"
@@ -200,7 +201,10 @@ class ExplorerApiHelperTest {
         + "    \"precommits\": [\n"
         + "        \"bc13da11\"\n"
         + "    ],\n"
-        + "    \"txs\": [\"" + tx1 + "\"],\n"
+        + "    \"txs\": [\n"
+        + "        {\"service_id\": 0, \"tx_hash\": \"" + tx1 + "\"},\n"
+        + "        {\"service_id\": 128, \"tx_hash\": \"" + tx2 + "\"}\n"
+        + "    ],\n"
         + "    \"time\": \"" + commitTime + "\"\n"
         + "}";
 
@@ -216,7 +220,8 @@ class ExplorerApiHelperTest {
         .commitTime(ZonedDateTime.parse(commitTime))
         .build();
     assertThat(response.getBlock(), is(expectedBlock));
-    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
+    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1),
+        HashCode.fromString(tx2)));
   }
 
   @Test

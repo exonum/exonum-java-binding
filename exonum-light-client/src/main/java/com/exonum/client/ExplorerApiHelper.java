@@ -18,6 +18,7 @@
 package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.JSON;
+import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
@@ -28,6 +29,7 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -69,7 +71,10 @@ final class ExplorerApiHelper {
   static BlockResponse parseGetBlockResponse(String json) {
     GetBlockResponse response = JSON.fromJson(json, GetBlockResponse.class);
 
-    return new BlockResponse(response.getAsBlock(), response.getTxs());
+    List<HashCode> txs = response.getTxs().stream()
+        .map(IndexedTxHash::getTxHash)
+        .collect(toList());
+    return new BlockResponse(response.getAsBlock(), txs);
   }
 
   static BlocksResponse parseGetBlocksResponse(String json) {
@@ -168,6 +173,7 @@ final class ExplorerApiHelper {
 
   @Value
   @AllArgsConstructor
+  @VisibleForTesting
   static class GetBlockResponse {
     int proposerId;
     long height;
@@ -176,10 +182,10 @@ final class ExplorerApiHelper {
     HashCode txHash;
     HashCode stateHash;
     JsonElement precommits; //TODO: in scope of LC P3
-    List<HashCode> txs;
+    List<IndexedTxHash> txs;
     ZonedDateTime time;
 
-    GetBlockResponse(Block block, List<HashCode> txs) {
+    GetBlockResponse(Block block, List<IndexedTxHash> txs) {
       this(block.getProposerId(), block.getHeight(),
           block.getNumTransactions(), block.getPreviousBlockHash(), block.getTxRootHash(),
           block.getStateHash(), new JsonArray(), ImmutableList.copyOf(txs),
@@ -197,6 +203,13 @@ final class ExplorerApiHelper {
           .commitTime(time)
           .build();
     }
+  }
+
+  @Value
+  @VisibleForTesting
+  static class IndexedTxHash {
+    int serviceId;
+    HashCode txHash;
   }
 
   @Value

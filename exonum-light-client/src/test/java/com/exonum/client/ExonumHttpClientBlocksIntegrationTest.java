@@ -60,6 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.client.ExplorerApiHelper.GetBlockResponse;
+import com.exonum.client.ExplorerApiHelper.IndexedTxHash;
 import com.exonum.client.request.BlockFilteringOption;
 import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
@@ -110,7 +111,8 @@ class ExonumHttpClientBlocksIntegrationTest {
   void getBlockByHeight() throws InterruptedException {
     // Mock response
     HashCode tx1 = HashCode.fromString("336a4acb");
-    String mockResponse = JSON.toJson(new GetBlockResponse(BLOCK_1, singletonList(tx1)));
+    String mockResponse = JSON.toJson(new GetBlockResponse(BLOCK_1,
+        singletonList(new IndexedTxHash(0, tx1))));
     enqueueResponse(mockResponse);
 
     // Call
