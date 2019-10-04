@@ -18,7 +18,6 @@ package com.exonum.client.response;
 
 import lombok.Value;
 
-
 /**
  * Some statistics about the blockchain system.
  */
