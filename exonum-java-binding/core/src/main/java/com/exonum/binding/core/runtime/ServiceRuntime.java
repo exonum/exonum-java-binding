@@ -402,7 +402,6 @@ public final class ServiceRuntime {
                 + serviceName));
   }
 
-
   /**
    * Converts an Exonum raw transaction to an executable transaction of given service.
    *
