@@ -59,6 +59,12 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
   }
 
   @Override
+  public long size() {
+    // todo:
+    return 0;
+  }
+
+  @Override
   public NavigableMap<Long, E>  getElements() {
     checkValid();
     return elements;

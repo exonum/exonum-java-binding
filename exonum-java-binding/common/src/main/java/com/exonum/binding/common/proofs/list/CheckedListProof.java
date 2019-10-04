@@ -35,6 +35,12 @@ import java.util.NavigableMap;
  * }</pre>
  */
 public interface CheckedListProof<E> extends CheckedProof {
+
+  /**
+   * Returns the size of the list: the total number of elements in it.
+   */
+  long size();
+
   /**
    * Get all list proof elements. There might be several consecutive ranges.
    *
