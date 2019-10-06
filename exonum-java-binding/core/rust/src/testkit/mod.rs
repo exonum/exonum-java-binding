@@ -16,26 +16,29 @@
 
 //! Provides native methods for Java TestKit support.
 
-use self::time_provider::JavaTimeProvider;
+use {JavaRuntimeProxy, JniResult};
 use exonum::{
-    blockchain::Block,
+    blockchain::{Block, InstanceConfig},
     crypto::{PublicKey, SecretKey},
     helpers::ValidatorId,
-    messages::{RawTransaction, Signed},
+    messages::{RawTransaction, Signed, Verified},
+    runtime::{AnyTx, InstanceSpec},
 };
 use exonum_merkledb::BinaryValue;
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeService};
-use handle::{cast_handle, drop_handle, to_handle, Handle};
+use handle::{cast_handle, drop_handle, Handle, to_handle};
 use jni::{
-    objects::{JObject, JValue},
-    sys::{jboolean, jbyteArray, jobjectArray, jshort},
-    Executor, JNIEnv,
+    Executor,
+    JNIEnv,
+    objects::{GlobalRef, JObject, JValue}, sys::{jboolean, jbyteArray, jobjectArray, jshort},
 };
 use proxy::ServiceProxy;
 use std::{panic, sync::Arc};
 use storage::View;
-use utils::{unwrap_exc_or, unwrap_exc_or_default};
+use utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default};
+
+use self::time_provider::JavaTimeProvider;
 
 mod time_provider;
 
@@ -54,6 +57,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
     services: jobjectArray,
     auditor: jboolean,
     validator_count: jshort,
+    runtime: JObject,
     time_provider: JObject,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -65,18 +69,16 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
         builder = builder.with_validators(validator_count as _);
         let builder = {
             let executor = Executor::new(Arc::new(env.get_java_vm()?));
-            let num_services = env.get_array_length(services)?;
-            for i in 0..num_services {
-                let service = env.get_object_array_element(services, i)?;
-                let global_ref = env.new_global_ref(service)?;
-                let service = ServiceProxy::from_global_ref(executor.clone(), global_ref);
-                builder = builder.with_service(service);
-            }
+
+            let runtime = JavaRuntimeProxy::new(executor.clone(), runtime.into());
+            builder = builder
+                .with_runtime(runtime)
+                .with_instances(instance_config_from_java_array(&env, services)?);
 
             // Handle Time Service
             if !time_provider.is_null() {
                 let provider = JavaTimeProvider::new(executor.clone(), time_provider);
-                builder = builder.with_service(TimeService::with_provider(
+                builder = builder.with_rust_service(TimeService::with_provider(
                     Box::new(provider) as Box<dyn TimeProvider>
                 ));
             }
@@ -156,7 +158,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
                 env.auto_local(env.get_object_array_element(transactions, i as _)?);
             let serialized_tx: jbyteArray = serialized_tx_object.as_obj().into_inner();
             let serialized_tx = env.convert_byte_array(serialized_tx)?;
-            let transaction: Signed<RawTransaction> =
+            let transaction: Verified<AnyTx> =
                 BinaryValue::from_bytes(serialized_tx.into()).unwrap();
             raw_transactions.push(transaction);
         }
@@ -202,7 +204,7 @@ fn serialize_block(env: &JNIEnv, block: Block) -> jni::errors::Result<jbyteArray
 
 fn create_java_keypair<'a>(
     env: &'a JNIEnv,
-    keypair: (&PublicKey, &SecretKey),
+    keypair: (PublicKey, SecretKey),
 ) -> jni::errors::Result<JValue<'a>> {
     let public_key_byte_array: JObject = env.byte_array_from_slice(&keypair.0[..])?.into();
     let secret_key_byte_array: JObject = env.byte_array_from_slice(&keypair.1[..])?.into();
@@ -212,4 +214,59 @@ fn create_java_keypair<'a>(
         KEYPAIR_CTOR_SIGNATURE,
         &[secret_key_byte_array.into(), public_key_byte_array.into()],
     )
+}
+
+// Converts Java array of `TestKitServiceInstances` to vector of `InstanceConfig`.
+fn instance_config_from_java_array(
+    env: &JNIEnv,
+    services: jobjectArray,
+) -> JniResult<Vec<InstanceConfig>> {
+    let mut instance_configs = vec![];
+    let num_services = env.get_array_length(services)?;
+    for i in 0..num_services {
+        let service_obj = env.get_object_array_element(services, i)?;
+
+        let artifact_id = convert_to_string(
+            &env,
+            env.get_field(service_obj, "artifactId", "Ljava/lang/String;")?
+                .l()?,
+        )?;
+        let artifact_filename = convert_to_string(
+            &env,
+            env.get_field(service_obj, "artifactFilename", "Ljava/lang/String;")?
+                .l()?,
+        )?;
+        let service_specs_obj: jobjectArray = env
+            .get_field(
+                service_obj,
+                "serviceSpecs",
+                "[Lcom/exonum/binding/testkit/ServiceSpec",
+            )?
+            .l()?
+            .into_inner();
+
+        let num_specs = env.get_array_length(service_specs_obj)?;
+
+        for k in 0..num_specs {
+            let service_spec = env.get_object_array_element(service_specs_obj, k)?;
+
+            let service_id = env.get_field(service_spec, "getServiceId", "I")?.i()?;
+            let service_name = convert_to_string(
+                &env,
+                env.get_field(service_spec, "getServiceName", "Ljava/lang/String;")?
+                    .l()?,
+            )?;
+            let config_params: jbyteArray = env
+                .get_field(service_spec, "getConfiguration", "[B")?
+                .l()?
+                .into_inner();
+            let config = env.convert_byte_array(config_params)?;
+
+            let spec =
+                InstanceSpec::new(service_id.into(), service_name.into(), artifact_id.into())?;
+            let cfg = InstanceConfig::new(spec, Some(artifact_filename.to_bytes()), config);
+            instance_configs.push(cfg);
+        }
+    }
+    Ok(instance_configs)
 }
