@@ -18,6 +18,9 @@ package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.proofs.list.ListProofEntry.MAX_HEIGHT;
 import static com.exonum.binding.common.proofs.list.ListProofEntry.MAX_INDEX;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getBranchHashCode;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getLeafHashCode;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getProofListHash;
 import static com.exonum.binding.test.Bytes.bytes;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -110,12 +113,106 @@ class FlatListProofTest {
 
     assertTrue(checked.isValid());
     assertThat(checked.size()).isEqualTo(size);
-    assertThat(checked.getElements()).containsExactly(entry((long) index, ELEMENTS.get(index)));
-    // todo: hash.
+    byte[] e0Value = ELEMENTS.get(index);
+    assertThat(checked.getElements()).containsExactly(entry((long) index, e0Value));
+    HashCode rootHash = getLeafHashCode(e0Value);
+    HashCode expectedListHash = getProofListHash(rootHash, size);
+    assertThat(checked.getIndexHash()).isEqualTo(expectedListHash);
   }
 
   // todo: more singletonListInvalid
-  // todo: more twoItemValid
+
+  @Test
+  void twoElementListValidProofE0() {
+    /*
+     H
+     1        o
+            /   \
+     0    e       h
+     */
+    int index = 0;
+    long size = 2L;
+    ListProofHashedEntry h1 = hashedEntry(1, 0);
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(size)
+        .addElement(ELEMENT_ENTRIES.get(index))
+        .addProofEntry(h1)
+        .build();
+
+    CheckedListProof<byte[]> checked = proof.verify();
+
+    assertTrue(checked.isValid());
+    assertThat(checked.size()).isEqualTo(size);
+    byte[] e0value = ELEMENTS.get(index);
+    assertThat(checked.getElements()).containsExactly(entry((long) index, e0value));
+
+    HashCode node0Hash = getLeafHashCode(e0value);
+    HashCode node1Hash = h1.getHash();
+    HashCode rootHash = getBranchHashCode(node0Hash, node1Hash);
+    HashCode expectedListHash = getProofListHash(rootHash, size);
+    assertThat(checked.getIndexHash()).isEqualTo(expectedListHash);
+  }
+
+  @Test
+  void twoElementListValidProofE1() {
+    /*
+     H
+     1        o
+            /   \
+     0    h       e
+     */
+    int index = 1;
+    long size = 2L;
+    ListProofHashedEntry h0 = hashedEntry(0, 0);
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(size)
+        .addElement(ELEMENT_ENTRIES.get(index))
+        .addProofEntry(h0)
+        .build();
+
+    CheckedListProof<byte[]> checked = proof.verify();
+
+    assertTrue(checked.isValid());
+    assertThat(checked.size()).isEqualTo(size);
+    byte[] e1value = ELEMENTS.get(index);
+    assertThat(checked.getElements()).containsExactly(entry((long) index, e1value));
+
+    HashCode node0Hash = h0.getHash();
+    HashCode node1Hash = getLeafHashCode(e1value);
+    HashCode rootHash = getBranchHashCode(node0Hash, node1Hash);
+    HashCode expectedListHash = getProofListHash(rootHash, size);
+    assertThat(checked.getIndexHash()).isEqualTo(expectedListHash);
+  }
+
+  @Test
+  void twoElementListValidProofFullProof() {
+    /*
+     H
+     1        o
+            /   \
+     0    e       e
+     */
+    long size = 2L;
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(size)
+        .addElements(ELEMENT_ENTRIES.subList(0, (int) size))
+        .build();
+
+    CheckedListProof<byte[]> checked = proof.verify();
+
+    assertTrue(checked.isValid());
+    assertThat(checked.size()).isEqualTo(size);
+    assertThat(checked.getElements()).containsExactly(
+        entry(0L, ELEMENTS.get(0)),
+        entry(1L, ELEMENTS.get(1)));
+
+    HashCode node0Hash = getLeafHashCode(ELEMENTS.get(0));
+    HashCode node1Hash = getLeafHashCode(ELEMENTS.get(1));
+    HashCode rootHash = getBranchHashCode(node0Hash, node1Hash);
+    HashCode expectedListHash = getProofListHash(rootHash, size);
+    assertThat(checked.getIndexHash()).isEqualTo(expectedListHash);
+  }
+
   @Test
   void twoElementListInvalidProofMissingHashNode1() {
     /*
@@ -241,6 +338,7 @@ class FlatListProofTest {
        0    e x    h
        */
       "0, 0",
+
       /*
        H
        1      x o
@@ -558,6 +656,11 @@ class FlatListProofTest {
 
     FlatListProofBuilder addElement(ListProofElementEntry elementEntry) {
       elements.add(elementEntry);
+      return this;
+    }
+
+    FlatListProofBuilder addElements(List<ListProofElementEntry> elementEntries) {
+      elements.addAll(elementEntries);
       return this;
     }
 
