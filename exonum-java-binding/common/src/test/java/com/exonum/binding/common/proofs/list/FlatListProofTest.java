@@ -66,7 +66,7 @@ class FlatListProofTest {
   private static final HashCode EMPTY_LIST_INDEX_HASH =
       HashCode.fromString("c6c0aa07f27493d2f2e5cff56c890a353a20086d6c25ec825128e12ae752b2d9");
 
-  private static final List<byte[]> ELEMENTS = createElements(4);
+  private static final List<byte[]> ELEMENTS = createElements(8);
   private static final List<ListProofElementEntry> ELEMENT_ENTRIES = createElementEntries(ELEMENTS);
 
   @Test
