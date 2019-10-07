@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.4.0 — 2019-10-09
+
 The new release of the light client brings support for Exonum 0.12
 and Exonum Java 0.8.
 
@@ -28,7 +30,8 @@ and Exonum Java 0.8.
   the current blockchain height are requested (#1137)
 - `Block` JSON representation to be compatible with the one used 
   for blocks by the core. Applied `@SerializedName` annotation
-  to most fields. (#1137)
+  to all fields. (#1137)
+- Updated project dependencies to the newest versions.
 
 ## 0.3.0 - 2019-07-22
 
