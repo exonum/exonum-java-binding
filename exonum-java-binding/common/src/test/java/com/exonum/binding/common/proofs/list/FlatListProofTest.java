@@ -465,18 +465,26 @@ class FlatListProofTest {
     int index = 2;
     ListProofElementEntry elementEntry = ELEMENT_ENTRIES.get(index);
     long size = 3;
+    ListProofHashedEntry h0 = hashedEntry(0, 1);
     FlatListProof proof = new FlatListProofBuilder()
         .size(size)
         .addElement(elementEntry)
-        .addProofEntry(hashedEntry(0, 1))
+        .addProofEntry(h0)
         .build();
 
     CheckedListProof<byte[]> checked = proof.verify();
 
     assertThat(checked.size()).isEqualTo(size);
     assertThat(checked.getElements())
-        .containsExactly(entry((long) index, elementEntry.getElement()));
-    // todo: verify hashing with odd number of elements
+        .containsExactly(entry((long) index, ELEMENTS.get(index)));
+
+    // Check the hash code
+    HashCode leafHash = getLeafHashCode(ELEMENTS.get(index));
+    HashCode node0Hash = h0.getHash();
+    HashCode node1Hash = getBranchHashCode(leafHash, null);
+    HashCode rootHash = getBranchHashCode(node0Hash, node1Hash);
+    HashCode expectedListHash = getProofListHash(rootHash, size);
+    assertThat(checked.getIndexHash()).isEqualTo(expectedListHash);
   }
 
   @Test
@@ -552,8 +560,89 @@ class FlatListProofTest {
         .hasMessageStartingWith(r2.toString());
   }
 
+  @ParameterizedTest
+  @MethodSource("fiveElementListInvalidProofExtraNodesAtInvalidIndexesSource")
+  void fiveElementListInvalidProofExtraNodesAtInvalidIndexes(
+      List<ListProofEntry> invalidProofEntries) {
+    /*
+     H
+     3          o
+              /   \
+     2      h       o
+                   /
+     1            o  {x} <- invalid nodes at various heights with indexes exceeding max
+                 /
+     0          e    {x} <—
+     */
+    FlatListProof proof = fiveElementListAt4()
+        .addAnyEntries(invalidProofEntries)
+        .build();
+
+    InvalidProofException e = assertThrows(InvalidProofException.class,
+        proof::verify);
+
+    assertThat(e).hasMessageContaining("Invalid node")
+        .hasMessageFindingMatch("(?i)at index .+ exceeding the max");
+  }
+
+  private static Collection<List<ListProofEntry>>
+  fiveElementListInvalidProofExtraNodesAtInvalidIndexesSource() {
+    /*
+    Target proof tree:
+     H
+     3          o
+              /   \
+     2      h       o
+                   /
+     1            o  {x} <- invalid nodes at various heights with indexes exceeding max
+                 /
+     0          e    {x} <—
+     */
+    byte[] value = bytes(1, 2, 3);
+    return asList(
+        //                        | index | height |
+        // At height 0
+        singletonList(hashedEntry(5, 0)),
+        singletonList(hashedEntry(6, 0)),
+        singletonList(hashedEntry(ListProofEntry.MAX_INDEX, 0)),
+        singletonList(elementEntry(5, value)),
+        singletonList(elementEntry(6, value)),
+        singletonList(elementEntry(MAX_INDEX, value)),
+        asList(hashedEntry(5, 0), hashedEntry(7, 0)),
+        // At height 1
+        singletonList(hashedEntry(3, 1)),
+        singletonList(hashedEntry(4, 1))
+    );
+  }
 
   @Test
+  void fiveElementListValidProofAt4() {
+    // Check the proof returned by fiveElementListAt4 is valid
+    FlatListProof proof = fiveElementListAt4().build();
+    CheckedListProof<byte[]> checked = proof.verify();
+    assertTrue(checked.isValid());
+    assertThat(checked.getElements()).containsExactly(entry(4L, ELEMENTS.get(4)));
+  }
+
+  private FlatListProofBuilder fiveElementListAt4() {
+    /*
+     H
+     3          o
+              /   \
+     2      h       o
+                   /
+     1            o
+                 /
+     0          e
+     */
+    return new FlatListProofBuilder()
+        .size(5)
+        .addElement(ELEMENT_ENTRIES.get(4))
+        .addProofEntry(hashedEntry(0, 2));
+  }
+
+  @ParameterizedTest
+  @MethodSource("eightElementListInvalidProofExtraNodesRedundantTotallySource")
   void eightElementListInvalidProofExtraNodesRedundantTotally(
       List<ListProofHashedEntry> invalidEntries
   ) {
