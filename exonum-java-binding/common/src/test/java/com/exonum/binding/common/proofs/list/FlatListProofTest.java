@@ -453,6 +453,7 @@ class FlatListProofTest {
 
   @Test
   void threeElementListValidProofE2() {
+    // todo: this or that: https://wiki.bf.local/display/EXN/Flat+list+proofs?focusedCommentId=34901842#comment-34901842
     /*
      H — height of nodes at each level
      2        o
@@ -475,6 +476,7 @@ class FlatListProofTest {
     assertThat(checked.size()).isEqualTo(size);
     assertThat(checked.getElements())
         .containsExactly(entry((long) index, elementEntry.getElement()));
+    // todo: verify hashing with odd number of elements
   }
 
   @Test
