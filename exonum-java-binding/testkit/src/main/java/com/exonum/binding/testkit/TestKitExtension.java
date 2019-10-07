@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
+// TODO: change documentation
 /**
  * Extension that injects TestKit into service tests and destroys afterwards. Register this
  * extension with TestKit builder and a TestKit will be injected as a parameter, instantiated from

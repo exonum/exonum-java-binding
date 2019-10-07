@@ -28,7 +28,8 @@ class TestKitAuditorParameterizationTest extends TestKitWithTestArtifact {
       TestKit.builder()
           .withNodeType(EmulatedNodeType.AUDITOR)
           .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID));
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+          .withArtifactsDirectory(artifactsDirectory));
 
   @Test
   void testTestKitValidator(@Validator TestKit testKit) {

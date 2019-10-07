@@ -32,7 +32,6 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transport.Server;
@@ -395,29 +394,33 @@ public final class ServiceRuntime {
    * @throws IllegalArgumentException if there is no service with such name
    */
   public Service getServiceInstanceByName(String serviceName) {
-    return findService(serviceName)
-        .map(ServiceWrapper::getService)
-        .orElseThrow(() ->
-            new IllegalArgumentException("No service with such name in the Java runtime "
-                + serviceName));
+    synchronized (lock) {
+      return findService(serviceName)
+          .map(ServiceWrapper::getService)
+          .orElseThrow(() ->
+              new IllegalArgumentException("No service with such name in the Java runtime "
+                  + serviceName));
+    }
   }
 
   /**
-   * Converts an Exonum raw transaction to an executable transaction of given service.
+   * Verifies that an Exonum raw transaction can be correctly converted to an executable
+   * transaction of given service.
    *
    * @param serviceId the id of the service
    * @param txId the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}
    *     within the service
    * @param arguments the {@linkplain TransactionMessage#getPayload() serialized transaction
    *     arguments}
-   * @return an executable transaction of the service
-   * @throws IllegalArgumentException of there is no service with such name in this runtime, or if
+   * @throws IllegalArgumentException if there is no service with such name in this runtime, or if
    *     the transaction is not known to the service, or the arguments are not valid: e.g., cannot
    *     be deserialized, or do not meet the preconditions
    */
-  public Transaction convertTransaction(int serviceId, int txId, byte[] arguments) {
-    ServiceWrapper service = getServiceById(serviceId);
-    return service.getTxConverter().toTransaction(txId, arguments);
+  public void verifyTransaction(int serviceId, int txId, byte[] arguments) {
+    synchronized (lock) {
+      ServiceWrapper service = getServiceById(serviceId);
+      service.convertTransaction(txId, arguments);
+    }
   }
 
   private void connectServiceApi(Integer serviceId, Node node) {

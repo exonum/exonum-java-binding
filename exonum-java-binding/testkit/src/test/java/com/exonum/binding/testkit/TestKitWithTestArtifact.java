@@ -30,10 +30,12 @@ class TestKitWithTestArtifact {
       ServiceArtifactId.of("com.exonum.binding", "test-service", "1.0.0");
   static final String SERVICE_NAME = "Test service";
   static final int SERVICE_ID = 46;
+  static Path artifactsDirectory;
 
   @BeforeAll
   static void setUp(@TempDir Path tmp) throws Exception {
-    Path artifactLocation = tmp.resolve(ARTIFACT_FILENAME);
+    artifactsDirectory = tmp;
+    Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);
     createArtifact(artifactLocation);
   }
 

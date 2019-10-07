@@ -87,6 +87,23 @@ final class ServiceWrapper {
   void executeTransaction(int txId, byte[] arguments, TransactionContext context)
       throws TransactionExecutionException {
     // Decode the transaction data into an executable transaction
+    Transaction transaction = convertTransaction(txId, arguments);
+    // Execute it
+    transaction.execute(context);
+  }
+
+  /**
+   * Converts an Exonum raw transaction to an executable transaction of this service.
+   *
+   * @param txId the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}
+   *     within the service
+   * @param arguments the {@linkplain TransactionMessage#getPayload() serialized transaction
+   *     arguments}
+   * @return an executable transaction of the service
+   * @throws IllegalArgumentException if the transaction is not known to the service, or the
+   *     arguments are not valid: e.g., cannot be deserialized, or do not meet the preconditions
+   */
+  Transaction convertTransaction(int txId, byte[] arguments) {
     Transaction transaction = txConverter.toTransaction(txId, arguments);
     if (transaction == null) {
       // Use \n in the format string to ensure the message (which is likely recorded
@@ -96,8 +113,7 @@ final class ServiceWrapper {
           + "Throw an exception if your service does not recognize this message id (%s) "
           + "or arguments (%s)", txId, BaseEncoding.base16().encode(arguments)));
     }
-    // Execute it
-    transaction.execute(context);
+    return transaction;
   }
 
   List<HashCode> getStateHashes(Snapshot snapshot) {

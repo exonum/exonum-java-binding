@@ -19,7 +19,6 @@ package com.exonum.binding.testkit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
-import com.exonum.binding.core.runtime.ServiceWrapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,7 +36,8 @@ class TestKitExtensionTest extends TestKitWithTestArtifact {
 
   private static final TestKit.Builder defaultBuilder = TestKit.builder()
       .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-      .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID);
+      .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+      .withArtifactsDirectory(artifactsDirectory);
 
   @Test
   void testKitInstantiationTestCase() {
@@ -121,9 +121,7 @@ class TestKitExtensionTest extends TestKitWithTestArtifact {
       instantiatedTestKit = testKit;
 
       // Check that TestKit was instantiated with a correct service
-      ServiceWrapper serviceWrapper = testKit.getServiceWrapper(SERVICE_NAME);
-      assertThat(serviceWrapper.getId()).isEqualTo(SERVICE_ID);
-      assertThat(serviceWrapper.getName()).isEqualTo(SERVICE_NAME);
+      TestService service = testKit.getService(SERVICE_NAME, TestService.class);
 
       // Check that main TestKit node is a validator
       assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);

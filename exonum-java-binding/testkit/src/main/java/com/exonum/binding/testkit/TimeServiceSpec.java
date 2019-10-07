@@ -22,13 +22,13 @@ package com.exonum.binding.testkit;
 @SuppressWarnings({"unused", "WeakerAccess"}) // Native API
 class TimeServiceSpec {
 
-  final TimeProviderAdapter getTimeProvider;
-  final String getServiceName;
-  final int getServiceId;
+  final TimeProviderAdapter timeProvider;
+  final String serviceName;
+  final int serviceId;
 
-  public TimeServiceSpec(String getServiceName, int getServiceId, TimeProviderAdapter getTimeProvider) {
-    this.getServiceName = getServiceName;
-    this.getServiceId = getServiceId;
-    this.getTimeProvider = getTimeProvider;
+  TimeServiceSpec(String serviceName, int serviceId, TimeProviderAdapter timeProvider) {
+    this.serviceName = serviceName;
+    this.serviceId = serviceId;
+    this.timeProvider = timeProvider;
   }
 }

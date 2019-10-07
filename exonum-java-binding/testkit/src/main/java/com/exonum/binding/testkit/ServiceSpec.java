@@ -22,13 +22,13 @@ package com.exonum.binding.testkit;
 @SuppressWarnings({"unused", "WeakerAccess"}) // Native API
 class ServiceSpec {
 
-  final String getServiceName;
-  final int getServiceId;
-  final byte[] getConfiguration;
+  final String serviceName;
+  final int serviceId;
+  final byte[] configuration;
 
-  public ServiceSpec(String getServiceName, int getServiceId, byte[] getConfiguration) {
-    this.getServiceName = getServiceName;
-    this.getServiceId = getServiceId;
-    this.getConfiguration = getConfiguration;
+  ServiceSpec(String serviceName, int serviceId, byte[] configuration) {
+    this.serviceName = serviceName;
+    this.serviceId = serviceId;
+    this.configuration = configuration;
   }
 }

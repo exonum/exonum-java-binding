@@ -30,7 +30,6 @@ final class TestSchema implements Schema {
 
   private final View view;
 
-  // TODO: inject ServiceInstanceSpec
   TestSchema(View view) {
     this.view = view;
   }
