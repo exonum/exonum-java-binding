@@ -25,8 +25,8 @@ use exonum::{
     runtime::{
         api::ServiceApiBuilder,
         dispatcher::{Dispatcher, DispatcherRef, DispatcherSender},
-        ArtifactId, ArtifactProtobufSpec, CallInfo, ErrorKind, ExecutionContext, ExecutionError,
-        InstanceDescriptor, InstanceId, InstanceSpec, Runtime, RuntimeIdentifier,
+        ApiChange, ArtifactId, ArtifactProtobufSpec, CallInfo, ErrorKind, ExecutionContext,
+        ExecutionError, InstanceDescriptor, InstanceId, InstanceSpec, Runtime, RuntimeIdentifier,
         StateHashAggregator,
     },
 };
@@ -51,24 +51,6 @@ use JniResult;
 pub struct JavaRuntimeProxy {
     exec: Executor,
     runtime_adapter: GlobalRef,
-}
-
-/// Artifact identification properties within `JavaRuntimeProxy`
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct JavaArtifactId(String);
-
-#[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
-#[exonum(pb = "proto::ServiceStateHashes")]
-struct ServiceStateHashes {
-    instance_id: u32,
-    state_hashes: Vec<Vec<u8>>,
-}
-
-#[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
-#[exonum(pb = "proto::ServiceRuntimeStateHashes")]
-struct ServiceRuntimeStateHashes {
-    runtime_state_hashes: Vec<Vec<u8>>,
-    service_state_hashes: Vec<ServiceStateHashes>,
 }
 
 impl JavaRuntimeProxy {
@@ -116,12 +98,6 @@ impl JavaRuntimeProxy {
     ) -> i32 {
         Self::validator_id(snapshot, pub_key)
             .map_or(default, |id| i32::from(id.0))
-    }
-}
-
-impl fmt::Debug for JavaRuntimeProxy {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "JavaRuntimeProxy()")
     }
 }
 
@@ -323,8 +299,23 @@ impl Runtime for JavaRuntimeProxy {
             .into()
     }
 
-    fn before_commit(&self, _dispatcher: &DispatcherRef, _fork: &mut Fork) {
-        // TODO: ECR-3585
+    fn before_commit(&self, _dispatcher: &DispatcherRef, fork: &mut Fork) {
+        unwrap_jni(self.exec.with_attached(|env| {
+            let view_handle = to_handle(View::from_ref_fork(fork));
+
+            panic_on_exception(
+                env,
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::before_commit_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[
+                        JValue::from(view_handle),
+                    ],
+                ),
+            );
+            Ok(())
+        }));
     }
 
     fn after_commit(
@@ -356,41 +347,36 @@ impl Runtime for JavaRuntimeProxy {
         }));
     }
 
-    // TODO: consider connecting api during the service start due to warning:
-    // "It is a temporary method which retains the existing `RustRuntime` code"
     fn api_endpoints(&self, context: &ApiContext) -> Vec<(String, ServiceApiBuilder)> {
-        let started_ids = Vec::<i32>::new();
-        let node = NodeContext::new(self.exec.clone(), context.clone());
-
-        unwrap_jni(self.exec.with_attached(|env| {
-            let node_handle = to_handle(node);
-            let ids_array = env.new_int_array(started_ids.capacity() as i32)?;
-            env.set_int_array_region(ids_array, 0, &started_ids)?;
-            let service_ids = JObject::from(ids_array);
-
-            panic_on_exception(
-                env,
-                env.call_method_unchecked(
-                    self.runtime_adapter.as_obj(),
-                    runtime_adapter::connect_apis_id(),
-                    JavaType::Primitive(Primitive::Void),
-                    &[
-                        JValue::from(service_ids),
-                        JValue::from(node_handle),
-                    ],
-                ),
-            );
-            Ok(())
-        }));
-
         Vec::<(String, ServiceApiBuilder)>::new()
     }
+
+    fn notify_api_changes(&self, _context: &ApiContext, _changes: &[ApiChange]) {
+
+    }
 }
+
+impl fmt::Debug for JavaRuntimeProxy {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "JavaRuntimeProxy()")
+    }
+}
+
+/// Artifact identification properties within `JavaRuntimeProxy`
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct JavaArtifactId(String);
 
 impl ToString for JavaArtifactId {
     fn to_string(&self) -> String {
         self.0.to_owned()
     }
+}
+
+#[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
+#[exonum(pb = "proto::ServiceStateHashes")]
+struct ServiceStateHashes {
+    instance_id: u32,
+    state_hashes: Vec<Vec<u8>>,
 }
 
 impl ServiceStateHashes {
@@ -401,6 +387,13 @@ impl ServiceStateHashes {
             .collect();
         (self.instance_id, hashes)
     }
+}
+
+#[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
+#[exonum(pb = "proto::ServiceRuntimeStateHashes")]
+struct ServiceRuntimeStateHashes {
+    runtime_state_hashes: Vec<Vec<u8>>,
+    service_state_hashes: Vec<ServiceStateHashes>,
 }
 
 impl ServiceRuntimeStateHashes {

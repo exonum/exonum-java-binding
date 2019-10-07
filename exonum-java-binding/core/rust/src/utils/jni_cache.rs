@@ -45,6 +45,7 @@ static mut RUNTIME_ADAPTER_INITIALIZE_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_STOP_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
+static mut RUNTIME_ADAPTER_BEFORE_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_MOUNT_API: Option<JMethodID> = None;
 
@@ -123,6 +124,12 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "getStateHashes",
         "(J)[B",
     );
+    RUNTIME_ADAPTER_BEFORE_COMMIT = get_method_id(
+        &env,
+        SERVICE_RUNTIME_ADAPTER_CLASS,
+        "beforeCommit",
+        "(J)V",
+    );
     RUNTIME_ADAPTER_AFTER_COMMIT = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
@@ -160,6 +167,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && RUNTIME_ADAPTER_STOP_SERVICE.is_some()
             && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
             && RUNTIME_ADAPTER_STATE_HASHES.is_some()
+            && RUNTIME_ADAPTER_BEFORE_COMMIT.is_some()
             && RUNTIME_ADAPTER_AFTER_COMMIT.is_some()
             && RUNTIME_ADAPTER_MOUNT_API.is_some()
             && JAVA_LANG_ERROR.is_some()
@@ -229,6 +237,12 @@ pub mod runtime_adapter {
     pub fn state_hashes_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { RUNTIME_ADAPTER_STATE_HASHES.unwrap() }
+    }
+
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.beforeCommit()`.
+    pub fn before_commit_id() -> JMethodID<'static> {
+        check_cache_initialized();
+        unsafe { RUNTIME_ADAPTER_BEFORE_COMMIT.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.afterCommit()`.
