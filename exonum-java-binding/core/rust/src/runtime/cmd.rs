@@ -17,9 +17,10 @@
 use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
 use exonum_cli::command::{
     finalize::Finalize, generate_config::GenerateConfig, generate_template::GenerateTemplate,
-    run::Run as StandardRun, ExonumCommand, StandardResult,
+    maintenance::Maintenance, run::Run as StandardRun, run_dev::RunDev, ExonumCommand,
+    StandardResult,
 };
-use failure::{self, format_err};
+use failure::{self, format_err, ResultExt};
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
@@ -28,20 +29,44 @@ use std::path::PathBuf;
 /// All possible Exonum Java App commands.
 ///
 /// Includes standard Exonum Core commands and modified `Run` command.
+// TODO: support run-dev
+#[derive(StructOpt, Debug)]
+#[structopt(author, about)]
 pub enum Command {
+    /// Generate common part of the nodes configuration.
+    #[structopt(name = "generate-template")]
     GenerateTemplate(GenerateTemplate),
+    /// Generate public and private configs of the node.
+    #[structopt(name = "generate-config")]
     GenerateConfig(GenerateConfig),
+    /// Generate final node configuration using public configs
+    /// of other nodes in the network.
+    #[structopt(name = "finalize")]
     Finalize(Finalize),
+    /// Run the node with provided node config.
+    #[structopt(name = "run")]
     Run(Run),
+    /// Perform different maintenance actions.
+    #[structopt(name = "maintenance")]
+    Maintenance(Maintenance),
+}
+
+impl Command {
+    /// Gets the struct from the command line arguments.  Print the
+    /// error message and quit the program in case of failure.
+    pub fn from_args() -> Self {
+        <Self as StructOpt>::from_args()
+    }
 }
 
 impl EjbCommand for Command {
     fn execute(self) -> Result<EjbCommandResult, failure::Error> {
         match self {
-            Command::GenerateTemplate(c) => c.execute().map(|c| c.into()),
-            Command::GenerateConfig(c) => c.execute().map(|c| c.into()),
-            Command::Finalize(c) => c.execute().map(|c| c.into()),
+            Command::GenerateTemplate(c) => c.execute().map(Into::into),
+            Command::GenerateConfig(c) => c.execute().map(Into::into),
+            Command::Finalize(c) => c.execute().map(Into::into),
             Command::Run(c) => c.execute(),
+            Command::Maintenance(c) => c.execute().map(Into::into),
         }
     }
 }
@@ -89,8 +114,11 @@ pub struct Run {
     jvm_args_append: Vec<String>,
 }
 
+/// Possible output of the Java Bindings CLI commands.
 pub enum EjbCommandResult {
+    /// Output of the standard Exonum Core commands.
     Standard(StandardResult),
+    /// Output of EJB-specific `run` command.
     EjbRun(Config),
 }
 
@@ -100,7 +128,9 @@ impl From<StandardResult> for EjbCommandResult {
     }
 }
 
+/// Interface of Java Bindings CLI commands.
 pub trait EjbCommand {
+    /// Returns the result of command execution.
     fn execute(self) -> Result<EjbCommandResult, failure::Error>;
 }
 
@@ -113,8 +143,6 @@ impl EjbCommand for Run {
                 jvm_debug_socket: self.jvm_debug,
             };
 
-            let artifacts_path = self.artifacts_path.canonicalize()?;
-
             let log_config_path = self
                 .ejb_log_config_path
                 .unwrap_or_else(|| get_path_to_default_log_config());
@@ -124,14 +152,14 @@ impl EjbCommand for Run {
                 .map(|p| p.to_string_lossy().into_owned());
 
             let runtime_config = RuntimeConfig {
-                artifacts_path,
+                artifacts_path: self.artifacts_path,
                 log_config_path,
                 port: self.ejb_port,
                 override_system_lib_path,
             };
 
             let config = Config {
-                node_config: node_run_config,
+                run_config: node_run_config,
                 jvm_config,
                 runtime_config,
             };

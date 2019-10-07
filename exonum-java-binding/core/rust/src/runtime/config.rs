@@ -21,7 +21,7 @@ use std::path::PathBuf;
 /// Full configuration of the EJB runtime and JVM.
 pub struct Config {
     /// TODO
-    pub node_config: NodeRunConfig,
+    pub run_config: NodeRunConfig,
     /// TODO
     pub jvm_config: JvmConfig,
     /// TODO

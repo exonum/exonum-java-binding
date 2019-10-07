@@ -21,6 +21,7 @@ mod library_loader;
 mod paths;
 pub mod services;
 
+pub use self::cmd::*;
 pub use self::config::*;
 pub use self::java_runtime_factory::create_service_runtime;
 pub use self::library_loader::get_lib_version;
