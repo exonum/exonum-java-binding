@@ -12,6 +12,7 @@ java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
 #exonum-btc-anchoring = "0.11" # commented out until anchoring switches to merkledb
 exonum-time = "0.12"
 env_logger = "0.6.1"
+failure = "0.1.5"
 log = "0.4"
 toml = "0.5"
 serde = "1.0"

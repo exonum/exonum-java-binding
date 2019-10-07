@@ -15,26 +15,50 @@
  */
 
 //use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
-use exonum_time::TimeServiceFactory;
+//use exonum_time::TimeServiceFactory;
 use java_bindings::{
-    exonum::helpers::fabric::{self, ServiceFactory},
     services::{
-        load_services_definition, system_service_names::*, EjbAppServices,
+        load_services_definition, EjbAppServices,
         PATH_TO_SERVICES_DEFINITION,
     },
-    JavaServiceFactoryAdapter,
+    Command, EjbCommand, EjbCommandResult,
 };
 
-use std::{collections::HashSet, path::Path};
+use java_bindings::exonum::blockchain::{BlockchainBuilder, InstanceCollection};
+use java_bindings::exonum::exonum_merkledb::{Database, RocksDB};
+use java_bindings::exonum::node::{ApiSender, Node, NodeChannel};
+use java_bindings::exonum::runtime::rust::ServiceFactory;
+use std::path::Path;
+use std::sync::Arc;
 
-/// Creates `NodeBuilder` using services configuration from `services.toml` located in the working directory.
-pub fn create() -> fabric::NodeBuilder {
-    let service_factories = prepare_service_factories(PATH_TO_SERVICES_DEFINITION);
-    let mut builder = fabric::NodeBuilder::new();
-    for service_factory in service_factories {
-        builder = builder.with_service(service_factory);
+pub fn run_node(command: Command) -> Result<(), failure::Error> {
+    if let EjbCommandResult::EjbRun(config) = command.execute()? {
+        let node_config = config.run_config.node_config;
+        let service_factories = prepare_service_factories(PATH_TO_SERVICES_DEFINITION);
+        let channel = NodeChannel::new(&node_config.mempool.events_pool_capacity);
+        let database = Arc::new(RocksDB::open(
+            config.run_config.db_path,
+            &node_config.database,
+        )?) as Arc<dyn Database>;
+
+        let keypair = node_config.service_keypair();
+        let api_sender = ApiSender::new(channel.api_requests.0.clone());
+        let internal_requests = channel.internal_requests.0.clone();
+
+        let blockchain = BlockchainBuilder::new(database, node_config.consensus.clone(), keypair)
+            .with_rust_runtime(service_factories.into_iter().map(InstanceCollection::new))
+            .finalize(api_sender, internal_requests)?;
+        let node_config_path = config
+            .run_config
+            .node_config_path
+            .to_str()
+            .unwrap()
+            .to_owned();
+        let node = Node::with_blockchain(blockchain, channel, node_config, Some(node_config_path));
+        node.run()
+    } else {
+        Ok(())
     }
-    builder
 }
 
 // Prepares vector of `ServiceFactory` from services configuration file located at given path.
@@ -45,11 +69,6 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
         system_services,
         user_services,
     } = load_services_definition(path).expect("Unable to load services definition");
-
-    // Make sure there is at least one user service defined.
-    if user_services.is_empty() {
-        panic!("At least one user service should be defined in the \"services.toml\" file");
-    }
 
     let system_services = system_services.unwrap_or_default();
 
@@ -62,21 +81,13 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
         resulting_factories.push(factory);
     }
 
-    // Process user services
-    for (name, artifact_path) in user_services {
-        resulting_factories.push(Box::new(JavaServiceFactoryAdapter::new(
-            name,
-            artifact_path,
-        )));
-    }
-
     resulting_factories
 }
 
 fn system_service_factory_for_name(name: &str) -> Box<dyn ServiceFactory> {
     match name {
         //        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<dyn ServiceFactory>,
-        TIME_SERVICE => Box::new(TimeServiceFactory) as Box<dyn ServiceFactory>,
+        //        TIME_SERVICE => Box::new(TimeServiceFactory) as Box<dyn ServiceFactory>,
         _ => panic!("Unknown system service name \"{}\" has been found", name),
     }
 }
@@ -84,6 +95,7 @@ fn system_service_factory_for_name(name: &str) -> Box<dyn ServiceFactory> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use java_bindings::services::system_service_names::*;
     use std::io::Write;
     use tempfile::{Builder, TempPath};
 
@@ -157,15 +169,21 @@ mod tests {
     fn system_service_factory_for_name_ok() {
         assert_eq!(
             "configuration",
-            system_service_factory_for_name(CONFIGURATION_SERVICE).service_name()
+            system_service_factory_for_name(CONFIGURATION_SERVICE)
+                .artifact_id()
+                .name
         );
         assert_eq!(
             "btc_anchoring",
-            system_service_factory_for_name(BTC_ANCHORING_SERVICE).service_name()
+            system_service_factory_for_name(BTC_ANCHORING_SERVICE)
+                .artifact_id()
+                .name
         );
         assert_eq!(
             "exonum_time",
-            system_service_factory_for_name(TIME_SERVICE).service_name()
+            system_service_factory_for_name(TIME_SERVICE)
+                .artifact_id()
+                .name
         );
     }
 
@@ -189,14 +207,14 @@ mod tests {
             || service_name == TIME_SERVICE
         {
             system_service_factory_for_name(service_name)
-                .service_name()
-                .to_owned()
+                .artifact_id()
+                .name
         } else {
             service_name.to_owned()
         };
 
         factories
             .iter()
-            .any(|factory| factory.service_name() == name)
+            .any(|factory| factory.artifact_id().name == name)
     }
 }

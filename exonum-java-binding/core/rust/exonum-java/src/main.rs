@@ -24,11 +24,12 @@ extern crate log;
 #[cfg(test)]
 extern crate tempfile;
 
-use java_bindings::get_lib_version;
+use java_bindings::{get_lib_version, Command};
+use node_builder::run_node;
 
-//mod node_builder;
+mod node_builder;
 
-fn main() {
+fn main() -> Result<(), failure::Error> {
     env_logger::init();
     // Panic if `_JAVA_OPTIONS` environmental variable is set.
     java_bindings::panic_if_java_options();
@@ -36,8 +37,7 @@ fn main() {
     // Log app's metadata
     log_app_metadata();
 
-    //    let builder = node_builder::create();
-    //    builder.run()
+    run_node(Command::from_args())
 }
 
 // Prints info about version and build mode of started app to the STDOUT.
