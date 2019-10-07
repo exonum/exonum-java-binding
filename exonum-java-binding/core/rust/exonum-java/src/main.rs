@@ -26,7 +26,7 @@ extern crate tempfile;
 
 use java_bindings::get_lib_version;
 
-mod node_builder;
+//mod node_builder;
 
 fn main() {
     env_logger::init();
@@ -36,8 +36,8 @@ fn main() {
     // Log app's metadata
     log_app_metadata();
 
-    let builder = node_builder::create();
-    builder.run()
+    //    let builder = node_builder::create();
+    //    builder.run()
 }
 
 // Prints info about version and build mode of started app to the STDOUT.
