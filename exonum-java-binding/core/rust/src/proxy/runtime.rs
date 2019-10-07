@@ -10,11 +10,15 @@ use futures::Future;
 use jni::objects::GlobalRef;
 use jni::Executor;
 
+/// Java Runtime stub
 #[derive(Debug)]
 pub struct JavaRuntimeProxy;
 
 impl JavaRuntimeProxy {
-    pub fn new(_executor: Executor, _adapter: GlobalRef) {}
+    /// Create new stub
+    pub fn new(_executor: Executor, _adapter: GlobalRef) -> Self {
+        Self {}
+    }
 }
 
 impl Runtime for JavaRuntimeProxy {
