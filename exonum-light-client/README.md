@@ -102,7 +102,7 @@ blocked till the response is received.
 HashCode txHash = exonumClient.submitTransaction(tx);
 ```
 *Be aware that this method submits the transaction to the pool of
-uncommitted transactions and dosn't wait for the transaction 
+uncommitted transactions and doesn't wait for the transaction 
 acceptance to a new block.*  
 <!-- TODO: Replace with a proper example --> 
 Also, you can take a look at the [integration test][send-tx-it]
