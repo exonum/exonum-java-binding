@@ -19,12 +19,9 @@ mod config;
 mod java_runtime_factory;
 mod library_loader;
 mod paths;
-//mod service_factory_adapter;
 pub mod services;
-//mod time_service;
 
 pub use self::config::*;
-pub use self::java_runtime_factory::JavaRuntimeFactory;
+pub use self::java_runtime_factory::create_service_runtime;
 pub use self::library_loader::get_lib_version;
 pub use self::paths::panic_if_java_options;
-//pub use self::service_factory_adapter::JavaServiceFactoryAdapter;
