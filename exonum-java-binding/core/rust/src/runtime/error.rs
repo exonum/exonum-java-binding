@@ -24,8 +24,8 @@ pub enum Error {
     IncorrectArtifactId = 0,
     /// Checked java exception is occurred
     JavaException = 1,
-    /// Unspecified error
-    UnspecifiedError = 2,
+    /// Any JNI error is occurred (except Java exception)
+    OtherJniError = 2,
     /// Not supported operation
     NotSupportedOperation = 3,
 }

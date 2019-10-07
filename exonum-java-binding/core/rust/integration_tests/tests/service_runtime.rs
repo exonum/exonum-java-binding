@@ -123,7 +123,7 @@ fn create_service_for_unknown_artifact() {
     });
 }
 
-// Creates a new instance of JavaServiceRuntime for same JVM.
+// Creates a new instance of JavaRuntimeFactory for same JVM.
 fn get_runtime() -> JavaRuntimeFactory {
     JavaRuntimeFactory::create_with_jvm(VM.clone(), 0)
 }
