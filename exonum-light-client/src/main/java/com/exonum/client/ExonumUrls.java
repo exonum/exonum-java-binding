@@ -26,7 +26,7 @@ final class ExonumUrls {
   static final String TRANSACTIONS = EXPLORER_PATHS_PREFIX + "/transactions";
   static final String BLOCK = EXPLORER_PATHS_PREFIX + "/block";
   static final String BLOCKS = EXPLORER_PATHS_PREFIX + "/blocks";
-  static final String MEMORY_POOL = SYS_PATHS_PREFIX + "/mempool";
+  static final String STATS = SYS_PATHS_PREFIX + "/stats";
   static final String HEALTH_CHECK = SYS_PATHS_PREFIX + "/healthcheck";
   static final String USER_AGENT = SYS_PATHS_PREFIX + "/user_agent";
 

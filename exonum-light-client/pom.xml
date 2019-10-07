@@ -61,7 +61,7 @@
 
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.7.0</ejb.version>
+    <ejb.version>0.8.0</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -134,6 +134,18 @@
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
+      <version>${hamcrest.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- An empty artifact, required while JUnit 4 is on the classpath (from mockwebserver)
+         to override its dependency on hamcrest.
+
+         See http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
+     -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
       <version>${hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
@@ -342,6 +354,7 @@
                 <exclude>com/exonum/client/response/BlocksRange.class</exclude>
                 <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
                 <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
+                <exclude>com/exonum/client/response/SystemStatistics.class</exclude>
                 <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
               </excludes>
             </configuration>
