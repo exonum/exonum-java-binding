@@ -21,7 +21,7 @@ use std::path::PathBuf;
 /// Full configuration of the EJB runtime and JVM.
 pub struct Config {
     /// TODO
-    pub standard_config: NodeRunConfig,
+    pub node_config: NodeRunConfig,
     /// TODO
     pub jvm_config: JvmConfig,
     /// TODO
@@ -53,6 +53,8 @@ pub struct JvmConfig {
 /// These parameters are private and can be unique for every node.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RuntimeConfig {
+    /// Path to the directory containing service artifacts.
+    pub artifacts_path: PathBuf,
     /// Path to `log4j` configuration file.
     pub log_config_path: PathBuf,
     /// A port of the HTTP server for Java services.

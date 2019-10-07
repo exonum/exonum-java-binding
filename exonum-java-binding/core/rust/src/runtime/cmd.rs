@@ -59,6 +59,9 @@ pub struct Run {
     /// Must be distinct from the ports used by Exonum.
     #[structopt(long)]
     ejb_port: i32,
+    /// Path to the directory containing service artifacts.
+    #[structopt(long)]
+    artifacts_path: PathBuf,
     /// Path to log4j configuration file.
     #[structopt(long)]
     ejb_log_config_path: Option<PathBuf>,
@@ -110,6 +113,8 @@ impl EjbCommand for Run {
                 jvm_debug_socket: self.jvm_debug,
             };
 
+            let artifacts_path = self.artifacts_path.canonicalize()?;
+
             let log_config_path = self
                 .ejb_log_config_path
                 .unwrap_or_else(|| get_path_to_default_log_config());
@@ -119,13 +124,14 @@ impl EjbCommand for Run {
                 .map(|p| p.to_string_lossy().into_owned());
 
             let runtime_config = RuntimeConfig {
+                artifacts_path,
                 log_config_path,
                 port: self.ejb_port,
                 override_system_lib_path,
             };
 
             let config = Config {
-                standard_config: node_run_config,
+                node_config: node_run_config,
                 jvm_config,
                 runtime_config,
             };
