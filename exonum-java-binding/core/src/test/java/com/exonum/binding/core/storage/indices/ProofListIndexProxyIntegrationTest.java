@@ -34,6 +34,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Contains tests of ProofListIndexProxy methods
@@ -140,10 +142,11 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  @Test
-  void getProofMultipleItemList() {
+  @ParameterizedTest
+  @ValueSource(ints = {2, 3, 4, 5, 7, 8, 9})
+  void getProofMultipleItemList(int size) {
     runTestWithView(database::createFork, (list) -> {
-      List<String> values = TestStorageItems.values;
+      List<String> values = TestStorageItems.values.subList(0, size);
 
       list.addAll(values);
 
