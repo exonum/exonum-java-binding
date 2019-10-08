@@ -65,9 +65,6 @@ class TestKitTest extends TestKitWithTestArtifact {
   private static final String SERVICE_NAME_2 = "Test service 2";
   private static final int SERVICE_ID_2 = 48;
 
-  private static final int RUST_RUNTIME_ID = 0;
-  private static final String EXONUM_TIME_ARTIFACT_NAME_PREFIX = "exonum-time:";
-
   private String TIME_SERVICE_NAME = "Time service";
   private int TIME_SERVICE_ID = 10;
 
@@ -87,7 +84,7 @@ class TestKitTest extends TestKitWithTestArtifact {
   void createTestKitForSingleService() {
     try (TestKit testKit = TestKit.forService(ARTIFACT_ID, ARTIFACT_FILENAME,
         SERVICE_NAME, SERVICE_ID, artifactsDirectory)) {
-      checkTestServiceInitialization(testKit, SERVICE_NAME);
+      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
     }
   }
 
@@ -98,7 +95,7 @@ class TestKitTest extends TestKitWithTestArtifact {
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      checkTestServiceInitialization(testKit, SERVICE_NAME);
+      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
     }
   }
 
@@ -110,8 +107,8 @@ class TestKitTest extends TestKitWithTestArtifact {
         .withService(ARTIFACT_ID, SERVICE_NAME_2, SERVICE_ID_2)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      checkTestServiceInitialization(testKit, SERVICE_NAME);
-      checkTestServiceInitialization(testKit, SERVICE_NAME_2);
+      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
+      checkTestServiceInitialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
     }
   }
 
@@ -191,7 +188,7 @@ class TestKitTest extends TestKitWithTestArtifact {
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, DEFAULT_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      checkTestServiceInitialization(testKit, SERVICE_NAME);
+      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
     }
   }
 
@@ -218,8 +215,8 @@ class TestKitTest extends TestKitWithTestArtifact {
         .withService(ARTIFACT_ID_2, SERVICE_NAME_2, SERVICE_ID_2)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      checkTestServiceInitialization(testKit, SERVICE_NAME);
-      checkTestService2Initialization(testKit, SERVICE_NAME_2);
+      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
+      checkTestService2Initialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
     }
   }
 
@@ -229,7 +226,7 @@ class TestKitTest extends TestKitWithTestArtifact {
     try (TestKit testKit = TestKit.builder()
         .withTimeService(TIME_SERVICE_NAME, TIME_SERVICE_ID, timeProvider)
         .build()) {
-      checkIfTimeServiceEnabled(testKit, TIME_SERVICE_NAME);
+      checkIfServiceEnabled(testKit, TIME_SERVICE_NAME, TIME_SERVICE_ID);
     }
   }
 
@@ -243,14 +240,14 @@ class TestKitTest extends TestKitWithTestArtifact {
         .withTimeService(TIME_SERVICE_NAME, TIME_SERVICE_ID, timeProvider)
         .withTimeService(timeServiceName2, timeServiceId2, timeProvider2)
         .build()) {
-      checkIfTimeServiceEnabled(testKit, TIME_SERVICE_NAME);
-      checkIfTimeServiceEnabled(testKit, timeServiceName2);
+      checkIfServiceEnabled(testKit, TIME_SERVICE_NAME, TIME_SERVICE_ID);
+      checkIfServiceEnabled(testKit, timeServiceName2, timeServiceId2);
     }
   }
 
-  private void checkTestServiceInitialization(TestKit testKit, String serviceName) {
+  private void checkTestServiceInitialization(TestKit testKit, String serviceName, int serviceId) {
     // Check that service appears in dispatcher schema
-    checkIfServiceEnabled(testKit, serviceName);
+    checkIfServiceEnabled(testKit, serviceName, serviceId);
     TestService service = testKit.getService(serviceName, TestService.class);
     // Check that TestService API is mounted
     Node serviceNode = service.getNode();
@@ -272,9 +269,9 @@ class TestKitTest extends TestKitWithTestArtifact {
     assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
-  private void checkTestService2Initialization(TestKit testKit, String serviceName) {
+  private void checkTestService2Initialization(TestKit testKit, String serviceName, int serviceId) {
     // Check that service appears in dispatcher schema
-    checkIfServiceEnabled(testKit, serviceName);
+    checkIfServiceEnabled(testKit, serviceName, serviceId);
     TestService2 service = testKit.getService(serviceName, TestService2.class);
     // Check that TestService2 API is mounted
     Node serviceNode = service.getNode();
@@ -288,23 +285,15 @@ class TestKitTest extends TestKitWithTestArtifact {
     assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
-  private void checkIfServiceEnabled(TestKit testKit, String serviceName) {
-    View view = testKit.getSnapshot();
-    MapIndex<String, InstanceSpec> serviceInstances =
-        new DispatcherSchema(view).serviceInstances();
-    assertThat(serviceInstances.containsKey(serviceName)).isTrue();
-  }
-
-  private void checkIfTimeServiceEnabled(TestKit testKit, String serviceName) {
+  private void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {
     View view = testKit.getSnapshot();
     MapIndex<String, InstanceSpec> serviceInstances =
         new DispatcherSchema(view).serviceInstances();
     assertThat(serviceInstances.containsKey(serviceName)).isTrue();
 
     InstanceSpec serviceSpec = serviceInstances.get(serviceName);
-    ArtifactId artifactId = serviceSpec.getArtifact();
-    assertThat(artifactId.getRuntimeId()).isEqualTo(RUST_RUNTIME_ID);
-    assertThat(artifactId.getName()).isEqualTo(EXONUM_TIME_ARTIFACT_NAME_PREFIX);
+    int actualServiceId = serviceSpec.getId();
+    assertThat(actualServiceId).isEqualTo(serviceId);
   }
 
   @Test

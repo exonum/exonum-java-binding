@@ -153,8 +153,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Deploys and creates a single service with no configuration and with a single validator
-   * node in this TestKit network.
+   * Deploys and creates a single service with no configuration, random suitable server port and
+   * with a single validator node in this TestKit network.
    *
    * @param artifactId the id of the artifact
    * @param artifactFilename a filename of the service artifact in the directory for artifacts
@@ -515,7 +515,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      */
     public Builder withService(ServiceArtifactId serviceArtifactId, String serviceName,
                                int serviceId, MessageLite configuration) {
-      checkServiceId(serviceId);
+      checkServiceId(serviceId, serviceName);
       checkServiceArtifactIsDeployed(serviceArtifactId);
       ServiceSpec serviceSpec = new ServiceSpec(serviceName, serviceId,
           configuration.toByteArray());
@@ -523,10 +523,10 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       return this;
     }
 
-    private void checkServiceId(int serviceId) {
+    private void checkServiceId(int serviceId, String serviceName) {
       checkArgument(0 <= serviceId && serviceId <= MAX_SERVICE_INSTANCE_ID,
-          "Service id must be in range [0; %s], but was %s",
-          MAX_SERVICE_INSTANCE_ID, serviceId);
+          "Service (%s) id must be in range [0; %s], but was %s",
+          serviceName, MAX_SERVICE_INSTANCE_ID, serviceId);
     }
 
     private void checkServiceArtifactIsDeployed(ServiceArtifactId serviceArtifactId) {
@@ -571,7 +571,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
 
     /**
-     * Adds a port for the web server providing transport to Java services.
+     * Adds a port for the web server providing transport to Java services. If not specified, will
+     * set a random suitable port.
      */
     public Builder withServerPort(Integer serverPort) {
       this.serverPort = serverPort;
