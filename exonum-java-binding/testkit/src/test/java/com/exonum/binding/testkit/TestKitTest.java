@@ -638,8 +638,7 @@ class TestKitTest extends TestKitWithTestArtifact {
     short invalidValidatorCount = TestKit.MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE + 1;
     TestKit.Builder testKitBuilder = TestKit.builder()
         .withTimeService(TIME_SERVICE_NAME, TIME_SERVICE_ID, timeProvider)
-        .withValidators(invalidValidatorCount)
-        .withArtifactsDirectory(artifactsDirectory);
+        .withValidators(invalidValidatorCount);
     IllegalArgumentException thrownException = assertThrows(exceptionType, testKitBuilder::build);
     String expectedMessage = String.format("Number of validators (%s) should be less than or equal"
         + " to %s when TimeService is instantiated.",

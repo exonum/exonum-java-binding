@@ -36,7 +36,8 @@ class TestKitParameterizationTest extends TestKitWithTestArtifact {
           .withNodeType(TEMPLATE_NODE_TYPE)
           .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
           .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-          .withValidators(TEMPLATE_VALIDATOR_COUNT));
+          .withValidators(TEMPLATE_VALIDATOR_COUNT)
+          .withArtifactsDirectory(artifactsDirectory));
 
   @Test
   void testDefaultTestKit(TestKit testKit) {

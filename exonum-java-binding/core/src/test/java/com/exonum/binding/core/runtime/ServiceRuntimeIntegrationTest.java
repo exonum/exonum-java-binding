@@ -479,8 +479,28 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
+    void getServiceInstanceByNameUnknownService() {
+      String invalidServiceName = "Wrong service name";
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> serviceRuntime.getServiceInstanceByName(invalidServiceName));
+      String expectedMessage =
+          String.format("No service with such name in the Java runtime: %s", invalidServiceName);
+      assertThat(e).hasMessageContaining(expectedMessage);
+    }
+
+    @Test
     void getServiceIdByName() {
       assertThat(serviceRuntime.getServiceIdByName(TEST_NAME)).isEqualTo(TEST_ID);
+    }
+
+    @Test
+    void getServiceIdByNameUnknownService() {
+      String invalidServiceName = "Wrong service name";
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> serviceRuntime.getServiceIdByName(invalidServiceName));
+      String expectedMessage =
+          String.format("No service with such name in the Java runtime: %s", invalidServiceName);
+      assertThat(e).hasMessageContaining(expectedMessage);
     }
   }
 

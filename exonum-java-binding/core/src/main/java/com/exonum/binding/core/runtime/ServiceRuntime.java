@@ -399,7 +399,7 @@ public final class ServiceRuntime {
       return findService(serviceName)
           .map(ServiceWrapper::getService)
           .orElseThrow(() ->
-              new IllegalArgumentException("No service with such name in the Java runtime "
+              new IllegalArgumentException("No service with such name in the Java runtime: "
                   + serviceName));
     }
   }
@@ -414,7 +414,7 @@ public final class ServiceRuntime {
       return findService(serviceName)
           .map(ServiceWrapper::getId)
           .orElseThrow(() ->
-              new IllegalArgumentException("No service with such name in the Java runtime "
+              new IllegalArgumentException("No service with such name in the Java runtime: "
                   + serviceName));
     }
   }
