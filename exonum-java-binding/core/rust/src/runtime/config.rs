@@ -20,11 +20,11 @@ use std::path::PathBuf;
 
 /// Full configuration of the EJB runtime and JVM.
 pub struct Config {
-    /// TODO
+    /// Node configuration parameters used in Exonum Core.
     pub run_config: NodeRunConfig,
-    /// TODO
+    /// JVM configuration parameters.
     pub jvm_config: JvmConfig,
-    /// TODO
+    /// Java runtime configuration parameters.
     pub runtime_config: RuntimeConfig,
 }
 
