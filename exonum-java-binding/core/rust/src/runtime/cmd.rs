@@ -43,7 +43,7 @@ pub enum Command {
     /// of other nodes in the network.
     #[structopt(name = "finalize")]
     Finalize(Finalize),
-    /// Run the node with provided node config.
+    /// Run the node with provided node config and Java runtime enabled.
     #[structopt(name = "run")]
     Run(Run),
     /// Perform different maintenance actions.
@@ -84,7 +84,7 @@ pub struct Run {
     /// Must be distinct from the ports used by Exonum.
     #[structopt(long)]
     ejb_port: i32,
-    /// Path to the directory containing service artifacts.
+    /// Path to the directory containing Java service artifacts.
     #[structopt(long)]
     artifacts_path: PathBuf,
     /// Path to log4j configuration file.
@@ -166,7 +166,7 @@ impl EjbCommand for Run {
 
             Ok(EjbCommandResult::EjbRun(config))
         } else {
-            Err(format_err!("Standard run command returned invalid result"))
+            unreachable!("Standard run command returned invalid result")
         }
     }
 }
