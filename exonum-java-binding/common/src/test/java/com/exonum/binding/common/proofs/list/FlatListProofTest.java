@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /*
 The test uses the following illustrations to aid understanding of the proof structure:
@@ -121,6 +122,120 @@ class FlatListProofTest {
   }
 
   // todo: more singletonListInvalid
+
+  @ParameterizedTest
+  @CsvSource({
+      // size of the list, height of the tree (and the root node)
+      "1, 0",
+      "2, 1",
+      "3, 2",
+      "4, 2",
+      "5, 3",
+      "8, 3"
+  })
+  void emptyRangeValidProof(long size, int height) {
+    /*
+     H
+     height        h — a single hash entry for the root, no elements
+     */
+    ListProofHashedEntry h1 = hashedEntry(0L, height);
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(size)
+        .addProofEntry(h1)
+        .build();
+
+    CheckedListProof<byte[]> checked = proof.verify();
+
+    assertTrue(checked.isValid());
+    assertThat(checked.size()).isEqualTo(size);
+    assertThat(checked.getElements()).isEmpty();
+
+    HashCode rootHash = h1.getHash();
+    HashCode expectedListHash = getProofListHash(rootHash, size);
+    assertThat(checked.getIndexHash()).isEqualTo(expectedListHash);
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {1, 2, 3, 4})
+  void emptyRangeInvalidProofNoHash(long size) {
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(size)
+        .build();
+
+    InvalidProofException e = assertThrows(InvalidProofException.class,
+        proof::verify);
+    assertThat(e).hasMessageContaining("No root hash in empty range proof");
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      // index | height. The only correct pair is 0, 2 for a 4-element list.
+      // Invalid indices
+      "1, 2",
+      "2, 2",
+      // Invalid heights
+      //   Below
+      "0, 0",
+      "0, 1",
+      //   Above
+      "0, 3",
+      "0, 4"
+  })
+  void emptyRangeInvalidProofBadRootHashEntry(long index, int height) {
+    /*
+    H
+    2     ? — root hashed entry at position (0, 2)
+
+    1    {x} — various hashed entries scattered among levels
+
+    0
+     */
+    ListProofHashedEntry h1 = hashedEntry(index, height);
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(4L)
+        .addProofEntry(h1)
+        .build();
+
+    InvalidProofException e = assertThrows(InvalidProofException.class,
+        proof::verify);
+    assertThat(e).hasMessageContaining(h1.toString());
+  }
+
+  @ParameterizedTest
+  @MethodSource("emptyRangeInvalidProofRedundantHashNodesSource")
+  void emptyRangeInvalidProofRedundantHashNodes(List<ListProofHashedEntry> redundantEntries) {
+    /*
+    H
+    2     h — root hashed entry
+
+    1    {x} — various hashed entries scattered among levels,
+               with valid and invalid indexes
+
+    0
+     */
+    ListProofHashedEntry rootHashEntry = hashedEntry(0L, 2);
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(4L)
+        .addProofEntry(rootHashEntry)
+        .addProofEntries(redundantEntries)
+        .build();
+    InvalidProofException e = assertThrows(InvalidProofException.class,
+        proof::verify);
+    assertThat(e).hasMessageContaining("A single root hash proof entry expected, but (%d) found");
+  }
+
+  static List<List<ListProofHashedEntry>> emptyRangeInvalidProofRedundantHashNodesSource() {
+    return asList(
+        singletonList(hashedEntry(0L, 1)),
+        // Sibling nodes at height 1, with valid indices
+        asList(hashedEntry(0L, 1), hashedEntry(1L, 1)),
+        // Nodes with invalid heights/indexes
+        // Invalid heights
+        singletonList(hashedEntry(0L, 3)),
+        // Invalid indices
+        singletonList(hashedEntry(2L, 1))
+    );
+  }
 
   @Test
   void twoElementListValidProofE0() {
@@ -453,7 +568,6 @@ class FlatListProofTest {
 
   @Test
   void threeElementListValidProofE2() {
-    // todo: this or that: https://wiki.bf.local/display/EXN/Flat+list+proofs?focusedCommentId=34901842#comment-34901842
     /*
      H — height of nodes at each level
      2        o
