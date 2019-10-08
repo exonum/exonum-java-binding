@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.4.0-SNAPSHOT</version>
+  <version>0.4.0</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Light Client</name>
@@ -435,11 +435,12 @@
       </build>
     </profile>
 
-    <!-- Fill in needed property when generating Javadocs on JDK 11+ -->
+    <!-- Fill in needed property when generating Javadocs on JDK 11–12 -->
     <profile>
-      <id>generate-javadocs-jdk11-plus</id>
+      <id>generate-javadocs-jdk11-12</id>
       <activation>
-        <jdk>[11,)</jdk>
+        <!-- Removed in 13 https://bugs.openjdk.java.net/browse/JDK-8215582-->
+        <jdk>[11,13)</jdk>
       </activation>
       <properties>
         <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>
