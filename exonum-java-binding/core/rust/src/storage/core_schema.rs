@@ -94,24 +94,3 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_n
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
-
-///// Returns the configuration for the latest height of the blockchain. Throws
-///// `java.lang.RuntimeException` if the "genesis block" has not been created yet.
-//#[no_mangle]
-//pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_nativeGetActualConfiguration(
-//    env: JNIEnv,
-//    _: JClass,
-//    schema_handle: Handle,
-//) -> jstring {
-//    let res = panic::catch_unwind(|| {
-//        let val = match handle::cast_handle::<SchemaType>(schema_handle) {
-//            SchemaType::SnapshotSchema(schema) => schema.actual_configuration(),
-//            SchemaType::ForkSchema(schema) => schema.actual_configuration(),
-//        };
-//        serde_json::to_string(&val)
-//            .map(|s| env.new_string(s))
-//            .unwrap()
-//            .map(|js| js.into_inner())
-//    });
-//    utils::unwrap_exc_or(&env, res, ptr::null_mut())
-//}
