@@ -1,4 +1,7 @@
 # Exonum Java Light Client
+
+![Maven Central](https://img.shields.io/maven-central/v/com.exonum.client/exonum-light-client)
+
 Java client for [Exonum blockchain][exonum].
 
 ## Overview
