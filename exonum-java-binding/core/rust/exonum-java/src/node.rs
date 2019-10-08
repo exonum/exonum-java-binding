@@ -32,10 +32,11 @@ pub fn run_node(command: Command) -> Result<(), failure::Error> {
 }
 
 fn create_node(config: Config) -> Result<Node, failure::Error> {
-    let channel = NodeChannel::new(&config.run_config.node_config.mempool.events_pool_capacity);
+    let node_config = config.run_config.node_config.clone();
+    let events_pool_capacity = &node_config.mempool.events_pool_capacity;
+    let channel = NodeChannel::new(events_pool_capacity);
     let blockchain = create_blockchain(&config, &channel)?;
 
-    let node_config = config.run_config.node_config;
     let node_config_path = config
         .run_config
         .node_config_path
