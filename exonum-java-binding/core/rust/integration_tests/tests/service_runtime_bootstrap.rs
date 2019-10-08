@@ -19,9 +19,13 @@ extern crate java_bindings;
 
 use integration_tests::vm::{fakes_classpath, java_library_path, log4j_path};
 use java_bindings::exonum::runtime::Runtime;
-use java_bindings::{create_service_runtime, Config, InternalConfig, JvmConfig, RuntimeConfig};
+use java_bindings::{
+    create_java_vm, create_service_runtime, Executor, InternalConfig, JvmConfig,
+    RuntimeConfig,
+};
 
 use std::path::PathBuf;
+use std::sync::Arc;
 
 #[test]
 // Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents
@@ -47,6 +51,8 @@ fn bootstrap() {
         system_lib_path: java_library_path(),
     };
 
-    let _runtime: Box<dyn Runtime> =
-        create_service_runtime(&jvm_config, &runtime_config, internal_config);
+    let java_vm = create_java_vm(&jvm_config, &runtime_config, internal_config);
+    let executor = Executor::new(Arc::new(java_vm));
+
+    let _runtime: Box<dyn Runtime> = create_service_runtime(executor, &runtime_config);
 }

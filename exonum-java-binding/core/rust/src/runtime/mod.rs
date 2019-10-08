@@ -22,6 +22,6 @@ mod paths;
 
 pub use self::cmd::*;
 pub use self::config::*;
-pub use self::java_runtime_factory::create_service_runtime;
+pub use self::java_runtime_factory::*;
 pub use self::library_loader::get_lib_version;
 pub use self::paths::panic_if_java_options;

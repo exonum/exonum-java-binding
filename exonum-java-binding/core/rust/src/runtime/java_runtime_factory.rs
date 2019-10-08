@@ -31,16 +31,11 @@ const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRunt
 const CREATE_RUNTIME_ADAPTER_SIGNATURE: &str =
     "(L/java/lang/String;I)Lcom/exonum/binding/core/runtime/ServiceRuntimeAdapter;";
 
-/// Creates new runtime from provided config.
-///
-/// There can be only one `JavaServiceRuntime` instance at a time.
+/// Instantiates JavaRuntimeProxy using provided Executor and runtime configuration parameters.
 pub fn create_service_runtime(
-    jvm_config: &JvmConfig,
+    executor: Executor,
     runtime_config: &RuntimeConfig,
-    internal_config: InternalConfig,
 ) -> Box<dyn Runtime> {
-    let java_vm = create_java_vm(jvm_config, runtime_config, internal_config);
-    let executor = Executor::new(Arc::new(java_vm));
     let runtime_adapter = create_service_runtime_adapter(&executor, &runtime_config);
     let runtime_proxy = JavaRuntimeProxy::new(executor, runtime_adapter);
     Box::new(runtime_proxy) as Box<dyn Runtime>
@@ -71,7 +66,7 @@ fn create_service_runtime_adapter(executor: &Executor, config: &RuntimeConfig) -
 /// # Panics
 ///
 /// - If user specified invalid additional JVM parameters.
-fn create_java_vm(
+pub fn create_java_vm(
     jvm_config: &JvmConfig,
     runtime_config: &RuntimeConfig,
     internal_config: InternalConfig,
