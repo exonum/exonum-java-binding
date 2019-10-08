@@ -26,9 +26,9 @@ use structopt::StructOpt;
 
 use std::path::PathBuf;
 
-/// All possible Exonum Java App commands.
+/// Exonum Java Bindings Application.
 ///
-/// Includes standard Exonum Core commands and modified `Run` command.
+/// Configures and runs Exonum node with Java runtime enabled.
 // TODO: support run-dev
 #[derive(StructOpt, Debug)]
 #[structopt(author, about)]
@@ -52,7 +52,7 @@ pub enum Command {
 }
 
 impl Command {
-    /// Gets the struct from the command line arguments.  Print the
+    /// Parse arguments from the command line arguments.  Print the
     /// error message and quit the program in case of failure.
     pub fn from_args() -> Self {
         <Self as StructOpt>::from_args()
