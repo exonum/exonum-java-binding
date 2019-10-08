@@ -25,9 +25,9 @@ extern crate log;
 extern crate tempfile;
 
 use java_bindings::{get_lib_version, Command};
-use node_builder::run_node;
+use node::run_node;
 
-mod node_builder;
+mod node;
 
 fn main() -> Result<(), failure::Error> {
     env_logger::init();
