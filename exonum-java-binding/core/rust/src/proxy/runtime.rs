@@ -24,60 +24,60 @@ impl JavaRuntimeProxy {
 impl Runtime for JavaRuntimeProxy {
     fn deploy_artifact(
         &mut self,
-        artifact: ArtifactId,
-        deploy_spec: Vec<u8>,
+        _artifact: ArtifactId,
+        _deploy_spec: Vec<u8>,
     ) -> Box<Future<Item = (), Error = ExecutionError>> {
         unimplemented!()
     }
 
-    fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
+    fn is_artifact_deployed(&self, _id: &ArtifactId) -> bool {
         unimplemented!()
     }
 
-    fn artifact_protobuf_spec(&self, id: &ArtifactId) -> Option<ArtifactProtobufSpec> {
+    fn artifact_protobuf_spec(&self, _id: &ArtifactId) -> Option<ArtifactProtobufSpec> {
         unimplemented!()
     }
 
-    fn start_service(&mut self, spec: &InstanceSpec) -> Result<(), ExecutionError> {
+    fn start_service(&mut self, _spec: &InstanceSpec) -> Result<(), ExecutionError> {
         unimplemented!()
     }
 
     fn initialize_service(
         &self,
-        fork: &Fork,
-        instance: InstanceDescriptor,
-        parameters: Vec<u8>,
+        _fork: &Fork,
+        _instance: InstanceDescriptor,
+        _parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
         unimplemented!()
     }
 
-    fn stop_service(&mut self, descriptor: InstanceDescriptor) -> Result<(), ExecutionError> {
+    fn stop_service(&mut self, _descriptor: InstanceDescriptor) -> Result<(), ExecutionError> {
         unimplemented!()
     }
 
     fn execute(
         &self,
-        context: &ExecutionContext,
-        call_info: &CallInfo,
-        arguments: &[u8],
+        _context: &ExecutionContext,
+        _call_info: &CallInfo,
+        _arguments: &[u8],
     ) -> Result<(), ExecutionError> {
         unimplemented!()
     }
 
-    fn state_hashes(&self, snapshot: &Snapshot) -> StateHashAggregator {
+    fn state_hashes(&self, _snapshot: &Snapshot) -> StateHashAggregator {
         unimplemented!()
     }
 
-    fn before_commit(&self, dispatcher: &DispatcherRef, fork: &mut Fork) {
+    fn before_commit(&self, _dispatcher: &DispatcherRef, _fork: &mut Fork) {
         unimplemented!()
     }
 
     fn after_commit(
         &self,
-        dispatcher: &DispatcherSender,
-        snapshot: &Snapshot,
-        service_keypair: &(PublicKey, SecretKey),
-        tx_sender: &ApiSender,
+        _dispatcher: &DispatcherSender,
+        _snapshot: &Snapshot,
+        _service_keypair: &(PublicKey, SecretKey),
+        _tx_sender: &ApiSender,
     ) {
         unimplemented!()
     }

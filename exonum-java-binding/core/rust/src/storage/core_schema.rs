@@ -17,10 +17,9 @@ use exonum_merkledb::{BinaryValue, Fork, Snapshot};
 use handle::{self, Handle};
 use jni::{
     objects::JClass,
-    sys::{jbyteArray, jlong, jstring},
+    sys::{jbyteArray, jlong},
     JNIEnv,
 };
-use serde_json;
 use std::{panic, ptr};
 use storage::db::{View, ViewRef};
 use utils;

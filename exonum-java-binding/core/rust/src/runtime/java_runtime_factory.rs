@@ -22,9 +22,9 @@ use jni::{
 };
 
 use exonum::runtime::Runtime;
-use runtime::config::{self, Config, InternalConfig, JvmConfig, RuntimeConfig};
-use std::{path::Path, sync::Arc};
-use utils::{convert_to_string, panic_on_exception, unwrap_jni};
+use runtime::config::{self, InternalConfig, JvmConfig, RuntimeConfig};
+use std::sync::Arc;
+use utils::unwrap_jni;
 use JavaRuntimeProxy;
 
 const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
@@ -198,7 +198,7 @@ mod tests {
         let error = Error::from(ErrorKind::Other(jni::sys::JNI_EINVAL));
         assert_eq!(
             "Invalid arguments",
-            JavaRuntimeFactory::transform_jni_error(error).description()
+            transform_jni_error(error).description()
         );
     }
 
@@ -207,16 +207,13 @@ mod tests {
         let error_detached = Error::from(ErrorKind::ThreadDetached);
         assert_eq!(
             "Current thread is not attached to the java VM",
-            JavaRuntimeFactory::transform_jni_error(error_detached).description()
+            transform_jni_error(error_detached).description()
         );
     }
 
     #[test]
     fn transform_jni_error_type_other_code_not_in_range() {
         let error = Error::from(ErrorKind::Other(-42));
-        assert_eq!(
-            "JNI error",
-            JavaRuntimeFactory::transform_jni_error(error).description()
-        );
+        assert_eq!("JNI error", transform_jni_error(error).description());
     }
 }
