@@ -20,7 +20,7 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
 import org.junit.jupiter.api.Disabled;
 
-@Disabled
+@Disabled("ECR-3608")
 class ProofListIndexProxyGroupIntegrationTest
     extends BaseListIndexProxyGroupTestable {
 

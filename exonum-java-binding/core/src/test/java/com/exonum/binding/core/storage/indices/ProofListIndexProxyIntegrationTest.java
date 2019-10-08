@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
  * Contains tests of ProofListIndexProxy methods
  * that are not present in {@link ListIndex} interface.
  */
-@Disabled
+@Disabled("ECR-3608")
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   private static final HashCode EMPTY_LIST_INDEX_HASH =
