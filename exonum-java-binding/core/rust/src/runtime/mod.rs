@@ -19,7 +19,6 @@ mod config;
 mod java_runtime_factory;
 mod library_loader;
 mod paths;
-pub mod services;
 
 pub use self::cmd::*;
 pub use self::config::*;
