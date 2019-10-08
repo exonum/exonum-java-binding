@@ -20,8 +20,7 @@ extern crate java_bindings;
 use integration_tests::vm::{fakes_classpath, java_library_path, log4j_path};
 use java_bindings::exonum::runtime::Runtime;
 use java_bindings::{
-    create_java_vm, create_service_runtime, Executor, InternalConfig, JvmConfig,
-    RuntimeConfig,
+    create_java_vm, create_service_runtime, Executor, InternalConfig, JvmConfig, RuntimeConfig,
 };
 
 use std::path::PathBuf;
