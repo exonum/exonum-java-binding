@@ -44,6 +44,7 @@ import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -63,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -260,6 +262,13 @@ class ServiceRuntimeIntegrationTest {
 
     assertThrows(IllegalArgumentException.class,
         () -> serviceRuntime.connectServiceApis(emptyServiceIds, node));
+  }
+
+  @Test
+  void getServerPort() {
+    OptionalInt serverPort = OptionalInt.of(25000);
+    when(server.getActualPort()).thenReturn(serverPort);
+    assertThat(serviceRuntime.getServerPort()).isEqualTo(serverPort);
   }
 
   @Nested
@@ -460,6 +469,18 @@ class ServiceRuntimeIntegrationTest {
 
       verify(serviceWrapper).createPublicApiHandlers(node, serviceRouter);
       verify(server).mountSubRouter(API_ROOT_PATH + "/" + serviceApiPath, serviceRouter);
+    }
+
+    @Test
+    void getServiceInstanceByName() {
+      Service service = mock(Service.class);
+      when(serviceWrapper.getService()).thenReturn(service);
+      assertThat(serviceRuntime.getServiceInstanceByName(TEST_NAME)).isEqualTo(service);
+    }
+
+    @Test
+    void getServiceIdByName() {
+      assertThat(serviceRuntime.getServiceIdByName(TEST_NAME)).isEqualTo(TEST_ID);
     }
   }
 

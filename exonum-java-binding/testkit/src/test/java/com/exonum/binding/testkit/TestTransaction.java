@@ -68,8 +68,8 @@ public final class TestTransaction implements Transaction {
   @Override
   public void execute(TransactionContext context) {
     // TODO: put serviceId and serviceName into TransactionContext and use it when
-    //  creating TestSchema
-    TestSchema schema = new TestSchema(context.getFork());
+    //  creating TestSchema [ECR-3639]
+    TestSchema schema = new TestSchema(context.getFork(), 46);
     ProofMapIndexProxy<HashCode, String> map = schema.testMap();
     map.put(getKey(), value);
   }
@@ -78,5 +78,4 @@ public final class TestTransaction implements Transaction {
     return Hashing.defaultHashFunction()
         .hashString(value, BODY_CHARSET);
   }
-
 }

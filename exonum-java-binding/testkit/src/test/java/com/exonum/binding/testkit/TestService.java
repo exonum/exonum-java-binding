@@ -44,7 +44,7 @@ final class TestService extends AbstractService {
 
   @Inject
   public TestService(ServiceInstanceSpec serviceSpec) {
-    serviceInstanceId = serviceSpec.getId();
+    this.serviceInstanceId = serviceSpec.getId();
   }
 
   Node getNode() {
@@ -53,7 +53,7 @@ final class TestService extends AbstractService {
 
   @Override
   protected TestSchema createDataSchema(View view) {
-    return new TestSchema(view);
+    return new TestSchema(view, serviceInstanceId);
   }
 
   @Override

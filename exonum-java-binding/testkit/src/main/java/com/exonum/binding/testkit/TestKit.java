@@ -35,6 +35,7 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
+import com.exonum.binding.core.runtime.ViewFactory;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
@@ -50,6 +51,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.protobuf.Any;
 import com.google.protobuf.MessageLite;
 import io.vertx.ext.web.Router;
@@ -58,6 +61,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -103,6 +108,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   static final int MAX_SERVICE_INSTANCE_ID = 1023;
   @VisibleForTesting
   static final Any DEFAULT_CONFIGURATION = Any.getDefaultInstance();
+  private static final int DEFAULT_SERVER_PORT = 0;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private final ServiceRuntime serviceRuntime;
   private final Set<Integer> timeServiceIds;
@@ -121,42 +127,29 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private static TestKit newInstance(TestKitServiceInstances[] serviceInstances,
                                      EmulatedNodeType nodeType, short validatorCount,
-                                     List<TimeServiceSpec> timeServiceSpecs, Path artifactsDirectory) {
+                                     List<TimeServiceSpec> timeServiceSpecs,
+                                     Optional<Path> artifactsDirectory,
+                                     Optional<Integer> serverPort) {
+    ServiceRuntime serviceRuntime = createServiceRuntime(artifactsDirectory, serverPort);
+    ViewFactory viewFactory = getViewFactory();
+    ServiceRuntimeAdapter serviceRuntimeAdapter =
+        new ServiceRuntimeAdapter(serviceRuntime, viewFactory);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
-    String artifactsDir = artifactsDirectory != null ? artifactsDirectory.toString() : "";
-    ServiceRuntime serviceRuntime =
-        ServiceRuntimeBootstrap.createServiceRuntime(artifactsDir, 0);
-    // TODO: create ServiceRuntimeAdapter
-    ServiceRuntimeAdapter serviceRuntimeAdapter = null;
     long nativeHandle = nativeCreateTestKit(serviceInstances, isAuditorNode, validatorCount,
         timeServiceSpecs.toArray(new TimeServiceSpec[0]), serviceRuntimeAdapter);
     return new TestKit(nativeHandle, timeServiceSpecs, serviceRuntime);
   }
 
-  /**
-   * Deploys and creates a single service with a single validator node in this TestKit network.
-   *
-   * @param artifactId the id of the artifact
-   * @param artifactFilename a filename of the service artifact in the directory for artifacts
-   * @param serviceName the name of the service
-   * @param serviceId the id of the service, must be in range
-   *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
-   * @param configuration the service configuration parameters
-   * @param artifactsDirectory the directory from which the service runtime loads service
-   *     artifacts
-   *
-   * @throws IllegalArgumentException if serviceId is not in range
-   *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
-   */
-  public static TestKit forService(ServiceArtifactId artifactId, String artifactFilename,
-                                   String serviceName, int serviceId,
-                                   MessageLite configuration, Path artifactsDirectory) {
-    return new Builder()
-        .withNodeType(EmulatedNodeType.VALIDATOR)
-        .withDeployedArtifact(artifactId, artifactFilename)
-        .withService(artifactId, serviceName, serviceId, configuration)
-        .withArtifactsDirectory(artifactsDirectory)
-        .build();
+  private static ServiceRuntime createServiceRuntime(Optional<Path> artifactsDirectory,
+                                              Optional<Integer> serverPort) {
+    String artifactsDir = artifactsDirectory.map(Path::toString).orElse("");
+    int port = serverPort.orElse(DEFAULT_SERVER_PORT);
+    return ServiceRuntimeBootstrap.createServiceRuntime(artifactsDir, port);
+  }
+
+  private static ViewFactory getViewFactory() {
+    Injector frameworkInjector = Guice.createInjector(new TestKitFrameworkModule());
+    return frameworkInjector.getInstance(ViewFactory.class);
   }
 
   /**
@@ -176,8 +169,12 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    */
   public static TestKit forService(ServiceArtifactId artifactId, String artifactFilename,
                                    String serviceName, int serviceId, Path artifactsDirectory) {
-    return forService(artifactId, artifactFilename, serviceName, serviceId, DEFAULT_CONFIGURATION,
-        artifactsDirectory);
+    return new Builder()
+        .withNodeType(EmulatedNodeType.VALIDATOR)
+        .withDeployedArtifact(artifactId, artifactFilename)
+        .withService(artifactId, serviceName, serviceId)
+        .withArtifactsDirectory(artifactsDirectory)
+        .build();
   }
 
   /**
@@ -195,6 +192,15 @@ public final class TestKit extends AbstractCloseableNativeProxy {
         "Service (name=%s, class=%s) cannot be cast to %s",
         serviceName, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
     return serviceClass.cast(service);
+  }
+
+  /**
+   * Get service instance id by its name.
+   *
+   * @throws IllegalArgumentException if there is no service with such name
+   */
+  public int getServiceIdByName(String serviceName) {
+    return serviceRuntime.getServiceIdByName(serviceName);
   }
 
   /**
@@ -352,6 +358,14 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     return createSnapshot(snapshotCleaner);
   }
 
+  /**
+   * Returns a server port of the corresponding runtime, or {@link OptionalInt#empty()} if it
+   * does not currently accept requests.
+   */
+  public OptionalInt getServerPort() {
+    return serviceRuntime.getServerPort();
+  }
+
   private Snapshot createSnapshot(Cleaner cleaner) {
     long snapshotHandle = nativeCreateSnapshot(nativeHandle.get());
     return Snapshot.newInstance(snapshotHandle, cleaner);
@@ -410,16 +424,21 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
     private Path artifactsDirectory;
     private List<TimeServiceSpec> timeServiceSpecs = new ArrayList<>();
+    private Integer serverPort;
 
     private Builder() {}
 
     /**
      * Returns a copy of this TestKit builder.
+     *
+     * <p>Note that this method performs a shallow copy.
      */
     Builder copy() {
       Builder builder = new Builder()
           .withNodeType(nodeType)
-          .withValidators(validatorCount);
+          .withValidators(validatorCount)
+          .withArtifactsDirectory(artifactsDirectory)
+          .withServerPort(serverPort);
       builder.timeServiceSpecs = timeServiceSpecs;
       builder.services = services;
       builder.serviceArtifactFilenames = serviceArtifactFilenames;
@@ -552,6 +571,14 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
 
     /**
+     * Adds a port for the web server providing transport to Java services.
+     */
+    public Builder withServerPort(Integer serverPort) {
+      this.serverPort = serverPort;
+      return this;
+    }
+
+    /**
      * Creates the TestKit instance.
      *
      * @throws IllegalArgumentException if validator count is invalid
@@ -564,7 +591,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkCorrectValidatorNumber();
       checkArtifactsDirectory();
       TestKitServiceInstances[] testKitServiceInstances = mergeServiceSpecs();
-      return newInstance(testKitServiceInstances, nodeType, validatorCount, timeServiceSpecs, artifactsDirectory);
+      return newInstance(testKitServiceInstances, nodeType, validatorCount,
+          timeServiceSpecs, Optional.ofNullable(artifactsDirectory),
+          Optional.ofNullable(serverPort));
     }
 
     /**

@@ -39,7 +39,7 @@ class TestKitWithTestArtifact {
     createArtifact(artifactLocation);
   }
 
-  private static void createArtifact(Path artifactLocation)
+  static void createArtifact(Path artifactLocation)
       throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId(ARTIFACT_ID.toString())

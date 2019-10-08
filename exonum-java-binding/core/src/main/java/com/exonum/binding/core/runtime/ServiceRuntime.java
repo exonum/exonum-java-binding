@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.logging.log4j.LogManager;
@@ -404,6 +405,21 @@ public final class ServiceRuntime {
   }
 
   /**
+   * Get service instance id by its name.
+   *
+   * @throws IllegalArgumentException if there is no service with such name
+   */
+  public int getServiceIdByName(String serviceName) {
+    synchronized (lock) {
+      return findService(serviceName)
+          .map(ServiceWrapper::getId)
+          .orElseThrow(() ->
+              new IllegalArgumentException("No service with such name in the Java runtime "
+                  + serviceName));
+    }
+  }
+
+  /**
    * Verifies that an Exonum raw transaction can be correctly converted to an executable
    * transaction of given service.
    *
@@ -420,6 +436,16 @@ public final class ServiceRuntime {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       service.convertTransaction(txId, arguments);
+    }
+  }
+
+  /**
+   * Returns a port server of this runtime is listening at, or {@link OptionalInt#empty()} if it
+   * does not currently accept requests.
+   */
+  public OptionalInt getServerPort() {
+    synchronized (lock) {
+      return server.getActualPort();
     }
   }
 

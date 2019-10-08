@@ -47,7 +47,7 @@ public class ServiceRuntimeAdapter {
   private final ViewFactory viewFactory;
   private static final Logger logger = LogManager.getLogger(ServiceRuntimeAdapter.class);
 
-  ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
+  public ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
     this.serviceRuntime = serviceRuntime;
     this.viewFactory = viewFactory;
   }
