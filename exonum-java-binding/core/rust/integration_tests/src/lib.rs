@@ -13,7 +13,6 @@
 // limitations under the License.
 
 extern crate java_bindings;
-#[macro_use]
 extern crate lazy_static;
 extern crate tempfile;
 

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO: remove when JavaRuntimeProxy implemented
+#![allow(dead_code)]
+
 use exonum_merkledb::{Fork, Snapshot};
 use jni::{objects::JClass, JNIEnv};
 

@@ -31,6 +31,7 @@ use std::path::PathBuf;
 // TODO: support run-dev
 #[derive(StructOpt, Debug)]
 #[structopt(author, about)]
+#[allow(clippy::large_enum_variant)]
 pub enum Command {
     /// Generate common part of the nodes configuration.
     #[structopt(name = "generate-template")]
@@ -144,7 +145,7 @@ impl EjbCommand for Run {
 
             let log_config_path = self
                 .ejb_log_config_path
-                .unwrap_or_else(|| get_path_to_default_log_config());
+                .unwrap_or_else(get_path_to_default_log_config);
 
             let override_system_lib_path = self
                 .ejb_override_java_library_path

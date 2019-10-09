@@ -23,7 +23,6 @@ use jni::{
 
 use exonum::runtime::Runtime;
 use runtime::config::{self, InternalConfig, JvmConfig, RuntimeConfig};
-use std::sync::Arc;
 use utils::unwrap_jni;
 use JavaRuntimeProxy;
 
