@@ -77,7 +77,7 @@ impl JavaRuntimeProxy {
         res.map_err(|err| {
             let kind: ErrorKind = match err.kind() {
                 JniErrorKind::JavaException => Error::JavaException.into(),
-                _ => Error::UnspecifiedError.into(),
+                _ => Error::OtherJniError.into(),
             };
             (kind, err).into()
         })
@@ -348,11 +348,41 @@ impl Runtime for JavaRuntimeProxy {
     }
 
     fn api_endpoints(&self, context: &ApiContext) -> Vec<(String, ServiceApiBuilder)> {
-        Vec::<(String, ServiceApiBuilder)>::new()
+        Vec::new()
     }
 
-    fn notify_api_changes(&self, _context: &ApiContext, _changes: &[ApiChange]) {
+    fn notify_api_changes(&self, context: &ApiContext, changes: &[ApiChange]) {
+        let added_instances_ids: Vec<i32> = changes.iter()
+            .filter_map(|change| {
+                if let ApiChange::InstanceAdded(instance_id) = change {
+                    Some(*instance_id as i32)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        let node = NodeContext::new(self.exec.clone(), context.clone());
 
+        unwrap_jni(self.exec.with_attached(|env| {
+            let node_handle = to_handle(node);
+            let ids_array = env.new_int_array(added_instances_ids.capacity() as i32)?;
+            env.set_int_array_region(ids_array, 0, &added_instances_ids)?;
+            let service_ids = JObject::from(ids_array);
+
+            panic_on_exception(
+                env,
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::connect_apis_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[
+                        JValue::from(service_ids),
+                        JValue::from(node_handle),
+                    ],
+                ),
+            );
+            Ok(())
+        }));
     }
 }
 
