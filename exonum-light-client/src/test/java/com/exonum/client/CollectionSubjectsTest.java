@@ -55,6 +55,8 @@ public class CollectionSubjectsTest {
 
     assertThat(map).containsEntry("hi", 1);
     assertThat(map).containsAtLeast("hi", 1, "Exonum", 2);
+    assertThat(map).containsExactly("hi", 1, "Exonum", 2, "service", 5)
+        .inOrder();
   }
 
   @Test
