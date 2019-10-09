@@ -63,7 +63,6 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import org.apache.logging.log4j.LogManager;
 import org.pf4j.PluginManager;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -159,7 +158,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private static ServiceRuntimeAdapter getServiceRuntimeAdapter(
       Path artifactsDirectory, int serverPort) {
-    // Create the framework injector
     Module frameworkModule = new FrameworkModule(artifactsDirectory, serverPort,
         DEPENDENCY_REFERENCE_CLASSES);
     Injector frameworkInjector = Guice.createInjector(frameworkModule);

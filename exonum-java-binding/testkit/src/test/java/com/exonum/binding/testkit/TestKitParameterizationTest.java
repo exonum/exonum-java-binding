@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class TestKitParameterizationTest extends TestKitWithTestArtifactsCreated {
+class TestKitParameterizationTest extends TestKitTestWithArtifactsCreated {
 
   private static final short TEMPLATE_VALIDATOR_COUNT = 1;
   private static final EmulatedNodeType TEMPLATE_NODE_TYPE = EmulatedNodeType.VALIDATOR;

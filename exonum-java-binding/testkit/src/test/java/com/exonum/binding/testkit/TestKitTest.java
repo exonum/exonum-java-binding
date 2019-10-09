@@ -57,7 +57,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class TestKitTest extends TestKitWithTestArtifactsCreated {
+class TestKitTest extends TestKitTestWithArtifactsCreated {
   private String TIME_SERVICE_NAME = "Time service";
   private int TIME_SERVICE_ID = 10;
 

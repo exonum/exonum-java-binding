@@ -23,7 +23,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 
-class TestKitWithTestArtifactsCreated {
+class TestKitTestWithArtifactsCreated {
 
   static final String ARTIFACT_FILENAME = "test-service.jar";
   static final ServiceArtifactId ARTIFACT_ID =
