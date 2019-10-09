@@ -37,12 +37,11 @@ import java.util.NavigableMap;
  * {@link #getProofStatus()} with description of why the proof is not
  * valid.
  */
-public class CheckedListProofImpl<E> implements CheckedListProof {
+public class CheckedListProofImpl<E> implements CheckedListProof<E> {
 
+  private final long size;
   private final HashCode calculatedIndexHash;
-
   private final NavigableMap<Long, E> elements;
-
   private final ListProofStatus proofStatus;
 
   /**
@@ -51,8 +50,9 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
    * @param elements proof elements collection (empty in case of a proof of absence)
    * @param proofStatus a status of proof verification
    */
-  public CheckedListProofImpl(HashCode calculatedIndexHash,
+  public CheckedListProofImpl(long size, HashCode calculatedIndexHash,
       NavigableMap<Long, E> elements, ListProofStatus proofStatus) {
+    this.size = size;
     this.calculatedIndexHash = checkNotNull(calculatedIndexHash);
     this.elements = checkNotNull(elements);
     this.proofStatus = checkNotNull(proofStatus);
@@ -60,8 +60,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
 
   @Override
   public long size() {
-    // todo:
-    return 0;
+    return size;
   }
 
   @Override

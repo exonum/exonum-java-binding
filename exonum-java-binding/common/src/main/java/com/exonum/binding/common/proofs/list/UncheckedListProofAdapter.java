@@ -51,7 +51,7 @@ public class UncheckedListProofAdapter implements UncheckedListProof {
     ListProofStatus structureCheckStatus = listProofStructureValidator.getProofStatus();
     HashCode calculatedIndexHash = listProofHashCalculator.getHash();
 
-    return new CheckedListProofImpl<>(
+    return new CheckedListProofImpl<>(0,
         calculatedIndexHash, listProofHashCalculator.getElements(), structureCheckStatus);
   }
 
