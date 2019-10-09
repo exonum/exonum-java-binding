@@ -17,7 +17,8 @@
 use exonum::{
     api::ApiContext,
     crypto::{Hash, PublicKey},
-    messages::{AnyTx, Verified, BinaryValue},
+    messages::{BinaryValue, SignedMessage},
+    runtime::{AnyTx, CallInfo},
 };
 use exonum_merkledb::{Snapshot, ObjectHash};
 use failure;
@@ -71,9 +72,9 @@ impl NodeContext {
     }
 
     #[doc(hidden)]
-    pub fn submit(&self, transaction: Verified<AnyTx>) -> Result<Hash, failure::Error> {
-        // TODO: check service is active
-        let _service_id = transaction.payload().call_info.instance_id;
+    pub fn submit(&self, tx: AnyTx) -> Result<Hash, failure::Error> {
+        let _service_id = tx.call_info.instance_id;
+//        TODO: check service is active
 //        if !self.blockchain.service_map().contains_key(&service_id) {
 //            return Err(format_err!(
 //                "Unable to broadcast transaction: service(ID={}) not found",
@@ -81,9 +82,17 @@ impl NodeContext {
 //            ));
 //        }
 
-        let tx_hash = transaction.object_hash();
+        let (pub_key, secret_key) = self.api_context.service_keypair();
+        let signed = SignedMessage::new(
+            tx.to_bytes(),
+            pub_key.to_owned(),
+            secret_key,
+        );
 
-        self.api_context.sender().broadcast_transaction(transaction)?;
+        let tx_hash = signed.object_hash();
+        self.api_context.sender().broadcast_transaction(
+            signed.into_verified()?
+        )?;
         Ok(tx_hash)
     }
 }
@@ -95,7 +104,6 @@ impl NodeContext {
 /// - `transaction` - a transaction to submit
 /// - `payload` - an array containing the transaction payload
 /// - `service_id` - an identifier of the service
-//  todo: [ECR-3438]
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubmit(
     env: JNIEnv,
@@ -112,14 +120,12 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
             &env,
             || -> JniResult<jbyteArray> {
                 let payload = env.convert_byte_array(payload)?;
-                let tx = match Verified::from_bytes(payload.into()) {
-                    Ok(tx) => tx,
-                    Err(err) => {
-                        let error_class = TX_SUBMISSION_EXCEPTION;
-                        let error_description = err.to_string();
-                        env.throw_new(error_class, error_description)?;
-                        return Ok(ptr::null_mut());
-                    }
+                let tx = AnyTx {
+                    call_info: CallInfo {
+                        instance_id: service_id as u32,
+                        method_id: transaction_id as u32,
+                    },
+                    arguments: payload
                 };
 
                 match node.submit(tx) {
