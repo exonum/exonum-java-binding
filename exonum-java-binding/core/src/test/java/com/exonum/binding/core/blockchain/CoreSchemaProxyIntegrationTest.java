@@ -59,7 +59,7 @@ class CoreSchemaProxyIntegrationTest {
   }
 
   @Test
-  @Disabled
+  @Disabled("ECR-3612")
   void getActiveConfigurationBeforeGenesisBlock() {
     assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getActualConfiguration));
   }

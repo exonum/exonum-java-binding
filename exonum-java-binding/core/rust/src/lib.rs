@@ -24,9 +24,9 @@
 extern crate chrono;
 pub extern crate exonum;
 extern crate exonum_cli;
-extern crate structopt;
 extern crate failure;
 pub extern crate jni;
+extern crate structopt;
 extern crate toml;
 #[macro_use]
 extern crate log;
