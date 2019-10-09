@@ -14,17 +14,15 @@
 
 use jni::{
     objects::{JClass, JObject, JString},
-    sys::{jboolean, jbyteArray, jobject, jsize},
+    sys::{jboolean, jbyteArray, jobject},
     JNIEnv,
 };
 
 use std::{panic, ptr};
 
-use exonum::crypto::Hash;
 use exonum_merkledb::{
     proof_map_index::{
-        MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
-        PROOF_MAP_KEY_SIZE,
+        MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, PROOF_MAP_KEY_SIZE,
     },
     Fork, ObjectHash, ProofMapIndex, Snapshot,
 };
@@ -41,12 +39,6 @@ type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
 const JAVA_ENTRY_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
-const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapProofEntry";
-const MAP_ENTRY: &str = "com/exonum/binding/common/collect/MapEntry";
-const UNCHECKED_FLAT_MAP_PROOF: &str = "com/exonum/binding/common/proofs/map/UncheckedFlatMapProof";
-const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
-    "([Lcom/exonum/binding/common/proofs/map/MapProofEntry;[Lcom/exonum/binding/common/collect/MapEntry;[[B)Lcom/exonum/binding/common/proofs/map/UncheckedFlatMapProof;";
-const BYTE_ARRAY: &str = "[B";
 
 enum IndexType {
     SnapshotIndex(Index<&'static dyn Snapshot>),
@@ -169,172 +161,42 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns Java-proof object.
+/// Returns proof serialized in protobuf format as a Java byte array.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetProof(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
     key: jbyteArray,
-) -> jobject {
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let key = convert_to_key(&env, key)?;
         let proof = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref map) => map.get_proof(key),
             IndexType::ForkIndex(ref map) => map.get_proof(key),
         };
-
-        Ok(convert_to_java_proof(&env, proof)?.into_inner())
+        env.byte_array_from_slice(&proof.to_bytes())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Returns Java-proof object.
+/// Returns proof serialized in protobuf format as a Java byte array.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetMultiProof(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
     keys: jbyteArray,
-) -> jobject {
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let keys = convert_to_keys(&env, keys)?;
         let proof = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref map) => map.get_multiproof(keys),
             IndexType::ForkIndex(ref map) => map.get_multiproof(keys),
         };
-
-        Ok(convert_to_java_proof(&env, proof)?.into_inner())
+        env.byte_array_from_slice(&proof.to_bytes())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
-}
-
-fn convert_to_java_proof<'a>(
-    env: &'a JNIEnv,
-    proof: MapProof<Key, Value>,
-) -> JniResult<JObject<'a>> {
-    let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
-
-    let native_entries: Vec<_> = proof.all_entries_unchecked().collect();
-
-    let map_entries: JObject = create_java_map_entries(&env, &native_entries)?;
-    let missing_keys: JObject = create_java_missing_keys(&env, &native_entries)?;
-
-    create_java_unchecked_map_proof(&env, proof_nodes, map_entries, missing_keys)
-}
-
-fn create_java_proof_nodes<'a>(
-    env: &'a JNIEnv,
-    map_proof: &MapProof<Key, Value>,
-) -> JniResult<JObject<'a>> {
-    let proof_entries = map_proof.proof_unchecked();
-    let java_entries = env.new_object_array(
-        proof_entries.len() as jsize,
-        MAP_PROOF_ENTRY,
-        JObject::null(),
-    )?;
-    for (i, (proof_path, value_hash)) in proof_entries.iter().enumerate() {
-        // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
-        //   consider using a single frame
-        env.with_local_frame(8, || {
-            let je = create_java_proof_node(env, &proof_path, &value_hash)?;
-            env.set_object_array_element(java_entries, i as jsize, je)?;
-            Ok(JObject::null())
-        })?;
-    }
-    Ok(java_entries.into())
-}
-
-/// Creates a proof node — a node in a proof contour that corresponds to a tree node
-/// that does not contain any of the requested keys.
-fn create_java_proof_node<'a>(
-    env: &'a JNIEnv,
-    proof_path: &ProofPath,
-    hash: &Hash,
-) -> JniResult<JObject<'a>> {
-    let proof_path: JObject = env.byte_array_from_slice(proof_path.as_bytes())?.into();
-    let hash: JObject = utils::convert_hash(env, hash)?.into();
-    env.new_object(
-        MAP_PROOF_ENTRY,
-        "([B[B)V",
-        &[proof_path.into(), hash.into()],
-    )
-}
-
-fn create_java_map_entries<'a>(
-    env: &'a JNIEnv,
-    entries: &[(&Key, Option<&Value>)],
-) -> JniResult<JObject<'a>> {
-    let existing_entries: Vec<(&Key, &Value)> = entries
-        .iter()
-        .filter_map(|e| match e {
-            (key, Some(value)) => Some((*key, *value)),
-            _ => None,
-        })
-        .collect();
-    let java_entries =
-        env.new_object_array(existing_entries.len() as jsize, MAP_ENTRY, JObject::null())?;
-
-    for (i, (key, value)) in existing_entries.iter().enumerate() {
-        // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
-        //   consider using a single frame
-        env.with_local_frame(8, || {
-            let je = create_java_map_entry(env, key, value)?;
-            env.set_object_array_element(java_entries, i as jsize, je)?;
-            Ok(JObject::null())
-        })?;
-    }
-    Ok(java_entries.into())
-}
-
-#[allow(clippy::ptr_arg)]
-fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
-    let key: JObject = env.byte_array_from_slice(key)?.into();
-    let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
-    env.call_static_method(
-        MAP_ENTRY,
-        "valueOf",
-        format!("(Ljava/lang/Object;Ljava/lang/Object;)L{};", MAP_ENTRY),
-        &[key.into(), value.into()],
-    )?
-    .l()
-}
-
-fn create_java_missing_keys<'a>(
-    env: &'a JNIEnv,
-    entries: &[(&Key, Option<&Value>)],
-) -> JniResult<JObject<'a>> {
-    let missing_keys: Vec<&Key> = entries
-        .iter()
-        .filter_map(|e| match e {
-            (key, None) => Some(*key),
-            _ => None,
-        })
-        .collect();
-    let java_missing_keys =
-        env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
-
-    for (i, key) in missing_keys.iter().enumerate() {
-        let java_key = env.byte_array_from_slice(key.as_ref())?.into();
-        env.set_object_array_element(java_missing_keys, i as jsize, java_key)?;
-        env.delete_local_ref(java_key)?;
-    }
-    Ok(java_missing_keys.into())
-}
-
-fn create_java_unchecked_map_proof<'a>(
-    env: &'a JNIEnv,
-    proof_nodes: JObject,
-    map_entries: JObject,
-    missing_keys: JObject,
-) -> JniResult<JObject<'a>> {
-    let java_proof = env.call_static_method(
-        UNCHECKED_FLAT_MAP_PROOF,
-        "fromNative",
-        UNCHECKED_FLAT_MAP_PROOF_SIG,
-        &[proof_nodes.into(), map_entries.into(), missing_keys.into()],
-    )?;
-    java_proof.l()
 }
 
 /// Returns the pointer to the iterator over a map keys and values.
@@ -628,3 +490,12 @@ fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
         .collect();
     Ok(keys)
 }
+
+// TODO: Stub code that is a workaround for compilation error for MapProof#to_bytes(). Should be removed when core PR #1477 is merged.
+trait ToBytes {
+    fn to_bytes(&self) -> Vec<u8> {
+        vec![1, 2, 3]
+    }
+}
+
+impl<K, V> ToBytes for MapProof<K, V> {}
