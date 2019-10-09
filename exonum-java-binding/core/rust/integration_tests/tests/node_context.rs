@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// TODO: uncomment and update once JavaRuntimeProxy implemented
+// TODO: uncomment and update once NodeContext supports dynamic services
 //
 //extern crate futures;
 //extern crate integration_tests;
