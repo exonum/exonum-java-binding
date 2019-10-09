@@ -51,7 +51,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -102,17 +101,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .build()) {
       checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
       checkTestServiceInitialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
-    }
-  }
-
-  @Test
-  void getServerPort() {
-    int serverPort = 25000;
-    try (TestKit testKit = TestKit.builder()
-        .withServerPort(serverPort)
-        .build()) {
-      OptionalInt expectedServerPort = OptionalInt.of(serverPort);
-      assertThat(testKit.getServerPort()).isEqualTo(expectedServerPort);
     }
   }
 

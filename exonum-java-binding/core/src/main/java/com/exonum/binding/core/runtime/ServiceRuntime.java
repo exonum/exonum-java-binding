@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.logging.log4j.LogManager;
@@ -421,16 +420,6 @@ public final class ServiceRuntime {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       service.convertTransaction(txId, arguments);
-    }
-  }
-
-  /**
-   * Returns a port server of this runtime is listening at, or {@link OptionalInt#empty()} if it
-   * does not currently accept requests.
-   */
-  public OptionalInt getServerPort() {
-    synchronized (lock) {
-      return server.getActualPort();
     }
   }
 

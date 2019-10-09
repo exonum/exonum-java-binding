@@ -17,6 +17,7 @@
 package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
@@ -57,13 +58,6 @@ final class ServiceWrapper {
    */
   Service getService() {
     return service;
-  }
-
-  /**
-   * Returns the transaction converter of this service.
-   */
-  TransactionConverter getTxConverter() {
-    return txConverter;
   }
 
   /**

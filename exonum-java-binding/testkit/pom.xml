@@ -25,13 +25,7 @@
   <dependencies>
     <dependency>
       <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-binding-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-time-oracle</artifactId>
+      <artifactId>exonum-java-app</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -52,13 +46,6 @@
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-testkit</artifactId>
       <version>${junit-platform-testkit.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-testing</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

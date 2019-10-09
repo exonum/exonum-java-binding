@@ -50,7 +50,11 @@ public final class ServiceRuntimeBootstrap {
    */
   private static final Stage APP_STAGE = Stage.PRODUCTION;
 
-  private static final ImmutableMap<String, Class<?>> DEPENDENCY_REFERENCE_CLASSES =
+  /**
+   * Dependency reference classes used to validate that service artifacts don't contain copies of
+   * the classes loaded by the application classloader.
+   */
+  public static final ImmutableMap<String, Class<?>> DEPENDENCY_REFERENCE_CLASSES =
       ImmutableMap.<String, Class<?>>builder()
           .put("exonum-java-binding-core", Service.class)
           .put("exonum-java-binding-common", HashCode.class)

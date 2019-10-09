@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.OptionalInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -262,13 +261,6 @@ class ServiceRuntimeIntegrationTest {
 
     assertThrows(IllegalArgumentException.class,
         () -> serviceRuntime.connectServiceApis(emptyServiceIds, node));
-  }
-
-  @Test
-  void getServerPort() {
-    OptionalInt serverPort = OptionalInt.of(25000);
-    when(server.getActualPort()).thenReturn(serverPort);
-    assertThat(serviceRuntime.getServerPort()).isEqualTo(serverPort);
   }
 
   @Nested
