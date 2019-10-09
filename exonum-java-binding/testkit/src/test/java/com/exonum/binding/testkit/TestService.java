@@ -61,6 +61,7 @@ final class TestService extends AbstractService {
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
+    configuration.getAsMessage()
   }
 
   @Override

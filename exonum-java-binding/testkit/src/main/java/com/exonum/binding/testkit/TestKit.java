@@ -17,12 +17,11 @@
 package com.exonum.binding.testkit;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import com.exonum.binding.app.ServiceRuntimeBootstrap;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.Serializer;
@@ -32,10 +31,10 @@ import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.runtime.FrameworkModule;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
-import com.exonum.binding.core.runtime.ViewFactory;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
@@ -45,23 +44,31 @@ import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.util.LibraryLoader;
+import com.exonum.binding.time.TimeSchema;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
+import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.protobuf.Any;
 import com.google.protobuf.MessageLite;
+import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
+import org.apache.logging.log4j.LogManager;
+import org.pf4j.PluginManager;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -102,13 +109,25 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * single emulated node submits them.
    */
   public static final short MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE = 3;
+  private static final ImmutableMap<String, Class<?>> DEPENDENCY_REFERENCE_CLASSES =
+      ImmutableMap.<String, Class<?>>builder()
+          .put("exonum-java-binding-core", Service.class)
+          .put("exonum-java-binding-common", HashCode.class)
+          .put("exonum-time-oracle", TimeSchema.class)
+          .put("vertx", Vertx.class)
+          .put("gson", Gson.class)
+          .put("guava", ImmutableMap.class)
+          .put("guice", Guice.class)
+          .put("pf4j", PluginManager.class)
+          .put("log4j", LogManager.class)
+          .build();
+
   @VisibleForTesting
   static final short MAX_SERVICE_NUMBER = 256;
   @VisibleForTesting
   static final int MAX_SERVICE_INSTANCE_ID = 1023;
   @VisibleForTesting
   static final Any DEFAULT_CONFIGURATION = Any.getDefaultInstance();
-  private static final int DEFAULT_SERVER_PORT = 0;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private final ServiceRuntime serviceRuntime;
   private final Set<Integer> timeServiceIds;
@@ -128,30 +147,27 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   private static TestKit newInstance(TestKitServiceInstances[] serviceInstances,
                                      EmulatedNodeType nodeType, short validatorCount,
                                      List<TimeServiceSpec> timeServiceSpecs,
-                                     Optional<Path> artifactsDirectory,
-                                     Optional<Integer> serverPort) {
-    ServiceRuntime serviceRuntime = createServiceRuntime(artifactsDirectory, serverPort);
-    ViewFactory viewFactory = getViewFactory();
+                                     Path artifactsDirectory, int serverPort) {
     ServiceRuntimeAdapter serviceRuntimeAdapter =
-        new ServiceRuntimeAdapter(serviceRuntime, viewFactory);
+        getServiceRuntimeAdapter(artifactsDirectory, serverPort);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
     long nativeHandle = nativeCreateTestKit(serviceInstances, isAuditorNode, validatorCount,
         timeServiceSpecs.toArray(new TimeServiceSpec[0]), serviceRuntimeAdapter);
+    ServiceRuntime serviceRuntime = serviceRuntimeAdapter.getServiceRuntime();
     return new TestKit(nativeHandle, timeServiceSpecs, serviceRuntime);
   }
 
-  private static ServiceRuntime createServiceRuntime(Optional<Path> artifactsDirectory,
-                                              Optional<Integer> serverPort) {
-    String artifactsDir = artifactsDirectory.map(Path::toString).orElse("");
-    int port = serverPort.orElse(DEFAULT_SERVER_PORT);
-    return ServiceRuntimeBootstrap.createServiceRuntime(artifactsDir, port);
+  private static ServiceRuntimeAdapter getServiceRuntimeAdapter(
+      Path artifactsDirectory, int serverPort) {
+    // Create the framework injector
+    Module frameworkModule = new FrameworkModule(artifactsDirectory, serverPort,
+        DEPENDENCY_REFERENCE_CLASSES);
+    Injector frameworkInjector = Guice.createInjector(frameworkModule);
+
+    return frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
   }
 
-  private static ViewFactory getViewFactory() {
-    Injector frameworkInjector = Guice.createInjector(new TestKitFrameworkModule());
-    return frameworkInjector.getInstance(ViewFactory.class);
-  }
-
+  // TODO: use default artifactsDir here?
   /**
    * Deploys and creates a single service with no configuration, random suitable server port and
    * with a single validator node in this TestKit network.
@@ -192,15 +208,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
         "Service (name=%s, class=%s) cannot be cast to %s",
         serviceName, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
     return serviceClass.cast(service);
-  }
-
-  /**
-   * Get service instance id by its name.
-   *
-   * @throws IllegalArgumentException if there is no service with such name
-   */
-  public int getServiceIdByName(String serviceName) {
-    return serviceRuntime.getServiceIdByName(serviceName);
   }
 
   /**
@@ -422,26 +429,28 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     private short validatorCount = 1;
     private Multimap<ServiceArtifactId, ServiceSpec> services = ArrayListMultimap.create();
     private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
+    // TODO: add default value
     private Path artifactsDirectory;
     private List<TimeServiceSpec> timeServiceSpecs = new ArrayList<>();
-    private Integer serverPort;
+    // Set 0 as a server port so it will assign a random suitable port by default
+    private Integer serverPort = 0;
 
     private Builder() {}
 
     /**
-     * Returns a copy of this TestKit builder.
+     * Returns a shallow copy of this TestKit builder.
      *
-     * <p>Note that this method performs a shallow copy.
+     * <p>Note that the remaining mutable state are {@linkplain TimeProvider time providers}.
      */
-    Builder copy() {
+    Builder shallowCopy() {
       Builder builder = new Builder()
           .withNodeType(nodeType)
           .withValidators(validatorCount)
           .withArtifactsDirectory(artifactsDirectory)
           .withServerPort(serverPort);
-      builder.timeServiceSpecs = timeServiceSpecs;
-      builder.services = services;
-      builder.serviceArtifactFilenames = serviceArtifactFilenames;
+      builder.timeServiceSpecs = new ArrayList<>(timeServiceSpecs);
+      builder.services = MultimapBuilder.hashKeys().arrayListValues().build(services);
+      builder.serviceArtifactFilenames = new HashMap<>(serviceArtifactFilenames);
       return builder;
     }
 
@@ -593,8 +602,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkArtifactsDirectory();
       TestKitServiceInstances[] testKitServiceInstances = mergeServiceSpecs();
       return newInstance(testKitServiceInstances, nodeType, validatorCount,
-          timeServiceSpecs, Optional.ofNullable(artifactsDirectory),
-          Optional.ofNullable(serverPort));
+          timeServiceSpecs, artifactsDirectory, serverPort);
     }
 
     /**
@@ -648,7 +656,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     private void checkArtifactsDirectory() {
       // If any services are to be created, then artifacts directory should be specified
       if (!services.isEmpty()) {
-        checkNotNull(artifactsDirectory, "Artifacts directory was not set.");
+        checkState(artifactsDirectory != null, "Artifacts directory was not set.");
       }
     }
   }

@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class TestKitAuditorParameterizationTest extends TestKitWithTestArtifact {
+class TestKitAuditorParameterizationTest extends TestKitWithTestArtifactsCreated {
 
   @RegisterExtension
   TestKitExtension testKitAuditorExtension = new TestKitExtension(

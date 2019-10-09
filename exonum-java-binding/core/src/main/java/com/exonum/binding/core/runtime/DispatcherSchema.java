@@ -34,7 +34,7 @@ public class DispatcherSchema {
   }
 
   /**
-   * Returns a map with a key-value pair of a service name and its instance spec.
+   * Returns a map of service instance specifications of started services indexed by their names.
    */
   public ProofMapIndexProxy<String, InstanceSpec> serviceInstances() {
     return ProofMapIndexProxy.newInstance("core.dispatcher.service_instances", view,

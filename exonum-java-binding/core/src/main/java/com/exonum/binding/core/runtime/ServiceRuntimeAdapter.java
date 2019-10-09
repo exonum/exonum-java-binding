@@ -53,6 +53,13 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
+   * Returns the corresponding service runtime.
+   */
+  public ServiceRuntime getServiceRuntime() {
+    return serviceRuntime;
+  }
+
+  /**
    * Deploys the Java service artifact.
    *
    * @param id the service artifact id in format "groupId:artifactId:version"

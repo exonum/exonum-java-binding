@@ -32,7 +32,7 @@ import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
 
-class TestKitExtensionTest extends TestKitWithTestArtifact {
+class TestKitExtensionTest extends TestKitWithTestArtifactsCreated {
 
   private static final TestKit.Builder defaultBuilder = TestKit.builder()
       .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)

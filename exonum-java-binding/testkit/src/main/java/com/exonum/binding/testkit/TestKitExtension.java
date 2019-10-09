@@ -171,7 +171,7 @@ public class TestKitExtension implements ParameterResolver {
 
   private TestKit.Builder createTestKitBuilder(ParameterContext parameterContext,
                                                ExtensionContext extensionContext) {
-    TestKit.Builder testKitBuilder = templateTestKitBuilder.copy();
+    TestKit.Builder testKitBuilder = templateTestKitBuilder.shallowCopy();
     Optional<Auditor> auditorAnnotation = parameterContext.findAnnotation(Auditor.class);
     Optional<Validator> validatorAnnotation = parameterContext.findAnnotation(Validator.class);
     if (auditorAnnotation.isPresent() && validatorAnnotation.isPresent()) {
