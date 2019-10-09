@@ -16,25 +16,25 @@
 
 //! Provides native methods for Java TestKit support.
 
-use {JavaRuntimeProxy, JniResult};
+use std::{panic, sync::Arc};
+
 use exonum::{
-    blockchain::{Block, InstanceConfig},
+    blockchain::{Block, InstanceCollection, InstanceConfig},
     crypto::{PublicKey, SecretKey},
     helpers::ValidatorId,
-    messages::{RawTransaction, Signed, Verified},
-    runtime::{AnyTx, InstanceSpec},
+    merkledb::BinaryValue,
+    runtime::{InstanceId, InstanceSpec, Runtime},
 };
-use exonum_merkledb::BinaryValue;
 use exonum_testkit::{TestKit, TestKitBuilder};
-use exonum_time::{time_provider::TimeProvider, TimeService};
-use handle::{cast_handle, drop_handle, Handle, to_handle};
+use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
 use jni::{
     Executor,
     JNIEnv,
-    objects::{GlobalRef, JObject, JValue}, sys::{jboolean, jbyteArray, jobjectArray, jshort},
+    objects::{JObject, JValue}, sys::{jboolean, jbyteArray, jobjectArray, jshort},
 };
-use proxy::ServiceProxy;
-use std::{panic, sync::Arc};
+
+use {JavaRuntimeProxy, JniResult};
+use handle::{cast_handle, drop_handle, Handle, to_handle};
 use storage::View;
 use utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default};
 
@@ -57,8 +57,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
     services: jobjectArray,
     auditor: jboolean,
     validator_count: jshort,
-    runtime: JObject,
-    time_provider: JObject,
+    time_service_specs: jobjectArray,
+    runtime_adapter: JObject,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let mut builder = if auditor == jni::sys::JNI_TRUE {
@@ -70,17 +70,21 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
         let builder = {
             let executor = Executor::new(Arc::new(env.get_java_vm()?));
 
-            let runtime = JavaRuntimeProxy::new(executor.clone(), runtime.into());
+            let runtime =
+                JavaRuntimeProxy::new(executor.clone(), env.new_global_ref(runtime_adapter)?);
+            // TODO: remove this line after corresponding From<JavaRuntimeProxy> implementation
+            let runtime = (
+                JavaRuntimeProxy::RUNTIME_ID as u32,
+                Box::new(runtime) as Box<dyn Runtime>,
+            );
             builder = builder
                 .with_runtime(runtime)
-                .with_instances(instance_config_from_java_array(&env, services)?);
+                .with_instances(instance_configs_from_java_array(&env, services)?);
 
-            // Handle Time Service
-            if !time_provider.is_null() {
-                let provider = JavaTimeProvider::new(executor.clone(), time_provider);
-                builder = builder.with_rust_service(TimeService::with_provider(
-                    Box::new(provider) as Box<dyn TimeProvider>
-                ));
+            for instance_spec in
+                time_service_specs_from_java_array(&env, executor.clone(), time_service_specs)?
+            {
+                builder = builder.with_service(instance_spec);
             }
 
             builder
@@ -158,9 +162,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
                 env.auto_local(env.get_object_array_element(transactions, i as _)?);
             let serialized_tx: jbyteArray = serialized_tx_object.as_obj().into_inner();
             let serialized_tx = env.convert_byte_array(serialized_tx)?;
-            let transaction: Verified<AnyTx> =
-                BinaryValue::from_bytes(serialized_tx.into()).unwrap();
-            raw_transactions.push(transaction);
+            raw_transactions.push(BinaryValue::from_bytes(serialized_tx.into()).unwrap());
         }
         let block = testkit
             .create_block_with_transactions(raw_transactions.into_iter())
@@ -217,7 +219,7 @@ fn create_java_keypair<'a>(
 }
 
 // Converts Java array of `TestKitServiceInstances` to vector of `InstanceConfig`.
-fn instance_config_from_java_array(
+fn instance_configs_from_java_array(
     env: &JNIEnv,
     services: jobjectArray,
 ) -> JniResult<Vec<InstanceConfig>> {
@@ -250,23 +252,60 @@ fn instance_config_from_java_array(
         for k in 0..num_specs {
             let service_spec = env.get_object_array_element(service_specs_obj, k)?;
 
-            let service_id = env.get_field(service_spec, "getServiceId", "I")?.i()?;
+            let service_id = env.get_field(service_spec, "serviceId", "I")?.i()? as u32;
             let service_name = convert_to_string(
                 &env,
-                env.get_field(service_spec, "getServiceName", "Ljava/lang/String;")?
+                env.get_field(service_spec, "serviceName", "Ljava/lang/String;")?
                     .l()?,
             )?;
             let config_params: jbyteArray = env
-                .get_field(service_spec, "getConfiguration", "[B")?
+                .get_field(service_spec, "configuration", "[B")?
                 .l()?
                 .into_inner();
             let config = env.convert_byte_array(config_params)?;
 
-            let spec =
-                InstanceSpec::new(service_id.into(), service_name.into(), artifact_id.into())?;
+            let spec = InstanceSpec::new(service_id, service_name, &artifact_id)
+                .expect("Unable to create instance specification for service");
             let cfg = InstanceConfig::new(spec, Some(artifact_filename.to_bytes()), config);
             instance_configs.push(cfg);
         }
     }
     Ok(instance_configs)
+}
+
+// Converts Java array of `TimeServiceSpec` to vector of `InstanceCollection`.
+fn time_service_specs_from_java_array(
+    env: &JNIEnv,
+    executor: Executor,
+    service_specs: jobjectArray,
+) -> JniResult<Vec<InstanceCollection>> {
+    let mut instance_collection = vec![];
+    let num_configs = env.get_array_length(service_specs)?;
+    for i in 0..num_configs {
+        let service_spec_obj = env.get_object_array_element(service_specs, i)?;
+
+        let service_id = env.get_field(service_spec_obj, "serviceId", "I")?.i()?;
+        let service_name = convert_to_string(
+            &env,
+            env.get_field(service_spec_obj, "serviceName", "Ljava/lang/String;")?
+                .l()?,
+        )?;
+        let time_provider = env
+            .get_field(
+                service_spec_obj,
+                "timeProvider",
+                "Lcom/exonum/binding/testkit/TimeProviderAdapter;",
+            )?
+            .l()?;
+
+        let provider = JavaTimeProvider::new(executor.clone(), time_provider);
+        let factory =
+            TimeServiceFactory::with_provider(Arc::new(provider) as Arc<dyn TimeProvider>);
+        instance_collection.push(InstanceCollection::new(factory).with_instance(
+            service_id as InstanceId,
+            service_name,
+            (),
+        ));
+    }
+    Ok(instance_collection)
 }
