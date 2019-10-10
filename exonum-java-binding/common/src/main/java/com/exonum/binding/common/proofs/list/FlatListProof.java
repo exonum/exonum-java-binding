@@ -20,6 +20,7 @@ import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
 import static com.google.common.math.BigIntegerMath.log2;
 import static java.util.stream.Collectors.toMap;
 
@@ -203,7 +204,7 @@ class FlatListProof {
       // Multiple-range proofs might have up to 'elements.size' proof nodes on the lowest level,
       // but Exonum does not currently produce such.
       int initialCapacity = (elements.size() <= 1) ? 1 : 2;
-      Map<Long, ListProofHashedEntry> proofAtHeight = new HashMap<>(initialCapacity);
+      Map<Long, ListProofHashedEntry> proofAtHeight = newHashMapWithExpectedSize(initialCapacity);
       proofByHeight.add(proofAtHeight);
     }
 
@@ -240,7 +241,7 @@ class FlatListProof {
    * Checks the element entries: no out-of-range elements; no duplicate indexes.
    */
   private void checkElementEntries() {
-    Map<Long, ListProofElementEntry> elementsByIndex = new HashMap<>(elements.size());
+    Map<Long, ListProofElementEntry> elementsByIndex = newHashMapWithExpectedSize(elements.size());
     for (ListProofElementEntry e : elements) {
       long index = e.getIndex();
       if (index < 0L || size <= index) {
@@ -337,7 +338,7 @@ class FlatListProof {
 
     // Reduce the adjacent nodes to produce the calculated nodes on the upper level
     Iterator<ListProofHashedEntry> mergedIter = merged.values().iterator();
-    Map<Long, ListProofHashedEntry> nextLevel = new HashMap<>((merged.size() + 1) / 2);
+    Map<Long, ListProofHashedEntry> nextLevel = newHashMapWithExpectedSize((merged.size() + 1) / 2);
     while (mergedIter.hasNext()) {
       ListProofHashedEntry left = mergedIter.next();
       ListProofHashedEntry right = null;
