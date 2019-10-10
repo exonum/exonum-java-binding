@@ -347,10 +347,6 @@ impl Runtime for JavaRuntimeProxy {
         }));
     }
 
-    fn api_endpoints(&self, context: &ApiContext) -> Vec<(String, ServiceApiBuilder)> {
-        Vec::new()
-    }
-
     fn notify_api_changes(&self, context: &ApiContext, changes: &[ApiChange]) {
         let added_instances_ids: Vec<i32> = changes.iter()
             .filter_map(|change| {
@@ -361,11 +357,16 @@ impl Runtime for JavaRuntimeProxy {
                 }
             })
             .collect();
+
+        if added_instances_ids.is_empty() {
+            return;
+        }
+
         let node = NodeContext::new(self.exec.clone(), context.clone());
 
         unwrap_jni(self.exec.with_attached(|env| {
             let node_handle = to_handle(node);
-            let ids_array = env.new_int_array(added_instances_ids.capacity() as i32)?;
+            let ids_array = env.new_int_array(added_instances_ids.len() as i32)?;
             env.set_int_array_region(ids_array, 0, &added_instances_ids)?;
             let service_ids = JObject::from(ids_array);
 
