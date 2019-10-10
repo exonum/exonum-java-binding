@@ -23,7 +23,7 @@ use exonum::{
     crypto::{PublicKey, SecretKey},
     helpers::ValidatorId,
     merkledb::BinaryValue,
-    runtime::{InstanceId, InstanceSpec, Runtime},
+    runtime::{InstanceSpec, Runtime},
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
@@ -228,16 +228,8 @@ fn instance_configs_from_java_array(
     for i in 0..num_services {
         let service_obj = env.get_object_array_element(services, i)?;
 
-        let artifact_id = convert_to_string(
-            &env,
-            env.get_field(service_obj, "artifactId", "Ljava/lang/String;")?
-                .l()?,
-        )?;
-        let artifact_filename = convert_to_string(
-            &env,
-            env.get_field(service_obj, "artifactFilename", "Ljava/lang/String;")?
-                .l()?,
-        )?;
+        let artifact_id = get_string_value(env, service_obj, "artifactId")?;
+        let artifact_filename = get_string_value(env, service_obj, "artifactFilename")?;
         let service_specs_obj: jobjectArray = env
             .get_field(
                 service_obj,
@@ -252,12 +244,7 @@ fn instance_configs_from_java_array(
         for k in 0..num_specs {
             let service_spec = env.get_object_array_element(service_specs_obj, k)?;
 
-            let service_id = env.get_field(service_spec, "serviceId", "I")?.i()? as u32;
-            let service_name = convert_to_string(
-                &env,
-                env.get_field(service_spec, "serviceName", "Ljava/lang/String;")?
-                    .l()?,
-            )?;
+            let (service_id, service_name) = get_service_id_and_name(env, service_spec)?;
             let config_params: jbyteArray = env
                 .get_field(service_spec, "configuration", "[B")?
                 .l()?
@@ -284,12 +271,7 @@ fn time_service_specs_from_java_array(
     for i in 0..num_configs {
         let service_spec_obj = env.get_object_array_element(service_specs, i)?;
 
-        let service_id = env.get_field(service_spec_obj, "serviceId", "I")?.i()?;
-        let service_name = convert_to_string(
-            &env,
-            env.get_field(service_spec_obj, "serviceName", "Ljava/lang/String;")?
-                .l()?,
-        )?;
+        let (service_id, service_name) = get_service_id_and_name(env, service_spec_obj)?;
         let time_provider = env
             .get_field(
                 service_spec_obj,
@@ -302,10 +284,25 @@ fn time_service_specs_from_java_array(
         let factory =
             TimeServiceFactory::with_provider(Arc::new(provider) as Arc<dyn TimeProvider>);
         instance_collection.push(InstanceCollection::new(factory).with_instance(
-            service_id as InstanceId,
+            service_id,
             service_name,
             (),
         ));
     }
     Ok(instance_collection)
+}
+
+// Returns id and name value from corresponding instances of Java objects.
+fn get_service_id_and_name(env: &JNIEnv, service_obj: JObject) -> JniResult<(u32, String)> {
+    let service_id = env.get_field(service_obj, "serviceId", "I")?.i()? as u32;
+    let service_name = get_string_value(env, service_obj, "serviceName")?;
+    Ok((service_id, service_name))
+}
+
+// Returns String value of instance's field.
+fn get_string_value(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResult<String> {
+    convert_to_string(
+        env,
+        env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?,
+    )
 }
