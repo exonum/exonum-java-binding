@@ -242,7 +242,7 @@ fn instance_configs_from_java_array(
             .get_field(
                 service_obj,
                 "serviceSpecs",
-                "[Lcom/exonum/binding/testkit/ServiceSpec",
+                "[Lcom/exonum/binding/testkit/ServiceSpec;",
             )?
             .l()?
             .into_inner();
