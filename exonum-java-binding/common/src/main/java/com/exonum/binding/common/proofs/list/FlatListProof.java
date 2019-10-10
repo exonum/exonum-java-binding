@@ -28,10 +28,13 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hasher;
 import com.exonum.binding.common.hash.Hashing;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
+import com.google.common.base.Functions;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -189,23 +192,28 @@ class FlatListProof {
       }
 
       // Check element entries: have unique indexes that are in range [0; size)
-      Map<Long, ListProofElementEntry> elementsByIndex = Maps
-          .uniqueIndex(elements, ListProofEntry::getIndex);
-      for (ListProofElementEntry elementEntry : elements) {
-        long index = elementEntry.getIndex();
+      Multimap<Long, ListProofElementEntry> elementsByIndex = Multimaps
+          .index(elements, ListProofEntry::getIndex);
+      for (Map.Entry<Long, Collection<ListProofElementEntry>> e : elementsByIndex.asMap()
+          .entrySet()) {
+        Collection<ListProofElementEntry> elementsAtIndex = e.getValue();
+        Long index = e.getKey();
+        if (elementsAtIndex.size() != 1) {
+          throw new InvalidProofException(
+              String.format("Multiple element entries at the same index (%d): %s", index,
+                  elementsAtIndex));
+        }
         if (index < 0L || size <= index) {
           throw new InvalidProofException(
               String.format("Entry at invalid index (%d), must be in range [0; %d): %s",
-                  index, size, elementEntry));
+                  index, size, elementsAtIndex));
         }
       }
 
       // Hash the element entries, and obtain the first level of calculated hashes
-//      Map<Long, ListProofHashedEntry> calculated = elements.stream()
-//          .map(FlatListProof::hashLeafNode)
-//          .collect(toMap(ListProofEntry::getIndex, Functions.identity()));
-      Map<Long, ListProofHashedEntry> calculated = Maps
-          .transformValues(elementsByIndex, FlatListProof::hashLeafNode);
+      Map<Long, ListProofHashedEntry> calculated = elements.stream()
+          .map(FlatListProof::hashLeafNode)
+          .collect(toMap(ListProofEntry::getIndex, Functions.identity()));
 
       // For each tree level, starting at the bottom
       for (int height = 0; height < treeHeight; height++) {

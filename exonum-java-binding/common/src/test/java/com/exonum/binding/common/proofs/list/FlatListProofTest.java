@@ -543,8 +543,9 @@ class FlatListProofTest {
     InvalidProofException e = assertThrows(InvalidProofException.class,
         proof::verify);
 
-    assertThat(e).hasMessageFindingMatch("Duplicate.+entries")
-        .hasMessageContaining(duplicateEntry.toString());
+    assertThat(e.getMessage())
+        .containsIgnoringCase("multiple element entries at the same index (0)")
+        .contains(duplicateEntry.toString());
   }
 
   @Test
@@ -564,9 +565,10 @@ class FlatListProofTest {
     InvalidProofException e = assertThrows(InvalidProofException.class,
         proof::verify);
 
-    assertThat(e).hasMessageFindingMatch("Duplicate.+node")
-        .hasMessageContaining(entry.toString())
-        .hasMessageContaining(conflictingEntry.toString());
+    assertThat(e.getMessage())
+        .containsIgnoringCase("multiple element entries at the same index (0)")
+        .contains(entry.toString())
+        .contains(conflictingEntry.toString());
   }
 
   @Test
