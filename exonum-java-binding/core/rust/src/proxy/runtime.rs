@@ -120,8 +120,6 @@ impl JavaRuntimeProxy {
         where
             H: Fn(&JNIEnv, JObject) -> ExecutionError,
     {
-        let kind = JniErrorKind::JavaException;
-
         result.map_err(|err| {
             match err.kind() {
                 JniErrorKind::JavaException => {
@@ -149,8 +147,6 @@ impl JavaRuntimeProxy {
         result: JniResult<R>,
     ) -> Result<R, ExecutionError>
     {
-        let kind = JniErrorKind::JavaException;
-
         result.map_err(|err| {
             match err.kind() {
                 JniErrorKind::JavaException => {
@@ -479,13 +475,14 @@ struct ServiceStateHashes {
     state_hashes: Vec<Vec<u8>>,
 }
 
-impl ServiceStateHashes {
-    fn to_hashes(&self) -> (InstanceId, Vec<Hash>) {
-        let hashes = self.state_hashes
+impl From<&ServiceStateHashes> for (InstanceId, Vec<Hash>) {
+    fn from(value: &ServiceStateHashes) -> Self {
+        let hashes: Vec<Hash> = value
+            .state_hashes
             .iter()
-            .map(|bytes| Hash::from_bytes(bytes.into()).unwrap())
+            .map(|bytes| to_hash(bytes))
             .collect();
-        (self.instance_id, hashes)
+        (value.instance_id, hashes)
     }
 }
 
@@ -500,14 +497,14 @@ impl ServiceRuntimeStateHashes {
     fn runtime(&self) -> Vec<Hash> {
         self.runtime_state_hashes
             .iter()
-            .map(|bytes| Hash::from_bytes(bytes.into()).unwrap())
+            .map(|bytes| to_hash(bytes))
             .collect()
     }
 
     fn instances(&self) -> Vec<(InstanceId, Vec<Hash>)> {
         self.service_state_hashes
             .iter()
-            .map(ServiceStateHashes::to_hashes)
+            .map(|service| service.into())
             .collect()
     }
 }
@@ -519,6 +516,10 @@ impl From<ServiceRuntimeStateHashes> for StateHashAggregator {
             instances: value.instances(),
         }
     }
+}
+
+fn to_hash(bytes: &Vec<u8>) -> Hash {
+    Hash::from_bytes(bytes.into()).unwrap()
 }
 
 type ExceptionHandler = Fn(&JNIEnv, JObject) -> ExecutionError;
