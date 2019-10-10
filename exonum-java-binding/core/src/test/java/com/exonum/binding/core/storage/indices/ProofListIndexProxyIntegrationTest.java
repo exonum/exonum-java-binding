@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -193,6 +194,8 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3, 4})
+  @Disabled("ECR-3673: empty ranges are not supported with the current tree format; "
+      + "need a flat one")
   void getRangeProofMultipleItemList_EmptyRange(int size) {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values.subList(0, size);
