@@ -117,8 +117,7 @@ class FlatListProof {
         throw new InvalidProofException(
             "Proof for empty list must not have proof entries, but has: " + proof);
       }
-      return new CheckedListProofImpl<>(size, EMPTY_LIST_INDEX_HASH, new TreeMap<>(),
-          ListProofStatus.VALID);
+      return newCheckedProof(EMPTY_LIST_INDEX_HASH);
     } else if (elements.isEmpty()) {
       // Empty range: must have a single root hash node
       if (proof.size() != 1) {
@@ -143,7 +142,7 @@ class FlatListProof {
       }
       HashCode rootHash = h.getHash();
       HashCode listHash = hashListIndex(rootHash);
-      return new CheckedListProofImpl<>(size, listHash, new TreeMap<>(), ListProofStatus.VALID);
+      return newCheckedProof(listHash);
     } else {
       // A list of size 1+
 
@@ -273,8 +272,7 @@ class FlatListProof {
       HashCode indexHash = hashListIndex(rootHash);
 
       // Extract the entries.
-      // todo: Extract into newCheckedProof(indexHash) — all the other things can be inferred.
-      return new CheckedListProofImpl<>(size, indexHash, indexElements(), ListProofStatus.VALID);
+      return newCheckedProof(indexHash);
     }
   }
 
@@ -357,6 +355,10 @@ class FlatListProof {
 
   private static Hasher newHasher() {
     return sha256().newHasher();
+  }
+
+  private CheckedListProofImpl<byte[]> newCheckedProof(HashCode indexHash) {
+    return new CheckedListProofImpl<>(size, indexHash, indexElements(), ListProofStatus.VALID);
   }
 
   private NavigableMap<Long, byte[]> indexElements() {
