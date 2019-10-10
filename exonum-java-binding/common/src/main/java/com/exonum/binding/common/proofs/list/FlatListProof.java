@@ -57,9 +57,9 @@ class FlatListProof {
          / \     /
      0  e   e   e
 
-    Proofs for elements of proof lists include the requested elements; and hashes of all
-    the sub-trees that are adjacent to the paths from the root node to the leaf nodes containing
-    the elements.
+    Proofs for elements of proof lists include the list size; the requested elements;
+    and hashes of all sub-trees that are adjacent to the paths from the root node to the leaf nodes
+    containing the elements.
 
     Here is a proof for the element at index 1 from the list shown above:
 
@@ -75,6 +75,8 @@ class FlatListProof {
        h — hashed proof entry (ListProofHashedEntry)
        o — 'virtual' node — not present in the proof, inferred during verification.
            Shown mostly to communicate the tree structure of the proof.
+
+    See also: https://wiki.bf.local/display/EXN/Flat+list+proofs
   */
 
   private static final long MAX_SIZE = ListProofEntry.MAX_INDEX + 1;
