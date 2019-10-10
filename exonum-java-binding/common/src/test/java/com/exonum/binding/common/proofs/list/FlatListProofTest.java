@@ -455,7 +455,7 @@ class FlatListProofTest {
   }
 
   private static Collection<List<ListProofEntry>>
-  twoElementListInvalidProofExtraNodesAtInvalidIndexesSource() {
+      twoElementListInvalidProofExtraNodesAtInvalidIndexesSource() {
     /*
     Target proof tree:
      H
@@ -499,12 +499,12 @@ class FlatListProofTest {
 
   @Test
   void twoElementListInvalidProofExtraNodesDuplicateHashed() {
-      /*
-       H
-       1        o
-             /    \ \
-       0    e      h h
-       */
+    /*
+     H
+     1        o
+           /    \ \
+     0    e      h h
+     */
     ListProofHashedEntry duplicateNode = hashedEntry(1, 0);
     FlatListProof proof = twoElementListAt0()
         .addProofEntry(duplicateNode)
@@ -519,12 +519,12 @@ class FlatListProofTest {
 
   @Test
   void twoElementListInvalidProofExtraNodesDuplicateElementSameValue() {
-      /*
-       H
-       1        o
-             / /  \
-       0    e e    h
-       */
+    /*
+     H
+     1        o
+           / /  \
+     0    e e    h
+     */
     ListProofElementEntry duplicateEntry = ELEMENT_ENTRIES.get(0);
     FlatListProof proof = twoElementListAt0()
         .addElement(duplicateEntry)
@@ -573,9 +573,9 @@ class FlatListProofTest {
    * Returns a builder with a structurally valid flat proof for a tree of size 2
    * and an element at index 0.
    */
-  private FlatListProofBuilder twoElementListAt0() {/*
+  private FlatListProofBuilder twoElementListAt0() {
+    /*
      H
-
      1        o
             /   \
      0    e       h
@@ -765,7 +765,7 @@ class FlatListProofTest {
   }
 
   private static Collection<List<ListProofEntry>>
-  fiveElementListInvalidProofExtraNodesAtInvalidIndexesSource() {
+      fiveElementListInvalidProofExtraNodesAtInvalidIndexesSource() {
     /*
     Target proof tree:
      H

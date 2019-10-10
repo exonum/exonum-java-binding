@@ -17,7 +17,7 @@
 package com.exonum.binding.common.proofs.list;
 
 /**
- * todo:
+ * Indicates that the corresponding list proof has invalid structure and must be rejected.
  */
 public class InvalidProofException extends RuntimeException {
 

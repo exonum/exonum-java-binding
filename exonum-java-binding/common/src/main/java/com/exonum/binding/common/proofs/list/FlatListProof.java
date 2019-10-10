@@ -149,7 +149,8 @@ class FlatListProof {
       // Calculate the expected tree height
       int treeHeight = calcTreeHeight(size);
 
-      // Index proof entries and verify their local correctness: no out-of-range nodes; no duplicates.
+      // Index proof entries and verify their local correctness: no out-of-range nodes;
+      // no duplicates.
       List<Map<Long, ListProofHashedEntry>> proofByHeight = new ArrayList<>(treeHeight);
       for (int i = 0; i < treeHeight; i++) {
         // For single-element proofs, only a single proof node is expected on each level.
@@ -245,8 +246,8 @@ class FlatListProof {
           }
         }
 
-        // Merge calculated on the previous level hashes with the proof entries of the current level,
-        // ordered by indexes. The sibling nodes will go in adjacent pairs.
+        // Merge calculated on the previous level hashes with the proof entries of the current
+        // level, ordered by indexes. The sibling nodes will go in adjacent pairs.
         SortedMap<Long, ListProofHashedEntry> merged = new TreeMap<>();
         merged.putAll(calculated);
         merged.putAll(proofAtLevel);
@@ -336,7 +337,7 @@ class FlatListProof {
         .putByte(LIST_BRANCH_PREFIX)
         .putObject(leftChild.getHash(), hashCodeFunnel());
     if (rightChild != null) {
-        hasher.putObject(rightChild.getHash(), hashCodeFunnel());
+      hasher.putObject(rightChild.getHash(), hashCodeFunnel());
     }
     return ListProofHashedEntry.newInstance(index, height, hasher.hash());
   }
@@ -368,6 +369,8 @@ class FlatListProof {
   }
 
   private static <U> BinaryOperator<U> throwingMerger() {
-    return (u, v) -> { throw new IllegalArgumentException("Duplicate values with the same key"); };
+    return (u, v) -> {
+      throw new IllegalArgumentException("Duplicate values with the same key");
+    };
   }
 }
