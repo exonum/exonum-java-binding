@@ -476,26 +476,15 @@ class FlatListProofTest {
     );
   }
 
-  @ParameterizedTest
-  @CsvSource({
-      /*
-       H
-       1        o
-             / /  \
-       0    e x    h
-       */
-      "0, 0",
-
-      /*
-       H
-       1      x o
-             / /  \
-       0     e     h
-       */
-      "0, 1"
-  })
-  void twoElementListInvalidProofExtraNodesRedundantCalculated(long index, int height) {
-    ListProofHashedEntry redundantNode = hashedEntry(index, height);
+  @Test
+  void twoElementListInvalidProofExtraNodesRedundantCalculated() {
+    /*
+     H
+     1        o
+           / /  \
+     0    e x    h
+     */
+    ListProofHashedEntry redundantNode = hashedEntry(0L, 0);
     FlatListProof proof = twoElementListAt0()
         .addProofEntry(redundantNode)
         .build();
@@ -712,6 +701,46 @@ class FlatListProofTest {
   }
 
   @ParameterizedTest
+  @CsvSource({
+      // Overriding the calculated hashes of element entries (h=0)
+      "0, 0",
+      "1, 0",
+      "4, 0",
+      // Overriding the calculated hashes at intermediate levels
+      "0, 1",
+      "2, 1",
+      "0, 2",
+      "1, 2",
+  })
+  void fiveElementListInvalidProofExtraNodesRedundantCalculated(long index, int height) {
+    /*
+    Target proof tree of size 5 with two ranges [0, 1], [4]:
+     H
+     3          o
+              /   \
+     2      o       o
+           / \     /
+     1    o   h   o
+         /\      /
+     0  e e     e
+     */
+    ListProofHashedEntry redundantNode = hashedEntry(index, height);
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(5L)
+        .addElements(ELEMENT_ENTRIES.get(0), ELEMENT_ENTRIES.get(1), ELEMENT_ENTRIES.get(4))
+        .addProofEntry(hashedEntry(1L, 1))
+        .addProofEntry(redundantNode)
+        .build();
+
+    InvalidProofException e = assertThrows(InvalidProofException.class,
+        proof::verify);
+
+    assertThat(e.getMessage()).containsIgnoringCase("Redundant proof entry")
+        .contains(redundantNode.toString())
+        .contains(String.format("with the same index (%d) as the calculated node", index));
+  }
+
+  @ParameterizedTest
   @MethodSource("fiveElementListInvalidProofExtraNodesAtInvalidIndexesSource")
   void fiveElementListInvalidProofExtraNodesAtInvalidIndexes(
       List<ListProofEntry> invalidProofEntries) {
@@ -898,6 +927,10 @@ class FlatListProofTest {
     FlatListProofBuilder addElement(ListProofElementEntry elementEntry) {
       elements.add(elementEntry);
       return this;
+    }
+
+    FlatListProofBuilder addElements(ListProofElementEntry... elementEntries) {
+      return addElements(asList(elementEntries));
     }
 
     FlatListProofBuilder addElements(List<ListProofElementEntry> elementEntries) {
