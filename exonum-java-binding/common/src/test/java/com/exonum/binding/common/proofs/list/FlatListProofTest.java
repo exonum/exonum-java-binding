@@ -422,6 +422,7 @@ class FlatListProofTest {
   static List<List<ListProofHashedEntry>> twoElementListInvalidProofNodesAboveMaxHeightSource() {
     return asList(
         //                        | index | height |
+        singletonList(hashedEntry(0, 1)),
         singletonList(hashedEntry(0, 2)),
         singletonList(hashedEntry(1, 2)),
         singletonList(hashedEntry(0, 3)),
