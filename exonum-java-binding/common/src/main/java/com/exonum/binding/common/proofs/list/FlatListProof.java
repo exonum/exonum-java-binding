@@ -29,12 +29,9 @@ import com.exonum.binding.common.hash.Hasher;
 import com.exonum.binding.common.hash.Hashing;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Functions;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -192,21 +189,19 @@ class FlatListProof {
       }
 
       // Check element entries: have unique indexes that are in range [0; size)
-      Multimap<Long, ListProofElementEntry> elementsByIndex = Multimaps
-          .index(elements, ListProofEntry::getIndex);
-      for (Map.Entry<Long, Collection<ListProofElementEntry>> e : elementsByIndex.asMap()
-          .entrySet()) {
-        Collection<ListProofElementEntry> elementsAtIndex = e.getValue();
-        Long index = e.getKey();
-        if (elementsAtIndex.size() != 1) {
-          throw new InvalidProofException(
-              String.format("Multiple element entries at the same index (%d): %s", index,
-                  elementsAtIndex));
-        }
+      Map<Long, ListProofElementEntry> elementsByIndex = new HashMap<>(elements.size());
+      for (ListProofElementEntry e : elements) {
+        long index = e.getIndex();
         if (index < 0L || size <= index) {
           throw new InvalidProofException(
               String.format("Entry at invalid index (%d), must be in range [0; %d): %s",
-                  index, size, elementsAtIndex));
+                  index, size, e));
+        }
+        ListProofElementEntry present = elementsByIndex.putIfAbsent(index, e);
+        if (present != null) {
+          throw new InvalidProofException(
+              String.format("Multiple element entries at the same index (%d): %s and %s", index,
+                  present, e));
         }
       }
 
