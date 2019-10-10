@@ -81,7 +81,7 @@ class FlatListProof {
 
   private static final long MAX_SIZE = ListProofEntry.MAX_INDEX + 1;
 
-  private static HashCode EMPTY_LIST_INDEX_HASH = hashListIndex(0L,
+  private static final HashCode EMPTY_LIST_INDEX_HASH = hashListIndex(0L,
       HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]));
 
   @VisibleForTesting
