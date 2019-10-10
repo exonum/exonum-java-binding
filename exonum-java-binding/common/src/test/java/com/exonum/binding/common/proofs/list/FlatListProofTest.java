@@ -100,6 +100,18 @@ class FlatListProofTest {
     );
   }
 
+  @ParameterizedTest
+  @ValueSource(longs = {Long.MIN_VALUE,-1L, /* Max size + 1: */ 0x100_0000_0000_0001L,
+      Long.MAX_VALUE})
+  void invalidSizeListInvalidProof(long size) {
+    FlatListProof proof = new FlatListProof(emptyList(), emptyList(), size);
+
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
+
+    assertThat(e.getMessage()).containsIgnoringCase("Invalid size")
+        .contains(Long.toString(size));
+  }
+
   @Test
   void emptyListValidProof() {
     FlatListProof proof = new FlatListProof(emptyList(), emptyList(), 0L);

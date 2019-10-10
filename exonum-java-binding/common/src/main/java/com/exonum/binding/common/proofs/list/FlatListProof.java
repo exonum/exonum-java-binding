@@ -104,8 +104,10 @@ class FlatListProof {
 
   CheckedListProof<byte[]> verify() {
     // Check the size
-    checkArgument(0 <= size && size <= MAX_SIZE,
-        "Invalid size (%s), must be in range [0; 2^56]", size);
+    if (size < 0 || MAX_SIZE < size) {
+      throw new InvalidProofException(String.format("Invalid size (%s), must be in range [0; 2^56]",
+          size));
+    }
 
     // Handle special cases
     if (size == 0) {
