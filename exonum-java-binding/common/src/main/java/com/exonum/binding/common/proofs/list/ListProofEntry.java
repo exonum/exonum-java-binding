@@ -38,13 +38,6 @@ interface ListProofEntry {
    */
   long getIndex();
 
-  /**
-   * Returns the height of the proof tree node corresponding to this entry.
-   * The height of leaf nodes is equal to 0; the height of the root, or top node:
-   * <em>ceil(log2(N))</em>.
-   */
-  int getHeight();
-
   static void checkIndex(long index) {
     checkArgument(0 <= index && index <= MAX_INDEX,
         "Entry index (%s) is out of range [0; 2^56]", index);

@@ -24,7 +24,13 @@ import com.google.auto.value.AutoValue;
  */
 @AutoValue
 abstract class ListProofHashedEntry implements ListProofEntry {
-  // todo: do we need the interface (are we going to operate on the entries using the interface?)
+
+  /**
+   * Returns the height of the proof tree node corresponding to this entry.
+   * The height of leaf nodes is equal to 0; the height of the root, or top node:
+   * <em>ceil(log2(N))</em>.
+   */
+  abstract int getHeight();
 
   /**
    * Returns the hash of the sub-tree this entry represents.

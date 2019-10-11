@@ -24,12 +24,6 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 abstract class ListProofElementEntry implements ListProofEntry {
 
-  @Override
-  public int getHeight() {
-    // Elements are always at height 0
-    return 0;
-  }
-
   /**
    * Returns a value of the element stored at this index in the list.
    */
