@@ -25,7 +25,6 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 abstract class ListProofHashedEntry implements ListProofEntry {
   // todo: do we need the interface (are we going to operate on the entries using the interface?)
-  //   Do we need entries at all, or just hashes?
 
   /**
    * Returns the hash of the sub-tree this entry represents.

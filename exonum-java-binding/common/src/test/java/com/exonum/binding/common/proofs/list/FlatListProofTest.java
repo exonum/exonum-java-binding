@@ -163,8 +163,6 @@ class FlatListProofTest {
     assertThat(checked.getIndexHash()).isEqualTo(expectedListHash);
   }
 
-  // todo: more singletonListInvalid
-
   @ParameterizedTest
   @CsvSource({
       // size of the list, height of the tree (and the root node)

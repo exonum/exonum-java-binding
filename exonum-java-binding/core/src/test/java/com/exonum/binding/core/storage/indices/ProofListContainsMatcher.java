@@ -61,7 +61,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
         .collect(toMap(Map.Entry::getKey, e -> e.getValue().toStringUtf8()));
 
     return checkedProof.isValid()
-        // todo: verify the list size also
+        // todo: [ECR-3673] verify the list size also
         && elementsMatcher.matches(actualElements)
         && list.getIndexHash().equals(checkedProof.getIndexHash());
   }
