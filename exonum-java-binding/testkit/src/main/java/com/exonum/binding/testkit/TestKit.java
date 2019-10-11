@@ -21,7 +21,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -51,15 +50,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.protobuf.Any;
 import com.google.protobuf.MessageLite;
 import io.vertx.ext.web.Router;
+import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +65,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * TestKit for testing blockchain services. It offers simple network configuration emulation
@@ -112,31 +109,29 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   private static final int SERVER_PORT = 0;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private final ServiceRuntime serviceRuntime;
-  private final Set<Integer> timeServiceIds;
+  private final Integer timeServiceId;
 
   @VisibleForTesting
   final Cleaner snapshotCleaner = new Cleaner("TestKit#getSnapshot");
 
-  private TestKit(long nativeHandle, List<TimeServiceSpec> timeServiceSpecs,
+  private TestKit(long nativeHandle, @Nullable TimeServiceSpec timeServiceSpec,
                   ServiceRuntime serviceRuntime) {
     super(nativeHandle, true);
     this.serviceRuntime = serviceRuntime;
-    timeServiceIds = timeServiceSpecs.stream()
-        .map(t -> t.serviceId)
-        .collect(toSet());
+    timeServiceId = timeServiceSpec == null ? null : timeServiceSpec.serviceId;
   }
 
   private static TestKit newInstance(TestKitServiceInstances[] serviceInstances,
                                      EmulatedNodeType nodeType, short validatorCount,
-                                     List<TimeServiceSpec> timeServiceSpecs,
+                                     @Nullable TimeServiceSpec timeServiceSpec,
                                      Path artifactsDirectory) {
     ServiceRuntimeAdapter serviceRuntimeAdapter =
         createServiceRuntimeAdapter(artifactsDirectory);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
     long nativeHandle = nativeCreateTestKit(serviceInstances, isAuditorNode, validatorCount,
-        timeServiceSpecs.toArray(new TimeServiceSpec[0]), serviceRuntimeAdapter);
+        timeServiceSpec, serviceRuntimeAdapter);
     ServiceRuntime serviceRuntime = serviceRuntimeAdapter.getServiceRuntime();
-    return new TestKit(nativeHandle, timeServiceSpecs, serviceRuntime);
+    return new TestKit(nativeHandle, timeServiceSpec, serviceRuntime);
   }
 
   private static ServiceRuntimeAdapter createServiceRuntimeAdapter(
@@ -241,10 +236,10 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private void checkTransaction(TransactionMessage transactionMessage) {
     int serviceId = transactionMessage.getServiceId();
-    // As transactions of time services might be submitted in TestKit that has those service
-    // activated, those transactions should be considered valid, as time services are not
+    // As transactions of time service might be submitted in TestKit that has this service
+    // activated, those transactions should be considered valid, as time service is not
     // contained in Java runtime
-    if (timeServiceIds.contains(serviceId)) {
+    if (serviceId == timeServiceId) {
       return;
     }
     try {
@@ -275,15 +270,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
       KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
-      return stream(poolTxsHashes)
+      return poolTxsHashes.stream()
           .map(txMessages::get)
           .filter(predicate)
           .collect(toList());
     });
-  }
-
-  private static <T> Stream<T> stream(KeySetIndexProxy<T> setIndex) {
-    return Streams.stream(setIndex);
   }
 
   /**
@@ -371,7 +362,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private static native long nativeCreateTestKit(TestKitServiceInstances[] services,
                                                  boolean auditor, short withValidatorCount,
-                                                 TimeServiceSpec[] timeProviderSpecs,
+                                                 TimeServiceSpec timeProviderSpec,
                                                  ServiceRuntimeAdapter serviceRuntimeAdapter);
 
   private native long nativeCreateSnapshot(long nativeHandle);
@@ -402,7 +393,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     private Multimap<ServiceArtifactId, ServiceSpec> services = ArrayListMultimap.create();
     private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
     private Path artifactsDirectory;
-    private List<TimeServiceSpec> timeServiceSpecs = new ArrayList<>();
+    private TimeServiceSpec timeServiceSpec;
 
     private Builder() {}
 
@@ -416,7 +407,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
           .withNodeType(nodeType)
           .withValidators(validatorCount)
           .withArtifactsDirectory(artifactsDirectory);
-      builder.timeServiceSpecs = new ArrayList<>(timeServiceSpecs);
+      builder.timeServiceSpec = timeServiceSpec;
       builder.services = MultimapBuilder.hashKeys().arrayListValues().build(services);
       builder.serviceArtifactFilenames = new HashMap<>(serviceArtifactFilenames);
       return builder;
@@ -536,14 +527,14 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     /**
      * Adds a time service specification with which the TestKit would create the corresponding
-     * time service instance. Several time service specifications can be added.
+     * time service instance. Only a single time service specification can be added.
      *
      * <p>Note that validator count should be
      * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
      */
     public Builder withTimeService(String serviceName, int serviceId, TimeProvider timeProvider) {
       TimeProviderAdapter timeProviderAdapter = new TimeProviderAdapter(timeProvider);
-      timeServiceSpecs.add(new TimeServiceSpec(serviceName, serviceId, timeProviderAdapter));
+      timeServiceSpec = new TimeServiceSpec(serviceName, serviceId, timeProviderAdapter);
       return this;
     }
 
@@ -561,7 +552,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkArtifactsDirectory();
       TestKitServiceInstances[] testKitServiceInstances = mergeServiceSpecs();
       return newInstance(testKitServiceInstances, nodeType, validatorCount,
-          timeServiceSpecs, artifactsDirectory);
+          timeServiceSpec, artifactsDirectory);
     }
 
     /**
@@ -598,7 +589,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
 
     private void checkCorrectValidatorNumber() {
-      if (!timeServiceSpecs.isEmpty()) {
+      if (timeServiceSpec != null) {
         checkArgument(validatorCount <= MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE,
             "Number of validators (%s) should be less than or equal to %s when TimeService is"
                 + " instantiated.",

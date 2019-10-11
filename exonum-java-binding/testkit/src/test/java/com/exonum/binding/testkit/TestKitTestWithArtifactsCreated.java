@@ -56,8 +56,14 @@ class TestKitTestWithArtifactsCreated {
 
   private static void createTestService2Artifact() throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME_2);
-    createArtifact(artifactLocation, ARTIFACT_ID_2, TestServiceModule2.class, TestTransaction.class,
-        TestSchema.class, TestService2.class);
+    createArtifact(artifactLocation, ARTIFACT_ID_2, TestServiceModule2.class,
+        TestTransaction.class, TestSchema.class, TestService2.class);
+  }
+
+  static void createInvalidArtifact(String filename) throws IOException {
+    Path artifactLocation = artifactsDirectory.resolve(filename);
+    createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class, TestTransaction.class,
+        TestSchema.class);
   }
 
   private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,

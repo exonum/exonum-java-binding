@@ -40,7 +40,6 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.messages.Runtime.ArtifactId;
 import com.exonum.binding.messages.Runtime.InstanceSpec;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
@@ -151,6 +150,33 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     assertThat(thrownException.getMessage()).isEqualTo("Artifacts directory was not set.");
   }
 
+  @Test
+  void createTestKitWithNoFileThrows() {
+    String invalidFilename = "invalid-filename.jar";
+    Class<RuntimeException> exceptionType = RuntimeException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, invalidFilename)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withArtifactsDirectory(artifactsDirectory);
+    RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    assertThat(thrownException.getMessage())
+        .contains("Failed to load the service from ", invalidFilename);
+  }
+
+  @Test
+  void createTestKitWithInvalidArtifactThrows() throws Exception {
+    String invalidFilename = "invalid-filename.jar";
+    createInvalidArtifact(invalidFilename);
+    Class<RuntimeException> exceptionType = RuntimeException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, invalidFilename)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withArtifactsDirectory(artifactsDirectory);
+    RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    assertThat(thrownException.getMessage())
+        .contains("Failed to load the service from ", invalidFilename);
+  }
+
   // TODO: update TestService so that different configuration changes state and refactor this test
   //  to validate that custom configuration works [ECR-3652]
   @Test
@@ -197,22 +223,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       checkIfServiceEnabled(testKit, TIME_SERVICE_NAME, TIME_SERVICE_ID);
-    }
-  }
-
-  @Test
-  void createTestKitWithSeveralTimeServices() {
-    String timeServiceName2 = "Time service 2";
-    int timeServiceId2 = 18;
-    TimeProvider timeProvider = FakeTimeProvider.create(TIME);
-    TimeProvider timeProvider2 = FakeTimeProvider.create(TIME.plusDays(1));
-    try (TestKit testKit = TestKit.builder()
-        .withTimeService(TIME_SERVICE_NAME, TIME_SERVICE_ID, timeProvider)
-        .withTimeService(timeServiceName2, timeServiceId2, timeProvider2)
-        .withArtifactsDirectory(artifactsDirectory)
-        .build()) {
-      checkIfServiceEnabled(testKit, TIME_SERVICE_NAME, TIME_SERVICE_ID);
-      checkIfServiceEnabled(testKit, timeServiceName2, timeServiceId2);
     }
   }
 

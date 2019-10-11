@@ -52,7 +52,9 @@ public final class ServiceRuntimeBootstrap {
 
   /**
    * Dependency reference classes used to validate that service artifacts don't contain copies of
-   * the classes loaded by the application classloader.
+   * the classes used in Exonum public APIs and loaded by the application classloader.
+   *
+   * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#using-libraries">Exonum dependencies</a>
    */
   public static final ImmutableMap<String, Class<?>> DEPENDENCY_REFERENCE_CLASSES =
       ImmutableMap.<String, Class<?>>builder()
