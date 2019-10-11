@@ -202,7 +202,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Returns Java representation of the proof that an element exists at the specified index.
+/// Returns the proof that an element exists at the specified index. The proof is serialized in
+/// the protobuf format.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetProof(
     env: JNIEnv,
@@ -220,7 +221,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Returns Java representation of the proof that some elements exists in the specified range.
+/// Returns the proof that some elements exists in the specified range. The proof is serialized in
+/// the protobuf format.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
     env: JNIEnv,
