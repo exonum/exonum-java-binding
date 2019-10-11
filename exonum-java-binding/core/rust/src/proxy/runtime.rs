@@ -132,7 +132,7 @@ impl JavaRuntimeProxy {
 
                     ExceptionHandlers::DEFAULT(env, exception)
                 },
-                _ => Error::OtherJniError.into(),
+                _ => (Error::OtherJniError, err).into(),
             }
         })
     }
@@ -153,7 +153,7 @@ impl JavaRuntimeProxy {
                     let exception = get_and_clear_java_exception(env);
                     ExceptionHandlers::DEFAULT(env, exception)
                 },
-                _ => Error::OtherJniError.into(),
+                _ => (Error::OtherJniError, err).into(),
             }
         })
     }
