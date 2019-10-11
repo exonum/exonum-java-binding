@@ -35,7 +35,7 @@ use jni::{
 use std::{panic, sync::Arc};
 use storage::View;
 use utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default};
-use {JavaRuntimeProxy, JniResult};
+use {JavaRuntimeProxy, JniError, JniResult};
 
 mod time_provider;
 
@@ -54,7 +54,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
     services: jobjectArray,
     auditor: jboolean,
     validator_count: jshort,
-    time_service_specs: jobjectArray,
+    time_service_spec: JObject,
     runtime_adapter: JObject,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
@@ -78,10 +78,10 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
                 .with_runtime(runtime)
                 .with_instances(instance_configs_from_java_array(&env, services)?);
 
-            for instance_spec in
-                time_service_specs_from_java_array(&env, executor.clone(), time_service_specs)?
+            if let Some(instance) =
+                time_service_instance_from_java(&env, executor.clone(), time_service_spec)?
             {
-                builder = builder.with_service(instance_spec);
+                builder = builder.with_service(instance);
             }
 
             builder
@@ -216,88 +216,118 @@ fn create_java_keypair<'a>(
 }
 
 // Converts Java array of `TestKitServiceInstances` to vector of `InstanceConfig`.
+//
+// `TestKitServiceInstances` representation:
+//      String artifactId;
+//      String artifactFilename;
+//      ServiceSpec[] serviceSpecs;
 fn instance_configs_from_java_array(
     env: &JNIEnv,
-    services: jobjectArray,
+    service_artifact_specs: jobjectArray,
 ) -> JniResult<Vec<InstanceConfig>> {
     let mut instance_configs = vec![];
-    let num_services = env.get_array_length(services)?;
-    for i in 0..num_services {
-        let service_obj = env.get_object_array_element(services, i)?;
+    let num_artifacts = env.get_array_length(service_artifact_specs)?;
+    for i in 0..num_artifacts {
+        let artifact_spec_obj = env.get_object_array_element(service_artifact_specs, i)?;
 
-        let artifact_id = get_string_value(env, service_obj, "artifactId")?;
-        let artifact_filename = get_string_value(env, service_obj, "artifactFilename")?;
+        let artifact_id = get_field_as_string(env, artifact_spec_obj, "artifactId")?;
+        let artifact_filename = get_field_as_string(env, artifact_spec_obj, "artifactFilename")?;
         let service_specs_obj: jobjectArray = env
             .get_field(
-                service_obj,
+                artifact_spec_obj,
                 "serviceSpecs",
                 "[Lcom/exonum/binding/testkit/ServiceSpec;",
             )?
             .l()?
             .into_inner();
-
-        let num_specs = env.get_array_length(service_specs_obj)?;
-
-        for k in 0..num_specs {
-            let service_spec = env.get_object_array_element(service_specs_obj, k)?;
-
-            let (service_id, service_name) = get_service_id_and_name(env, service_spec)?;
-            let config_params: jbyteArray = env
-                .get_field(service_spec, "configuration", "[B")?
-                .l()?
-                .into_inner();
-            let config = env.convert_byte_array(config_params)?;
-
-            let spec = InstanceSpec::new(service_id, service_name, &artifact_id)
-                .expect("Unable to create instance specification for service");
-            let cfg = InstanceConfig::new(spec, Some(artifact_filename.to_bytes()), config);
-            instance_configs.push(cfg);
-        }
+        let configs = parse_service_specs(env, service_specs_obj, artifact_id, artifact_filename)?;
+        instance_configs.extend(configs);
     }
     Ok(instance_configs)
 }
 
-// Converts Java array of `TimeServiceSpec` to vector of `InstanceCollection`.
-fn time_service_specs_from_java_array(
+// Converts Java array of `ServiceSpec` instances into vector of `InstanceConfig` for specific artifact.
+fn parse_service_specs(
+    env: &JNIEnv,
+    specs_array: jobjectArray,
+    artifact_id: String,
+    artifact_filename: String,
+) -> JniResult<Vec<InstanceConfig>> {
+    let num_specs = env.get_array_length(specs_array)?;
+
+    let mut instance_configs = vec![];
+    for i in 0..num_specs {
+        let service_spec = env.get_object_array_element(specs_array, i)?;
+        let (spec, config) = parse_instance_spec(&env, service_spec, &artifact_id)?;
+        let cfg = InstanceConfig::new(spec, Some(artifact_filename.to_bytes()), config);
+        instance_configs.push(cfg);
+    }
+
+    Ok(instance_configs)
+}
+
+// Parses the `ServiceSpec` instance.
+//
+// `ServiceSpec` representation:
+//      String serviceName;
+//      int serviceId;
+//      byte[] configuration;
+fn parse_instance_spec(
+    env: &JNIEnv,
+    service_spec_obj: JObject,
+    artifact_id: impl AsRef<str>,
+) -> JniResult<(InstanceSpec, Vec<u8>)> {
+    let (service_id, service_name) = get_service_id_and_name(env, service_spec_obj)?;
+    let config_params: jbyteArray = env
+        .get_field(service_spec_obj, "configuration", "[B")?
+        .l()?
+        .into_inner();
+    let config = env.convert_byte_array(config_params)?;
+    let spec = InstanceSpec::new(service_id, service_name, artifact_id).map_err(|err| {
+        JniError::from(format!(
+            "Unable to create instance specification for the service with id {}: {}",
+            service_id, err
+        ))
+    })?;
+
+    Ok((spec, config))
+}
+
+// Creates `InstanceCollection` from `TimeServiceSpec` object.
+fn time_service_instance_from_java(
     env: &JNIEnv,
     executor: Executor,
-    service_specs: jobjectArray,
-) -> JniResult<Vec<InstanceCollection>> {
-    let mut instance_collection = vec![];
-    let num_configs = env.get_array_length(service_specs)?;
-    for i in 0..num_configs {
-        let service_spec_obj = env.get_object_array_element(service_specs, i)?;
-
-        let (service_id, service_name) = get_service_id_and_name(env, service_spec_obj)?;
-        let time_provider = env
-            .get_field(
-                service_spec_obj,
-                "timeProvider",
-                "Lcom/exonum/binding/testkit/TimeProviderAdapter;",
-            )?
-            .l()?;
-
-        let provider = JavaTimeProvider::new(executor.clone(), time_provider);
-        let factory =
-            TimeServiceFactory::with_provider(Arc::new(provider) as Arc<dyn TimeProvider>);
-        instance_collection.push(InstanceCollection::new(factory).with_instance(
-            service_id,
-            service_name,
-            (),
-        ));
+    time_service_spec: JObject,
+) -> JniResult<Option<InstanceCollection>> {
+    if time_service_spec.is_null() {
+        return Ok(None);
     }
-    Ok(instance_collection)
+
+    let (service_id, service_name) = get_service_id_and_name(env, time_service_spec)?;
+    let time_provider = env
+        .get_field(
+            time_service_spec,
+            "timeProvider",
+            "Lcom/exonum/binding/testkit/TimeProviderAdapter;",
+        )?
+        .l()?;
+
+    let provider = JavaTimeProvider::new(executor.clone(), time_provider);
+    let factory = TimeServiceFactory::with_provider(Arc::new(provider) as Arc<dyn TimeProvider>);
+    let instance = InstanceCollection::new(factory).with_instance(service_id, service_name, ());
+
+    Ok(Some(instance))
 }
 
 // Returns id and name value from corresponding instances of Java objects.
 fn get_service_id_and_name(env: &JNIEnv, service_obj: JObject) -> JniResult<(u32, String)> {
     let service_id = env.get_field(service_obj, "serviceId", "I")?.i()? as u32;
-    let service_name = get_string_value(env, service_obj, "serviceName")?;
+    let service_name = get_field_as_string(env, service_obj, "serviceName")?;
     Ok((service_id, service_name))
 }
 
 // Returns String value of instance's field.
-fn get_string_value(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResult<String> {
+fn get_field_as_string(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResult<String> {
     convert_to_string(
         env,
         env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?,
