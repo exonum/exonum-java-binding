@@ -18,7 +18,7 @@ package com.exonum.binding.common.proofs.list;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-interface ListProofEntry {
+public interface ListProofEntry {
 
   /**
    * The maximum height of a list proof tree.

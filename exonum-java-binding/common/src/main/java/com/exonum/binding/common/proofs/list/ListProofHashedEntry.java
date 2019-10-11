@@ -23,7 +23,7 @@ import com.google.auto.value.AutoValue;
  * A hash of a sub-tree in a Merkle proof tree.
  */
 @AutoValue
-abstract class ListProofHashedEntry implements ListProofEntry {
+public abstract class ListProofHashedEntry implements ListProofEntry {
 
   /**
    * Returns the height of the proof tree node corresponding to this entry.
@@ -37,7 +37,7 @@ abstract class ListProofHashedEntry implements ListProofEntry {
    */
   abstract HashCode getHash();
 
-  static ListProofHashedEntry newInstance(long index, int height, HashCode nodeHash) {
+  public static ListProofHashedEntry newInstance(long index, int height, HashCode nodeHash) {
     ListProofEntry.checkIndex(index);
     ListProofEntry.checkHeight(height);
     return new AutoValue_ListProofHashedEntry(index, height, nodeHash);
