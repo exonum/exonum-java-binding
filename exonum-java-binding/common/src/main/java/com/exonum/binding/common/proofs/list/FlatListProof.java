@@ -351,8 +351,7 @@ class FlatListProof {
   }
 
   private long levelSizeAt(int height) {
-    // todo: Is there a one-liner for ceil(ceil(... ceil(size / 2) / 2 ... / 2)))?
-    // todo: consider memoizing if no efficient ^
+    // Consider memoizing the level sizes to avoid re-calculation
     checkArgument(height >= 0);
     long levelSize = size;
     while (height-- != 0) {
