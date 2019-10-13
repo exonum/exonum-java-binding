@@ -56,7 +56,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class TestKitTest extends TestKitTestWithArtifactsCreated {
-  private String TIME_SERVICE_NAME = "Time service";
+  private String TIME_SERVICE_NAME = "time-service";
   private int TIME_SERVICE_ID = 10;
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
@@ -342,7 +342,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
             .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
             .withArtifactsDirectory(artifactsDirectory);
     for (int i = 0; i < TestKit.MAX_SERVICE_NUMBER + 1; i++) {
-      String serviceName = SERVICE_NAME + " " + i;
+      String serviceName = SERVICE_NAME + i;
       int serviceId = SERVICE_ID + i;
       testKitBuilder = testKitBuilder.withService(ARTIFACT_ID, serviceName, serviceId);
     }

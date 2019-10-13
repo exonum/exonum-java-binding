@@ -28,13 +28,13 @@ class TestKitTestWithArtifactsCreated {
   static final String ARTIFACT_FILENAME = "test-service.jar";
   static final ServiceArtifactId ARTIFACT_ID =
       ServiceArtifactId.of("com.exonum.binding", "test-service", "1.0.0");
-  static final String SERVICE_NAME = "Test service";
+  static final String SERVICE_NAME = "test-service";
   static final int SERVICE_ID = 46;
 
   static final String ARTIFACT_FILENAME_2 = "test-service-2.jar";
   static final ServiceArtifactId ARTIFACT_ID_2 =
       ServiceArtifactId.of("com.exonum.binding", "test-service-2", "1.0.0");
-  static final String SERVICE_NAME_2 = "Test service 2";
+  static final String SERVICE_NAME_2 = "test-service2";
   static final int SERVICE_ID_2 = 48;
 
   static Path artifactsDirectory;
