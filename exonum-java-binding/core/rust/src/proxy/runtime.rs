@@ -136,27 +136,6 @@ impl JavaRuntimeProxy {
             }
         })
     }
-
-    /// Handles and clears any Java exceptions.
-    ///
-    /// Any JNI errors are converted into `ExecutionError` with their descriptions, for JNI errors
-    /// like `JniErrorKind::JavaException` it gets (and clears) any exception that is currently
-    /// being thrown, then exception is passed to `ExceptionHandlers::DEFAULT`.
-    fn handle_any_exception<R>(
-        env: &JNIEnv,
-        result: JniResult<R>,
-    ) -> Result<R, ExecutionError>
-    {
-        result.map_err(|err| {
-            match err.kind() {
-                JniErrorKind::JavaException => {
-                    let exception = get_and_clear_java_exception(env);
-                    ExceptionHandlers::DEFAULT(env, exception)
-                },
-                _ => (Error::OtherJniError, err).into(),
-            }
-        })
-    }
 }
 
 impl Runtime for JavaRuntimeProxy {
@@ -185,7 +164,11 @@ impl Runtime for JavaRuntimeProxy {
                 ],
             ).and_then(JValue::v);
 
-            Ok(Self::handle_any_exception(env, jni_res))
+            Ok(Self::handle_exception(
+                env,
+                jni_res,
+                &[(&classes_refs::service_loading_exception(), ExceptionHandlers::SERVICE_LOADING)]
+            ))
         });
 
         Box::new(
@@ -243,7 +226,7 @@ impl Runtime for JavaRuntimeProxy {
                 ],
             ).and_then(JValue::v);
 
-            Ok(Self::handle_any_exception(env, jni_res))
+            Ok(Self::handle_exception::<&ExceptionHandler, ()>(env, jni_res, &[]))
         });
         Self::convert_jni(result)?
     }
@@ -270,7 +253,7 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(params),
                 ],
             ).and_then(JValue::v);
-            Ok(Self::handle_any_exception(env, jni_res))
+            Ok(Self::handle_exception::<&ExceptionHandler, ()>(env, jni_res, &[]))
         });
         Self::convert_jni(result)?
     }
@@ -289,7 +272,7 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(id),
                 ],
             ).and_then(JValue::v);
-            Ok(Self::handle_any_exception(env, jni_res))
+            Ok(Self::handle_exception::<&ExceptionHandler, ()>(env, jni_res, &[]))
         });
         Self::convert_jni(result)?
     }
@@ -462,9 +445,9 @@ impl fmt::Debug for JavaRuntimeProxy {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct JavaArtifactId(String);
 
-impl ToString for JavaArtifactId {
-    fn to_string(&self) -> String {
-        self.0.to_owned()
+impl fmt::Display for JavaArtifactId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -544,13 +527,6 @@ impl ExceptionHandlers {
         assert!(!exception.is_null(), "No exception thrown.");
         let msg = unwrap_jni(get_exception_message(env, exception));
         let desc = format!("ServiceLoadingException(message: {:?})", msg);
-        (Error::JavaException, desc).into()
-    };
-
-    const CLOSE_FAILURES: &'static ExceptionHandler = &|env, exception| {
-        assert!(!exception.is_null(), "No exception thrown.");
-        let msg = unwrap_jni(get_exception_message(env, exception));
-        let desc = format!("CloseFailuresException(message: {:?})", msg);
         (Error::JavaException, desc).into()
     };
 

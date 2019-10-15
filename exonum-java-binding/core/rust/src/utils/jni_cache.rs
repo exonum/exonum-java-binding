@@ -52,6 +52,7 @@ static mut RUNTIME_ADAPTER_MOUNT_API: Option<JMethodID> = None;
 static mut JAVA_LANG_ERROR: Option<GlobalRef> = None;
 static mut JAVA_LANG_RUNTIME_EXCEPTION: Option<GlobalRef> = None;
 static mut TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
+static mut SERVICE_LOADING_EXCEPTION: Option<GlobalRef> = None;
 
 /// This function is executed on loading native library by JVM.
 /// It initializes the cache of method and class references.
@@ -155,6 +156,13 @@ unsafe fn cache_methods(env: &JNIEnv) {
                 .into(),
         )
         .ok();
+    SERVICE_LOADING_EXCEPTION = env
+        .new_global_ref(
+            env.find_class("com/exonum/binding/core/runtime/ServiceLoadingException")
+                .unwrap()
+                .into(),
+        )
+        .ok();
 
     assert!(
         OBJECT_GET_CLASS.is_some()
@@ -172,7 +180,8 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && RUNTIME_ADAPTER_MOUNT_API.is_some()
             && JAVA_LANG_ERROR.is_some()
             && JAVA_LANG_RUNTIME_EXCEPTION.is_some()
-            && TRANSACTION_EXECUTION_EXCEPTION.is_some(),
+            && TRANSACTION_EXECUTION_EXCEPTION.is_some()
+            && SERVICE_LOADING_EXCEPTION.is_some(),
         "Error caching Java entities"
     );
 
@@ -311,5 +320,11 @@ pub mod classes_refs {
     pub fn transaction_execution_exception() -> GlobalRef {
         check_cache_initialized();
         unsafe { TRANSACTION_EXECUTION_EXCEPTION.clone().unwrap() }
+    }
+
+    /// Returns cached `JClass` for `ServiceLoadingException` as a `GlobalRef`.
+    pub fn service_loading_exception() -> GlobalRef {
+        check_cache_initialized();
+        unsafe { SERVICE_LOADING_EXCEPTION.clone().unwrap() }
     }
 }
