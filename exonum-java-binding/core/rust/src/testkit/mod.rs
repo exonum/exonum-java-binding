@@ -43,6 +43,8 @@ const KEYPAIR_CLASS: &str = "com/exonum/binding/common/crypto/KeyPair";
 const KEYPAIR_CTOR_SIGNATURE: &str = "([B[B)Lcom/exonum/binding/common/crypto/KeyPair;";
 const EMULATED_NODE_CLASS: &str = "com/exonum/binding/testkit/EmulatedNode";
 const EMULATED_NODE_CTOR_SIGNATURE: &str = "(ILcom/exonum/binding/common/crypto/KeyPair;)V";
+const SERVICE_SPECS_FIELD_TYPE: &str = "[Lcom/exonum/binding/testkit/ServiceSpec;";
+const TIME_PROVIDER_FIELD_TYPE: &str = "Lcom/exonum/binding/testkit/TimeProviderAdapter;";
 
 /// Creates TestKit instance with specified services and wires public API handlers.
 /// The caller is responsible for properly destroying TestKit instance and freeing
@@ -228,15 +230,17 @@ fn instance_configs_from_java_array(
     let mut instance_configs = vec![];
     let num_artifacts = env.get_array_length(service_artifact_specs)?;
     for i in 0..num_artifacts {
-        let artifact_spec_obj = env.get_object_array_element(service_artifact_specs, i)?;
+        let artifact_spec_obj =
+            env.auto_local(env.get_object_array_element(service_artifact_specs, i)?);
 
-        let artifact_id = get_field_as_string(env, artifact_spec_obj, "artifactId")?;
-        let artifact_filename = get_field_as_string(env, artifact_spec_obj, "artifactFilename")?;
+        let artifact_id = get_field_as_string(env, artifact_spec_obj.as_obj(), "artifactId")?;
+        let artifact_filename =
+            get_field_as_string(env, artifact_spec_obj.as_obj(), "artifactFilename")?;
         let service_specs_obj: jobjectArray = env
             .get_field(
-                artifact_spec_obj,
+                artifact_spec_obj.as_obj(),
                 "serviceSpecs",
-                "[Lcom/exonum/binding/testkit/ServiceSpec;",
+                SERVICE_SPECS_FIELD_TYPE,
             )?
             .l()?
             .into_inner();
@@ -257,11 +261,12 @@ fn parse_service_specs(
 
     let mut instance_configs = vec![];
     for i in 0..num_specs {
-        let service_spec = env.get_object_array_element(specs_array, i)?;
-        let (spec, config) = parse_instance_spec(&env, service_spec, &artifact_id)?;
+        let service_spec = env.auto_local(env.get_object_array_element(specs_array, i)?);
+        let (spec, config) = parse_instance_spec(&env, service_spec.as_obj(), &artifact_id)?;
         let cfg = InstanceConfig::new(spec, Some(artifact_filename.to_bytes()), config);
         instance_configs.push(cfg);
     }
+    env.delete_local_ref(specs_array.into())?;
 
     Ok(instance_configs)
 }
@@ -294,6 +299,11 @@ fn parse_instance_spec(
 }
 
 // Creates `InstanceCollection` from `TimeServiceSpec` object.
+//
+// `TimeServiceSpec`
+//      TimeProviderAdapter timeProvider;
+//      String serviceName;
+//      int serviceId;
 fn time_service_instance_from_java(
     env: &JNIEnv,
     executor: Executor,
@@ -305,11 +315,7 @@ fn time_service_instance_from_java(
 
     let (service_id, service_name) = get_service_id_and_name(env, time_service_spec)?;
     let time_provider = env
-        .get_field(
-            time_service_spec,
-            "timeProvider",
-            "Lcom/exonum/binding/testkit/TimeProviderAdapter;",
-        )?
+        .get_field(time_service_spec, "timeProvider", TIME_PROVIDER_FIELD_TYPE)?
         .l()?;
 
     let provider = JavaTimeProvider::new(executor.clone(), time_provider);
@@ -330,6 +336,7 @@ fn get_service_id_and_name(env: &JNIEnv, service_obj: JObject) -> JniResult<(u32
 fn get_field_as_string(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResult<String> {
     convert_to_string(
         env,
-        env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?,
+        env.auto_local(env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?)
+            .as_obj(),
     )
 }
