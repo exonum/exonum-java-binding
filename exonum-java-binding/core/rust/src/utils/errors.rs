@@ -70,7 +70,6 @@ pub fn check_error_on_exception<T>(env: &JNIEnv, result: JniResult<T>) -> Result
     })
 }
 
-
 /// Unwraps `jni::Result`
 ///
 /// Panics if there is some JNI error.

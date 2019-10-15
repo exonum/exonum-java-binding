@@ -73,15 +73,6 @@ impl NodeContext {
 
     #[doc(hidden)]
     pub fn submit(&self, tx: AnyTx) -> Result<Hash, failure::Error> {
-        let _service_id = tx.call_info.instance_id;
-//        TODO: check service is active
-//        if !self.blockchain.service_map().contains_key(&service_id) {
-//            return Err(format_err!(
-//                "Unable to broadcast transaction: service(ID={}) not found",
-//                service_id
-//            ));
-//        }
-
         let (pub_key, secret_key) = self.api_context.service_keypair();
         let signed = SignedMessage::new(
             tx.to_bytes(),
@@ -90,6 +81,7 @@ impl NodeContext {
         );
 
         let tx_hash = signed.object_hash();
+        // TODO: check Core behaviour/any errors on service inactivity
         self.api_context.sender().broadcast_transaction(
             signed.into_verified()?
         )?;
@@ -101,17 +93,17 @@ impl NodeContext {
 ///
 /// Parameters:
 /// - `node_handle` - a native handle to the native node object
-/// - `transaction` - a transaction to submit
-/// - `payload` - an array containing the transaction payload
-/// - `service_id` - an identifier of the service
+/// - `method_id` - an identifier method within the service
+/// - `arguments` - an array containing the transaction arguments
+/// - `instance_id` - an identifier of the service
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubmit(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
-    payload: jbyteArray,
-    service_id: jshort,
-    transaction_id: jshort,
+    arguments: jbyteArray,
+    instance_id: jshort,
+    method_id: jshort,
 ) -> jbyteArray {
     use utils::convert_hash;
     let res = panic::catch_unwind(|| {
@@ -119,21 +111,21 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
         let hash = unwrap_jni_verbose(
             &env,
             || -> JniResult<jbyteArray> {
-                let payload = env.convert_byte_array(payload)?;
+                let arguments = env.convert_byte_array(arguments)?;
                 let tx = AnyTx {
                     call_info: CallInfo {
-                        instance_id: service_id as u32,
-                        method_id: transaction_id as u32,
+                        instance_id: instance_id as u32,
+                        method_id: method_id as u32,
                     },
-                    arguments: payload
+                    arguments: arguments
                 };
 
                 match node.submit(tx) {
                     Ok(tx_hash) => convert_hash(&env, &tx_hash),
                     Err(err) => {
-                        // node#submit can fail for two reasons: unknown transaction id and
-                        // an error in ApiSender#send. The former is the service implementation
-                        // error; the latter is an internal, unrecoverable error.
+                        // node#submit can fail on an error in ApiSender#send.
+                        // The former is the service implementation error;
+                        // the latter is an internal, unrecoverable error.
                         let error_class = TX_SUBMISSION_EXCEPTION;
                         let error_description = err.to_string();
                         env.throw_new(error_class, error_description)?;
