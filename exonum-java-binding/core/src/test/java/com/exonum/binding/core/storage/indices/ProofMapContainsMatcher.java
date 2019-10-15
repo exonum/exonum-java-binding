@@ -45,10 +45,10 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
   @Override
   protected boolean matchesSafely(ProofMapIndexProxy<HashCode, String> map) {
     CheckedMapProof checkedProof = checkProof(map);
-    HashCode expectedRootHash = map.getRootHash();
+    HashCode expectedIndexHash = map.getIndexHash();
 
     return mapProofMatcher.matches(checkedProof)
-        && checkedProof.getRootHash().equals(expectedRootHash);
+        && checkedProof.getIndexHash().equals(expectedIndexHash);
   }
 
   @Override
@@ -60,8 +60,8 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
   @Override
   protected void describeMismatchSafely(ProofMapIndexProxy<HashCode, String> map,
       Description mismatchDescription) {
-    mismatchDescription.appendText("was a proof map with Merkle root=")
-        .appendValue(map.getRootHash())
+    mismatchDescription.appendText("was a proof map with index root=")
+        .appendValue(map.getIndexHash())
         .appendText(" providing a proof that ");
     CheckedMapProof checkedProof = checkProof(map);
     mapProofMatcher.describeMismatch(checkedProof, mismatchDescription);

@@ -23,4 +23,6 @@ public interface ListProofVisitor {
   void visit(ListProofHashNode listProofHashNode);
 
   void visit(ListProofElement value);
+
+  void visit(ListProofOfAbsence listProofOfAbsence);
 }

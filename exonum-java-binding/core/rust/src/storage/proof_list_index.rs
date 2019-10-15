@@ -14,7 +14,7 @@
 
 use exonum::crypto::Hash;
 use exonum_merkledb::{
-    proof_list_index::{ListProof, ProofListIndexIter},
+    proof_list_index::{ListProof, ProofListIndexIter, ProofOfAbsence},
     Fork, ObjectHash, ProofListIndex, Snapshot,
 };
 use jni::{
@@ -33,7 +33,7 @@ use utils;
 type Index<T> = ProofListIndex<T, Value>;
 
 enum IndexType {
-    SnapshotIndex(Index<&'static Snapshot>),
+    SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 
@@ -48,7 +48,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
         Ok(handle::to_handle(
-            match *handle::cast_handle::<View>(view_handle).get() {
+            match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
                     IndexType::SnapshotIndex(Index::new(name, &*snapshot))
                 }
@@ -72,7 +72,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
         let group_name = utils::convert_to_string(&env, group_name)?;
         let list_id = env.convert_byte_array(list_id)?;
         let view_ref = handle::cast_handle::<View>(view_handle).get();
-        Ok(handle::to_handle(match *view_ref {
+        Ok(handle::to_handle(match view_ref {
             ViewRef::Snapshot(snapshot) => {
                 IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
             }
@@ -376,7 +376,7 @@ fn make_java_proof_root<'a>(
 ) -> Result<JObject<'a>> {
     let root = make_java_proof(env, proof)?;
     env.new_object(
-        "com/exonum/binding/common/proofs/list/ListProof",
+        "com/exonum/binding/common/proofs/list/UncheckedListProofAdapter",
         "(Lcom/exonum/binding/common/proofs/list/ListProofNode;J)V",
         &[root.into(), (length as jlong).into()],
     )
@@ -402,8 +402,8 @@ fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JOb
             make_java_proof_branch(env, left, right)
         }
         ListProof::Leaf(ref value) => make_java_proof_element(env, value),
-        ListProof::Absent(_) => {
-            unimplemented!("The ProofOfAbsence structure is not public for the moment")
+        ListProof::Absent(ref proof_of_absence) => {
+            make_java_proof_of_absence(env, proof_of_absence)
         }
     }
 }
@@ -438,6 +438,18 @@ fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>>
     let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
     env.new_object(
         "com/exonum/binding/common/proofs/list/ListProofHashNode",
+        "([B)V",
+        &[hash.as_obj().into()],
+    )
+}
+
+fn make_java_proof_of_absence<'a>(
+    env: &JNIEnv<'a>,
+    proof_of_absence: &ProofOfAbsence,
+) -> Result<JObject<'a>> {
+    let hash = env.auto_local(utils::convert_hash(env, &proof_of_absence.merkle_root())?.into());
+    env.new_object(
+        "com/exonum/binding/common/proofs/list/ListProofOfAbsence",
         "([B)V",
         &[hash.as_obj().into()],
     )

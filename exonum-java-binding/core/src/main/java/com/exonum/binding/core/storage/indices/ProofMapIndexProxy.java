@@ -285,15 +285,16 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
 
   /**
-   * Returns the root hash of the underlying Merkle-Patricia tree.
+   * Returns the index hash which represents the complete state of this map.
+   * Any modifications to the stored entries affect the index hash.
    *
-   * @throws IllegalStateException  if this map is not valid
+   * @throws IllegalStateException if this map is not valid
    */
-  public HashCode getRootHash() {
-    return HashCode.fromBytes(nativeGetRootHash(getNativeHandle()));
+  public HashCode getIndexHash() {
+    return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
 
-  private native byte[] nativeGetRootHash(long nativeHandle);
+  private native byte[] nativeGetIndexHash(long nativeHandle);
 
   @Override
   public void remove(K key) {

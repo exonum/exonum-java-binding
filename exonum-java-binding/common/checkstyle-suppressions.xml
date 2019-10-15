@@ -14,4 +14,7 @@
     <!-- Allow underscore in the class name so that IDEs work properly. -->
     <suppress files="Message_Builder2Test\.java" checks="TypeName"/>
 
+    <!-- Allow `aInstance` name -->
+    <suppress files="SignedMessageTest.java|ParsedTransactionMessageTest.java|JsonSerializerTest.java"
+      checks="MethodName"/>
 </suppressions>

@@ -19,6 +19,7 @@ package com.exonum.client;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
@@ -46,19 +47,19 @@ class SystemApiHelperTest {
 
   private static List<Arguments> memoryPoolSource() {
     return ImmutableList.of(
-        Arguments.of("{\"size\": 0}", 0),
-        Arguments.of("{\"size\": 2}", 2),
-        Arguments.of("{\"size\": " + Integer.MAX_VALUE + "}", Integer.MAX_VALUE)
+        arguments("{\"size\": 0}", 0),
+        arguments("{\"size\": 2}", 2),
+        arguments("{\"size\": " + Integer.MAX_VALUE + "}", Integer.MAX_VALUE)
     );
   }
 
   private static List<Arguments> healthCheckSource() {
     return ImmutableList.of(
-        Arguments.of("{\"consensus_status\": \"Enabled\", \"connected_peers\": 0}",
+        arguments("{\"consensus_status\": \"Enabled\", \"connected_peers\": 0}",
             new HealthCheckInfo(ConsensusStatus.ENABLED, 0)),
-        Arguments.of("{\"consensus_status\": \"Disabled\", \"connected_peers\": 0}",
+        arguments("{\"consensus_status\": \"Disabled\", \"connected_peers\": 0}",
             new HealthCheckInfo(ConsensusStatus.DISABLED, 0)),
-        Arguments.of("{\"consensus_status\": \"Active\", \"connected_peers\": 1 }",
+        arguments("{\"consensus_status\": \"Active\", \"connected_peers\": 1 }",
             new HealthCheckInfo(ConsensusStatus.ACTIVE, 1))
     );
   }

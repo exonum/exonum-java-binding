@@ -23,4 +23,4 @@ network. See the [documentation][testkit-documentation] for more information and
 The 0.7.0 [release page][release-page] for the changelog and pre-built binaries.
 
 [release-page]: https://github.com/exonum/exonum-java-binding/releases/tag/ejb/v0.7.0
-[testkit-documentation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#testing
+[testkit-documentation]: https://exonum.com/doc/version/0.12/get-started/java-binding/#testing

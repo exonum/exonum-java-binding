@@ -15,11 +15,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.8.0] - 2019-09-09
+
+### Overview
+
+This release brings mainly internal fixes and improvements. It is based on Exonum 0.12.
+
 ### Changed
 - `Ed25519CryptoFunction` to use the system libsodium by default. If libsodium is not installed,
   it will load the bundled library. (#991)
 - `Ed25519CryptoFunction` is made package-private. It remains accessible via 
   `CryptoFunctions#ed25519`.
+- After the introduction of MerkleDB the hash of the index is not equal to the root hash of the
+  corresponding proof tree anymore. Therefore `CheckedProof#getRootHash`,
+  `ProofListIndexProxy#getRootHash` and `ProofMapIndexProxy#getRootHash` are replaced with
+  `CheckedProof#getIndexHash`, `ProofListIndexProxy#getIndexHash` and
+  `ProofMapIndexProxy#getIndexHash` accordingly.
+- Network configuration workflow. `generate-config` subcommand now accepts a single parameter -
+  output directory instead of separate parameters for private and public node configs. See
+  [Tutorial](./core/rust/exonum-java/TUTORIAL.md) for updated instructions.
+
+### Added
+- `stream` for sets: `KeySetIndex` and `ValueSetIndex`. (#1088)
+- Proofs of absence of an element with the specified index for `ProofListIndexProxy`. (#1081)
 
 ## [0.7.0] - 2019-07-17
 
@@ -46,7 +64,7 @@ the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.
 - `RawTransaction#fromMessage(TransactionMessage)`, which is mostly useful in tests,
   where you might have a message but need it as a `RawTransaction` in some assertions.
 
-[testkit-documentation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#testing
+[testkit-documentation]: https://exonum.com/doc/version/0.12/get-started/java-binding/#testing
 
 ### Changed
 - Improved the throughput of transaction processing twofold. Java services on Exonum Java 0.7.0 
@@ -107,7 +125,7 @@ The release is based on Exonum 0.11.
 - `toOptional()` method to `EntryIndexProxy`. (#790)
 - `getTransactionPool()` method to `Blockchain`. (#850)
 
-[installation]: https://exonum.com/doc/version/0.11/get-started/java-binding/#installation
+[installation]: https://exonum.com/doc/version/0.12/get-started/java-binding/#installation
 
 ### Changed
 - Service HTTP APIs provided with `Service#createPublicApiHandlers` are now mounted
@@ -279,7 +297,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.7.0...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.8.0...HEAD
+[0.8.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.7.0...ejb/v0.8.0
 [0.7.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...ejb/v0.7.0
 [0.6.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...ejb/v0.6.0
 [0.5.0]: https://github.com/exonum/exonum-java-binding/compare/v0.4...ejb/v0.5.0

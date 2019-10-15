@@ -179,12 +179,12 @@ fn throw(env: &JNIEnv, error_message: &str) {
 }
 
 /// Tries to get meaningful description from panic-error.
-pub fn any_to_string(any: &Box<Any + Send>) -> String {
+pub fn any_to_string(any: &Box<dyn Any + Send>) -> String {
     if let Some(s) = any.downcast_ref::<&str>() {
         s.to_string()
     } else if let Some(s) = any.downcast_ref::<String>() {
         s.clone()
-    } else if let Some(error) = any.downcast_ref::<Box<Error + Send>>() {
+    } else if let Some(error) = any.downcast_ref::<Box<dyn Error + Send>>() {
         error.description().to_string()
     } else {
         "Unknown error occurred".to_string()

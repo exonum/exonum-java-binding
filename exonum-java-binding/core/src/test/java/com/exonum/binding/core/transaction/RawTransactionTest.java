@@ -25,8 +25,8 @@ class RawTransactionTest {
 
   @Test
   void builderTest() {
-    short serviceId = 0x0A;
-    short transactionId = 0x0B;
+    int serviceId = 0x0A;
+    int transactionId = 0x0B;
     byte[] payload = Bytes.bytes(0x00, 0x01, 0x02);
 
     RawTransaction transaction = RawTransaction.newBuilder()

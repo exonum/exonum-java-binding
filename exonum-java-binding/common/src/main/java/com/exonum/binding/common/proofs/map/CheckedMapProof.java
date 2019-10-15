@@ -23,17 +23,17 @@ import java.util.Set;
 
 /**
  * A checked map proof.
- * In case of incorrect proof all methods (except for getStatus and compareWithRootHash)
+ * In case of incorrect proof all methods (except for getProofStatus)
  * throw IllegalStateException.
  * Example usage:
  * <pre>{@code
  * ByteString key = "The key for which I want a proved value".getBytes();
- * HashCode expectedRootHash = // get a known root hash from block proof //
+ * HashCode expectedIndexHash = // get a known index hash from block proof //
  * UncheckedMapProof proof = requestProofForKey(key);
  * // Convert to checked
  * CheckedMapProof checkedProof = proof.check();
- * // Check the root hash
- * if (checkedProof.isValid() && checkedProof.getRootHash().equals(expectedRootHash)) {
+ * // Check the index hash
+ * if (checkedProof.isValid() && checkedProof.getIndexHash().equals(expectedIndexHash)) {
  *   // Get and use the value(s)
  *   ByteString value = checked.get(key);
  * }

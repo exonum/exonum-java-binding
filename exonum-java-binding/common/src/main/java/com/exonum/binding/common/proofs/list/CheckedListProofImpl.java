@@ -30,7 +30,10 @@ import java.util.NavigableMap;
  *   <li>a calculated index hash of corresponding collection
  *   <li>proof elements
  * </ul>
- * If the proof is not valid, you may get the verification status using
+ *
+ * <p>If the proof is the proof of absence, then empty collection of elements is returned.
+ *
+ * <p>If the proof is not valid, you may get the verification status using
  * {@link #getProofStatus()} with description of why the proof is not
  * valid.
  */
@@ -45,7 +48,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
   /**
    * Creates checked list proof.
    * @param calculatedIndexHash calculated index hash of the proof
-   * @param elements proof elements collection
+   * @param elements proof elements collection (empty in case of a proof of absence)
    * @param proofStatus a status of proof verification
    */
   public CheckedListProofImpl(HashCode calculatedIndexHash,
@@ -62,7 +65,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof {
   }
 
   @Override
-  public HashCode getRootHash() {
+  public HashCode getIndexHash() {
     checkValid();
     return calculatedIndexHash;
   }

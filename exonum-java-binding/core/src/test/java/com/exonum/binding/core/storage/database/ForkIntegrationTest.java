@@ -118,6 +118,113 @@ class ForkIntegrationTest {
     );
   }
 
+  @Test
+  void rollbacksChangesMadeSinceLastCheckpoint() throws Exception {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner("parent")) {
+      Fork fork = db.createFork(cleaner);
+
+      // Create a list with a single element
+      String listName = "list";
+      ListIndex<String> l1 = newList(listName, fork);
+      l1.add("s1");
+
+      // Create a checkpoint
+      fork.createCheckpoint();
+
+      ListIndex<String> l2 = newList(listName, fork);
+      // Modify the list
+      l2.add("s2");
+      assertThat(l2).containsExactly("s1", "s2");
+
+      // Rollback the changes
+      fork.rollback();
+
+      // Verify the state of the list is equal to the one just before
+      // the checkpoint was created
+      ListIndex<String> l3 = newList(listName, fork);
+      assertThat(l3).containsExactly("s1");
+    }
+  }
+
+  @Test
+  void rollbackDoesNotAffectDatabase() throws Exception {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+         Cleaner cleaner = new Cleaner("cleaner")) {
+      String indexName = "list";
+
+      Fork fork1 = db.createFork(cleaner);
+      ListIndex<String> list1 = newList(indexName, fork1);
+      list1.add("s1");
+      // Merge the fork, so that the database has a list ["s1"]
+      db.merge(fork1);
+
+      Fork fork2 = db.createFork(cleaner);
+      ListIndex<String> list2 = newList(indexName, fork2);
+      list2.add("s2");
+      list2.add("s3");
+      assertThat(list2).containsExactly("s1", "s2", "s3");
+      // Rollback the 2nd fork
+      fork2.rollback();
+      // and merge it (a fork with no changes)
+      db.merge(fork2);
+
+      // Only changes from the first fork persist in the database, because
+      // second fork was rolled back.
+      Snapshot s = db.createSnapshot(cleaner);
+      ListIndex<String> list3 = newList(indexName, s);
+      assertThat(list3).containsExactly("s1");
+    }
+  }
+
+  @Test
+  void rollbacksAllChangesIfNoCheckpointWasCreated() throws Exception {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+         Cleaner cleaner = new Cleaner("parent")) {
+      Fork fork = db.createFork(cleaner);
+
+      ListIndex<String> list = newList("list", fork);
+      list.add("s1");
+
+      fork.rollback();
+
+      ListIndex<String> list2 = newList("list", fork);
+      assertThat(list2).isEmpty();
+    }
+  }
+
+  @Test
+  void createCheckpointInvalidatesDependentObjects() throws CloseFailuresException {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner("parent")) {
+      Fork fork = db.createFork(cleaner);
+
+      ListIndex<String> l1 = newList("test_list", fork);
+
+      // Create a checkpoint
+      fork.createCheckpoint();
+
+      // Check the collections created before checkpoint are inaccessible
+      assertThrows(IllegalStateException.class, l1::size);
+    }
+  }
+
+  @Test
+  void rollbackInvalidatesDependentObjects() throws CloseFailuresException {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner("parent")) {
+      Fork fork = db.createFork(cleaner);
+
+      ListIndex<String> l1 = newList("test_list", fork);
+
+      // Rollback
+      fork.rollback();
+
+      // Check the collections created before rollback are inaccessible
+      assertThrows(IllegalStateException.class, l1::size);
+    }
+  }
+
   private static ListIndex<String> newList(String name, View view) {
     return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
   }

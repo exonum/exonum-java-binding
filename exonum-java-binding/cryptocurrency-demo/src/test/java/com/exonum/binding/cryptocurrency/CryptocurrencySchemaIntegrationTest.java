@@ -44,7 +44,7 @@ class CryptocurrencySchemaIntegrationTest {
     Snapshot view = testKit.getSnapshot();
     CryptocurrencySchema schema = new CryptocurrencySchema(view);
 
-    HashCode walletsMerkleRoot = schema.wallets().getRootHash();
+    HashCode walletsMerkleRoot = schema.wallets().getIndexHash();
     ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
 
     assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);

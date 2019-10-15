@@ -38,17 +38,17 @@ public class CheckedFlatMapProof implements CheckedMapProof {
 
   private final Set<ByteString> missingKeys;
 
-  private final HashCode rootHash;
+  private final HashCode indexHash;
 
   private final MapProofStatus status;
 
   private CheckedFlatMapProof(
       MapProofStatus status,
-      HashCode rootHash,
+      HashCode indexHash,
       Set<MapEntry<ByteString, ByteString>> entries,
       Set<ByteString> missingKeys) {
     this.status = checkNotNull(status);
-    this.rootHash = checkNotNull(rootHash);
+    this.indexHash = checkNotNull(indexHash);
     this.entries = entries.stream()
         .collect(toMap(MapEntry::getKey, MapEntry::getValue));
     this.missingKeys = checkNotNull(missingKeys);
@@ -57,16 +57,16 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   /**
    * Creates a valid map proof.
    *
-   * @param rootHash the Merkle root hash calculated by the validator
+   * @param indexHash the index hash calculated by the validator
    * @param entries the set of entries that are proved to be in the map
    * @param missingKeys the set of keys that are proved <em>not</em> to be in the map
    * @return a new checked proof
    */
   public static CheckedFlatMapProof correct(
-      HashCode rootHash,
+      HashCode indexHash,
       Set<MapEntry<ByteString, ByteString>> entries,
       Set<ByteString> missingKeys) {
-    return new CheckedFlatMapProof(MapProofStatus.CORRECT, rootHash, entries, missingKeys);
+    return new CheckedFlatMapProof(MapProofStatus.CORRECT, indexHash, entries, missingKeys);
   }
 
   /**
@@ -105,9 +105,9 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   @Override
-  public HashCode getRootHash() {
+  public HashCode getIndexHash() {
     checkValid();
-    return rootHash;
+    return indexHash;
   }
 
   @Override

@@ -42,6 +42,19 @@ public final class Fork extends View {
    * to cancel it on peer ownership transfer, happening in {@link #intoPatch()}.
    */
   private final ProxyDestructor destructor;
+  /**
+   * A cleaner for this fork.
+   */
+  private final Cleaner forkCleaner;
+  /**
+   * A cleaner for objects depending on the fork. A separate cleaner is needed to be able to destroy
+   * the objects depending on the fork, primarily — indexes, when it is converted into patch
+   * and invalidated or rolled-back (which requires collection invalidation).
+   *
+   * <p>It is a "child" of the {@link #forkCleaner} which destroys the fork itself and,
+   * through this cleaner, any dependent objects.
+   */
+  private Cleaner indexCleaner;
 
   /**
    * Creates a new owning Fork proxy.
@@ -59,7 +72,7 @@ public final class Fork extends View {
    * @param nativeHandle a handle of the native Fork object
    * @param owningHandle whether a proxy owns the corresponding native object and is responsible
    *                     to clean it up
-   * @param cleaner a cleaner to perform any operations
+   * @param cleaner a cleaner to destroy this fork and any dependent objects
    */
   public static Fork newInstance(long nativeHandle, boolean owningHandle, Cleaner cleaner) {
     checkNotNull(cleaner, "cleaner");
@@ -72,12 +85,7 @@ public final class Fork extends View {
       }
     });
 
-    // Create a cleaner for collections. A separate cleaner is needed to be able to destroy
-    // the objects depending on the fork when it is converted into patch and invalidated
-    Cleaner forkCleaner = new Cleaner();
-    cleaner.add(forkCleaner::close);
-
-    return new Fork(h, destructor, forkCleaner);
+    return new Fork(h, destructor, cleaner);
   }
 
   /**
@@ -85,11 +93,18 @@ public final class Fork extends View {
    *
    * @param nativeHandle a handle of the native Fork object
    * @param destructor a destructor of the native peer, registered with the parent cleaner
-   * @param forkCleaner a cleaner for objects depending on the fork
+   * @param parentCleaner a cleaner for this fork
    */
-  private Fork(NativeHandle nativeHandle, ProxyDestructor destructor, Cleaner forkCleaner) {
-    super(nativeHandle, forkCleaner, true);
+  private Fork(NativeHandle nativeHandle, ProxyDestructor destructor, Cleaner parentCleaner) {
+    super(nativeHandle, true);
     this.destructor = destructor;
+    this.forkCleaner = parentCleaner;
+    replaceIndexCleaner();
+  }
+
+  @Override
+  public Cleaner getCleaner() {
+    return indexCleaner;
   }
 
   /**
@@ -111,7 +126,7 @@ public final class Fork extends View {
 
     // Close all resources depending on this fork
     try {
-      getCleaner().close();
+      indexCleaner.close();
     } catch (CloseFailuresException e) {
       // Destroy this fork and abort the operation if there are any failures
       destructor.clean();
@@ -137,6 +152,62 @@ public final class Fork extends View {
   }
 
   /**
+   * Creates in-memory checkpoint that can be used to rollback changes.
+   */
+  void createCheckpoint() {
+    checkState(nativeCanRollback(getNativeHandle()),
+        "This fork does not support checkpoints");
+
+    closeDependentObjects();
+
+    nativeCreateCheckpoint(getNativeHandle());
+  }
+
+  /**
+   * Rollbacks changes to the latest checkpoint. Affects only changes made with
+   * this particular Fork instance.
+   *
+   * <p>If no checkpoints was created, rollbacks all changes made by this fork.
+   */
+  void rollback() {
+    checkState(nativeCanRollback(getNativeHandle()),
+        "This fork does not support rollbacks");
+
+    closeDependentObjects();
+
+    nativeRollback(getNativeHandle());
+  }
+
+  private void closeDependentObjects() {
+    // Clear the registry of opened indexes as they will be closed
+    clearOpenIndexes();
+
+    // Close the active collections (and any other dependent objects),
+    // as rollback requires their invalidation
+    try {
+      indexCleaner.close();
+    } catch (CloseFailuresException e) {
+      // Close failures must not normally happen and usually indicate a serious framework error,
+      // hence we abort the operation. However, it is not always caused by an error
+      // in the framework, as the client code can register its own operations in the Cleaner,
+      // provided by this fork.
+      destructor.clean();
+      throw new IllegalStateException(
+          "Operation aborted due to some objects that had failed to close", e);
+    }
+
+    // Create a new cleaner for indexes instead of the recently closed
+    replaceIndexCleaner();
+  }
+
+  private void replaceIndexCleaner() {
+    // Create a new cleaner for collections
+    indexCleaner = new Cleaner();
+    // Register in the parent cleaner
+    forkCleaner.add(indexCleaner::close);
+  }
+
+  /**
    * Returns true if this fork can be converted into patch.
    */
   private static native boolean nativeCanConvertIntoPatch(long nativeHandle);
@@ -149,4 +220,24 @@ public final class Fork extends View {
    * invalidated.
    */
   private static native long nativeIntoPatch(long nativeHandle);
+
+  /**
+   * Creates in-memory checkpoint that can be used to rollback changes.
+   */
+  private static native void nativeCreateCheckpoint(long nativeHandle);
+
+  /**
+   * Rollback changes to the latest checkpoint. Affects only changes made with
+   * this particular Fork instance.
+   */
+  private static native void nativeRollback(long nativeHandle);
+
+  /**
+   * Returns true if creating checkpoints and performing rollbacks is
+   * possible with this particular Fork instance.
+   *
+   * @see #createCheckpoint()
+   * @see #rollback()
+   */
+  private static native boolean nativeCanRollback(long nativeHandle);
 }

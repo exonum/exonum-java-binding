@@ -42,7 +42,7 @@ class CheckedMapProofMatcherTest {
   private static final String TEST_VALUE = "hello";
   private static final List<MapTestEntry> TEST_ENTRY_LIST = Arrays
       .asList(presentEntry(TEST_KEY1, TEST_VALUE), absentEntry(TEST_KEY2));
-  private static final HashCode ROOT_HASH = HashCode.fromString("123456ef");
+  private static final HashCode INDEX_HASH = HashCode.fromString("123456ef");
 
   @Test
   void matchesInvalidProof() {
@@ -63,7 +63,7 @@ class CheckedMapProofMatcherTest {
         MapEntry.valueOf(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
 
     CheckedMapProof proof = CheckedFlatMapProof.correct(
-        ROOT_HASH,
+        INDEX_HASH,
         Collections.singleton(entry),
         Collections.singleton(toByteString(TEST_KEY2)));
 
@@ -82,9 +82,9 @@ class CheckedMapProofMatcherTest {
     ByteString actualValue = ByteString.copyFromUtf8("hello");
     MapEntry<ByteString, ByteString> entry = MapEntry.valueOf(toByteString(presentKey),
         actualValue);
-    HashCode rootHash = HashCode.fromString("123456ef");
+    HashCode indexHash = HashCode.fromString("123456ef");
     CheckedMapProof proof = CheckedFlatMapProof.correct(
-        rootHash,
+        indexHash,
         Collections.singleton(entry),
         Collections.singleton(toByteString(absentKey)));
 
@@ -92,7 +92,7 @@ class CheckedMapProofMatcherTest {
     matcher.describeMismatchSafely(proof, d);
 
     assertThat(d.toString(), equalTo("was a valid proof, entries=[(ab -> hello)], "
-        + "missing keys=[cd], Merkle root=<123456ef>"));
+        + "missing keys=[cd], index hash=<123456ef>"));
   }
 
   @Test

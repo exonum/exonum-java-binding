@@ -21,7 +21,7 @@ import static com.exonum.binding.test.Bytes.createPrefixed;
 import com.google.protobuf.ByteString;
 import java.util.BitSet;
 
-class DbKeyTestUtils {
+public class DbKeyTestUtils {
 
   /**
    * Returns a new branch db key with the given prefix. The number of significant bits

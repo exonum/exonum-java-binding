@@ -19,6 +19,7 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V9;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,7 +38,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 class ValueSetIndexProxyIntegrationTest
@@ -159,10 +159,25 @@ class ValueSetIndexProxyIntegrationTest
     });
   }
 
+  @Test
+  void testStream() {
+    runTestWithView(database::createFork, (set) -> {
+      List<String> elements = TestStorageItems.values;
+
+      elements.forEach(set::add);
+
+      List<ValueSetIndexProxy.Entry<String>> entriesFromStream = set.stream()
+          .collect(toList());
+      List<ValueSetIndexProxy.Entry<String>> entriesExpected = getOrderedEntries(elements);
+
+      assertThat(entriesFromStream, equalTo(entriesExpected));
+    });
+  }
+
   private static List<HashCode> getOrderedHashes(List<String> elements) {
     return getOrderedEntries(elements).stream()
         .map(ValueSetIndexProxy.Entry::getHash)
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private static List<ValueSetIndexProxy.Entry<String>> getOrderedEntries(List<String> elements) {
@@ -170,7 +185,7 @@ class ValueSetIndexProxyIntegrationTest
         .map(value -> ValueSetIndexProxy.Entry.from(getHashOf(value), value))
         .sorted((e1, e2) -> UnsignedBytes.lexicographicalComparator()
             .compare(e1.getHash().asBytes(), e2.getHash().asBytes()))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   @Test

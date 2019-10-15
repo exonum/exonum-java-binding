@@ -16,9 +16,6 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.io.BaseEncoding.base16;
-
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
@@ -33,7 +30,6 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
-import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
 import org.apache.logging.log4j.LogManager;
@@ -61,9 +57,9 @@ class ServiceRuntimeAdapter {
    * Deploys the Java service artifact.
    *
    * @param id the service artifact id in format "groupId:artifactId:version"
-   * @param deploySpec the deploy specification as a serialized {@link com.google.protobuf.Any}
+   * @param deploySpec the deploy specification as a serialized
+   *     {@link com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments}
    *     protobuf message
-   *     with {@link com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments}
    * @throws IllegalArgumentException if the deploy specification or id are not valid
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
    * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
@@ -75,15 +71,22 @@ class ServiceRuntimeAdapter {
     serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), artifactFilename);
   }
 
+  /**
+   * Returns true if the artifact with the given id is deployed in this runtime; false — otherwise.
+   * @param id the service artifact id in format "groupId:artifactId:version"
+   */
+  boolean isArtifactDeployed(String id) {
+    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom(id);
+    return serviceRuntime.isArtifactDeployed(artifactId);
+  }
+
   private static DeployArguments unpackDeployArgs(String id, byte[] deploySpec) {
     try {
-      Any anyDeploySpec = Any.parseFrom(deploySpec);
-      checkArgument(anyDeploySpec.is(DeployArguments.class), "Deploy specification "
-              + "for %s contains message of unexpected type inside Any (%s), must be %s",
-          id, anyDeploySpec.getTypeUrl(), DeployArguments.getDescriptor().getFullName());
-      return anyDeploySpec.unpack(DeployArguments.class);
+      return DeployArguments.parseFrom(deploySpec);
     } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException("Invalid deploy specification for " + id, e);
+      String message = "Invalid deploy specification for " + id;
+      logger.error(message, e);
+      throw new IllegalArgumentException(message, e);
     }
   }
 
@@ -104,34 +107,22 @@ class ServiceRuntimeAdapter {
   }
 
   /**
-   * Configures a started service instance.
+   * Performs an initial configuration of a started service instance.
    *
    * @param id the id of the service
    * @param forkHandle a handle to a native fork object
-   * @param configuration the service configuration parameters as serialized protobuf Any
+   * @param configuration the service configuration parameters as a serialized protobuf message
    * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#configureService(Integer, Fork, Any)
+   * @see ServiceRuntime#initializeService(Integer, Fork, byte[])
    */
-  void configureService(int id, long forkHandle, byte[] configuration)
+  void initializeService(int id, long forkHandle, byte[] configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
-      Any parsedConfig = decodeConfiguration(configuration);
 
-      serviceRuntime.configureService(id, fork, parsedConfig);
+      serviceRuntime.initializeService(id, fork, configuration);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
-    }
-  }
-
-  private static Any decodeConfiguration(byte[] configuration) {
-    try {
-      return Any.parseFrom(configuration);
-    } catch (InvalidProtocolBufferException e) {
-      String message = String.format("Could not parse the config (%s) as Any",
-          base16().encode(configuration));
-      logger.error(message, e);
-      throw new IllegalArgumentException(message, e);
     }
   }
 
