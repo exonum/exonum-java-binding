@@ -37,6 +37,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
@@ -92,6 +98,33 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
+
+      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+            <configuration>
+              <protocArtifact>
+                com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
+              </protocArtifact>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+    <extensions>
+      <!-- Use an extension that sets the OS classifier, required to locate
+           the correct protoc executable -->
+      <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.6.2</version>
+      </extension>
+    </extensions>
   </build>
 </project>

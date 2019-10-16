@@ -41,6 +41,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -181,12 +182,24 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   //  to validate that custom configuration works [ECR-3652]
   @Test
   void createTestKitWithBuilderForSingleServiceWithCustomConfiguration() {
+    String configurationValue = "Custom value";
+    TestConfiguration testConfiguration = TestConfiguration.newBuilder()
+        .setValue(configurationValue)
+        .build();
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, DEFAULT_CONFIGURATION)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, testConfiguration)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
+      TestService service = testKit.getService(SERVICE_NAME, TestService.class);
+      // Check that configuration value is used in initialization
+      Snapshot view = testKit.getSnapshot();
+      TestSchema testSchema = service.createDataSchema(view);
+      ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
+      Map<HashCode, String> testMap = toMap(testProofMap);
+      Map<HashCode, String> expected = ImmutableMap.of(
+          TestService.INITIAL_ENTRY_KEY, configurationValue);
+      assertThat(testMap).isEqualTo(expected);
     }
   }
 
