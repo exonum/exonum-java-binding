@@ -42,7 +42,7 @@ use std::fmt;
 use storage::View;
 use to_handle;
 use utils::{
-    jni_cache::{classes_refs, runtime_adapter},
+    jni_cache::{classes_refs, runtime_adapter, tx_execution_exception},
     panic_on_exception, unwrap_jni, get_and_clear_java_exception,
     describe_java_exception, get_exception_message,
 };
@@ -181,7 +181,7 @@ impl Runtime for JavaRuntimeProxy {
     fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
         let artifact = match self.parse_artifact(id) {
             Ok(id) => id.to_string(),
-            Err(err) => {
+            Err(_) => {
                 return false;
             },
         };
@@ -531,7 +531,12 @@ impl ExceptionHandlers {
     };
 
     fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {
-        let err_code = env.call_method(exception, "getErrorCode", "()B", &[])?;
+        let err_code = env.call_method_unchecked(
+            exception,
+            tx_execution_exception::get_error_code_id(),
+            JavaType::Primitive(Primitive::Byte),
+            &[],
+        )?;
         err_code.b()
     }
 }

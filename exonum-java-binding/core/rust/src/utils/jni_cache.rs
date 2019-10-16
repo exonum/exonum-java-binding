@@ -37,6 +37,7 @@ static INIT: Once = ONCE_INIT;
 static mut OBJECT_GET_CLASS: Option<JMethodID> = None;
 static mut CLASS_GET_NAME: Option<JMethodID> = None;
 static mut THROWABLE_GET_MESSAGE: Option<JMethodID> = None;
+static mut TX_EXECUTION_GET_ERROR_CODE: Option<JMethodID> = None;
 
 static mut RUNTIME_ADAPTER_DEPLOY_ARTIFACT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED: Option<JMethodID> = None;
@@ -82,6 +83,12 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "java/lang/Throwable",
         "getMessage",
         "()Ljava/lang/String;",
+    );
+    TX_EXECUTION_GET_ERROR_CODE = get_method_id(
+        &env,
+        "com/exonum/binding/core/transaction/TransactionExecutionException",
+        "getErrorCode",
+        "()B",
     );
     RUNTIME_ADAPTER_DEPLOY_ARTIFACT = get_method_id(
         &env,
@@ -168,6 +175,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         OBJECT_GET_CLASS.is_some()
             && JAVA_LANG_ERROR.is_some()
             && THROWABLE_GET_MESSAGE.is_some()
+            && TX_EXECUTION_GET_ERROR_CODE.is_some()
             && RUNTIME_ADAPTER_DEPLOY_ARTIFACT.is_some()
             && RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.is_some()
             && RUNTIME_ADAPTER_CREATE_SERVICE.is_some()
@@ -297,6 +305,17 @@ pub mod throwable {
     pub fn get_message_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { THROWABLE_GET_MESSAGE.unwrap() }
+    }
+}
+
+/// Refers to the cached methods of the `com.exonum.binding.core.transaction.TransactionExecutionException` class.
+pub mod tx_execution_exception {
+    use super::*;
+
+    /// Returns cached `JMethodID` for `TransactionExecutionException.getErrorCode()`.
+    pub fn get_error_code_id() -> JMethodID<'static> {
+        check_cache_initialized();
+        unsafe { TX_EXECUTION_GET_ERROR_CODE.unwrap() }
     }
 }
 

@@ -81,7 +81,7 @@ impl NodeContext {
         );
 
         let tx_hash = signed.object_hash();
-        // TODO: check Core behaviour/any errors on service inactivity
+        // TODO(ECR-3679): check Core behaviour/any errors on service inactivity
         self.api_context.sender().broadcast_transaction(
             signed.into_verified()?
         )?;
@@ -123,9 +123,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
                 match node.submit(tx) {
                     Ok(tx_hash) => convert_hash(&env, &tx_hash),
                     Err(err) => {
-                        // node#submit can fail on an error in ApiSender#send.
-                        // The former is the service implementation error;
-                        // the latter is an internal, unrecoverable error.
+                        // node#submit can fail on an error in ApiSender#send
                         let error_class = TX_SUBMISSION_EXCEPTION;
                         let error_description = err.to_string();
                         env.throw_new(error_class, error_description)?;
