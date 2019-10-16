@@ -164,11 +164,7 @@ impl Runtime for JavaRuntimeProxy {
                 ],
             ).and_then(JValue::v);
 
-            Ok(Self::handle_exception(
-                env,
-                jni_res,
-                &[(&classes_refs::service_loading_exception(), ExceptionHandlers::SERVICE_LOADING)]
-            ))
+            Ok(Self::handle_exception::<&ExceptionHandler, ()>(env, jni_res, &[]))
         });
 
         Box::new(
@@ -521,13 +517,6 @@ impl ExceptionHandlers {
         let msg = unwrap_jni(get_exception_message(env, exception))
             .unwrap_or(String::new());
         ExecutionError::new(ErrorKind::service(code), msg)
-    };
-
-    const SERVICE_LOADING: &'static ExceptionHandler = &|env, exception| {
-        assert!(!exception.is_null(), "No exception thrown.");
-        let msg = unwrap_jni(get_exception_message(env, exception));
-        let desc = format!("ServiceLoadingException(message: {:?})", msg);
-        (Error::JavaException, desc).into()
     };
 
     fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {
