@@ -17,7 +17,7 @@
 use exonum::{
     api::ApiContext,
     crypto::{Hash, PublicKey},
-    messages::{BinaryValue, SignedMessage},
+    messages::Verified,
     runtime::{AnyTx, CallInfo},
 };
 use exonum_merkledb::{Snapshot, ObjectHash};
@@ -74,17 +74,15 @@ impl NodeContext {
     #[doc(hidden)]
     pub fn submit(&self, tx: AnyTx) -> Result<Hash, failure::Error> {
         let (pub_key, secret_key) = self.api_context.service_keypair();
-        let signed = SignedMessage::new(
-            tx.to_bytes(),
+
+        let verified = Verified::from_value(
+            tx,
             pub_key.to_owned(),
             secret_key,
         );
-
-        let tx_hash = signed.object_hash();
+        let tx_hash = verified.object_hash();
         // TODO(ECR-3679): check Core behaviour/any errors on service inactivity
-        self.api_context.sender().broadcast_transaction(
-            signed.into_verified()?
-        )?;
+        self.api_context.sender().broadcast_transaction(verified)?;
         Ok(tx_hash)
     }
 }
