@@ -93,15 +93,16 @@ impl JavaRuntimeProxy {
             .map_or(default, |id| i32::from(id.0))
     }
 
-    /// Converts `JniResult<R>` into `Result<R, ExecutionError>`.
+    /// Converts `JniResult<R>` into `Result<R, ExecutionError>`. Need to be used after all
+    /// other checks. It doesn't panic unlike `utils::unwrap_jni`.
     fn convert_jni<R>(res: JniResult<R>) -> Result<R, ExecutionError> {
-        res.map_err(|err| {
-            let kind: ErrorKind = match err.kind() {
-                JniErrorKind::JavaException => Error::JavaException.into(),
-                _ => Error::OtherJniError.into(),
-            };
-            (kind, err).into()
-        })
+        res.map_err(|err|
+            (
+                Error::OtherJniError,
+                format!("JNI error in not managed code fragment: {:?}", err)
+            )
+                .into()
+        )
     }
 
     /// Handles and clears any Java exceptions.
