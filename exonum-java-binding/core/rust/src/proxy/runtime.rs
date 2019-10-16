@@ -349,7 +349,7 @@ impl Runtime for JavaRuntimeProxy {
 
     fn before_commit(&self, _dispatcher: &DispatcherRef, fork: &mut Fork) {
         unwrap_jni(self.exec.with_attached(|env| {
-            let view_handle = to_handle(View::from_ref_fork(fork));
+            let view_handle = to_handle(View::from_ref_mut_fork(fork));
 
             panic_on_exception(
                 env,
