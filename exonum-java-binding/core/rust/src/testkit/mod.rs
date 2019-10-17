@@ -234,29 +234,25 @@ fn instance_configs_from_java_array(
     let mut instance_configs = vec![];
     let num_artifacts = env.get_array_length(service_artifact_specs)?;
     for i in 0..num_artifacts {
-        let artifact_spec_obj =
-            env.auto_local(env.get_object_array_element(service_artifact_specs, i)?);
+        env.with_local_frame(8, || {
+            let artifact_spec_obj = env.get_object_array_element(service_artifact_specs, i)?;
 
-        let artifact_id = to_artifact_id_str(get_field_as_string(
-            env,
-            artifact_spec_obj.as_obj(),
-            "artifactId",
-        )?);
-        let deploy_args: jbyteArray = env
-            .get_field(artifact_spec_obj.as_obj(), "deployArguments", "[B")?
-            .l()?
-            .into_inner();
-        let deploy_args = env.convert_byte_array(deploy_args)?;
-        let service_specs_obj: jobjectArray = env
-            .get_field(
-                artifact_spec_obj.as_obj(),
-                "serviceSpecs",
-                SERVICE_SPECS_FIELD_TYPE,
-            )?
-            .l()?
-            .into_inner();
-        let configs = parse_service_specs(env, service_specs_obj, artifact_id, deploy_args)?;
-        instance_configs.extend(configs);
+            let artifact_id =
+                to_artifact_id_str(get_field_as_string(env, artifact_spec_obj, "artifactId")?);
+            let deploy_args: jbyteArray = env
+                .get_field(artifact_spec_obj, "deployArguments", "[B")?
+                .l()?
+                .into_inner();
+            let deploy_args = env.convert_byte_array(deploy_args)?;
+            let service_specs_obj: jobjectArray = env
+                .get_field(artifact_spec_obj, "serviceSpecs", SERVICE_SPECS_FIELD_TYPE)?
+                .l()?
+                .into_inner();
+            let configs = parse_service_specs(env, service_specs_obj, artifact_id, deploy_args)?;
+            instance_configs.extend(configs);
+
+            Ok(JObject::null())
+        })?;
     }
     Ok(instance_configs)
 }
@@ -272,12 +268,15 @@ fn parse_service_specs(
 
     let mut instance_configs = vec![];
     for i in 0..num_specs {
-        let service_spec = env.auto_local(env.get_object_array_element(specs_array, i)?);
-        let (spec, config) = parse_instance_spec(&env, service_spec.as_obj(), &artifact_id)?;
-        let cfg = InstanceConfig::new(spec, Some(deploy_args.to_bytes()), config);
-        instance_configs.push(cfg);
+        env.with_local_frame(8, || {
+            let service_spec = env.get_object_array_element(specs_array, i)?;
+            let (spec, config) = parse_instance_spec(&env, service_spec, &artifact_id)?;
+            let cfg = InstanceConfig::new(spec, Some(deploy_args.to_bytes()), config);
+            instance_configs.push(cfg);
+
+            Ok(JObject::null())
+        })?;
     }
-    env.delete_local_ref(specs_array.into())?;
 
     Ok(instance_configs)
 }
@@ -347,8 +346,7 @@ fn get_service_id_and_name(env: &JNIEnv, service_obj: JObject) -> JniResult<(u32
 fn get_field_as_string(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResult<String> {
     convert_to_string(
         env,
-        env.auto_local(env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?)
-            .as_obj(),
+        env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?,
     )
 }
 
