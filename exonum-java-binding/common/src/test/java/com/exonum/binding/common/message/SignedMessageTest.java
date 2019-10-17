@@ -29,8 +29,8 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.messages.Consensus;
 import com.exonum.binding.messages.Consensus.ExonumMessage;
-import com.exonum.binding.messages.Helpers;
-import com.exonum.binding.messages.Helpers.Signature;
+import com.exonum.binding.messages.Types;
+import com.exonum.binding.messages.Types.Signature;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,11 +51,11 @@ class SignedMessageTest {
     @BeforeEach
     void createProtoMessage() {
       payload = ExonumMessage.getDefaultInstance();
-      Helpers.PublicKey authorPk = aPublicKey()
+      Types.PublicKey authorPk = aPublicKey()
           .setData(ByteString.copyFrom(TEST_PUBLIC_KEY.toBytes()))
           .build();
       testSignature = new byte[Ed25519.SIGNATURE_BYTES];
-      Helpers.Signature signature = aSignature()
+      Types.Signature signature = aSignature()
           .setData(ByteString.copyFrom(testSignature))
           .build();
       message = Consensus.SignedMessage.newBuilder()
@@ -105,8 +105,8 @@ class SignedMessageTest {
   void parseFromPayloadNotExonumMessage() {
     ByteString invalidPayload = ByteString.copyFrom(
         bytes("Invalid payload: not an ExonumMessage"));
-    Helpers.PublicKey authorPk = aPublicKey().build();
-    Helpers.Signature signature = aSignature().build();
+    Types.PublicKey authorPk = aPublicKey().build();
+    Types.Signature signature = aSignature().build();
     byte[] message = Consensus.SignedMessage.newBuilder()
         .setPayload(invalidPayload)
         .setAuthor(authorPk)
@@ -118,12 +118,12 @@ class SignedMessageTest {
     assertThrows(InvalidProtocolBufferException.class, () -> SignedMessage.parseFrom(message));
   }
 
-  private static Helpers.PublicKey.Builder aPublicKey() {
-    return Helpers.PublicKey.newBuilder()
+  private static Types.PublicKey.Builder aPublicKey() {
+    return Types.PublicKey.newBuilder()
         .setData(ByteString.copyFrom(TEST_PUBLIC_KEY.toBytes()));
   }
 
-  private static Helpers.Signature.Builder aSignature() {
+  private static Types.Signature.Builder aSignature() {
     byte[] testSignature = new byte[Ed25519.SIGNATURE_BYTES];
     return Signature.newBuilder()
         .setData(ByteString.copyFrom(testSignature));
