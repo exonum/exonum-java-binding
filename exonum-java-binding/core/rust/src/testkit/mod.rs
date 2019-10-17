@@ -225,7 +225,7 @@ fn create_java_keypair<'a>(
 //
 // `TestKitServiceInstances` representation:
 //      String artifactId;
-//      String artifactFilename;
+//      byte[] deployArguments;
 //      ServiceSpec[] serviceSpecs;
 fn instance_configs_from_java_array(
     env: &JNIEnv,
@@ -242,8 +242,11 @@ fn instance_configs_from_java_array(
             artifact_spec_obj.as_obj(),
             "artifactId",
         )?);
-        let artifact_filename =
-            get_field_as_string(env, artifact_spec_obj.as_obj(), "artifactFilename")?;
+        let deploy_args: jbyteArray = env
+            .get_field(artifact_spec_obj.as_obj(), "deployArguments", "[B")?
+            .l()?
+            .into_inner();
+        let deploy_args = env.convert_byte_array(deploy_args)?;
         let service_specs_obj: jobjectArray = env
             .get_field(
                 artifact_spec_obj.as_obj(),
@@ -252,7 +255,7 @@ fn instance_configs_from_java_array(
             )?
             .l()?
             .into_inner();
-        let configs = parse_service_specs(env, service_specs_obj, artifact_id, artifact_filename)?;
+        let configs = parse_service_specs(env, service_specs_obj, artifact_id, deploy_args)?;
         instance_configs.extend(configs);
     }
     Ok(instance_configs)
@@ -263,7 +266,7 @@ fn parse_service_specs(
     env: &JNIEnv,
     specs_array: jobjectArray,
     artifact_id: String,
-    artifact_filename: String,
+    deploy_args: Vec<u8>,
 ) -> JniResult<Vec<InstanceConfig>> {
     let num_specs = env.get_array_length(specs_array)?;
 
@@ -271,7 +274,7 @@ fn parse_service_specs(
     for i in 0..num_specs {
         let service_spec = env.auto_local(env.get_object_array_element(specs_array, i)?);
         let (spec, config) = parse_instance_spec(&env, service_spec.as_obj(), &artifact_id)?;
-        let cfg = InstanceConfig::new(spec, Some(artifact_filename.to_bytes()), config);
+        let cfg = InstanceConfig::new(spec, Some(deploy_args.to_bytes()), config);
         instance_configs.push(cfg);
     }
     env.delete_local_ref(specs_array.into())?;
