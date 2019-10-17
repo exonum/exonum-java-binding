@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// TODO: need to be removed in ECR-3458
+#![allow(unused_imports)]
+#![allow(dead_code)]
 
 use jni::{
     self,

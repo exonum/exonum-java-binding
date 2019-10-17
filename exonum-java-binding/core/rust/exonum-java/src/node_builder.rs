@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-use exonum_btc_anchoring::ServiceFactory as BtcAnchoringServiceFactory;
-use exonum_configuration::ServiceFactory as ConfigurationServiceFactory;
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
     exonum::helpers::fabric::{self, ServiceFactory},
@@ -23,7 +21,6 @@ use java_bindings::{
         load_services_definition, system_service_names::*, EjbAppServices,
         PATH_TO_SERVICES_DEFINITION,
     },
-    JavaServiceFactoryAdapter,
 };
 
 use std::{collections::HashSet, path::Path};
@@ -81,9 +78,7 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
 
 fn system_service_factory_for_name(name: &str) -> Box<dyn ServiceFactory> {
     match name {
-        CONFIGURATION_SERVICE => Box::new(ConfigurationServiceFactory) as Box<dyn ServiceFactory>,
-        BTC_ANCHORING_SERVICE => Box::new(BtcAnchoringServiceFactory) as Box<dyn ServiceFactory>,
-        TIME_SERVICE => Box::new(TimeServiceFactory) as Box<dyn ServiceFactory>,
+        TIME_SERVICE => Box::new(TimeServiceFactory::default()) as Box<dyn ServiceFactory>,
         _ => panic!("Unknown system service name \"{}\" has been found", name),
     }
 }
