@@ -35,6 +35,7 @@ import com.exonum.binding.core.runtime.FrameworkModule;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
+import com.exonum.binding.core.runtime.ServiceRuntimeProtos;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
@@ -584,8 +585,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
         Map.Entry<ServiceArtifactId, String> serviceArtifact) {
       ServiceArtifactId serviceArtifactId = serviceArtifact.getKey();
       ServiceSpec[] serviceSpecs = services.get(serviceArtifactId).toArray(new ServiceSpec[0]);
+      ServiceRuntimeProtos.DeployArguments deployArgs = ServiceRuntimeProtos.DeployArguments.newBuilder()
+          .setArtifactFilename(serviceArtifact.getValue())
+          .build();
       return new TestKitServiceInstances(
-          serviceArtifactId.toString(), serviceArtifact.getValue(), serviceSpecs);
+          serviceArtifactId.toString(), deployArgs.toByteArray(), serviceSpecs);
     }
 
     private void checkCorrectValidatorNumber() {

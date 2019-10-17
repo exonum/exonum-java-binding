@@ -60,8 +60,9 @@ class TestKitTestWithArtifactsCreated {
         TestTransaction.class, TestSchema.class, TestService2.class);
   }
 
-  static void createInvalidArtifact(String filename) throws IOException {
-    Path artifactLocation = artifactsDirectory.resolve(filename);
+  static void createInvalidArtifact(Path directory, String filename) throws IOException {
+    Path artifactLocation = directory.resolve(filename);
+    // Create an invalid artifact without a TestService class
     createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class, TestTransaction.class,
         TestSchema.class);
   }

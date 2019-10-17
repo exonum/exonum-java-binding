@@ -23,12 +23,12 @@ package com.exonum.binding.testkit;
 class TestKitServiceInstances {
 
   final String artifactId;
-  final String artifactFilename;
+  final byte[] deployArguments;
   final ServiceSpec[] serviceSpecs;
 
-  TestKitServiceInstances(String artifactId, String artifactFilename, ServiceSpec[] serviceSpecs) {
+  TestKitServiceInstances(String artifactId, byte[] deployArguments, ServiceSpec[] serviceSpecs) {
     this.artifactId = artifactId;
-    this.artifactFilename = artifactFilename;
+    this.deployArguments = deployArguments;
     this.serviceSpecs = serviceSpecs;
   }
 }

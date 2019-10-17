@@ -45,6 +45,8 @@ import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+
+import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -52,6 +54,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -152,29 +155,29 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
 
   @Test
   void createTestKitWithNoFileThrows() {
-    String invalidFilename = "invalid-filename.jar";
+    String nonexistentArtifactFilename = "nonexistent-artifact.jar";
     Class<RuntimeException> exceptionType = RuntimeException.class;
     TestKit.Builder testKitBuilder = TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, invalidFilename)
+        .withDeployedArtifact(ARTIFACT_ID, nonexistentArtifactFilename)
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
         .withArtifactsDirectory(artifactsDirectory);
     RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
     assertThat(thrownException.getMessage())
-        .contains("Failed to load the service from ", invalidFilename);
+        .contains("Failed to load the service from ", nonexistentArtifactFilename);
   }
 
   @Test
-  void createTestKitWithInvalidArtifactThrows() throws Exception {
-    String invalidFilename = "invalid-filename.jar";
-    createInvalidArtifact(invalidFilename);
+  void createTestKitWithInvalidArtifactThrows(@TempDir Path directory) throws Exception {
+    String invalidArtifactFilename = "invalid-artifact.jar";
+    createInvalidArtifact(directory, invalidArtifactFilename);
     Class<RuntimeException> exceptionType = RuntimeException.class;
     TestKit.Builder testKitBuilder = TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, invalidFilename)
+        .withDeployedArtifact(ARTIFACT_ID, invalidArtifactFilename)
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
         .withArtifactsDirectory(artifactsDirectory);
     RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
     assertThat(thrownException.getMessage())
-        .contains("Failed to load the service from ", invalidFilename);
+        .contains("Failed to load the service from ", invalidArtifactFilename);
   }
 
   // TODO: update TestService so that different configuration changes state and refactor this test
