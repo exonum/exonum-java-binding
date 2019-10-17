@@ -82,6 +82,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
             );
             builder = builder
                 .with_runtime(runtime)
+                // TODO: Rewrite with protobuf: ECR-3689
                 .with_instances(instance_configs_from_java_array(&env, services)?);
 
             if let Some(instance) =
@@ -248,6 +249,7 @@ fn instance_configs_from_java_array(
                 .get_field(artifact_spec_obj, "serviceSpecs", SERVICE_SPECS_FIELD_TYPE)?
                 .l()?
                 .into_inner();
+            // TODO: Avoid deploy arguments duplication after ECR-3690
             let configs = parse_service_specs(env, service_specs_obj, artifact_id, deploy_args)?;
             instance_configs.extend(configs);
 
