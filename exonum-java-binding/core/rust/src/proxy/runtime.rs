@@ -438,6 +438,12 @@ impl fmt::Debug for JavaRuntimeProxy {
     }
 }
 
+impl From<JavaRuntimeProxy> for (u32, Box<dyn Runtime>) {
+    fn from(r: JavaRuntimeProxy) -> Self {
+        (JavaRuntimeProxy::RUNTIME_ID as u32, Box::new(r))
+    }
+}
+
 /// Artifact identification properties within `JavaRuntimeProxy`
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct JavaArtifactId(String);
