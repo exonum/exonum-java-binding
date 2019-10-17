@@ -35,7 +35,7 @@ import com.exonum.binding.core.runtime.FrameworkModule;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos;
+import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
@@ -57,7 +57,6 @@ import com.google.inject.Module;
 import com.google.protobuf.Any;
 import com.google.protobuf.MessageLite;
 import io.vertx.ext.web.Router;
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +65,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
 /**
  * TestKit for testing blockchain services. It offers simple network configuration emulation
@@ -447,7 +447,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * <p>Once the service artifact is deployed, the service instances can be added with
      * {@link #withService(ServiceArtifactId, String, int, MessageLite)}.
      */
-    public Builder withDeployedArtifact(ServiceArtifactId serviceArtifactId, String artifactFilename) {
+    public Builder withDeployedArtifact(
+        ServiceArtifactId serviceArtifactId, String artifactFilename) {
       serviceArtifactFilenames.put(serviceArtifactId, artifactFilename);
       return this;
     }
@@ -492,17 +493,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       return this;
     }
 
-    private void checkServiceId(int serviceId, String serviceName) {
-      checkArgument(0 <= serviceId && serviceId <= MAX_SERVICE_INSTANCE_ID,
-          "Service (%s) id must be in range [0; %s], but was %s",
-          serviceName, MAX_SERVICE_INSTANCE_ID, serviceId);
-    }
-
-    private void checkServiceArtifactIsDeployed(ServiceArtifactId serviceArtifactId) {
-      checkArgument(serviceArtifactFilenames.containsKey(serviceArtifactId),
-          "Service %s should be deployed first in order to be created", serviceArtifactId);
-    }
-
     /**
      * Adds a service specification with which the TestKit would create the corresponding service
      * instance with no configuration. Several service specifications can be added. All
@@ -524,6 +514,17 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     public Builder withService(ServiceArtifactId serviceArtifactId, String serviceName,
                                int serviceId) {
       return withService(serviceArtifactId, serviceName, serviceId, DEFAULT_CONFIGURATION);
+    }
+
+    private void checkServiceId(int serviceId, String serviceName) {
+      checkArgument(0 <= serviceId && serviceId <= MAX_SERVICE_INSTANCE_ID,
+          "Service (%s) id must be in range [0; %s], but was %s",
+          serviceName, MAX_SERVICE_INSTANCE_ID, serviceId);
+    }
+
+    private void checkServiceArtifactIsDeployed(ServiceArtifactId serviceArtifactId) {
+      checkArgument(serviceArtifactFilenames.containsKey(serviceArtifactId),
+          "Service %s should be deployed first in order to be created", serviceArtifactId);
     }
 
     /**
@@ -585,7 +586,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
         Map.Entry<ServiceArtifactId, String> serviceArtifact) {
       ServiceArtifactId serviceArtifactId = serviceArtifact.getKey();
       ServiceSpec[] serviceSpecs = services.get(serviceArtifactId).toArray(new ServiceSpec[0]);
-      ServiceRuntimeProtos.DeployArguments deployArgs = ServiceRuntimeProtos.DeployArguments.newBuilder()
+      DeployArguments deployArgs = DeployArguments.newBuilder()
           .setArtifactFilename(serviceArtifact.getValue())
           .build();
       return new TestKitServiceInstances(

@@ -18,10 +18,10 @@ package com.exonum.binding.testkit;
 
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.io.TempDir;
 
 class TestKitTestWithArtifactsCreated {
 
@@ -68,7 +68,8 @@ class TestKitTestWithArtifactsCreated {
   }
 
   private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,
-                                     Class serviceModule, Class<?>... artifactClasses) throws IOException {
+                                     Class serviceModule,
+                                     Class<?>... artifactClasses) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId(serviceArtifactId.toString())
         .setPluginVersion(serviceArtifactId.getVersion())

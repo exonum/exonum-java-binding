@@ -59,8 +59,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class TestKitTest extends TestKitTestWithArtifactsCreated {
-  private String TIME_SERVICE_NAME = "time-service";
-  private int TIME_SERVICE_ID = 10;
+  private static final String TIME_SERVICE_NAME = "time-service";
+  private static final int TIME_SERVICE_ID = 10;
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
