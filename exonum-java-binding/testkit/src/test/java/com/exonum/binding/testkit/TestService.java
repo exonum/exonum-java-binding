@@ -29,6 +29,7 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
@@ -36,8 +37,7 @@ import java.nio.charset.StandardCharsets;
 final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
-      .hashString("initial key", StandardCharsets.UTF_8);
-  static final String INITIAL_ENTRY_VALUE = "initial value";
+      .hashString("Initial key", StandardCharsets.UTF_8);
 
   private final int serviceInstanceId;
   private Node node;

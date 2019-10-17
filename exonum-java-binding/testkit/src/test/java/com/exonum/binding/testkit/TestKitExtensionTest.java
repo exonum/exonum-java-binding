@@ -36,7 +36,7 @@ class TestKitExtensionTest extends TestKitTestWithArtifactsCreated {
 
   private static final TestKit.Builder defaultBuilder = TestKit.builder()
       .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-      .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+      .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
       .withArtifactsDirectory(artifactsDirectory);
 
   @Test

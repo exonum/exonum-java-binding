@@ -18,6 +18,7 @@ package com.exonum.binding.testkit;
 
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
+import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
@@ -30,6 +31,10 @@ class TestKitTestWithArtifactsCreated {
       ServiceArtifactId.of("com.exonum.binding", "test-service", "1.0.0");
   static final String SERVICE_NAME = "test-service";
   static final int SERVICE_ID = 46;
+  static final String CONFIGURATION_VALUE = "Initial value";
+  static final TestConfiguration SERVICE_CONFIGURATION = TestConfiguration.newBuilder()
+      .setValue(CONFIGURATION_VALUE)
+      .build();
 
   static final String ARTIFACT_FILENAME_2 = "test-service-2.jar";
   static final ServiceArtifactId ARTIFACT_ID_2 =
