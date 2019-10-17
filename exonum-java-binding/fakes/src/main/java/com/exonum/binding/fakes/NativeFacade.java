@@ -64,7 +64,7 @@ public final class NativeFacade {
 
   /**
    * Writes a service artifact that can be loaded, but with a service that cannot be
-   * {@linkplain ServiceRuntime#createService(ServiceInstanceSpec) instantiated}.
+   * {@linkplain ServiceRuntime#addService(com.exonum.binding.core.storage.database.Fork, ServiceInstanceSpec, byte[]) instantiated}.
    * @param artifactId the id of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location

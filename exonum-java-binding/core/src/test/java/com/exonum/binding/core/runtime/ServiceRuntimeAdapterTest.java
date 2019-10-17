@@ -32,6 +32,8 @@ import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.messages.Runtime.ArtifactId;
+import com.exonum.binding.messages.Runtime.InstanceSpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -101,7 +103,7 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
-  void initializeService() throws CloseFailuresException {
+  void addService() throws CloseFailuresException {
     int serviceId = 1;
     long forkHandle = 0x110b;
     Cleaner cleaner = new Cleaner();
@@ -109,13 +111,26 @@ class ServiceRuntimeAdapterTest {
     when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
+    String serviceName = "s1";
+    String javaArtifactId = "com.acme:foo:1.2.3";
+    byte[] instanceSpec = InstanceSpec.newBuilder()
+        .setId(serviceId)
+        .setName(serviceName)
+        .setArtifact(ArtifactId.newBuilder()
+            .setRuntimeId(1)
+            .setName(javaArtifactId)
+            .build())
+        .build()
+        .toByteArray();
     byte[] configuration = bytes(1, 2);
 
     // Initialize the service
-    serviceRuntimeAdapter.initializeService(serviceId, forkHandle, configuration);
+    serviceRuntimeAdapter.addService(forkHandle, instanceSpec, configuration);
 
     // Check the runtime was invoked with correct config
-    verify(serviceRuntime).initializeService(serviceId, fork, configuration);
+    ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
+        ServiceArtifactId.parseFrom(javaArtifactId));
+    verify(serviceRuntime).addService(fork, expected, configuration);
   }
 
   @Test
