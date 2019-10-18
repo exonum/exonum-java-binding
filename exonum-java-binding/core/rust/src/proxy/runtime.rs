@@ -48,6 +48,7 @@ use utils::{
 };
 use JniErrorKind;
 use JniResult;
+use JniError;
 
 /// A proxy for `ServiceRuntimeAdapter`s.
 #[derive(Clone)]
@@ -93,19 +94,7 @@ impl JavaRuntimeProxy {
             .map_or(default, |id| i32::from(id.0))
     }
 
-    /// Converts `JniResult<R>` into `Result<R, ExecutionError>`. Need to be used after all
-    /// other checks. It doesn't panic unlike `utils::unwrap_jni`.
-    fn convert_jni<R>(res: JniResult<R>) -> Result<R, ExecutionError> {
-        res.map_err(|err|
-            (
-                Error::OtherJniError,
-                format!("JNI error in not managed code fragment: {:?}", err)
-            )
-                .into()
-        )
-    }
-
-    /// Handles and clears any Java exceptions.
+    /// Handles and clears any Java exceptions or other JNI errors.
     ///
     /// Any JNI errors are converted into `ExecutionError` with their descriptions, for JNI errors
     /// like `JniErrorKind::JavaException` it gets (and clears) any exception that is currently
@@ -113,29 +102,97 @@ impl JavaRuntimeProxy {
     /// type and `exception_handlers` mapping.
     /// `ExceptionHandlers::DEFAULT` is called in case of there is no any handlers or handlers are
     /// not matched to exception type.
-    fn handle_exception<H, R>(
+    fn handle_error_or_exception<H, R>(
         env: &JNIEnv,
-        result: JniResult<R>,
+        err: JniError,
         exception_handlers: &[(&GlobalRef, H)],
-    ) -> Result<R, ExecutionError>
+    ) -> ExecutionError
         where
             H: Fn(&JNIEnv, JObject) -> ExecutionError,
     {
-        result.map_err(|err| {
-            match err.kind() {
-                JniErrorKind::JavaException => {
-                    let exception = get_and_clear_java_exception(env);
-                    for (class, handler) in exception_handlers {
-                        if unwrap_jni(env.is_instance_of(exception, *class)) {
-                            return handler(env, exception);
-                        }
+        match err.kind() {
+            JniErrorKind::JavaException => {
+                let exception = get_and_clear_java_exception(env);
+                for (class, handler) in exception_handlers {
+                    if unwrap_jni(env.is_instance_of(exception, *class)) {
+                        return handler(env, exception);
                     }
+                }
 
-                    ExceptionHandlers::DEFAULT(env, exception)
+                ExceptionHandlers::DEFAULT(env, exception)
+            },
+            _ => (Error::OtherJniError, err).into(),
+        }
+    }
+
+    /// Executes closure `f` and handles any type of JNI errors from it.
+    ///
+    /// Any JNI errors are converted into `ExecutionError` with their descriptions, for JNI errors
+    /// like `JniErrorKind::JavaException` it gets (and clears) any exception that is currently
+    /// being thrown, `ExceptionHandlers::DEFAULT` is applied for such exceptions.
+    fn jni_call_default<F, R>(
+        &self,
+        f: F,
+    ) -> Result<R, ExecutionError>
+        where
+            F: FnOnce(&JNIEnv) -> JniResult<R>,
+    {
+        self.jni_call::<F, &ExceptionHandler, R>(&[], f)
+    }
+
+    /// Executes closure `f` and handles any type of JNI errors from it.
+    ///
+    /// Any JNI errors are converted into `ExecutionError` with their descriptions, for JNI errors
+    /// like `JniErrorKind::JavaException` it gets (and clears) any exception that is currently
+    /// being thrown, then exception is passed to corresponding `ExceptionHandler` according their
+    /// type and `exception_handlers` mapping.
+    /// `ExceptionHandlers::DEFAULT` is called in case of there is no any handlers or handlers are
+    /// not matched to exception type.
+    fn jni_call<F, H, R>(
+        &self,
+        exception_handlers: &[(&GlobalRef, H)],
+        f: F,
+    ) -> Result<R, ExecutionError>
+        where
+            F: FnOnce(&JNIEnv) -> JniResult<R>,
+            H: Fn(&JNIEnv, JObject) -> ExecutionError,
+    {
+        let mut execution_error: Option<ExecutionError> = None;
+
+        // Any errors or exceptions from `f` closure (managed native or java code)
+        // will be handled by `Self::handle_error_or_exception` and stored as `execution_error`,
+        // `result` will be solely `Ok` in such case;
+        // Other errors (from jni_rs or JVM) are unexpected, they will be returned exclusively
+        // as `JniResult`
+        let result = self.exec.with_attached(|env| {
+            match f(env) {
+                Ok(value) => Ok(Some(value)),
+                Err(err) => {
+                    execution_error = Some(
+                        Self::handle_error_or_exception::<H, R>(env, err, exception_handlers)
+                    );
+                    Ok(None)
                 },
-                _ => (Error::OtherJniError, err).into(),
             }
-        })
+        });
+
+        match execution_error {
+            None => {
+                match result {
+                    Ok(result) => {
+                        assert!(result.is_some());
+                        Ok(result.unwrap())
+                    },
+                    Err(err) => Err(
+                        (
+                            Error::OtherJniError,
+                            format!("Unexpected error JNI error: {:?}", err)
+                        ).into()
+                    )
+                }
+            },
+            Some(error) => Err(error),
+        }
     }
 }
 
@@ -151,11 +208,11 @@ impl Runtime for JavaRuntimeProxy {
             Err(err) => return Box::new(Err(err).into_future()),
         };
 
-        let result = self.exec.with_attached(|env| {
+        let result = self.jni_call_default(|env| {
             let artifact_id = JObject::from(env.new_string(id)?);
             let spec = JObject::from(env.byte_array_from_slice(&deploy_spec)?);
 
-            let jni_res = env.call_method_unchecked(
+            env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::deploy_artifact_id(),
                 JavaType::Primitive(Primitive::Void),
@@ -163,16 +220,10 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(artifact_id),
                     JValue::from(spec),
                 ],
-            ).and_then(JValue::v);
-
-            Ok(Self::handle_exception::<&ExceptionHandler, ()>(env, jni_res, &[]))
+            ).and_then(JValue::v)
         });
 
-        Box::new(
-            Self::convert_jni(result)
-                .unwrap_or_else(|err| Err(err))
-                .into_future()
-        )
+        Box::new(result.into_future())
     }
 
     fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
@@ -203,17 +254,16 @@ impl Runtime for JavaRuntimeProxy {
     }
 
     fn start_service(&mut self, spec: &InstanceSpec) -> Result<(), ExecutionError> {
-        let adapter = self.runtime_adapter.as_obj().clone();
         let service_name = spec.name.clone();
         let id = spec.id;
         let artifact = self.parse_artifact(&spec.artifact)?;
 
-        let result = self.exec.with_attached(|env| {
+        self.jni_call_default(|env| {
             let name = JObject::from(env.new_string(service_name)?);
             let artifact_id = JObject::from(env.new_string(artifact.to_string())?);
 
-            let jni_res = env.call_method_unchecked(
-                adapter,
+            env.call_method_unchecked(
+                self.runtime_adapter.as_obj(),
                 runtime_adapter::create_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
@@ -221,11 +271,8 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(id as i32),
                     JValue::from(artifact_id),
                 ],
-            ).and_then(JValue::v);
-
-            Ok(Self::handle_exception::<&ExceptionHandler, ()>(env, jni_res, &[]))
-        });
-        Self::convert_jni(result)?
+            ).and_then(JValue::v)
+        })
     }
 
     fn initialize_service(
@@ -235,12 +282,12 @@ impl Runtime for JavaRuntimeProxy {
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
 
-        let result = self.exec.with_attached(|env| {
+        self.jni_call_default(|env| {
             let id = descriptor.id as i32;
             let view_handle = to_handle(View::from_ref_fork(fork));
             let params = JObject::from(env.byte_array_from_slice(&parameters)?);
 
-            let jni_res = env.call_method_unchecked(
+            env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::initialize_service_id(),
                 JavaType::Primitive(Primitive::Void),
@@ -249,29 +296,23 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(view_handle),
                     JValue::from(params),
                 ],
-            ).and_then(JValue::v);
-            Ok(Self::handle_exception::<&ExceptionHandler, ()>(env, jni_res, &[]))
-        });
-        Self::convert_jni(result)?
+            ).and_then(JValue::v)
+        })
     }
 
     fn stop_service(&mut self, descriptor: InstanceDescriptor) -> Result<(), ExecutionError> {
-        let adapter = self.runtime_adapter.as_obj();
-
-        let result = self.exec.with_attached(|env| {
+        self.jni_call_default(|env| {
             let id = descriptor.id as i32;
 
-            let jni_res = env.call_method_unchecked(
-                adapter,
+            env.call_method_unchecked(
+                self.runtime_adapter.as_obj(),
                 runtime_adapter::stop_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(id),
                 ],
-            ).and_then(JValue::v);
-            Ok(Self::handle_exception::<&ExceptionHandler, ()>(env, jni_res, &[]))
-        });
-        Self::convert_jni(result)?
+            ).and_then(JValue::v)
+        })
     }
 
     fn execute(
@@ -280,45 +321,38 @@ impl Runtime for JavaRuntimeProxy {
         call_info: &CallInfo,
         arguments: &[u8],
     ) -> Result<(), ExecutionError> {
-        let tx = if let Some((hash, pub_key)) = context.caller.as_transaction()
-        {
-            (hash.to_bytes(), pub_key.to_bytes())
-        } else {
-            // TODO: caller is Blockchain (not Transaction) is not supported  yet
-            return Err(Error::NotSupportedOperation.into());
+        let tx = match context.caller.as_transaction() {
+            Some((hash, pub_key)) => (hash.to_bytes(), pub_key.to_bytes()),
+            None => {
+                // TODO (ECR-3702): caller is Service (not Transaction) is not supported yet
+                return Err(Error::NotSupportedOperation.into());
+            }
         };
 
-        let res = self.exec.with_attached(|env| {
-            let service_id = call_info.instance_id as i32;
-            let tx_id = call_info.method_id as i32;
-            let args = JObject::from(env.byte_array_from_slice(arguments)?);
-            let view_handle = to_handle(View::from_ref_fork(context.fork));
-            let pub_key = JObject::from(env.byte_array_from_slice(&tx.0)?);
-            let hash = JObject::from(env.byte_array_from_slice(&tx.1)?);
+        self.jni_call(
+            &[(&classes_refs::transaction_execution_exception(), ExceptionHandlers::TX_EXECUTION)],
+            |env| {
+                let service_id = call_info.instance_id as i32;
+                let tx_id = call_info.method_id as i32;
+                let args = JObject::from(env.byte_array_from_slice(arguments)?);
+                let view_handle = to_handle(View::from_ref_fork(context.fork));
+                let pub_key = JObject::from(env.byte_array_from_slice(&tx.0)?);
+                let hash = JObject::from(env.byte_array_from_slice(&tx.1)?);
 
-            let result = env.call_method_unchecked(
-                self.runtime_adapter.as_obj(),
-                runtime_adapter::execute_tx_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(service_id),
-                    JValue::from(tx_id),
-                    JValue::from(args),
-                    JValue::from(view_handle),
-                    JValue::from(pub_key),
-                    JValue::from(hash),
-                ],
-            ).and_then(JValue::v);
-
-            let checked_result = Self::handle_exception(
-                env,
-                result,
-                &[(&classes_refs::transaction_execution_exception(), ExceptionHandlers::TX_EXECUTION)]
-            );
-
-            Ok(checked_result)
-        });
-        Self::convert_jni(res)?
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::execute_tx_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[
+                        JValue::from(service_id),
+                        JValue::from(tx_id),
+                        JValue::from(args),
+                        JValue::from(view_handle),
+                        JValue::from(pub_key),
+                        JValue::from(hash),
+                    ],
+                ).and_then(JValue::v)
+            })
     }
 
     fn state_hashes(&self, snapshot: &dyn Snapshot) -> StateHashAggregator {
