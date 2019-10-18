@@ -66,7 +66,7 @@ pub extern "system" fn JNI_OnLoad(vm: JavaVM, _: *mut c_void) -> jint {
         init_cache(&env);
         JNI_VERSION_1_8
     })
-        .unwrap_or(INVALID_JNI_VERSION)
+    .unwrap_or(INVALID_JNI_VERSION)
 }
 
 /// Initializes JNI cache considering synchronization

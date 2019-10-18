@@ -43,15 +43,15 @@ extern crate lazy_static;
 
 extern crate exonum_testkit;
 extern crate exonum_time;
+extern crate futures;
 #[cfg(test)]
 extern crate tempfile;
-extern crate futures;
 
 pub use exonum::exonum_merkledb;
 
 pub mod handle;
-mod proxy;
 mod proto;
+mod proxy;
 mod runtime;
 mod storage;
 //mod testkit;

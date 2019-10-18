@@ -15,7 +15,6 @@
 //! The set of specific for the Java runtime implementation errors.
 use exonum::runtime::{ErrorKind, ExecutionError};
 
-
 /// List of possible Java runtime errors.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, IntoExecutionError)]
 #[exonum(crate = "crate", kind = "runtime")]

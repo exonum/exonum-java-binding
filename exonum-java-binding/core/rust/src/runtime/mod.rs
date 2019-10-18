@@ -23,8 +23,8 @@ mod library_loader;
 mod paths;
 pub mod services;
 
-pub use self::error::*;
 pub use self::config::*;
+pub use self::error::*;
 pub use self::java_runtime_factory::JavaRuntimeFactory;
 pub use self::library_loader::get_lib_version;
 pub use self::paths::panic_if_java_options;

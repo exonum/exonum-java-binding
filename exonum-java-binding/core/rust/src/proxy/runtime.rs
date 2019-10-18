@@ -18,9 +18,9 @@ use exonum::{
     api::ApiContext,
     blockchain::Schema as CoreSchema,
     crypto::{Hash, PublicKey, SecretKey},
+    exonum_merkledb::{self, Fork, Snapshot},
     helpers::ValidatorId,
     messages::BinaryValue,
-    exonum_merkledb::{self, Fork, Snapshot},
     node::ApiSender,
     runtime::{
         dispatcher::{DispatcherRef, DispatcherSender},
@@ -33,7 +33,7 @@ use futures::{Future, IntoFuture};
 use jni::{
     objects::{GlobalRef, JObject, JValue},
     signature::{JavaType, Primitive},
-    Executor, JNIEnv
+    Executor, JNIEnv,
 };
 use proto;
 use proxy::node::NodeContext;
@@ -42,13 +42,13 @@ use std::fmt;
 use storage::View;
 use to_handle;
 use utils::{
+    describe_java_exception, get_and_clear_java_exception, get_exception_message,
     jni_cache::{classes_refs, runtime_adapter, tx_execution_exception},
-    panic_on_exception, unwrap_jni, get_and_clear_java_exception,
-    describe_java_exception, get_exception_message,
+    panic_on_exception, unwrap_jni,
 };
+use JniError;
 use JniErrorKind;
 use JniResult;
-use JniError;
 
 /// A proxy for `ServiceRuntimeAdapter`s.
 #[derive(Clone)]
@@ -85,13 +85,8 @@ impl JavaRuntimeProxy {
     }
 
     /// If the current node is a validator, return its identifier, for other nodes return `default`.
-    fn validator_id_or(
-        snapshot: &dyn Snapshot,
-        pub_key: &PublicKey,
-        default: i32
-    ) -> i32 {
-        Self::validator_id(snapshot, pub_key)
-            .map_or(default, |id| i32::from(id.0))
+    fn validator_id_or(snapshot: &dyn Snapshot, pub_key: &PublicKey, default: i32) -> i32 {
+        Self::validator_id(snapshot, pub_key).map_or(default, |id| i32::from(id.0))
     }
 
     /// Handles and clears any Java exceptions or other JNI errors.
@@ -107,8 +102,8 @@ impl JavaRuntimeProxy {
         err: JniError,
         exception_handlers: &[(&GlobalRef, H)],
     ) -> ExecutionError
-        where
-            H: Fn(&JNIEnv, JObject) -> ExecutionError,
+    where
+        H: Fn(&JNIEnv, JObject) -> ExecutionError,
     {
         match err.kind() {
             JniErrorKind::JavaException => {
@@ -120,7 +115,7 @@ impl JavaRuntimeProxy {
                 }
 
                 ExceptionHandlers::DEFAULT(env, exception)
-            },
+            }
             _ => (Error::OtherJniError, err).into(),
         }
     }
@@ -130,12 +125,9 @@ impl JavaRuntimeProxy {
     /// Any JNI errors are converted into `ExecutionError` with their descriptions, for JNI errors
     /// like `JniErrorKind::JavaException` it gets (and clears) any exception that is currently
     /// being thrown, `ExceptionHandlers::DEFAULT` is applied for such exceptions.
-    fn jni_call_default<F, R>(
-        &self,
-        f: F,
-    ) -> Result<R, ExecutionError>
-        where
-            F: FnOnce(&JNIEnv) -> JniResult<R>,
+    fn jni_call_default<F, R>(&self, f: F) -> Result<R, ExecutionError>
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
         self.jni_call::<F, &ExceptionHandler, R>(&[], f)
     }
@@ -153,9 +145,9 @@ impl JavaRuntimeProxy {
         exception_handlers: &[(&GlobalRef, H)],
         f: F,
     ) -> Result<R, ExecutionError>
-        where
-            F: FnOnce(&JNIEnv) -> JniResult<R>,
-            H: Fn(&JNIEnv, JObject) -> ExecutionError,
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
+        H: Fn(&JNIEnv, JObject) -> ExecutionError,
     {
         let mut execution_error: Option<ExecutionError> = None;
 
@@ -164,32 +156,29 @@ impl JavaRuntimeProxy {
         // `result` will be solely `Ok` in such case;
         // Other errors (from jni_rs or JVM) are unexpected, they will be returned exclusively
         // as `JniResult`
-        let result = self.exec.with_attached(|env| {
-            match f(env) {
-                Ok(value) => Ok(Some(value)),
-                Err(err) => {
-                    execution_error = Some(
-                        Self::handle_error_or_exception::<H, R>(env, err, exception_handlers)
-                    );
-                    Ok(None)
-                },
+        let result = self.exec.with_attached(|env| match f(env) {
+            Ok(value) => Ok(Some(value)),
+            Err(err) => {
+                execution_error = Some(Self::handle_error_or_exception::<H, R>(
+                    env,
+                    err,
+                    exception_handlers,
+                ));
+                Ok(None)
             }
         });
 
         match execution_error {
-            None => {
-                match result {
-                    Ok(result) => {
-                        assert!(result.is_some());
-                        Ok(result.unwrap())
-                    },
-                    Err(err) => Err(
-                        (
-                            Error::OtherJniError,
-                            format!("Unexpected error JNI error: {:?}", err)
-                        ).into()
-                    )
+            None => match result {
+                Ok(result) => {
+                    assert!(result.is_some());
+                    Ok(result.unwrap())
                 }
+                Err(err) => Err((
+                    Error::OtherJniError,
+                    format!("Unexpected error JNI error: {:?}", err),
+                )
+                    .into()),
             },
             Some(error) => Err(error),
         }
@@ -202,7 +191,6 @@ impl Runtime for JavaRuntimeProxy {
         artifact: ArtifactId,
         deploy_spec: Vec<u8>,
     ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
-
         let id = match self.parse_artifact(&artifact) {
             Ok(id) => id.to_string(),
             Err(err) => return Box::new(Err(err).into_future()),
@@ -216,11 +204,9 @@ impl Runtime for JavaRuntimeProxy {
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::deploy_artifact_id(),
                 JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(artifact_id),
-                    JValue::from(spec),
-                ],
-            ).and_then(JValue::v)
+                &[JValue::from(artifact_id), JValue::from(spec)],
+            )
+            .and_then(JValue::v)
         });
 
         Box::new(result.into_future())
@@ -231,7 +217,7 @@ impl Runtime for JavaRuntimeProxy {
             Ok(id) => id.to_string(),
             Err(_) => {
                 return false;
-            },
+            }
         };
 
         unwrap_jni(self.exec.with_attached(|env| {
@@ -245,7 +231,8 @@ impl Runtime for JavaRuntimeProxy {
                     JavaType::Primitive(Primitive::Boolean),
                     &[JValue::from(artifact_id)],
                 ),
-            ).z()
+            )
+            .z()
         }))
     }
 
@@ -271,7 +258,8 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(id as i32),
                     JValue::from(artifact_id),
                 ],
-            ).and_then(JValue::v)
+            )
+            .and_then(JValue::v)
         })
     }
 
@@ -281,7 +269,6 @@ impl Runtime for JavaRuntimeProxy {
         descriptor: InstanceDescriptor,
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
-
         self.jni_call_default(|env| {
             let id = descriptor.id as i32;
             let view_handle = to_handle(View::from_ref_fork(fork));
@@ -296,7 +283,8 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(view_handle),
                     JValue::from(params),
                 ],
-            ).and_then(JValue::v)
+            )
+            .and_then(JValue::v)
         })
     }
 
@@ -308,10 +296,9 @@ impl Runtime for JavaRuntimeProxy {
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::stop_service_id(),
                 JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(id),
-                ],
-            ).and_then(JValue::v)
+                &[JValue::from(id)],
+            )
+            .and_then(JValue::v)
         })
     }
 
@@ -330,7 +317,10 @@ impl Runtime for JavaRuntimeProxy {
         };
 
         self.jni_call(
-            &[(&classes_refs::transaction_execution_exception(), ExceptionHandlers::TX_EXECUTION)],
+            &[(
+                &classes_refs::transaction_execution_exception(),
+                ExceptionHandlers::TX_EXECUTION,
+            )],
             |env| {
                 let service_id = call_info.instance_id as i32;
                 let tx_id = call_info.method_id as i32;
@@ -351,8 +341,10 @@ impl Runtime for JavaRuntimeProxy {
                         JValue::from(pub_key),
                         JValue::from(hash),
                     ],
-                ).and_then(JValue::v)
-            })
+                )
+                .and_then(JValue::v)
+            },
+        )
     }
 
     fn state_hashes(&self, snapshot: &dyn Snapshot) -> StateHashAggregator {
@@ -388,9 +380,7 @@ impl Runtime for JavaRuntimeProxy {
                     self.runtime_adapter.as_obj(),
                     runtime_adapter::before_commit_id(),
                     JavaType::Primitive(Primitive::Void),
-                    &[
-                        JValue::from(view_handle),
-                    ],
+                    &[JValue::from(view_handle)],
                 ),
             );
             Ok(())
@@ -407,7 +397,7 @@ impl Runtime for JavaRuntimeProxy {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
             let validator_id = Self::validator_id_or(snapshot, &service_keypair.0, -1);
-            let height:u64 = CoreSchema::new(snapshot).height().into();
+            let height: u64 = CoreSchema::new(snapshot).height().into();
 
             panic_on_exception(
                 env,
@@ -427,7 +417,8 @@ impl Runtime for JavaRuntimeProxy {
     }
 
     fn notify_api_changes(&self, context: &ApiContext, changes: &[ApiChange]) {
-        let added_instances_ids: Vec<i32> = changes.iter()
+        let added_instances_ids: Vec<i32> = changes
+            .iter()
             .filter_map(|change| {
                 if let ApiChange::InstanceAdded(instance_id) = change {
                     Some(*instance_id as i32)
@@ -455,10 +446,7 @@ impl Runtime for JavaRuntimeProxy {
                     self.runtime_adapter.as_obj(),
                     runtime_adapter::connect_apis_id(),
                     JavaType::Primitive(Primitive::Void),
-                    &[
-                        JValue::from(service_ids),
-                        JValue::from(node_handle),
-                    ],
+                    &[JValue::from(service_ids), JValue::from(node_handle)],
                 ),
             );
             Ok(())
@@ -555,8 +543,7 @@ impl ExceptionHandlers {
     const TX_EXECUTION: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let code = unwrap_jni(Self::get_tx_error_code(env, exception)) as u8;
-        let msg = unwrap_jni(get_exception_message(env, exception))
-            .unwrap_or(String::new());
+        let msg = unwrap_jni(get_exception_message(env, exception)).unwrap_or(String::new());
         ExecutionError::new(ErrorKind::service(code), msg)
     };
 

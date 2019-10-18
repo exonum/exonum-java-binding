@@ -20,7 +20,7 @@ use exonum::{
     messages::Verified,
     runtime::{AnyTx, CallInfo},
 };
-use exonum_merkledb::{Snapshot, ObjectHash};
+use exonum_merkledb::{ObjectHash, Snapshot};
 use failure;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jshort};
@@ -46,10 +46,7 @@ pub struct NodeContext {
 
 impl NodeContext {
     /// Creates a node context for a service.
-    pub fn new(
-        executor: Executor,
-        api_context: ApiContext,
-    ) -> Self {
+    pub fn new(executor: Executor, api_context: ApiContext) -> Self {
         NodeContext {
             executor,
             api_context,
@@ -75,11 +72,7 @@ impl NodeContext {
     pub fn submit(&self, tx: AnyTx) -> Result<Hash, failure::Error> {
         let (pub_key, secret_key) = self.api_context.service_keypair();
 
-        let verified = Verified::from_value(
-            tx,
-            pub_key.to_owned(),
-            secret_key,
-        );
+        let verified = Verified::from_value(tx, pub_key.to_owned(), secret_key);
         let tx_hash = verified.object_hash();
         // TODO(ECR-3679): check Core behaviour/any errors on service inactivity
         self.api_context.sender().broadcast_transaction(verified)?;
@@ -115,7 +108,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
                         instance_id: instance_id as u32,
                         method_id: method_id as u32,
                     },
-                    arguments: arguments
+                    arguments: arguments,
                 };
 
                 match node.submit(tx) {

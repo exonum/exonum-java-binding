@@ -1,7 +1,7 @@
 extern crate exonum_build;
 
+use exonum_build::protobuf_generate;
 use std::env::var_os;
-use exonum_build::{protobuf_generate};
 
 fn main() {
     // We need to link to libc++.dylib on Mac if using static linkage with RocksDB
@@ -12,10 +12,5 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=c++");
     }
 
-    protobuf_generate(
-        "../src/main/proto",
-        &["src/proto",],
-        "protobuf_mod.rs",
-    );
-
+    protobuf_generate("../src/main/proto", &["src/proto"], "protobuf_mod.rs");
 }
