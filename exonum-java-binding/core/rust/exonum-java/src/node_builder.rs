@@ -77,6 +77,7 @@ fn prepare_service_factories<P: AsRef<Path>>(path: P) -> Vec<Box<dyn ServiceFact
 }
 
 fn system_service_factory_for_name(name: &str) -> Box<dyn ServiceFactory> {
+    // TODO (ECR-3714): return anchoring service back
     match name {
         TIME_SERVICE => Box::new(TimeServiceFactory::default()) as Box<dyn ServiceFactory>,
         _ => panic!("Unknown system service name \"{}\" has been found", name),
