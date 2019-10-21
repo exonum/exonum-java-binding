@@ -59,7 +59,7 @@ interface ServiceLoader {
 
   /**
    * Unloads all previously loaded services. The clients <b>must not</b> unload the services
-   * while any of them is in use (there are active instances of it).
+   * while any of them are in use (there are active instances of them).
    *
    * <p>This method will attempt to unload each service, and communicate any exceptions
    * afterwards.
