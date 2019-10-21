@@ -40,6 +40,9 @@
     <skipRustLibBuild>false</skipRustLibBuild>
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->
     <build.cargoFlag></build.cargoFlag>
+    <protobuf.python.outputDirectory>
+      ${project.parent.basedir}/launcher-plugin/exonum_java_runtime_plugin/proto
+    </protobuf.python.outputDirectory>
   </properties>
 
   <dependencies>
@@ -297,12 +300,27 @@
         <extensions>true</extensions>
         <executions>
           <execution>
+            <id>protobuf-compile-java</id>
             <goals>
               <goal>compile</goal>
               <goal>test-compile</goal>
             </goals>
             <configuration>
               <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+            </configuration>
+          </execution>
+          <!-- Compile protobuf description of service runtime to Python
+               for exonum_java_runtime_plugin -->
+          <execution>
+            <id>protobuf-compile-python</id>
+            <goals>
+              <goal>compile-python</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${protobuf.python.outputDirectory}</outputDirectory>
+              <includes>
+                <include>service_runtime.proto</include>
+              </includes>
             </configuration>
           </execution>
         </executions>
