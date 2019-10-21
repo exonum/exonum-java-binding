@@ -25,9 +25,9 @@ except (ModuleNotFoundError, ImportError):
 class JavaDeploySpecLoader(RuntimeSpecLoader):
     """Artifact spec encoder for Java runtime"""
 
-    def encode_spec(self, data: Dict[str, Any]) -> bytes:
+    def encode_spec(self, config: Dict[str, Any]) -> bytes:
         spec = service_runtime_pb2.DeployArguments()
 
-        spec.artifact_filename = data["artifact_filename"]
+        spec.artifact_filename = config["artifact_filename"]
 
         return spec.SerializeToString()
