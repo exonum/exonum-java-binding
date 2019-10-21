@@ -176,7 +176,7 @@ impl JavaRuntimeProxy {
                 }
                 Err(err) => Err((
                     Error::OtherJniError,
-                    format!("Unexpected error JNI error: {:?}", err),
+                    format!("Unexpected JNI error: {:?}", err),
                 )
                     .into()),
             },
