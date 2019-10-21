@@ -15,6 +15,8 @@ python3 -m pip install -e launcher-plugin
 
 ## Usage
 
+TODO: Move the entire section to the EJB App tutorial.
+
 Add `plugins` session to configuration file of the Exonum Launcher:
 
 ```yaml
@@ -27,7 +29,7 @@ plugins:
   artifact: {}
 ```
 
-To load service artifact, provide a path to the service artifact, for example:
+To load service artifact, provide a filename of the service artifact, for example:
 
 ```yaml
 artifacts:
