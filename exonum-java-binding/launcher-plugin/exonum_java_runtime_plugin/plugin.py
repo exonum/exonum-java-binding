@@ -19,7 +19,7 @@ from exonum_launcher.runtimes.runtime import RuntimeSpecLoader
 try:
     from .proto import service_runtime_pb2
 except (ModuleNotFoundError, ImportError):
-    raise RuntimeError("Use proto/generate_proto.sh script to generate protobuf definition")
+    raise RuntimeError("Protobuf definition is not found")
 
 
 class JavaRuntimeSpecLoader(RuntimeSpecLoader):
