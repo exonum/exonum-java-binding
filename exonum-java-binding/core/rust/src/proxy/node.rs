@@ -102,13 +102,13 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
         let hash = unwrap_jni_verbose(
             &env,
             || -> JniResult<jbyteArray> {
-                let arguments = env.convert_byte_array(arguments)?;
+                let args = env.convert_byte_array(arguments)?;
                 let tx = AnyTx {
                     call_info: CallInfo {
                         instance_id: instance_id as u32,
                         method_id: method_id as u32,
                     },
-                    arguments: arguments,
+                    arguments: args,
                 };
 
                 match node.submit(tx) {
