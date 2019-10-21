@@ -16,8 +16,8 @@
 
 package com.exonum.binding.testkit;
 
-import static com.exonum.binding.testkit.TestKit.DEFAULT_CONFIGURATION;
 import static com.exonum.binding.testkit.TestKit.MAX_SERVICE_INSTANCE_ID;
+import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,7 +73,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
           .withArtifactsDirectory(artifactsDirectory));
 
   @Test
-  void createTestKitForSingleService() {
+  void createTestKitForSingleServiceWithDefaultConfiguration() {
     try (TestKit testKit = TestKit.forService(ARTIFACT_ID_2, ARTIFACT_FILENAME_2,
         SERVICE_NAME_2, SERVICE_ID_2, artifactsDirectory)) {
       checkTestService2Initialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
@@ -203,14 +203,18 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
 
   @Test
   void createTestKitWithThrowingInitialization() {
-    try (TestKit testKit = TestKit.builder()
+    TestConfiguration invalidConfiguration = TestConfiguration.newBuilder()
+        .setValue(THROWING_VALUE)
+        .build();
+    Class<RuntimeException> exceptionType = RuntimeException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        // Initialization without valid configuration will throw
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-        .withArtifactsDirectory(artifactsDirectory)
-        .build()) {
-      // TODO: validate the correct TestKit behaviour in case if service couldn't be started
-    }
+        // Initialize with special invalid configuration
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, invalidConfiguration)
+        .withArtifactsDirectory(artifactsDirectory);
+    RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    assertThat(thrownException.getMessage())
+        .contains("Service configuration had an invalid value:", THROWING_VALUE);
   }
 
   @ParameterizedTest

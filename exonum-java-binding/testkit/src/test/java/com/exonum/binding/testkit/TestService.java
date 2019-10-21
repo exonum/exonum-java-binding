@@ -38,6 +38,7 @@ final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("Initial key", StandardCharsets.UTF_8);
+  static final String THROWING_VALUE = "Incorrect value";
 
   private final int serviceInstanceId;
   private Node node;
@@ -60,6 +61,10 @@ final class TestService extends AbstractService {
   public void initialize(Fork fork, Configuration configuration) {
     TestConfiguration initialConfiguration = configuration.getAsMessage(TestConfiguration.class);
     String configurationValue = initialConfiguration.getValue();
+    if (configurationValue.equals(THROWING_VALUE)) {
+      throw new IllegalArgumentException("Service configuration had an invalid value: "
+          + configurationValue);
+    }
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, configurationValue);
