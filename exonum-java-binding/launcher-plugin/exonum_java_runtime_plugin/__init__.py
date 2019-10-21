@@ -1,1 +1,1 @@
-from .plugin import JavaRuntimeSpecLoader
+from .plugin import JavaDeploySpecLoader

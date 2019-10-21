@@ -25,7 +25,7 @@ runtimes:
 
 plugins:
   runtime:
-    java: "exonum_java_runtime_plugin.JavaRuntimeSpecLoader"
+    java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
   artifact: {}
 ```
 

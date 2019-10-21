@@ -22,7 +22,7 @@ except (ModuleNotFoundError, ImportError):
     raise RuntimeError("Protobuf definition is not found")
 
 
-class JavaRuntimeSpecLoader(RuntimeSpecLoader):
+class JavaDeploySpecLoader(RuntimeSpecLoader):
     """Artifact spec encoder for Java runtime"""
 
     def encode_spec(self, data: Dict[str, Any]) -> bytes:
