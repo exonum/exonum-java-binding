@@ -33,12 +33,15 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
  * Contains tests of ProofListIndexProxy methods
  * that are not present in {@link ListIndex} interface.
  */
+@Disabled("ECR-3608")
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   private static final HashCode EMPTY_LIST_INDEX_HASH =

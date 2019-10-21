@@ -52,7 +52,7 @@ class ListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   @Override
   StorageIndex createOfOtherType(String name, View view) {
-    return ProofListIndexProxy.newInstance(name, view, StandardSerializers.string());
+    return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
   @Override

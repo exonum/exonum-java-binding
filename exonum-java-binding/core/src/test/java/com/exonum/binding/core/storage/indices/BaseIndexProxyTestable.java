@@ -37,6 +37,7 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -82,6 +83,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
    * and then that the index becomes inaccessible after the cleaner is closed.
    */
   @Test
+  @Disabled("TODO: ")
   void indexConstructorRegistersItsDestructor() throws CloseFailuresException {
     String name = "test_index";
 
@@ -104,6 +106,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     }
   }
 
+  @Disabled("TODO: ")
   @ParameterizedTest
   @ValueSource(strings = {
       "",
@@ -125,6 +128,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @Test
+  @Disabled("TODO: ")
   void indexConstructorAllowsMultipleInstancesFromFork() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
@@ -156,6 +160,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @Test
+  @Disabled("TODO: ")
   void indexConstructorThrowsIfIndexWithSameNameButOtherTypeIsOpened()
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
@@ -179,6 +184,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
    * - Constructor of the other type checks it, preventing illegal access to the internals.
    */
   @Test
+  @Disabled("TODO: ")
   void indexConstructorPersistsIndexTypeInfo() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
@@ -202,6 +208,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @Test
+  @Disabled("TODO: ")
   void getName() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
@@ -213,6 +220,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @Test
+  @Disabled("TODO: ")
   void getAddress() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
@@ -225,6 +233,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @Test
+  @Disabled("TODO: ")
   void getAddressInGroup() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String groupName = "test_index";
@@ -240,6 +249,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @Test
+  @Disabled("TODO: ")
   void toStringIncludesNameAndType() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {

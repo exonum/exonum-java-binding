@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ValueSetIndexProxyIntegrationTest
@@ -60,6 +62,7 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
+  @Disabled("TODO: ")
   void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, ValueSetIndexProxy::clear);
   }
@@ -160,6 +163,7 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Test
+  @Disabled("TODO: ")
   void testStream() {
     runTestWithView(database::createFork, (set) -> {
       List<String> elements = TestStorageItems.values;
