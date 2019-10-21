@@ -526,7 +526,7 @@ impl From<ServiceRuntimeStateHashes> for StateHashAggregator {
     }
 }
 
-fn to_hash(bytes: &Vec<u8>) -> Hash {
+fn to_hash(bytes: &[u8]) -> Hash {
     Hash::from_bytes(bytes.into()).unwrap()
 }
 
@@ -543,7 +543,7 @@ impl ExceptionHandlers {
     const TX_EXECUTION: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let code = unwrap_jni(Self::get_tx_error_code(env, exception)) as u8;
-        let msg = unwrap_jni(get_exception_message(env, exception)).unwrap_or(String::new());
+        let msg = unwrap_jni(get_exception_message(env, exception)).unwrap_or_default();
         ExecutionError::new(ErrorKind::service(code), msg)
     };
 

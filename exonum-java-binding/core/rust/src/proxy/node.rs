@@ -65,7 +65,7 @@ impl NodeContext {
 
     #[doc(hidden)]
     pub fn public_key(&self) -> PublicKey {
-        self.api_context.service_keypair().0.clone()
+        self.api_context.service_keypair().0
     }
 
     #[doc(hidden)]
