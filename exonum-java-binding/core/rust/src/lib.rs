@@ -38,7 +38,6 @@ extern crate serde;
 extern crate serde_derive;
 pub extern crate serde_json;
 
-#[macro_use]
 extern crate lazy_static;
 
 extern crate exonum_testkit;

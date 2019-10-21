@@ -114,12 +114,8 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "initializeService",
         "(IJ[B)V",
     );
-    RUNTIME_ADAPTER_STOP_SERVICE = get_method_id(
-        &env,
-        SERVICE_RUNTIME_ADAPTER_CLASS,
-        "stopService",
-        "(I)V",
-    );
+    RUNTIME_ADAPTER_STOP_SERVICE =
+        get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "stopService", "(I)V");
     RUNTIME_ADAPTER_EXECUTE_TX = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
@@ -132,18 +128,10 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "getStateHashes",
         "(J)[B",
     );
-    RUNTIME_ADAPTER_BEFORE_COMMIT = get_method_id(
-        &env,
-        SERVICE_RUNTIME_ADAPTER_CLASS,
-        "beforeCommit",
-        "(J)V",
-    );
-    RUNTIME_ADAPTER_AFTER_COMMIT = get_method_id(
-        &env,
-        SERVICE_RUNTIME_ADAPTER_CLASS,
-        "afterCommit",
-        "(JIJ)V",
-    );
+    RUNTIME_ADAPTER_BEFORE_COMMIT =
+        get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "beforeCommit", "(J)V");
+    RUNTIME_ADAPTER_AFTER_COMMIT =
+        get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "afterCommit", "(JIJ)V");
     RUNTIME_ADAPTER_MOUNT_API = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,

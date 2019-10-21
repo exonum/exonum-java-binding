@@ -96,11 +96,7 @@ fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<Extern
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     let storage = TemporaryDB::new();
-    let api_context = ApiContext::new(
-        storage,
-        keypair,
-        app_tx.clone(),
-    );
+    let api_context = ApiContext::new(storage, keypair, app_tx.clone());
     let node = NodeContext::new(EXECUTOR.clone(), api_context);
     (node, app_rx)
 }
