@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-
 pub const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
