@@ -85,6 +85,10 @@ final class ServiceWrapper {
     return service.getStateHashes(snapshot);
   }
 
+  void beforeCommit(Fork fork) {
+    service.beforeCommit(fork);
+  }
+
   void afterCommit(BlockCommittedEvent event) {
     service.afterCommit(event);
   }

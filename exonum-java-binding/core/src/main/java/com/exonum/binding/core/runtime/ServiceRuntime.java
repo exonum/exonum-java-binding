@@ -314,6 +314,32 @@ public final class ServiceRuntime {
   }
 
   /**
+   * Performs the before commit operation for all services in the runtime.
+   *
+   * @param fork a fork allowing the runtime and the service to modify the database state.
+   *             Must allow checkpoints and rollbacks.
+   */
+  public void beforeCommit(Fork fork) {
+    synchronized (lock) {
+      try {
+        for (ServiceWrapper service : services.values()) {
+          fork.createCheckpoint();
+          try {
+            service.beforeCommit(fork);
+          } catch (Exception e) {
+            logger.error("Service {} threw exception in beforeCommit. Any changes are rolled-back",
+                service.getName(), e);
+            fork.rollback();
+          }
+        }
+      } catch (Exception e) {
+        logger.error("Unexpected exception in beforeCommit", e);
+        throw e;
+      }
+    }
+  }
+
+  /**
    * Notifies the services in the runtime of the block commit event.
    */
   public void afterCommit(BlockCommittedEvent event) {

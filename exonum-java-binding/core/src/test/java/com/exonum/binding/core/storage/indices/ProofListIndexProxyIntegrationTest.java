@@ -20,6 +20,7 @@ import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesAbsence;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -36,6 +37,8 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Contains tests of ProofListIndexProxy methods
@@ -143,10 +146,11 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  @Test
-  void getProofMultipleItemList() {
+  @ParameterizedTest
+  @ValueSource(ints = {2, 3, 4, 5, 7, 8, 9})
+  void getProofMultipleItemList(int size) {
     runTestWithView(database::createFork, (list) -> {
-      List<String> values = TestStorageItems.values;
+      List<String> values = TestStorageItems.values.subList(0, size);
 
       list.addAll(values);
 
@@ -187,6 +191,20 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
       int from = values.size() / 2;
       int to = values.size();
       assertThat(list, provesThatContains(from, values.subList(from, to)));
+    });
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {1, 2, 3, 4})
+  @Disabled("ECR-3673: empty ranges are not supported with the current tree format; "
+      + "need a flat one")
+  void getRangeProofMultipleItemList_EmptyRange(int size) {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> values = TestStorageItems.values.subList(0, size);
+
+      list.addAll(values);
+
+      assertThat(list, provesThatContains(0, emptyList()));
     });
   }
 

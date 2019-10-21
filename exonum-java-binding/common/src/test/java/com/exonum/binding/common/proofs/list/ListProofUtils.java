@@ -54,10 +54,14 @@ final class ListProofUtils {
     return root;
   }
 
-  static HashCode getNodeHashCode(ByteString v) {
+  static HashCode getLeafHashCode(ByteString value) {
+    return getLeafHashCode(value.toByteArray());
+  }
+
+  static HashCode getLeafHashCode(byte[] value) {
     return Hashing.defaultHashFunction().newHasher()
         .putByte(BLOB_PREFIX)
-        .putBytes(v.toByteArray())
+        .putBytes(value)
         .hash();
   }
 

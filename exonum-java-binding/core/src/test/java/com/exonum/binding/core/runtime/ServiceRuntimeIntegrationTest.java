@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,6 +51,7 @@ import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 import io.vertx.ext.web.Router;
 import java.nio.file.Path;
@@ -374,6 +376,34 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
+    void beforeCommitSingleService() throws CloseFailuresException {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Fork fork = database.createFork(cleaner);
+
+        serviceRuntime.beforeCommit(fork);
+
+        verify(serviceWrapper).beforeCommit(fork);
+      }
+    }
+
+    @Test
+    void beforeCommitThrowingServiceChangesAreRolledBack() throws CloseFailuresException {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Fork fork = spy(database.createFork(cleaner));
+        doThrow(IllegalStateException.class).when(serviceWrapper).beforeCommit(fork);
+
+        serviceRuntime.beforeCommit(fork);
+
+        InOrder inOrder = Mockito.inOrder(fork, serviceWrapper);
+        inOrder.verify(fork).createCheckpoint();
+        inOrder.verify(serviceWrapper).beforeCommit(fork);
+        inOrder.verify(fork).rollback();
+      }
+    }
+
+    @Test
     void afterCommitSingleService() {
       BlockCommittedEvent event = mock(BlockCommittedEvent.class);
 
@@ -482,6 +512,37 @@ class ServiceRuntimeIntegrationTest {
         ServiceRuntimeStateHashes runtimeStateHashes = serviceRuntime.getStateHashes(s);
         ServiceRuntimeStateHashes expectedStateHashes = expectedBuilder.build();
         assertThat(runtimeStateHashes).isEqualTo(expectedStateHashes);
+      }
+    }
+
+    @Test
+    void beforeCommitMultipleServicesWithFirstThrowing() throws CloseFailuresException {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Collection<ServiceWrapper> services = SERVICES.values();
+
+        // Setup the first service to throw exception in its before commit handler
+        ServiceWrapper service1 = services
+            .iterator()
+            .next();
+        Fork fork = spy(database.createFork(cleaner));
+        doThrow(RuntimeException.class).when(service1).beforeCommit(fork);
+
+        // Notify the runtime before the block commit
+        serviceRuntime.beforeCommit(fork);
+
+        // Verify that each service got the notifications, i.e., the first service
+        // throwing an exception has not disrupted the notification process
+        Object[] mocks = Lists.asList(fork, services.toArray()).toArray();
+        InOrder inOrder = Mockito.inOrder(mocks);
+        for (ServiceWrapper service : services) {
+          inOrder.verify(fork).createCheckpoint();
+          inOrder.verify(service).beforeCommit(fork);
+          // Verify the fork was rolled-back once after the throwing service
+          if (service.equals(service1)) {
+            inOrder.verify(fork).rollback();
+          }
+        }
       }
     }
 

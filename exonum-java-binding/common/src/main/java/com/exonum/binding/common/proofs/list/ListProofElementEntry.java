@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,21 @@
 
 package com.exonum.binding.common.proofs.list;
 
+import com.google.auto.value.AutoValue;
+
 /**
- * A proof that some elements exist in a proof list of a certain size. You must
- * {@link #check} its structure and index hash before accessing the elements.
+ * A value stored in the Merkle tree at its bottom level (at height 0).
  */
-public interface UncheckedListProof {
+@AutoValue
+abstract class ListProofElementEntry implements ListProofEntry {
 
   /**
-   * Checks that a proof has either correct or incorrect structure and returns a CheckedListProof.
+   * Returns a value of the element stored at this index in the list.
    */
-  CheckedListProof check();
+  abstract byte[] getElement();
 
-  /**
-   * Returns the root node of the corresponding proof tree of this UncheckedListProof.
-   */
-  ListProofNode getListProofRootNode();
+  static ListProofElementEntry newInstance(long index, byte[] element) {
+    ListProofEntry.checkIndex(index);
+    return new AutoValue_ListProofElementEntry(index, element);
+  }
 }
