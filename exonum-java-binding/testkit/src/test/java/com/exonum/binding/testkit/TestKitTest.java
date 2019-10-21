@@ -45,7 +45,7 @@ import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-
+import com.google.protobuf.ByteString;
 import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -387,7 +387,8 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .isEqualTo(afterCommitTransaction.getServiceId());
     assertThat(inPoolTransaction.getTransactionId())
         .isEqualTo(afterCommitTransaction.getTransactionId());
-    assertThat(inPoolTransaction.getPayload()).isEqualTo(afterCommitTransaction.getPayload());
+    ByteString expectedPayload = ByteString.copyFrom(afterCommitTransaction.getPayload());
+    assertThat(inPoolTransaction.getPayload()).isEqualTo(expectedPayload);
 
     Block nextBlock = testKit.createBlock();
     assertThat(nextBlock.getNumTransactions()).isEqualTo(1);
@@ -551,8 +552,8 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
         () -> testKit.createBlockWithTransactions(message));
     assertThat(thrownException.getMessage())
-        .contains("failed to convert transaction", SERVICE_NAME,
-            Integer.toString(SERVICE_ID), message.toString());
+        .contains("failed to convert transaction", Integer.toString(SERVICE_ID),
+            message.toString());
   }
 
   @Test

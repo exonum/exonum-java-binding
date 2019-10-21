@@ -236,11 +236,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   private void checkTransaction(TransactionMessage transactionMessage) {
-    int serviceId = transactionMessage.getServiceId();
+    Integer serviceId = transactionMessage.getServiceId();
     // As transactions of time service might be submitted in TestKit that has this service
     // activated, those transactions should be considered valid, as time service is not
     // contained in Java runtime
-    if (serviceId == timeServiceId) {
+    if (serviceId.equals(timeServiceId)) {
       return;
     }
     try {

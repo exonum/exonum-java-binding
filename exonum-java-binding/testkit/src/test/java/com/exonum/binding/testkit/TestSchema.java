@@ -32,7 +32,7 @@ final class TestSchema implements Schema {
 
   TestSchema(View view, int serviceInstanceId) {
     this.view = view;
-    this.testMapName = "TestKitService_map " + serviceInstanceId;
+    this.testMapName = "TestKitService_map." + serviceInstanceId;
   }
 
   ProofMapIndexProxy<HashCode, String> testMap() {
