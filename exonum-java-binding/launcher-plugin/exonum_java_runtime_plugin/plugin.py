@@ -14,7 +14,7 @@
 
 from typing import Dict, Any
 
-from exonum_launcher.runtime import RuntimeSpecLoader
+from exonum_launcher.runtimes.runtime import RuntimeSpecLoader
 
 try:
     from .proto import service_runtime_pb2
