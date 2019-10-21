@@ -33,7 +33,11 @@ To load service artifact, provide a path to the service artifact, for example:
 artifacts:
   cryptocurrency:
     runtime: java
-    name: "cryptocurrency"
+    name: "com.exonum.examples:cryptocurrency:0.9.0-SNAPSHOT"
     spec:
       artifact_filename: "cryptocurrency-0.9.0-SNAPSHOT-artifact.jar"
 ```
+
+# License
+
+Apache License version 2.0. See [LICENSE](LICENSE) for details.
