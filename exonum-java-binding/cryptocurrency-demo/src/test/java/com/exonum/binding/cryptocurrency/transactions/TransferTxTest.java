@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
@@ -27,7 +28,6 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.ne
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -41,6 +41,7 @@ import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
+import com.exonum.binding.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
@@ -148,9 +149,8 @@ class TransferTxTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
-    TransactionResult expectedTransactionResult =
-        TransactionResult.error(UNKNOWN_SENDER.errorCode, null);
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
+    ExecutionStatus expectedTransactionResult = serviceError(UNKNOWN_SENDER.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
@@ -171,9 +171,8 @@ class TransferTxTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
-    TransactionResult expectedTransactionResult =
-        TransactionResult.error(UNKNOWN_RECEIVER.errorCode, null);
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
+    ExecutionStatus expectedTransactionResult = serviceError(UNKNOWN_RECEIVER.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
@@ -188,9 +187,8 @@ class TransferTxTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
-    TransactionResult expectedTransactionResult =
-        TransactionResult.error(SAME_SENDER_AND_RECEIVER.errorCode, null);
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
+    ExecutionStatus expectedTransactionResult = serviceError(SAME_SENDER_AND_RECEIVER.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
@@ -215,9 +213,8 @@ class TransferTxTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(transferTx.hash());
-    TransactionResult expectedTransactionResult =
-        TransactionResult.error(INSUFFICIENT_FUNDS.errorCode, null);
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
+    ExecutionStatus expectedTransactionResult = serviceError(INSUFFICIENT_FUNDS.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 

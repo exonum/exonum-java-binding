@@ -16,12 +16,12 @@
 
 package com.exonum.binding.testkit;
 
+import static com.exonum.binding.common.blockchain.ExecutionStatuses.success;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
@@ -42,6 +42,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -309,10 +310,10 @@ class TestKitTest {
     Blockchain blockchain = Blockchain.newInstance(view);
     assertThat(blockchain.getHeight()).isEqualTo(1);
     assertThat(block).isEqualTo(blockchain.getBlock(1));
-    Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
+    Map<HashCode, ExecutionStatus> transactionResults = toMap(blockchain.getTxResults());
     assertThat(transactionResults).hasSize(1);
-    TransactionResult transactionResult = transactionResults.get(message.hash());
-    assertThat(transactionResult).isEqualTo(TransactionResult.successful());
+    ExecutionStatus transactionResult = transactionResults.get(message.hash());
+    assertThat(transactionResult).isEqualTo(success());
   }
 
   @Test
@@ -408,13 +409,13 @@ class TestKitTest {
     Blockchain blockchain = Blockchain.newInstance(view);
     assertThat(blockchain.getHeight()).isEqualTo(1);
     assertThat(block).isEqualTo(blockchain.getBlock(1));
-    Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
+    Map<HashCode, ExecutionStatus> transactionResults = toMap(blockchain.getTxResults());
     assertThat(transactionResults).hasSize(2);
 
-    TransactionResult transactionResult = transactionResults.get(message.hash());
-    assertThat(transactionResult).isEqualTo(TransactionResult.successful());
-    TransactionResult transactionResult2 = transactionResults.get(message2.hash());
-    assertThat(transactionResult2).isEqualTo(TransactionResult.successful());
+    ExecutionStatus transactionResult = transactionResults.get(message.hash());
+    assertThat(transactionResult).isEqualTo(success());
+    ExecutionStatus transactionResult2 = transactionResults.get(message2.hash());
+    assertThat(transactionResult2).isEqualTo(success());
   }
 
   @Test

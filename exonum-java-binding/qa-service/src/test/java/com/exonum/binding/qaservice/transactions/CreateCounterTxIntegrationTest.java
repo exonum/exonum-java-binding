@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.TransactionUtils.toTransactionMessage;
@@ -26,13 +27,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceImpl;
@@ -121,9 +122,8 @@ class CreateCounterTxIntegrationTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
-    TransactionResult expectedTransactionResult =
-        TransactionResult.error(COUNTER_ALREADY_EXISTS.code, null);
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transactionMessage2.hash());
+    ExecutionStatus expectedTransactionResult = serviceError(COUNTER_ALREADY_EXISTS.code);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 

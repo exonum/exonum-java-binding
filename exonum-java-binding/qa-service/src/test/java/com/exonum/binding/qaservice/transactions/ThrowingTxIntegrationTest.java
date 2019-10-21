@@ -23,7 +23,6 @@ import static com.exonum.binding.qaservice.TransactionUtils.newContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.proxy.Cleaner;
@@ -33,6 +32,9 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.messages.Runtime.ExecutionError2;
+import com.exonum.binding.messages.Runtime.ExecutionError2.ErrorKind;
+import com.exonum.binding.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceModule;
@@ -86,13 +88,24 @@ class ThrowingTxIntegrationTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(throwingTx.hash());
-    assertThat(txResult).isNotEmpty();
-    TransactionResult transactionResult = txResult.get();
-    assertThat(transactionResult.getType()).isEqualTo(TransactionResult.Type.UNEXPECTED_ERROR);
-    assertThat(transactionResult.getErrorCode()).isEmpty();
-    assertThat(transactionResult.getErrorDescription())
-        .contains("#execute of this transaction always throws");
+    ExecutionStatus expectedTxResult = ExecutionStatus.newBuilder()
+        .setError(ExecutionError2.newBuilder()
+            .setKind(ErrorKind.RUNTIME) // fixme: the actual kind is not yet known
+            .setDescription("#execute of this transaction always throws")
+            .build())
+        .build();
+    /*
+     todo: In tests it might be useful not only to be able to easily create expected
+      results (which is relatively easy with a combination of factory methods and a builder),
+      but also to access the description and match it against a condition (e.g., contains, or
+      containsIgnoringCase), which is not perfect:
+
+        String description = txResult.get()
+            .getError() // ! might throw
+            .getDescription();
+     */
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(throwingTx.hash());
+    assertThat(txResult).hasValue(expectedTxResult);
   }
 
   @Test

@@ -16,6 +16,9 @@
 
 package com.exonum.binding.core.transaction;
 
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.messages.Runtime.ExecutionStatus;
 import javax.annotation.Nullable;
 
 /**
@@ -32,7 +35,9 @@ import javax.annotation.Nullable;
  * <a href="https://exonum.com/doc/version/0.12/advanced/node-management/#transaction">the API endpoint documentation</a>
  * for more information.
  *
- * @see com.exonum.binding.common.blockchain.TransactionResult
+ * @see Blockchain#getTxResult(HashCode)
+ * @see Blockchain#getTxResults()
+ * @see ExecutionStatus
  */
 public class TransactionExecutionException extends Exception {
 

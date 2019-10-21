@@ -59,6 +59,24 @@ message ExecutionError {
 message ExecutionStatus {
   oneof result {
     google.protobuf.Empty ok = 1;
-    ExecutionError error = 2;
+    ExecutionError2 error = 2;
   }
+}
+
+// fixme: A temporary replacement until the message is fixed in the core:  
+/// Result of unsuccessful runtime execution.
+message ExecutionError2 {
+  /// The kind of error that indicates in which module the error occurred.
+  enum ErrorKind {
+    PANIC = 0;
+    DISPATCHER = 1;
+    RUNTIME = 2;
+    SERVICE = 3;
+  }
+  ErrorKind kind = 1;
+  /// User defined error code that can have different meanings for the different
+  /// error kinds.
+  uint32 code = 2;
+  /// Optional description which doesn't affect `object_hash`.
+  string description = 3;
 }
