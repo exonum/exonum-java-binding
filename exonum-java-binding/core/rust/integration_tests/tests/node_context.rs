@@ -31,12 +31,11 @@ use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::{
     exonum::{
         api::ApiContext,
-        blockchain::{Blockchain, Service, Transaction},
-        crypto::{gen_keypair, Hash, PublicKey, SecretKey},
-        messages::{RawTransaction, ServiceTransaction},
+        crypto::{gen_keypair, PublicKey, SecretKey},
         node::{ApiSender, ExternalMessage},
+        runtime::{AnyTx, CallInfo},
     },
-    exonum_merkledb::{Snapshot, TemporaryDB},
+    exonum_merkledb::TemporaryDB,
     jni::JavaVM,
     Executor, NodeContext,
 };
@@ -46,7 +45,7 @@ lazy_static! {
     pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
-const TEST_TRANSACTION_ID: u16 = 0;
+const TEST_TRANSACTION_ID: u32 = 0;
 const TEST_TRANSACTION_PAYLOAD: &[u8] = &[1, 2, 3];
 
 #[test]
@@ -83,12 +82,14 @@ fn submit_transaction_to_missing_service() {
     assert!(res.is_err());
 }
 
-fn create_raw_transaction(service_id: u16) -> RawTransaction {
-    let service_transaction = ServiceTransaction::from_raw_unchecked(
-        TEST_TRANSACTION_ID,
-        TEST_TRANSACTION_PAYLOAD.to_vec(),
-    );
-    RawTransaction::new(service_id, service_transaction)
+fn create_raw_transaction(instance_id: u32) -> AnyTx {
+    AnyTx{
+        call_info: CallInfo {
+            instance_id,
+            method_id: TEST_TRANSACTION_ID,
+        },
+        arguments: TEST_TRANSACTION_PAYLOAD.to_vec()
+    }
 }
 
 fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<ExternalMessage>) {
@@ -96,7 +97,7 @@ fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<Extern
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     let storage = TemporaryDB::new();
-    let api_context = ApiContext::new(storage, keypair, app_tx.clone());
+    let api_context = ApiContext::new(storage.into(), keypair, app_tx.clone());
     let node = NodeContext::new(EXECUTOR.clone(), api_context);
     (node, app_rx)
 }

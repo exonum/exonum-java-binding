@@ -19,5 +19,5 @@ use java_bindings::utils::jni_cache;
 #[test]
 #[should_panic(expected = "JNI cache is not initialized")]
 fn cache_not_initialized() {
-    jni_cache::transaction_adapter::execute_id();
+    jni_cache::runtime_adapter::execute_tx_id();
 }

@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 extern crate integration_tests;
 extern crate java_bindings;
 
+//TODO (ECR-3458): fix this when runtime configuration and instantiation will be implemented
+#[cfg(feature = "TODO_ECR-3458")]
 use integration_tests::vm::{fakes_classpath, java_library_path, log4j_path};
-use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig};
+#[cfg(feature = "TODO_ECR-3458")]
+use java_bindings::{Config, InternalConfig, JavaRuntimeProxy, JvmConfig, RuntimeConfig};
 
+#[cfg(feature = "TODO_ECR-3458")]
 #[test]
 // Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents
 // the execution of system tests.
