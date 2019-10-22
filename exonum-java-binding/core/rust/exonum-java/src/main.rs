@@ -15,8 +15,7 @@
  */
 
 extern crate env_logger;
-extern crate exonum_btc_anchoring;
-extern crate exonum_configuration;
+extern crate exonum_cli;
 extern crate exonum_time;
 extern crate java_bindings;
 #[macro_use]
@@ -26,8 +25,8 @@ extern crate log;
 extern crate tempfile;
 
 use java_bindings::get_lib_version;
-
-mod node_builder;
+// TODO: make sure that it is fixed in ECR-3458
+//mod node_builder;
 
 fn main() {
     env_logger::init();
@@ -37,8 +36,9 @@ fn main() {
     // Log app's metadata
     log_app_metadata();
 
-    let builder = node_builder::create();
-    builder.run()
+    // TODO: make sure that it is fixed in ECR-3458
+    //let builder = node_builder::create();
+    //builder.run()
 }
 
 // Prints info about version and build mode of started app to the STDOUT.
