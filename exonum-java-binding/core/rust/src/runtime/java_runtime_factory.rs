@@ -34,10 +34,9 @@ const CREATE_RUNTIME_ADAPTER_SIGNATURE: &str =
 pub fn create_service_runtime(
     executor: Executor,
     runtime_config: &RuntimeConfig,
-) -> Box<dyn Runtime> {
+) -> JavaRuntimeProxy {
     let runtime_adapter = create_service_runtime_adapter(&executor, &runtime_config);
-    let runtime_proxy = JavaRuntimeProxy::new(executor, runtime_adapter);
-    Box::new(runtime_proxy) as Box<dyn Runtime>
+    JavaRuntimeProxy::new(executor, runtime_adapter)
 }
 
 /// Creates service runtime adapter for JavaRuntimeProxy.
@@ -125,8 +124,8 @@ fn build_jvm_arguments(
 
 /// Adds extra user arguments (optional) to JVM configuration.
 fn add_user_arguments<I>(mut args_builder: InitArgsBuilder, user_args: I) -> InitArgsBuilder
-    where
-        I: IntoIterator<Item = String>,
+where
+    I: IntoIterator<Item = String>,
 {
     for param in user_args {
         let option = config::validate_and_convert(&param).unwrap();

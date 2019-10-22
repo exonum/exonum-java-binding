@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-use java_bindings::{Command, Config, EjbCommand, EjbCommandResult};
+use java_bindings::{
+    create_java_vm, create_service_runtime,
+    exonum::{
+        blockchain::{Blockchain, BlockchainBuilder, InstanceCollection},
+        exonum_merkledb::{Database, RocksDB},
+        node::{ApiSender, Node, NodeChannel},
+        runtime::rust::ServiceFactory,
+    },
+    Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
+};
 
-use java_bindings::exonum::blockchain::{Blockchain, BlockchainBuilder, InstanceCollection};
-use java_bindings::exonum::exonum_merkledb::{Database, RocksDB};
-use java_bindings::exonum::node::{ApiSender, Node, NodeChannel};
-use java_bindings::exonum::runtime::rust::ServiceFactory;
 use std::sync::Arc;
 
 pub fn run_node(command: Command) -> Result<(), failure::Error> {
@@ -60,10 +65,22 @@ fn create_blockchain(config: &Config, channel: &NodeChannel) -> Result<Blockchai
     let api_sender = ApiSender::new(channel.api_requests.0.clone());
     let internal_requests = channel.internal_requests.0.clone();
 
+    let java_runtime = create_java_runtime(&config);
+
     BlockchainBuilder::new(database, node_config.consensus.clone(), keypair)
-        // TODO: add Java runtime
+        .with_additional_runtime(java_runtime)
         .with_rust_runtime(service_factories.into_iter().map(InstanceCollection::new))
         .finalize(api_sender, internal_requests)
+}
+
+fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
+    let executor = Executor::new(Arc::new(create_java_vm(
+        &config.jvm_config,
+        &config.runtime_config,
+        InternalConfig::default(),
+    )));
+
+    create_service_runtime(executor, &config.runtime_config)
 }
 
 fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error> {

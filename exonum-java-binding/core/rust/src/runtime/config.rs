@@ -17,6 +17,7 @@
 use exonum_cli::command::run::NodeRunConfig;
 use std::fmt;
 use std::path::PathBuf;
+use {absolute_library_path, system_classpath};
 
 /// Full configuration of the EJB runtime and JVM.
 pub struct Config {
@@ -72,6 +73,15 @@ pub struct InternalConfig {
     pub system_class_path: String,
     /// EJB library path.
     pub system_lib_path: String,
+}
+
+impl Default for InternalConfig {
+    fn default() -> Self {
+        Self {
+            system_class_path: system_classpath(),
+            system_lib_path: absolute_library_path(),
+        }
+    }
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.
