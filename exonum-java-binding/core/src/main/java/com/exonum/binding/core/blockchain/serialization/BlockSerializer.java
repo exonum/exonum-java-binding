@@ -22,17 +22,20 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
+import com.exonum.binding.messages.Blockchain;
+import com.exonum.binding.messages.Helpers;
+import com.exonum.binding.messages.Helpers.Hash;
 import com.google.protobuf.ByteString;
 
 public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
 
-  private static final Serializer<CoreProtos.Block> PROTO_SERIALIZER =
-      protobuf(CoreProtos.Block.class);
+  private static final Serializer<Blockchain.Block> PROTO_SERIALIZER =
+      protobuf(Blockchain.Block.class);
 
   @Override
   public byte[] toBytes(Block value) {
-    CoreProtos.Block block = CoreProtos.Block.newBuilder()
+    Blockchain.Block block = Blockchain.Block.newBuilder()
         .setProposerId(value.getProposerId())
         .setHeight(value.getHeight())
         .setTxCount(value.getNumTransactions())
@@ -46,7 +49,7 @@ public enum BlockSerializer implements Serializer<Block> {
   @Override
   public Block fromBytes(byte[] binaryBlock) {
     HashCode blockHash = Hashing.sha256().hashBytes(binaryBlock);
-    CoreProtos.Block copiedBlocks = PROTO_SERIALIZER.fromBytes(binaryBlock);
+    Blockchain.Block copiedBlocks = PROTO_SERIALIZER.fromBytes(binaryBlock);
     return Block.builder()
         .proposerId(copiedBlocks.getProposerId())
         .height(copiedBlocks.getHeight())
@@ -58,14 +61,14 @@ public enum BlockSerializer implements Serializer<Block> {
         .build();
   }
 
-  private static CoreProtos.Hash toHashProto(HashCode hash) {
+  private static Helpers.Hash toHashProto(HashCode hash) {
     ByteString bytes = ByteString.copyFrom(hash.asBytes());
-    return CoreProtos.Hash.newBuilder()
+    return Helpers.Hash.newBuilder()
         .setData(bytes)
         .build();
   }
 
-  private static HashCode toHashCode(CoreProtos.Hash hash) {
+  private static HashCode toHashCode(Hash hash) {
     ByteString bytes = hash.getData();
     return HashCode.fromBytes(bytes.toByteArray());
   }

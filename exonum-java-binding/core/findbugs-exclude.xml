@@ -37,9 +37,6 @@
 
   <!--  Auto-generated Protobuf-messages -->
   <Match>
-    <Source name="~.*CoreProtos\.java"/>
-  </Match>
-  <Match>
     <Source name="~.*ServiceRuntimeProtos\.java"/>
   </Match>
 </FindBugsFilter>

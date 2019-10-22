@@ -100,9 +100,14 @@ class ThrowingTxIntegrationTest {
       but also to access the description and match it against a condition (e.g., contains, or
       containsIgnoringCase), which is not perfect:
 
-        String description = txResult.get()
-            .getError() // ! might throw
+        ExecutionStatus txResult = blockchain.getTxResult(throwingTx.hash())
+            .orElseThrow(() -> new AssertionError("No result"));
+
+        assertTrue(txResult.hasError());
+        String description = txResult
+            .getError() // ! might throw without check above
             .getDescription();
+        assertThat(description).containsIgnoringCase("foo");
      */
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(throwingTx.hash());
     assertThat(txResult).hasValue(expectedTxResult);
