@@ -77,6 +77,8 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
 
   @Test
   void createTestKitForSingleServiceWithDefaultConfiguration() {
+    // Deploy service that ignores configuration and should initialize correctly
+    // with the default one
     try (TestKit testKit = TestKit.forService(ARTIFACT_ID_2, ARTIFACT_FILENAME_2,
         SERVICE_NAME_2, SERVICE_ID_2, artifactsDirectory)) {
       checkTestService2Initialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
@@ -125,7 +127,8 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     TestKit.Builder testKitBuilder = TestKit.builder()
         .withArtifactsDirectory(artifactsDirectory);
     IllegalArgumentException thrownException = assertThrows(exceptionType,
-        () -> testKitBuilder.withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION));
+        () -> testKitBuilder.withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID,
+            SERVICE_CONFIGURATION));
     assertThat(thrownException.getMessage())
         .isEqualTo("Service %s should be deployed first in order to be created",
         ARTIFACT_ID.toString());

@@ -19,8 +19,6 @@ package com.exonum.binding.testkit;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
