@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.runtime;
+package com.exonum.binding.common.proofs.list;
 
-import com.exonum.binding.core.service.AbstractServiceModule;
-import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
+import com.google.auto.value.AutoValue;
 
-public class TestServiceModule extends AbstractServiceModule {
+/**
+ * A value stored in the Merkle tree at its bottom level (at height 0).
+ */
+@AutoValue
+abstract class ListProofElementEntry implements ListProofEntry {
 
-  @Override
-  protected void configure() {
-    bind(Service.class)
-        .to(TestService.class);
+  /**
+   * Returns a value of the element stored at this index in the list.
+   */
+  abstract byte[] getElement();
 
-    bind(TransactionConverter.class)
-        .toInstance((txId, payload) -> (context) -> System.out.println("Transaction#execute"));
+  static ListProofElementEntry newInstance(long index, byte[] element) {
+    ListProofEntry.checkIndex(index);
+    return new AutoValue_ListProofElementEntry(index, element);
   }
 }

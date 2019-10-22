@@ -17,7 +17,7 @@
 package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.proofs.list.ListProofUtils.getBranchHashCode;
-import static com.exonum.binding.common.proofs.list.ListProofUtils.getNodeHashCode;
+import static com.exonum.binding.common.proofs.list.ListProofUtils.getLeafHashCode;
 import static com.exonum.binding.common.proofs.list.ListProofUtils.getProofListHash;
 import static com.google.common.collect.ImmutableMap.of;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -47,7 +47,7 @@ class ListProofHashCalculatorTest {
     long length = 1;
     calculator = new ListProofHashCalculator(root, length);
 
-    HashCode expectedProofListHash = getProofListHash(getNodeHashCode(V1), length);
+    HashCode expectedProofListHash = getProofListHash(getLeafHashCode(V1), length);
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1)));
     assertEquals(expectedProofListHash, calculator.getHash());
@@ -63,7 +63,7 @@ class ListProofHashCalculatorTest {
     calculator = new ListProofHashCalculator(root, length);
 
     // Calculate expected proof list hash
-    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
+    HashCode expectedRootHash = getBranchHashCode(getLeafHashCode(V1), getLeafHashCode(V2));
     HashCode expectedProofListHash = getProofListHash(expectedRootHash, length);
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1,
@@ -88,8 +88,8 @@ class ListProofHashCalculatorTest {
     calculator = new ListProofHashCalculator(root, length);
 
     // Calculate expected proof list hash
-    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
-    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), getNodeHashCode(V4));
+    HashCode leftBranchHash = getBranchHashCode(getLeafHashCode(V1), getLeafHashCode(V2));
+    HashCode rightBranchHash = getBranchHashCode(getLeafHashCode(V3), getLeafHashCode(V4));
     HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
     HashCode expectedProofListHash = getProofListHash(expectedRootHash, length);
 
@@ -111,7 +111,7 @@ class ListProofHashCalculatorTest {
     long length = 2;
     calculator = new ListProofHashCalculator(root, length);
 
-    HashCode expectedRootHash = getBranchHashCode(getNodeHashCode(V1), H2);
+    HashCode expectedRootHash = getBranchHashCode(getLeafHashCode(V1), H2);
     HashCode expectedProofListHash = getProofListHash(expectedRootHash, length);
 
     assertThat(calculator.getElements(), equalTo(of(0L, V1)));
@@ -127,7 +127,7 @@ class ListProofHashCalculatorTest {
     long length = 2;
     calculator = new ListProofHashCalculator(root, length);
 
-    HashCode expectedRootHash = getBranchHashCode(H1, getNodeHashCode(V2));
+    HashCode expectedRootHash = getBranchHashCode(H1, getLeafHashCode(V2));
     HashCode expectedProofListHash = getProofListHash(expectedRootHash, length);
 
     assertThat(calculator.getElements(), equalTo(of(1L, V2)));
@@ -150,8 +150,8 @@ class ListProofHashCalculatorTest {
     long length = 3;
     calculator = new ListProofHashCalculator(root, length);
 
-    HashCode leftBranchHash = getBranchHashCode(getNodeHashCode(V1), getNodeHashCode(V2));
-    HashCode rightBranchHash = getBranchHashCode(getNodeHashCode(V3), null);
+    HashCode leftBranchHash = getBranchHashCode(getLeafHashCode(V1), getLeafHashCode(V2));
+    HashCode rightBranchHash = getBranchHashCode(getLeafHashCode(V3), null);
     HashCode expectedRootHash = getBranchHashCode(leftBranchHash, rightBranchHash);
     HashCode expectedProofListHash = getProofListHash(expectedRootHash, length);
 
