@@ -113,8 +113,6 @@ impl View {
     /// SIGINT will occur.
     ///
     /// Both indexes mutability and `&mut self` methods of `Fork` available.
-    // TODO: remove dead_code after implementing beforeCommit
-    #[allow(dead_code)]
     pub fn from_ref_mut_fork(fork: &mut Fork) -> Self {
         View::RefMutFork(unsafe { std::mem::transmute(fork) })
     }

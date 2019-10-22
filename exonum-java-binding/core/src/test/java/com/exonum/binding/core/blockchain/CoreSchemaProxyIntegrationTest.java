@@ -38,16 +38,19 @@ import org.junit.jupiter.api.Test;
 class CoreSchemaProxyIntegrationTest {
 
   @Test
+  @Disabled("ECR-3612")
   void getHeightBeforeGenesisBlockTest() {
     assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getHeight));
   }
 
   @Test
+  @Disabled("ECR-3612")
   void getAllBlockHashesTest() {
     assertSchema((schema) -> assertThat(schema.getBlockHashes()).isEmpty());
   }
 
   @Test
+  @Disabled("ECR-3612")
   void getBlockTransactionsTest() {
     assertSchema((schema) -> {
       long height = 0L;
@@ -65,31 +68,37 @@ class CoreSchemaProxyIntegrationTest {
   }
 
   @Test
+  @Disabled("ECR-3612")
   void getBlocksTest() {
     assertSchema((schema) -> assertTrue(schema.getBlocks().isEmpty()));
   }
 
   @Test
+  @Disabled("ECR-3612")
   void getLastBlockBeforeGenesisBlockTest() {
     assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getLastBlock));
   }
 
   @Test
+  @Disabled("ECR-3612")
   void getTxMessagesTest() {
     assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
   }
 
   @Test
+  @Disabled("ECR-3612")
   void getTxResultsTest() {
     assertSchema((schema) -> assertTrue(schema.getTxResults().isEmpty()));
   }
 
   @Test
+  @Disabled("ECR-3612")
   void getTxLocationsTest() {
     assertSchema((schema) -> assertTrue(schema.getTxLocations().isEmpty()));
   }
 
   @Test
+  @Disabled("ECR-3612")
   void getTransactionPool() {
     assertSchema((schema) -> {
       Set<HashCode> set = ImmutableSet.copyOf(schema.getTransactionPool());

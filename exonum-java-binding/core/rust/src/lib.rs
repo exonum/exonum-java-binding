@@ -23,6 +23,8 @@
 
 extern crate chrono;
 pub extern crate exonum;
+#[macro_use]
+extern crate exonum_derive;
 extern crate exonum_cli;
 extern crate failure;
 pub extern crate jni;
@@ -31,6 +33,7 @@ extern crate toml;
 #[macro_use]
 extern crate log;
 extern crate parking_lot;
+extern crate protobuf;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -48,6 +51,7 @@ extern crate tempfile;
 pub use exonum::exonum_merkledb;
 
 pub mod handle;
+mod proto;
 mod proxy;
 mod runtime;
 mod storage;

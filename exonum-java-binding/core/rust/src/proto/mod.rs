@@ -1,4 +1,4 @@
-// Copyright 2018 The Exonum Team
+// Copyright 2019 The Exonum Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod node;
-mod runtime;
+//! Module of the rust-protobuf generated files.
 
-pub use self::node::*;
-pub use self::runtime::*;
+#![allow(bare_trait_objects)]
+#![allow(renamed_and_removed_lints)]
+
+pub use self::service_runtime::*;
+
+include!(concat!(env!("OUT_DIR"), "/protobuf_mod.rs"));
