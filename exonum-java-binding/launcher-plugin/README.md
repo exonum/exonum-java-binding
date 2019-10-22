@@ -9,7 +9,6 @@
 - [`exonum-launcher`](https://github.com/exonum/exonum-launcher)
 
 ```bash
-cd exonum-java-binding
 # Generate sources
 mvn generate-sources -pl core
 # Install plugin
