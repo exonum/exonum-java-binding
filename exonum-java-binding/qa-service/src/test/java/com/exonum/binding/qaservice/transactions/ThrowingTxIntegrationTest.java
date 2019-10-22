@@ -90,7 +90,7 @@ class ThrowingTxIntegrationTest {
     Blockchain blockchain = Blockchain.newInstance(view);
     ExecutionStatus expectedTxResult = ExecutionStatus.newBuilder()
         .setError(ExecutionError2.newBuilder()
-            .setKind(ErrorKind.RUNTIME) // fixme: the actual kind is not yet known
+            .setKind(ErrorKind.RUNTIME) // fixme: the actual kind is not yet known: ECR-3588
             .setDescription("#execute of this transaction always throws")
             .build())
         .build();
