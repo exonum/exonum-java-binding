@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.io.TempDir;
 
 class TestKitTestWithArtifactsCreated {
 
@@ -65,14 +67,16 @@ class TestKitTestWithArtifactsCreated {
         TestTransaction.class, TestSchema.class, TestService2.class);
   }
 
-  static void createInvalidArtifact(String filename) throws IOException {
-    Path artifactLocation = artifactsDirectory.resolve(filename);
+  static void createInvalidArtifact(Path directory, String filename) throws IOException {
+    Path artifactLocation = directory.resolve(filename);
+    // Create an invalid artifact without a TestService class
     createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class, TestTransaction.class,
         TestSchema.class);
   }
 
   private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,
-                                     Class serviceModule, Class<?>... artifactClasses) throws IOException {
+                                     Class serviceModule,
+                                     Class<?>... artifactClasses) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId(serviceArtifactId.toString())
         .setPluginVersion(serviceArtifactId.getVersion())
