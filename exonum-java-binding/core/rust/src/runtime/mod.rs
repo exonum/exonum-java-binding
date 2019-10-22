@@ -16,12 +16,14 @@
 
 mod cmd;
 mod config;
+mod error;
 mod java_runtime_factory;
 mod library_loader;
 mod paths;
 
 pub use self::cmd::*;
 pub use self::config::*;
+pub use self::error::*;
 pub use self::java_runtime_factory::*;
 pub use self::library_loader::get_lib_version;
 pub use self::paths::*;
