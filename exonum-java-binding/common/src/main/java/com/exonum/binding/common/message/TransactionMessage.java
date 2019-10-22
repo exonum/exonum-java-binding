@@ -27,8 +27,8 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.messages.Consensus;
 import com.exonum.binding.messages.Consensus.ExonumMessage;
-import com.exonum.binding.messages.Helpers;
-import com.exonum.binding.messages.Helpers.Signature;
+import com.exonum.binding.messages.Types;
+import com.exonum.binding.messages.Types.Signature;
 import com.exonum.binding.messages.Runtime.AnyTx;
 import com.exonum.binding.messages.Runtime.CallInfo;
 import com.google.protobuf.ByteString;
@@ -191,7 +191,7 @@ public interface TransactionMessage {
       byte[] signature = crypto.signMessage(exonumMessage, keys.getPrivateKey());
 
       Consensus.SignedMessage signedMessage = Consensus.SignedMessage.newBuilder()
-          .setAuthor(Helpers.PublicKey.newBuilder()
+          .setAuthor(Types.PublicKey.newBuilder()
               .setData(ByteString.copyFrom(authorPublicKey.toBytes()))
               .build())
           .setPayload(ByteString.copyFrom(exonumMessage))
