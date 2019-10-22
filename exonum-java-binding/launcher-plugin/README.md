@@ -10,6 +10,9 @@
 
 ```bash
 cd exonum-java-binding
+# Generate sources
+mvn generate-sources -pl core
+# Install plugin
 python3 -m pip install -e launcher-plugin
 ```
 
