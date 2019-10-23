@@ -93,7 +93,7 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
 }
 
 fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
-    // TODO: add anchoring service
+    // TODO(ECR-3714): add anchoring service
     vec![Box::new(TimeServiceFactory::with_provider(
         SystemTimeProvider,
     ))]
