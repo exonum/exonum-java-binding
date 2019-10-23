@@ -129,25 +129,6 @@ pub fn remove_handle<T: 'static>(handle: Handle) {
     remove_handle_impl::<T>(handle, HandleOwnershipType::JavaOwned);
 }
 
-/// Adds native-owned handle to the resource manager.
-///
-/// # Panics
-///
-/// See `add_handle_impl` for the details.
-pub fn register_handle<T: 'static>(handle: Handle) {
-    assert_ne!(handle, 0);
-    add_handle_impl::<T>(handle, HandleOwnershipType::NativeOwned);
-}
-
-/// Removes native-owned handle from the resource manager.
-///
-/// # Panics
-///
-/// See `remove_handle_impl` for the details.
-pub fn unregister_handle<T: 'static>(handle: Handle) {
-    remove_handle_impl::<T>(handle, HandleOwnershipType::NativeOwned);
-}
-
 /// Checks given handle for validity.
 ///
 /// # Panics
@@ -212,19 +193,9 @@ mod tests {
             Some(HandleOwnershipType::JavaOwned),
         );
 
-        // Add native-owned handle.
-        enum T3 {}
-        register_handle::<T3>(MANAGE_HANDLES_NON_OWNED_HANDLE);
-        check_handle::<T3>(MANAGE_HANDLES_NON_OWNED_HANDLE);
-        check_handle_impl::<T3>(
-            MANAGE_HANDLES_NON_OWNED_HANDLE,
-            Some(HandleOwnershipType::NativeOwned),
-        );
-
         // Remove all handles.
         remove_handle::<T1>(MANAGE_HANDLES_FIRST_HANDLE);
         remove_handle::<T1>(MANAGE_HANDLES_SECOND_HANDLE);
-        unregister_handle::<T3>(MANAGE_HANDLES_NON_OWNED_HANDLE);
     }
 
     #[test]
@@ -270,12 +241,5 @@ mod tests {
         add_handle::<T>(WRONG_TYPE_HANDLE);
         enum OtherT {}
         check_handle::<OtherT>(WRONG_TYPE_HANDLE);
-    }
-
-    #[test]
-    #[should_panic(expected = "handle should be")]
-    fn check_wrong_ownrship_handle() {
-        add_handle::<T>(WRONG_OWNERSHIP_HANDLE);
-        unregister_handle::<T>(WRONG_OWNERSHIP_HANDLE);
     }
 }
