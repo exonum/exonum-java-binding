@@ -17,9 +17,6 @@
 //! Wrappers and helper functions around Java pointers. Used for memory management
 //! between native and Java.
 
-// TODO Remove `allow(dead_code)` after [https://jira.bf.local/browse/ECR-910].
-#![allow(dead_code)]
-
 use jni::sys::jlong;
 use jni::JNIEnv;
 

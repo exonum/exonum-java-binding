@@ -19,33 +19,7 @@ use std::sync::RwLock;
 use super::super::Handle;
 
 lazy_static! {
-    static ref HANDLES_MAP: RwLock<HashMap<Handle, HandleInfo>> = RwLock::new(HashMap::new());
-}
-
-/// Represents `Handle` ownership model.
-#[derive(Debug, PartialEq, Eq)]
-enum HandleOwnershipType {
-    /// A handle to a native object, owned by the Java side.
-    JavaOwned,
-    /// A handle to a native object, owned by the native side, and temporarily made available to
-    /// the Java side.
-    NativeOwned,
-}
-
-/// Information associated with handle.
-#[derive(Debug)]
-struct HandleInfo {
-    object_type: TypeId,
-    ownership: HandleOwnershipType,
-}
-
-impl HandleInfo {
-    fn new(object_type: TypeId, ownership: HandleOwnershipType) -> Self {
-        Self {
-            object_type,
-            ownership,
-        }
-    }
+    static ref HANDLES_MAP: RwLock<HashMap<Handle, TypeId>> = RwLock::new(HashMap::new());
 }
 
 /// Adds given handle to the resource manager.
@@ -53,13 +27,13 @@ impl HandleInfo {
 /// # Panics
 ///
 /// Panics if handle is equal to zero or it is already present in the resource manager.
-fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
+pub fn add_handle<T: 'static>(handle: Handle) {
     assert_ne!(handle, 0);
     assert!(
         HANDLES_MAP
             .write()
             .expect("Unable to obtain write-lock")
-            .insert(handle, HandleInfo::new(TypeId::of::<T>(), ownership))
+            .insert(handle, TypeId::of::<T>())
             .is_none(),
         "Trying to add the same handle for the second time: {:X}",
         handle
@@ -71,9 +45,9 @@ fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
 /// # Panics
 ///
 /// See `check_handle_impl` for details.
-fn remove_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
-    check_handle_impl::<T>(handle, Some(ownership));
-    // Return value is ignored because `check_handle_impl` already checks that handle is present.
+pub fn remove_handle<T: 'static>(handle: Handle) {
+    check_handle::<T>(handle);
+    // Return value is ignored because `check_handle` already checks that handle is present.
     HANDLES_MAP
         .write()
         .expect("Unable to obtain write-lock")
@@ -85,57 +59,22 @@ fn remove_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType
 /// # Panics
 ///
 /// Panics if handle is unknown or its type or ownership model is wrong.
-fn check_handle_impl<T: 'static>(handle: Handle, ownership: Option<HandleOwnershipType>) {
+pub fn check_handle<T: 'static>(handle: Handle) {
     match HANDLES_MAP
         .read()
         .expect("Unable to obtain read-lock")
         .get(&handle)
     {
-        Some(info) => {
+        Some(type_id) => {
             let actual_object_type = TypeId::of::<T>();
             assert_eq!(
-                info.object_type, actual_object_type,
+                *type_id, actual_object_type,
                 "Wrong type id for '{:X}' handle",
                 handle
             );
-
-            if let Some(val) = ownership {
-                assert_eq!(
-                    val, info.ownership,
-                    "Error: '{:X}' handle should be {:?}",
-                    handle, info.ownership
-                );
-            }
         }
         None => panic!("Invalid handle value: '{:X}'", handle),
     }
-}
-
-/// Adds Java-owned handle to the resource manager.
-///
-/// # Panics
-///
-/// See `add_handle_impl` for the details.
-pub fn add_handle<T: 'static>(handle: Handle) {
-    add_handle_impl::<T>(handle, HandleOwnershipType::JavaOwned);
-}
-
-/// Removes Java-owned handle from the resource manager.
-///
-/// # Panics
-///
-/// See `remove_handle_impl` for the details.
-pub fn remove_handle<T: 'static>(handle: Handle) {
-    remove_handle_impl::<T>(handle, HandleOwnershipType::JavaOwned);
-}
-
-/// Checks given handle for validity.
-///
-/// # Panics
-///
-/// See `check_handle_impl` for the details.
-pub fn check_handle<T: 'static>(handle: Handle) {
-    check_handle_impl::<T>(handle, None);
 }
 
 /// Returns the number of known handles.
@@ -158,40 +97,26 @@ mod tests {
     // state and tests are run concurrently.
     const MANAGE_HANDLES_FIRST_HANDLE: Handle = 1000;
     const MANAGE_HANDLES_SECOND_HANDLE: Handle = 2000;
-    const MANAGE_HANDLES_NON_OWNED_HANDLE: Handle = 3000;
-    const DUPLICATED_HANDLE: Handle = 4000;
-    const WRONG_TYPE_HANDLE: Handle = 5000;
-    const WRONG_OWNERSHIP_HANDLE: Handle = 6000;
+    const DUPLICATED_HANDLE: Handle = 3000;
+    const WRONG_TYPE_HANDLE: Handle = 4000;
 
     #[test]
     fn manage_handles() {
-        // Add Java-owned handle.
+        // Add handle.
         enum T1 {}
         add_handle::<T1>(MANAGE_HANDLES_FIRST_HANDLE);
         check_handle::<T1>(MANAGE_HANDLES_FIRST_HANDLE);
-        check_handle_impl::<T1>(
-            MANAGE_HANDLES_FIRST_HANDLE,
-            Some(HandleOwnershipType::JavaOwned),
-        );
 
-        // Add second Java-owned handle.
+        // Add second handle.
         enum T2 {}
         add_handle::<T2>(MANAGE_HANDLES_SECOND_HANDLE);
         check_handle::<T2>(MANAGE_HANDLES_SECOND_HANDLE);
-        check_handle_impl::<T2>(
-            MANAGE_HANDLES_SECOND_HANDLE,
-            Some(HandleOwnershipType::JavaOwned),
-        );
 
         remove_handle::<T2>(MANAGE_HANDLES_SECOND_HANDLE);
 
         // Reuse handle value.
         add_handle::<T1>(MANAGE_HANDLES_SECOND_HANDLE);
         check_handle::<T1>(MANAGE_HANDLES_SECOND_HANDLE);
-        check_handle_impl::<T1>(
-            MANAGE_HANDLES_SECOND_HANDLE,
-            Some(HandleOwnershipType::JavaOwned),
-        );
 
         // Remove all handles.
         remove_handle::<T1>(MANAGE_HANDLES_FIRST_HANDLE);
