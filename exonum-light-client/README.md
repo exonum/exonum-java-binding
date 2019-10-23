@@ -1,4 +1,7 @@
 # Exonum Java Light Client
+
+![Maven Central](https://img.shields.io/maven-central/v/com.exonum.client/exonum-light-client)
+
 Java client for [Exonum blockchain][exonum].
 
 ## Overview
@@ -24,8 +27,9 @@ The following table shows versions compatibility:
 
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
-| 0.3.0        | 0.11.0 | 0.6.0-0.7.0 |
-| 0.2.0        | 0.11.0 | 0.6.0       |
+| 0.4.0        | 0.12.* | 0.8.0       |
+| 0.3.0        | 0.11.* | 0.6.0-0.7.0 |
+| 0.2.0        | 0.11.* | 0.6.0       |
 | 0.1.0        | 0.10.* | 0.4         |
 
 ## System Dependencies
@@ -38,12 +42,12 @@ If you are using Maven, add this to your _pom.xml_ file
 <dependency>
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 If you are using Gradle, add this to your dependencies
 ```Groovy
-compile 'com.exonum.client:exonum-light-client:0.3.0'
+compile 'com.exonum.client:exonum-light-client:0.4.0'
 ```
 
 ## Examples
@@ -101,7 +105,7 @@ blocked till the response is received.
 HashCode txHash = exonumClient.submitTransaction(tx);
 ```
 *Be aware that this method submits the transaction to the pool of
-uncommitted transactions and dosn't wait for the transaction 
+uncommitted transactions and doesn't wait for the transaction 
 acceptance to a new block.*  
 <!-- TODO: Replace with a proper example --> 
 Also, you can take a look at the [integration test][send-tx-it]
@@ -134,9 +138,9 @@ which is required for the client.
 Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 
 [exonum]: https://github.com/exonum/exonum
-[ejb-documentation]: https://exonum.com/doc/api/java-binding/0.7.0/index.html
-[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding/0.7.0/com/exonum/binding/common/message/TransactionMessage.Builder.html
+[ejb-documentation]: https://exonum.com/doc/api/java-binding/0.8.0/index.html
+[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding/0.8.0/com/exonum/binding/common/message/TransactionMessage.Builder.html
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
-[standard-serializers]: https://exonum.com/doc/api/java-binding/0.7.0/com/exonum/binding/common/serialization/StandardSerializers.html
+[standard-serializers]: https://exonum.com/doc/api/java-binding/0.8.0/com/exonum/binding/common/serialization/StandardSerializers.html
 [send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
-[exonum-client]: https://exonum.com/doc/api/java-light-client/0.3.0/com/exonum/client/ExonumClient.html
+[exonum-client]: https://exonum.com/doc/api/java-light-client/0.4.0/com/exonum/client/ExonumClient.html

@@ -20,11 +20,11 @@ import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.google.common.base.Preconditions.checkState;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
@@ -42,8 +42,10 @@ import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.ThrowingTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.time.TimeSchema;
+import com.exonum.core.messages.Blockchain.Config;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
@@ -77,6 +79,11 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Nullable
   private Node node;
+
+  @Inject
+  public QaServiceImpl(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
+  }
 
   @Override
   protected Schema createDataSchema(View view) {
@@ -190,13 +197,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public StoredConfiguration getActualConfiguration() {
+  public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
 
-      return blockchain.getActualConfiguration();
+      return blockchain.getConsensusConfiguration();
     });
   }
 

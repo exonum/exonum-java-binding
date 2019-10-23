@@ -19,13 +19,10 @@ package com.exonum.client;
 
 import static com.exonum.client.Blocks.BLOCK_1;
 import static com.exonum.client.Blocks.BLOCK_1_JSON;
-import static com.exonum.client.Blocks.BLOCK_1_TIME;
 import static com.exonum.client.Blocks.BLOCK_2;
 import static com.exonum.client.Blocks.BLOCK_2_JSON;
-import static com.exonum.client.Blocks.BLOCK_2_TIME;
 import static com.exonum.client.Blocks.BLOCK_3;
 import static com.exonum.client.Blocks.BLOCK_3_JSON;
-import static com.exonum.client.Blocks.BLOCK_3_TIME;
 import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,10 +35,12 @@ import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 class ExplorerApiHelperTest {
@@ -185,18 +184,43 @@ class ExplorerApiHelperTest {
 
   @Test
   void parseGetBlockResponse() {
-    String tx1 = "336a4acbe2ff0dd18989316f4bc8d17a4bfe79985424fe483c45e8ac92963d13";
+    String prevHash = "81abde95";
+    String txHash = "c6c0aa07";
+    String stateHash = "2eab5971";
+    String tx1 = "336a4acb";
+    String tx2 = "12345678";
+    String commitTime = "2019-10-01T17:07:45.663021Z";
     String json = "{\n"
-        + "    'block': " + BLOCK_1_JSON + ",\n"
-        + "    'precommits': ['a410964c2c21199b48e2'],\n"
-        + "    'txs': ['" + tx1 + "'],\n"
-        + "    'time': '" + BLOCK_1_TIME + "'\n"
+        + "    \"proposer_id\": 0,\n"
+        + "    \"height\": 2,\n"
+        + "    \"tx_count\": 1,\n"
+        + "    \"prev_hash\": \"" + prevHash + "\",\n"
+        + "    \"tx_hash\": \"" + txHash + "\",\n"
+        + "    \"state_hash\": \"" + stateHash + "\",\n"
+        + "    \"precommits\": [\n"
+        + "        \"bc13da11\"\n"
+        + "    ],\n"
+        + "    \"txs\": [\n"
+        + "        {\"service_id\": 0, \"tx_hash\": \"" + tx1 + "\"},\n"
+        + "        {\"service_id\": 128, \"tx_hash\": \"" + tx2 + "\"}\n"
+        + "    ],\n"
+        + "    \"time\": \"" + commitTime + "\"\n"
         + "}";
 
     BlockResponse response = ExplorerApiHelper.parseGetBlockResponse(json);
 
-    assertThat(response.getBlock(), is(BLOCK_1));
-    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1)));
+    Block expectedBlock = Block.builder()
+        .proposerId(0)
+        .height(2)
+        .numTransactions(1)
+        .previousBlockHash(HashCode.fromString(prevHash))
+        .txRootHash(HashCode.fromString(txHash))
+        .stateHash(HashCode.fromString(stateHash))
+        .commitTime(ZonedDateTime.parse(commitTime))
+        .build();
+    assertThat(response.getBlock(), is(expectedBlock));
+    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1),
+        HashCode.fromString(tx2)));
   }
 
   @Test
@@ -206,9 +230,7 @@ class ExplorerApiHelperTest {
         + "        'start': 6,\n"
         + "        'end': 288\n"
         + "    },\n"
-        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "],\n"
-        + "    'times': ['" + BLOCK_1_TIME + "','" + BLOCK_2_TIME + "','" + BLOCK_3_TIME
-        + "']\n"
+        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "]\n"
         + "}\n";
 
     BlocksResponse response = ExplorerApiHelper.parseGetBlocksResponse(json);

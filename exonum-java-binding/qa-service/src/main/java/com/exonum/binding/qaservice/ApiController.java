@@ -18,7 +18,7 @@ package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.COUNTER_ID_PARAM;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_CONSENSUS_CONFIGURATION_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_COUNTER_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
@@ -30,19 +30,21 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIME
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static com.google.common.net.HttpHeaders.LOCATION;
+import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.core.messages.Blockchain.Config;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
@@ -80,7 +82,7 @@ final class ApiController {
             .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
-            .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
+            .put(GET_CONSENSUS_CONFIGURATION_PATH, this::getConsensusConfiguration)
             .put(TIME_PATH, this::getTime)
             .put(VALIDATORS_TIMES_PATH, this::getValidatorsTimes)
             .build();
@@ -138,9 +140,12 @@ final class ApiController {
     respondWithJson(rc, counter);
   }
 
-  private void getActualConfiguration(RoutingContext rc) {
-    StoredConfiguration configuration = service.getActualConfiguration();
-    respondWithJson(rc, configuration);
+  private void getConsensusConfiguration(RoutingContext rc) {
+    Config configuration = service.getConsensusConfiguration();
+
+    rc.response()
+        .putHeader(CONTENT_TYPE, OCTET_STREAM.toString())
+        .write(Buffer.buffer(configuration.toByteArray()));
   }
 
   private void getTime(RoutingContext rc) {
@@ -256,7 +261,7 @@ final class ApiController {
     static final String COUNTER_ID_PARAM = "counterId";
     static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
     @VisibleForTesting
-    static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
+    static final String GET_CONSENSUS_CONFIGURATION_PATH = "/consensusConfiguration";
     @VisibleForTesting
     static final String TIME_PATH = "/time";
     @VisibleForTesting

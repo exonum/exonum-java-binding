@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice.transactions;
 
+import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.TransactionUtils.createCounter;
 import static com.exonum.binding.qaservice.TransactionUtils.newContext;
@@ -23,7 +24,6 @@ import static com.exonum.binding.qaservice.TransactionUtils.toTransactionMessage
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.proxy.Cleaner;
@@ -35,6 +35,7 @@ import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceModule;
@@ -111,8 +112,8 @@ class ErrorTxIntegrationTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
-    TransactionResult expectedTransactionResult = TransactionResult.error(errorCode, null);
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(errorTx.hash());
+    ExecutionStatus expectedTransactionResult = serviceError(errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
@@ -126,9 +127,8 @@ class ErrorTxIntegrationTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(errorTx.hash());
-    TransactionResult expectedTransactionResult =
-        TransactionResult.error(errorCode, errorDescription);
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(errorTx.hash());
+    ExecutionStatus expectedTransactionResult = serviceError(errorCode, errorDescription);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
@@ -149,6 +149,7 @@ class ErrorTxIntegrationTest {
       ErrorTx tx = new ErrorTx(0L, errorCode, "Foo");
 
       // Execute the transaction
+      // TODO: use service name and service id when creating TransactionContext
       TransactionContext context = newContext(view);
       assertThrows(TransactionExecutionException.class, () -> tx.execute(context));
 

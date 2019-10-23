@@ -18,7 +18,7 @@
 package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.JSON;
-import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
@@ -30,13 +30,14 @@ import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -69,53 +70,21 @@ final class ExplorerApiHelper {
 
   static BlockResponse parseGetBlockResponse(String json) {
     GetBlockResponse response = JSON.fromJson(json, GetBlockResponse.class);
-    ZonedDateTime time = response.getTime();
-    Block block = toTimeBlock(response.getBlock(), time);
 
-    return new BlockResponse(block, response.getTxs());
+    List<HashCode> txs = response.getTxs().stream()
+        .map(IndexedTxHash::getTxHash)
+        .collect(toList());
+    return new BlockResponse(response.getAsBlock(), txs);
   }
 
   static BlocksResponse parseGetBlocksResponse(String json) {
     GetBlocksResponse response = JSON.fromJson(json, GetBlocksResponse.class);
-    List<GetBlockResponseBlock> blocks = response.getBlocks();
-    int blocksSize = blocks.size();
-    List<ZonedDateTime> times = response.getTimes();
-    if (times != null) {
-      int timesSize = times.size();
-      checkState(blocksSize == timesSize,
-          "Blocks size %s doesn't equal to commit times size %s", blocksSize, timesSize);
-    }
-
-    List<Block> timeBlocks = new ArrayList<>(blocksSize);
-    for (int i = 0; i < blocksSize; i++) {
-      if (times == null) {
-        timeBlocks.add(toTimeBlock(blocks.get(i)));
-      } else {
-        timeBlocks.add(toTimeBlock(blocks.get(i), times.get(i)));
-      }
-    }
 
     return new BlocksResponse(
-        timeBlocks,
+        response.getBlocks(),
         response.getRange().getStart(),
         response.getRange().getEnd()
     );
-  }
-
-  private static Block toTimeBlock(GetBlockResponseBlock block) {
-    return toTimeBlock(block, null);
-  }
-
-  private static Block toTimeBlock(GetBlockResponseBlock block, @Nullable ZonedDateTime time) {
-    return Block.builder()
-        .proposerId(block.getProposerId())
-        .numTransactions(block.getTxCount())
-        .height(block.getHeight())
-        .previousBlockHash(block.getPrevHash())
-        .stateHash(block.getStateHash())
-        .txRootHash(block.getTxHash())
-        .commitTime(time)
-        .build();
   }
 
   private static TransactionResult getTransactionResult(
@@ -203,30 +172,50 @@ final class ExplorerApiHelper {
   }
 
   @Value
-  private static class GetBlockResponse {
-    GetBlockResponseBlock block;
-    JsonElement precommits; //TODO: in scope of LC P3
-    List<HashCode> txs;
-    ZonedDateTime time;
-  }
-
-  @Value
+  @AllArgsConstructor
   @VisibleForTesting
-  static class GetBlockResponseBlock {
+  static class GetBlockResponse {
     int proposerId;
     long height;
     int txCount;
     HashCode prevHash;
     HashCode txHash;
     HashCode stateHash;
+    JsonElement precommits; //TODO: in scope of LC P3
+    List<IndexedTxHash> txs;
+    ZonedDateTime time;
+
+    GetBlockResponse(Block block, List<IndexedTxHash> txs) {
+      this(block.getProposerId(), block.getHeight(),
+          block.getNumTransactions(), block.getPreviousBlockHash(), block.getTxRootHash(),
+          block.getStateHash(), new JsonArray(), ImmutableList.copyOf(txs),
+          block.getCommitTime().orElse(null));
+    }
+
+    Block getAsBlock() {
+      return Block.builder()
+          .proposerId(proposerId)
+          .height(height)
+          .numTransactions(txCount)
+          .previousBlockHash(prevHash)
+          .txRootHash(txHash)
+          .stateHash(stateHash)
+          .commitTime(time)
+          .build();
+    }
+  }
+
+  @Value
+  @VisibleForTesting
+  static class IndexedTxHash {
+    int serviceId;
+    HashCode txHash;
   }
 
   @Value
   private static class GetBlocksResponse {
-    List<GetBlockResponseBlock> blocks;
+    List<Block> blocks;
     GetBlocksResponseRange range;
-    @Nullable
-    List<ZonedDateTime> times;
   }
 
   @Value

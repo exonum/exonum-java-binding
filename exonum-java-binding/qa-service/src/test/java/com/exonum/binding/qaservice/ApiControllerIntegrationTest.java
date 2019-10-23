@@ -17,7 +17,7 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.hash.Hashing.sha256;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_CONSENSUS_CONFIGURATION_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
@@ -32,7 +32,6 @@ import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,13 +39,11 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.exonum.binding.common.configuration.ConsensusConfiguration;
-import com.exonum.binding.common.configuration.StoredConfiguration;
-import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
+import com.exonum.core.messages.Blockchain.Config;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -84,7 +81,9 @@ import org.mockito.quality.Strictness;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
-@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
+// Execute the tests sequentially, as each of them creates a Vertx instance with its
+// own thread pool, which drives the delays up.
+@Execution(ExecutionMode.SAME_THREAD)
 @SuppressWarnings("WeakerAccess")
 class ApiControllerIntegrationTest {
 
@@ -325,20 +324,19 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void getActualConfiguration(VertxTestContext context) {
-    StoredConfiguration configuration = createConfiguration();
-    when(qaService.getActualConfiguration()).thenReturn(configuration);
+  void getConsensusConfiguration(VertxTestContext context) {
+    Config configuration = createConfiguration();
+    when(qaService.getConsensusConfiguration()).thenReturn(configuration);
 
-    get(GET_ACTUAL_CONFIGURATION_PATH)
+    get(GET_CONSENSUS_CONFIGURATION_PATH)
         .send(context.succeeding(response -> context.verify(() -> {
           assertAll(
               () -> assertThat(response.statusCode()).isEqualTo(HTTP_OK),
               () -> {
-                String body = response.bodyAsString();
-                StoredConfiguration storedConfiguration = JSON_SERIALIZER
-                    .fromJson(body, StoredConfiguration.class);
+                Buffer body = response.bodyAsBuffer();
+                Config consensusConfig = Config.parseFrom(body.getBytes());
 
-                assertThat(storedConfiguration).isEqualTo(configuration);
+                assertThat(consensusConfig).isEqualTo(configuration);
               });
           context.completeNow();
         })));
@@ -431,30 +429,16 @@ class ApiControllerIntegrationTest {
         }));
   }
 
-  private StoredConfiguration createConfiguration() {
-    return StoredConfiguration.builder()
-        .previousCfgHash(HashCode.fromString("11"))
-        .actualFrom(1)
-        .validatorKeys(
-            singletonList(
-                ValidatorKey.builder()
-                    .consensusKey(PublicKey.fromHexString("22"))
-                    .serviceKey(PublicKey.fromHexString("33"))
-                    .build()
-            )
-        )
-        .consensusConfiguration(
-            ConsensusConfiguration.builder()
-                .firstRoundTimeout(1)
-                .statusTimeout(2)
-                .peersTimeout(3)
-                .txsBlockLimit(4)
-                .maxMessageLen(5)
-                .minProposeTimeout(6)
-                .maxProposeTimeout(7)
-                .proposeTimeoutThreshold(8)
-                .build()
-        )
+  private static Config createConfiguration() {
+    return Config.newBuilder()
+        .setFirstRoundTimeout(1)
+        .setStatusTimeout(2)
+        .setPeersTimeout(3)
+        .setTxsBlockLimit(4)
+        .setMaxMessageLen(5)
+        .setMinProposeTimeout(6)
+        .setMaxProposeTimeout(7)
+        .setProposeTimeoutThreshold(8)
         .build();
   }
 }

@@ -1,7 +1,7 @@
 [package]
 name = "java_bindings"
 version = "0.9.0-SNAPSHOT"
-authors = ["Exonum Team <exonum@bitfury.com>"]
+authors = ["Exonum Team <contact@exonum.com>"]
 
 [workspace]
 members = ["integration_tests", "exonum-java"]
@@ -15,23 +15,23 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-chrono = "0.4.7"
+chrono = "0.4.9"
 exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
+exonum-cli = "0.12"
 exonum-derive = "0.12"
 exonum-proto = "0.12"
-exonum-time = "0.12"
 exonum-testkit = "0.12"
-exonum-cli = "0.12"
-failure = "0.1.1"
+exonum-time = "0.12"
+failure = "0.1.6"
 futures = "0.1.25"
-jni = { version = "0.13.1", features = ["invocation"] }
+jni = { version = "0.14.0", features = ["invocation"] }
 lazy_static = "1.3.0"
 log = "0.4.8"
 parking_lot = "0.6"
 protobuf = { version = "2.8.0", features = ["with-serde"] }
 serde = "1.0"
 serde_derive = "1.0"
-serde_json = "1.0.40"
+serde_json = "1.0.41"
 structopt = "0.3.2"
 toml = "0.5"
 
@@ -49,10 +49,10 @@ rpath = true
 
 # FIXME: using git dependency until new Exonum with dynamic services will be released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
-exonum-build = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
-exonum-derive = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
-exonum-cli = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
-exonum-proto = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
+exonum-build = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
+exonum-derive = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
+exonum-cli = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
+exonum-proto = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }

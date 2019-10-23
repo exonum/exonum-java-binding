@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.4.0-SNAPSHOT</version>
+  <version>0.5.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Light Client</name>
@@ -61,19 +61,19 @@
 
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.7.0</ejb.version>
+    <ejb.version>0.8.0</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Project dependencies -->
-    <okhttp.version>4.2.0</okhttp.version>
+    <okhttp.version>4.2.2</okhttp.version>
     <lombok.version>1.18.10</lombok.version>
     <!--Test dependencies-->
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
-    <mockito.version>3.0.0</mockito.version>
-    <hamcrest.version>2.1</hamcrest.version>
-    <equalsverifier.version>3.1.9</equalsverifier.version>
+    <mockito.version>3.1.0</mockito.version>
+    <hamcrest.version>2.2</hamcrest.version>
+    <equalsverifier.version>3.1.10</equalsverifier.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
@@ -134,6 +134,18 @@
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
+      <version>${hamcrest.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- An empty artifact, required while JUnit 4 is on the classpath (from mockwebserver)
+         to override its dependency on hamcrest.
+
+         See http://hamcrest.org/JavaHamcrest/distributables#upgrading-from-hamcrest-1x
+     -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-core</artifactId>
       <version>${hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
@@ -272,7 +284,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -305,7 +317,7 @@
           <dependency>
             <groupId>org.pitest</groupId>
             <artifactId>pitest-junit5-plugin</artifactId>
-            <version>0.9</version>
+            <version>0.10</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -329,7 +341,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.4</version>
+            <version>0.8.5</version>
             <configuration>
               <excludes>
                 <!--
@@ -342,6 +354,7 @@
                 <exclude>com/exonum/client/response/BlocksRange.class</exclude>
                 <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
                 <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
+                <exclude>com/exonum/client/response/SystemStatistics.class</exclude>
                 <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
               </excludes>
             </configuration>
@@ -422,11 +435,12 @@
       </build>
     </profile>
 
-    <!-- Fill in needed property when generating Javadocs on JDK 11+ -->
+    <!-- Fill in needed property when generating Javadocs on JDK 11–12 -->
     <profile>
-      <id>generate-javadocs-jdk11-plus</id>
+      <id>generate-javadocs-jdk11-12</id>
       <activation>
-        <jdk>[11,)</jdk>
+        <!-- Removed in 13 https://bugs.openjdk.java.net/browse/JDK-8215582-->
+        <jdk>[11,13)</jdk>
       </activation>
       <properties>
         <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>

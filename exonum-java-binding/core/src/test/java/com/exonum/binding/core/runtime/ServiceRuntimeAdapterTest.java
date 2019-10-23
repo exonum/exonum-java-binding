@@ -28,12 +28,11 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.messages.Runtime.ArtifactId;
-import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.ArtifactId;
+import com.exonum.core.messages.Runtime.InstanceSpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,20 +74,21 @@ class ServiceRuntimeAdapterTest {
         .build();
     byte[] deploySpec = deployArguments.toByteArray();
 
-    serviceRuntimeAdapter.deployArtifact("com.acme:foo:1.2.3", deploySpec);
+    String name = "com.acme:foo:1.2.3";
+    serviceRuntimeAdapter.deployArtifact(name, deploySpec);
 
-    ServiceArtifactId expectedId = ServiceArtifactId.of("com.acme", "foo", "1.2.3");
+    ServiceArtifactId expectedId = ServiceArtifactId.newJavaId(name);
     verify(serviceRuntime).deployArtifact(expectedId, artifactFilename);
   }
 
   @Test
   void isArtifactDeployed() {
-    String artifactId = "com.acme:foo:1.3.2";
+    String artifactName = "com.acme:foo:1.3.2";
 
-    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.parseFrom(artifactId)))
+    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.newJavaId(artifactName)))
         .thenReturn(true);
 
-    assertTrue(serviceRuntimeAdapter.isArtifactDeployed(artifactId));
+    assertTrue(serviceRuntimeAdapter.isArtifactDeployed(artifactName));
   }
 
   @Test
@@ -112,13 +112,13 @@ class ServiceRuntimeAdapterTest {
         .thenReturn(fork);
 
     String serviceName = "s1";
-    String javaArtifactId = "com.acme:foo:1.2.3";
+    String javaArtifactName = "com.acme:foo:1.2.3";
     byte[] instanceSpec = InstanceSpec.newBuilder()
         .setId(serviceId)
         .setName(serviceName)
         .setArtifact(ArtifactId.newBuilder()
             .setRuntimeId(1)
-            .setName(javaArtifactId)
+            .setName(javaArtifactName)
             .build())
         .build()
         .toByteArray();
@@ -129,7 +129,7 @@ class ServiceRuntimeAdapterTest {
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
-        ServiceArtifactId.parseFrom(javaArtifactId));
+        ServiceArtifactId.newJavaId(javaArtifactName));
     verify(serviceRuntime).addService(fork, expected, configuration);
   }
 

@@ -16,10 +16,10 @@
 
 package com.exonum.binding.qaservice;
 
-import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Service;
+import com.exonum.core.messages.Blockchain.Config;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +45,7 @@ public interface QaService extends Service {
 
   Optional<Counter> getValue(HashCode counterId);
 
-  StoredConfiguration getActualConfiguration();
+  Config getConsensusConfiguration();
 
   Optional<ZonedDateTime> getTime();
 

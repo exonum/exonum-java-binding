@@ -47,9 +47,8 @@ import org.pf4j.PluginState;
 final class Pf4jServiceLoader implements ServiceLoader {
 
   private static final Comparator<ServiceArtifactId> SERVICE_ID_COMPARATOR =
-      Comparator.comparing(ServiceArtifactId::getGroupId)
-          .thenComparing(ServiceArtifactId::getArtifactId)
-          .thenComparing(ServiceArtifactId::getVersion);
+      // No need to compare id — it is always Java
+      Comparator.comparing(ServiceArtifactId::getName);
 
   private final PluginManager pluginManager;
   private final ClassLoadingScopeChecker classLoadingChecker;
@@ -132,11 +131,12 @@ final class Pf4jServiceLoader implements ServiceLoader {
   private static ServiceArtifactId extractServiceId(String pluginId)
       throws ServiceLoadingException {
     try {
-      return ServiceArtifactId.parseFrom(pluginId);
+      JavaArtifactNames.checkArtifactName(pluginId);
+      return ServiceArtifactId.newJavaId(pluginId);
     } catch (IllegalArgumentException e) {
-      throw new ServiceLoadingException(
-          String.format("Invalid plugin id (%s) is specified in service artifact metadata, "
-              + "must be in format 'groupId:artifactId:version'", pluginId));
+      String message = String.format(
+          "Invalid plugin id (%s) is specified in service artifact metadata", pluginId);
+      throw new ServiceLoadingException(message, e);
     }
   }
 
@@ -190,7 +190,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
   public void unloadService(ServiceArtifactId artifactId) {
     checkArgument(loadedServices.containsKey(artifactId), "No such artifactId: %s", artifactId);
 
-    String pluginId = artifactId.toString();
+    String pluginId = artifactId.getName();
     try {
       boolean stopped = pluginManager.unloadPlugin(pluginId);
       // The docs don't say why it may fail to stop the plugin.
@@ -210,7 +210,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
     // Unload the plugins
     List<Exception> errors = new ArrayList<>();
     for (ServiceArtifactId artifactId : loadedServices.keySet()) {
-      String pluginId = artifactId.toString();
+      String pluginId = artifactId.getName();
       try {
         unloadPlugin(pluginId);
       } catch (Exception e) {

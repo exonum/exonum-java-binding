@@ -40,6 +40,13 @@
     </dependency>
 
     <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>fake-service</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
@@ -83,12 +90,39 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>
-            ${jacoco.args}
+          <excludes>
+            <!-- Exclude integration tests as they require a `package`d fake-service
+                 and some special configuration. -->
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+          <argLine>${jacoco.it.args}
             -Djava.library.path=${ejb-core.nativeLibPath}
             ${java.vm.assertionFlag}
           </argLine>
+          <systemPropertyVariables>
+            <it.artifactsDir>${project.parent.basedir}/fake-service/target</it.artifactsDir>
+            <it.artifactFilename>fake-service-artifact.jar</it.artifactFilename>
+            <it.artifactName>${project.groupId}:fake-service:${project.version}</it.artifactName>
+          </systemPropertyVariables>
         </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
