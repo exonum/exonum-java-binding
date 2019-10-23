@@ -8,6 +8,9 @@
     <!-- Exclude repackaged Guava code -->
     <suppress files="com.exonum.binding.common.hash" checks=".*"/>
 
+    <!-- Exclude auto-generated protobuf code -->
+    <suppress files="com.exonum.binding.messages" checks=".*"/>
+
     <!-- Exclude (mostly) auto-generated code -->
     <suppress files="Message_Builder2\.java" checks=".*"/>
 
