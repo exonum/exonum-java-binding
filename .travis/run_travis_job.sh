@@ -27,10 +27,7 @@ then
     cargo fmt -- --check
 
     # Run clippy static analysis.
-    cargo clippy -p exonum-java -p java_bindings --tests --all-features -- -D warnings
-    # Ignoring integration tests as they are broken right now
-    # TODO: use `cargo clippy --all --test` after integration tests fixed (ECR-3591)
-    cargo clippy -p integration_tests --all-features -- -D warnings
+    cargo clippy --all --tests --all-features -- -D warnings
 
     echo 'Rust checks are completed.'
 else
