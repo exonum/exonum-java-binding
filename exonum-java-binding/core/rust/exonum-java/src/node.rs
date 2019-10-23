@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
     create_java_vm, create_service_runtime,
     exonum::{
@@ -92,6 +93,8 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
 }
 
 fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
-    // TODO: add anchoring & time services
-    vec![]
+    // TODO: add anchoring service
+    vec![Box::new(TimeServiceFactory::with_provider(
+        SystemTimeProvider,
+    ))]
 }
