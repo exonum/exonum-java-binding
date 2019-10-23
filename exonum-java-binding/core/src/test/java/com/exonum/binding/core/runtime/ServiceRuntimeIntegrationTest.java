@@ -324,6 +324,8 @@ class ServiceRuntimeIntegrationTest {
             .fork(database.createFork(cleaner))
             .txMessageHash(TEST_HASH)
             .authorPk(TEST_PUBLIC_KEY)
+            .serviceName(TEST_NAME)
+            .serviceId(TEST_ID)
             .build();
 
         serviceRuntime.executeTransaction(TEST_ID, txId, arguments, context);
@@ -343,6 +345,8 @@ class ServiceRuntimeIntegrationTest {
             .fork(database.createFork(cleaner))
             .txMessageHash(TEST_HASH)
             .authorPk(TEST_PUBLIC_KEY)
+            .serviceName(TEST_NAME)
+            .serviceId(TEST_ID)
             .build();
 
         Exception e = assertThrows(IllegalArgumentException.class,

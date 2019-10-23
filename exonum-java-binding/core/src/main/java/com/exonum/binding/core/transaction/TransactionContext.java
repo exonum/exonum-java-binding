@@ -51,6 +51,18 @@ public interface TransactionContext {
   PublicKey getAuthorPk();
 
   /**
+   * Returns the name of the service instance.
+   */
+  String getServiceName();
+
+  /**
+   * Returns the numeric id of the service instance.
+   *
+   * @see TransactionMessage#getServiceId()
+   */
+  Integer getServiceId();
+
+  /**
    * Returns the builder of the transaction context.
    */
   static Builder builder() {
@@ -64,6 +76,8 @@ public interface TransactionContext {
     private Fork fork;
     private HashCode hash;
     private PublicKey authorPk;
+    private String serviceName;
+    private Integer serviceId;
 
     /**
      * Sets database fork for the context.
@@ -90,10 +104,26 @@ public interface TransactionContext {
     }
 
     /**
+     * Sets service name for the context.
+     */
+    public Builder serviceName(String serviceName) {
+      this.serviceName = serviceName;
+      return this;
+    }
+
+    /**
+     * Sets service id for the context.
+     */
+    public Builder serviceId(int serviceId) {
+      this.serviceId = serviceId;
+      return this;
+    }
+
+    /**
      * Creates the transaction context instance.
      */
     public TransactionContext build() {
-      return new InternalTransactionContext(fork, hash, authorPk);
+      return new InternalTransactionContext(fork, hash, authorPk, serviceName, serviceId);
     }
 
     private Builder() {

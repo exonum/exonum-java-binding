@@ -29,11 +29,16 @@ final class InternalTransactionContext implements TransactionContext {
   private final Fork fork;
   private final HashCode hash;
   private final PublicKey authorPk;
+  private final String serviceName;
+  private final int serviceId;
 
-  InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPk) {
+  InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPk, String serviceName,
+                             Integer serviceId) {
     this.fork = checkNotNull(fork);
     this.hash = checkNotNull(hash);
     this.authorPk = checkNotNull(authorPk);
+    this.serviceName = checkNotNull(serviceName);
+    this.serviceId = checkNotNull(serviceId);
   }
 
   @Override
@@ -51,4 +56,13 @@ final class InternalTransactionContext implements TransactionContext {
     return authorPk;
   }
 
+  @Override
+  public String getServiceName() {
+    return serviceName;
+  }
+
+  @Override
+  public int getServiceId() {
+    return serviceId;
+  }
 }

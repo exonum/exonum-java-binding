@@ -157,10 +157,14 @@ class ServiceRuntimeAdapter {
       Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
       HashCode hash = HashCode.fromBytes(txMessageHash);
       PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
+      // TODO: get service name from ServiceRuntime
+      String serviceName = null;
       TransactionContext context = TransactionContext.builder()
           .fork(fork)
           .txMessageHash(hash)
           .authorPk(authorPk)
+          .serviceName(serviceName)
+          .serviceId(serviceId)
           .build();
 
       serviceRuntime.executeTransaction(serviceId, txId, arguments, context);
