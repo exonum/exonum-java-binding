@@ -1,5 +1,7 @@
 extern crate exonum_build;
 
+use exonum_build::ProtobufGenerator;
+
 use std::env::var_os;
 
 fn main() {
@@ -11,7 +13,6 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=c++");
     }
 
-    use exonum_build::ProtobufGenerator;
     ProtobufGenerator::with_mod_name("protobuf_mod.rs")
         .with_input_dir("../src/main/proto")
         .add_path("../src/main/proto")
