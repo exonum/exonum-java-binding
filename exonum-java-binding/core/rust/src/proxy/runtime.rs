@@ -25,8 +25,7 @@ use exonum::{
     runtime::{
         dispatcher::{DispatcherRef, DispatcherSender},
         ApiChange, ArtifactId, ArtifactProtobufSpec, CallInfo, ErrorKind, ExecutionContext,
-        ExecutionError, InstanceDescriptor, InstanceId, InstanceSpec, Runtime, RuntimeIdentifier,
-        StateHashAggregator,
+        ExecutionError, InstanceId, InstanceSpec, Runtime, RuntimeIdentifier, StateHashAggregator,
     },
 };
 use futures::{Future, IntoFuture};
@@ -240,63 +239,44 @@ impl Runtime for JavaRuntimeProxy {
         Some(ArtifactProtobufSpec::default())
     }
 
-    fn start_service(&mut self, spec: &InstanceSpec) -> Result<(), ExecutionError> {
-        let service_name = spec.name.clone();
-        let id = spec.id;
-        let artifact = self.parse_artifact(&spec.artifact)?;
+    fn restart_service(&mut self, spec: &InstanceSpec) -> Result<(), ExecutionError> {
+        let serialized_instance_spec: Vec<u8> = spec.to_bytes();
 
         self.jni_call_default(|env| {
-            let name = JObject::from(env.new_string(service_name)?);
-            let artifact_id = JObject::from(env.new_string(artifact.to_string())?);
-
+            let serialized_instance_spec =
+                JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::create_service_id(),
+                runtime_adapter::restart_service_id(),
                 JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(name),
-                    JValue::from(id as i32),
-                    JValue::from(artifact_id),
-                ],
+                &[JValue::from(serialized_instance_spec)],
             )
             .and_then(JValue::v)
         })
     }
 
-    fn initialize_service(
-        &self,
-        fork: &Fork,
-        descriptor: InstanceDescriptor,
+    fn add_service(
+        &mut self,
+        fork: &mut Fork,
+        instance_spec: &InstanceSpec,
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
+        let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
         self.jni_call_default(|env| {
-            let id = descriptor.id as i32;
+            let instance_spec =
+                JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
             let view_handle = to_handle(View::from_ref_fork(fork));
             let params = JObject::from(env.byte_array_from_slice(&parameters)?);
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::initialize_service_id(),
+                runtime_adapter::add_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
-                    JValue::from(id),
                     JValue::from(view_handle),
+                    JValue::from(instance_spec),
                     JValue::from(params),
                 ],
-            )
-            .and_then(JValue::v)
-        })
-    }
-
-    fn stop_service(&mut self, descriptor: InstanceDescriptor) -> Result<(), ExecutionError> {
-        self.jni_call_default(|env| {
-            let id = descriptor.id as i32;
-
-            env.call_method_unchecked(
-                self.runtime_adapter.as_obj(),
-                runtime_adapter::stop_service_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[JValue::from(id)],
             )
             .and_then(JValue::v)
         })
@@ -447,6 +427,21 @@ impl Runtime for JavaRuntimeProxy {
                     runtime_adapter::connect_apis_id(),
                     JavaType::Primitive(Primitive::Void),
                     &[JValue::from(service_ids), JValue::from(node_handle)],
+                ),
+            );
+            Ok(())
+        }));
+    }
+
+    fn shutdown(&self) {
+        unwrap_jni(self.exec.with_attached(|env| {
+            panic_on_exception(
+                env,
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::shutdown_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[],
                 ),
             );
             Ok(())
