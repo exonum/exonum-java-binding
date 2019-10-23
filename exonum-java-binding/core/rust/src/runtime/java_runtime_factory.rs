@@ -21,7 +21,6 @@ use jni::{
     Executor, InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use exonum::runtime::Runtime;
 use runtime::config::{self, InternalConfig, JvmConfig, RuntimeConfig};
 use utils::unwrap_jni;
 use JavaRuntimeProxy;
