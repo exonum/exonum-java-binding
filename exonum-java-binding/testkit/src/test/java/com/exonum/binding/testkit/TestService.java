@@ -29,6 +29,7 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
@@ -36,8 +37,8 @@ import java.nio.charset.StandardCharsets;
 final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
-      .hashString("initial key", StandardCharsets.UTF_8);
-  static final String INITIAL_ENTRY_VALUE = "initial value";
+      .hashString("Initial key", StandardCharsets.UTF_8);
+  static final String THROWING_VALUE = "Incorrect value";
 
   private final int serviceInstanceId;
   private Node node;
@@ -58,9 +59,15 @@ final class TestService extends AbstractService {
 
   @Override
   public void initialize(Fork fork, Configuration configuration) {
+    TestConfiguration initialConfiguration = configuration.getAsMessage(TestConfiguration.class);
+    String configurationValue = initialConfiguration.getValue();
+    if (configurationValue.equals(THROWING_VALUE)) {
+      throw new IllegalArgumentException("Service configuration had an invalid value: "
+          + configurationValue);
+    }
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
-    testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
+    testMap.put(INITIAL_ENTRY_KEY, configurationValue);
   }
 
   @Override

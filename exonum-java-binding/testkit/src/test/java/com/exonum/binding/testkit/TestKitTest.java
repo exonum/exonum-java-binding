@@ -16,8 +16,8 @@
 
 package com.exonum.binding.testkit;
 
-import static com.exonum.binding.testkit.TestKit.DEFAULT_CONFIGURATION;
 import static com.exonum.binding.testkit.TestKit.MAX_SERVICE_INSTANCE_ID;
+import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +41,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -71,14 +72,16 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
           .withArtifactsDirectory(artifactsDirectory));
 
   @Test
-  void createTestKitForSingleService() {
-    try (TestKit testKit = TestKit.forService(ARTIFACT_ID, ARTIFACT_FILENAME,
-        SERVICE_NAME, SERVICE_ID, artifactsDirectory)) {
-      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
+  void createTestKitForSingleServiceWithDefaultConfiguration() {
+    // Deploy service that ignores configuration and should initialize correctly
+    // with the default one
+    try (TestKit testKit = TestKit.forService(ARTIFACT_ID_2, ARTIFACT_FILENAME_2,
+        SERVICE_NAME_2, SERVICE_ID_2, artifactsDirectory)) {
+      checkTestService2Initialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
     }
   }
 
@@ -86,7 +89,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   void createTestKitWithBuilderForSingleService() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
@@ -97,7 +100,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   void createTestKitWithTwoServiceInstancesSameArtifact() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withService(ARTIFACT_ID, SERVICE_NAME_2, SERVICE_ID_2)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
@@ -124,7 +127,8 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     TestKit.Builder testKitBuilder = TestKit.builder()
         .withArtifactsDirectory(artifactsDirectory);
     IllegalArgumentException thrownException = assertThrows(exceptionType,
-        () -> testKitBuilder.withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID));
+        () -> testKitBuilder.withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID,
+            SERVICE_CONFIGURATION));
     assertThat(thrownException.getMessage())
         .isEqualTo("Service %s should be deployed first in order to be created",
         ARTIFACT_ID.toString());
@@ -148,7 +152,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     Class<IllegalStateException> exceptionType = IllegalStateException.class;
     TestKit.Builder testKitBuilder = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID);
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION);
     IllegalStateException thrownException = assertThrows(exceptionType, testKitBuilder::build);
     assertThat(thrownException.getMessage()).isEqualTo("Artifacts directory was not set.");
   }
@@ -159,7 +163,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     Class<RuntimeException> exceptionType = RuntimeException.class;
     TestKit.Builder testKitBuilder = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, nonexistentArtifactFilename)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory);
     RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
     assertThat(thrownException.getMessage())
@@ -173,24 +177,50 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     Class<RuntimeException> exceptionType = RuntimeException.class;
     TestKit.Builder testKitBuilder = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, invalidArtifactFilename)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory);
     RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
     assertThat(thrownException.getMessage())
         .contains("Failed to load the service from ", invalidArtifactFilename);
   }
 
-  // TODO: update TestService so that different configuration changes state and refactor this test
-  //  to validate that custom configuration works [ECR-3652]
   @Test
-  void createTestKitWithBuilderForSingleServiceWithCustomConfiguration() {
+  void createTestKitWithCustomConfiguration() {
+    String configurationValue = "Custom value";
+    TestConfiguration testConfiguration = TestConfiguration.newBuilder()
+        .setValue(configurationValue)
+        .build();
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, DEFAULT_CONFIGURATION)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, testConfiguration)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
+      TestService service = testKit.getService(SERVICE_NAME, TestService.class);
+      // Check that configuration value is used in initialization
+      Snapshot view = testKit.getSnapshot();
+      TestSchema testSchema = service.createDataSchema(view);
+      ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
+      Map<HashCode, String> testMap = toMap(testProofMap);
+      Map<HashCode, String> expected = ImmutableMap.of(
+          TestService.INITIAL_ENTRY_KEY, configurationValue);
+      assertThat(testMap).isEqualTo(expected);
     }
+  }
+
+  @Test
+  void createTestKitWithThrowingInitialization() {
+    TestConfiguration invalidConfiguration = TestConfiguration.newBuilder()
+        .setValue(THROWING_VALUE)
+        .build();
+    Class<RuntimeException> exceptionType = RuntimeException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        // Initialize with special invalid configuration
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, invalidConfiguration)
+        .withArtifactsDirectory(artifactsDirectory);
+    RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    assertThat(thrownException.getMessage())
+        .contains("Service configuration had an invalid value:", THROWING_VALUE);
   }
 
   @ParameterizedTest
@@ -208,7 +238,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   void createTestKitWithBuilderForMultipleDifferentServices() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withDeployedArtifact(ARTIFACT_ID_2, ARTIFACT_FILENAME_2)
         .withService(ARTIFACT_ID_2, SERVICE_NAME_2, SERVICE_ID_2)
         .withArtifactsDirectory(artifactsDirectory)
@@ -245,7 +275,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
     Map<HashCode, String> testMap = toMap(testProofMap);
     Map<HashCode, String> expected = ImmutableMap.of(
-        TestService.INITIAL_ENTRY_KEY, TestService.INITIAL_ENTRY_VALUE);
+        TestService.INITIAL_ENTRY_KEY, CONFIGURATION_VALUE);
     assertThat(testMap).isEqualTo(expected);
 
     // Check that genesis block was committed
@@ -285,7 +315,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     short validatorCount = 2;
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withValidators(validatorCount)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
@@ -302,7 +332,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     try (TestKit testKit = TestKit.builder()
         .withNodeType(EmulatedNodeType.AUDITOR)
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withValidators(validatorCount)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
@@ -319,7 +349,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     short invalidValidatorCount = 0;
     TestKit.Builder testKitBuilder = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory);
     assertThrows(exceptionType, () -> testKitBuilder.withValidators(invalidValidatorCount));
   }
@@ -569,7 +599,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     try (TestKit testKit = TestKit.builder()
         .withNodeType(EmulatedNodeType.AUDITOR)
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       EmulatedNode node = testKit.getEmulatedNode();
