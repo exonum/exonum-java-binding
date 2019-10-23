@@ -78,7 +78,7 @@ fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
     let executor = Executor::new(Arc::new(create_java_vm(
         &config.jvm_config,
         &config.runtime_config,
-        InternalConfig::default(),
+        InternalConfig::app_config(),
     )));
 
     create_service_runtime(executor, &config.runtime_config)

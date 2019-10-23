@@ -75,8 +75,9 @@ pub struct InternalConfig {
     pub system_lib_path: String,
 }
 
-impl Default for InternalConfig {
-    fn default() -> Self {
+impl InternalConfig {
+    /// Returns InternalConfig with system paths intended for Exonum Java App.
+    pub fn app_config() -> Self {
         Self {
             system_class_path: system_classpath(),
             system_lib_path: absolute_library_path(),
