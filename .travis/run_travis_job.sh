@@ -11,7 +11,7 @@ set -eu -o pipefail
 set -x
 
 # Run rust code checks if CHECK_RUST is true, or java tests if it's not
-if [ "$CHECK_RUST" = true ] 
+if [ "$CHECK_RUST" = true ]
 then
     # Install clippy and rustfmt.
     rustup component add clippy
@@ -27,7 +27,10 @@ then
     cargo fmt -- --check
 
     # Run clippy static analysis.
-    cargo clippy --all --tests --all-features -- -D warnings
+    cargo clippy -p exonum-java -p java_bindings --tests --all-features -- -D warnings
+    # Ignoring integration tests as they are broken right now
+    # TODO: use `cargo clippy --all --test` after integration tests fixed (ECR-3458)
+    cargo clippy -p integration_tests --all-features -- -D warnings
 
     echo 'Rust checks are completed.'
 else

@@ -20,7 +20,7 @@ import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
 
-class TestServiceModule extends AbstractServiceModule {
+public class TestServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {
