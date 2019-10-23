@@ -437,6 +437,17 @@ public final class ServiceRuntime {
         );
   }
 
+  /**
+   * Get service name by its id.
+   *
+   * @throws IllegalArgumentException if there is no service with such id
+   */
+  public String getServiceNameById(Integer serviceId) {
+    synchronized (lock) {
+      return getServiceById(serviceId).getName();
+    }
+  }
+
   private ServiceWrapper getServiceById(Integer serviceId) {
     checkService(serviceId);
     return servicesById.get(serviceId);

@@ -62,7 +62,7 @@ final class InternalTransactionContext implements TransactionContext {
   }
 
   @Override
-  public int getServiceId() {
+  public Integer getServiceId() {
     return serviceId;
   }
 }

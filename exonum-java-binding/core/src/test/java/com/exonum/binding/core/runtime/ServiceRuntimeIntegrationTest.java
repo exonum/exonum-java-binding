@@ -442,6 +442,21 @@ class ServiceRuntimeIntegrationTest {
       verify(serviceWrapper).createPublicApiHandlers(node, serviceRouter);
       verify(server).mountSubRouter(API_ROOT_PATH + "/" + serviceApiPath, serviceRouter);
     }
+
+    @Test
+    void getServiceNameByInstance() {
+      assertThat(serviceRuntime.getServiceNameById(TEST_ID)).isEqualTo(TEST_NAME);
+    }
+
+    @Test
+    void getServiceNameByInstanceUnknownServiceId() {
+      Integer invalidServiceId = TEST_ID + 1;
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> serviceRuntime.getServiceNameById(invalidServiceId));
+      String expectedMessage =
+          String.format("No service with id=%s in the Java runtime", invalidServiceId);
+      assertThat(e).hasMessageContaining(expectedMessage);
+    }
   }
 
   private static byte[] anyConfiguration() {
