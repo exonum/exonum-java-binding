@@ -72,7 +72,7 @@
     <!--Test dependencies-->
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
     <mockito.version>3.1.0</mockito.version>
-    <hamcrest.version>2.1</hamcrest.version>
+    <hamcrest.version>2.2</hamcrest.version>
     <equalsverifier.version>3.1.10</equalsverifier.version>
     <!--Plugins-->
     <!-- Checkstyle -->
@@ -317,7 +317,7 @@
           <dependency>
             <groupId>org.pitest</groupId>
             <artifactId>pitest-junit5-plugin</artifactId>
-            <version>0.9</version>
+            <version>0.10</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -341,7 +341,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.4</version>
+            <version>0.8.5</version>
             <configuration>
               <excludes>
                 <!--
