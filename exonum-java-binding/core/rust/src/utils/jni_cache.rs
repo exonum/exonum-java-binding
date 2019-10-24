@@ -213,13 +213,13 @@ pub mod runtime_adapter {
         unsafe { RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.unwrap() }
     }
 
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.createService()`.
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.restartService()`.
     pub fn restart_service_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { RUNTIME_ADAPTER_RESTART_SERVICE.unwrap() }
     }
 
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.initializeService()`.
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.addService()`.
     pub fn add_service_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { RUNTIME_ADAPTER_ADD_SERVICE.unwrap() }
