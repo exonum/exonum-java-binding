@@ -23,8 +23,7 @@ use java_bindings::{
     create_java_vm, create_service_runtime, Executor, InternalConfig, JvmConfig, RuntimeConfig,
 };
 
-use std::path::PathBuf;
-use std::sync::Arc;
+use std::{path::PathBuf, sync::Arc};
 
 #[test]
 // Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents
