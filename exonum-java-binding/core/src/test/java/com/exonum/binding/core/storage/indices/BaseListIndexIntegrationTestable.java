@@ -43,7 +43,6 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 
 /**

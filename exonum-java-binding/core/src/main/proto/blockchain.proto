@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+// todo: It currently duplicates the .proto file in common (and is old)
 syntax = "proto3";
 
 option java_package = "com.exonum.binding.core.blockchain.serialization";

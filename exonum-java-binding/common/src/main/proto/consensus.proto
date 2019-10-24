@@ -20,7 +20,8 @@ package exonum.consensus;
 
 option java_package = "com.exonum.binding.messages";
 
-import "helpers.proto";
+import "types.proto";
+import "common.proto";
 import "blockchain.proto";
 import "runtime.proto";
 import "google/protobuf/timestamp.proto";
@@ -28,14 +29,14 @@ import "google/protobuf/timestamp.proto";
 // Container for the signed messages.
 //
 // Keep in mind, that:
-// hash(SignedMessage) = hash(exonum_msg || key.bytes || sign.bytes)
+// hash(SignedMessage) = hash(payload || key.bytes || sign.bytes)
 message SignedMessage {
   // Message payload.
   bytes payload = 1;
   // Message author.
-  exonum.PublicKey author = 2;
+  exonum.crypto.PublicKey author = 2;
   // Digital signature.
-  exonum.Signature signature = 3;
+  exonum.crypto.Signature signature = 3;
 }
 
 // List of consensus messages
@@ -48,7 +49,7 @@ message Connect {
 
 message Status {
   uint64 height = 1;
-  exonum.Hash last_hash = 2;
+  exonum.crypto.Hash last_hash = 2;
   uint64 pool_size = 3;
 }
 
@@ -56,15 +57,15 @@ message Propose {
   uint32 validator = 1;
   uint64 height = 2;
   uint32 round = 3;
-  exonum.Hash prev_hash = 4;
-  repeated exonum.Hash transactions = 5;
+  exonum.crypto.Hash prev_hash = 4;
+  repeated exonum.crypto.Hash transactions = 5;
 }
 
 message Prevote {
   uint32 validator = 1;
   uint64 height = 2;
   uint32 round = 3;
-  exonum.Hash propose_hash = 4;
+  exonum.crypto.Hash propose_hash = 4;
   uint32 locked_round = 5;
 }
 
@@ -72,51 +73,51 @@ message Precommit {
   uint32 validator = 1;
   uint64 height = 2;
   uint32 round = 3;
-  exonum.Hash propose_hash = 4;
-  exonum.Hash block_hash = 5;
+  exonum.crypto.Hash propose_hash = 4;
+  exonum.crypto.Hash block_hash = 5;
   google.protobuf.Timestamp time = 6;
 }
 
 message BlockResponse {
-  exonum.PublicKey to = 1;
+  exonum.crypto.PublicKey to = 1;
   exonum.Block block = 2;
   repeated bytes precommits = 3;
-  repeated exonum.Hash transactions = 4;
+  repeated exonum.crypto.Hash transactions = 4;
 }
 
 message TransactionsResponse {
-  exonum.PublicKey to = 1;
+  exonum.crypto.PublicKey to = 1;
   repeated bytes transactions = 2;
 }
 
 message ProposeRequest {
-  exonum.PublicKey to = 1;
+  exonum.crypto.PublicKey to = 1;
   uint64 height = 2;
-  exonum.Hash propose_hash = 3;
+  exonum.crypto.Hash propose_hash = 3;
 }
 
 message TransactionsRequest {
-  exonum.PublicKey to = 1;
-  repeated exonum.Hash txs = 2;
+  exonum.crypto.PublicKey to = 1;
+  repeated exonum.crypto.Hash txs = 2;
 }
 
 message PrevotesRequest {
-  exonum.PublicKey to = 1;
+  exonum.crypto.PublicKey to = 1;
   uint64 height = 2;
   uint32 round = 3;
-  exonum.Hash propose_hash = 4;
-  exonum.BitVec validators = 5;
+  exonum.crypto.Hash propose_hash = 4;
+  exonum.common.BitVec validators = 5;
 }
 
-message PeersRequest { exonum.PublicKey to = 1; }
+message PeersRequest { exonum.crypto.PublicKey to = 1; }
 
 message BlockRequest {
-  exonum.PublicKey to = 1;
+  exonum.crypto.PublicKey to = 1;
   uint64 height = 2;
 }
 
 message PoolTransactionsRequest {
-  exonum.PublicKey to = 1;
+  exonum.crypto.PublicKey to = 1;
 }
 
 message ExonumMessage {

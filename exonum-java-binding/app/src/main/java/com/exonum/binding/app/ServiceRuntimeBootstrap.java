@@ -18,7 +18,7 @@ package com.exonum.binding.app;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.runtime.FrameworkModule;
-import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.binding.time.TimeSchema;
@@ -79,8 +79,8 @@ public final class ServiceRuntimeBootstrap {
    * @param serverPort a port for the web server providing transport to Java services
    * @return a new service runtime
    */
-  public static ServiceRuntime createServiceRuntime(String serviceArtifactsDir,
-      int serverPort) {
+  public static ServiceRuntimeAdapter createServiceRuntime(String serviceArtifactsDir,
+                                                           int serverPort) {
     try {
       // Log the information about the runtime and environment
       logRuntimeInfo();
@@ -93,7 +93,7 @@ public final class ServiceRuntimeBootstrap {
           DEPENDENCY_REFERENCE_CLASSES);
       Injector frameworkInjector = Guice.createInjector(APP_STAGE, frameworkModule);
 
-      return frameworkInjector.getInstance(ServiceRuntime.class);
+      return frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
     } catch (Throwable t) {
       logger.fatal("Failed to create the Java Service Runtime", t);
       throw t;

@@ -39,7 +39,9 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +57,7 @@ import org.pf4j.PluginManager;
 abstract class Pf4jServiceLoaderIntegrationTestable {
 
   private static final String PLUGIN_ID = "com.acme:foo-service:1.0.1";
+  private static final String PLUGIN_ID_2 = "org.acme:bar-service:3.2.1";
   private static final Map<String, Class<?>> TEST_DEPENDENCY_REFERENCE_CLASSES = ImmutableMap.of(
       "exonum-java-binding", Service.class,
       "vertx", Vertx.class,
@@ -260,6 +263,31 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     ServiceArtifactId unknownPluginId = ServiceArtifactId.parseFrom(PLUGIN_ID);
     Optional<?> serviceDefinition = serviceLoader.findService(unknownPluginId);
     assertThat(serviceDefinition).isEmpty();
+  }
+
+  @Test
+  void loadsUnloadsAll(@TempDir Path tmp) throws Exception {
+    Map<String, Path> pluginLocationsById = ImmutableMap.of(PLUGIN_ID, tmp.resolve("p1.jar"),
+        PLUGIN_ID_2, tmp.resolve("p2.jar"));
+
+    // Prepare the artifact files
+    for (Entry<String, Path> e : pluginLocationsById.entrySet()) {
+      anArtifact()
+          .setPluginId(e.getKey())
+          .writeTo(e.getValue());
+    }
+
+    // Load the plugins
+    for (Path location : pluginLocationsById.values()) {
+      serviceLoader.loadService(location);
+    }
+
+    // Unload all
+    serviceLoader.unloadAll();
+
+    // Verify each is unloaded
+    Set<String> pluginIds = pluginLocationsById.keySet();
+    pluginIds.forEach(this::verifyUnloaded);
   }
 
   /**

@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-pub mod service;
-pub mod transaction;
+package com.exonum.binding.common.proofs.list;
 
-pub const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
+import com.google.auto.value.AutoValue;
+
+/**
+ * A value stored in the Merkle tree at its bottom level (at height 0).
+ */
+@AutoValue
+abstract class ListProofElementEntry implements ListProofEntry {
+
+  /**
+   * Returns a value of the element stored at this index in the list.
+   */
+  abstract byte[] getElement();
+
+  static ListProofElementEntry newInstance(long index, byte[] element) {
+    ListProofEntry.checkIndex(index);
+    return new AutoValue_ListProofElementEntry(index, element);
+  }
+}

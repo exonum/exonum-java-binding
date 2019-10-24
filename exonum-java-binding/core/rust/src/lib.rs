@@ -24,12 +24,16 @@
 extern crate chrono;
 pub extern crate exonum;
 #[macro_use]
+extern crate exonum_derive;
+extern crate exonum_cli;
 extern crate failure;
 pub extern crate jni;
+extern crate structopt;
 extern crate toml;
 #[macro_use]
 extern crate log;
 extern crate parking_lot;
+extern crate protobuf;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -40,25 +44,26 @@ extern crate lazy_static;
 
 extern crate exonum_testkit;
 extern crate exonum_time;
+extern crate futures;
 #[cfg(test)]
 extern crate tempfile;
 
 pub use exonum::exonum_merkledb;
 
 pub mod handle;
+mod proto;
 mod proxy;
 mod runtime;
 mod storage;
-mod testkit;
+//mod testkit;
 pub mod utils;
 
-pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
+pub use self::handle::{cast_handle, drop_handle, to_handle, Handle};
 pub use handle::resource_manager::*;
 pub use proxy::*;
-pub use runtime::services;
 pub use runtime::*;
 pub use storage::*;
-pub use testkit::*;
+//pub use testkit::*;
 
 pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};
 pub use jni::Executor;
