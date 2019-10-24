@@ -243,13 +243,13 @@ impl Runtime for JavaRuntimeProxy {
         let serialized_instance_spec: Vec<u8> = spec.to_bytes();
 
         self.jni_call_default(|env| {
-            let serialized_instance_spec =
+            let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::restart_service_id(),
                 JavaType::Primitive(Primitive::Void),
-                &[JValue::from(serialized_instance_spec)],
+                &[JValue::from(instance_spec)],
             )
             .and_then(JValue::v)
         })
