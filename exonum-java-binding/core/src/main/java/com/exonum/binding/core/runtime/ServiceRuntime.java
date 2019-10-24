@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
@@ -260,18 +261,27 @@ public final class ServiceRuntime {
 
   /**
    * Executes a transaction belonging to the given service.
-   *
    * @param serviceId the numeric identifier of the service instance to which the transaction
    *     belongs
    * @param txId the transaction type identifier
    * @param arguments the serialized transaction arguments
-   * @param context the transaction execution context
+   * @param fork a native fork object
+   * @param txMessageHash the hash of the transaction message
+   * @param authorPublicKey the public key of the transaction author
    */
   public void executeTransaction(Integer serviceId, int txId, byte[] arguments,
-      TransactionContext context) throws TransactionExecutionException {
+                                 Fork fork, HashCode txMessageHash, PublicKey authorPublicKey)
+      throws TransactionExecutionException {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
-
+      String serviceName = service.getName();
+      TransactionContext context = TransactionContext.builder()
+          .fork(fork)
+          .txMessageHash(txMessageHash)
+          .authorPk(authorPublicKey)
+          .serviceName(serviceName)
+          .serviceId(serviceId)
+          .build();
       try {
         service.executeTransaction(txId, arguments, context);
       } catch (Exception e) {
@@ -435,17 +445,6 @@ public final class ServiceRuntime {
         .ifPresent(someRoute ->
             logger.info("    E.g.: http://127.0.0.1:{}{}", port, serviceApiPath + someRoute)
         );
-  }
-
-  /**
-   * Get service name by its id.
-   *
-   * @throws IllegalArgumentException if there is no service with such id
-   */
-  public String getServiceNameById(Integer serviceId) {
-    synchronized (lock) {
-      return getServiceById(serviceId).getName();
-    }
   }
 
   private ServiceWrapper getServiceById(Integer serviceId) {

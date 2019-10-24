@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Fork;
+import java.util.Objects;
 
 /**
  * Default implementation of the transaction context.
@@ -64,5 +65,26 @@ final class InternalTransactionContext implements TransactionContext {
   @Override
   public Integer getServiceId() {
     return serviceId;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    InternalTransactionContext that = (InternalTransactionContext) o;
+    return serviceId == that.serviceId
+        && Objects.equals(fork, that.fork)
+        && Objects.equals(hash, that.hash)
+        && Objects.equals(authorPk, that.authorPk)
+        && Objects.equals(serviceName, that.serviceName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(fork, hash, authorPk, serviceName, serviceId);
   }
 }

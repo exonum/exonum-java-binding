@@ -320,17 +320,19 @@ class ServiceRuntimeIntegrationTest {
           Cleaner cleaner = new Cleaner()) {
         int txId = 1;
         byte[] arguments = bytes(127);
-        TransactionContext context = TransactionContext.builder()
-            .fork(database.createFork(cleaner))
+        Fork fork = database.createFork(cleaner);
+        TransactionContext expectedContext = TransactionContext.builder()
+            .fork(fork)
             .txMessageHash(TEST_HASH)
             .authorPk(TEST_PUBLIC_KEY)
             .serviceName(TEST_NAME)
             .serviceId(TEST_ID)
             .build();
 
-        serviceRuntime.executeTransaction(TEST_ID, txId, arguments, context);
+        serviceRuntime.executeTransaction(TEST_ID, txId, arguments, fork, TEST_HASH,
+            TEST_PUBLIC_KEY);
 
-        verify(serviceWrapper).executeTransaction(txId, arguments, context);
+        verify(serviceWrapper).executeTransaction(txId, arguments, expectedContext);
       }
     }
 
@@ -341,16 +343,10 @@ class ServiceRuntimeIntegrationTest {
         int serviceId = TEST_ID + 1;
         int txId = 1;
         byte[] arguments = bytes(127);
-        TransactionContext context = TransactionContext.builder()
-            .fork(database.createFork(cleaner))
-            .txMessageHash(TEST_HASH)
-            .authorPk(TEST_PUBLIC_KEY)
-            .serviceName(TEST_NAME)
-            .serviceId(TEST_ID)
-            .build();
 
         Exception e = assertThrows(IllegalArgumentException.class,
-            () -> serviceRuntime.executeTransaction(serviceId, txId, arguments, context));
+            () -> serviceRuntime.executeTransaction(serviceId, txId, arguments,
+                database.createFork(cleaner), TEST_HASH, TEST_PUBLIC_KEY));
 
         assertThat(e).hasMessageContaining(String.valueOf(serviceId));
       }
@@ -441,21 +437,6 @@ class ServiceRuntimeIntegrationTest {
 
       verify(serviceWrapper).createPublicApiHandlers(node, serviceRouter);
       verify(server).mountSubRouter(API_ROOT_PATH + "/" + serviceApiPath, serviceRouter);
-    }
-
-    @Test
-    void getServiceNameByInstance() {
-      assertThat(serviceRuntime.getServiceNameById(TEST_ID)).isEqualTo(TEST_NAME);
-    }
-
-    @Test
-    void getServiceNameByInstanceUnknownServiceId() {
-      Integer invalidServiceId = TEST_ID + 1;
-      Exception e = assertThrows(IllegalArgumentException.class,
-          () -> serviceRuntime.getServiceNameById(invalidServiceId));
-      String expectedMessage =
-          String.format("No service with id=%s in the Java runtime", invalidServiceId);
-      assertThat(e).hasMessageContaining(expectedMessage);
     }
   }
 
