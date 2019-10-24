@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-//todo: disabled until ECR-3458
-//mod cmd;
+mod cmd;
 mod config;
-pub mod error;
+mod error;
 mod java_runtime_factory;
 mod library_loader;
 mod paths;
-pub mod services;
 
+pub use self::cmd::*;
 pub use self::config::*;
 pub use self::error::*;
-pub use self::java_runtime_factory::JavaRuntimeFactory;
+pub use self::java_runtime_factory::*;
 pub use self::library_loader::get_lib_version;
-pub use self::paths::panic_if_java_options;
+pub use self::paths::*;

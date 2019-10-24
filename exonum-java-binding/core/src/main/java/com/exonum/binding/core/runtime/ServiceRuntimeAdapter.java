@@ -42,13 +42,13 @@ import org.apache.logging.log4j.Logger;
  * <p>For more detailed documentation on the operations, see the {@link ServiceRuntime}.
  */
 @SuppressWarnings({"unused", "SameParameterValue"}) // Native API
-class ServiceRuntimeAdapter {
+public class ServiceRuntimeAdapter {
 
   private final ServiceRuntime serviceRuntime;
   private final ViewFactory viewFactory;
   private static final Logger logger = LogManager.getLogger(ServiceRuntimeAdapter.class);
 
-  ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
+  public ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
     this.serviceRuntime = serviceRuntime;
     this.viewFactory = viewFactory;
   }
