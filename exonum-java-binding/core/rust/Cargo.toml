@@ -17,6 +17,7 @@ invocation = ["jni/invocation"]
 [dependencies]
 exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
 exonum-derive = "0.12"
+exonum-proto = "0.12"
 exonum-time = "0.12"
 exonum-testkit = "0.12"
 exonum-cli = "0.12"
@@ -47,9 +48,10 @@ rpath = true
 
 # FIXME: using git dependency until new Exonum with dynamic services will be released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "270def3" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "270def3" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "270def3" }
-exonum-build = { git = "https://github.com/exonum/exonum", rev = "270def3" }
-exonum-derive = { git = "https://github.com/exonum/exonum", rev = "270def3" }
-exonum-cli = { git = "https://github.com/exonum/exonum", rev = "270def3" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
+exonum-build = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
+exonum-derive = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
+exonum-cli = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
+exonum-proto = { git = "https://github.com/exonum/exonum", rev = "47114e3" }
