@@ -44,7 +44,6 @@ extern crate lazy_static;
 extern crate exonum_testkit;
 extern crate exonum_time;
 extern crate futures;
-extern crate proc_macro;
 #[cfg(test)]
 extern crate tempfile;
 
