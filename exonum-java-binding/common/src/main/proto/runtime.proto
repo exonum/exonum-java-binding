@@ -16,15 +16,21 @@ syntax = "proto3";
 
 package exonum.runtime;
 
+/*
+  TODO: (All .proto) (1) Better package structure?
+    (2) Shall they all reside in common (i.e. are they all useful to any client)?
+ */
 option java_package = "com.exonum.binding.messages";
 
+import "blockchain.proto";
 import "google/protobuf/empty.proto";
 
 // Unique service transaction identifier.
 message CallInfo {
-  // Service instance identifier.
+  // Unique service instance identifier. The dispatcher uses this identifier to find the
+  // corresponding runtime to execute a transaction.
   uint32 instance_id = 1;
-  // Identifier of method in service interface to call.
+  // Identifier of the method in the service interface required for the call.
   uint32 method_id = 2;
 }
 
@@ -60,5 +66,23 @@ message ExecutionStatus {
   oneof result {
     google.protobuf.Empty ok = 1;
     ExecutionError error = 2;
+  }
+}
+
+// Configuration parameters of the certain service instance.
+message ServiceConfig {
+  // Corresponding service instance ID.
+  uint32 instance_id = 1;
+  // Raw bytes representation of service configuration parameters.
+  bytes params = 2;
+}
+
+// This message contains one atomic configuration change.
+message ConfigChange {
+  oneof message {
+    // New consensus config.
+    exonum.Config consensus = 1;
+    // New service instance config.
+    ServiceConfig service = 2;
   }
 }

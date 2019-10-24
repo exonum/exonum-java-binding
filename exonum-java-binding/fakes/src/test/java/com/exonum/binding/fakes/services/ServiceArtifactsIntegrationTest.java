@@ -29,6 +29,7 @@ import com.exonum.binding.test.CiOnly;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -47,6 +48,11 @@ class ServiceArtifactsIntegrationTest {
     serviceRuntime = ServiceRuntimeBootstrap.createServiceRuntime(tmp.toString(), 0);
   }
 
+  @AfterEach
+  void tearDown() throws InterruptedException {
+    serviceRuntime.close();
+  }
+
   @Test
   void createValidArtifact() throws IOException, ServiceLoadingException {
     ServiceArtifactId id =
@@ -55,7 +61,7 @@ class ServiceArtifactsIntegrationTest {
 
     serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
 
-    UserServiceAdapter service = serviceRuntime.createService(id.toString());
+    UserServiceAdapter service = serviceRuntime.addService(fork, id.toString(), configuration);
 
     assertThat(service.getId(), equalTo(TestService.ID));
   }
@@ -76,6 +82,7 @@ class ServiceArtifactsIntegrationTest {
 
     serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
 
-    assertThrows(RuntimeException.class, () -> serviceRuntime.createService(id.toString()));
+    assertThrows(RuntimeException.class, () -> serviceRuntime.addService(fork, id.toString(),
+        configuration));
   }
 }

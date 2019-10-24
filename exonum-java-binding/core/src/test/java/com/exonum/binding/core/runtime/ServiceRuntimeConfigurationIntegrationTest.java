@@ -20,6 +20,9 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.google.inject.Guice;
@@ -70,8 +73,14 @@ class ServiceRuntimeConfigurationIntegrationTest {
     // Create a service instance
     String name = "s1";
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(name, 1, ARTIFACT_ID);
-    runtime.createService(instanceSpec);
-
+    try (TemporaryDb database = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
+      Fork fork = database.createFork(cleaner);
+      runtime.addService(fork, instanceSpec, new byte[0]);
+    }
     assertThat(runtime.findService(name)).isNotEmpty();
+
+    // Shutdown the runtime
+    runtime.shutdown();
   }
 }
