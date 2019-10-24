@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::any::TypeId;
-use std::collections::HashMap;
-use std::sync::RwLock;
+use std::{any::TypeId, collections::HashMap, sync::RwLock};
 
 use super::super::Handle;
 

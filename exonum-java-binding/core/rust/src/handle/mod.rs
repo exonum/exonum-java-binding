@@ -17,13 +17,13 @@
 //! Wrappers and helper functions around Java pointers. Used for memory management
 //! between native and Java.
 
-use jni::sys::jlong;
-use jni::JNIEnv;
+use jni::{sys::jlong, JNIEnv};
 
 use std::panic;
 
-pub mod resource_manager;
 use super::utils::unwrap_exc_or_default;
+
+pub mod resource_manager;
 
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
