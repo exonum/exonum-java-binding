@@ -28,7 +28,7 @@ use std::path::PathBuf;
 /// Exonum Java Bindings Application.
 ///
 /// Configures and runs Exonum node with Java runtime enabled.
-// TODO: support run-dev
+// TODO: support run-dev (ECR-3727)
 #[derive(StructOpt, Debug)]
 #[structopt(author, about)]
 #[allow(clippy::large_enum_variant)]
