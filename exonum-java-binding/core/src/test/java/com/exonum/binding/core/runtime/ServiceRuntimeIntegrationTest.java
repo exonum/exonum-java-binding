@@ -44,7 +44,6 @@ import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -509,23 +508,6 @@ class ServiceRuntimeIntegrationTest {
 
       verify(serviceWrapper).createPublicApiHandlers(node, serviceRouter);
       verify(server).mountSubRouter(API_ROOT_PATH + "/" + serviceApiPath, serviceRouter);
-    }
-
-    @Test
-    void getServiceInstanceByName() {
-      Service service = mock(Service.class);
-      when(serviceWrapper.getService()).thenReturn(service);
-      assertThat(serviceRuntime.getServiceInstanceByName(TEST_NAME)).isEqualTo(service);
-    }
-
-    @Test
-    void getServiceInstanceByNameUnknownService() {
-      String invalidServiceName = "Wrong service name";
-      Exception e = assertThrows(IllegalArgumentException.class,
-          () -> serviceRuntime.getServiceInstanceByName(invalidServiceName));
-      String expectedMessage =
-          String.format("No service with such name in the Java runtime: %s", invalidServiceName);
-      assertThat(e).hasMessageContaining(expectedMessage);
     }
   }
 

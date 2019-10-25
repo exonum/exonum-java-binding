@@ -458,12 +458,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     return constructTestTransactionMessage(payload, KEY_PAIR);
   }
 
-  private TransactionMessage constructTestTransactionMessage(String payload, TestKit testKit) {
-    EmulatedNode emulatedNode = testKit.getEmulatedNode();
-    KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
-    return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
-  }
-
   private TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(SERVICE_ID)
