@@ -399,16 +399,15 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
 
   @Test
   void getTransactionPool(TestKit testKit) {
-    // Create two blocks with no transactions
+    // Create two blocks with no transactions, so two afterCommit transactions are stored in
+    // the transaction pool
     Block block1 = testKit.createBlock();
     Block block2 = testKit.createBlockWithTransactions();
-    // Two blocks were created, so two afterCommit transactions should be submitted into pool
-    List<TransactionMessage> transactionsInPool = testKit.getTransactionPool();
     RawTransaction afterCommitTransaction1 =
         constructAfterCommitTransaction(SERVICE_ID, block1.getHeight());
     RawTransaction afterCommitTransaction2 =
         constructAfterCommitTransaction(SERVICE_ID, block2.getHeight());
-    List<RawTransaction> rawTransactionsInPool = transactionsInPool.stream()
+    List<RawTransaction> rawTransactionsInPool = testKit.getTransactionPool().stream()
         .map(RawTransaction::fromMessage)
         .collect(toList());
     assertThat(rawTransactionsInPool)
