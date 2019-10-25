@@ -19,18 +19,13 @@
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug
     </ejb-core.nativeLibPath>
     <junit-platform-testkit.version>1.5.2</junit-platform-testkit.version>
+    <auto-value.version>1.6.6</auto-value.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-binding-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-time-oracle</artifactId>
+      <artifactId>exonum-java-app</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -38,6 +33,12 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>${junit.jupiter.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -51,6 +52,13 @@
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-testkit</artifactId>
       <version>${junit-platform-testkit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-testing</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -90,6 +98,33 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
+
+      <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+            <configuration>
+              <protocArtifact>
+                com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
+              </protocArtifact>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
+    <extensions>
+      <!-- Use an extension that sets the OS classifier, required to locate
+           the correct protoc executable -->
+      <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>${os-maven-plugin.version}</version>
+      </extension>
+    </extensions>
   </build>
 </project>

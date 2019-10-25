@@ -16,15 +16,17 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.Integer.parseInt;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
 import com.google.auto.value.AutoValue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * A service artifact identifier. It consist of the three coordinates that usually identify any
- * Java artifact: groupId, artifactId and version.
+ * A service artifact identifier. It consist of the runtime id in which the service shall be
+ * deployed and the three coordinates that usually identify any Java artifact: groupId, artifactId
+ * and version.
  *
  * <p>The extensions of this class must be immutable and hence thread-safe.
  */
@@ -32,70 +34,58 @@ import java.util.regex.Pattern;
 public abstract class ServiceArtifactId {
 
   private static final String DELIMITER = ":";
-  private static final Pattern FORBIDDEN_CHARS_PATTERN = Pattern.compile("[\\s:]");
-  private static final int KEEP_EMPTY = -1;
+  private static final int NUM_FIELDS = 2;
 
   /**
-   * Returns the group id of this service (e.g., "com.acme").
+   * Returns the runtime id in which the service shall be deployed.
    */
-  public abstract String getGroupId();
+  public abstract int getRuntimeId();
 
   /**
-   * Returns the artifact id of this service (e.g., "land-registry"), aka service name.
+   * Returns the full artifact name of this service (e.g., "com.acme:land-registry:1.2.0").
    */
-  public abstract String getArtifactId();
+  public abstract String getName();
 
   /**
-   * Returns the version of this service (e.g., "1.2.0").
-   */
-  public abstract String getVersion();
-
-  /**
-   * Parses a service id in format "groupId:artifactId:version" as {@link #toString()} produces.
+   * Parses a service id in format "runtimeId:serviceName" as {@link #toString()} produces.
    *
-   * @param serviceArtifactId a string in format "groupId:artifactId:version". Whitespace
+   * @param serviceArtifactId a string in format "runtimeId:serviceName". Whitespace
    *     characters, including preceding and trailing, are not allowed
    * @return a ServiceArtifactId with the given coordinates
    * @throws IllegalArgumentException if the format is not correct
    */
   public static ServiceArtifactId parseFrom(String serviceArtifactId) {
-    String[] coordinates = serviceArtifactId.split(DELIMITER, KEEP_EMPTY);
-    checkArgument(coordinates.length == 3,
-        "Invalid serviceArtifactId (%s), must have 'groupId:artifactId:version' format",
-        serviceArtifactId);
-    String groupId = coordinates[0];
-    String artifactId = coordinates[1];
-    String version = coordinates[2];
-    return of(groupId, artifactId, version);
+    String[] coordinates = serviceArtifactId.split(DELIMITER, NUM_FIELDS);
+    int runtimeId = parseInt(coordinates[0]);
+    String name = coordinates[1];
+    return valueOf(runtimeId, name);
   }
 
   /**
-   * Creates a new service id of the given coordinate. Each coordinate may be empty.
+   * Creates a new service artifact id of a Java artifact.
    *
-   * @throws IllegalArgumentException if any coordinate contains forbidden characters: whitespace,
-   *     colon
+   * @param name the name of the service; must not be blank
    */
-  public static ServiceArtifactId of(String groupId, String artifactId, String version) {
-    return new AutoValue_ServiceArtifactId(checkNoForbiddenChars(groupId),
-        checkNoForbiddenChars(artifactId),
-        checkNoForbiddenChars(version));
-  }
-
-  private static String checkNoForbiddenChars(String s) {
-    Matcher matcher = FORBIDDEN_CHARS_PATTERN.matcher(s);
-
-    if (matcher.find()) {
-      throw new IllegalArgumentException(String.format("'%s' must not have any forbidden "
-          + "characters, but there is at index %d", s, matcher.start()));
-    }
-    return s;
+  public static ServiceArtifactId newJavaId(String name) {
+    return valueOf(JAVA.getId(), name);
   }
 
   /**
-   * Returns a service id in the following format: "groupId:artifactId:version".
+   * Creates a new service artifact id.
+   *
+   * @param runtimeId the runtime id in which the service shall be deployed
+   * @param name the name of the service; must not be blank
+   */
+  public static ServiceArtifactId valueOf(int runtimeId, String name) {
+    checkArgument(isNotBlank(name), "name is blank: '%s'", name);
+    return new AutoValue_ServiceArtifactId(runtimeId, name);
+  }
+
+  /**
+   * Returns an artifact id in the following format: "runtimeId:serviceName".
    */
   @Override
   public final String toString() {
-    return getGroupId() + DELIMITER + getArtifactId() + DELIMITER + getVersion();
+    return getRuntimeId() + DELIMITER + getName();
   }
 }

@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.testkit;
+package com.exonum.binding.core.runtime;
 
-import com.exonum.binding.core.service.AbstractServiceModule;
-import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.google.inject.Singleton;
+/**
+ * Represents well-known runtime ids, as assigned by the Exonum core.
+ */
+public enum RuntimeId {
+  RUST(0),
+  JAVA(1);
 
-public final class TestServiceModule extends AbstractServiceModule {
+  private final int id;
 
-  @Override
-  protected void configure() {
-    bind(Service.class).to(TestService.class).in(Singleton.class);
-    bind(TransactionConverter.class).toInstance(TestTransaction::from);
+  RuntimeId(int id) {
+    this.id = id;
+  }
+
+  /**
+   * Returns the numeric id assigned to this runtime by the Exonum core.
+   */
+  public int getId() {
+    return id;
   }
 }

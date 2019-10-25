@@ -32,10 +32,12 @@ import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
 
-class TestKitExtensionTest {
+class TestKitExtensionTest extends TestKitTestWithArtifactsCreated {
 
   private static final TestKit.Builder defaultBuilder = TestKit.builder()
-      .withService(TestServiceModule.class);
+      .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+      .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+      .withArtifactsDirectory(artifactsDirectory);
 
   @Test
   void testKitInstantiationTestCase() {
@@ -119,8 +121,7 @@ class TestKitExtensionTest {
       instantiatedTestKit = testKit;
 
       // Check that TestKit was instantiated with a correct service
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      assertThat(service.getName()).isEqualTo(TestService.SERVICE_NAME);
+      checkIfServiceEnabled(testKit, SERVICE_NAME, SERVICE_ID);
 
       // Check that main TestKit node is a validator
       assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);

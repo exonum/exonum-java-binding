@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
@@ -28,14 +27,14 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.configuration.StoredConfiguration;
-import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.messages.Blockchain.Config;
+import com.exonum.binding.messages.Blockchain.ValidatorKeys;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.EmulatedNode;
@@ -180,21 +179,19 @@ class QaServiceImplIntegrationTest {
   }
 
   @Test
-  void getActualConfiguration(@ValidatorCount(NEW_VALIDATOR_COUNT) TestKit testKit) {
+  void getConsensusConfiguration(@ValidatorCount(NEW_VALIDATOR_COUNT) TestKit testKit) {
     QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
-    StoredConfiguration configuration = service.getActualConfiguration();
+    Config configuration = service.getConsensusConfiguration();
 
-    HashCode expectedPreviousCfgHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
-    assertThat(configuration.previousCfgHash()).isEqualTo(expectedPreviousCfgHash);
+    assertThat(configuration.getValidatorKeysCount()).isEqualTo(NEW_VALIDATOR_COUNT);
 
     EmulatedNode emulatedNode = testKit.getEmulatedNode();
-    List<ValidatorKey> validatorKeys = configuration.validatorKeys();
-
-    assertThat(validatorKeys).hasSize(NEW_VALIDATOR_COUNT);
-
     PublicKey emulatedNodeServiceKey = emulatedNode.getServiceKeyPair().getPublicKey();
-    List<PublicKey> serviceKeys = configuration.validatorKeys().stream()
-        .map(ValidatorKey::serviceKey)
+    List<PublicKey> serviceKeys = configuration.getValidatorKeysList().stream()
+        .map(ValidatorKeys::getServiceKey)
+        // fixme: [ECR-3734] highly error-prone and verbose key#getData.toByteArray susceptible
+        //  to incorrect key#toByteArray.
+        .map(key -> PublicKey.fromBytes(key.getData().toByteArray()))
         .collect(toList());
 
     assertThat(serviceKeys).hasSize(NEW_VALIDATOR_COUNT);

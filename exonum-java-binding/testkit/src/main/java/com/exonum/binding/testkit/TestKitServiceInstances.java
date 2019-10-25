@@ -16,18 +16,19 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.core.runtime.ViewFactory;
-import com.exonum.binding.core.runtime.ViewProxyFactory;
-import com.exonum.binding.core.transport.Server;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
+/**
+ * Specifications of service instances to be deployed and created by TestKit.
+ */
+@SuppressWarnings({"unused", "WeakerAccess"}) // Native API
+class TestKitServiceInstances {
 
-class TestKitFrameworkModule extends AbstractModule {
+  final String artifactId;
+  final byte[] deployArguments;
+  final ServiceSpec[] serviceSpecs;
 
-  @Override
-  protected void configure() {
-    bind(Server.class).toProvider(Server::create).in(Singleton.class);
-
-    bind(ViewFactory.class).toInstance(ViewProxyFactory.getInstance());
+  TestKitServiceInstances(String artifactId, byte[] deployArguments, ServiceSpec[] serviceSpecs) {
+    this.artifactId = artifactId;
+    this.deployArguments = deployArguments;
+    this.serviceSpecs = serviceSpecs;
   }
 }

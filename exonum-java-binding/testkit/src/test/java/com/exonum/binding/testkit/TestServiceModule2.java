@@ -21,11 +21,11 @@ import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.google.inject.Singleton;
 
-public final class TestServiceModule extends AbstractServiceModule {
+public final class TestServiceModule2 extends AbstractServiceModule {
 
   @Override
   protected void configure() {
-    bind(Service.class).to(TestService.class).in(Singleton.class);
+    bind(Service.class).to(TestService2.class).in(Singleton.class);
     bind(TransactionConverter.class).toInstance(TestTransaction::from);
   }
 }

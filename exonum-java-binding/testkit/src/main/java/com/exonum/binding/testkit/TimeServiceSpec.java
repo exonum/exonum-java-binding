@@ -16,16 +16,19 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.core.service.AbstractServiceModule;
-import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.google.inject.Singleton;
+/**
+ * A specification of a time service instance used by TestKit for service creation.
+ */
+@SuppressWarnings({"unused", "WeakerAccess"}) // Native API
+class TimeServiceSpec {
 
-public final class TestServiceModule extends AbstractServiceModule {
+  final TimeProviderAdapter timeProvider;
+  final String serviceName;
+  final int serviceId;
 
-  @Override
-  protected void configure() {
-    bind(Service.class).to(TestService.class).in(Singleton.class);
-    bind(TransactionConverter.class).toInstance(TestTransaction::from);
+  TimeServiceSpec(String serviceName, int serviceId, TimeProviderAdapter timeProvider) {
+    this.serviceName = serviceName;
+    this.serviceId = serviceId;
+    this.timeProvider = timeProvider;
   }
 }

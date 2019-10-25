@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
-import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.storage.database.View;
@@ -29,6 +28,7 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.messages.Blockchain.Config;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
 
@@ -231,13 +231,14 @@ public final class Blockchain {
   }
 
   /**
-   * Returns the configuration for the latest height of the blockchain, including services and their
-   * parameters.
+   * Returns the current consensus configuration of the network.
    *
-   * @throws RuntimeException if the "genesis block" was not created
+   * @throws IllegalStateException if the "genesis block" was not created
+   * @see <a href="https://exonum.com/doc/version/0.12/architecture/configuration/">Exonum configuration</a> for
+   *     consensus configuration information.
    */
-  public StoredConfiguration getActualConfiguration() {
-    return schema.getActualConfiguration();
+  public Config getConsensusConfiguration() {
+    return schema.getConsensusConfiguration();
   }
 
   /**

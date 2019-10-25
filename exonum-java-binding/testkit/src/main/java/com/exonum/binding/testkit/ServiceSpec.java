@@ -16,16 +16,19 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.core.service.AbstractServiceModule;
-import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.google.inject.Singleton;
+/**
+ * A specification of a service instance used by TestKit for service creation.
+ */
+@SuppressWarnings({"unused", "WeakerAccess"}) // Native API
+class ServiceSpec {
 
-public final class TestServiceModule extends AbstractServiceModule {
+  final String serviceName;
+  final int serviceId;
+  final byte[] configuration;
 
-  @Override
-  protected void configure() {
-    bind(Service.class).to(TestService.class).in(Singleton.class);
-    bind(TransactionConverter.class).toInstance(TestTransaction::from);
+  ServiceSpec(String serviceName, int serviceId, byte[] configuration) {
+    this.serviceName = serviceName;
+    this.serviceId = serviceId;
+    this.configuration = configuration;
   }
 }
