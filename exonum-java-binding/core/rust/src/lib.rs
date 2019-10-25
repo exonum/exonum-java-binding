@@ -28,6 +28,7 @@ extern crate exonum_derive;
 extern crate exonum_cli;
 extern crate failure;
 pub extern crate jni;
+extern crate structopt;
 extern crate toml;
 #[macro_use]
 extern crate log;
@@ -57,10 +58,9 @@ mod storage;
 //mod testkit;
 pub mod utils;
 
-pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
+pub use self::handle::{cast_handle, drop_handle, to_handle, Handle};
 pub use handle::resource_manager::*;
 pub use proxy::*;
-pub use runtime::services;
 pub use runtime::*;
 pub use storage::*;
 //pub use testkit::*;

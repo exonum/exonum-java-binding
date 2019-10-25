@@ -24,6 +24,7 @@ import com.exonum.binding.core.service.ServiceModule;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,8 @@ import org.pf4j.PluginState;
  * A loader of services as PF4J plugins. Such plugins are required to have PluginId set in
  * a certain format ('groupId:artifactId:version'); have a single {@link ServiceModule} as
  * an extension.
+ *
+ * <p>This class is not thread-safe.
  *
  * @see <a href="https://pf4j.org/doc/getting-started.html">PF4J docs</a>
  */
@@ -195,6 +198,35 @@ final class Pf4jServiceLoader implements ServiceLoader {
       checkState(stopped, "Unknown error whilst unloading the plugin (%s)", pluginId);
     } finally {
       loadedServices.remove(artifactId);
+    }
+  }
+
+  @Override
+  public void unloadAll() {
+    // Unload the services. As it does not matter if there are strong refs to the classes
+    // loaded by the plugin classloaders (instances of a subclass of URLClassLoader) when
+    // they are closed, unload first, clear second.
+
+    // Unload the plugins
+    List<Exception> errors = new ArrayList<>();
+    for (ServiceArtifactId artifactId : loadedServices.keySet()) {
+      String pluginId = artifactId.toString();
+      try {
+        unloadPlugin(pluginId);
+      } catch (Exception e) {
+        errors.add(e);
+      }
+    }
+
+    // Clear the loaded services
+    loadedServices.clear();
+
+    // Communicate the errors, if any
+    if (!errors.isEmpty()) {
+      IllegalStateException e = new IllegalStateException(
+          "Failed to unload some plugins (see suppressed)");
+      errors.forEach(e::addSuppressed);
+      throw e;
     }
   }
 

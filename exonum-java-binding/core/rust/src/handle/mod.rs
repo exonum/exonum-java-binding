@@ -17,48 +17,16 @@
 //! Wrappers and helper functions around Java pointers. Used for memory management
 //! between native and Java.
 
-// TODO Remove `allow(dead_code)` after [https://jira.bf.local/browse/ECR-910].
-#![allow(dead_code)]
+use jni::{sys::jlong, JNIEnv};
 
-use jni::sys::jlong;
-use jni::JNIEnv;
-
-use std::marker::PhantomData;
 use std::panic;
 
-pub mod resource_manager;
 use super::utils::unwrap_exc_or_default;
+
+pub mod resource_manager;
 
 /// Raw pointer passed to and from Java-side.
 pub type Handle = jlong;
-
-/// Wrapper for a non-owned handle. Calls `handle.resource_manager::unregister_handle` in the `Drop`
-/// implementation.
-pub struct NonOwnedHandle<T: 'static> {
-    handle: Handle,
-    handle_type: PhantomData<T>,
-}
-
-impl<T> NonOwnedHandle<T> {
-    fn new(handle: Handle) -> Self {
-        resource_manager::register_handle::<T>(handle);
-        Self {
-            handle,
-            handle_type: PhantomData,
-        }
-    }
-
-    /// Returns `Handle` value.
-    pub fn get(&self) -> Handle {
-        self.handle
-    }
-}
-
-impl<T> Drop for NonOwnedHandle<T> {
-    fn drop(&mut self) {
-        resource_manager::unregister_handle::<T>(self.handle);
-    }
-}
 
 /// Returns a handle (a raw pointer) to the given Java-owned object allocated in the heap. This
 /// handle must be freed by the `drop_handle` function call.
@@ -66,13 +34,6 @@ pub fn to_handle<T: 'static>(val: T) -> Handle {
     let handle = Box::into_raw(Box::new(val)) as Handle;
     resource_manager::add_handle::<T>(handle);
     handle
-}
-
-/// Returns a handle (a raw pointer) to the given native-owned object. This handle should not be
-/// freed manually.
-pub fn as_handle<T>(val: &mut T) -> NonOwnedHandle<T> {
-    let ptr = val as *mut T;
-    NonOwnedHandle::new(ptr as Handle)
 }
 
 /// "Converts" a handle to the object reference.

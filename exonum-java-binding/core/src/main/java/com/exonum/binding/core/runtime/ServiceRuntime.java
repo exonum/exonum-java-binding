@@ -26,7 +26,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
-import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -49,6 +48,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -65,7 +65,7 @@ import org.apache.logging.log4j.Logger;
  * possible errors if it is ever accessed by other objects.
  */
 @Singleton
-public final class ServiceRuntime {
+public final class ServiceRuntime implements AutoCloseable {
 
   @VisibleForTesting
   static final String API_ROOT_PATH = "/api/services";
@@ -164,41 +164,76 @@ public final class ServiceRuntime {
   }
 
   /**
-   * Creates a new service instance with the given specification. This method registers
-   * the service API.
+   * Creates a new service instance with the given specification, and performs its
+   * initial configuration.
    *
+   * @param fork a database view to apply configuration
    * @param instanceSpec a service instance specification; must reference a deployed artifact
-   * @throws IllegalArgumentException if the artifactId is unknown
-   * @throws RuntimeException if it failed to instantiate the service
+   * @param configuration service instance configuration parameters as a serialized protobuf
+   *     message
+   * @throws IllegalArgumentException if the service is already started; or its artifact
+   *     is not deployed
+   * @throws RuntimeException if it failed to instantiate the service;
+   *     or if the service initialization failed
    */
-  public void createService(ServiceInstanceSpec instanceSpec) {
-    ServiceArtifactId artifactId = instanceSpec.getArtifactId();
+  public void addService(Fork fork, ServiceInstanceSpec instanceSpec, byte[] configuration) {
     try {
       synchronized (lock) {
-        // Check no such service in the runtime
-        String name = instanceSpec.getName();
-        checkArgument(!findService(name).isPresent(),
-            "Service with name '%s' already created: %s", name, services.get(name));
+        // Create a new service
+        ServiceWrapper service = createService(instanceSpec);
 
-        // Find the service definition
-        LoadedServiceDefinition serviceDefinition = serviceLoader.findService(artifactId)
-            .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
-
-        // Instantiate the service
-        ServiceWrapper service = servicesFactory.createService(serviceDefinition, instanceSpec);
+        // Initialize it
+        service.initialize(fork, new ServiceConfiguration(configuration));
 
         // Register it in the runtime
         registerService(service);
       }
 
       // Log the instantiation event
-      String name = instanceSpec.getName();
-      int id = instanceSpec.getId();
-      logger.info("Created {} service (id={}, artifactId={})", name, id, artifactId);
+      logger.info("Added a new service: {}", instanceSpec);
     } catch (Exception e) {
-      logger.error("Failed to create a service {} instance", instanceSpec, e);
+      logger.error("Failed to add a service {} instance with parameters {}",
+          instanceSpec, configuration, e);
       throw e;
     }
+  }
+
+  /**
+   * Starts a service that has been previously added to this runtime after runtime restart.
+   *
+   * @param instanceSpec a service instance specification; must reference a deployed artifact
+   * @throws IllegalArgumentException if the service is already started; or its artifact
+   *     is not deployed
+   */
+  public void restartService(ServiceInstanceSpec instanceSpec) {
+    try {
+      synchronized (lock) {
+        // Create a previously added service
+        ServiceWrapper service = createService(instanceSpec);
+        // Register it in the runtime
+        registerService(service);
+      }
+
+      logger.info("Restarted a service: {}", instanceSpec);
+    } catch (Exception e) {
+      logger.error("Failed to restart a service {} instance", instanceSpec, e);
+      throw e;
+    }
+  }
+
+  private ServiceWrapper createService(ServiceInstanceSpec instanceSpec) {
+    // Check no such service in the runtime
+    String name = instanceSpec.getName();
+    checkArgument(!findService(name).isPresent(),
+        "Service with name '%s' already created: %s", name, services.get(name));
+
+    // Find the service definition
+    ServiceArtifactId artifactId = instanceSpec.getArtifactId();
+    LoadedServiceDefinition serviceDefinition = serviceLoader.findService(artifactId)
+        .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
+
+    // Instantiate the service
+    return servicesFactory.createService(serviceDefinition, instanceSpec);
   }
 
   private void registerService(ServiceWrapper service) {
@@ -207,55 +242,6 @@ public final class ServiceRuntime {
 
     int id = service.getId();
     servicesById.put(id, service);
-  }
-
-  /**
-   * Performs an initial configuration of the service instance.
-   *
-   * @param id the id of the started service
-   * @param view a database view to apply configuration
-   * @param configuration service instance configuration parameters as a serialized protobuf
-   *     message
-   */
-  public void initializeService(Integer id, Fork view, byte[] configuration) {
-    synchronized (lock) {
-      ServiceWrapper service = getServiceById(id);
-      try {
-        Configuration config = new ServiceConfiguration(configuration);
-        service.initialize(view, config);
-      } catch (Exception e) {
-        String name = service.getName();
-        logger.error("Service {} configuration with parameters {} failed",
-            name, configuration, e);
-        throw e;
-      }
-      logger.info("Configured service {} with parameters {}", service.getName(), configuration);
-    }
-  }
-
-  /**
-   * Stops a started service.
-   *
-   * <p><strong>The present implementation is rather limited, as the core uses it only
-   * if the service configuration failed, hence this operation is (a) blocking; (b) complete —
-   * there is no preceding notification that the service is about to be stopped, no guarantees
-   * on transaction processing; (c) no artifact unloading.</strong>
-   * @param id the id of the started service
-   */
-  public void stopService(Integer id) {
-    synchronized (lock) {
-      ServiceWrapper service = getServiceById(id);
-
-      // Unregister the service
-      unregisterService(service);
-
-      logger.info("Stopped service {}", service.getName());
-    }
-  }
-
-  private void unregisterService(ServiceWrapper service) {
-    services.remove(service.getName());
-    servicesById.remove(service.getId());
   }
 
   /**
@@ -435,6 +421,72 @@ public final class ServiceRuntime {
         .ifPresent(someRoute ->
             logger.info("    E.g.: http://127.0.0.1:{}{}", port, serviceApiPath + someRoute)
         );
+  }
+
+  /**
+   * Stops this runtime. It will stop the server providing transport to services,
+   * remove all services and unload their artifacts. The operation is irreversible;
+   * the runtime may not be used after this operation completes.
+   *
+   * @throws InterruptedException if an interrupt was requested
+   */
+  public void shutdown() throws InterruptedException {
+    synchronized (lock) {
+      try {
+        logger.info("Shutting down the runtime");
+
+        // Stop the server
+        stopServer();
+
+        // Clear the services
+        clearServices();
+
+        // Finally, when no service classes remain in use, unload the service artifacts
+        unloadArtifacts();
+
+        logger.info("The runtime shutdown complete");
+      } catch (Exception e) {
+        logger.error("Shutdown failure", e);
+        throw e;
+      }
+    }
+  }
+
+  private void stopServer() throws InterruptedException {
+    try {
+      logger.info("Requesting the HTTP server to stop");
+      server.stop().get();
+      logger.info("Stopped the HTTP server");
+    } catch (InterruptedException e) {
+      // An interruption was requested
+      logger.warn("Interrupted before completion");
+      throw e;
+    } catch (ExecutionException e) {
+      // Log and go on — such exceptions shall not affect the process
+      Throwable stopException = e.getCause();
+      logger.error("Exception occurred whilst stopping the server", stopException);
+    }
+  }
+
+  private void clearServices() {
+    services.clear();
+    servicesById.clear();
+  }
+
+  private void unloadArtifacts() {
+    try {
+      logger.info("Unloading the artifacts");
+      serviceLoader.unloadAll();
+      logger.info("Unloaded the artifacts");
+    } catch (IllegalStateException e) {
+      // Log and go on — such exception shall not affect the process
+      logger.error("Unload failure", e);
+    }
+  }
+
+  @Override
+  public void close() throws InterruptedException {
+    shutdown();
   }
 
   private ServiceWrapper getServiceById(Integer serviceId) {

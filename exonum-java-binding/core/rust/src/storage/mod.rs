@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//mod core_schema;
+mod core_schema;
 mod db;
 mod entry;
 mod fork;
