@@ -121,7 +121,7 @@ class TestKitExtensionTest extends TestKitTestWithArtifactsCreated {
       instantiatedTestKit = testKit;
 
       // Check that TestKit was instantiated with a correct service
-      TestService service = testKit.getService(SERVICE_NAME, TestService.class);
+      checkIfServiceEnabled(testKit, SERVICE_NAME, SERVICE_ID);
 
       // Check that main TestKit node is a validator
       assertThat(testKit.getEmulatedNode().getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
