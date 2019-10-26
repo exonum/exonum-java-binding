@@ -25,7 +25,7 @@ import com.google.auto.value.AutoValue;
  * Default implementation of the transaction context.
  */
 @AutoValue
-public abstract class InternalTransactionContext implements TransactionContext {
+abstract class InternalTransactionContext implements TransactionContext {
 
   public static InternalTransactionContext newInstance(Fork fork, HashCode hash,
                                                        PublicKey authorPk, String serviceName,
