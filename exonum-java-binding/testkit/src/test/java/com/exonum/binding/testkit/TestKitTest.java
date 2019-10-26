@@ -39,6 +39,8 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.messages.Blockchain.Config;
+import com.exonum.binding.messages.Blockchain.ValidatorKeys;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
@@ -514,7 +516,19 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     EmulatedNode node = testKit.getEmulatedNode();
     assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
     assertThat(node.getValidatorId()).isNotEmpty();
-    assertThat(node.getServiceKeyPair()).isNotNull();
+
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Config configuration = blockchain.getConsensusConfiguration();
+
+    // Check the public service key of the emulated node is included
+    List<PublicKey> serviceKeys = configuration.getValidatorKeysList().stream()
+        .map(ValidatorKeys::getServiceKey)
+        .map(key -> PublicKey.fromBytes(key.getData().toByteArray()))
+        .collect(toList());
+    PublicKey emulatedNodeServiceKey = node.getServiceKeyPair().getPublicKey();
+    List<PublicKey> expectedKeys = ImmutableList.of(emulatedNodeServiceKey);
+    assertThat(serviceKeys).isEqualTo(expectedKeys);
   }
 
   @Test
