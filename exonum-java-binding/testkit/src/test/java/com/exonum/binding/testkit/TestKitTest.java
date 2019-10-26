@@ -261,25 +261,28 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   private void checkTestServiceInitialization(TestKit testKit, String serviceName, int serviceId) {
     // Check that service appears in dispatcher schema
     checkIfServiceEnabled(testKit, serviceName, serviceId);
-    // Check that initialization changed database state
     Snapshot view = testKit.getSnapshot();
+    // Check that genesis block was committed
+    checkGenesisBlockCommit(view);
+
+    // Check that initialization changed database state
     TestSchema testSchema = new TestSchema(view, serviceId);
     ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
     Map<HashCode, String> testMap = toMap(testProofMap);
     Map<HashCode, String> expected = ImmutableMap.of(
         TestService.INITIAL_ENTRY_KEY, CONFIGURATION_VALUE);
     assertThat(testMap).isEqualTo(expected);
-
-    // Check that genesis block was committed
-    Blockchain blockchain = Blockchain.newInstance(view);
-    assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
   private void checkTestService2Initialization(TestKit testKit, String serviceName, int serviceId) {
     // Check that service appears in dispatcher schema
     checkIfServiceEnabled(testKit, serviceName, serviceId);
+
     // Check that genesis block was committed
-    Snapshot view = testKit.getSnapshot();
+    checkGenesisBlockCommit(testKit.getSnapshot());
+  }
+
+  private void checkGenesisBlockCommit(Snapshot view) {
     Blockchain blockchain = Blockchain.newInstance(view);
     assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
