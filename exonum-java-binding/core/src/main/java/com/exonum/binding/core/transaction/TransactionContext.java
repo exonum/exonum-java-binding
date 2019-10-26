@@ -123,7 +123,7 @@ public interface TransactionContext {
      * Creates the transaction context instance.
      */
     public TransactionContext build() {
-      return new InternalTransactionContext(fork, hash, authorPk, serviceName, serviceId);
+      return InternalTransactionContext.newInstance(fork, hash, authorPk, serviceName, serviceId);
     }
 
     private Builder() {

@@ -16,75 +16,35 @@
 
 package com.exonum.binding.core.transaction;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Fork;
-import java.util.Objects;
+import com.google.auto.value.AutoValue;
 
 /**
  * Default implementation of the transaction context.
  */
-final class InternalTransactionContext implements TransactionContext {
-  private final Fork fork;
-  private final HashCode hash;
-  private final PublicKey authorPk;
-  private final String serviceName;
-  private final int serviceId;
+@AutoValue
+public abstract class InternalTransactionContext implements TransactionContext {
 
-  InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPk, String serviceName,
-                             Integer serviceId) {
-    this.fork = checkNotNull(fork);
-    this.hash = checkNotNull(hash);
-    this.authorPk = checkNotNull(authorPk);
-    this.serviceName = checkNotNull(serviceName);
-    this.serviceId = checkNotNull(serviceId);
+  public static InternalTransactionContext newInstance(Fork fork, HashCode hash,
+                                                       PublicKey authorPk, String serviceName,
+                                                       Integer serviceId) {
+    return new AutoValue_InternalTransactionContext(fork, hash, authorPk, serviceName, serviceId);
   }
 
   @Override
-  public Fork getFork() {
-    return fork;
-  }
+  public abstract Fork getFork();
 
   @Override
-  public HashCode getTransactionMessageHash() {
-    return hash;
-  }
+  public abstract HashCode getTransactionMessageHash();
 
   @Override
-  public PublicKey getAuthorPk() {
-    return authorPk;
-  }
+  public abstract PublicKey getAuthorPk();
 
   @Override
-  public String getServiceName() {
-    return serviceName;
-  }
+  public abstract String getServiceName();
 
   @Override
-  public Integer getServiceId() {
-    return serviceId;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    InternalTransactionContext that = (InternalTransactionContext) o;
-    return serviceId == that.serviceId
-        && Objects.equals(fork, that.fork)
-        && Objects.equals(hash, that.hash)
-        && Objects.equals(authorPk, that.authorPk)
-        && Objects.equals(serviceName, that.serviceName);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(fork, hash, authorPk, serviceName, serviceId);
-  }
+  public abstract Integer getServiceId();
 }
