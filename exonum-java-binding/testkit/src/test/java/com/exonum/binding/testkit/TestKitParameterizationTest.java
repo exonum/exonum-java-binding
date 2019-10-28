@@ -60,7 +60,7 @@ class TestKitParameterizationTest extends TestKitTestWithArtifactsCreated {
   private static Consumer<Snapshot> verifyNumValidators(int expected) {
     return (view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
+      assertThat(blockchain.getConsensusConfiguration().getValidatorKeysCount())
           .isEqualTo(expected);
     };
   }

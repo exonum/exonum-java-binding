@@ -44,7 +44,7 @@ class GuiceServicesFactoryTest {
 
   @Test
   void createService() {
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
@@ -60,7 +60,7 @@ class GuiceServicesFactoryTest {
 
   @Test
   void createServiceFailsIfNoServiceBindingsInModule() {
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:incomplete-service:1.0.0");
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:incomplete-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, IncompleteServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,

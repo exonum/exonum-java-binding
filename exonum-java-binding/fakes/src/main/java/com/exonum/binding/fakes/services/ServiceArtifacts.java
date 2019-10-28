@@ -17,7 +17,9 @@
 package com.exonum.binding.fakes.services;
 
 import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.fakes.services.invalidservice.NonInstantiableService;
 import com.exonum.binding.fakes.services.invalidservice.NonInstantiableServiceModule;
 import com.exonum.binding.fakes.services.service.PutValueTransaction;
@@ -72,7 +74,7 @@ public final class ServiceArtifacts {
 
   /**
    * Writes a service artifact that can be loaded, but with a service that cannot be
-   * {@linkplain ServiceRuntime#createService(String) instantiated}.
+   * {@linkplain ServiceRuntime#addService(Fork, ServiceInstanceSpec, byte[])}  instantiated}.
    * @param artifactId the artifact id
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
