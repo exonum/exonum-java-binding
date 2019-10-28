@@ -17,7 +17,7 @@
 package com.exonum.binding.core.runtime;
 
 /**
- * Represents a well-known runtime ids, as assigned by the Exonum core.
+ * Represents well-known runtime ids, as assigned by the Exonum core.
  */
 public enum RuntimeId {
   RUST(0),
