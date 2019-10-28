@@ -380,7 +380,7 @@
         <configuration>
           <effort>max</effort>
           <threshold>medium</threshold>
-          <excludeFilterFile>${project.basedir}/findbugs-exclude.xml</excludeFilterFile>
+          <excludeFilterFile>${project.basedir}/spotbugs-exclude.xml</excludeFilterFile>
         </configuration>
       </plugin>
 

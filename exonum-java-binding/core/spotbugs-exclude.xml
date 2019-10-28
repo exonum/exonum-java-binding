@@ -42,4 +42,7 @@
   <Match>
     <Source name="~.*ServiceRuntimeProtos\.java"/>
   </Match>
+  <Match>
+    <Source name="~.*DeployArguments\.java"/>
+  </Match>
 </FindBugsFilter>
