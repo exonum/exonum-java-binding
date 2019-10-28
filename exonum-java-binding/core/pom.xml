@@ -309,8 +309,8 @@
               <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
             </configuration>
           </execution>
-          <!-- Compile protobuf description of service runtime to Python
-               for exonum_java_runtime_plugin -->
+          <!-- Compile protobuf description of Java service runtime deploy arguments
+               to Python for exonum_java_runtime_plugin -->
           <execution>
             <id>protobuf-compile-python</id>
             <goals>
@@ -319,7 +319,7 @@
             <configuration>
               <outputDirectory>${protobuf.python.outputDirectory}</outputDirectory>
               <includes>
-                <include>service_runtime.proto</include>
+                <include>deploy_arguments.proto</include>
               </includes>
             </configuration>
           </execution>
