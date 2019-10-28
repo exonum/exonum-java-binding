@@ -35,6 +35,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.InvalidProofException;
 import com.exonum.binding.test.Bytes;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -136,7 +137,7 @@ class FlatListProofTest {
 
   @Test
   void emptyListInvalidProofIfHasHashedEntries() {
-    ListProofHashedEntry unexpectedEntry = hashedEntry(0, 0, HashCode.fromInt(1));
+    ListProofHashedEntry unexpectedEntry = hashedEntry(0, 0);
     FlatListProof proof = new FlatListProof(emptyList(), singletonList(unexpectedEntry), 0L);
 
     InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
@@ -368,6 +369,35 @@ class FlatListProofTest {
     HashCode expectedListHash = getProofListHash(rootHash, size);
     assertThat(checked.getIndexHash()).isEqualTo(expectedListHash);
   }
+
+  @ParameterizedTest
+  @ValueSource(ints = {1, 31, 33})
+  void twoElementListInvalidProofHashOfInvalidSize(int hashSize) {
+    /*
+     H
+     1        o
+            /   \
+     0    e       h
+     */
+    int index = 0;
+    ListProofElementEntry element = ELEMENT_ENTRIES.get(index);
+    long size = 2L;
+    ListProofHashedEntry hashed = ListProofHashedEntry.newInstance(1L, 0,
+        HashCode.fromBytes(new byte[hashSize]));
+    FlatListProof proof = new FlatListProofBuilder()
+        .size(size)
+        .addElement(element)
+        .addProofEntry(hashed)
+        .build();
+
+    InvalidProofException e = assertThrows(InvalidProofException.class,
+        proof::verify);
+
+    int hashSizeBits = hashSize * Byte.SIZE;
+    assertThat(e.getMessage()).containsIgnoringCase("Invalid hash size")
+        .contains(String.valueOf(hashSizeBits));
+  }
+
 
   @Test
   void twoElementListInvalidProofMissingHashNodeAt1() {
@@ -917,10 +947,6 @@ class FlatListProofTest {
         .putLong(index)
         .putInt(height)
         .hash();
-    return ListProofHashedEntry.newInstance(index, height, nodeHash);
-  }
-
-  private static ListProofHashedEntry hashedEntry(long index, int height, HashCode nodeHash) {
     return ListProofHashedEntry.newInstance(index, height, nodeHash);
   }
 

@@ -18,6 +18,7 @@ package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
 import static com.exonum.binding.common.hash.Hashing.sha256;
+import static com.exonum.binding.common.proofs.ProofHashes.checkSha256Hash;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
@@ -27,6 +28,7 @@ import static java.util.stream.Collectors.toMap;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hasher;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.proofs.InvalidProofException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Functions;
 import java.math.BigInteger;
@@ -109,6 +111,9 @@ class FlatListProof {
           size));
     }
 
+    // Check proof hashes
+    checkProofHashes();
+
     // Handle special cases
     if (size == 0) {
       // Empty list
@@ -119,6 +124,15 @@ class FlatListProof {
     } else {
       // 1+ element proof
       return verifyNonEmptyListProof();
+    }
+  }
+
+  /**
+   * Checks that each proof entry has a valid SHA-256 hash.
+   */
+  private void checkProofHashes() {
+    for (ListProofHashedEntry e : proof) {
+      checkSha256Hash(e.getHash());
     }
   }
 
