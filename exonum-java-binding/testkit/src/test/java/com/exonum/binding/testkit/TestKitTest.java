@@ -186,7 +186,7 @@ class TestKitTest {
         .build()) {
       Snapshot view = testKit.getSnapshot();
       Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
+      assertThat(blockchain.getConsensusConfiguration().getValidatorKeysCount())
           .isEqualTo(validatorCount);
     }
   }
@@ -201,7 +201,7 @@ class TestKitTest {
         .build()) {
       Snapshot view = testKit.getSnapshot();
       Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
+      assertThat(blockchain.getConsensusConfiguration().getValidatorKeysCount())
           .isEqualTo(validatorCount);
     }
   }

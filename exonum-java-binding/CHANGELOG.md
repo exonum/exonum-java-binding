@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed
+- Replaced Blockchain#getActualConfiguration with Blockchain#getConsensusConfiguration,
+  returning only the consensus configuration (now also containing the validator public keys)
+  as a protobuf message.
+
 ## [0.8.0] - 2019-09-09
 
 ### Overview
