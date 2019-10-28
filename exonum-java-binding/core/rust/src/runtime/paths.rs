@@ -1,6 +1,3 @@
-// TODO: need to be removed in ECR-3458
-#![allow(dead_code)]
-
 use std::path::PathBuf;
 use std::{env, fs};
 

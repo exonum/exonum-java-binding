@@ -165,7 +165,7 @@ public final class Cleaner implements AutoCloseable {
 
     // Currently only the number of failures is recorded. If extra context is needed,
     // the clean actions might be included as well.
-    List<Throwable> suppressedExceptions = new ArrayList<>(0);
+    List<Throwable> suppressedExceptions = new ArrayList<>();
     while (!registeredCleanActions.isEmpty()) {
       CleanAction cleanAction = registeredCleanActions.pop();
       // Try to perform the operation.
