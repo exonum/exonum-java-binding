@@ -407,6 +407,8 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     // Create two blocks with no transactions, so two afterCommit transactions are stored in
     // the transaction pool
     Block block1 = testKit.createBlock();
+    // Use #createBlockWithTransactions() so that an empty block is created and first afterCommit
+    // transaction stays in pool
     Block block2 = testKit.createBlockWithTransactions();
     RawTransaction afterCommitTransaction1 =
         constructAfterCommitTransaction(SERVICE_ID, block1.getHeight());
