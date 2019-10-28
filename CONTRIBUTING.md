@@ -37,7 +37,7 @@ You need to install the following dependencies:
   Also on Mac you need a [`coreutils`](https://formulae.brew.sh/formula/coreutils) package installed.
 
 ### Building
-__Important__: In order to retrieve submodules you have to execute `git submodule update --init` before first build.
+__Important__: Keep in mind that project contains git submodules and addition steps are required to init and/or update them.
 
 Set required environment variables, once in a shell you use to build the project:
 ```$sh
