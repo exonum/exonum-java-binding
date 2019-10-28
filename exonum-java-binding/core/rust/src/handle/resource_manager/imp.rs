@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::any::TypeId;
+use std::any::{self, TypeId};
 use std::collections::HashMap;
 use std::sync::RwLock;
 
@@ -36,13 +36,15 @@ enum HandleOwnershipType {
 #[derive(Debug)]
 struct HandleInfo {
     object_type: TypeId,
+    type_name: &'static str,
     ownership: HandleOwnershipType,
 }
 
 impl HandleInfo {
-    fn new(object_type: TypeId, ownership: HandleOwnershipType) -> Self {
+    fn new(object_type: TypeId, type_name: &'static str, ownership: HandleOwnershipType) -> Self {
         Self {
             object_type,
+            type_name,
             ownership,
         }
     }
@@ -59,7 +61,10 @@ fn add_handle_impl<T: 'static>(handle: Handle, ownership: HandleOwnershipType) {
         HANDLES_MAP
             .write()
             .expect("Unable to obtain write-lock")
-            .insert(handle, HandleInfo::new(TypeId::of::<T>(), ownership))
+            .insert(
+                handle,
+                HandleInfo::new(TypeId::of::<T>(), any::type_name::<T>(), ownership)
+            )
             .is_none(),
         "Trying to add the same handle for the second time: {:X}",
         handle
@@ -94,9 +99,12 @@ fn check_handle_impl<T: 'static>(handle: Handle, ownership: Option<HandleOwnersh
         Some(info) => {
             let actual_object_type = TypeId::of::<T>();
             assert_eq!(
-                info.object_type, actual_object_type,
-                "Wrong type id for '{:X}' handle",
-                handle
+                info.object_type,
+                actual_object_type,
+                "Wrong type id for '{:X}' handle, expected '{}', actual '{}'",
+                handle,
+                info.type_name,
+                any::type_name::<T>(),
             );
 
             if let Some(val) = ownership {
