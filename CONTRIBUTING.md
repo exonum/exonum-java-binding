@@ -23,6 +23,7 @@ You need to install the following dependencies:
   To install a specific Rust version, use `rustup install 1.36.0` command.
   * The [system dependencies](https://exonum.com/doc/version/0.12/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
+
   __Important__: On Mac OS it is necessary to install RocksDB
   package and to set the environment variable `ROCKSDB_LIB_DIR`.
   To install the package via Homebrew:
@@ -36,6 +37,11 @@ You need to install the following dependencies:
   Also on Mac you need a [`coreutils`](https://formulae.brew.sh/formula/coreutils) package installed.
 
 ### Building
+__Important__: Keep in mind that project contains git submodules and extra steps are required
+to init and/or update them:
+  * `git submodule update --init` before the first build
+  * `git submodule update` when the submodule revision changes.
+
 Set required environment variables, once in a shell you use to build the project:
 ```$sh
 $ source exonum-java-binding/tests_profile

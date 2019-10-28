@@ -17,22 +17,18 @@
 package com.exonum.binding.core.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.google.common.testing.NullPointerTester;
-import com.google.common.testing.NullPointerTester.Visibility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ServiceArtifactIdTest {
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "com.acme:foo-service:0.1.0",
-      "com.acme:foo-service:1.1.1-beta1",
-      "::",
+      "0:land-registry",
+      "1:com.acme:foo-service:1.1.1-beta1",
+      "100500:::",
   })
   void parseFromRoundtrip(String serviceId) {
     ServiceArtifactId parsedId = ServiceArtifactId.parseFrom(serviceId);
@@ -41,62 +37,29 @@ class ServiceArtifactIdTest {
     assertThat(parsedAsString).isEqualTo(serviceId);
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {
-      "",
-      "too-few:components",
-      "com.acme:foo-service:0.1.0:extra-component",
-      " : : ",
-      "com acme:foo:1.0",
-      "com.acme:foo service:1.0",
-      "com.acme:foo-service:1 0",
-      "com.acme:foo-service: 1.0",
-      "com.acme:foo-service:1.0 ",
-  })
-  void parseFromInvalidInput(String serviceId) {
-    assertThrows(IllegalArgumentException.class, () -> ServiceArtifactId.parseFrom(serviceId));
+  @Test
+  void valueOf() {
+    int runtimeId = 1;
+    String name = "test-service";
+    ServiceArtifactId id = ServiceArtifactId.valueOf(runtimeId, name);
+
+    assertThat(id.getRuntimeId()).isEqualTo(runtimeId);
+    assertThat(id.getName()).isEqualTo(name);
   }
 
   @Test
-  void of() {
-    String groupId = "com.acme";
-    String artifactId = "foo";
-    String version = "1.0";
-    ServiceArtifactId id = ServiceArtifactId.of(groupId, artifactId, version);
+  void newJavaId() {
+    String name = "test-service";
+    ServiceArtifactId id = ServiceArtifactId.newJavaId(name);
 
-    assertThat(id.getGroupId()).isEqualTo(groupId);
-    assertThat(id.getArtifactId()).isEqualTo(artifactId);
-    assertThat(id.getVersion()).isEqualTo(version);
-  }
-
-  @Test
-  void ofRejectsNulls() {
-    new NullPointerTester()
-        .setDefault(String.class, "foo")
-        .testStaticMethods(ServiceArtifactId.class, Visibility.PACKAGE);
-  }
-
-  @ParameterizedTest
-  @CsvSource({
-      "com acme,foo,1.0",
-      "com.acme,f o,1.0",
-      "com.acme,foo,1 0",
-      "' com.acme',foo,1.0",
-      "'com.acme ',foo,1.0",
-      "com:acme,foo,1.0",
-  })
-  void ofInvalidComponents(String groupId, String artifactId, String version) {
-    assertThrows(IllegalArgumentException.class, () -> ServiceArtifactId
-        .of(groupId, artifactId, version));
+    assertThat(id.getRuntimeId()).isEqualTo(RuntimeId.JAVA.getId());
+    assertThat(id.getName()).isEqualTo(name);
   }
 
   @Test
   void toStringTest() {
-    String groupId = "com.acme";
-    String artifactId = "foo";
-    String version = "1.0";
-    ServiceArtifactId id = ServiceArtifactId.of(groupId, artifactId, version);
+    ServiceArtifactId id = ServiceArtifactId.valueOf(0, "full-name");
 
-    assertThat(id.toString()).isEqualTo("com.acme:foo:1.0");
+    assertThat(id.toString()).isEqualTo("0:full-name");
   }
 }

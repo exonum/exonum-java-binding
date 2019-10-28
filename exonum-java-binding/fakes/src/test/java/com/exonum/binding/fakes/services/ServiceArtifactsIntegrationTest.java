@@ -56,7 +56,7 @@ class ServiceArtifactsIntegrationTest {
   @Test
   void createValidArtifact() throws IOException, ServiceLoadingException {
     ServiceArtifactId id =
-        ServiceArtifactId.parseFrom("com.exonum.binding:valid-test-service:1.0.0");
+        ServiceArtifactId.newJavaId("com.exonum.binding:valid-test-service:1.0.0");
     ServiceArtifacts.createValidArtifact(id, artifactLocation);
 
     serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
@@ -68,7 +68,7 @@ class ServiceArtifactsIntegrationTest {
 
   @Test
   void createUnloadableArtifact() throws IOException {
-    String id = "com.exonum.binding:unloadable-test-service:1.0.0";
+    String id = "1:com.exonum.binding:unloadable-test-service:1.0.0";
     ServiceArtifacts.createUnloadableArtifact(id, artifactLocation);
     assertThrows(ServiceLoadingException.class,
         () -> serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), ARTIFACT_FILENAME));
@@ -77,7 +77,7 @@ class ServiceArtifactsIntegrationTest {
   @Test
   void createWithUninstantiableService() throws IOException, ServiceLoadingException {
     ServiceArtifactId id =
-        ServiceArtifactId.parseFrom("com.exonum.binding:uninstantiable-test-service:1.0.0");
+        ServiceArtifactId.newJavaId("com.exonum.binding:uninstantiable-test-service:1.0.0");
     ServiceArtifacts.createWithUninstantiableService(id, artifactLocation);
 
     serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
