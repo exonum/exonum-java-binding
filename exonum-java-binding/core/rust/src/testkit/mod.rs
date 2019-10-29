@@ -23,7 +23,7 @@ use exonum::{
     crypto::{PublicKey, SecretKey},
     helpers::ValidatorId,
     merkledb::BinaryValue,
-    runtime::{InstanceSpec, RuntimeIdentifier},
+    runtime::InstanceSpec,
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
@@ -232,8 +232,7 @@ fn instance_configs_from_java_array(
         env.with_local_frame(8, || {
             let artifact_spec_obj = env.get_object_array_element(service_artifact_specs, i)?;
 
-            let artifact_id =
-                to_artifact_id_str(get_field_as_string(env, artifact_spec_obj, "artifactId")?);
+            let artifact_id = get_field_as_string(env, artifact_spec_obj, "artifactId")?;
             let deploy_args: jbyteArray = env
                 .get_field(artifact_spec_obj, "deployArguments", "[B")?
                 .l()?
@@ -343,14 +342,5 @@ fn get_field_as_string(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResul
     convert_to_string(
         env,
         env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?,
-    )
-}
-
-// Creates string to be parsed as `ArtifactId` from `JavaArtifactId` representation.
-fn to_artifact_id_str(java_artifact_id: String) -> String {
-    format!(
-        "{}:{}",
-        u32::from(RuntimeIdentifier::Java),
-        java_artifact_id
     )
 }
