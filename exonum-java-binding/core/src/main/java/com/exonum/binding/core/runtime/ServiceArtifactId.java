@@ -24,8 +24,9 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import com.google.auto.value.AutoValue;
 
 /**
- * A service artifact identifier. It consist of the three coordinates that usually identify any
- * Java artifact: groupId, artifactId and version.
+ * A service artifact identifier. It consist of the runtime id in which the service shall be
+ * deployed and the three coordinates that usually identify any Java artifact: groupId, artifactId
+ * and version.
  *
  * <p>The extensions of this class must be immutable and hence thread-safe.
  */
@@ -44,6 +45,13 @@ public abstract class ServiceArtifactId {
    * Returns the full artifact name of this service (e.g., "com.acme:land-registry:1.2.0").
    */
   public abstract String getName();
+
+  /**
+   * Returns the version of this service (e.g., "1.2.0").
+   */
+  public String getVersion() {
+    return getName().split(DELIMITER)[2];
+  }
 
   /**
    * Parses a service id in format "runtimeId:serviceName" as {@link #toString()} produces.

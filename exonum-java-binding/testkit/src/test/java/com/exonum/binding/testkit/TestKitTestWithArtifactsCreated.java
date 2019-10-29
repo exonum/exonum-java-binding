@@ -34,7 +34,7 @@ class TestKitTestWithArtifactsCreated {
 
   static final String ARTIFACT_FILENAME = "test-service.jar";
   static final ServiceArtifactId ARTIFACT_ID =
-      ServiceArtifactId.of("com.exonum.binding", "test-service", "1.0.0");
+      ServiceArtifactId.newJavaId("com.exonum.binding:test-service:1.0.0");
   static final String SERVICE_NAME = "test-service";
   static final int SERVICE_ID = 46;
   static final String CONFIGURATION_VALUE = "Initial value";
@@ -44,7 +44,7 @@ class TestKitTestWithArtifactsCreated {
 
   static final String ARTIFACT_FILENAME_2 = "test-service-2.jar";
   static final ServiceArtifactId ARTIFACT_ID_2 =
-      ServiceArtifactId.of("com.exonum.binding", "test-service-2", "1.0.0");
+      ServiceArtifactId.newJavaId("com.exonum.binding:test-service-2:1.0.0");
   static final String SERVICE_NAME_2 = "test-service2";
   static final int SERVICE_ID_2 = 48;
 
@@ -93,7 +93,7 @@ class TestKitTestWithArtifactsCreated {
                                      Class serviceModule,
                                      Class<?>... artifactClasses) throws IOException {
     new ServiceArtifactBuilder()
-        .setPluginId(serviceArtifactId.toString())
+        .setPluginId(serviceArtifactId.getName())
         .setPluginVersion(serviceArtifactId.getVersion())
         .addClasses(artifactClasses)
         .addExtensionClass(serviceModule)
