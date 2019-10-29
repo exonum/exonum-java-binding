@@ -47,13 +47,6 @@ public abstract class ServiceArtifactId {
   public abstract String getName();
 
   /**
-   * Returns the version of this service (e.g., "1.2.0").
-   */
-  public String getVersion() {
-    return getName().split(DELIMITER)[2];
-  }
-
-  /**
    * Parses a service id in format "runtimeId:serviceName" as {@link #toString()} produces.
    *
    * @param serviceArtifactId a string in format "runtimeId:serviceName". Whitespace

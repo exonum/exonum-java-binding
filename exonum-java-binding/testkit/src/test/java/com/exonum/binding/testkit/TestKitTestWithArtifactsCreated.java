@@ -33,8 +33,9 @@ import org.junit.jupiter.api.io.TempDir;
 class TestKitTestWithArtifactsCreated {
 
   static final String ARTIFACT_FILENAME = "test-service.jar";
+  private static final String ARTIFACT_VERSION = "1.0.0";
   static final ServiceArtifactId ARTIFACT_ID =
-      ServiceArtifactId.newJavaId("com.exonum.binding:test-service:1.0.0");
+      ServiceArtifactId.newJavaId("com.exonum.binding:test-service:" + ARTIFACT_VERSION);
   static final String SERVICE_NAME = "test-service";
   static final int SERVICE_ID = 46;
   static final String CONFIGURATION_VALUE = "Initial value";
@@ -43,8 +44,9 @@ class TestKitTestWithArtifactsCreated {
       .build();
 
   static final String ARTIFACT_FILENAME_2 = "test-service-2.jar";
+  private static final String ARTIFACT_VERSION_2 = "2.8.0";
   static final ServiceArtifactId ARTIFACT_ID_2 =
-      ServiceArtifactId.newJavaId("com.exonum.binding:test-service-2:1.0.0");
+      ServiceArtifactId.newJavaId("com.exonum.binding:test-service-2:" + ARTIFACT_VERSION_2);
   static final String SERVICE_NAME_2 = "test-service2";
   static final int SERVICE_ID_2 = 48;
 
@@ -61,21 +63,21 @@ class TestKitTestWithArtifactsCreated {
 
   private static void createTestServiceArtifact() throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);
-    createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class, TestTransaction.class,
-        TestSchema.class, TestService.class);
+    createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
+        TestTransaction.class, TestSchema.class, TestService.class);
   }
 
   private static void createTestService2Artifact() throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME_2);
-    createArtifact(artifactLocation, ARTIFACT_ID_2, TestServiceModule2.class,
+    createArtifact(artifactLocation, ARTIFACT_ID_2, ARTIFACT_VERSION_2, TestServiceModule2.class,
         TestTransaction.class, TestSchema.class, TestService2.class);
   }
 
   static void createInvalidArtifact(Path directory, String filename) throws IOException {
     Path artifactLocation = directory.resolve(filename);
     // Create an invalid artifact without a TestService class
-    createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class, TestTransaction.class,
-        TestSchema.class);
+    createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
+        TestTransaction.class, TestSchema.class);
   }
 
   static void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {
@@ -90,11 +92,11 @@ class TestKitTestWithArtifactsCreated {
   }
 
   private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,
-                                     Class serviceModule,
+                                     String serviceArtifactVersion, Class serviceModule,
                                      Class<?>... artifactClasses) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId(serviceArtifactId.getName())
-        .setPluginVersion(serviceArtifactId.getVersion())
+        .setPluginVersion(serviceArtifactVersion)
         .addClasses(artifactClasses)
         .addExtensionClass(serviceModule)
         .writeTo(artifactLocation);
