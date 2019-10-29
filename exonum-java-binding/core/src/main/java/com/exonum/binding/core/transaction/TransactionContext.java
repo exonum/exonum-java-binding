@@ -16,6 +16,8 @@
 
 package com.exonum.binding.core.transaction;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -23,8 +25,6 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Transaction context class. Contains required information for the transaction execution.
