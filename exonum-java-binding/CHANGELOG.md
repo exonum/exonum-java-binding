@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- MapProof to enforce 32-byte long hash codes. 
+
 ### Removed
 - Replaced Blockchain#getActualConfiguration with Blockchain#getConsensusConfiguration,
   returning only the consensus configuration (now also containing the validator public keys)
