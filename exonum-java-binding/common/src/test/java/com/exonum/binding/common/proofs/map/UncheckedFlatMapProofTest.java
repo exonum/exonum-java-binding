@@ -39,6 +39,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class UncheckedFlatMapProofTest {
 
@@ -203,6 +205,19 @@ class UncheckedFlatMapProofTest {
     assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.INVALID_ORDER));
   }
 
+  @ParameterizedTest
+  @ValueSource(ints = {1, 31, 33})
+  void mapProofWithHashesOfInvalidSizeShallBeIncorrect(int size) {
+    DbKey key = DbKeyTestUtils.leafKeyFromPrefix("10");
+    HashCode hash = HashCode.fromBytes(new byte[size]);
+    MapProofEntry proofEntry = new MapProofEntry(key, hash);
+    UncheckedMapProof uncheckedFlatMapProof =
+        new UncheckedFlatMapProof(singletonList(proofEntry), emptyList(), emptyList());
+
+    CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
+    assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.INVALID_HASH_SIZE));
+  }
+
   @Test
   void mapProofWithSingleBranchProofEntryShouldBeInvalid() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
@@ -270,7 +285,9 @@ class UncheckedFlatMapProofTest {
   }
 
   private static MapProofEntry createMapProofEntry(DbKey dbKey) {
-    return new MapProofEntry(dbKey, HashCode.fromBytes(dbKey.getKeySlice()));
+    HashCode hash = Hashing.sha256()
+        .hashObject(dbKey, dbKeyFunnel());
+    return new MapProofEntry(dbKey, hash);
   }
 
   private static MapEntry<ByteString, ByteString> createMapEntry(ByteString key, ByteString value) {
