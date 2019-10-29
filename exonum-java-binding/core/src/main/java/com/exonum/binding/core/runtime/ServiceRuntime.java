@@ -28,7 +28,6 @@ import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateH
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -371,21 +370,6 @@ public final class ServiceRuntime implements AutoCloseable {
       for (Integer serviceId : serviceIds) {
         connectServiceApi(serviceId, node);
       }
-    }
-  }
-
-  /**
-   * Get service instance by its name.
-   *
-   * @throws IllegalArgumentException if there is no service with such name
-   */
-  public Service getServiceInstanceByName(String serviceName) {
-    synchronized (lock) {
-      return findService(serviceName)
-          .map(ServiceWrapper::getService)
-          .orElseThrow(() ->
-              new IllegalArgumentException("No service with such name in the Java runtime: "
-                  + serviceName));
     }
   }
 

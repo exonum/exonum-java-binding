@@ -16,7 +16,13 @@
 
 package com.exonum.binding.testkit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.messages.Runtime.InstanceSpec;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import java.io.IOException;
@@ -70,6 +76,17 @@ class TestKitTestWithArtifactsCreated {
     // Create an invalid artifact without a TestService class
     createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class, TestTransaction.class,
         TestSchema.class);
+  }
+
+  static void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {
+    View view = testKit.getSnapshot();
+    MapIndex<String, InstanceSpec> serviceInstances =
+        new DispatcherSchema(view).serviceInstances();
+    assertThat(serviceInstances.containsKey(serviceName)).isTrue();
+
+    InstanceSpec serviceSpec = serviceInstances.get(serviceName);
+    int actualServiceId = serviceSpec.getId();
+    assertThat(actualServiceId).isEqualTo(serviceId);
   }
 
   private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,

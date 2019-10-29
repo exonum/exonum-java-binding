@@ -20,6 +20,7 @@ import static com.exonum.binding.testkit.TestKit.MAX_SERVICE_INSTANCE_ID;
 import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -33,14 +34,13 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.runtime.DispatcherSchema;
-import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.exonum.binding.messages.Blockchain.Config;
+import com.exonum.binding.messages.Blockchain.ValidatorKeys;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
@@ -195,10 +195,9 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, testConfiguration)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      TestService service = testKit.getService(SERVICE_NAME, TestService.class);
       // Check that configuration value is used in initialization
       Snapshot view = testKit.getSnapshot();
-      TestSchema testSchema = service.createDataSchema(view);
+      TestSchema testSchema = new TestSchema(view, SERVICE_ID);
       ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
       Map<HashCode, String> testMap = toMap(testProofMap);
       Map<HashCode, String> expected = ImmutableMap.of(
@@ -262,52 +261,30 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   private void checkTestServiceInitialization(TestKit testKit, String serviceName, int serviceId) {
     // Check that service appears in dispatcher schema
     checkIfServiceEnabled(testKit, serviceName, serviceId);
-    TestService service = testKit.getService(serviceName, TestService.class);
-    // Check that TestService API is mounted
-    Node serviceNode = service.getNode();
-    EmulatedNode emulatedTestKitNode = testKit.getEmulatedNode();
-    assertThat(serviceNode.getPublicKey())
-        .isEqualTo(emulatedTestKitNode.getServiceKeyPair().getPublicKey());
+    Snapshot view = testKit.getSnapshot();
+    // Check that genesis block was committed
+    checkGenesisBlockCommit(view);
 
     // Check that initialization changed database state
-    Snapshot view = testKit.getSnapshot();
-    TestSchema testSchema = service.createDataSchema(view);
+    TestSchema testSchema = new TestSchema(view, serviceId);
     ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
     Map<HashCode, String> testMap = toMap(testProofMap);
     Map<HashCode, String> expected = ImmutableMap.of(
         TestService.INITIAL_ENTRY_KEY, CONFIGURATION_VALUE);
     assertThat(testMap).isEqualTo(expected);
-
-    // Check that genesis block was committed
-    Blockchain blockchain = Blockchain.newInstance(view);
-    assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
   private void checkTestService2Initialization(TestKit testKit, String serviceName, int serviceId) {
     // Check that service appears in dispatcher schema
     checkIfServiceEnabled(testKit, serviceName, serviceId);
-    TestService2 service = testKit.getService(serviceName, TestService2.class);
-    // Check that TestService2 API is mounted
-    Node serviceNode = service.getNode();
-    EmulatedNode emulatedTestKitNode = testKit.getEmulatedNode();
-    assertThat(serviceNode.getPublicKey())
-        .isEqualTo(emulatedTestKitNode.getServiceKeyPair().getPublicKey());
 
     // Check that genesis block was committed
-    Snapshot view = testKit.getSnapshot();
-    Blockchain blockchain = Blockchain.newInstance(view);
-    assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
+    checkGenesisBlockCommit(testKit.getSnapshot());
   }
 
-  private void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {
-    View view = testKit.getSnapshot();
-    MapIndex<String, InstanceSpec> serviceInstances =
-        new DispatcherSchema(view).serviceInstances();
-    assertThat(serviceInstances.containsKey(serviceName)).isTrue();
-
-    InstanceSpec serviceSpec = serviceInstances.get(serviceName);
-    int actualServiceId = serviceSpec.getId();
-    assertThat(actualServiceId).isEqualTo(serviceId);
+  private void checkGenesisBlockCommit(Snapshot view) {
+    Blockchain blockchain = Blockchain.newInstance(view);
+    assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
   @Test
@@ -352,20 +329,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory);
     assertThrows(exceptionType, () -> testKitBuilder.withValidators(invalidValidatorCount));
-  }
-
-  @Test
-  void getServiceWithWrongClassThrows(TestKit testKit) {
-    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    assertThrows(exceptionType,
-        () -> testKit.getService(SERVICE_NAME, TestService2.class));
-  }
-
-  @Test
-  void getServiceWithWrongNameThrows(TestKit testKit) {
-    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    assertThrows(exceptionType, () -> testKit.getService("Invalid service name",
-        TestService.class));
   }
 
   @Test
@@ -440,6 +403,25 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  void getTransactionPool(TestKit testKit) {
+    // Create two blocks with no transactions, so two afterCommit transactions are stored in
+    // the transaction pool
+    Block block1 = testKit.createBlock();
+    // Use #createBlockWithTransactions() so that an empty block is created and first afterCommit
+    // transaction stays in pool
+    Block block2 = testKit.createBlockWithTransactions();
+    RawTransaction afterCommitTransaction1 =
+        constructAfterCommitTransaction(SERVICE_ID, block1.getHeight());
+    RawTransaction afterCommitTransaction2 =
+        constructAfterCommitTransaction(SERVICE_ID, block2.getHeight());
+    List<RawTransaction> rawTransactionsInPool = testKit.getTransactionPool().stream()
+        .map(RawTransaction::fromMessage)
+        .collect(toList());
+    assertThat(rawTransactionsInPool)
+        .containsExactlyInAnyOrder(afterCommitTransaction1, afterCommitTransaction2);
+  }
+
+  @Test
   void createBlockWithSingleTransaction(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     Block block = testKit.createBlockWithTransactions(message);
@@ -468,52 +450,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
-  void nodeSubmittedTransactionsArePlacedInPool(TestKit testKit) {
-    TestService service = testKit.getService(SERVICE_NAME, TestService.class);
-
-    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-    service.getNode().submitTransaction(rawTransaction);
-
-    List<TransactionMessage> transactionsInPool =
-        testKit.findTransactionsInPool(tx -> tx.getServiceId() == SERVICE_ID);
-    assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
-  }
-
-  @Test
-  void getTransactionPool(TestKit testKit) {
-    TestService service = testKit.getService(SERVICE_NAME, TestService.class);
-
-    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-    TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
-    RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
-
-    service.getNode().submitTransaction(rawTransaction);
-    service.getNode().submitTransaction(rawTransaction2);
-
-    List<TransactionMessage> transactionsInPool = testKit.getTransactionPool();
-    assertThat(transactionsInPool).containsExactlyInAnyOrder(message, message2);
-  }
-
-  @Test
-  void findTransactionsInPool(TestKit testKit) {
-    TestService service = testKit.getService(SERVICE_NAME, TestService.class);
-
-    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-    TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
-    RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
-    service.getNode().submitTransaction(rawTransaction);
-    service.getNode().submitTransaction(rawTransaction2);
-
-    List<TransactionMessage> transactionsInPool =
-        testKit.findTransactionsInPool(
-            tx -> tx.getPayload().equals(message.getPayload()));
-    assertThat(transactionsInPool).containsExactly(message);
-  }
-
-  @Test
   void createBlockWithTransactionsVarargs(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
@@ -527,12 +463,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
 
   private TransactionMessage constructTestTransactionMessage(String payload) {
     return constructTestTransactionMessage(payload, KEY_PAIR);
-  }
-
-  private TransactionMessage constructTestTransactionMessage(String payload, TestKit testKit) {
-    EmulatedNode emulatedNode = testKit.getEmulatedNode();
-    KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
-    return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
   }
 
   private TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
@@ -591,7 +521,19 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     EmulatedNode node = testKit.getEmulatedNode();
     assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
     assertThat(node.getValidatorId()).isNotEmpty();
-    assertThat(node.getServiceKeyPair()).isNotNull();
+
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Config configuration = blockchain.getConsensusConfiguration();
+
+    // Check the public service key of the emulated node is included
+    List<PublicKey> serviceKeys = configuration.getValidatorKeysList().stream()
+        .map(ValidatorKeys::getServiceKey)
+        .map(key -> PublicKey.fromBytes(key.getData().toByteArray()))
+        .collect(toList());
+    PublicKey emulatedNodeServiceKey = node.getServiceKeyPair().getPublicKey();
+    List<PublicKey> expectedKeys = ImmutableList.of(emulatedNodeServiceKey);
+    assertThat(serviceKeys).isEqualTo(expectedKeys);
   }
 
   @Test
