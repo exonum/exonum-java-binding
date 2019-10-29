@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.binding.common.proofs;
 
 /**
- * Indicates that the corresponding list proof has invalid structure and must be rejected.
+ * Indicates that the corresponding proof has invalid structure and must be rejected.
  */
 public class InvalidProofException extends RuntimeException {
 
