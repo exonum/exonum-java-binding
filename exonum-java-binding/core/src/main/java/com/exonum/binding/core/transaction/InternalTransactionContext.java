@@ -32,19 +32,4 @@ abstract class InternalTransactionContext implements TransactionContext {
                                                        Integer serviceId) {
     return new AutoValue_InternalTransactionContext(fork, hash, authorPk, serviceName, serviceId);
   }
-
-  @Override
-  public abstract Fork getFork();
-
-  @Override
-  public abstract HashCode getTransactionMessageHash();
-
-  @Override
-  public abstract PublicKey getAuthorPk();
-
-  @Override
-  public abstract String getServiceName();
-
-  @Override
-  public abstract Integer getServiceId();
 }
