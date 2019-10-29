@@ -35,10 +35,6 @@ final class TestService2 extends AbstractService {
     this.serviceInstanceId = serviceSpec.getId();
   }
 
-  Node getNode() {
-    return node;
-  }
-
   @Override
   protected TestSchema createDataSchema(View view) {
     return new TestSchema(view, serviceInstanceId);

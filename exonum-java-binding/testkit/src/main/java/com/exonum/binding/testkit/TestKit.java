@@ -170,23 +170,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Returns an instance of a service with the given service name and service class. Only
-   * user-defined services can be requested, i.e., it is not possible to get an instance of a
-   * built-in service such as the time oracle.
-   *
-   * @return the service instance or null if there is no service with such id
-   * @throws IllegalArgumentException if the service with given id was not found or could not be
-   *     cast to given class
-   */
-  public <T extends Service> T getService(String serviceName, Class<T> serviceClass) {
-    Service service = serviceRuntime.getServiceInstanceByName(serviceName);
-    checkArgument(service.getClass().equals(serviceClass),
-        "Service (name=%s, class=%s) cannot be cast to %s",
-        serviceName, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
-    return serviceClass.cast(service);
-  }
-
-  /**
    * Creates a block with the given transaction(s). Transactions are applied in the lexicographical
    * order of their hashes. In-pool transactions will be ignored.
    *
