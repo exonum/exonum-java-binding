@@ -56,7 +56,7 @@ pub use runtime::*;
 pub use storage::*;
 pub use testkit::*;
 
-pub use self::handle::{cast_handle, drop_handle, Handle, to_handle};
+pub use self::handle::{cast_handle, drop_handle, to_handle, Handle};
 
 pub mod handle;
 mod proto;

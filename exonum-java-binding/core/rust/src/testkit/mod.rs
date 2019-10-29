@@ -28,15 +28,15 @@ use exonum::{
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
 use jni::{
-    Executor,
-    JNIEnv,
-    objects::{JObject, JValue}, sys::{jboolean, jbyteArray, jobjectArray, jshort},
+    objects::{JObject, JValue},
+    sys::{jboolean, jbyteArray, jobjectArray, jshort},
+    Executor, JNIEnv,
 };
 
-use {JavaRuntimeProxy, JniError, JniResult};
-use handle::{cast_handle, drop_handle, Handle, to_handle};
+use handle::{cast_handle, drop_handle, to_handle, Handle};
 use storage::View;
 use utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default};
+use {JavaRuntimeProxy, JniError, JniResult};
 
 use self::time_provider::JavaTimeProvider;
 
