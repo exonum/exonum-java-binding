@@ -23,7 +23,7 @@ use exonum::{
     crypto::{PublicKey, SecretKey},
     helpers::ValidatorId,
     merkledb::BinaryValue,
-    runtime::{InstanceSpec, Runtime, RuntimeIdentifier},
+    runtime::{InstanceSpec, RuntimeIdentifier},
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
@@ -74,11 +74,6 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
 
             let runtime =
                 JavaRuntimeProxy::new(executor.clone(), env.new_global_ref(runtime_adapter)?);
-            // TODO: remove this line after corresponding From<JavaRuntimeProxy> implementation
-            let runtime = (
-                JavaRuntimeProxy::RUNTIME_ID as u32,
-                Box::new(runtime) as Box<dyn Runtime>,
-            );
             builder = builder
                 .with_additional_runtime(runtime)
                 // TODO: Rewrite with protobuf: ECR-3689
