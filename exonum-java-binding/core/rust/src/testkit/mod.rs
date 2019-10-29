@@ -33,7 +33,6 @@ use jni::{
     objects::{JObject, JValue}, sys::{jboolean, jbyteArray, jobjectArray, jshort},
 };
 
-use {JavaRuntimeProxy, JniResult};
 use {JavaRuntimeProxy, JniError, JniResult};
 use handle::{cast_handle, drop_handle, Handle, to_handle};
 use storage::View;
@@ -81,14 +80,14 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
                 Box::new(runtime) as Box<dyn Runtime>,
             );
             builder = builder
-                .with_runtime(runtime)
+                .with_additional_runtime(runtime)
                 // TODO: Rewrite with protobuf: ECR-3689
                 .with_instances(instance_configs_from_java_array(&env, services)?);
 
             if let Some(instance) =
                 time_service_instance_from_java(&env, executor.clone(), time_service_spec)?
             {
-                builder = builder.with_service(instance);
+                builder = builder.with_rust_service(instance);
             }
 
             builder
