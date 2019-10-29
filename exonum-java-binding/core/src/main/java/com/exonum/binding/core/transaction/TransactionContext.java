@@ -24,6 +24,8 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Transaction context class. Contains required information for the transaction execution.
  * The context is provided by the framework and users shouldn't create context instances manually
@@ -60,7 +62,7 @@ public interface TransactionContext {
    *
    * @see TransactionMessage#getServiceId()
    */
-  Integer getServiceId();
+  int getServiceId();
 
   /**
    * Returns the builder of the transaction context.
@@ -123,11 +125,10 @@ public interface TransactionContext {
      * Creates the transaction context instance.
      */
     public TransactionContext build() {
-      return InternalTransactionContext.newInstance(fork, hash, authorPk, serviceName, serviceId);
+      return InternalTransactionContext.newInstance(fork, hash, authorPk, serviceName,
+          checkNotNull(serviceId));
     }
 
-    private Builder() {
-    }
+    private Builder() {}
   }
-
 }

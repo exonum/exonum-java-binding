@@ -269,7 +269,7 @@ public final class ServiceRuntime {
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    */
-  public void executeTransaction(Integer serviceId, int txId, byte[] arguments,
+  public void executeTransaction(int serviceId, int txId, byte[] arguments,
                                  Fork fork, HashCode txMessageHash, PublicKey authorPublicKey)
       throws TransactionExecutionException {
     synchronized (lock) {

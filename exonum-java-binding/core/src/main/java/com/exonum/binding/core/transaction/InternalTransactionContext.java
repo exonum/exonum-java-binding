@@ -29,7 +29,7 @@ abstract class InternalTransactionContext implements TransactionContext {
 
   public static InternalTransactionContext newInstance(Fork fork, HashCode hash,
                                                        PublicKey authorPk, String serviceName,
-                                                       Integer serviceId) {
+                                                       int serviceId) {
     return new AutoValue_InternalTransactionContext(fork, hash, authorPk, serviceName, serviceId);
   }
 }
