@@ -51,7 +51,7 @@ class TimeSchemaProxy implements TimeSchema {
   private void checkIfEnabled() {
     MapIndex<String, InstanceSpec> serviceInstances = new RuntimeSchema(view).serviceInstances();
     checkArgument(serviceInstances.containsKey(name), "No service instance "
-        + "with the given name (%s) started.");
+        + "with the given name (%s) started.", name);
 
     InstanceSpec serviceSpec = serviceInstances.get(name);
     ArtifactId artifactId = serviceSpec.getArtifact();
