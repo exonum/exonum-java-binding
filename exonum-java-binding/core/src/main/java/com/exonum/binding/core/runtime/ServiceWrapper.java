@@ -103,7 +103,7 @@ final class ServiceWrapper {
       // Use \n in the format string to ensure the message (which is likely recorded
       // to the blockchain) stays the same on any platform
       throw new NullPointerException(String.format("Invalid service implementation: "
-          + "TransactionConverter#toTransaction must never return null.\n"
+          + "TransactionConverter#toTransaction must never return null.%n"
           + "Throw an exception if your service does not recognize this message id (%s) "
           + "or arguments (%s)", txId, BaseEncoding.base16().encode(arguments)));
     }
