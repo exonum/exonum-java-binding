@@ -44,21 +44,22 @@ matrix:
       os: linux
       jdk: openjdk8
       env: CHECK_RUST=false
+    - name: "Linux JDK 12 CHECK_RUST=false"
+      os: linux
+      jdk: openjdk12
+      env: CHECK_RUST=false
+  exclude: # Exclude macos builds till RocksDB is fixed: ECR-3772
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
       # Specify the image containing JDK 8
       # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
       osx_image: xcode9.3
       env:
-      - CHECK_RUST=false
-      - ROCKSDB_LIB_DIR=/usr/local/lib
-      - ROCKSDB_STATIC=1
-      - SNAPPY_LIB_DIR=/usr/local/lib
-      - SNAPPY_STATIC=1
-    - name: "Linux JDK 12 CHECK_RUST=false"
-      os: linux
-      jdk: openjdk12
-      env: CHECK_RUST=false
+        - CHECK_RUST=false
+        - ROCKSDB_LIB_DIR=/usr/local/lib
+        - ROCKSDB_STATIC=1
+        - SNAPPY_LIB_DIR=/usr/local/lib
+        - SNAPPY_STATIC=1
 
 cache:
   directories:
