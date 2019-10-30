@@ -101,7 +101,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
-        .withService(ARTIFACT_ID, SERVICE_NAME_2, SERVICE_ID_2)
+        .withService(ARTIFACT_ID, SERVICE_NAME_2, SERVICE_ID_2, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
@@ -180,8 +180,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory);
     RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
-    assertThat(thrownException.getMessage())
-        .contains("Failed to load the service from ", invalidArtifactFilename);
+    assertThat(thrownException.getMessage()).contains("Unable to create blockchain instance");
   }
 
   @Test
@@ -259,11 +258,12 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   private void checkTestServiceInitialization(TestKit testKit, String serviceName, int serviceId) {
-    // Check that service appears in dispatcher schema
-    checkIfServiceEnabled(testKit, serviceName, serviceId);
     Snapshot view = testKit.getSnapshot();
     // Check that genesis block was committed
     checkGenesisBlockCommit(view);
+
+    // Check that service appears in dispatcher schema
+    checkIfServiceEnabled(testKit, serviceName, serviceId);
 
     // Check that initialization changed database state
     TestSchema testSchema = new TestSchema(view, serviceId);
@@ -274,12 +274,13 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     assertThat(testMap).isEqualTo(expected);
   }
 
-  private void checkTestService2Initialization(TestKit testKit, String serviceName, int serviceId) {
-    // Check that service appears in dispatcher schema
-    checkIfServiceEnabled(testKit, serviceName, serviceId);
-
+  private void checkTestService2Initialization(TestKit testKit, String serviceName,
+                                               int serviceId) {
     // Check that genesis block was committed
     checkGenesisBlockCommit(testKit.getSnapshot());
+
+    // Check that service appears in dispatcher schema
+    checkIfServiceEnabled(testKit, serviceName, serviceId);
   }
 
   private void checkGenesisBlockCommit(Snapshot view) {
@@ -497,8 +498,9 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .sign(KEY_PAIR, CRYPTO_FUNCTION);
     IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
         () -> testKit.createBlockWithTransactions(message));
-    assertThat(thrownException.getMessage())
-        .contains("No service with id", Integer.toString(wrongServiceId));
+    String expectedMessage = String.format("No service with id=%s in the Java runtime",
+        wrongServiceId);
+    assertThat(thrownException.getCause().getMessage()).contains(expectedMessage);
   }
 
   @Test
