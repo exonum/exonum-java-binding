@@ -20,7 +20,6 @@ import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.google.common.base.Preconditions.checkState;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -36,6 +35,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.messages.Blockchain.Config;
 import com.exonum.binding.qaservice.transactions.CreateCounterTx;
 import com.exonum.binding.qaservice.transactions.ErrorTx;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
@@ -93,7 +93,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public void configure(Fork fork, Configuration configuration) {
+  public void initialize(Fork fork, Configuration configuration) {
     // Add a default counter to the blockchain.
     createCounter(DEFAULT_COUNTER_NAME, fork);
 
@@ -190,13 +190,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public StoredConfiguration getActualConfiguration() {
+  public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
 
-      return blockchain.getActualConfiguration();
+      return blockchain.getConsensusConfiguration();
     });
   }
 

@@ -18,7 +18,7 @@ package com.exonum.binding.app;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import org.junit.jupiter.api.Test;
@@ -29,11 +29,11 @@ class ServiceRuntimeBootstrapIntegrationTest {
   private static final int PORT = 25000;
 
   @Test
-  void createServiceRuntime() {
-    ServiceRuntime serviceRuntime = ServiceRuntimeBootstrap.createServiceRuntime("/tmp/", PORT);
+  void createServiceRuntimeAdapter() {
+    ServiceRuntimeAdapter serviceRuntimeAdapter = ServiceRuntimeBootstrap.createServiceRuntime("/tmp/", PORT);
 
     // Check the runtime is created
-    assertNotNull(serviceRuntime);
+    assertNotNull(serviceRuntimeAdapter);
 
     // Check that once createServiceRuntime returns, the native library is loaded. If it’s not,
     // we’ll get an UnsatisfiedLinkError, failing the test.

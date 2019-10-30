@@ -132,16 +132,15 @@ pub fn fakes_classpath() -> String {
 ///
 /// It requires the log4j-core library to be present on the classpath, which is the case with fakes.
 fn log4j_path_option() -> String {
-    format!("-Dlog4j.configurationFile={}", log4j_path())
+    format!(
+        "-Dlog4j.configurationFile={}",
+        log4j_path().to_str().unwrap()
+    )
 }
 
 /// Returns a path to Log4j configuration file to be used in the integration tests.
-pub fn log4j_path() -> String {
-    project_root_dir()
-        .join("log4j2.xml")
-        .to_str()
-        .expect(CONVERSION_FAILED_MESSAGE)
-        .to_owned()
+pub fn log4j_path() -> PathBuf {
+    project_root_dir().join("log4j2.xml")
 }
 
 fn libpath_option() -> String {

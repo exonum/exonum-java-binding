@@ -19,10 +19,8 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -34,6 +32,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.RequiresNativeLibrary;
+import org.assertj.core.api.Assertions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -196,8 +195,8 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       Exception e = assertThrows(RuntimeException.class, () -> createOfOtherType(name, snapshot));
 
       // TODO: Change message after https://jira.bf.local/browse/ECR-3354
-      assertThat(e, hasMessage(containsStringIgnoringCase(
-              "Index type does not match specified one")));
+      Assertions.assertThat(e.getMessage())
+          .containsIgnoringCase("Index type does not match specified one");
     }
   }
 

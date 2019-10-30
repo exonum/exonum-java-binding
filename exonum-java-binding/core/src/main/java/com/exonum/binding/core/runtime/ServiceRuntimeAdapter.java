@@ -16,14 +16,10 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.io.BaseEncoding.base16;
-
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
@@ -33,7 +29,8 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
-import com.google.protobuf.Any;
+import com.exonum.binding.messages.Runtime.ArtifactId;
+import com.exonum.binding.messages.Runtime.InstanceSpec;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
 import org.apache.logging.log4j.LogManager;
@@ -46,13 +43,13 @@ import org.apache.logging.log4j.Logger;
  * <p>For more detailed documentation on the operations, see the {@link ServiceRuntime}.
  */
 @SuppressWarnings({"unused", "SameParameterValue"}) // Native API
-class ServiceRuntimeAdapter {
+public class ServiceRuntimeAdapter {
 
   private final ServiceRuntime serviceRuntime;
   private final ViewFactory viewFactory;
   private static final Logger logger = LogManager.getLogger(ServiceRuntimeAdapter.class);
 
-  ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
+  public ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
     this.serviceRuntime = serviceRuntime;
     this.viewFactory = viewFactory;
   }
@@ -60,89 +57,86 @@ class ServiceRuntimeAdapter {
   /**
    * Deploys the Java service artifact.
    *
-   * @param id the service artifact id in format "groupId:artifactId:version"
-   * @param deploySpec the deploy specification as a serialized {@link com.google.protobuf.Any}
+   * @param name the Java service artifact name in format "groupId:artifactId:version"
+   * @param deploySpec the deploy specification as a serialized
+   *     {@link com.exonum.binding.core.runtime.DeployArguments}
    *     protobuf message
-   *     with {@link com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments}
    * @throws IllegalArgumentException if the deploy specification or id are not valid
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
    * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
    */
-  void deployArtifact(String id, byte[] deploySpec) throws ServiceLoadingException {
-    DeployArguments deployArguments = unpackDeployArgs(id, deploySpec);
+  void deployArtifact(String name, byte[] deploySpec) throws ServiceLoadingException {
+    DeployArguments deployArguments = parseDeployArgs(name, deploySpec);
     String artifactFilename = deployArguments.getArtifactFilename();
 
-    serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), artifactFilename);
-  }
-
-  private static DeployArguments unpackDeployArgs(String id, byte[] deploySpec) {
-    try {
-      Any anyDeploySpec = Any.parseFrom(deploySpec);
-      checkArgument(anyDeploySpec.is(DeployArguments.class), "Deploy specification "
-              + "for %s contains message of unexpected type inside Any (%s), must be %s",
-          id, anyDeploySpec.getTypeUrl(), DeployArguments.getDescriptor().getFullName());
-      return anyDeploySpec.unpack(DeployArguments.class);
-    } catch (InvalidProtocolBufferException e) {
-      throw new IllegalArgumentException("Invalid deploy specification for " + id, e);
-    }
+    serviceRuntime.deployArtifact(ServiceArtifactId.newJavaId(name), artifactFilename);
   }
 
   /**
-   * Creates a new instance of an already deployed service.
-   *
-   * @param name the name of the service
-   * @param id the numeric identifier of the service
-   * @param artifactId the service artifact id from which to create a new service
-   * @see ServiceRuntime#createService(ServiceInstanceSpec)
+   * Returns true if the artifact with the given name is deployed in this runtime;
+   * false — otherwise.
+   * @param name the service artifact name in format "groupId:artifactId:version"
    */
-  // todo: if ServiceInstanceSpec is in protobuf, consider passing the bytes and decoding them
-  //   in Java
-  void createService(String name, int id, String artifactId) {
-    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(name, id,
-        ServiceArtifactId.parseFrom(artifactId));
-    serviceRuntime.createService(instanceSpec);
+  boolean isArtifactDeployed(String name) {
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId(name);
+    return serviceRuntime.isArtifactDeployed(artifactId);
   }
 
-  /**
-   * Configures a started service instance.
-   *
-   * @param id the id of the service
-   * @param forkHandle a handle to a native fork object
-   * @param configuration the service configuration parameters as serialized protobuf Any
-   * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#configureService(Integer, Fork, Any)
-   */
-  void configureService(int id, long forkHandle, byte[] configuration)
-      throws CloseFailuresException {
-    try (Cleaner cleaner = new Cleaner()) {
-      Fork fork = viewFactory.createFork(forkHandle, cleaner);
-      Any parsedConfig = decodeConfiguration(configuration);
-
-      serviceRuntime.configureService(id, fork, parsedConfig);
-    } catch (CloseFailuresException e) {
-      handleCloseFailure(e);
-    }
-  }
-
-  private static Any decodeConfiguration(byte[] configuration) {
+  private static DeployArguments parseDeployArgs(String name, byte[] deploySpec) {
     try {
-      return Any.parseFrom(configuration);
+      return DeployArguments.parseFrom(deploySpec);
     } catch (InvalidProtocolBufferException e) {
-      String message = String.format("Could not parse the config (%s) as Any",
-          base16().encode(configuration));
+      String message = "Invalid deploy specification for " + name;
       logger.error(message, e);
       throw new IllegalArgumentException(message, e);
     }
   }
 
   /**
-   * Stops a service instance with the given id.
+   * Creates a new instance of an already deployed service and performs its initial configuration.
    *
-   * @param id the id of the service
-   * @see ServiceRuntime#stopService(Integer)
+   * @param forkHandle a handle to a native fork object
+   * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
+   *     protobuf message
+   * @param configuration the service initial configuration parameters as a serialized protobuf
+   *     message
+   * @see ServiceRuntime#addService(Fork, ServiceInstanceSpec, byte[])
+   * @throws CloseFailuresException if there was a failure in destroying some native peers
    */
-  void stopService(int id) {
-    serviceRuntime.stopService(id);
+  void addService(long forkHandle, byte[] instanceSpec, byte[] configuration)
+      throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      Fork fork = viewFactory.createFork(forkHandle, cleaner);
+      ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
+
+      serviceRuntime.addService(fork, javaInstanceSpec, configuration);
+    } catch (CloseFailuresException e) {
+      handleCloseFailure(e);
+    }
+  }
+
+  /**
+   * Restarts the service instance that has been successfully added to the blockchain.
+   *
+   * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
+   *     protobuf message
+   */
+  void restartService(byte[] instanceSpec) {
+    ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
+    serviceRuntime.restartService(javaInstanceSpec);
+  }
+
+  private static ServiceInstanceSpec parseInstanceSpec(byte[] instanceSpec) {
+    try {
+      InstanceSpec spec = InstanceSpec.parseFrom(instanceSpec);
+      ArtifactId artifact = spec.getArtifact();
+      ServiceArtifactId artifactId = ServiceArtifactId.valueOf(artifact.getRuntimeId(),
+          artifact.getName());
+      return ServiceInstanceSpec.newInstance(spec.getName(), spec.getId(), artifactId);
+    } catch (InvalidProtocolBufferException e) {
+      logger.error(e);
+      throw new IllegalArgumentException(e);
+    }
   }
 
   /**
@@ -200,6 +194,23 @@ class ServiceRuntimeAdapter {
   }
 
   /**
+   * Performs the before commit operation for services in this runtime.
+   *
+   * @param forkHandle a handle to the native fork object, which must support checkpoints
+   *                   and rollbacks
+   * @throws CloseFailuresException if there was a failure in destroying some native peers
+   * @see ServiceRuntime#beforeCommit(Fork)
+   */
+  void beforeCommit(long forkHandle) throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner("beforeCommit")) {
+      Fork fork = viewFactory.createFork(forkHandle, cleaner);
+      serviceRuntime.beforeCommit(fork);
+    } catch (CloseFailuresException e) {
+      handleCloseFailure(e);
+    }
+  }
+
+  /**
    * Notifies the runtime of the block commit event.
    *
    * @param snapshotHandle a handle to the native snapshot object
@@ -233,6 +244,15 @@ class ServiceRuntimeAdapter {
   void connectServiceApis(int[] serviceIds, long nodeNativeHandle) {
     Node node = new NodeProxy(nodeNativeHandle);
     serviceRuntime.connectServiceApis(serviceIds, node);
+  }
+
+  /**
+   * Stops the Java service runtime.
+   *
+   * @see ServiceRuntime#shutdown()
+   */
+  void shutdown() throws InterruptedException {
+    serviceRuntime.shutdown();
   }
 
   private static void handleCloseFailure(CloseFailuresException e) throws CloseFailuresException {

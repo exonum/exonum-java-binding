@@ -1,3 +1,7 @@
+extern crate exonum_build;
+
+use exonum_build::ProtobufGenerator;
+
 use std::env::var_os;
 
 fn main() {
@@ -8,4 +12,9 @@ fn main() {
     if cfg!(target_os = "macos") && var_os("ROCKSDB_STATIC").is_some() {
         println!("cargo:rustc-link-lib=dylib=c++");
     }
+
+    ProtobufGenerator::with_mod_name("protobuf_mod.rs")
+        .with_input_dir("../src/main/proto")
+        .add_path("../src/main/proto")
+        .generate();
 }

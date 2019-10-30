@@ -17,22 +17,22 @@
 package com.exonum.binding.core.runtime;
 
 import static com.exonum.binding.test.Bytes.bytes;
-import static com.exonum.binding.test.Bytes.toHexString;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.google.protobuf.Any;
+import com.exonum.binding.messages.Runtime.ArtifactId;
+import com.exonum.binding.messages.Runtime.InstanceSpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,27 +72,23 @@ class ServiceRuntimeAdapterTest {
     DeployArguments deployArguments = DeployArguments.newBuilder()
         .setArtifactFilename(artifactFilename)
         .build();
-    byte[] deploySpec = Any.pack(deployArguments).toByteArray();
+    byte[] deploySpec = deployArguments.toByteArray();
 
-    serviceRuntimeAdapter.deployArtifact("com.acme:foo:1.2.3", deploySpec);
+    String name = "com.acme:foo:1.2.3";
+    serviceRuntimeAdapter.deployArtifact(name, deploySpec);
 
-    ServiceArtifactId expectedId = ServiceArtifactId.of("com.acme", "foo", "1.2.3");
+    ServiceArtifactId expectedId = ServiceArtifactId.newJavaId(name);
     verify(serviceRuntime).deployArtifact(expectedId, artifactFilename);
   }
 
   @Test
-  void deployArtifactWrongType() {
-    String id = "com.acme:foo:1.2.3";
-    ServiceStateHashes wrongMessage = ServiceStateHashes.newBuilder().build();
-    byte[] deploySpec = Any.pack(wrongMessage).toByteArray();
+  void isArtifactDeployed() {
+    String artifactName = "com.acme:foo:1.3.2";
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntimeAdapter.deployArtifact(id, deploySpec));
+    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.newJavaId(artifactName)))
+        .thenReturn(true);
 
-    assertThat(e).hasMessageContainingAll(
-        id,
-        ServiceStateHashes.class.getSimpleName(),
-        DeployArguments.class.getSimpleName());
+    assertTrue(serviceRuntimeAdapter.isArtifactDeployed(artifactName));
   }
 
   @Test
@@ -107,7 +103,7 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
-  void configureService() throws CloseFailuresException {
+  void addService() throws CloseFailuresException {
     int serviceId = 1;
     long forkHandle = 0x110b;
     Cleaner cleaner = new Cleaner();
@@ -115,27 +111,38 @@ class ServiceRuntimeAdapterTest {
     when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
-    Any configFromTx = Any.getDefaultInstance();
-    byte[] configuration = configFromTx.toByteArray();
+    String serviceName = "s1";
+    String javaArtifactName = "com.acme:foo:1.2.3";
+    byte[] instanceSpec = InstanceSpec.newBuilder()
+        .setId(serviceId)
+        .setName(serviceName)
+        .setArtifact(ArtifactId.newBuilder()
+            .setRuntimeId(1)
+            .setName(javaArtifactName)
+            .build())
+        .build()
+        .toByteArray();
+    byte[] configuration = bytes(1, 2);
 
-    // Configure the service
-    serviceRuntimeAdapter.configureService(serviceId, forkHandle, configuration);
+    // Initialize the service
+    serviceRuntimeAdapter.addService(forkHandle, instanceSpec, configuration);
 
     // Check the runtime was invoked with correct config
-    verify(serviceRuntime).configureService(serviceId, fork, configFromTx);
+    ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
+        ServiceArtifactId.newJavaId(javaArtifactName));
+    verify(serviceRuntime).addService(fork, expected, configuration);
   }
 
   @Test
-  void configureServiceNotAny() {
-    int serviceId = 1;
+  void beforeCommit() throws CloseFailuresException {
     long forkHandle = 0x110b;
-    byte[] invalidConfig = bytes("rubbish");
+    Fork fork = mock(Fork.class);
+    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+        .thenReturn(fork);
 
-    // Configure the service
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntimeAdapter.configureService(serviceId, forkHandle, invalidConfig));
+    serviceRuntimeAdapter.beforeCommit(forkHandle);
 
-    assertThat(e).hasMessageContainingAll("Any", toHexString(invalidConfig));
+    verify(serviceRuntime).beforeCommit(fork);
   }
 
   @Test

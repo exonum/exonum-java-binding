@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +38,4 @@ message ServiceStateHashes {
   uint32 instance_id = 1;
   // Service state hashes.
   repeated bytes state_hashes = 2;
-}
-
-/* Java ServiceRuntime deploy arguments, specified in the deploy request
- * transaction. Currently only a single protocol is supported:
- * loading an artifact from a file. */
-message DeployArguments {
-
-  /* A name of the service artifact file located in the directory
-   * for storing Java service artifacts. */
-  string artifact_filename = 1;
 }

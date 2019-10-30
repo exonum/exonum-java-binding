@@ -25,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.blockchain.TransactionResult;
-import com.exonum.binding.common.configuration.StoredConfiguration;
-import com.exonum.binding.common.configuration.ValidatorKey;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
@@ -42,6 +40,8 @@ import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.messages.Blockchain.Config;
+import com.exonum.binding.messages.Blockchain.ValidatorKeys;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
 import com.google.common.collect.ImmutableList;
@@ -387,24 +387,24 @@ class BlockchainIntegrationTest {
     }
 
     @Test
-    void getActualConfiguration() {
+    void getConsensusConfiguration() {
       testKitTest((blockchain) -> {
-        StoredConfiguration configuration = blockchain.getActualConfiguration();
-        List<ValidatorKey> validatorKeys = configuration.validatorKeys();
+        Config configuration = blockchain.getConsensusConfiguration();
+        int numKeysInConfig = configuration.getValidatorKeysCount();
         // Check the number of validator keys
-        assertThat(validatorKeys).hasSize(VALIDATOR_COUNT);
+        assertThat(numKeysInConfig).isEqualTo(VALIDATOR_COUNT);
 
-        // Check the public key of the emulated node is included
-        List<PublicKey> serviceKeys = validatorKeys.stream()
-            .map(ValidatorKey::serviceKey)
+        // Check the public service key of the emulated node is included
+        List<PublicKey> serviceKeys = configuration.getValidatorKeysList().stream()
+            .map(ValidatorKeys::getServiceKey)
+            // fixme: [ECR-3734] highly error-prone and verbose key#getData.toByteArray susceptible
+            //  to incorrect key#toByteArray.
+            .map(key -> PublicKey.fromBytes(key.getData().toByteArray()))
             .collect(toList());
         EmulatedNode emulatedNode = testKit.getEmulatedNode();
         PublicKey emulatedNodeServiceKey = emulatedNode.getServiceKeyPair().getPublicKey();
         List<PublicKey> expectedKeys = ImmutableList.of(emulatedNodeServiceKey);
         assertThat(serviceKeys).isEqualTo(expectedKeys);
-
-        // Check the previous config is empty
-        assertThat(configuration.previousCfgHash()).isEqualTo(ZERO_HASH_CODE);
       });
     }
 

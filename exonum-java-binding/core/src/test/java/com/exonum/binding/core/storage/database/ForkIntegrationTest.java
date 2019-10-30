@@ -29,6 +29,7 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Iterator;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
@@ -144,6 +145,56 @@ class ForkIntegrationTest {
       // the checkpoint was created
       ListIndex<String> l3 = newList(listName, fork);
       assertThat(l3).containsExactly("s1");
+    }
+  }
+
+  @Test
+  @DisplayName("rollback shall work when multiple checkpoints are created, reverting to the"
+      + "state as of the last checkpoint")
+  void rollbacksToTheLastCheckpointWhenMultipleAreCreated() throws Exception {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner("parent")) {
+      Fork fork = db.createFork(cleaner);
+
+      // Create a list with a single element
+      String listName = "list";
+
+      // Modify and create the first checkpoint
+      {
+        ListIndex<String> list = newList(listName, fork);
+        list.add("s1");
+        fork.createCheckpoint();
+      }
+
+      // Modify and create the second checkpoint
+      {
+        ListIndex<String> list = newList(listName, fork);
+        list.add("s2");
+        fork.createCheckpoint();
+      }
+
+      // Modify the list
+      {
+        ListIndex<String> list = newList(listName, fork);
+        list.add("s3");
+        assertThat(list).containsExactly("s1", "s2", "s3");
+      }
+
+      // Rollback the changes: must restore the state as of the second checkpoint
+      fork.rollback();
+      {
+        ListIndex<String> list = newList(listName, fork);
+        assertThat(list).containsExactly("s1", "s2");
+      }
+
+      // Rollback again: as no nested (stacked) checkpoints are supported,
+      // the first checkpoint is no longer available and any rollback will revert
+      // the state to the last (second) checkpoint
+      fork.rollback();
+      {
+        ListIndex<String> list = newList(listName, fork);
+        assertThat(list).containsExactly("s1", "s2");
+      }
     }
   }
 

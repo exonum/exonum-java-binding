@@ -94,6 +94,9 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     if (orderCheckResult != MapProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
     }
+    if (containsInvalidHashes()) {
+      return CheckedFlatMapProof.invalid(MapProofStatus.INVALID_HASH_SIZE);
+    }
     if (prefixesIncluded()) {
       return CheckedFlatMapProof.invalid(MapProofStatus.EMBEDDED_PATH);
     }
@@ -138,6 +141,17 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   /**
+   * Returns true if any hash in the proof has size different from 32 bytes.
+   */
+  private boolean containsInvalidHashes() {
+    // TODO: [ECR-2410] Migrate to ProofHashes#checkSha256Hash.
+    return proof.stream()
+        .map(MapProofEntry::getHash)
+        .map(HashCode::bits)
+        .anyMatch(size -> size != Hashing.DEFAULT_HASH_SIZE_BITS);
+  }
+
+  /**
    * Check if any entry has a prefix among the paths in the proof entries. Both found and absent
    * keys are checked.
    */
@@ -149,8 +163,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
             missingKeys.stream())
         .map(DbKey::newLeafKey);
 
-    // TODO: proof entries are checked to be sorted at this stage, so it's possible …
-    // to use binary search here
+    // TODO: proof entries are checked to be sorted at this stage, so it's possible
+    //   to use binary search here
     return requestedKeys
         .anyMatch(leafEntryKey -> proof.stream()
             .map(MapProofEntry::getDbKey)

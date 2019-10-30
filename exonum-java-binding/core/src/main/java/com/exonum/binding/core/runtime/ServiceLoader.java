@@ -56,4 +56,16 @@ interface ServiceLoader {
    * @throws IllegalStateException if the service identified by the given id is not currently loaded
    */
   void unloadService(ServiceArtifactId artifactId);
+
+  /**
+   * Unloads all previously loaded services. The clients <b>must not</b> unload the services
+   * while any of them are in use (there are active instances of them).
+   *
+   * <p>This method will attempt to unload each service, and communicate any exceptions
+   * afterwards.
+   *
+   * @throws IllegalStateException if any service failed to unload, the exceptions they
+   *     had thrown will be in the list of suppressed exceptions
+   */
+  void unloadAll();
 }

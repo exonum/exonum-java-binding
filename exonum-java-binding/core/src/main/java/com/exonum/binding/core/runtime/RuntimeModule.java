@@ -47,6 +47,7 @@ final class RuntimeModule extends PrivateModule {
         .annotatedWith(named(DEPENDENCY_REFERENCE_CLASSES_KEY))
         .toInstance(dependencyReferenceClasses);
     bind(ServiceLoader.class).to(Pf4jServiceLoader.class);
+    bind(ServicesFactory.class).to(GuiceServicesFactory.class);
     bind(PluginManager.class).to(JarPluginManager.class);
   }
 }

@@ -12,29 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-syntax = "proto3";
+//! Module of the rust-protobuf generated files.
 
-package exonum;
+#![allow(bare_trait_objects)]
+#![allow(renamed_and_removed_lints)]
 
-import "helpers.proto";
+pub use self::service_runtime::*;
 
-option java_package = "com.exonum.binding.messages";
-
-message Block {
-  uint32 proposer_id = 1;
-  uint64 height = 2;
-  uint32 tx_count = 3;
-  exonum.Hash prev_hash = 4;
-  exonum.Hash tx_hash = 5;
-  exonum.Hash state_hash = 6;
-}
-
-message ConfigReference {
-  uint64 actual_from = 1;
-  exonum.Hash cfg_hash = 2;
-}
-
-message TxLocation {
-  uint64 block_height = 1;
-  uint64 position_in_block = 2;
-}
+include!(concat!(env!("OUT_DIR"), "/protobuf_mod.rs"));

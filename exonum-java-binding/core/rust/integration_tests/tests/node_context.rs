@@ -30,6 +30,7 @@ use futures::{
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::{
     exonum::{
+        api::ApiContext,
         blockchain::{Blockchain, Service, Transaction},
         crypto::{gen_keypair, Hash, PublicKey, SecretKey},
         messages::{RawTransaction, ServiceTransaction},
@@ -94,34 +95,8 @@ fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<Extern
     let api_channel = mpsc::channel(128);
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
-    struct EmptyService;
-
-    impl Service for EmptyService {
-        fn service_id(&self) -> u16 {
-            0
-        }
-
-        fn service_name(&self) -> &str {
-            "empty_service"
-        }
-
-        fn state_hash(&self, _: &Snapshot) -> Vec<Hash> {
-            vec![]
-        }
-
-        fn tx_from_raw(&self, _: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
-            unimplemented!()
-        }
-    }
-
     let storage = TemporaryDB::new();
-    let blockchain = Blockchain::new(
-        storage,
-        vec![Box::new(EmptyService)],
-        keypair.0,
-        keypair.1,
-        app_tx.clone(),
-    );
-    let node = NodeContext::new(EXECUTOR.clone(), blockchain, keypair.0, app_tx);
+    let api_context = ApiContext::new(storage, keypair, app_tx.clone());
+    let node = NodeContext::new(EXECUTOR.clone(), api_context);
     (node, app_rx)
 }
