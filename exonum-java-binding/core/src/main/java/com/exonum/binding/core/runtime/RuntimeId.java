@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-mod cmd;
-mod config;
-mod error;
-mod java_runtime_factory;
-mod library_loader;
-mod paths;
+package com.exonum.binding.core.runtime;
 
-pub use self::cmd::*;
-pub use self::config::*;
-pub use self::error::*;
-pub use self::java_runtime_factory::*;
-pub use self::library_loader::get_lib_version;
-pub use self::paths::*;
+/**
+ * Represents well-known runtime ids, as assigned by the Exonum core.
+ */
+public enum RuntimeId {
+  RUST(0),
+  JAVA(1);
+
+  private final int id;
+
+  RuntimeId(int id) {
+    this.id = id;
+  }
+
+  /**
+   * Returns the numeric id assigned to this runtime by the Exonum core.
+   */
+  public int getId() {
+    return id;
+  }
+}

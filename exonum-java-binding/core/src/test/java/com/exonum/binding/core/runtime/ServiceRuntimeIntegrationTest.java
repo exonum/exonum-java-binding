@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -108,7 +109,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void deployCorrectArtifact() throws Exception {
-    ServiceArtifactId serviceId = ServiceArtifactId.of("com.acme", "foo-service", "1.0.0");
+    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     String artifactFilename = "foo-service.jar";
     Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -126,7 +127,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void deployArtifactWrongId() throws Exception {
-    ServiceArtifactId actualId = ServiceArtifactId.of("com.acme", "actual", "1.0.0");
+    ServiceArtifactId actualId = ServiceArtifactId.newJavaId("com.acme:actual:1.0.0");
     String artifactFilename = "foo-service.jar";
     Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -134,7 +135,7 @@ class ServiceRuntimeIntegrationTest {
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenReturn(serviceDefinition);
 
-    ServiceArtifactId expectedId = ServiceArtifactId.of("com.acme", "expected", "1.0.0");
+    ServiceArtifactId expectedId = ServiceArtifactId.newJavaId("com.acme:expected:1.0.0");
 
     Exception actual = assertThrows(ServiceLoadingException.class,
         () -> serviceRuntime.deployArtifact(expectedId, artifactFilename));
@@ -147,7 +148,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void deployArtifactFailed() throws Exception {
-    ServiceArtifactId serviceId = ServiceArtifactId.of("com.acme", "foo-service", "1.0.0");
+    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId("com.acme:actual:1.0.0");
     String artifactFilename = "foo-service.jar";
     Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     ServiceLoadingException exception = new ServiceLoadingException("Boom");
@@ -163,8 +164,8 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void createService() {
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+  void addService() {
+    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme:foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
@@ -179,7 +180,9 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    serviceRuntime.createService(instanceSpec);
+    Fork fork = mock(Fork.class);
+    byte[] configuration = anyConfiguration();
+    serviceRuntime.addService(fork, instanceSpec, configuration);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(serviceDefinition, instanceSpec);
@@ -187,11 +190,15 @@ class ServiceRuntimeIntegrationTest {
     // and is present in the runtime
     Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
     assertThat(serviceOpt).hasValue(serviceWrapper);
+
+    // and the service was configured
+    Configuration expectedConfig = new ServiceConfiguration(configuration);
+    verify(serviceWrapper).initialize(fork, expectedConfig);
   }
 
   @Test
-  void createServiceDuplicate() {
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+  void addServiceDuplicate() {
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
@@ -206,11 +213,13 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    serviceRuntime.createService(instanceSpec);
+    Fork fork = mock(Fork.class);
+    byte[] configuration = anyConfiguration();
+    serviceRuntime.addService(fork, instanceSpec, configuration);
 
     // Try to create another service with the same service instance specification
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.createService(instanceSpec));
+        () -> serviceRuntime.addService(fork, instanceSpec, configuration));
 
     assertThat(e).hasMessageContaining("name");
     assertThat(e).hasMessageContaining(TEST_NAME);
@@ -220,37 +229,76 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void createServiceUnknownService() {
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+  void addServiceUnknownServiceArtifact() {
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
 
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
 
+    Fork fork = mock(Fork.class);
+    byte[] configuration = anyConfiguration();
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.createService(instanceSpec));
+        () -> serviceRuntime.addService(fork, instanceSpec, configuration));
+
     assertThat(e).hasMessageFindingMatch("Unknown.+artifact");
     assertThat(e).hasMessageContaining(String.valueOf(artifactId));
+
+    assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
   }
 
   @Test
-  void configureNonExistingService() throws CloseFailuresException {
-    try (Database database = TemporaryDb.newInstance();
-        Cleaner cleaner = new Cleaner()) {
-      Fork view = database.createFork(cleaner);
-      byte[] config = anyConfiguration();
+  void addServiceBadInitialConfiguration() {
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+    when(serviceLoader.findService(artifactId))
+        .thenReturn(Optional.of(serviceDefinition));
 
-      // Configure the service
-      Exception e = assertThrows(IllegalArgumentException.class,
-          () -> serviceRuntime.initializeService(TEST_ID, view, config));
+    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(servicesFactory.createService(serviceDefinition, instanceSpec))
+        .thenReturn(serviceWrapper);
 
-      assertThat(e).hasMessageContaining(String.valueOf(TEST_ID));
-    }
+    Fork fork = mock(Fork.class);
+    byte[] configuration = anyConfiguration();
+    ServiceConfiguration expectedConfig = new ServiceConfiguration(configuration);
+    doThrow(IllegalArgumentException.class).when(serviceWrapper)
+        .initialize(fork, expectedConfig);
+
+    // Try to create and initialize the service
+    assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.addService(fork, instanceSpec, configuration));
+
+    assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
   }
 
   @Test
-  void stopNonExistingService() {
-    assertThrows(IllegalArgumentException.class, () -> serviceRuntime.stopService(TEST_ID));
+  void restartService() {
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+    when(serviceLoader.findService(artifactId))
+        .thenReturn(Optional.of(serviceDefinition));
+
+    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
+    when(servicesFactory.createService(serviceDefinition, instanceSpec))
+        .thenReturn(serviceWrapper);
+
+    // Create the service from the artifact
+    serviceRuntime.restartService(instanceSpec);
+
+    // Check it was instantiated as expected
+    verify(servicesFactory).createService(serviceDefinition, instanceSpec);
+
+    // and is present in the runtime
+    Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
+    assertThat(serviceOpt).hasValue(serviceWrapper);
   }
 
   @Test
@@ -262,9 +310,34 @@ class ServiceRuntimeIntegrationTest {
         () -> serviceRuntime.connectServiceApis(emptyServiceIds, node));
   }
 
+  @Test
+  void shutdown() throws InterruptedException {
+    CompletableFuture<Void> stopFuture = CompletableFuture.completedFuture(null);
+    when(server.stop()).thenReturn(stopFuture);
+
+    serviceRuntime.shutdown();
+
+    InOrder inOrder = Mockito.inOrder(server, serviceLoader);
+    inOrder.verify(server).stop();
+    inOrder.verify(serviceLoader).unloadAll();
+  }
+
+  @Test
+  void shutdownIfStopFailureShallUnloadArtifacts() throws InterruptedException {
+    CompletableFuture<Void> stopFuture = new CompletableFuture<>();
+    stopFuture.completeExceptionally(new Exception("Server#stop async failure"));
+    when(server.stop()).thenReturn(stopFuture);
+
+    serviceRuntime.shutdown();
+
+    verify(server).stop();
+    // Verify that serviceLoader was invoked despite the stop failure
+    verify(serviceLoader).unloadAll();
+  }
+
   @Nested
   class WithSingleService {
-    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     final ServiceInstanceSpec INSTANCE_SPEC = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, ARTIFACT_ID);
 
@@ -286,32 +359,7 @@ class ServiceRuntimeIntegrationTest {
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
-      serviceRuntime.createService(INSTANCE_SPEC);
-    }
-
-    @Test
-    void configureService() throws CloseFailuresException {
-      try (Database database = TemporaryDb.newInstance();
-          Cleaner cleaner = new Cleaner()) {
-        Fork view = database.createFork(cleaner);
-        byte[] configuration = anyConfiguration();
-        // Configure the service
-        serviceRuntime.initializeService(TEST_ID, view, configuration);
-
-        // Check the service was configured
-        Configuration expectedConfig = new ServiceConfiguration(configuration);
-        verify(serviceWrapper).initialize(view, expectedConfig);
-      }
-    }
-
-    @Test
-    void stopService() {
-      // Stop the service
-      serviceRuntime.stopService(TEST_ID);
-
-      // Check no service with such name remains registered
-      Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
-      assertThat(serviceOpt).isEmpty();
+      serviceRuntime.restartService(INSTANCE_SPEC);
     }
 
     @Test
@@ -446,7 +494,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Nested
   class WithMultipleServices {
-    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom("com.acme:foo-service:1.0.0");
+    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     final Map<ServiceInstanceSpec, ServiceWrapper> SERVICES = ImmutableMap.of(
         ServiceInstanceSpec.newInstance("a", 1, ARTIFACT_ID), mock(ServiceWrapper.class, "a"),
         ServiceInstanceSpec.newInstance("b", 2, ARTIFACT_ID), mock(ServiceWrapper.class, "b"),
@@ -481,7 +529,7 @@ class ServiceRuntimeIntegrationTest {
 
       // Create the services
       for (ServiceInstanceSpec instanceSpec : SERVICES.keySet()) {
-        serviceRuntime.createService(instanceSpec);
+        serviceRuntime.restartService(instanceSpec);
       }
     }
 

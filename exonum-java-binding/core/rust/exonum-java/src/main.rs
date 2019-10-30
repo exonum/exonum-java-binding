@@ -15,7 +15,7 @@
  */
 
 extern crate env_logger;
-extern crate exonum_cli;
+//extern crate exonum_btc_anchoring;
 extern crate exonum_time;
 extern crate java_bindings;
 #[macro_use]
@@ -24,11 +24,12 @@ extern crate log;
 #[cfg(test)]
 extern crate tempfile;
 
-use java_bindings::get_lib_version;
-// TODO: make sure that it is fixed in ECR-3458
-//mod node_builder;
+use java_bindings::{get_lib_version, Command};
+use node::run_node;
 
-fn main() {
+mod node;
+
+fn main() -> Result<(), failure::Error> {
     env_logger::init();
     // Panic if `_JAVA_OPTIONS` environmental variable is set.
     java_bindings::panic_if_java_options();
@@ -36,9 +37,7 @@ fn main() {
     // Log app's metadata
     log_app_metadata();
 
-    // TODO: make sure that it is fixed in ECR-3458
-    //let builder = node_builder::create();
-    //builder.run()
+    run_node(Command::from_args())
 }
 
 // Prints info about version and build mode of started app to the STDOUT.

@@ -20,6 +20,9 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.google.inject.Guice;
@@ -38,16 +41,17 @@ import org.junit.jupiter.api.io.TempDir;
 @RequiresNativeLibrary
 class ServiceRuntimeConfigurationIntegrationTest {
 
+  private static final String ARTIFACT_VERSION = "1.0.0";
   private static final ServiceArtifactId ARTIFACT_ID =
-      ServiceArtifactId.parseFrom("com.exonum.binding:test-service:1.0.0");
+      ServiceArtifactId.newJavaId("com.exonum.binding:test-service:" + ARTIFACT_VERSION);
   private static final String ARTIFACT_FILENAME = "test-service.jar";
 
   @BeforeEach
   void createValidArtifact(@TempDir Path tmpArtifactDir) throws IOException {
     Path artifactLocation = tmpArtifactDir.resolve(ARTIFACT_FILENAME);
     new ServiceArtifactBuilder()
-        .setPluginId(ARTIFACT_ID.toString())
-        .setPluginVersion(ARTIFACT_ID.getVersion())
+        .setPluginId(ARTIFACT_ID.getName())
+        .setPluginVersion(ARTIFACT_VERSION)
         .addClasses(TestService.class)
         .addExtensionClass(TestServiceModule.class)
         .writeTo(artifactLocation);
@@ -70,8 +74,14 @@ class ServiceRuntimeConfigurationIntegrationTest {
     // Create a service instance
     String name = "s1";
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(name, 1, ARTIFACT_ID);
-    runtime.createService(instanceSpec);
-
+    try (TemporaryDb database = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
+      Fork fork = database.createFork(cleaner);
+      runtime.addService(fork, instanceSpec, new byte[0]);
+    }
     assertThat(runtime.findService(name)).isNotEmpty();
+
+    // Shutdown the runtime
+    runtime.shutdown();
   }
 }

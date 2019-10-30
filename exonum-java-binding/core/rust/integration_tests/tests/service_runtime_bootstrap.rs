@@ -18,7 +18,12 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use integration_tests::vm::{fakes_classpath, java_library_path, log4j_path};
-use java_bindings::{Config, InternalConfig, JavaServiceRuntime, JvmConfig, RuntimeConfig};
+use java_bindings::exonum::runtime::Runtime;
+use java_bindings::{
+    create_java_vm, create_service_runtime, Executor, InternalConfig, JvmConfig, RuntimeConfig,
+};
+
+use std::{path::PathBuf, sync::Arc};
 
 #[test]
 // Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents
@@ -32,15 +37,11 @@ fn bootstrap() {
     };
 
     let runtime_config = RuntimeConfig {
+        artifacts_path: PathBuf::from("/tmp/"),
         // Pass log4j path to avoid error messages of mis-configuration
         log_config_path: log4j_path(),
         port: 6300,
         override_system_lib_path: None,
-    };
-
-    let config = Config {
-        jvm_config,
-        runtime_config,
     };
 
     let internal_config = InternalConfig {
@@ -48,12 +49,8 @@ fn bootstrap() {
         system_lib_path: java_library_path(),
     };
 
-    let runtime = JavaServiceRuntime::new(config, internal_config);
+    let java_vm = create_java_vm(&jvm_config, &runtime_config, internal_config);
+    let executor = Executor::new(Arc::new(java_vm));
 
-    let result = runtime
-        .get_executor()
-        .with_attached(|env| env.get_version());
-
-    assert!(result.is_ok());
-    assert!(i32::from(result.unwrap()) > 0);
+    let _runtime: Box<dyn Runtime> = create_service_runtime(executor, &runtime_config);
 }

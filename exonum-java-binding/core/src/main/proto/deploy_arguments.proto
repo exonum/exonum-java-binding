@@ -14,4 +14,20 @@
  * limitations under the License.
  */
 
-pub const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
+syntax = "proto3";
+
+package exonum.java.runtime;
+
+option java_package = "com.exonum.binding.core.runtime";
+option java_multiple_files = true;
+
+
+/* Java ServiceRuntime deploy arguments, specified in the deploy request
+ * transaction. Currently only a single protocol is supported:
+ * loading an artifact from a file. */
+message DeployArguments {
+
+  /* A name of the service artifact file located in the directory
+   * for storing Java service artifacts. */
+  string artifact_filename = 1;
+}

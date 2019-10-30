@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::mock::NATIVE_FACADE_CLASS;
 use java_bindings::{
     jni::objects::{JObject, JValue},
     utils::{panic_on_exception, unwrap_jni},
     Executor,
 };
 use tempfile::{self, TempPath};
+
+const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
 
 /// Creates valid service artifact.
 pub fn create_service_artifact_valid(executor: &Executor) -> TempPath {

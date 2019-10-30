@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
  * code and an optional description. Unexpected errors include only a description.
  */
 @AutoValue
+// todo: Fix the tx result support [ECR-3693]
 public abstract class TransactionResult {
 
   /** The maximum allowed user-defined transaction error code. */

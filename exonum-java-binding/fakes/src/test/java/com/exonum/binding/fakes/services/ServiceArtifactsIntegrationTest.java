@@ -29,6 +29,7 @@ import com.exonum.binding.test.CiOnly;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -47,22 +48,27 @@ class ServiceArtifactsIntegrationTest {
     serviceRuntime = ServiceRuntimeBootstrap.createServiceRuntime(tmp.toString(), 0);
   }
 
+  @AfterEach
+  void tearDown() throws InterruptedException {
+    serviceRuntime.close();
+  }
+
   @Test
   void createValidArtifact() throws IOException, ServiceLoadingException {
     ServiceArtifactId id =
-        ServiceArtifactId.parseFrom("com.exonum.binding:valid-test-service:1.0.0");
+        ServiceArtifactId.newJavaId("com.exonum.binding:valid-test-service:1.0.0");
     ServiceArtifacts.createValidArtifact(id, artifactLocation);
 
     serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
 
-    UserServiceAdapter service = serviceRuntime.createService(id.toString());
+    UserServiceAdapter service = serviceRuntime.addService(fork, id.toString(), configuration);
 
     assertThat(service.getId(), equalTo(TestService.ID));
   }
 
   @Test
   void createUnloadableArtifact() throws IOException {
-    String id = "com.exonum.binding:unloadable-test-service:1.0.0";
+    String id = "1:com.exonum.binding:unloadable-test-service:1.0.0";
     ServiceArtifacts.createUnloadableArtifact(id, artifactLocation);
     assertThrows(ServiceLoadingException.class,
         () -> serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), ARTIFACT_FILENAME));
@@ -71,11 +77,12 @@ class ServiceArtifactsIntegrationTest {
   @Test
   void createWithUninstantiableService() throws IOException, ServiceLoadingException {
     ServiceArtifactId id =
-        ServiceArtifactId.parseFrom("com.exonum.binding:uninstantiable-test-service:1.0.0");
+        ServiceArtifactId.newJavaId("com.exonum.binding:uninstantiable-test-service:1.0.0");
     ServiceArtifacts.createWithUninstantiableService(id, artifactLocation);
 
     serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
 
-    assertThrows(RuntimeException.class, () -> serviceRuntime.createService(id.toString()));
+    assertThrows(RuntimeException.class, () -> serviceRuntime.addService(fork, id.toString(),
+        configuration));
   }
 }

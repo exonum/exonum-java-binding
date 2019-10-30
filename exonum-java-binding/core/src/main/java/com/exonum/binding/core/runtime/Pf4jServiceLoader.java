@@ -24,6 +24,7 @@ import com.exonum.binding.core.service.ServiceModule;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -39,14 +40,15 @@ import org.pf4j.PluginState;
  * a certain format ('groupId:artifactId:version'); have a single {@link ServiceModule} as
  * an extension.
  *
+ * <p>This class is not thread-safe.
+ *
  * @see <a href="https://pf4j.org/doc/getting-started.html">PF4J docs</a>
  */
 final class Pf4jServiceLoader implements ServiceLoader {
 
   private static final Comparator<ServiceArtifactId> SERVICE_ID_COMPARATOR =
-      Comparator.comparing(ServiceArtifactId::getGroupId)
-          .thenComparing(ServiceArtifactId::getArtifactId)
-          .thenComparing(ServiceArtifactId::getVersion);
+      // No need to compare id — it is always Java
+      Comparator.comparing(ServiceArtifactId::getName);
 
   private final PluginManager pluginManager;
   private final ClassLoadingScopeChecker classLoadingChecker;
@@ -129,11 +131,12 @@ final class Pf4jServiceLoader implements ServiceLoader {
   private static ServiceArtifactId extractServiceId(String pluginId)
       throws ServiceLoadingException {
     try {
-      return ServiceArtifactId.parseFrom(pluginId);
+      JavaArtifactNames.checkArtifactName(pluginId);
+      return ServiceArtifactId.newJavaId(pluginId);
     } catch (IllegalArgumentException e) {
-      throw new ServiceLoadingException(
-          String.format("Invalid plugin id (%s) is specified in service artifact metadata, "
-              + "must be in format 'groupId:artifactId:version'", pluginId));
+      String message = String.format(
+          "Invalid plugin id (%s) is specified in service artifact metadata", pluginId);
+      throw new ServiceLoadingException(message, e);
     }
   }
 
@@ -187,7 +190,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
   public void unloadService(ServiceArtifactId artifactId) {
     checkArgument(loadedServices.containsKey(artifactId), "No such artifactId: %s", artifactId);
 
-    String pluginId = artifactId.toString();
+    String pluginId = artifactId.getName();
     try {
       boolean stopped = pluginManager.unloadPlugin(pluginId);
       // The docs don't say why it may fail to stop the plugin.
@@ -195,6 +198,35 @@ final class Pf4jServiceLoader implements ServiceLoader {
       checkState(stopped, "Unknown error whilst unloading the plugin (%s)", pluginId);
     } finally {
       loadedServices.remove(artifactId);
+    }
+  }
+
+  @Override
+  public void unloadAll() {
+    // Unload the services. As it does not matter if there are strong refs to the classes
+    // loaded by the plugin classloaders (instances of a subclass of URLClassLoader) when
+    // they are closed, unload first, clear second.
+
+    // Unload the plugins
+    List<Exception> errors = new ArrayList<>();
+    for (ServiceArtifactId artifactId : loadedServices.keySet()) {
+      String pluginId = artifactId.getName();
+      try {
+        unloadPlugin(pluginId);
+      } catch (Exception e) {
+        errors.add(e);
+      }
+    }
+
+    // Clear the loaded services
+    loadedServices.clear();
+
+    // Communicate the errors, if any
+    if (!errors.isEmpty()) {
+      IllegalStateException e = new IllegalStateException(
+          "Failed to unload some plugins (see suppressed)");
+      errors.forEach(e::addSuppressed);
+      throw e;
     }
   }
 
