@@ -31,13 +31,12 @@ use exonum_merkledb::{
 
 use handle::{self, Handle};
 use storage::{
-    db::{Value, View, ViewRef},
+    db::{Key, Value, View, ViewRef},
     PairIter,
 };
 use utils;
 use JniResult;
 
-type Key = [u8; PROOF_MAP_KEY_SIZE];
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
 const JAVA_ENTRY_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
@@ -607,7 +606,6 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 
 fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
     let bytes = env.convert_byte_array(array)?;
-    assert_eq!(PROOF_MAP_KEY_SIZE, bytes.len());
 
     let mut key = Key::default();
     key.copy_from_slice(&bytes);
