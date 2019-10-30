@@ -24,9 +24,9 @@ import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import com.google.auto.value.AutoValue;
 
 /**
- * A service artifact identifier. It consist of the runtime id in which the service shall be
- * deployed and the three coordinates that usually identify any Java artifact: groupId, artifactId
- * and version.
+ * A service artifact identifier. It consists of the runtime id in which the service shall be
+ * deployed and the service artifact name. The name of Java artifacts usually contains the three
+ * coordinates identifying any Java artifact: groupId, artifactId and version.
  *
  * <p>The extensions of this class must be immutable and hence thread-safe.
  */
