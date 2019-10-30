@@ -53,6 +53,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
@@ -76,6 +77,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
           .withArtifactsDirectory(artifactsDirectory));
 
   @Test
+  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitForSingleServiceWithDefaultConfiguration() {
     // Deploy service that ignores configuration and should initialize correctly
     // with the default one
@@ -86,6 +88,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitWithBuilderForSingleService() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
@@ -97,6 +100,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitWithTwoServiceInstancesSameArtifact() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
@@ -233,6 +237,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitWithBuilderForMultipleDifferentServices() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
@@ -247,6 +252,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitWithTimeService() {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()
@@ -423,6 +429,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  @Disabled("Disabled until transaction results fix")
   void createBlockWithSingleTransaction(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     Block block = testKit.createBlockWithTransactions(message);
@@ -439,6 +446,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  @Disabled("Disabled until transaction results fix")
   void createBlockWithTransactions(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
@@ -451,6 +459,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  @Disabled("Disabled until transaction results fix")
   void createBlockWithTransactionsVarargs(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
@@ -554,6 +563,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
+  @Disabled("Disabled until TimeSchema DS support is complete")
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()
