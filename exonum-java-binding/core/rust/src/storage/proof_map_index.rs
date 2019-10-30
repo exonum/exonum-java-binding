@@ -14,7 +14,7 @@
 
 use jni::{
     objects::{JClass, JObject, JString},
-    sys::{jboolean, jbyteArray, jobject, jsize},
+    sys::{jarray, jboolean, jbyteArray, jobject, jsize},
     JNIEnv,
 };
 
@@ -24,7 +24,6 @@ use exonum::crypto::Hash;
 use exonum_merkledb::{
     proof_map_index::{
         MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
-        PROOF_MAP_KEY_SIZE,
     },
     Fork, ObjectHash, ProofMapIndex, Snapshot,
 };
@@ -194,7 +193,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-    keys: jbyteArray,
+    keys: jarray,
 ) -> jobject {
     let res = panic::catch_unwind(|| {
         let keys = convert_to_keys(&env, keys)?;
@@ -612,17 +611,15 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
     Ok(key)
 }
 
-fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
-    let bytes = env.convert_byte_array(array)?;
-    assert_eq!(bytes.len() % PROOF_MAP_KEY_SIZE, 0);
+fn convert_to_keys(env: &JNIEnv, array: jarray) -> JniResult<Vec<Key>> {
+    let num_keys = env.get_array_length(array)?;
 
-    let keys = bytes
-        .chunks(PROOF_MAP_KEY_SIZE)
-        .map(|bytes| {
-            let mut key = Key::default();
-            key.copy_from_slice(bytes);
-            key
-        })
-        .collect();
+    let mut keys = Vec::with_capacity(num_keys as usize);
+    for i in 0..num_keys {
+        let byte_arr: jbyteArray = env.get_object_array_element(array,i)?.into_inner();
+        let key = env.convert_byte_array(byte_arr)?;
+        keys.push(key);
+    }
+
     Ok(keys)
 }
