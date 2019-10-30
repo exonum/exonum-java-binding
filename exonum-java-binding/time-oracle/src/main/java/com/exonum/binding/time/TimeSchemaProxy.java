@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.core.runtime.RuntimeId;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -31,7 +32,7 @@ import java.time.ZonedDateTime;
 
 class TimeSchemaProxy implements TimeSchema {
 
-  private static final int RUST_RUNTIME_ID = 0;
+  private static final int RUST_RUNTIME_ID = RuntimeId.RUST.getId();
   private static final String EXONUM_TIME_ARTIFACT_NAME_PREFIX = "exonum-time:";
 
   private static final Serializer<PublicKey> PUBLIC_KEY_SERIALIZER =
