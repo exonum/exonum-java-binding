@@ -23,6 +23,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.messages.Runtime.InstanceSpec;
 
+// todo: Replace with dispatcher schema when testkit lands [ECR-3597]
 class RuntimeSchema {
 
   private final View view;
