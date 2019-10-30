@@ -157,7 +157,7 @@ public class ServiceRuntimeAdapter {
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    * @throws TransactionExecutionException if the transaction execution failed
-   * @see ServiceRuntime#executeTransaction(Integer, int, byte[], TransactionContext)
+   * @see ServiceRuntime#executeTransaction(int, int, byte[], Fork, HashCode, PublicKey)
    * @see com.exonum.binding.core.transaction.Transaction#execute(TransactionContext)
    */
   void executeTransaction(int serviceId, int txId, byte[] arguments,
@@ -168,13 +168,8 @@ public class ServiceRuntimeAdapter {
       Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
       HashCode hash = HashCode.fromBytes(txMessageHash);
       PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
-      TransactionContext context = TransactionContext.builder()
-          .fork(fork)
-          .txMessageHash(hash)
-          .authorPk(authorPk)
-          .build();
 
-      serviceRuntime.executeTransaction(serviceId, txId, arguments, context);
+      serviceRuntime.executeTransaction(serviceId, txId, arguments, fork, hash, authorPk);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
