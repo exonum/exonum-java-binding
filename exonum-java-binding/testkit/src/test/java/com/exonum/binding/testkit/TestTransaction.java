@@ -67,9 +67,7 @@ public final class TestTransaction implements Transaction {
 
   @Override
   public void execute(TransactionContext context) {
-    // TODO: put serviceId and serviceName into TransactionContext and use it when
-    //  creating TestSchema [ECR-3639]
-    TestSchema schema = new TestSchema(context.getFork(), 46);
+    TestSchema schema = new TestSchema(context.getFork(), context.getServiceId());
     ProofMapIndexProxy<HashCode, String> map = schema.testMap();
     map.put(getKey(), value);
   }
