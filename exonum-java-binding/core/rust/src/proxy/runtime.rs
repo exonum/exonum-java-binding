@@ -472,7 +472,7 @@ impl fmt::Display for JavaArtifactId {
 }
 
 #[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
-#[exonum(pb = "proto::ServiceStateHashes")]
+#[protobuf_convert(source = "proto::ServiceStateHashes")]
 struct ServiceStateHashes {
     instance_id: u32,
     state_hashes: Vec<Vec<u8>>,
@@ -489,8 +489,8 @@ impl From<&ServiceStateHashes> for (InstanceId, Vec<Hash>) {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
-#[exonum(pb = "proto::ServiceRuntimeStateHashes")]
+#[derive(Serialize, Deserialize, Clone, ProtobufConvert, BinaryValue, PartialEq)]
+#[protobuf_convert(source = "proto::ServiceRuntimeStateHashes")]
 struct ServiceRuntimeStateHashes {
     runtime_state_hashes: Vec<Vec<u8>>,
     service_state_hashes: Vec<ServiceStateHashes>,
