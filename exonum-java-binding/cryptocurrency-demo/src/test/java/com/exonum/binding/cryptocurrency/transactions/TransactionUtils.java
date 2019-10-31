@@ -21,68 +21,63 @@ import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.google.protobuf.ByteString;
 
 /**
  * Helper class to create transaction messages from raw transactions.
  */
-public class TransactionUtils {
+public final class TransactionUtils {
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
   static final long DEFAULT_INITIAL_BALANCE = 100L;
 
   /**
-   * Returns a CreateWalletTx transaction message with given default initial balance and signed
-   * with given owner key pair.
+   * Returns a CreateWalletTx transaction message with given default initial balance and
+   * service id and signed with given owner key pair.
    */
   static TransactionMessage newCreateWalletTransaction(
-      long initialBalance, KeyPair ownerKeyPair) {
-    RawTransaction rawTransaction = newCreateWalletRawTransaction(initialBalance);
-    return toTransactionMessage(rawTransaction, ownerKeyPair);
-  }
-
-  /**
-   * Creates new raw create wallet transaction with a given initial balance.
-   */
-  static RawTransaction newCreateWalletRawTransaction(long initialBalance) {
-    return RawTransaction.newBuilder()
-        .serviceId(CryptocurrencyService.ID)
+      long initialBalance, KeyPair ownerKeyPair, int serviceId) {
+    return TransactionMessage.builder()
+        .payload(createCreateWalletTxPayload(initialBalance))
+        .serviceId(serviceId)
         .transactionId(CreateWalletTx.ID)
-        .payload(TxMessageProtos.CreateWalletTx.newBuilder()
-            .setInitialBalance(initialBalance)
-            .build()
-            .toByteArray())
-        .build();
+        .sign(ownerKeyPair, CRYPTO_FUNCTION);
   }
 
   /**
-   * Returns a TransferTx transaction message with given seed, receiver key and transfer amount and
-   * signed with given owner key pair.
+   * Create a CreateWalletTx transaction payload with given initial balance.
+   */
+  static byte[] createCreateWalletTxPayload(long initialBalance) {
+    return TxMessageProtos.CreateWalletTx.newBuilder()
+        .setInitialBalance(initialBalance)
+        .build()
+        .toByteArray();
+  }
+
+  /**
+   * Returns a TransferTx transaction message with given seed, receiver key, transfer amount and
+   * service id and signed with given owner key pair.
    */
   static TransactionMessage newTransferTransaction(
-      long seed, KeyPair ownerKeyPair, PublicKey receiverKey, long sum) {
-    RawTransaction rawTransaction = newTransferRawTransaction(seed, sum, receiverKey);
-    return toTransactionMessage(rawTransaction, ownerKeyPair);
+      long seed, KeyPair ownerKeyPair, PublicKey receiverKey, long sum, int serviceId) {
+    return TransactionMessage.builder()
+        .payload(createTransferTxPayload(seed, receiverKey, sum))
+        .serviceId(serviceId)
+        .transactionId(CreateWalletTx.ID)
+        .sign(ownerKeyPair, CRYPTO_FUNCTION);
   }
 
   /**
-   * Creates a new raw transfer transaction message using the provided receiver key and amount.
+   * Create a TransferTx transaction payload with given seed, receiver key and sum.
    */
-  static RawTransaction newTransferRawTransaction(
-      long seed, long amount, PublicKey recipientId) {
-    return RawTransaction.newBuilder()
-        .serviceId(CryptocurrencyService.ID)
-        .transactionId(TransferTx.ID)
-        .payload(TxMessageProtos.TransferTx.newBuilder()
-            .setSeed(seed)
-            .setToWallet(fromPublicKey(recipientId))
-            .setSum(amount)
-            .build()
-            .toByteArray())
-        .build();
+  static byte[] createTransferTxPayload(long seed, PublicKey receiverKey, long sum) {
+    return TxMessageProtos.TransferTx.newBuilder()
+        .setSeed(seed)
+        .setToWallet(fromPublicKey(receiverKey))
+        .setSum(sum)
+        .build()
+        .toByteArray();
   }
 
   /**
@@ -90,19 +85,6 @@ public class TransactionUtils {
    */
   private static ByteString fromPublicKey(PublicKey k) {
     return ByteString.copyFrom(k.toBytes());
-  }
-
-  /**
-   * Given a {@code rawTransaction}, signs it using given key pair and returns a resulting
-   * transaction message.
-   */
-  private static TransactionMessage toTransactionMessage(
-      RawTransaction rawTransaction, KeyPair keyPair) {
-    return TransactionMessage.builder()
-        .serviceId(rawTransaction.getServiceId())
-        .transactionId(rawTransaction.getTransactionId())
-        .payload(rawTransaction.getPayload())
-        .sign(keyPair, CRYPTO_FUNCTION);
   }
 
   private TransactionUtils() {

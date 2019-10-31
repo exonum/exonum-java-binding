@@ -18,39 +18,16 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.cryptocurrency.CryptocurrencyService;
-
 final class TransactionPreconditions {
-
-  private static final short SERVICE_ID = CryptocurrencyService.ID;
 
   private TransactionPreconditions() {
     throw new AssertionError("Non-instantiable");
   }
 
-  static void checkTransaction(RawTransaction transaction, short expectedTxId) {
-    checkServiceId(transaction);
-    checkTransactionId(transaction, expectedTxId);
-  }
-
-  private static void checkServiceId(RawTransaction transaction) {
-    short serviceId = transaction.getServiceId();
-    checkArgument(
-        serviceId == SERVICE_ID,
-        "Transaction (%s) does not belong to this service: wrong service ID (%s), must be %s",
-        transaction,
-        serviceId,
-        SERVICE_ID);
-  }
-
-  private static void checkTransactionId(
-      RawTransaction transaction, short expectedTxId) {
-    short txId = transaction.getTransactionId();
+  static void checkTransactionId(int txId, int expectedTxId) {
     checkArgument(
         txId == expectedTxId,
-        "Transaction (%s) has wrong transaction ID (%s), must be %s",
-        transaction,
+        "Transaction has wrong transaction ID (%s), must be %s",
         txId,
         expectedTxId);
   }

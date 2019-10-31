@@ -23,6 +23,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
@@ -30,6 +31,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
+import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.ext.web.Router;
 import java.util.List;
@@ -42,9 +44,15 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   @Nullable private Node node;
 
+  private final String serviceInstanceName;
+
+  @Inject
+  CryptocurrencyServiceImpl(ServiceInstanceSpec serviceSpec) {
+    this.serviceInstanceName = serviceSpec.getName();
+  }
   @Override
   protected Schema createDataSchema(View view) {
-    return new CryptocurrencySchema(view);
+    return new CryptocurrencySchema(view, serviceInstanceName);
   }
 
   @Override
@@ -61,7 +69,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      CryptocurrencySchema schema = new CryptocurrencySchema(view, serviceInstanceName);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       return Optional.ofNullable(wallets.get(ownerKey));
@@ -73,7 +81,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkBlockchainInitialized();
 
     return node.withSnapshot(view -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      CryptocurrencySchema schema = new CryptocurrencySchema(view, serviceInstanceName);
       ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();

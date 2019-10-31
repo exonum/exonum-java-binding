@@ -16,44 +16,29 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.exonum.binding.core.service.TransactionConverter;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.cryptocurrency.CryptocurrencyService;
 import com.google.common.collect.ImmutableMap;
-import java.util.function.Function;
+
+import java.util.function.BiFunction;
 
 /** A converter of cryptocurrency service transaction messages. */
 public final class CryptocurrencyTransactionConverter implements TransactionConverter {
 
-  private static final ImmutableMap<Short, Function<RawTransaction, Transaction>>
+  private static final ImmutableMap<Integer, BiFunction<Integer, byte[], Transaction>>
       TRANSACTION_FACTORIES =
-          ImmutableMap.of(
-              CreateWalletTx.ID, CreateWalletTx::fromRawTransaction,
-              TransferTx.ID, TransferTx::fromRawTransaction);
+      ImmutableMap.of(
+          CreateWalletTx.ID, CreateWalletTx::from,
+          TransferTx.ID, TransferTx::from);
 
   @Override
-  public Transaction toTransaction(RawTransaction rawTransaction) {
-    checkServiceId(rawTransaction);
-
-    short txId = rawTransaction.getTransactionId();
+  public Transaction toTransaction(int txId, byte[] arguments) {
     return TRANSACTION_FACTORIES
         .getOrDefault(
             txId,
-            (m) -> {
+            (t, a) -> {
               throw new IllegalArgumentException("Unknown transaction id: " + txId);
             })
-        .apply(rawTransaction);
-  }
-
-  private static void checkServiceId(RawTransaction rawTransaction) {
-    short serviceId = rawTransaction.getServiceId();
-    checkArgument(
-        serviceId == CryptocurrencyService.ID,
-        "Wrong service id (%s), must be %s",
-        serviceId,
-        CryptocurrencyService.ID);
+        .apply(txId, arguments);
   }
 }

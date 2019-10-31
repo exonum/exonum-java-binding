@@ -36,12 +36,13 @@ import java.util.List;
 public final class CryptocurrencySchema implements Schema {
 
   /** A namespace of cryptocurrency service collections. */
-  private static final String NAMESPACE = CryptocurrencyService.NAME.replace('-', '_');
+  private final String namespace;
 
   private final View view;
 
-  public CryptocurrencySchema(View view) {
+  public CryptocurrencySchema(View view, String serviceName) {
     this.view = checkNotNull(view);
+    this.namespace = "cryptocurrency_service_namespace." + serviceName + ".";
   }
 
   @Override
@@ -72,7 +73,7 @@ public final class CryptocurrencySchema implements Schema {
         StandardSerializers.hash());
   }
 
-  private static String fullIndexName(String name) {
-    return NAMESPACE + "__" + name;
+  private String fullIndexName(String name) {
+    return namespace + name;
   }
 }
