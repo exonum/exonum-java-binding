@@ -19,7 +19,6 @@ package com.exonum.binding.cryptocurrency.transactions;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.transaction.Transaction;
 import com.google.common.collect.ImmutableMap;
-
 import java.util.function.BiFunction;
 
 /** A converter of cryptocurrency service transaction messages. */

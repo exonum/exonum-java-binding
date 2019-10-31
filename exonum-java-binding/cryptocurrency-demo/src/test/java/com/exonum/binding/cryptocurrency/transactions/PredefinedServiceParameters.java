@@ -17,7 +17,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.core.runtime.ServiceArtifactId;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -25,7 +24,7 @@ import java.nio.file.Paths;
  * Predefined service parameters used by TestKit in integration tests.
  */
 public final class PredefinedServiceParameters {
-  // TODO: review these values
+  // TODO: fix these parameters
   public static final String ARTIFACT_FILENAME =
       "exonum-java-binding-cryptocurrency-demo-0.9.0-SNAPSHOT-artifact.jar";
   public static final ServiceArtifactId ARTIFACT_ID =

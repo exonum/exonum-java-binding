@@ -33,7 +33,7 @@ public final class TransactionUtils {
   static final long DEFAULT_INITIAL_BALANCE = 100L;
 
   /**
-   * Returns a CreateWalletTx transaction message with given default initial balance and
+   * Returns a CreateWalletTx transaction message with a given default initial balance and
    * service id and signed with given owner key pair.
    */
   static TransactionMessage newCreateWalletTransaction(
@@ -46,7 +46,7 @@ public final class TransactionUtils {
   }
 
   /**
-   * Create a CreateWalletTx transaction payload with given initial balance.
+   * Creates a CreateWalletTx transaction payload with a given initial balance.
    */
   static byte[] createCreateWalletTxPayload(long initialBalance) {
     return TxMessageProtos.CreateWalletTx.newBuilder()
@@ -56,7 +56,7 @@ public final class TransactionUtils {
   }
 
   /**
-   * Returns a TransferTx transaction message with given seed, receiver key, transfer amount and
+   * Returns a TransferTx transaction message with a given seed, receiver key, transfer amount and
    * service id and signed with given owner key pair.
    */
   static TransactionMessage newTransferTransaction(
@@ -69,7 +69,7 @@ public final class TransactionUtils {
   }
 
   /**
-   * Create a TransferTx transaction payload with given seed, receiver key and sum.
+   * Creates a TransferTx transaction payload with a given seed, receiver key and sum.
    */
   static byte[] createTransferTxPayload(long seed, PublicKey receiverKey, long sum) {
     return TxMessageProtos.TransferTx.newBuilder()
