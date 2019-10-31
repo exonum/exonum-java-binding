@@ -19,7 +19,7 @@ exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocks
 exonum-time = "0.12"
 exonum-testkit = "0.12"
 chrono = "0.4.9"
-failure = "0.1.1"
+failure = "0.1.6"
 toml = "0.5"
 jni = { version = "0.13.1", features = ["invocation"] }
 lazy_static = "1.3.0"
