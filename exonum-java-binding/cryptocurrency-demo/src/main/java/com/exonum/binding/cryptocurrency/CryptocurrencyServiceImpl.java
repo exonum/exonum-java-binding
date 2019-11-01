@@ -50,6 +50,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   CryptocurrencyServiceImpl(ServiceInstanceSpec serviceSpec) {
     this.serviceInstanceName = serviceSpec.getName();
   }
+
   @Override
   protected Schema createDataSchema(View view) {
     return new CryptocurrencySchema(view, serviceInstanceName);

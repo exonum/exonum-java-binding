@@ -24,15 +24,12 @@ import java.nio.file.Paths;
  * Predefined service parameters used by TestKit in integration tests.
  */
 public final class PredefinedServiceParameters {
-  // TODO: fix these parameters
-  public static final String ARTIFACT_FILENAME =
-      "exonum-java-binding-cryptocurrency-demo-0.9.0-SNAPSHOT-artifact.jar";
+  public static final String ARTIFACT_FILENAME = System.getProperty("it.artifactFilename");
   public static final ServiceArtifactId ARTIFACT_ID =
-      ServiceArtifactId.newJavaId(
-          "com.exonum.binding:exonum-java-binding-cryptocurrency-demo:0.9.0-SNAPSHOT");
-  public static final String SERVICE_NAME = "cryptocurrency-service";
-  public static final int SERVICE_ID = 46;
-  public static Path artifactsDirectory = Paths.get("target");
+      ServiceArtifactId.newJavaId(System.getProperty("it.artifactId"));
+  public static final String SERVICE_NAME = System.getProperty("it.serviceName");
+  public static final int SERVICE_ID = Integer.parseInt(System.getProperty("it.serviceId"));
+  public static Path artifactsDirectory = Paths.get(System.getProperty("it.artifactsDirectory"));
 
   private PredefinedServiceParameters() {}
 }

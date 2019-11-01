@@ -64,7 +64,7 @@ public final class TransactionUtils {
     return TransactionMessage.builder()
         .payload(createTransferTxPayload(seed, receiverKey, sum))
         .serviceId(serviceId)
-        .transactionId(CreateWalletTx.ID)
+        .transactionId(TransferTx.ID)
         .sign(ownerKeyPair, CRYPTO_FUNCTION);
   }
 
