@@ -31,6 +31,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.messages.Runtime.ArtifactId;
 import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
 import org.apache.logging.log4j.LogManager;
@@ -42,16 +43,23 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>For more detailed documentation on the operations, see the {@link ServiceRuntime}.
  */
-@SuppressWarnings({"unused", "SameParameterValue"}) // Native API
 public class ServiceRuntimeAdapter {
 
   private final ServiceRuntime serviceRuntime;
   private final ViewFactory viewFactory;
   private static final Logger logger = LogManager.getLogger(ServiceRuntimeAdapter.class);
 
+  @Inject
   public ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
     this.serviceRuntime = serviceRuntime;
     this.viewFactory = viewFactory;
+  }
+
+  /**
+   * Returns the corresponding service runtime.
+   */
+  public ServiceRuntime getServiceRuntime() {
+    return serviceRuntime;
   }
 
   /**
