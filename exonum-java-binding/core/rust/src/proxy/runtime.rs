@@ -306,8 +306,8 @@ impl Runtime for JavaRuntimeProxy {
                 let tx_id = call_info.method_id as i32;
                 let args = JObject::from(env.byte_array_from_slice(arguments)?);
                 let view_handle = to_handle(View::from_ref_fork(context.fork));
-                let pub_key = JObject::from(env.byte_array_from_slice(&tx.0)?);
-                let hash = JObject::from(env.byte_array_from_slice(&tx.1)?);
+                let hash = JObject::from(env.byte_array_from_slice(&tx.0)?);
+                let pub_key = JObject::from(env.byte_array_from_slice(&tx.1)?);
 
                 env.call_method_unchecked(
                     self.runtime_adapter.as_obj(),
@@ -318,8 +318,8 @@ impl Runtime for JavaRuntimeProxy {
                         JValue::from(tx_id),
                         JValue::from(args),
                         JValue::from(view_handle),
-                        JValue::from(pub_key),
                         JValue::from(hash),
+                        JValue::from(pub_key),
                     ],
                 )
                 .and_then(JValue::v)
