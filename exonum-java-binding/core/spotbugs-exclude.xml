@@ -16,7 +16,7 @@
        is resolved to a platform-dependent value. -->
   <Match>
     <Class name="~.*ServiceWrapper"/>
-    <Method name="executeTransaction"/>
+    <Method name="convertTransaction"/>
     <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
   </Match>
 
