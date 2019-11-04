@@ -31,6 +31,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.messages.Runtime.ArtifactId;
 import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
 import org.apache.logging.log4j.LogManager;
@@ -42,16 +43,23 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>For more detailed documentation on the operations, see the {@link ServiceRuntime}.
  */
-@SuppressWarnings({"unused", "SameParameterValue"}) // Native API
 public class ServiceRuntimeAdapter {
 
   private final ServiceRuntime serviceRuntime;
   private final ViewFactory viewFactory;
   private static final Logger logger = LogManager.getLogger(ServiceRuntimeAdapter.class);
 
+  @Inject
   public ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
     this.serviceRuntime = serviceRuntime;
     this.viewFactory = viewFactory;
+  }
+
+  /**
+   * Returns the corresponding service runtime.
+   */
+  public ServiceRuntime getServiceRuntime() {
+    return serviceRuntime;
   }
 
   /**
@@ -149,7 +157,7 @@ public class ServiceRuntimeAdapter {
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    * @throws TransactionExecutionException if the transaction execution failed
-   * @see ServiceRuntime#executeTransaction(Integer, int, byte[], TransactionContext)
+   * @see ServiceRuntime#executeTransaction(int, int, byte[], Fork, HashCode, PublicKey)
    * @see com.exonum.binding.core.transaction.Transaction#execute(TransactionContext)
    */
   void executeTransaction(int serviceId, int txId, byte[] arguments,
@@ -160,13 +168,8 @@ public class ServiceRuntimeAdapter {
       Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
       HashCode hash = HashCode.fromBytes(txMessageHash);
       PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
-      TransactionContext context = TransactionContext.builder()
-          .fork(fork)
-          .txMessageHash(hash)
-          .authorPk(authorPk)
-          .build();
 
-      serviceRuntime.executeTransaction(serviceId, txId, arguments, context);
+      serviceRuntime.executeTransaction(serviceId, txId, arguments, fork, hash, authorPk);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
