@@ -17,7 +17,7 @@ from typing import Dict, Any
 from exonum_launcher.runtimes.runtime import RuntimeSpecLoader
 
 try:
-    from .proto import service_runtime_pb2
+    from .proto import deploy_arguments_pb2
 except (ModuleNotFoundError, ImportError):
     raise RuntimeError("Protobuf definition is not found")
 
@@ -26,7 +26,7 @@ class JavaDeploySpecLoader(RuntimeSpecLoader):
     """Artifact spec encoder for Java runtime"""
 
     def encode_spec(self, config: Dict[str, Any]) -> bytes:
-        spec = service_runtime_pb2.DeployArguments()
+        spec = deploy_arguments_pb2.DeployArguments()
 
         spec.artifact_filename = config["artifact_filename"]
 
