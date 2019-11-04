@@ -22,8 +22,8 @@ import static com.exonum.binding.common.message.ByteStringFunnel.byteStringFunne
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.messages.Consensus;
-import com.exonum.binding.messages.Consensus.ExonumMessage;
+import com.exonum.core.messages.Consensus;
+import com.exonum.core.messages.Consensus.ExonumMessage;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 

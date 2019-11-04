@@ -18,9 +18,9 @@ package com.exonum.binding.common.blockchain;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.messages.Runtime.ExecutionError2;
-import com.exonum.binding.messages.Runtime.ExecutionError2.ErrorKind;
-import com.exonum.binding.messages.Runtime.ExecutionStatus;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.protobuf.Empty;
 
 /**
@@ -65,7 +65,7 @@ public final class ExecutionStatuses {
   public static ExecutionStatus serviceError(int code, String description) {
     checkArgument(0 <= code, "Error code (%s) must be non-negative", code);
     return ExecutionStatus.newBuilder()
-        .setError(ExecutionError2.newBuilder()
+        .setError(ExecutionError.newBuilder()
             .setKind(ErrorKind.SERVICE)
             .setCode(code)
             .setDescription(description))

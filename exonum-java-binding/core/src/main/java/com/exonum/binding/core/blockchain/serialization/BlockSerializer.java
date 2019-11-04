@@ -22,9 +22,9 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
-import com.exonum.binding.messages.Blockchain;
-import com.exonum.binding.messages.Helpers;
-import com.exonum.binding.messages.Helpers.Hash;
+import com.exonum.core.messages.Blockchain;
+import com.exonum.core.messages.Types;
+import com.exonum.core.messages.Types.Hash;
 import com.google.protobuf.ByteString;
 
 public enum BlockSerializer implements Serializer<Block> {
@@ -61,9 +61,9 @@ public enum BlockSerializer implements Serializer<Block> {
         .build();
   }
 
-  private static Helpers.Hash toHashProto(HashCode hash) {
+  private static Types.Hash toHashProto(HashCode hash) {
     ByteString bytes = ByteString.copyFrom(hash.asBytes());
-    return Helpers.Hash.newBuilder()
+    return Types.Hash.newBuilder()
         .setData(bytes)
         .build();
   }

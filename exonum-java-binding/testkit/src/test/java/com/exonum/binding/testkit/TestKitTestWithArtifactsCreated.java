@@ -22,7 +22,7 @@ import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.InstanceSpec;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import java.io.IOException;

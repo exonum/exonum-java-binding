@@ -27,8 +27,8 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.messages.Blockchain.Config;
-import com.exonum.binding.messages.Runtime.ExecutionStatus;
+import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
 

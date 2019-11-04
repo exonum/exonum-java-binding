@@ -20,8 +20,8 @@ import static com.exonum.binding.common.serialization.StandardSerializers.protob
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.messages.Blockchain;
-import com.exonum.binding.messages.Blockchain.TxLocation;
+import com.exonum.core.messages.Blockchain;
+import com.exonum.core.messages.Blockchain.TxLocation;
 
 public enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
   INSTANCE;

@@ -19,7 +19,7 @@ package com.exonum.binding.qaservice;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.messages.Blockchain.Config;
+import com.exonum.core.messages.Blockchain.Config;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;

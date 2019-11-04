@@ -18,7 +18,7 @@ package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.Blockchain;
-import com.exonum.binding.messages.Runtime.ExecutionStatus;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import javax.annotation.Nullable;
 
 /**

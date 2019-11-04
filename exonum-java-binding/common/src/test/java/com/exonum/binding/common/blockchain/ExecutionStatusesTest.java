@@ -21,9 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import com.exonum.binding.messages.Runtime.ExecutionError2;
-import com.exonum.binding.messages.Runtime.ExecutionError2.ErrorKind;
-import com.exonum.binding.messages.Runtime.ExecutionStatus;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class ExecutionStatusesTest {
     ExecutionStatus s = ExecutionStatuses.serviceError(code, description);
 
     assertTrue(s.hasError());
-    ExecutionError2 error = s.getError();
+    ExecutionError error = s.getError();
     assertThat(error.getKind()).isEqualTo(ErrorKind.SERVICE);
     assertThat(error.getCode()).isEqualTo(code);
     assertThat(error.getDescription()).isEqualTo(description);

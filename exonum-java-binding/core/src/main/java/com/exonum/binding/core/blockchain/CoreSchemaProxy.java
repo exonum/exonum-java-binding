@@ -40,8 +40,8 @@ import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.exonum.binding.messages.Blockchain.Config;
-import com.exonum.binding.messages.Runtime.ExecutionStatus;
+import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 

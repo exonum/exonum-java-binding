@@ -32,9 +32,9 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.messages.Runtime.ExecutionError2;
-import com.exonum.binding.messages.Runtime.ExecutionError2.ErrorKind;
-import com.exonum.binding.messages.Runtime.ExecutionStatus;
+import com.exonum.core.messages.Runtime.ExecutionError;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.QaServiceModule;
@@ -89,7 +89,7 @@ class ThrowingTxIntegrationTest {
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
     ExecutionStatus expectedTxResult = ExecutionStatus.newBuilder()
-        .setError(ExecutionError2.newBuilder()
+        .setError(ExecutionError.newBuilder()
             .setKind(ErrorKind.RUNTIME) // fixme: the actual kind is not yet known: ECR-3588
             .setDescription("#execute of this transaction always throws")
             .build())
