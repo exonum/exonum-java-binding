@@ -21,11 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import java.util.function.Consumer;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class TestKitParameterizationTest {
+class TestKitParameterizationTest extends TestKitTestWithArtifactsCreated {
 
   private static final short TEMPLATE_VALIDATOR_COUNT = 1;
   private static final EmulatedNodeType TEMPLATE_NODE_TYPE = EmulatedNodeType.VALIDATOR;
@@ -35,8 +34,10 @@ class TestKitParameterizationTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withNodeType(TEMPLATE_NODE_TYPE)
-          .withService(TestServiceModule.class)
-          .withValidators(TEMPLATE_VALIDATOR_COUNT));
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+          .withValidators(TEMPLATE_VALIDATOR_COUNT)
+          .withArtifactsDirectory(artifactsDirectory));
 
   @Test
   void testDefaultTestKit(TestKit testKit) {
@@ -59,7 +60,7 @@ class TestKitParameterizationTest {
   private static Consumer<Snapshot> verifyNumValidators(int expected) {
     return (view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
+      assertThat(blockchain.getConsensusConfiguration().getValidatorKeysCount())
           .isEqualTo(expected);
     };
   }

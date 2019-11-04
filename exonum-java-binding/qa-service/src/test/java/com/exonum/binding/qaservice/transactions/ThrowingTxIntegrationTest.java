@@ -129,6 +129,7 @@ class ThrowingTxIntegrationTest {
       ThrowingTx tx = new ThrowingTx(0L);
 
       // Execute the transaction
+      // TODO: use service name and service id when creating TransactionContext
       TransactionContext context = newContext(view);
       IllegalStateException expected = assertThrows(IllegalStateException.class,
           () -> tx.execute(context));

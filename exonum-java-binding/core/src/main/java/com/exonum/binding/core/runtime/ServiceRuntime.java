@@ -22,7 +22,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
@@ -246,18 +248,27 @@ public final class ServiceRuntime implements AutoCloseable {
 
   /**
    * Executes a transaction belonging to the given service.
-   *
    * @param serviceId the numeric identifier of the service instance to which the transaction
    *     belongs
    * @param txId the transaction type identifier
    * @param arguments the serialized transaction arguments
-   * @param context the transaction execution context
+   * @param fork a native fork object
+   * @param txMessageHash the hash of the transaction message
+   * @param authorPublicKey the public key of the transaction author
    */
-  public void executeTransaction(Integer serviceId, int txId, byte[] arguments,
-      TransactionContext context) throws TransactionExecutionException {
+  public void executeTransaction(int serviceId, int txId, byte[] arguments,
+                                 Fork fork, HashCode txMessageHash, PublicKey authorPublicKey)
+      throws TransactionExecutionException {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
-
+      String serviceName = service.getName();
+      TransactionContext context = TransactionContext.builder()
+          .fork(fork)
+          .txMessageHash(txMessageHash)
+          .authorPk(authorPublicKey)
+          .serviceName(serviceName)
+          .serviceId(serviceId)
+          .build();
       try {
         service.executeTransaction(txId, arguments, context);
       } catch (Exception e) {
@@ -369,6 +380,26 @@ public final class ServiceRuntime implements AutoCloseable {
       for (Integer serviceId : serviceIds) {
         connectServiceApi(serviceId, node);
       }
+    }
+  }
+
+  /**
+   * Verifies that an Exonum raw transaction can be correctly converted to an executable
+   * transaction of given service.
+   *
+   * @param serviceId the id of the service
+   * @param txId the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}
+   *     within the service
+   * @param arguments the {@linkplain TransactionMessage#getPayload() serialized transaction
+   *     arguments}
+   * @throws IllegalArgumentException if there is no service with such id in this runtime, or if
+   *     the transaction is not known to the service, or the arguments are not valid: e.g., cannot
+   *     be deserialized, or do not meet the preconditions
+   */
+  public void verifyTransaction(int serviceId, int txId, byte[] arguments) {
+    synchronized (lock) {
+      ServiceWrapper service = getServiceById(serviceId);
+      service.convertTransaction(txId, arguments);
     }
   }
 

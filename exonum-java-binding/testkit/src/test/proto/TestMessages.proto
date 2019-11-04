@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_package = "com.exonum.binding.testkit";
+option java_outer_classname = "TestProtoMessages";
+
+message TestConfiguration {
+  string value = 1;
+}

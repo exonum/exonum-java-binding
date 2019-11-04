@@ -149,6 +149,7 @@ class ErrorTxIntegrationTest {
       ErrorTx tx = new ErrorTx(0L, errorCode, "Foo");
 
       // Execute the transaction
+      // TODO: use service name and service id when creating TransactionContext
       TransactionContext context = newContext(view);
       assertThrows(TransactionExecutionException.class, () -> tx.execute(context));
 

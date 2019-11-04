@@ -21,13 +21,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class TestKitAuditorParameterizationTest {
+class TestKitAuditorParameterizationTest extends TestKitTestWithArtifactsCreated {
 
   @RegisterExtension
   TestKitExtension testKitAuditorExtension = new TestKitExtension(
       TestKit.builder()
           .withNodeType(EmulatedNodeType.AUDITOR)
-          .withService(TestServiceModule.class));
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+          .withArtifactsDirectory(artifactsDirectory));
 
   @Test
   void testTestKitValidator(@Validator TestKit testKit) {

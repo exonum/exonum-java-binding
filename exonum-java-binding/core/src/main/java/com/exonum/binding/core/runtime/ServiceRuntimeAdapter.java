@@ -20,7 +20,6 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments;
 import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
@@ -30,7 +29,9 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.binding.messages.Runtime.ArtifactId;
 import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
 import org.apache.logging.log4j.LogManager;
@@ -42,50 +43,58 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>For more detailed documentation on the operations, see the {@link ServiceRuntime}.
  */
-@SuppressWarnings({"unused", "SameParameterValue"}) // Native API
 public class ServiceRuntimeAdapter {
 
   private final ServiceRuntime serviceRuntime;
   private final ViewFactory viewFactory;
   private static final Logger logger = LogManager.getLogger(ServiceRuntimeAdapter.class);
 
+  @Inject
   public ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
     this.serviceRuntime = serviceRuntime;
     this.viewFactory = viewFactory;
   }
 
   /**
+   * Returns the corresponding service runtime.
+   */
+  public ServiceRuntime getServiceRuntime() {
+    return serviceRuntime;
+  }
+
+  /**
    * Deploys the Java service artifact.
    *
-   * @param id the service artifact id in format "groupId:artifactId:version"
+   * @param name the Java service artifact name in format "groupId:artifactId:version"
    * @param deploySpec the deploy specification as a serialized
-   *     {@link com.exonum.binding.core.runtime.ServiceRuntimeProtos.DeployArguments}
+   *     {@link com.exonum.binding.core.runtime.DeployArguments}
    *     protobuf message
    * @throws IllegalArgumentException if the deploy specification or id are not valid
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
    * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
    */
-  void deployArtifact(String id, byte[] deploySpec) throws ServiceLoadingException {
-    DeployArguments deployArguments = parseDeployArgs(id, deploySpec);
+  void deployArtifact(String name, byte[] deploySpec) throws ServiceLoadingException {
+    DeployArguments deployArguments = parseDeployArgs(name, deploySpec);
     String artifactFilename = deployArguments.getArtifactFilename();
 
-    serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), artifactFilename);
+    serviceRuntime.deployArtifact(ServiceArtifactId.newJavaId(name), artifactFilename);
   }
 
   /**
-   * Returns true if the artifact with the given id is deployed in this runtime; false — otherwise.
-   * @param id the service artifact id in format "groupId:artifactId:version"
+   * Returns true if the artifact with the given name is deployed in this runtime;
+   * false — otherwise.
+   * @param name the service artifact name in format "groupId:artifactId:version"
    */
-  boolean isArtifactDeployed(String id) {
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom(id);
+  boolean isArtifactDeployed(String name) {
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId(name);
     return serviceRuntime.isArtifactDeployed(artifactId);
   }
 
-  private static DeployArguments parseDeployArgs(String id, byte[] deploySpec) {
+  private static DeployArguments parseDeployArgs(String name, byte[] deploySpec) {
     try {
       return DeployArguments.parseFrom(deploySpec);
     } catch (InvalidProtocolBufferException e) {
-      String message = "Invalid deploy specification for " + id;
+      String message = "Invalid deploy specification for " + name;
       logger.error(message, e);
       throw new IllegalArgumentException(message, e);
     }
@@ -128,8 +137,10 @@ public class ServiceRuntimeAdapter {
   private static ServiceInstanceSpec parseInstanceSpec(byte[] instanceSpec) {
     try {
       InstanceSpec spec = InstanceSpec.parseFrom(instanceSpec);
-      return ServiceInstanceSpec.newInstance(spec.getName(), spec.getId(),
-          ServiceArtifactId.parseFrom(spec.getArtifact().getName()));
+      ArtifactId artifact = spec.getArtifact();
+      ServiceArtifactId artifactId = ServiceArtifactId.valueOf(artifact.getRuntimeId(),
+          artifact.getName());
+      return ServiceInstanceSpec.newInstance(spec.getName(), spec.getId(), artifactId);
     } catch (InvalidProtocolBufferException e) {
       logger.error(e);
       throw new IllegalArgumentException(e);
@@ -146,7 +157,7 @@ public class ServiceRuntimeAdapter {
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    * @throws TransactionExecutionException if the transaction execution failed
-   * @see ServiceRuntime#executeTransaction(Integer, int, byte[], TransactionContext)
+   * @see ServiceRuntime#executeTransaction(int, int, byte[], Fork, HashCode, PublicKey)
    * @see com.exonum.binding.core.transaction.Transaction#execute(TransactionContext)
    */
   void executeTransaction(int serviceId, int txId, byte[] arguments,
@@ -157,13 +168,8 @@ public class ServiceRuntimeAdapter {
       Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
       HashCode hash = HashCode.fromBytes(txMessageHash);
       PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
-      TransactionContext context = TransactionContext.builder()
-          .fork(fork)
-          .txMessageHash(hash)
-          .authorPk(authorPk)
-          .build();
 
-      serviceRuntime.executeTransaction(serviceId, txId, arguments, context);
+      serviceRuntime.executeTransaction(serviceId, txId, arguments, fork, hash, authorPk);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }

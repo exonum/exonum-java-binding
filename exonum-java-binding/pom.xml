@@ -134,6 +134,7 @@
     <!-- Default build mode is `debug`, can also be `release`. Usually controlled
          by the packaging script (package_app.sh), but can also be set from the CLI -->
     <build.mode>debug</build.mode>
+    <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -562,6 +563,7 @@
                 <exclude>**/TxMessageProtos*</exclude>
                 <exclude>**/WalletProtos*</exclude>
                 <exclude>**/ServiceRuntimeProtos*</exclude>
+                <exclude>**/DeployArguments*</exclude>
                 <exclude>com/exonum/binding/messages/*</exclude>
               </excludes>
             </configuration>

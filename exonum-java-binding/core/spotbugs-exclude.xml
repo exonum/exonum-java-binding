@@ -16,12 +16,13 @@
        is resolved to a platform-dependent value. -->
   <Match>
     <Class name="~.*ServiceWrapper"/>
-    <Method name="executeTransaction"/>
+    <Method name="convertTransaction"/>
     <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
   </Match>
 
   <!-- Exclude the auto-generated files.
-       Remove the rules below once https://github.com/spotbugs/spotbugs/issues/694 is resolved. -->
+       Remove the rules below once https://github.com/spotbugs/spotbugs/issues/694 is resolved
+       and released (targets 4.0.0). -->
 
   <!-- It is good, hashCode is specified in the parent, which is *the* way
        to configure it in AutoValue -->
@@ -38,5 +39,8 @@
   <!--  Auto-generated Protobuf-messages -->
   <Match>
     <Source name="~.*ServiceRuntimeProtos\.java"/>
+  </Match>
+  <Match>
+    <Source name="~.*DeployArguments\.java"/>
   </Match>
 </FindBugsFilter>

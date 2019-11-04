@@ -306,8 +306,8 @@ impl Runtime for JavaRuntimeProxy {
                 let tx_id = call_info.method_id as i32;
                 let args = JObject::from(env.byte_array_from_slice(arguments)?);
                 let view_handle = to_handle(View::from_ref_fork(context.fork));
-                let pub_key = JObject::from(env.byte_array_from_slice(&tx.0)?);
-                let hash = JObject::from(env.byte_array_from_slice(&tx.1)?);
+                let hash = JObject::from(env.byte_array_from_slice(&tx.0)?);
+                let pub_key = JObject::from(env.byte_array_from_slice(&tx.1)?);
 
                 env.call_method_unchecked(
                     self.runtime_adapter.as_obj(),
@@ -318,8 +318,8 @@ impl Runtime for JavaRuntimeProxy {
                         JValue::from(tx_id),
                         JValue::from(args),
                         JValue::from(view_handle),
-                        JValue::from(pub_key),
                         JValue::from(hash),
+                        JValue::from(pub_key),
                     ],
                 )
                 .and_then(JValue::v)
@@ -472,7 +472,7 @@ impl fmt::Display for JavaArtifactId {
 }
 
 #[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
-#[exonum(pb = "proto::ServiceStateHashes")]
+#[protobuf_convert(source = "proto::ServiceStateHashes")]
 struct ServiceStateHashes {
     instance_id: u32,
     state_hashes: Vec<Vec<u8>>,
@@ -489,8 +489,8 @@ impl From<&ServiceStateHashes> for (InstanceId, Vec<Hash>) {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
-#[exonum(pb = "proto::ServiceRuntimeStateHashes")]
+#[derive(Serialize, Deserialize, Clone, ProtobufConvert, BinaryValue, PartialEq)]
+#[protobuf_convert(source = "proto::ServiceRuntimeStateHashes")]
 struct ServiceRuntimeStateHashes {
     runtime_state_hashes: Vec<Vec<u8>>,
     service_state_hashes: Vec<ServiceStateHashes>,

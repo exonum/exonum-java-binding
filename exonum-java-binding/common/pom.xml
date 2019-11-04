@@ -147,6 +147,7 @@
             </goals>
             <configuration>
               <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+              <protoSourceRoot>${basedir}/src/main/proto/src</protoSourceRoot>
             </configuration>
           </execution>
         </executions>
@@ -215,7 +216,7 @@
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-        <version>1.6.2</version>
+        <version>${os-maven-plugin.version}</version>
       </extension>
     </extensions>
   </build>
