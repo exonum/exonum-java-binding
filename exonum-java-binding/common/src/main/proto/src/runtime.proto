@@ -16,7 +16,7 @@ syntax = "proto3";
 
 package exonum.runtime;
 
-option java_package = "com.exonum.binding.messages";
+option java_package = "com.exonum.core.messages";
 
 import "blockchain.proto";
 import "google/protobuf/empty.proto";
@@ -40,45 +40,40 @@ message ArtifactId {
   string name = 2;
 }
 
+message ArtifactSpec {
+  ArtifactId artifact = 1;
+  bytes payload = 2;
+}
+
 message InstanceSpec {
   uint32 id = 1;
   string name = 2;
   ArtifactId artifact = 3;
 }
 
-/// Result of unsuccessful runtime execution.
+// The kind of ExecutionError.
+enum ErrorKind {
+  PANIC = 0;
+  DISPATCHER = 1;
+  RUNTIME = 2;
+  SERVICE = 3;
+}
+
+// Result of unsuccessful runtime execution.
 message ExecutionError {
-  /// The kind of error that indicates in which module the error occurred.
-  uint32 kind = 1;
-  /// User defined error code that can have different meanings for the different
-  /// error kinds.
+  // The kind of error that indicates in which module the error occurred.
+  ErrorKind kind = 1;
+  // User defined error code that can have different meanings for the different
+  // error kinds.
   uint32 code = 2;
-  /// Optional description which doesn't affect `object_hash`.
+  // Optional description which doesn't affect `object_hash`.
   string description = 3;
 }
 
-/// Result of runtime execution.
+// Result of runtime execution.
 message ExecutionStatus {
   oneof result {
     google.protobuf.Empty ok = 1;
     ExecutionError error = 2;
-  }
-}
-
-// Configuration parameters of the certain service instance.
-message ServiceConfig {
-  // Corresponding service instance ID.
-  uint32 instance_id = 1;
-  // Raw bytes representation of service configuration parameters.
-  bytes params = 2;
-}
-
-// This message contains one atomic configuration change.
-message ConfigChange {
-  oneof message {
-    // New consensus config.
-    exonum.Config consensus = 1;
-    // New service instance config.
-    ServiceConfig service = 2;
   }
 }
