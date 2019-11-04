@@ -1,3 +1,0 @@
-[submodule "exonum-java-binding/common/src/main/proto"]
-	path = exonum-java-binding/common/src/main/proto
-	url = https://github.com/exonum/exonum-proto-sources.git
