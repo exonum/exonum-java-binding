@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.RuntimeId;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
@@ -50,7 +51,7 @@ class TimeSchemaProxy implements TimeSchema {
   }
 
   private void checkIfEnabled() {
-    MapIndex<String, InstanceSpec> serviceInstances = new RuntimeSchema(view).serviceInstances();
+    MapIndex<String, InstanceSpec> serviceInstances = new DispatcherSchema(view).serviceInstances();
     checkArgument(serviceInstances.containsKey(name), "No service instance "
         + "with the given name (%s) started.", name);
 
