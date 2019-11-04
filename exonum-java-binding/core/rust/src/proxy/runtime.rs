@@ -45,7 +45,6 @@ use utils::{
     jni_cache::{classes_refs, runtime_adapter, tx_execution_exception},
     panic_on_exception, unwrap_jni,
 };
-use JniError;
 use JniErrorKind;
 use JniResult;
 
@@ -88,99 +87,64 @@ impl JavaRuntimeProxy {
         Self::validator_id(snapshot, pub_key).map_or(default, |id| i32::from(id.0))
     }
 
-    /// Handles and clears any Java exceptions or other JNI errors.
-    ///
-    /// Any JNI errors are converted into `ExecutionError` with their descriptions, for JNI errors
-    /// like `JniErrorKind::JavaException` it gets (and clears) any exception that is currently
-    /// being thrown, then exception is passed to corresponding `ExceptionHandler` according their
-    /// type and `exception_handlers` mapping.
-    /// `ExceptionHandlers::DEFAULT` is called in case of there is no any handlers or handlers are
-    /// not matched to exception type.
-    fn handle_error_or_exception<H, R>(
-        env: &JNIEnv,
-        err: JniError,
-        exception_handlers: &[(&GlobalRef, H)],
-    ) -> ExecutionError
-    where
-        H: Fn(&JNIEnv, JObject) -> ExecutionError,
-    {
-        match err.kind() {
-            JniErrorKind::JavaException => {
-                let exception = get_and_clear_java_exception(env);
-                for (class, handler) in exception_handlers {
-                    if unwrap_jni(env.is_instance_of(exception, *class)) {
-                        return handler(env, exception);
-                    }
-                }
-
-                ExceptionHandlers::DEFAULT(env, exception)
-            }
-            _ => (Error::OtherJniError, err).into(),
-        }
-    }
-
     /// Executes closure `f` and handles any type of JNI errors from it.
     ///
-    /// Any JNI errors are converted into `ExecutionError` with their descriptions, for JNI errors
-    /// like `JniErrorKind::JavaException` it gets (and clears) any exception that is currently
-    /// being thrown, `ExceptionHandlers::DEFAULT` is applied for such exceptions.
+    /// Does not perform handling of `TransactionExecutionException`.
     fn jni_call_default<F, R>(&self, f: F) -> Result<R, ExecutionError>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
     {
-        self.jni_call::<F, &ExceptionHandler, R>(&[], f)
+        self.jni_call_impl(f, false)
+    }
+
+    /// Executes closure `f` and handles any type of JNI errors from it.
+    ///
+    /// Performs handling of `TransactionExecutionException`.
+    fn jni_call_transaction_execute<F, R>(&self, f: F) -> Result<R, ExecutionError>
+    where
+        F: FnOnce(&JNIEnv) -> JniResult<R>,
+    {
+        self.jni_call_impl(f, true)
     }
 
     /// Executes closure `f` and handles any type of JNI errors from it.
     ///
     /// Any JNI errors are converted into `ExecutionError` with their descriptions, for JNI errors
     /// like `JniErrorKind::JavaException` it gets (and clears) any exception that is currently
-    /// being thrown, then exception is passed to corresponding `ExceptionHandler` according their
-    /// type and `exception_handlers` mapping.
-    /// `ExceptionHandlers::DEFAULT` is called in case of there is no any handlers or handlers are
-    /// not matched to exception type.
-    fn jni_call<F, H, R>(
+    /// being thrown, `handle_java_exception` is applied for such exceptions.
+    fn jni_call_impl<F, R>(
         &self,
-        exception_handlers: &[(&GlobalRef, H)],
         f: F,
+        check_for_transaction_execution_exception: bool,
     ) -> Result<R, ExecutionError>
     where
         F: FnOnce(&JNIEnv) -> JniResult<R>,
-        H: Fn(&JNIEnv, JObject) -> ExecutionError,
     {
-        let mut execution_error: Option<ExecutionError> = None;
-
-        // Any errors or exceptions from `f` closure (managed native or java code)
-        // will be handled by `Self::handle_error_or_exception` and stored as `execution_error`,
-        // `result` will be solely `Ok` in such case;
-        // Other errors (from jni_rs or JVM) are unexpected, they will be returned exclusively
-        // as `JniResult`
-        let result = self.exec.with_attached(|env| match f(env) {
-            Ok(value) => Ok(Some(value)),
-            Err(err) => {
-                execution_error = Some(Self::handle_error_or_exception::<H, R>(
-                    env,
-                    err,
-                    exception_handlers,
-                ));
-                Ok(None)
-            }
+        let result = self.exec.with_attached(|env| {
+            // It looks like `f(env).map_err(|err| ...)` and it actually is, but we can't use
+            // it here because of different types of returned results and usage of
+            // question mark operator.
+            Ok(match f(env) {
+                Ok(value) => Ok(value),
+                Err(err) => {
+                    let execution_error = match err.kind() {
+                        JniErrorKind::JavaException => {
+                            handle_java_exception(env, check_for_transaction_execution_exception)?
+                        }
+                        _ => (Error::OtherJniError, err).into(),
+                    };
+                    Err(execution_error)
+                }
+            })
         });
 
-        match execution_error {
-            None => match result {
-                Ok(result) => {
-                    assert!(result.is_some());
-                    Ok(result.unwrap())
-                }
-                Err(err) => Err((
-                    Error::OtherJniError,
-                    format!("Unexpected JNI error: {:?}", err),
-                )
-                    .into()),
-            },
-            Some(error) => Err(error),
-        }
+        // If any error occurred in Java Bindings glue code, we return `OtherJniError`.
+        result.unwrap_or_else(|e| {
+            Err(ExecutionError::new(
+                Error::OtherJniError.into(),
+                format!("Unexpected JNI error: {:?}", e),
+            ))
+        })
     }
 }
 
@@ -296,35 +260,29 @@ impl Runtime for JavaRuntimeProxy {
             }
         };
 
-        self.jni_call(
-            &[(
-                &classes_refs::transaction_execution_exception(),
-                ExceptionHandlers::TX_EXECUTION,
-            )],
-            |env| {
-                let service_id = call_info.instance_id as i32;
-                let tx_id = call_info.method_id as i32;
-                let args = JObject::from(env.byte_array_from_slice(arguments)?);
-                let view_handle = to_handle(View::from_ref_fork(context.fork));
-                let hash = JObject::from(env.byte_array_from_slice(&tx.0)?);
-                let pub_key = JObject::from(env.byte_array_from_slice(&tx.1)?);
+        self.jni_call_transaction_execute(|env| {
+            let service_id = call_info.instance_id as i32;
+            let tx_id = call_info.method_id as i32;
+            let args = JObject::from(env.byte_array_from_slice(arguments)?);
+            let view_handle = to_handle(View::from_ref_fork(context.fork));
+            let hash = JObject::from(env.byte_array_from_slice(&tx.0)?);
+            let pub_key = JObject::from(env.byte_array_from_slice(&tx.1)?);
 
-                env.call_method_unchecked(
-                    self.runtime_adapter.as_obj(),
-                    runtime_adapter::execute_tx_id(),
-                    JavaType::Primitive(Primitive::Void),
-                    &[
-                        JValue::from(service_id),
-                        JValue::from(tx_id),
-                        JValue::from(args),
-                        JValue::from(view_handle),
-                        JValue::from(hash),
-                        JValue::from(pub_key),
-                    ],
-                )
-                .and_then(JValue::v)
-            },
-        )
+            env.call_method_unchecked(
+                self.runtime_adapter.as_obj(),
+                runtime_adapter::execute_tx_id(),
+                JavaType::Primitive(Primitive::Void),
+                &[
+                    JValue::from(service_id),
+                    JValue::from(tx_id),
+                    JValue::from(args),
+                    JValue::from(view_handle),
+                    JValue::from(hash),
+                    JValue::from(pub_key),
+                ],
+            )
+            .and_then(JValue::v)
+        })
     }
 
     fn state_hashes(&self, snapshot: &dyn Snapshot) -> StateHashAggregator {
@@ -525,30 +483,46 @@ fn to_hash(bytes: &[u8]) -> Hash {
     Hash::from_bytes(bytes.into()).unwrap()
 }
 
-type ExceptionHandler = Fn(&JNIEnv, JObject) -> ExecutionError;
-struct ExceptionHandlers;
+/// Converts Java exception to `ExecutionError`.
+///
+/// If `check_for_transaction_execution_exception` is true, returns `ErrorKind::Service` with
+/// user-provided error code and error message, else returns `ErrorKind::Runtime` with
+/// `Error::JavaException` code.
+fn handle_java_exception(
+    env: &JNIEnv,
+    check_for_transaction_execution_exception: bool,
+) -> JniResult<ExecutionError> {
+    let exception = get_and_clear_java_exception(env);
 
-impl ExceptionHandlers {
-    const DEFAULT: &'static ExceptionHandler = &|env, exception| {
-        assert!(!exception.is_null(), "No exception thrown.");
+    // If the exception is instance of `TransactionExecutionException` and we should check for it,
+    // use `ErrorKind::Service`.
+    if check_for_transaction_execution_exception
+        && is_transaction_execution_exception(env, exception)?
+    {
+        let code = get_tx_error_code(env, exception)? as u8;
+        let message = get_exception_message(env, exception)?.unwrap_or_default();
+        Ok(ExecutionError::new(ErrorKind::service(code), message))
+    } else {
         let message = describe_java_exception(env, exception);
-        (Error::JavaException, message).into()
-    };
-
-    const TX_EXECUTION: &'static ExceptionHandler = &|env, exception| {
-        assert!(!exception.is_null(), "No exception thrown.");
-        let code = unwrap_jni(Self::get_tx_error_code(env, exception)) as u8;
-        let msg = unwrap_jni(get_exception_message(env, exception)).unwrap_or_default();
-        ExecutionError::new(ErrorKind::service(code), msg)
-    };
-
-    fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {
-        let err_code = env.call_method_unchecked(
-            exception,
-            tx_execution_exception::get_error_code_id(),
-            JavaType::Primitive(Primitive::Byte),
-            &[],
-        )?;
-        err_code.b()
+        Ok(ExecutionError::new(Error::JavaException.into(), message))
     }
+}
+
+/// Returns `true` if exception is instance of `TransactionExecutionException` class.
+fn is_transaction_execution_exception(env: &JNIEnv, exception: JObject) -> JniResult<bool> {
+    env.is_instance_of(
+        exception,
+        classes_refs::transaction_execution_exception().as_obj(),
+    )
+}
+
+/// Returns user-provided error code of the `TransactionExecutionException`.
+fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {
+    let err_code = env.call_method_unchecked(
+        exception,
+        tx_execution_exception::get_error_code_id(),
+        JavaType::Primitive(Primitive::Byte),
+        &[],
+    )?;
+    err_code.b()
 }
