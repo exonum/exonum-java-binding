@@ -11,6 +11,7 @@ fn main() {
     // also needs to be linked against `libc++.dylib`.
     if cfg!(target_os = "macos") && var_os("ROCKSDB_STATIC").is_some() {
         println!("cargo:rustc-link-lib=dylib=c++");
+        println!("cargo:rustc-link-lib=static=zstd");
     }
 
     ProtobufGenerator::with_mod_name("protobuf_mod.rs")
