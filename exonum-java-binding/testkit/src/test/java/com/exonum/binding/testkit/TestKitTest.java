@@ -564,7 +564,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
-  @Disabled("Disabled until TimeSchema DS support is complete")
+  @Disabled("Till ProofMap in hashing flavour is implemented: ECR-3779")
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()
@@ -577,7 +577,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
       testKit.createBlock();
       testKit.createBlock();
       testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        TimeSchema timeSchema = TimeSchema.newInstance(view, TIME_SERVICE_NAME);
         Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
         assertThat(consolidatedTime).contains(TIME);
 
@@ -595,7 +595,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
       testKit.createBlock();
       testKit.createBlock();
       testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        TimeSchema timeSchema = TimeSchema.newInstance(view, TIME_SERVICE_NAME);
         Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
         assertThat(consolidatedTime).contains(newTime);
       });

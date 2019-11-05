@@ -27,8 +27,8 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.messages.Runtime.ArtifactId;
-import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.ArtifactId;
+import com.exonum.core.messages.Runtime.InstanceSpec;
 import java.time.ZonedDateTime;
 
 class TimeSchemaProxy implements TimeSchema {
@@ -52,7 +52,7 @@ class TimeSchemaProxy implements TimeSchema {
 
   private void checkIfEnabled() {
     MapIndex<String, InstanceSpec> serviceInstances = new DispatcherSchema(view).serviceInstances();
-    checkArgument(serviceInstances.containsKey(name), "No service instance "
+    checkArgument(serviceInstances.containsKey(name), "No time service instance "
         + "with the given name (%s) started.", name);
 
     InstanceSpec serviceSpec = serviceInstances.get(name);
