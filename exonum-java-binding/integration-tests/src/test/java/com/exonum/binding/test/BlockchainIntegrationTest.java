@@ -16,6 +16,7 @@
 
 package com.exonum.binding.test;
 
+import static com.exonum.binding.common.blockchain.ExecutionStatuses.success;
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.test.TestTransaction.BODY_CHARSET;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -24,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
@@ -40,8 +40,9 @@ import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.messages.Blockchain.Config;
-import com.exonum.binding.messages.Blockchain.ValidatorKeys;
+import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Blockchain.ValidatorKeys;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
 import com.google.common.collect.ImmutableList;
@@ -263,10 +264,10 @@ class BlockchainIntegrationTest {
     @Test
     void getTxResults() {
       testKitTest((blockchain) -> {
-        ProofMapIndexProxy<HashCode, TransactionResult> txResults = blockchain.getTxResults();
-        Map<HashCode, TransactionResult> txResultsMap = toMap(txResults);
-        Map<HashCode, TransactionResult> expected =
-            ImmutableMap.of(expectedBlockTransaction.hash(), TransactionResult.successful());
+        ProofMapIndexProxy<HashCode, ExecutionStatus> txResults = blockchain.getTxResults();
+        Map<HashCode, ExecutionStatus> txResultsMap = toMap(txResults);
+        ImmutableMap<HashCode, ExecutionStatus> expected =
+            ImmutableMap.of(expectedBlockTransaction.hash(), success());
         assertThat(txResultsMap).isEqualTo(expected);
       });
     }
@@ -274,9 +275,9 @@ class BlockchainIntegrationTest {
     @Test
     void getTxResult() {
       testKitTest((blockchain) -> {
-        Optional<TransactionResult> txResult =
+        Optional<ExecutionStatus> txResult =
             blockchain.getTxResult(expectedBlockTransaction.hash());
-        assertThat(txResult).hasValue(TransactionResult.successful());
+        assertThat(txResult).hasValue(success());
       });
     }
 
@@ -284,7 +285,7 @@ class BlockchainIntegrationTest {
     void getTxResultOfUnknownTx() {
       testKitTest((blockchain) -> {
         HashCode unknownHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(unknownHash);
+        Optional<ExecutionStatus> txResult = blockchain.getTxResult(unknownHash);
         assertThat(txResult).isEmpty();
       });
     }
