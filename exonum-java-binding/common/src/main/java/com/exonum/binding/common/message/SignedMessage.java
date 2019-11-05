@@ -16,9 +16,6 @@
 
 package com.exonum.binding.common.message;
 
-import static com.exonum.binding.common.crypto.AbstractKey.keyFunnel;
-import static com.exonum.binding.common.message.ByteStringFunnel.byteStringFunnel;
-
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -36,18 +33,17 @@ import com.google.protobuf.InvalidProtocolBufferException;
  */
 final class SignedMessage {
 
-  // We keep the original payload as bytes for correct and efficient #hash implementation.
-  private final ByteString payloadBytes;
   private final ExonumMessage payload;
   private final PublicKey authorPk;
   private final ByteString signature;
+  private final HashCode hash;
 
-  private SignedMessage(ByteString payloadBytes, ExonumMessage payload,
-      PublicKey authorPk, ByteString signature) {
-    this.payloadBytes = payloadBytes;
+  private SignedMessage(ExonumMessage payload, PublicKey authorPk,
+                        ByteString signature, HashCode hash) {
     this.payload = payload;
     this.authorPk = authorPk;
     this.signature = signature;
+    this.hash = hash;
   }
 
   /**
@@ -64,7 +60,6 @@ final class SignedMessage {
     // Try to decode the SignedMessage container
     Consensus.SignedMessage message = Consensus.SignedMessage.parseFrom(messageBytes);
     return fromProto(message);
-
   }
 
   /**
@@ -85,7 +80,9 @@ final class SignedMessage {
         .toByteArray());
     ByteString signature = message.getSignature().getData();
 
-    return new SignedMessage(payloadBytes, payload, authorPk, signature);
+    HashCode hash = Hashing.sha256().hashBytes(message.toByteArray());
+
+    return new SignedMessage(payload, authorPk, signature, hash);
   }
 
   /**
@@ -117,14 +114,10 @@ final class SignedMessage {
   }
 
   /**
-   * Returns the hash of the signed message, which is defined as
-   * {@code hash(SignedMessage) = hash(exonum_msg || key.bytes || sign.bytes)}.
+   * Returns the hash of the signed message, which is the hash of the protobuf-serialized
+   * representation.
    */
   HashCode hash() {
-    return Hashing.sha256().newHasher()
-        .putObject(payloadBytes, byteStringFunnel())
-        .putObject(authorPk, keyFunnel())
-        .putObject(signature, byteStringFunnel())
-        .hash();
+    return hash;
   }
 }
