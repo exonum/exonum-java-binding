@@ -16,7 +16,6 @@
 
 package com.exonum.binding.common.message;
 
-import static com.exonum.binding.common.crypto.AbstractKey.keyFunnel;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,12 +81,8 @@ class SignedMessageTest {
 
       HashCode hash = signedMessage.hash();
 
-      // Hash the source objects used to construct the message in the required order
-      HashCode expectedHash = sha256().newHasher()
-          .putBytes(payload.toByteArray())
-          .putObject(TEST_PUBLIC_KEY, keyFunnel())
-          .putBytes(testSignature)
-          .hash();
+      // Hash of the SignedMessage is equal to the hash of the protobuf-serialized byte array
+      HashCode expectedHash = sha256().hashBytes(message.toByteArray());
 
       assertThat(hash).isEqualTo(expectedHash);
     }
