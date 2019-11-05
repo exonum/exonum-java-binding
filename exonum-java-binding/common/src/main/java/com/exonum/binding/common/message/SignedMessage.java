@@ -114,8 +114,8 @@ final class SignedMessage {
   }
 
   /**
-   * Returns the hash of the signed message, which is defined as
-   * {@code hash(SignedMessage) = hash(exonum_msg || key.bytes || sign.bytes)}.
+   * Returns the hash of the signed message, which is the hash of the protobuf-serialized
+   * representation.
    */
   HashCode hash() {
     return hash;
