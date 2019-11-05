@@ -23,6 +23,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
 
@@ -54,13 +55,15 @@ public interface TransactionContext {
 
   /**
    * Returns the name of the service instance.
+   *
+   * @see ServiceInstanceSpec#getName()
    */
   String getServiceName();
 
   /**
    * Returns the numeric id of the service instance.
    *
-   * @see TransactionMessage#getServiceId()
+   * @see ServiceInstanceSpec#getId()
    */
   int getServiceId();
 

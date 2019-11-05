@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.test;
+package com.exonum.binding.fakeservice;
 
-import com.exonum.binding.core.service.AbstractServiceModule;
-import com.exonum.binding.core.service.Service;
-import com.google.inject.Singleton;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 
-public final class TestServiceModule extends AbstractServiceModule {
+class PutTransaction implements Transaction {
+
+  static final int ID = 0;
+
+  private final String key;
+  private final String value;
+
+  PutTransaction(String key, String value) {
+    this.key = key;
+    this.value = value;
+  }
 
   @Override
-  protected void configure() {
-    bind(Service.class).to(TestService.class).in(Singleton.class);
+  public void execute(TransactionContext context) {
+    FakeSchema schema = new FakeSchema(context.getServiceName(), context.getFork());
+    schema.testMap()
+        .put(key, value);
   }
 }

@@ -18,7 +18,9 @@ package com.exonum.binding.test;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.success;
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
-import static com.exonum.binding.test.TestTransaction.BODY_CHARSET;
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_DIR;
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_FILENAME;
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_ID;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,12 +41,12 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
+import com.exonum.binding.testkit.EmulatedNode;
+import com.exonum.binding.testkit.TestKit;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Blockchain.ValidatorKeys;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
-import com.exonum.binding.testkit.EmulatedNode;
-import com.exonum.binding.testkit.TestKit;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -66,14 +68,18 @@ class BlockchainIntegrationTest {
   private static final HashCode ZERO_HASH_CODE = HashCode.fromBytes(
       new byte[DEFAULT_HASH_SIZE_BYTES]);
   private static final int GENESIS_BLOCK_HEIGHT = 0;
+  private static final String SERVICE_NAME = "service";
+  private static final int SERVICE_ID = 100;
 
   private TestKit testKit;
 
   @BeforeEach
   void setUp() {
     testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
         .withValidators(VALIDATOR_COUNT)
+        .withArtifactsDirectory(ARTIFACT_DIR)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
         .build();
   }
 
@@ -128,8 +134,7 @@ class BlockchainIntegrationTest {
 
     @BeforeEach
     void commitBlock() {
-      String payload = "Test";
-      TransactionMessage transactionMessage = constructTestTransactionMessage(payload);
+      TransactionMessage transactionMessage = createTestTransactionMessage();
       expectedBlockTransaction = transactionMessage;
       block = testKit.createBlockWithTransactions(transactionMessage);
     }
@@ -254,8 +259,7 @@ class BlockchainIntegrationTest {
       testKitTest((blockchain) -> {
         MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
         Map<HashCode, TransactionMessage> txMessagesMap = toMap(txMessages);
-        // Should include one executed and one in-pool (submitted in afterCommit) transaction
-        assertThat(txMessagesMap).hasSize(2);
+        assertThat(txMessagesMap).hasSize(1);
         assertThat(txMessagesMap.get(expectedBlockTransaction.hash()))
             .isEqualTo(expectedBlockTransaction);
       });
@@ -410,17 +414,11 @@ class BlockchainIntegrationTest {
     }
 
     @Test
+    // todo: Consider how to test pool operations — through afterCommit?
     void getTransactionPool() {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-      service.getNode().submitTransaction(rawTransaction);
-
       testKitTest((blockchain) -> {
         KeySetIndexProxy<HashCode> transactionPool = blockchain.getTransactionPool();
-        assertThat(transactionPool.contains(message.hash()))
-            .describedAs("pool=%s", transactionPool)
-            .isTrue();
+        assertThat(transactionPool).isEmpty();
       });
     }
   }
@@ -440,24 +438,19 @@ class BlockchainIntegrationTest {
     return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 
-  private static TransactionMessage constructTestTransactionMessage(
-      String payload, TestKit testKit) {
-    EmulatedNode emulatedNode = testKit.getEmulatedNode();
-    KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
-    return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
+  private static TransactionMessage createTestTransactionMessage() {
+    return createTestTransactionMessage("k1", "v1");
   }
 
-  private static TransactionMessage constructTestTransactionMessage(String payload) {
-    return constructTestTransactionMessage(payload, KEY_PAIR);
-  }
-
-  private static TransactionMessage constructTestTransactionMessage(
-      String payload, KeyPair keyPair) {
+  private static TransactionMessage createTestTransactionMessage(String key, String value) {
     return TransactionMessage.builder()
-        .serviceId(TestService.SERVICE_ID)
-        .transactionId(TestTransaction.ID)
-        .payload(payload.getBytes(BODY_CHARSET))
-        .sign(keyPair, CRYPTO_FUNCTION);
+        .serviceId(SERVICE_ID)
+        .transactionId(0)
+        .payload(PutTransactionArgs.newBuilder()
+            .setKey(key)
+            .setValue(value)
+            .build())
+        .sign(KEY_PAIR, CRYPTO_FUNCTION);
   }
 
   /**

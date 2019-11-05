@@ -30,7 +30,6 @@ import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 
 class TestServiceIntegrationTest {
@@ -41,7 +40,7 @@ class TestServiceIntegrationTest {
     try (Cleaner cleaner = new Cleaner();
         TemporaryDb temporaryDb = TemporaryDb.newInstance()) {
       Fork fork = temporaryDb.createFork(cleaner);
-      TestService service = new TestService();
+      TestService service = new TestService(instanceSpec);
 
       Optional<String> initialConfig = service.initialize(fork);
 

@@ -35,9 +35,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
+@Disabled("ECR-3597")
 class TimeSchemaProxyIntegrationTest {
 
   private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime
@@ -49,8 +51,9 @@ class TimeSchemaProxyIntegrationTest {
   void createTestKit() {
     TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
     testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
-        .withTimeService(timeProvider)
+        // todo: allow testkit with no artifacts dir if no user-services deployed.
+        //  Or is it needed only here?
+        .withTimeService("default-time", 10, timeProvider)
         .build();
   }
 
