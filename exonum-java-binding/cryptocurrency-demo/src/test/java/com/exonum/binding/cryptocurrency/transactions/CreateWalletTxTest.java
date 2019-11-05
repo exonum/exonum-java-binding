@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.DEFAULT_INITIAL_BALANCE;
@@ -24,7 +25,6 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.ne
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -36,6 +36,7 @@ import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
@@ -108,9 +109,8 @@ class CreateWalletTxTest {
     // Check that the second tx has failed
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<TransactionResult> txResult = blockchain.getTxResult(transactionMessage2.hash());
-    TransactionResult expectedTransactionResult =
-        TransactionResult.error(WALLET_ALREADY_EXISTS.errorCode, null);
+    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transactionMessage2.hash());
+    ExecutionStatus expectedTransactionResult = serviceError(WALLET_ALREADY_EXISTS.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 

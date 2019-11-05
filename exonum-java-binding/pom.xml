@@ -562,10 +562,9 @@
                 <exclude>**/*AutoValue*</exclude>
                 <exclude>**/TxMessageProtos*</exclude>
                 <exclude>**/WalletProtos*</exclude>
-                <exclude>**/CoreProtos*</exclude>
                 <exclude>**/ServiceRuntimeProtos*</exclude>
                 <exclude>**/DeployArguments*</exclude>
-                <exclude>com/exonum/binding/messages/*</exclude>
+                <exclude>com/exonum/core/messages/*</exclude>
               </excludes>
             </configuration>
             <executions>
