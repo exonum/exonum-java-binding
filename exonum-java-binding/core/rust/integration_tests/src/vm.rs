@@ -65,7 +65,7 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
         .option(&libpath_option());
 
     if with_fakes {
-        jvm_args_builder = jvm_args_builder.option(&fakes_classpath_option());
+        jvm_args_builder = jvm_args_builder.option(&app_classpath_option());
         // Enable log4j
         jvm_args_builder = jvm_args_builder.option(&log4j_path_option());
     }
@@ -105,13 +105,13 @@ pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
-fn fakes_classpath_option() -> String {
-    format!("-Djava.class.path={}", fakes_classpath())
+fn app_classpath_option() -> String {
+    format!("-Djava.class.path={}", app_classpath())
 }
 
-pub fn fakes_classpath() -> String {
+pub fn app_classpath() -> String {
     let classpath_txt_path =
-        java_binding_parent_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
+        java_binding_parent_root_dir().join("app/target/ejb-app-classpath.txt");
 
     let mut class_path = String::new();
     File::open(classpath_txt_path)
@@ -119,7 +119,7 @@ pub fn fakes_classpath() -> String {
         .read_to_string(&mut class_path)
         .expect("Failed to read classpath.txt");
 
-    let fakes_path = java_binding_parent_root_dir().join("fakes/target/classes/");
+    let fakes_path = java_binding_parent_root_dir().join("app/target/classes/");
     let fakes_classes = fakes_path.to_str().expect(CONVERSION_FAILED_MESSAGE);
 
     // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
