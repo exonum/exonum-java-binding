@@ -16,7 +16,10 @@
 
 package com.exonum.binding.core.service;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import java.util.List;
@@ -25,6 +28,35 @@ import java.util.List;
  * A base class for user services.
  */
 public abstract class AbstractService implements Service {
+
+  private final ServiceInstanceSpec instanceSpec;
+
+  protected AbstractService(ServiceInstanceSpec instanceSpec) {
+    this.instanceSpec = checkNotNull(instanceSpec);
+  }
+
+  /**
+   * Returns the name of the service instance.
+   * @see ServiceInstanceSpec#getName()
+   */
+  protected final String getName() {
+    return instanceSpec.getName();
+  }
+
+  /**
+   * Returns the numeric id of the service instance.
+   * @see ServiceInstanceSpec#getId()
+   */
+  protected final int getId() {
+    return instanceSpec.getId();
+  }
+
+  /**
+   * Returns this service instance specification.
+   */
+  protected final ServiceInstanceSpec getInstanceSpec() {
+    return instanceSpec;
+  }
 
   @Override
   public List<HashCode> getStateHashes(Snapshot snapshot) {

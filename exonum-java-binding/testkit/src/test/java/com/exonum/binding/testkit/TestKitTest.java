@@ -39,11 +39,11 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
+import com.exonum.binding.time.TimeSchema;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Blockchain.ValidatorKeys;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
-import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
-import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -564,7 +564,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
-  @Disabled("Disabled until TimeSchema DS support is complete")
+  @Disabled("Till ProofMap in hashing flavour is implemented: ECR-3779")
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()
@@ -577,7 +577,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
       testKit.createBlock();
       testKit.createBlock();
       testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        TimeSchema timeSchema = TimeSchema.newInstance(view, TIME_SERVICE_NAME);
         Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
         assertThat(consolidatedTime).contains(TIME);
 
@@ -595,7 +595,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
       testKit.createBlock();
       testKit.createBlock();
       testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        TimeSchema timeSchema = TimeSchema.newInstance(view, TIME_SERVICE_NAME);
         Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
         assertThat(consolidatedTime).contains(newTime);
       });

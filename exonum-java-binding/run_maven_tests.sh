@@ -17,4 +17,4 @@ source tests_profile
 mvn install \
   --activate-profiles ci-build \
   -Drust.compiler.version="${RUST_COMPILER_VERSION}" \
-  -pl core -am
+  -pl core,fake-service,integration-tests -am

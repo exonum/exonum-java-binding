@@ -40,17 +40,16 @@ final class TestService extends AbstractService {
       .hashString("Initial key", StandardCharsets.UTF_8);
   static final String THROWING_VALUE = "Incorrect value";
 
-  private final int serviceInstanceId;
   private Node node;
 
   @Inject
   public TestService(ServiceInstanceSpec serviceSpec) {
-    this.serviceInstanceId = serviceSpec.getId();
+    super(serviceSpec);
   }
 
   @Override
   protected TestSchema createDataSchema(View view) {
-    return new TestSchema(view, serviceInstanceId);
+    return new TestSchema(view, getId());
   }
 
   @Override
@@ -69,7 +68,7 @@ final class TestService extends AbstractService {
   @Override
   public void afterCommit(BlockCommittedEvent event) {
     long height = event.getHeight();
-    RawTransaction rawTransaction = constructAfterCommitTransaction(serviceInstanceId, height);
+    RawTransaction rawTransaction = constructAfterCommitTransaction(getId(), height);
     node.submitTransaction(rawTransaction);
   }
 
