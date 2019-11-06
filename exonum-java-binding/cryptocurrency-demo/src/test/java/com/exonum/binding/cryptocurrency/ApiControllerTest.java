@@ -56,7 +56,9 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
-@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
+// Run all tests in the same thread to avoid creating several Vertx instances, each
+// with its own thread pool.
+@Execution(ExecutionMode.SAME_THREAD)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
 class ApiControllerTest {
 

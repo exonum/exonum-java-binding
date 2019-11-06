@@ -81,7 +81,9 @@ import org.mockito.quality.Strictness;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
-@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
+// Execute the tests sequentially, as each of them creates a Vertx instance with its
+// own thread pool, which drives the delays up.
+@Execution(ExecutionMode.SAME_THREAD)
 @SuppressWarnings("WeakerAccess")
 class ApiControllerIntegrationTest {
 
