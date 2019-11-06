@@ -4,18 +4,18 @@ version = "0.9.0-SNAPSHOT"
 authors = ["Exonum team <contact@exonum.com>"]
 
 [dependencies]
+env_logger = "0.7.1"
+exonum-time = "0.12"
+failure = "0.1.5"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).
 # Although its primary goal is to detect _programming_ errors that shall not occur
 # in a correct application early, it is currently required in the application
 # because some public APIs in Java permit passing arbitrary pointers (e.g., Snapshot#newInstance).
 java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
-exonum-time = "0.12"
-env_logger = "0.7.1"
-failure = "0.1.5"
 log = "0.4"
-toml = "0.5"
 serde = "1.0"
 serde_derive = "1.0"
+toml = "0.5"
 
 [dev-dependencies]
 tempfile = "3"
