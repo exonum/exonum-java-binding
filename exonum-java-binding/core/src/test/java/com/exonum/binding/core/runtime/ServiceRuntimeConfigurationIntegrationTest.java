@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.service.NodeFake;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -67,19 +68,24 @@ class ServiceRuntimeConfigurationIntegrationTest {
     // Create the runtime
     ServiceRuntime runtime = injector.getInstance(ServiceRuntime.class);
 
-    // Deploy the service to the runtime
-    runtime.deployArtifact(ARTIFACT_ID, ARTIFACT_FILENAME);
-    assertTrue(runtime.isArtifactDeployed(ARTIFACT_ID));
-
-    // Create a service instance
-    String name = "s1";
-    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(name, 1, ARTIFACT_ID);
     try (TemporaryDb database = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
+      // Initialize it
+      runtime.initialize(/* todo: replace with a proper thing since it is non-functional? */
+          new NodeFake(database));
+
+      // Deploy the service to the runtime
+      runtime.deployArtifact(ARTIFACT_ID, ARTIFACT_FILENAME);
+      assertTrue(runtime.isArtifactDeployed(ARTIFACT_ID));
+
+      // Initialize and register a service instance
+      String name = "s1";
+      ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(name, 1, ARTIFACT_ID);
       Fork fork = database.createFork(cleaner);
-      runtime.addService(fork, instanceSpec, new byte[0]);
+      runtime.startAddingService(fork, instanceSpec, new byte[0]);
+      runtime.commitService(instanceSpec);
+      assertThat(runtime.findService(name)).isNotEmpty();
     }
-    assertThat(runtime.findService(name)).isNotEmpty();
 
     // Shutdown the runtime
     runtime.shutdown();
