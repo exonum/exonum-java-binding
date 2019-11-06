@@ -15,7 +15,7 @@
  */
 
 use exonum::{
-    api::ApiContext,
+    blockchain::Blockchain,
     crypto::{Hash, PublicKey},
     messages::Verified,
     runtime::{AnyTx, CallInfo},
@@ -41,15 +41,15 @@ const TX_SUBMISSION_EXCEPTION: &str =
 #[derive(Clone)]
 pub struct NodeContext {
     executor: Executor,
-    api_context: ApiContext,
+    blockchain: Blockchain,
 }
 
 impl NodeContext {
     /// Creates a node context for a service.
-    pub fn new(executor: Executor, api_context: ApiContext) -> Self {
+    pub fn new(executor: Executor, blockchain: Blockchain) -> Self {
         NodeContext {
             executor,
-            api_context,
+            blockchain,
         }
     }
 
@@ -60,22 +60,22 @@ impl NodeContext {
 
     #[doc(hidden)]
     pub fn create_snapshot(&self) -> Box<dyn Snapshot> {
-        self.api_context.snapshot()
+        self.blockchain.snapshot()
     }
 
     #[doc(hidden)]
     pub fn public_key(&self) -> PublicKey {
-        self.api_context.service_keypair().0
+        self.blockchain.service_keypair().0
     }
 
     #[doc(hidden)]
     pub fn submit(&self, tx: AnyTx) -> Result<Hash, failure::Error> {
-        let (pub_key, secret_key) = self.api_context.service_keypair();
+        let (pub_key, secret_key) = self.blockchain.service_keypair();
 
         let verified = Verified::from_value(tx, pub_key.to_owned(), secret_key);
         let tx_hash = verified.object_hash();
         // TODO(ECR-3679): check Core behaviour/any errors on service inactivity
-        self.api_context.sender().broadcast_transaction(verified)?;
+        self.blockchain.sender().broadcast_transaction(verified)?;
         Ok(tx_hash)
     }
 }
