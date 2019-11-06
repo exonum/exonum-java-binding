@@ -254,7 +254,7 @@ public final class ServiceRuntime implements AutoCloseable {
         .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
     // Instantiate the service
-    return servicesFactory.createService(serviceDefinition, instanceSpec);
+    return servicesFactory.createService(serviceDefinition, instanceSpec, node);
   }
 
   private void registerService(ServiceWrapper service) {
@@ -272,7 +272,7 @@ public final class ServiceRuntime implements AutoCloseable {
     try {
       // Create the service API handlers
       Router router = server.createRouter();
-      service.createPublicApiHandlers(node, router);
+      service.createPublicApiHandlers(router);
 
       // Mount the service handlers
       String serviceApiPath = createServiceApiPath(service);

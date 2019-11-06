@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -180,7 +181,7 @@ class ServiceRuntimeIntegrationTest {
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec))
+    when(servicesFactory.createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class)))
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
@@ -190,7 +191,7 @@ class ServiceRuntimeIntegrationTest {
     serviceRuntime.commitService(instanceSpec);
 
     // Check it was instantiated as expected
-    verify(servicesFactory, atLeastOnce()).createService(serviceDefinition, instanceSpec);
+    verify(servicesFactory, atLeastOnce()).createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class));
 
     // and is present in the runtime
     Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
@@ -214,7 +215,7 @@ class ServiceRuntimeIntegrationTest {
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec))
+    when(servicesFactory.createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class)))
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
@@ -230,7 +231,7 @@ class ServiceRuntimeIntegrationTest {
     assertThat(e).hasMessageContaining(TEST_NAME);
 
     // Check the service was instantiated only once
-    verify(servicesFactory).createService(serviceDefinition, instanceSpec);
+    verify(servicesFactory).createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class));
   }
 
   @Test
@@ -263,7 +264,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec))
+    when(servicesFactory.createService(serviceDefinition, instanceSpec,/* fixme: */ any(Node.class)))
         .thenReturn(serviceWrapper);
 
     Fork fork = mock(Fork.class);
@@ -292,14 +293,14 @@ class ServiceRuntimeIntegrationTest {
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec))
+    when(servicesFactory.createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class)))
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
     serviceRuntime.commitService(instanceSpec);
 
     // Check it was instantiated as expected
-    verify(servicesFactory).createService(serviceDefinition, instanceSpec);
+    verify(servicesFactory).createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class));
 
     // and is present in the runtime
     Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
@@ -351,7 +352,7 @@ class ServiceRuntimeIntegrationTest {
       when(serviceLoader.findService(ARTIFACT_ID))
           .thenReturn(Optional.of(serviceDefinition));
       // Setup the factory
-      when(servicesFactory.createService(serviceDefinition, INSTANCE_SPEC))
+      when(servicesFactory.createService(serviceDefinition, INSTANCE_SPEC, /* fixme: */ any(Node.class)))
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
@@ -503,7 +504,7 @@ class ServiceRuntimeIntegrationTest {
       Node node = mock(Node.class);
 //      serviceRuntime.connectServiceApis(new int[] {TEST_ID}, node);
 
-      verify(serviceWrapper).createPublicApiHandlers(node, serviceRouter);
+      verify(serviceWrapper).createPublicApiHandlers(serviceRouter);
       verify(server).mountSubRouter(API_ROOT_PATH + "/" + serviceApiPath, serviceRouter);
     }
   }
@@ -543,7 +544,7 @@ class ServiceRuntimeIntegrationTest {
         ServiceWrapper service = entry.getValue();
         when(service.getId()).thenReturn(instanceSpec.getId());
         when(service.getName()).thenReturn(instanceSpec.getName());
-        when(servicesFactory.createService(serviceDefinition, instanceSpec))
+        when(servicesFactory.createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class)))
             .thenReturn(service);
       }
 
