@@ -39,15 +39,15 @@ static mut CLASS_GET_NAME: Option<JMethodID> = None;
 static mut THROWABLE_GET_MESSAGE: Option<JMethodID> = None;
 static mut TX_EXECUTION_GET_ERROR_CODE: Option<JMethodID> = None;
 
+static mut RUNTIME_ADAPTER_INITIALIZE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_DEPLOY_ARTIFACT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED: Option<JMethodID> = None;
-static mut RUNTIME_ADAPTER_RESTART_SERVICE: Option<JMethodID> = None;
-static mut RUNTIME_ADAPTER_ADD_SERVICE: Option<JMethodID> = None;
+static mut RUNTIME_ADAPTER_START_ADDING_SERVICE: Option<JMethodID> = None;
+static mut RUNTIME_ADAPTER_COMMIT_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_BEFORE_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_COMMIT: Option<JMethodID> = None;
-static mut RUNTIME_ADAPTER_MOUNT_API: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_SHUTDOWN: Option<JMethodID> = None;
 
 static mut JAVA_LANG_ERROR: Option<GlobalRef> = None;
@@ -90,6 +90,8 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "getErrorCode",
         "()B",
     );
+    RUNTIME_ADAPTER_INITIALIZE =
+        get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "initialize", "(J)V");
     RUNTIME_ADAPTER_DEPLOY_ARTIFACT = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
@@ -102,17 +104,17 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "isArtifactDeployed",
         "(Ljava/lang/String;)Z",
     );
-    RUNTIME_ADAPTER_RESTART_SERVICE = get_method_id(
+    RUNTIME_ADAPTER_START_ADDING_SERVICE = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
-        "restartService",
-        "([B)V",
-    );
-    RUNTIME_ADAPTER_ADD_SERVICE = get_method_id(
-        &env,
-        SERVICE_RUNTIME_ADAPTER_CLASS,
-        "addService",
+        "startAddingService",
         "(J[B[B)V",
+    );
+    RUNTIME_ADAPTER_COMMIT_SERVICE = get_method_id(
+        &env,
+        SERVICE_RUNTIME_ADAPTER_CLASS,
+        "commitService",
+        "([B])V",
     );
     RUNTIME_ADAPTER_EXECUTE_TX = get_method_id(
         &env,
@@ -127,15 +129,9 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "(J)[B",
     );
     RUNTIME_ADAPTER_BEFORE_COMMIT =
-        get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "beforeCommit", "(J)V");
+        get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "beforeCommit", "(IJ)V");
     RUNTIME_ADAPTER_AFTER_COMMIT =
         get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "afterCommit", "(JIJ)V");
-    RUNTIME_ADAPTER_MOUNT_API = get_method_id(
-        &env,
-        SERVICE_RUNTIME_ADAPTER_CLASS,
-        "connectServiceApis",
-        "([IJ)V",
-    );
     RUNTIME_ADAPTER_SHUTDOWN =
         get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "shutdown", "()V");
     JAVA_LANG_ERROR = env
@@ -164,15 +160,16 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && JAVA_LANG_ERROR.is_some()
             && THROWABLE_GET_MESSAGE.is_some()
             && TX_EXECUTION_GET_ERROR_CODE.is_some()
+            && RUNTIME_ADAPTER_INITIALIZE.is_some()
             && RUNTIME_ADAPTER_DEPLOY_ARTIFACT.is_some()
             && RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.is_some()
-            && RUNTIME_ADAPTER_RESTART_SERVICE.is_some()
-            && RUNTIME_ADAPTER_ADD_SERVICE.is_some()
+            && RUNTIME_ADAPTER_START_ADDING_SERVICE.is_some()
+            && RUNTIME_ADAPTER_COMMIT_SERVICE.is_some()
             && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
             && RUNTIME_ADAPTER_STATE_HASHES.is_some()
             && RUNTIME_ADAPTER_BEFORE_COMMIT.is_some()
             && RUNTIME_ADAPTER_AFTER_COMMIT.is_some()
-            && RUNTIME_ADAPTER_MOUNT_API.is_some()
+            && RUNTIME_ADAPTER_SHUTDOWN.is_some()
             && JAVA_LANG_ERROR.is_some()
             && JAVA_LANG_RUNTIME_EXCEPTION.is_some()
             && TRANSACTION_EXECUTION_EXCEPTION.is_some()
@@ -201,6 +198,12 @@ fn check_cache_initialized() {
 pub mod runtime_adapter {
     use super::*;
 
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.initialize()`.
+    pub fn initialize_id() -> JMethodID<'static> {
+        check_cache_initialized();
+        unsafe { RUNTIME_ADAPTER_INITIALIZE.unwrap() }
+    }
+
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.deployArtifact()`.
     pub fn deploy_artifact_id() -> JMethodID<'static> {
         check_cache_initialized();
@@ -213,16 +216,16 @@ pub mod runtime_adapter {
         unsafe { RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.unwrap() }
     }
 
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.restartService()`.
-    pub fn restart_service_id() -> JMethodID<'static> {
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.startAddingService()`.
+    pub fn start_adding_service_id() -> JMethodID<'static> {
         check_cache_initialized();
-        unsafe { RUNTIME_ADAPTER_RESTART_SERVICE.unwrap() }
+        unsafe { RUNTIME_ADAPTER_START_ADDING_SERVICE.unwrap() }
     }
 
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.addService()`.
-    pub fn add_service_id() -> JMethodID<'static> {
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.commitService()`.
+    pub fn commit_service_id() -> JMethodID<'static> {
         check_cache_initialized();
-        unsafe { RUNTIME_ADAPTER_ADD_SERVICE.unwrap() }
+        unsafe { RUNTIME_ADAPTER_COMMIT_SERVICE.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.executeTransaction()`.
@@ -247,12 +250,6 @@ pub mod runtime_adapter {
     pub fn after_commit_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { RUNTIME_ADAPTER_AFTER_COMMIT.unwrap() }
-    }
-
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.connectServiceApis()`.
-    pub fn connect_apis_id() -> JMethodID<'static> {
-        check_cache_initialized();
-        unsafe { RUNTIME_ADAPTER_MOUNT_API.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.shutdown()`.
