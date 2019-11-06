@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
 use exonum_cli::command::{
-    finalize::Finalize, generate_config::GenerateConfig, generate_template::GenerateTemplate,
-    maintenance::Maintenance, run::Run as StandardRun, ExonumCommand, StandardResult,
+    finalize::Finalize,
+    generate_config::{GenerateConfig, PUB_CONFIG_FILE_NAME, SEC_CONFIG_FILE_NAME},
+    generate_template::GenerateTemplate,
+    maintenance::Maintenance,
+    run::Run as StandardRun,
+    ExonumCommand, StandardResult,
 };
-use failure;
+use failure::{self, ResultExt};
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
-use std::path::PathBuf;
+use std::{fs, path::PathBuf, str::FromStr};
+
+use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
+
+/// Database directory name for `run-dev` command.
+const DB_DIRECTORY_NAME: &str = "db";
 
 /// Exonum Java Bindings Application.
 ///
 /// Configures and runs Exonum node with Java runtime enabled.
-// TODO: support run-dev (ECR-3727)
 #[derive(StructOpt, Debug)]
 #[structopt(author, about)]
 #[allow(clippy::large_enum_variant)]
@@ -46,6 +53,9 @@ pub enum Command {
     /// Run the node with provided node config and Java runtime enabled.
     #[structopt(name = "run")]
     Run(Run),
+    /// Run the node in development mode (generate configuration and db files automatically).
+    #[structopt(name = "run-dev")]
+    RunDev(RunDev),
     /// Perform different maintenance actions.
     #[structopt(name = "maintenance")]
     Maintenance(Maintenance),
@@ -66,6 +76,7 @@ impl EjbCommand for Command {
             Command::GenerateConfig(c) => c.execute().map(Into::into),
             Command::Finalize(c) => c.execute().map(Into::into),
             Command::Run(c) => c.execute(),
+            Command::RunDev(c) => c.execute(),
             Command::Maintenance(c) => c.execute().map(Into::into),
         }
     }
@@ -112,6 +123,39 @@ pub struct Run {
     /// Must not have a leading dash. For example, `Xmx2G`.
     #[structopt(long)]
     jvm_args_append: Vec<String>,
+}
+
+/// EJB-specific `run-dev` command.
+///
+/// Automatically generates node configuration for one
+/// validator and runs it using provided `artifacts_dir` as a directory for configuration
+/// files, database and Java service artifacts.
+#[derive(Debug, StructOpt, Serialize, Deserialize)]
+#[structopt(rename_all = "kebab-case")]
+pub struct RunDev {
+    /// Path to the directory containing Java service artifacts and temporary files for
+    /// the node.
+    #[structopt(long)]
+    artifacts_dir: PathBuf,
+}
+
+impl RunDev {
+    /// Returns to the file or directory in the artifacts directory.
+    fn artifact_path(&self, artifact_name: &str) -> PathBuf {
+        let mut path = self.artifacts_dir.clone();
+        path.push(artifact_name);
+        path
+    }
+
+    /// Deletes database directory if it exists.
+    fn cleanup(&self) -> Result<(), failure::Error> {
+        let database_dir = self.artifact_path(DB_DIRECTORY_NAME);
+        if database_dir.exists() {
+            fs::remove_dir_all(self.artifacts_dir.clone())
+                .context("Expected DATABASE_PATH folder being removable.")?;
+        }
+        Ok(())
+    }
 }
 
 /// Possible output of the Java Bindings CLI commands.
@@ -168,6 +212,73 @@ impl EjbCommand for Run {
         } else {
             unreachable!("Standard run command returned invalid result")
         }
+    }
+}
+
+impl EjbCommand for RunDev {
+    fn execute(self) -> Result<EjbCommandResult, failure::Error> {
+        let VALIDATORS_COUNT = 1;
+        let DB_PATH = self.artifact_path(DB_DIRECTORY_NAME);
+        let NODE_CONFIG_PATH = self.artifact_path("node.toml");
+        let COMMON_CONFIG_PATH = self.artifact_path("template.toml");
+        let EJB_PORT = 6400;
+
+        let PEER_ADDRESS = "127.0.0.1:6200".parse().unwrap();
+        let PUBLIC_API_ADDRESS = "127.0.0.1:8080".parse().unwrap();
+        let PRIVATE_API_ADDRESS = "127.0.0.1:8081".parse().unwrap();
+        let PUBLIC_ALLOW_ORIGIN = "http://127.0.0.1:8080, http://localhost:8080".into();
+        let PRIVATE_ALLOW_ORIGIN = "http://127.0.0.1:8081, http://localhost:8081".into();
+
+        self.cleanup()?;
+
+        let generate_template = GenerateTemplate {
+            common_config: COMMON_CONFIG_PATH.clone(),
+            validators_count: VALIDATORS_COUNT,
+        };
+        generate_template.execute()?;
+
+        let generate_config = GenerateConfig {
+            common_config: COMMON_CONFIG_PATH.clone(),
+            output_dir: self.artifacts_dir.clone(),
+            peer_address: PEER_ADDRESS,
+            listen_address: None,
+            no_password: true,
+            master_key_pass: None,
+            master_key_path: None,
+        };
+        generate_config.execute()?;
+
+        let finalize = Finalize {
+            secret_config_path: self.artifact_path(SEC_CONFIG_FILE_NAME),
+            output_config_path: NODE_CONFIG_PATH.clone(),
+            public_configs: vec![self.artifact_path(PUB_CONFIG_FILE_NAME)],
+            public_api_address: Some(PUBLIC_API_ADDRESS),
+            private_api_address: Some(PRIVATE_API_ADDRESS),
+            public_allow_origin: Some(PUBLIC_ALLOW_ORIGIN),
+            private_allow_origin: Some(PRIVATE_ALLOW_ORIGIN),
+        };
+        finalize.execute()?;
+
+        let standard_run = StandardRun {
+            node_config: NODE_CONFIG_PATH,
+            db_path: DB_PATH,
+            public_api_address: None,
+            private_api_address: None,
+            master_key_pass: Some(FromStr::from_str("pass:").unwrap()),
+        };
+
+        let run = Run {
+            standard: standard_run,
+            ejb_port: EJB_PORT,
+            artifacts_path: self.artifacts_dir,
+            ejb_log_config_path: None,
+            ejb_override_java_library_path: None,
+            jvm_debug: None,
+            jvm_args_prepend: vec![],
+            jvm_args_append: vec![],
+        };
+
+        run.execute()
     }
 }
 
