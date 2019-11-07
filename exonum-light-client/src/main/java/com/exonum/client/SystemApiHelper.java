@@ -21,6 +21,7 @@ import static com.exonum.client.ExonumApi.JSON;
 
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.SystemStatistics;
 import lombok.Value;
 
 /**
@@ -38,24 +39,25 @@ final class SystemApiHelper {
     );
   }
 
-  static int parseMemoryPoolJson(String json) {
-    MemoryPoolResponse response = JSON.fromJson(json, MemoryPoolResponse.class);
-    return response.getSize();
+  static SystemStatistics parseStatsJson(String json) {
+    StatsResponse response = JSON.fromJson(json, StatsResponse.class);
+    return new SystemStatistics(response.txPoolSize, response.txCount);
   }
 
   /**
    * Json object wrapper for memory pool response.
    */
   @Value
-  private static class MemoryPoolResponse {
-    int size;
+  private static class StatsResponse {
+    int txPoolSize;
+    long txCount;
   }
 
   /**
    * Json object wrapper for health check response.
    */
   @Value
-  private class HealthCheckResponse {
+  private static class HealthCheckResponse {
     String consensusStatus;
     int connectedPeers;
   }

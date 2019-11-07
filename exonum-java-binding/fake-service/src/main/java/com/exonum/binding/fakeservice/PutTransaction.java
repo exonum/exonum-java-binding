@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.storage.indices;
+package com.exonum.binding.fakeservice;
 
-import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 
-class ProofListIndexProxyGroupIntegrationTest
-    extends BaseListIndexProxyGroupTestable {
+class PutTransaction implements Transaction {
+
+  static final int ID = 0;
+
+  private final String key;
+  private final String value;
+
+  PutTransaction(String key, String value) {
+    this.key = key;
+    this.value = value;
+  }
 
   @Override
-  ListIndex<String> createInGroup(byte[] id, View view) {
-    return ProofListIndexProxy.newInGroupUnsafe("proof_list_group_IT", id, view,
-        StandardSerializers.string());
+  public void execute(TransactionContext context) {
+    FakeSchema schema = new FakeSchema(context.getServiceName(), context.getFork());
+    schema.testMap()
+        .put(key, value);
   }
 }

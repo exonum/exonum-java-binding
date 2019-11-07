@@ -18,7 +18,7 @@
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
     <nativeLibPath>${env.EXONUM_HOME}/lib/native</nativeLibPath>
     <hamcrest.version>2.1</hamcrest.version>
-    <mockito.version>3.0.0</mockito.version>
+    <mockito.version>3.1.0</mockito.version>
     <exonum.version>0.9.0-SNAPSHOT</exonum.version>
   </properties>
 
@@ -131,6 +131,7 @@
 
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.2.0</version>
         <executions>
           <execution>
             <id>package-service-artifact</id>

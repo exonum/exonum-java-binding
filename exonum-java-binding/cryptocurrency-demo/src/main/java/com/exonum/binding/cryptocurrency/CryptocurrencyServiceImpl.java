@@ -46,8 +46,9 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   private final String serviceInstanceName;
 
   @Inject
-  CryptocurrencyServiceImpl(ServiceInstanceSpec serviceSpec) {
-    this.serviceInstanceName = serviceSpec.getName();
+  public CryptocurrencyServiceImpl(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
+    this.serviceInstanceName = instanceSpec.getName();
   }
 
   @Override

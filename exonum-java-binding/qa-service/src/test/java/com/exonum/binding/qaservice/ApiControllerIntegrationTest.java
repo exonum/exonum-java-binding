@@ -43,7 +43,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
-import com.exonum.binding.messages.Blockchain.Config;
+import com.exonum.core.messages.Blockchain.Config;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -81,7 +81,9 @@ import org.mockito.quality.Strictness;
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
-@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
+// Execute the tests sequentially, as each of them creates a Vertx instance with its
+// own thread pool, which drives the delays up.
+@Execution(ExecutionMode.SAME_THREAD)
 @SuppressWarnings("WeakerAccess")
 class ApiControllerIntegrationTest {
 

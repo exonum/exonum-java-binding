@@ -16,7 +16,6 @@
 
 package com.exonum.binding.common.message;
 
-import static com.exonum.binding.common.crypto.AbstractKey.keyFunnel;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,10 +26,10 @@ import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.messages.Consensus;
-import com.exonum.binding.messages.Consensus.ExonumMessage;
-import com.exonum.binding.messages.Types;
-import com.exonum.binding.messages.Types.Signature;
+import com.exonum.core.messages.Consensus;
+import com.exonum.core.messages.Consensus.ExonumMessage;
+import com.exonum.core.messages.Types;
+import com.exonum.core.messages.Types.Signature;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,12 +81,8 @@ class SignedMessageTest {
 
       HashCode hash = signedMessage.hash();
 
-      // Hash the source objects used to construct the message in the required order
-      HashCode expectedHash = sha256().newHasher()
-          .putBytes(payload.toByteArray())
-          .putObject(TEST_PUBLIC_KEY, keyFunnel())
-          .putBytes(testSignature)
-          .hash();
+      // Hash of the SignedMessage is equal to the hash of the protobuf-serialized byte array
+      HashCode expectedHash = sha256().hashBytes(message.toByteArray());
 
       assertThat(hash).isEqualTo(expectedHash);
     }

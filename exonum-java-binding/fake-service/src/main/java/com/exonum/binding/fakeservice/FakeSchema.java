@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.test;
+package com.exonum.binding.fakeservice;
+
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static java.util.Collections.emptyList;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import java.util.Collections;
+import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import java.util.List;
 
-final class TestSchema implements Schema {
+class FakeSchema implements Schema {
 
-  static final String TEST_MAP_NAME = "TestKitService_map";
-
+  private final String namespace;
   private final View view;
 
-  TestSchema(View view) {
+  FakeSchema(String serviceName, View view) {
+    this.namespace = serviceName;
     this.view = view;
-  }
-
-  ProofMapIndexProxy<HashCode, String> testMap() {
-    return ProofMapIndexProxy.newInstance(TEST_MAP_NAME, view, StandardSerializers.hash(),
-        StandardSerializers.string());
   }
 
   @Override
   public List<HashCode> getStateHashes() {
-    HashCode rootHash = testMap().getIndexHash();
-    return Collections.singletonList(rootHash);
+    return emptyList();
+  }
+
+  MapIndexProxy<String, String> testMap() {
+    String fullName = namespace + ".test-map";
+    return MapIndexProxy.newInstance(fullName, view, string(), string());
   }
 }

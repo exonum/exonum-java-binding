@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.test;
+package com.exonum.client.response;
 
-import com.exonum.binding.core.service.AbstractServiceModule;
-import com.exonum.binding.core.service.Service;
-import com.google.inject.Singleton;
+import lombok.Value;
 
-public final class TestServiceModule extends AbstractServiceModule {
+/**
+ * Some statistics about the blockchain system.
+ */
+@Value
+public class SystemStatistics {
+  /**
+   * A number of {@linkplain TransactionStatus#IN_POOL unconfirmed} transactions which are currently
+   * located in the unconfirmed transactions pool and are waiting for acceptance in a block.
+   */
+  int numUnconfirmedTransactions;
 
-  @Override
-  protected void configure() {
-    bind(Service.class).to(TestService.class).in(Singleton.class);
-  }
+  /**
+   * A number of {@linkplain TransactionStatus#COMMITTED committed} transactions in the blockchain.
+   */
+  long numCommittedTransactions;
 }

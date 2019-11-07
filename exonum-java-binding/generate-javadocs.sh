@@ -10,7 +10,7 @@ set -eu -o pipefail
 mvn clean install -DskipTests -DskipRustLibBuild
 
 # Generate the aggregated Javadocs for the published modules
-mvn javadoc:aggregate -Dmaven.javadoc.skip=false \
+mvn javadoc:aggregate -Dmaven.javadoc.skip=false -DskipRustLibBuild \
   `# Include only the published artifacts. As package filtering wildcards are rather limited,\
    it is more convenient to specify the list of projects:` \
   --projects com.exonum.binding:exonum-java-binding-parent,common,core,testkit,time-oracle

@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_package = "com.exonum.binding.fakeservice";
+
+message PutTransactionArgs {
+  string key = 1;
+  string value = 2;
+}

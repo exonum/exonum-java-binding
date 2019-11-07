@@ -16,6 +16,7 @@
 
 package com.exonum.binding.testkit;
 
+import static com.exonum.binding.common.blockchain.ExecutionStatuses.success;
 import static com.exonum.binding.testkit.TestKit.MAX_SERVICE_INSTANCE_ID;
 import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
@@ -24,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
@@ -39,10 +39,11 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.messages.Blockchain.Config;
-import com.exonum.binding.messages.Blockchain.ValidatorKeys;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.binding.time.TimeSchema;
+import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Blockchain.ValidatorKeys;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -439,10 +440,10 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     Blockchain blockchain = Blockchain.newInstance(view);
     assertThat(blockchain.getHeight()).isEqualTo(1);
     assertThat(block).isEqualTo(blockchain.getBlock(1));
-    Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
+    Map<HashCode, ExecutionStatus> transactionResults = toMap(blockchain.getTxResults());
     assertThat(transactionResults).hasSize(1);
-    TransactionResult transactionResult = transactionResults.get(message.hash());
-    assertThat(transactionResult).isEqualTo(TransactionResult.successful());
+    ExecutionStatus transactionResult = transactionResults.get(message.hash());
+    assertThat(transactionResult).isEqualTo(success());
   }
 
   @Test
@@ -488,13 +489,13 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
     Blockchain blockchain = Blockchain.newInstance(view);
     assertThat(blockchain.getHeight()).isEqualTo(1);
     assertThat(block).isEqualTo(blockchain.getBlock(1));
-    Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
+    Map<HashCode, ExecutionStatus> transactionResults = toMap(blockchain.getTxResults());
     assertThat(transactionResults).hasSize(2);
 
-    TransactionResult transactionResult = transactionResults.get(message.hash());
-    assertThat(transactionResult).isEqualTo(TransactionResult.successful());
-    TransactionResult transactionResult2 = transactionResults.get(message2.hash());
-    assertThat(transactionResult2).isEqualTo(TransactionResult.successful());
+    ExecutionStatus transactionResult = transactionResults.get(message.hash());
+    assertThat(transactionResult).isEqualTo(success());
+    ExecutionStatus transactionResult2 = transactionResults.get(message2.hash());
+    assertThat(transactionResult2).isEqualTo(success());
   }
 
   @Test
@@ -563,7 +564,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
-  @Disabled("Disabled until TimeSchema DS support is complete")
+  @Disabled("Till ProofMap in hashing flavour is implemented: ECR-3779")
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()
@@ -576,7 +577,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
       testKit.createBlock();
       testKit.createBlock();
       testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        TimeSchema timeSchema = TimeSchema.newInstance(view, TIME_SERVICE_NAME);
         Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
         assertThat(consolidatedTime).contains(TIME);
 
@@ -594,7 +595,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
       testKit.createBlock();
       testKit.createBlock();
       testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
+        TimeSchema timeSchema = TimeSchema.newInstance(view, TIME_SERVICE_NAME);
         Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
         assertThat(consolidatedTime).contains(newTime);
       });

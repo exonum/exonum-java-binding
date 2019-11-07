@@ -16,22 +16,23 @@
 
 package com.exonum.binding.fakeservice;
 
-import com.exonum.binding.core.service.AbstractServiceModule;
-import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
-import com.google.inject.Singleton;
-import org.pf4j.Extension;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
+import com.google.protobuf.InvalidProtocolBufferException;
 
-/**
- * A module configuring {@link FakeService}.
- */
-@Extension
-public final class FakeServiceModule extends AbstractServiceModule {
+class FakeTxConverter implements TransactionConverter {
 
   @Override
-  protected void configure() {
-    bind(Service.class).to(FakeService.class)
-        .in(Singleton.class);
-    bind(TransactionConverter.class).to(FakeTxConverter.class);
+  public Transaction toTransaction(int txId, byte[] arguments) {
+    try {
+      if (txId == PutTransaction.ID) {
+        PutTransactionArgs args = PutTransactionArgs.parseFrom(arguments);
+        return new PutTransaction(args.getKey(), args.getValue());
+      }
+      throw new IllegalArgumentException("Unknown transaction: " + txId);
+    } catch (InvalidProtocolBufferException e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 }

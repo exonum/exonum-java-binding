@@ -28,10 +28,10 @@ import io.vertx.ext.web.Router;
 final class TestService2 extends AbstractService {
 
   private final int serviceInstanceId;
-  private Node node;
 
   @Inject
   public TestService2(ServiceInstanceSpec serviceSpec) {
+    super(serviceSpec);
     this.serviceInstanceId = serviceSpec.getId();
   }
 
@@ -45,6 +45,6 @@ final class TestService2 extends AbstractService {
 
   @Override
   public void createPublicApiHandlers(Node node, Router router) {
-    this.node = node;
+    // No handlers
   }
 }
