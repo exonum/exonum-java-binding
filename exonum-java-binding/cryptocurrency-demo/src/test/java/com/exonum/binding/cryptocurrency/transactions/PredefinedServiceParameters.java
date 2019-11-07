@@ -16,12 +16,12 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.google.common.base.Strings;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Predefined service parameters used by TestKit in integration tests.

@@ -25,8 +25,8 @@ import static com.exonum.binding.cryptocurrency.transactions.PredefinedServicePa
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.DEFAULT_INITIAL_BALANCE;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTxPayload;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTxPayload;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -39,11 +39,10 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import java.util.Optional;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

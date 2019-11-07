@@ -27,9 +27,9 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.IN
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTxPayload;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTxPayload;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -44,12 +44,11 @@ import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.reflect.TypeToken;
-import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
