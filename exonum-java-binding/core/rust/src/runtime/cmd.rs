@@ -54,6 +54,9 @@ pub enum Command {
     #[structopt(name = "run")]
     Run(Run),
     /// Run the node in development mode (generate configuration and db files automatically).
+    ///
+    /// Runs one node with public API address 127.0.0.1:8080, private API address 127.0.0.1:8081,
+    /// EJB port 6400 and no logging configuration.
     #[structopt(name = "run-dev")]
     RunDev(RunDev),
     /// Perform different maintenance actions.
