@@ -224,9 +224,7 @@
           <systemPropertyVariables>
             <it.artifactFilename>${artifactFilename}.jar</it.artifactFilename>
             <it.artifactId>${groupId}:${artifactId}:${version}</it.artifactId>
-            <it.serviceName>cryptocurrency-demo</it.serviceName>
-            <it.serviceId>46</it.serviceId>
-            <it.artifactsDirectory>target</it.artifactsDirectory>
+            <it.artifactsDirectory>${project.build.directory}</it.artifactsDirectory>
           </systemPropertyVariables>
         </configuration>
         <executions>

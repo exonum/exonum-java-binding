@@ -30,8 +30,6 @@ import java.util.List;
 
 /**
  * A schema of the cryptocurrency service.
- *
- * <p>Has one collection: Wallets (names and values) (Merkelized)
  */
 public final class CryptocurrencySchema implements Schema {
 
@@ -42,7 +40,7 @@ public final class CryptocurrencySchema implements Schema {
 
   public CryptocurrencySchema(View view, String serviceName) {
     this.view = checkNotNull(view);
-    this.namespace = "cryptocurrency_service_namespace." + serviceName + ".";
+    this.namespace = serviceName + ".";
   }
 
   @Override

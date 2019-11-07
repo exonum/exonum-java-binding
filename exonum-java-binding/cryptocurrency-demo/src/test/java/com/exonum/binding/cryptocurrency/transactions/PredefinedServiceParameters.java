@@ -17,19 +17,29 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.google.common.base.Strings;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Predefined service parameters used by TestKit in integration tests.
  */
 public final class PredefinedServiceParameters {
-  public static final String ARTIFACT_FILENAME = System.getProperty("it.artifactFilename");
+  public static final String ARTIFACT_FILENAME = getRequiredProperty("it.artifactFilename");
   public static final ServiceArtifactId ARTIFACT_ID =
-      ServiceArtifactId.newJavaId(System.getProperty("it.artifactId"));
-  public static final String SERVICE_NAME = System.getProperty("it.serviceName");
-  public static final int SERVICE_ID = Integer.parseInt(System.getProperty("it.serviceId"));
-  public static Path artifactsDirectory = Paths.get(System.getProperty("it.artifactsDirectory"));
+      ServiceArtifactId.newJavaId(getRequiredProperty("it.artifactId"));
+  public static Path artifactsDirectory = Paths.get(getRequiredProperty("it.artifactsDirectory"));
+  public static final String SERVICE_NAME = "cryptocurrency-demo";
+  public static final int SERVICE_ID = 46;
+
+  private static String getRequiredProperty(String key) {
+    String property = System.getProperty(key);
+    checkState(!Strings.isNullOrEmpty(property),
+        "Absent property: %s=%s", key, property);
+    return property;
+  }
 
   private PredefinedServiceParameters() {}
 }

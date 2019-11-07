@@ -39,7 +39,7 @@ public final class TransactionUtils {
   static TransactionMessage newCreateWalletTransaction(
       long initialBalance, KeyPair ownerKeyPair, int serviceId) {
     return TransactionMessage.builder()
-        .payload(createCreateWalletTxPayload(initialBalance))
+        .payload(newCreateWalletTxPayload(initialBalance))
         .serviceId(serviceId)
         .transactionId(CreateWalletTx.ID)
         .sign(ownerKeyPair, CRYPTO_FUNCTION);
@@ -48,7 +48,7 @@ public final class TransactionUtils {
   /**
    * Creates a CreateWalletTx transaction payload with a given initial balance.
    */
-  static byte[] createCreateWalletTxPayload(long initialBalance) {
+  static byte[] newCreateWalletTxPayload(long initialBalance) {
     return TxMessageProtos.CreateWalletTx.newBuilder()
         .setInitialBalance(initialBalance)
         .build()
@@ -62,7 +62,7 @@ public final class TransactionUtils {
   static TransactionMessage newTransferTransaction(
       long seed, KeyPair ownerKeyPair, PublicKey receiverKey, long sum, int serviceId) {
     return TransactionMessage.builder()
-        .payload(createTransferTxPayload(seed, receiverKey, sum))
+        .payload(newTransferTxPayload(seed, receiverKey, sum))
         .serviceId(serviceId)
         .transactionId(TransferTx.ID)
         .sign(ownerKeyPair, CRYPTO_FUNCTION);
@@ -71,7 +71,7 @@ public final class TransactionUtils {
   /**
    * Creates a TransferTx transaction payload with a given seed, receiver key and sum.
    */
-  static byte[] createTransferTxPayload(long seed, PublicKey receiverKey, long sum) {
+  static byte[] newTransferTxPayload(long seed, PublicKey receiverKey, long sum) {
     return TxMessageProtos.TransferTx.newBuilder()
         .setSeed(seed)
         .setToWallet(fromPublicKey(receiverKey))

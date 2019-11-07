@@ -19,7 +19,6 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransactionId;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -52,9 +51,7 @@ public final class CreateWalletTx implements Transaction {
   /**
    * Creates a create wallet transaction given transaction id and the serialized transaction data.
    */
-  static CreateWalletTx from(int txId, byte[] arguments) {
-    checkTransactionId(txId, ID);
-
+  static CreateWalletTx from(byte[] arguments) {
     TxMessageProtos.CreateWalletTx body = PROTO_SERIALIZER.fromBytes(arguments);
 
     long initialBalance = body.getInitialBalance();

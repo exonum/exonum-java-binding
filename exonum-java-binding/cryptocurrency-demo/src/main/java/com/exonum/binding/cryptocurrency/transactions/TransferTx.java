@@ -22,7 +22,6 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.IN
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransactionId;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -62,9 +61,7 @@ public final class TransferTx implements Transaction {
   /**
    * Creates a new transfer transaction given transaction id and the serialized transaction data.
    */
-  static TransferTx from(int txId, byte[] arguments) {
-    checkTransactionId(txId, ID);
-
+  static TransferTx from(byte[] arguments) {
     TxMessageProtos.TransferTx body = PROTO_SERIALIZER.fromBytes(arguments);
 
     long seed = body.getSeed();

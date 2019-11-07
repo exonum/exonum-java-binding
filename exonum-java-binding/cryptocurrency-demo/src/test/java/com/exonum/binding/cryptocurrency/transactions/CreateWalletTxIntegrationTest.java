@@ -24,7 +24,7 @@ import static com.exonum.binding.cryptocurrency.transactions.PredefinedServicePa
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.DEFAULT_INITIAL_BALANCE;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createCreateWalletTxPayload;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTxPayload;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -62,9 +62,9 @@ class CreateWalletTxIntegrationTest {
   @Test
   void from() {
     long initialBalance = 100L;
-    byte[] arguments = createCreateWalletTxPayload(initialBalance);
+    byte[] arguments = newCreateWalletTxPayload(initialBalance);
 
-    CreateWalletTx tx = CreateWalletTx.from(CreateWalletTx.ID, arguments);
+    CreateWalletTx tx = CreateWalletTx.from(arguments);
 
     assertThat(tx).isEqualTo(new CreateWalletTx(initialBalance));
   }

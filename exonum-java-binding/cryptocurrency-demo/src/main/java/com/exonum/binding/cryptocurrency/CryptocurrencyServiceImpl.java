@@ -26,7 +26,6 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -52,7 +51,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
+  protected CryptocurrencySchema createDataSchema(View view) {
     return new CryptocurrencySchema(view, serviceInstanceName);
   }
 
@@ -70,7 +69,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view, serviceInstanceName);
+      CryptocurrencySchema schema = createDataSchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       return Optional.ofNullable(wallets.get(ownerKey));
@@ -82,7 +81,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkBlockchainInitialized();
 
     return node.withSnapshot(view -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view, serviceInstanceName);
+      CryptocurrencySchema schema = createDataSchema(view);
       ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();

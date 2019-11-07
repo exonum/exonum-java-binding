@@ -19,12 +19,12 @@ package com.exonum.binding.cryptocurrency.transactions;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.transaction.Transaction;
 import com.google.common.collect.ImmutableMap;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /** A converter of cryptocurrency service transaction messages. */
 public final class CryptocurrencyTransactionConverter implements TransactionConverter {
 
-  private static final ImmutableMap<Integer, BiFunction<Integer, byte[], Transaction>>
+  private static final ImmutableMap<Integer, Function<byte[], Transaction>>
       TRANSACTION_FACTORIES =
       ImmutableMap.of(
           CreateWalletTx.ID, CreateWalletTx::from,
@@ -35,9 +35,9 @@ public final class CryptocurrencyTransactionConverter implements TransactionConv
     return TRANSACTION_FACTORIES
         .getOrDefault(
             txId,
-            (t, a) -> {
+            (a) -> {
               throw new IllegalArgumentException("Unknown transaction id: " + txId);
             })
-        .apply(txId, arguments);
+        .apply(arguments);
   }
 }

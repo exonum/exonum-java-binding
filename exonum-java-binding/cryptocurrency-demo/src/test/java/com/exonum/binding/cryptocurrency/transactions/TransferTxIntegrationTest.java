@@ -26,7 +26,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.IN
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.createTransferTxPayload;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTxPayload;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,9 +74,9 @@ class TransferTxIntegrationTest {
     long sum = 50L;
     PublicKey recipientKey = TO_KEY_PAIR.getPublicKey();
 
-    byte[] arguments = createTransferTxPayload(seed, recipientKey, sum);
+    byte[] arguments = newTransferTxPayload(seed, recipientKey, sum);
 
-    TransferTx tx = TransferTx.from(TransferTx.ID, arguments);
+    TransferTx tx = TransferTx.from(arguments);
 
     assertThat(tx).isEqualTo(new TransferTx(seed, recipientKey, sum));
   }
@@ -90,10 +90,10 @@ class TransferTxIntegrationTest {
   })
   void fromRawTransactionRejectsNonPositiveBalance(long transferAmount) {
     long seed = 1;
-    byte[] arguments = createTransferTxPayload(seed, TO_KEY_PAIR.getPublicKey(), transferAmount);
+    byte[] arguments = newTransferTxPayload(seed, TO_KEY_PAIR.getPublicKey(), transferAmount);
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransferTx.from(TransferTx.ID, arguments));
+        () -> TransferTx.from(arguments));
 
     assertThat(e.getMessage()).contains("transfer amount")
         .contains(Long.toString(transferAmount));
