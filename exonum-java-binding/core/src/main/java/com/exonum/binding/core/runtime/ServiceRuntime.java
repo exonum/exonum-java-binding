@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.core.runtime.FrameworkModule.SERVICE_WEB_SERVER_PORT;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -39,18 +38,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.protobuf.ByteString;
-import io.vertx.ext.web.Route;
-import io.vertx.ext.web.Router;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,7 +70,7 @@ public final class ServiceRuntime implements AutoCloseable {
 
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
-  private final Server server;
+  private final RuntimeTransport runtimeTransport;
   private final Path artifactsDir;
   /**
    * The active services indexed by their name. It is stored in a sorted map that offers
@@ -94,37 +89,35 @@ public final class ServiceRuntime implements AutoCloseable {
   private Node node;
 
   /**
-   * Creates a new runtime with the given framework injector. Starts the server on instantiation;
-   * never stops it.
+   * Creates a new Java service runtime.
    *
    * @param serviceLoader a loader of service artifacts
    * @param servicesFactory the factory of services
-   * @param server a web server providing transport to Java services
+   * @param runtimeTransport a web server providing transport to Java services
    * @param artifactsDir the directory in which administrators place and from which
    *     the service runtime loads service artifacts; may not exist at instantiation time
-   * @param serverPort a port for the web server providing transport to Java services
    */
   @Inject
-  public ServiceRuntime(ServiceLoader serviceLoader, ServicesFactory servicesFactory, Server server,
-      @Named(FrameworkModule.SERVICE_RUNTIME_ARTIFACTS_DIRECTORY) Path artifactsDir,
-      @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
+  public ServiceRuntime(ServiceLoader serviceLoader, ServicesFactory servicesFactory,
+      RuntimeTransport runtimeTransport,
+      @Named(FrameworkModule.SERVICE_RUNTIME_ARTIFACTS_DIRECTORY) Path artifactsDir) {
     this.serviceLoader = checkNotNull(serviceLoader);
     this.servicesFactory = checkNotNull(servicesFactory);
-    this.server = checkNotNull(server);
+    this.runtimeTransport = checkNotNull(runtimeTransport);
     this.artifactsDir = checkNotNull(artifactsDir);
-
-    // Start the server
-    server.start(serverPort);
   }
 
   /**
-   * Initializes the runtime with the given node.
+   * Initializes the runtime with the given node. Starts the transport for Java services.
    */
   public void initialize(Node node) {
     synchronized (lock) {
       checkState(this.node == null, "Invalid attempt to replace already set node (%s) with %s",
           this.node, node);
       this.node = checkNotNull(node);
+
+      // Start the server
+      runtimeTransport.start();
     }
   }
 
@@ -270,16 +263,7 @@ public final class ServiceRuntime implements AutoCloseable {
    */
   private void connectServiceApi(ServiceWrapper service) {
     try {
-      // Create the service API handlers
-      Router router = server.createRouter();
-      service.createPublicApiHandlers(router);
-
-      // Mount the service handlers
-      String serviceApiPath = createServiceApiPath(service);
-      server.mountSubRouter(serviceApiPath, router);
-
-      // Log the endpoints
-      logApiMountEvent(service, serviceApiPath, router);
+      runtimeTransport.connectServiceApi(service);
     } catch (Exception e) {
       // The core currently requires not to propagate the exception to it, but handle it
       // in the runtime. Such behaviour is user-hostile as we hide the error in logs instead
@@ -288,33 +272,6 @@ public final class ServiceRuntime implements AutoCloseable {
       logger.error("Failed to connect service {} public API. "
           + "Its HTTP handlers will likely be inaccessible", service.getName(), e);
     }
-  }
-
-  private static String createServiceApiPath(ServiceWrapper service) {
-    String servicePathFragment = service.getPublicApiRelativePath();
-    return API_ROOT_PATH + "/" + servicePathFragment;
-  }
-
-  private void logApiMountEvent(ServiceWrapper service, String serviceApiPath, Router router) {
-    List<Route> serviceRoutes = router.getRoutes();
-    if (serviceRoutes.isEmpty()) {
-      // The service has no API: nothing to log
-      return;
-    }
-
-    String serviceName = service.getName();
-    int port = server.getActualPort().orElse(0);
-    // Currently the API is mounted on *all* interfaces, see VertxServer#start
-    logger.info("Service {} API is mounted at :{}{}", serviceName, port, serviceApiPath);
-
-    // Log the full path to one of the service endpoint
-    serviceRoutes.stream()
-        .map(Route::getPath)
-        .filter(Objects::nonNull) // null routes are possible in failure handlers, for instance
-        .findAny()
-        .ifPresent(someRoute ->
-            logger.info("    E.g.: http://127.0.0.1:{}{}", port, serviceApiPath + someRoute)
-        );
   }
 
   /**
@@ -481,16 +438,15 @@ public final class ServiceRuntime implements AutoCloseable {
   private void stopServer() throws InterruptedException {
     try {
       logger.info("Requesting the HTTP server to stop");
-      server.stop().get();
+      runtimeTransport.close();
       logger.info("Stopped the HTTP server");
     } catch (InterruptedException e) {
       // An interruption was requested
       logger.warn("Interrupted before completion");
       throw e;
-    } catch (ExecutionException e) {
+    } catch (Exception e) {
       // Log and go on — such exceptions shall not affect the process
-      Throwable stopException = e.getCause();
-      logger.error("Exception occurred whilst stopping the server", stopException);
+      logger.error("Exception occurred whilst stopping the server", e);
     }
   }
 

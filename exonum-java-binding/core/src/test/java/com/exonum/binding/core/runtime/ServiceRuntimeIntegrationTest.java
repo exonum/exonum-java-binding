@@ -16,11 +16,9 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.core.runtime.ServiceRuntime.API_ROOT_PATH;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.collect.Comparators.isInStrictOrder;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -28,8 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -49,10 +45,8 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transport.Server;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
-import io.vertx.ext.web.Router;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -60,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -76,7 +69,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
 class ServiceRuntimeIntegrationTest {
 
-  static final int PORT = 25000;
   // [ECR-587] Replace with a temp directory obtained from a TempDir JUnit extension so that
   //   the check of its existence passes.
   static final Path ARTIFACTS_DIR = Paths.get("/tmp/");
@@ -90,18 +82,22 @@ class ServiceRuntimeIntegrationTest {
   @Mock
   private ServicesFactory servicesFactory;
   @Mock
-  private Server server;
+  private RuntimeTransport transport;
+
   private ServiceRuntime serviceRuntime;
 
   @BeforeEach
   void setUp() {
-    serviceRuntime = new ServiceRuntime(serviceLoader, servicesFactory, server, ARTIFACTS_DIR,
-        PORT);
+    serviceRuntime = new ServiceRuntime(serviceLoader, servicesFactory, transport, ARTIFACTS_DIR);
   }
 
   @Test
-  void startsServerOnInstantiation() {
-    verify(server).start(PORT);
+  void startsServerOnInitialization() {
+    Node node = mock(Node.class);
+
+    serviceRuntime.initialize(node);
+
+    verify(transport).start();
   }
 
   @Test
@@ -167,8 +163,9 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void addService() {
-    serviceRuntime.initialize(mock(Node.class));
+  void startAddingService() {
+    Node node = mock(Node.class);
+    serviceRuntime.initialize(node);
 
     ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme:foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -179,63 +176,30 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
-    when(serviceWrapper.getId()).thenReturn(TEST_ID);
-    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class)))
+    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
     Fork fork = mock(Fork.class);
     byte[] configuration = anyConfiguration();
     serviceRuntime.startAddingService(fork, instanceSpec, configuration);
-    serviceRuntime.commitService(instanceSpec);
 
     // Check it was instantiated as expected
-    verify(servicesFactory, atLeastOnce()).createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class));
-
-    // and is present in the runtime
-    Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
-    assertThat(serviceOpt).hasValue(serviceWrapper);
+    verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
 
     // and the service was configured
     Configuration expectedConfig = new ServiceConfiguration(configuration);
     verify(serviceWrapper).initialize(fork, expectedConfig);
+
+    // but not committed
+    assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
   }
 
   @Test
-  void addServiceDuplicate() {
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
-    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
-    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
-        TEST_ID, artifactId);
-    when(serviceLoader.findService(artifactId))
-        .thenReturn(Optional.of(serviceDefinition));
+  void startAddingServiceUnknownServiceArtifact() {
+    Node node = mock(Node.class);
+    serviceRuntime.initialize(node);
 
-    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
-    when(serviceWrapper.getId()).thenReturn(TEST_ID);
-    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class)))
-        .thenReturn(serviceWrapper);
-
-    // Create the service from the artifact
-    Fork fork = mock(Fork.class);
-    byte[] configuration = anyConfiguration();
-    serviceRuntime.startAddingService(fork, instanceSpec, configuration);
-
-    // Try to create another service with the same service instance specification
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.startAddingService(fork, instanceSpec, configuration));
-
-    assertThat(e).hasMessageContaining("name");
-    assertThat(e).hasMessageContaining(TEST_NAME);
-
-    // Check the service was instantiated only once
-    verify(servicesFactory).createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class));
-  }
-
-  @Test
-  void addServiceUnknownServiceArtifact() {
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
 
@@ -254,7 +218,10 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void addServiceBadInitialConfiguration() {
+  void startAddingServiceBadInitialConfiguration() {
+    Node node = mock(Node.class);
+    serviceRuntime.initialize(node);
+
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
@@ -264,7 +231,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec,/* fixme: */ any(Node.class)))
+    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
         .thenReturn(serviceWrapper);
 
     Fork fork = mock(Fork.class);
@@ -281,7 +248,10 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void restartService() {
+  void commitService() {
+    Node node = mock(Node.class);
+    serviceRuntime.initialize(node);
+
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
@@ -293,14 +263,17 @@ class ServiceRuntimeIntegrationTest {
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class)))
+    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
     serviceRuntime.commitService(instanceSpec);
 
     // Check it was instantiated as expected
-    verify(servicesFactory).createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class));
+    verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
+
+    // and its API is connected
+    verify(transport).connectServiceApi(serviceWrapper);
 
     // and is present in the runtime
     Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
@@ -308,26 +281,55 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void shutdown() throws InterruptedException {
-    CompletableFuture<Void> stopFuture = CompletableFuture.completedFuture(null);
-    when(server.stop()).thenReturn(stopFuture);
+  void commitServiceDuplicate() {
+    Node node = mock(Node.class);
+    serviceRuntime.initialize(node);
 
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+    when(serviceLoader.findService(artifactId))
+        .thenReturn(Optional.of(serviceDefinition));
+
+    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
+    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
+        .thenReturn(serviceWrapper);
+
+    // Create the service from the artifact
+    serviceRuntime.commitService(instanceSpec);
+
+    // Try to create another service with the same service instance specification
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.commitService(instanceSpec));
+
+    assertThat(e).hasMessageContaining("name");
+    assertThat(e).hasMessageContaining(TEST_NAME);
+
+    // Check the service was instantiated only once
+    verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
+  }
+
+  @Test
+  void shutdown() throws InterruptedException {
     serviceRuntime.shutdown();
 
-    InOrder inOrder = Mockito.inOrder(server, serviceLoader);
-    inOrder.verify(server).stop();
+    InOrder inOrder = Mockito.inOrder(transport, serviceLoader);
+    inOrder.verify(transport).close();
     inOrder.verify(serviceLoader).unloadAll();
   }
 
   @Test
   void shutdownIfStopFailureShallUnloadArtifacts() throws InterruptedException {
-    CompletableFuture<Void> stopFuture = new CompletableFuture<>();
-    stopFuture.completeExceptionally(new Exception("Server#stop async failure"));
-    when(server.stop()).thenReturn(stopFuture);
+    IllegalStateException stopFailure = new IllegalStateException("Server#stop failure");
+    doThrow(stopFailure).when(transport).close();
 
     serviceRuntime.shutdown();
 
-    verify(server).stop();
+    verify(transport).close();
     // Verify that serviceLoader was invoked despite the stop failure
     verify(serviceLoader).unloadAll();
   }
@@ -343,6 +345,10 @@ class ServiceRuntimeIntegrationTest {
 
     @BeforeEach
     void addService() {
+      // Initialize the runtime
+      Node node = mock(Node.class);
+      serviceRuntime.initialize(node);
+
       // Setup the service
       when(serviceWrapper.getId()).thenReturn(TEST_ID);
       when(serviceWrapper.getName()).thenReturn(TEST_NAME);
@@ -352,7 +358,7 @@ class ServiceRuntimeIntegrationTest {
       when(serviceLoader.findService(ARTIFACT_ID))
           .thenReturn(Optional.of(serviceDefinition));
       // Setup the factory
-      when(servicesFactory.createService(serviceDefinition, INSTANCE_SPEC, /* fixme: */ any(Node.class)))
+      when(servicesFactory.createService(serviceDefinition, INSTANCE_SPEC, node))
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
@@ -491,22 +497,6 @@ class ServiceRuntimeIntegrationTest {
 
       verify(serviceWrapper).afterCommit(event);
     }
-
-    @Test
-    // todo: move to 'commit'
-    void connectServiceApisSingleService() {
-      Router serviceRouter = mock(Router.class);
-      when(serviceRouter.getRoutes()).thenReturn(emptyList());
-      when(server.createRouter()).thenReturn(serviceRouter);
-      String serviceApiPath = "test-service";
-      when(serviceWrapper.getPublicApiRelativePath()).thenReturn(serviceApiPath);
-
-      Node node = mock(Node.class);
-//      serviceRuntime.connectServiceApis(new int[] {TEST_ID}, node);
-
-      verify(serviceWrapper).createPublicApiHandlers(serviceRouter);
-      verify(server).mountSubRouter(API_ROOT_PATH + "/" + serviceApiPath, serviceRouter);
-    }
   }
 
   private static byte[] anyConfiguration() {
@@ -534,6 +524,10 @@ class ServiceRuntimeIntegrationTest {
 
     @BeforeEach
     void addServices() {
+      // Initialize the runtime
+      Node node = mock(Node.class);
+      serviceRuntime.initialize(node);
+
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
           .newInstance(ARTIFACT_ID, TestServiceModule::new);
       when(serviceLoader.findService(ARTIFACT_ID))
@@ -544,7 +538,7 @@ class ServiceRuntimeIntegrationTest {
         ServiceWrapper service = entry.getValue();
         when(service.getId()).thenReturn(instanceSpec.getId());
         when(service.getName()).thenReturn(instanceSpec.getName());
-        when(servicesFactory.createService(serviceDefinition, instanceSpec, /* fixme: */ any(Node.class)))
+        when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
             .thenReturn(service);
       }
 
