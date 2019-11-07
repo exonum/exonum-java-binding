@@ -43,17 +43,15 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   @Nullable private Node node;
 
-  private final String serviceInstanceName;
-
   @Inject
   public CryptocurrencyServiceImpl(ServiceInstanceSpec instanceSpec) {
     super(instanceSpec);
-    this.serviceInstanceName = instanceSpec.getName();
   }
 
   @Override
   protected CryptocurrencySchema createDataSchema(View view) {
-    return new CryptocurrencySchema(view, serviceInstanceName);
+    String name = getName();
+    return new CryptocurrencySchema(view, name);
   }
 
   @Override
