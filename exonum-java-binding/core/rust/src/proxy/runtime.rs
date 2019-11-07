@@ -44,6 +44,9 @@ use JniError;
 use JniErrorKind;
 use JniResult;
 
+/// Default validator ID. -1 is used as not-a-value in Java runtime.
+const DEFAULT_VALIDATOR_ID: i32 = -1;
+
 /// A proxy for `ServiceRuntimeAdapter`s.
 #[derive(Clone)]
 pub struct JavaRuntimeProxy {
@@ -61,8 +64,7 @@ impl JavaRuntimeProxy {
         JavaRuntimeProxy {
             exec: executor,
             runtime_adapter: adapter,
-            // We use -1 as not-a-value in Java for validator id.
-            validator_id: -1,
+            validator_id: DEFAULT_VALIDATOR_ID,
         }
     }
 
@@ -75,14 +77,11 @@ impl JavaRuntimeProxy {
     }
 
     /// If the current node is a validator, returns its ID, otherwise returns `-1`.
-    fn validator_id(&self, snapshot: &dyn Snapshot, pub_key: &PublicKey) -> i32 {
-        // We use -1 as not-a-value in Java for validator id.
-        let default_validator_id = -1;
-
+    fn validator_id(snapshot: &dyn Snapshot, pub_key: &PublicKey) -> i32 {
         CoreSchema::new(snapshot)
             .consensus_config()
             .find_validator(|validator_keys| *pub_key == validator_keys.service_key)
-            .map_or(default_validator_id, |id| i32::from(id.0))
+            .map_or(DEFAULT_VALIDATOR_ID, |id| i32::from(id.0))
     }
 
     /// Handles and clears any Java exceptions or other JNI errors.
@@ -185,7 +184,7 @@ impl Runtime for JavaRuntimeProxy {
     fn initialize(&mut self, blockchain: &Blockchain) {
         // Store validator ID of the current node to use it in `afterCommit` later.
         let node_public_key = &blockchain.service_keypair().0;
-        self.validator_id = self.validator_id(&blockchain.snapshot(), node_public_key);
+        self.validator_id = Self::validator_id(&blockchain.snapshot(), node_public_key);
 
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_owned_snapshot(blockchain.snapshot()));
