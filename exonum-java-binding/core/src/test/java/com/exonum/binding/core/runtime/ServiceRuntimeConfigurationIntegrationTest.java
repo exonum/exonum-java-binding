@@ -71,8 +71,7 @@ class ServiceRuntimeConfigurationIntegrationTest {
     try (TemporaryDb database = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       // Initialize it
-      runtime.initialize(/* todo: replace with a proper thing since it is non-functional? */
-          new NodeFake(database));
+      runtime.initialize(new NodeFake(database));
 
       // Deploy the service to the runtime
       runtime.deployArtifact(ARTIFACT_ID, ARTIFACT_FILENAME);

@@ -40,6 +40,5 @@ interface ServicesFactory {
    * @param node a node for the service to use
    */
   ServiceWrapper createService(LoadedServiceDefinition definition,
-      // todo: Make it accept ServiceFrameworkModule instead?
       ServiceInstanceSpec instanceSpec, Node node);
 }
