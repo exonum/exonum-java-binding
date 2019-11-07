@@ -30,7 +30,6 @@ use jni::{
     signature::{JavaType, Primitive},
     Executor, JNIEnv,
 };
-use proto;
 use runtime::Error;
 use std::fmt;
 use storage::View;
@@ -43,6 +42,7 @@ use utils::{
 use JniError;
 use JniErrorKind;
 use JniResult;
+use {proto, NodeContext};
 
 /// Default validator ID. -1 is used as not-a-value in Java runtime.
 const DEFAULT_VALIDATOR_ID: i32 = -1;
@@ -187,13 +187,13 @@ impl Runtime for JavaRuntimeProxy {
         self.validator_id = Self::validator_id(&blockchain.snapshot(), node_public_key);
 
         unwrap_jni(self.exec.with_attached(|env| {
-            let view_handle = to_handle(View::from_owned_snapshot(blockchain.snapshot()));
+            let node_handle = to_handle(NodeContext::new(self.exec.clone(), blockchain.clone()));
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::initialize_id(),
                 JavaType::Primitive(Primitive::Void),
-                &[JValue::from(view_handle)],
+                &[JValue::from(node_handle)],
             )
             .and_then(JValue::v)
         }))
