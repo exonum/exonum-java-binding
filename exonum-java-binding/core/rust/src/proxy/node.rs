@@ -24,7 +24,7 @@ use exonum_merkledb::{ObjectHash, Snapshot};
 use failure;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jshort};
-use jni::{Executor, JNIEnv};
+use jni::JNIEnv;
 
 use std::{panic, ptr};
 
@@ -39,23 +39,14 @@ const TX_SUBMISSION_EXCEPTION: &str =
 /// An Exonum node context. Allows to add transactions to Exonum network
 /// and get a snapshot of the database state.
 #[derive(Clone)]
-pub struct NodeContext {
-    executor: Executor,
+pub struct NodeProxy {
     blockchain: Blockchain,
 }
 
-impl NodeContext {
+impl NodeProxy {
     /// Creates a node context for a service.
-    pub fn new(executor: Executor, blockchain: Blockchain) -> Self {
-        NodeContext {
-            executor,
-            blockchain,
-        }
-    }
-
-    #[doc(hidden)]
-    pub fn executor(&self) -> &Executor {
-        &self.executor
+    pub fn new(blockchain: Blockchain) -> Self {
+        NodeProxy { blockchain }
     }
 
     #[doc(hidden)]
@@ -98,7 +89,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
 ) -> jbyteArray {
     use utils::convert_hash;
     let res = panic::catch_unwind(|| {
-        let node = cast_handle::<NodeContext>(node_handle);
+        let node = cast_handle::<NodeProxy>(node_handle);
         let hash = unwrap_jni_verbose(
             &env,
             || -> JniResult<jbyteArray> {
@@ -143,7 +134,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeCrea
     node_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let node = cast_handle::<NodeContext>(node_handle);
+        let node = cast_handle::<NodeProxy>(node_handle);
         let snapshot = node.create_snapshot();
         let view = View::from_owned_snapshot(snapshot);
         Ok(to_handle(view))
@@ -159,7 +150,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeGetP
     node_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let node = cast_handle::<NodeContext>(node_handle);
+        let node = cast_handle::<NodeProxy>(node_handle);
         let public_key = node.public_key();
         Ok(unwrap_jni_verbose(
             &env,
@@ -176,5 +167,5 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeFree
     _: JClass,
     node_handle: Handle,
 ) {
-    drop_handle::<NodeContext>(&env, node_handle);
+    drop_handle::<NodeProxy>(&env, node_handle);
 }

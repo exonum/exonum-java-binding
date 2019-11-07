@@ -42,7 +42,7 @@ use utils::{
 use JniError;
 use JniErrorKind;
 use JniResult;
-use {proto, NodeContext};
+use {proto, NodeProxy};
 
 /// Default validator ID. -1 is used as not-a-value in Java runtime.
 const DEFAULT_VALIDATOR_ID: i32 = -1;
@@ -187,7 +187,7 @@ impl Runtime for JavaRuntimeProxy {
         self.validator_id = Self::validator_id(&blockchain.snapshot(), node_public_key);
 
         unwrap_jni(self.exec.with_attached(|env| {
-            let node_handle = to_handle(NodeContext::new(self.exec.clone(), blockchain.clone()));
+            let node_handle = to_handle(NodeProxy::new(blockchain.clone()));
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
