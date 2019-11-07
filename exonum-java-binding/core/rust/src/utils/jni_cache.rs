@@ -114,7 +114,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
         "commitService",
-        "([B])V",
+        "([B)V",
     );
     RUNTIME_ADAPTER_EXECUTE_TX = get_method_id(
         &env,
