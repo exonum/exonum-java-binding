@@ -145,7 +145,6 @@
         <configuration>
           <argLine>
             ${jacoco.args}
-            -Djava.library.path=${ejb-core.nativeLibPath}
             ${java.vm.assertionFlag}
           </argLine>
           <excludes>

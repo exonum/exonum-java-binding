@@ -43,8 +43,8 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
+import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -99,7 +99,6 @@ class CreateWalletTxIntegrationTest {
 
   @Test
   @RequiresNativeLibrary
-  @Disabled("Disabled until transaction results fix")
   void executeAlreadyExistingWalletTx(TestKit testKit) {
     // Create a new wallet
     TransactionMessage transactionMessage =
