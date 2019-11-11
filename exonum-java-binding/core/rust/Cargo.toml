@@ -49,10 +49,10 @@ rpath = true
 
 # FIXME: using git dependency until new Exonum with dynamic services will be released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
-exonum-build = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
-exonum-derive = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
-exonum-cli = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
-exonum-proto = { git = "https://github.com/exonum/exonum", rev = "d28f542c" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "2bbea6654" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "2bbea6654" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "2bbea6654" }
+exonum-build = { git = "https://github.com/exonum/exonum", rev = "2bbea6654" }
+exonum-derive = { git = "https://github.com/exonum/exonum", rev = "2bbea6654" }
+exonum-cli = { git = "https://github.com/exonum/exonum", rev = "2bbea6654" }
+exonum-proto = { git = "https://github.com/exonum/exonum", rev = "2bbea6654" }

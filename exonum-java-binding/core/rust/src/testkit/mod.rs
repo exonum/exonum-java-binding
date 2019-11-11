@@ -87,7 +87,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
 
             builder
         };
-        let testkit = builder.create();
+        let mut testkit = builder.create();
         // Mount API handlers
         testkit.api();
         Ok(to_handle(testkit))
