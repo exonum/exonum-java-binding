@@ -430,7 +430,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
-  @Disabled("Disabled until transaction results fix")
   void createBlockWithSingleTransaction(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     Block block = testKit.createBlockWithTransactions(message);
@@ -447,7 +446,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
-  @Disabled("Disabled until transaction results fix")
   void createBlockWithTransactions(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
@@ -460,7 +458,6 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   }
 
   @Test
-  @Disabled("Disabled until transaction results fix")
   void createBlockWithTransactionsVarargs(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
