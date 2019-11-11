@@ -53,7 +53,7 @@ pub enum Command {
     /// Run the node in development mode (generate configuration and db files automatically).
     ///
     /// Runs one node with public API address 127.0.0.1:8080, private API address 127.0.0.1:8081,
-    /// EJB port 6400 and no logging configuration.
+    /// EJB port 6400.
     #[structopt(name = "run-dev")]
     RunDev(RunDev),
     /// Perform different maintenance actions.
@@ -128,8 +128,7 @@ pub struct Run {
 /// EJB-specific `run-dev` command.
 ///
 /// Automatically generates node configuration for one
-/// validator and runs it using provided `artifacts_dir` as a directory for configuration
-/// files, database and Java service artifacts.
+/// validator and runs it using provided `artifacts_path` as a directory for Java service artifacts.
 #[derive(Debug, StructOpt, Serialize, Deserialize)]
 #[structopt(rename_all = "kebab-case")]
 pub struct RunDev {
@@ -151,6 +150,9 @@ pub struct RunDev {
     /// configuration files themselves.
     #[structopt(long, short = "c")]
     node_config: Option<PathBuf>,
+    /// Path to log4j configuration file.
+    #[structopt(long)]
+    ejb_log_config_path: Option<PathBuf>,
 }
 
 impl RunDev {
@@ -317,7 +319,7 @@ impl EjbCommand for RunDev {
             standard: standard_run,
             ejb_port: EJB_PORT,
             artifacts_path: self.artifacts_path,
-            ejb_log_config_path: None,
+            ejb_log_config_path: self.ejb_log_config_path,
             ejb_override_java_library_path: None,
             jvm_debug: None,
             jvm_args_prepend: vec![],
