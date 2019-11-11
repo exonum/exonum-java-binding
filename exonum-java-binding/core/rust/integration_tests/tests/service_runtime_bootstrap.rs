@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+extern crate exonum_testkit;
 extern crate integration_tests;
 extern crate java_bindings;
-extern crate exonum_testkit;
 
 use integration_tests::vm::{fakes_classpath, java_library_path, log4j_path};
 use java_bindings::exonum::runtime::Runtime;
@@ -24,8 +24,8 @@ use java_bindings::{
     create_java_vm, create_service_runtime, Executor, InternalConfig, JvmConfig, RuntimeConfig,
 };
 
-use std::{path::PathBuf, sync::Arc};
 use exonum_testkit::TestKitBuilder;
+use std::{path::PathBuf, sync::Arc};
 
 #[test]
 // Fails on Java 12. Ignored until [ECR-3133] is fixed because the cause of the issue also prevents
@@ -56,6 +56,8 @@ fn bootstrap() {
 
     let runtime = create_service_runtime(executor, &runtime_config);
 
-    let mut testkit = TestKitBuilder::validator().with_additional_runtime(runtime).create();
+    let mut testkit = TestKitBuilder::validator()
+        .with_additional_runtime(runtime)
+        .create();
     testkit.create_block();
 }
