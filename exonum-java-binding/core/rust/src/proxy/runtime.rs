@@ -52,7 +52,7 @@ const DEFAULT_VALIDATOR_ID: i32 = -1;
 pub struct JavaRuntimeProxy {
     exec: Executor,
     runtime_adapter: GlobalRef,
-    validator_id: i32,
+    blockchain: Option<Blockchain>,
 }
 
 impl JavaRuntimeProxy {
@@ -64,7 +64,7 @@ impl JavaRuntimeProxy {
         JavaRuntimeProxy {
             exec: executor,
             runtime_adapter: adapter,
-            validator_id: DEFAULT_VALIDATOR_ID,
+            blockchain: None,
         }
     }
 
@@ -182,9 +182,7 @@ impl JavaRuntimeProxy {
 
 impl Runtime for JavaRuntimeProxy {
     fn initialize(&mut self, blockchain: &Blockchain) {
-        // Store validator ID of the current node to use it in `afterCommit` later.
-        let node_public_key = &blockchain.service_keypair().0;
-        self.validator_id = Self::validator_id(&blockchain.snapshot(), node_public_key);
+        self.blockchain = Some(blockchain.clone());
 
         unwrap_jni(self.exec.with_attached(|env| {
             let node_handle = to_handle(Node::new(blockchain.clone()));
@@ -393,6 +391,13 @@ impl Runtime for JavaRuntimeProxy {
     fn after_commit(&mut self, snapshot: &dyn Snapshot, _mailbox: &mut Mailbox) {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
+            let public_key = self
+                .blockchain
+                .as_ref()
+                .expect("afterCommit called before initialize")
+                .service_keypair()
+                .0;
+            let validator_id = Self::validator_id(snapshot, &public_key);
             let height: u64 = CoreSchema::new(snapshot).height().into();
 
             panic_on_exception(
@@ -403,7 +408,7 @@ impl Runtime for JavaRuntimeProxy {
                     JavaType::Primitive(Primitive::Void),
                     &[
                         JValue::from(view_handle),
-                        JValue::from(self.validator_id),
+                        JValue::from(validator_id),
                         JValue::from(height as i64),
                     ],
                 ),
