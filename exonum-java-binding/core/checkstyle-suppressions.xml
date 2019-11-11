@@ -23,7 +23,7 @@
     <suppress files="BlockTest\.java" checks="MethodName"/>
 
     <!-- Suppress indentation as there is a bug with lambdas -->
-    <suppress files="ServiceRuntime.java" checks="Indentation"/>
+    <suppress files="RuntimeTransport.java" checks="Indentation"/>
 
     <!-- Allow constant names in inner classes (they can't have static final members) -->
     <suppress files="ServiceRuntimeIntegrationTest\.java" checks="(AbbreviationAsWordInName)|(MemberName)"/>

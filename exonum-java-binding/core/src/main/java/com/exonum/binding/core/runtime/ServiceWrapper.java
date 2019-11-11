@@ -44,13 +44,15 @@ final class ServiceWrapper {
   private final Service service;
   private final TransactionConverter txConverter;
   private final ServiceInstanceSpec instanceSpec;
+  private final Node node;
 
   @Inject
   ServiceWrapper(Service service, TransactionConverter txConverter,
-      ServiceInstanceSpec instanceSpec) {
+      ServiceInstanceSpec instanceSpec, Node node) {
     this.service = service;
     this.txConverter = txConverter;
     this.instanceSpec = instanceSpec;
+    this.node = node;
   }
 
   /**
@@ -122,7 +124,7 @@ final class ServiceWrapper {
     service.afterCommit(event);
   }
 
-  void createPublicApiHandlers(Node node, Router router) {
+  void createPublicApiHandlers(Router router) {
     service.createPublicApiHandlers(node, router);
   }
 

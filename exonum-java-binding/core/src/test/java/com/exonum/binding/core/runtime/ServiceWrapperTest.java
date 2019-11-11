@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.transaction.Transaction;
@@ -45,6 +46,7 @@ class ServiceWrapperTest {
 
   private static final ServiceArtifactId TEST_ARTIFACT_ID =
       ServiceArtifactId.newJavaId("com.acme:foo:1.2.3");
+
   final ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance("test-service",
       1, TEST_ARTIFACT_ID);
 
@@ -54,11 +56,14 @@ class ServiceWrapperTest {
   @Mock
   TransactionConverter txConverter;
 
+  @Mock
+  Node node;
+
   ServiceWrapper serviceWrapper;
 
   @BeforeEach
   void setUp() {
-    serviceWrapper = new ServiceWrapper(service, txConverter, instanceSpec);
+    serviceWrapper = new ServiceWrapper(service, txConverter, instanceSpec, node);
   }
 
   @Test
@@ -121,7 +126,7 @@ class ServiceWrapperTest {
   })
   void serviceApiPath(String serviceName, String expectedPathFragment) {
     ServiceInstanceSpec spec = ServiceInstanceSpec.newInstance(serviceName, 1, TEST_ARTIFACT_ID);
-    serviceWrapper = new ServiceWrapper(service, txConverter, spec);
+    serviceWrapper = new ServiceWrapper(service, txConverter, spec, node);
 
     assertThat(serviceWrapper.getPublicApiRelativePath()).isEqualTo(expectedPathFragment);
   }
