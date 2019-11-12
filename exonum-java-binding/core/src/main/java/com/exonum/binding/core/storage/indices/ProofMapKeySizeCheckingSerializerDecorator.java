@@ -16,14 +16,17 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkProofKey;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.serialization.Serializer;
 
 /**
- * A serializer decorator that checks proof map keys are not null.
+ * A serializer decorator that checks that proof map keys are 32-byte long.
+ *
+ * @see StoragePreconditions#checkProofKey(byte[])
  */
-final class ProofMapKeyCheckingSerializerDecorator<T> implements Serializer<T> {
+final class ProofMapKeySizeCheckingSerializerDecorator<T> implements Serializer<T> {
 
   private final Serializer<T> delegate;
 
@@ -32,26 +35,26 @@ final class ProofMapKeyCheckingSerializerDecorator<T> implements Serializer<T> {
    *
    * @param serializer a serializer to decorate
    */
-  public static <T> ProofMapKeyCheckingSerializerDecorator<T> from(Serializer<T> serializer) {
-    if (serializer instanceof ProofMapKeyCheckingSerializerDecorator) {
-      return (ProofMapKeyCheckingSerializerDecorator<T>) serializer;
+  public static <T> ProofMapKeySizeCheckingSerializerDecorator<T> from(Serializer<T> serializer) {
+    if (serializer instanceof ProofMapKeySizeCheckingSerializerDecorator) {
+      return (ProofMapKeySizeCheckingSerializerDecorator<T>) serializer;
     }
-    return new ProofMapKeyCheckingSerializerDecorator<>(serializer);
+    return new ProofMapKeySizeCheckingSerializerDecorator<>(serializer);
   }
 
-  private ProofMapKeyCheckingSerializerDecorator(Serializer<T> delegate) {
+  private ProofMapKeySizeCheckingSerializerDecorator(Serializer<T> delegate) {
     this.delegate = checkNotNull(delegate);
   }
 
   @Override
   public byte[] toBytes(T proofKey) {
     byte[] dbValue = delegate.toBytes(proofKey);
-    return checkNotNull(dbValue);
+    return checkProofKey(dbValue);
   }
 
   @Override
   public T fromBytes(byte[] serializedProofKey) {
-    checkNotNull(serializedProofKey);
+    checkProofKey(serializedProofKey);
     return delegate.fromBytes(serializedProofKey);
   }
 }

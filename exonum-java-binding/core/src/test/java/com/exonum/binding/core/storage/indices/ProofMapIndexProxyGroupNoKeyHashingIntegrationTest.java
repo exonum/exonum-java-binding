@@ -16,20 +16,19 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
-import static com.exonum.binding.core.storage.indices.TestStorageItems.K2;
-import static com.exonum.binding.core.storage.indices.TestStorageItems.K3;
+import static com.exonum.binding.core.storage.indices.ProofMapIndexProxyNoKeyHashingIntegrationTest.PROOF_KEYS;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
 import com.google.common.collect.ImmutableMap;
 
-class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<HashCode> {
+class ProofMapIndexProxyGroupNoKeyHashingIntegrationTest
+    extends BaseMapIndexGroupTestable<HashCode> {
 
-  private static final HashCode PK1 = HashCode.fromString(K1);
-  private static final HashCode PK2 = HashCode.fromString(K2);
-  private static final HashCode PK3 = HashCode.fromString(K3);
+  private static final HashCode PK1 = PROOF_KEYS.get(0);
+  private static final HashCode PK2 = PROOF_KEYS.get(1);
+  private static final HashCode PK3 = PROOF_KEYS.get(2);
 
   private static final String GROUP_NAME = "proof_map_group_IT";
 
@@ -46,7 +45,7 @@ class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<H
 
   @Override
   ProofMapIndexProxy<HashCode, String> createInGroup(byte[] mapId, View view) {
-    return ProofMapIndexProxy.newInGroupUnsafe(GROUP_NAME, mapId, view,
+    return ProofMapIndexProxy.newInGroupUnsafeNoKeyHashing(GROUP_NAME, mapId, view,
         StandardSerializers.hash(), StandardSerializers.string());
   }
 }
