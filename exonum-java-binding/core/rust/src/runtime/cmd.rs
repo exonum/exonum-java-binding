@@ -296,10 +296,11 @@ impl EjbCommand for Run {
 /// each run of the `RunDev::execute`.
 impl EjbCommand for RunDev {
     fn execute(self) -> Result<EjbCommandResult, failure::Error> {
-        let DB_PATH = self
-            .db_path
-            .clone()
-            .unwrap_or(tempfile::tempdir()?.into_path());
+        let DB_PATH = self.db_path.clone().unwrap_or_else(|| {
+            tempfile::tempdir()
+                .expect("Cannot create temporary directory")
+                .into_path()
+        });
         let node_config_path = if let Some(node_config_path) = self.node_config.clone() {
             node_config_path
         } else {
