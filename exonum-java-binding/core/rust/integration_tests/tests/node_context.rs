@@ -83,12 +83,12 @@ fn submit_transaction_to_missing_service() {
 }
 
 fn create_raw_transaction(instance_id: u32) -> AnyTx {
-    AnyTx{
+    AnyTx {
         call_info: CallInfo {
             instance_id,
             method_id: TEST_TRANSACTION_ID,
         },
-        arguments: TEST_TRANSACTION_PAYLOAD.to_vec()
+        arguments: TEST_TRANSACTION_PAYLOAD.to_vec(),
     }
 }
 
