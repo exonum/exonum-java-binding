@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.core.runtime.FrameworkModule.SERVICE_WEB_SERVER_PORT;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -39,18 +38,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.protobuf.ByteString;
-import io.vertx.ext.web.Route;
-import io.vertx.ext.web.Router;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -75,7 +70,7 @@ public final class ServiceRuntime implements AutoCloseable {
 
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
-  private final Server server;
+  private final RuntimeTransport runtimeTransport;
   private final Path artifactsDir;
   /**
    * The active services indexed by their name. It is stored in a sorted map that offers
@@ -90,28 +85,40 @@ public final class ServiceRuntime implements AutoCloseable {
   private final Map<Integer, ServiceWrapper> servicesById = new HashMap<>();
   private final Object lock = new Object();
 
+  // todo: [ECR-2334] Ensure the Node is properly destroyed when the runtime is stopped
+  private Node node;
+
   /**
-   * Creates a new runtime with the given framework injector. Starts the server on instantiation;
-   * never stops it.
+   * Creates a new Java service runtime.
    *
    * @param serviceLoader a loader of service artifacts
    * @param servicesFactory the factory of services
-   * @param server a web server providing transport to Java services
+   * @param runtimeTransport a web server providing transport to Java services
    * @param artifactsDir the directory in which administrators place and from which
    *     the service runtime loads service artifacts; may not exist at instantiation time
-   * @param serverPort a port for the web server providing transport to Java services
    */
   @Inject
-  public ServiceRuntime(ServiceLoader serviceLoader, ServicesFactory servicesFactory, Server server,
-      @Named(FrameworkModule.SERVICE_RUNTIME_ARTIFACTS_DIRECTORY) Path artifactsDir,
-      @Named(SERVICE_WEB_SERVER_PORT) int serverPort) {
+  public ServiceRuntime(ServiceLoader serviceLoader, ServicesFactory servicesFactory,
+      RuntimeTransport runtimeTransport,
+      @Named(FrameworkModule.SERVICE_RUNTIME_ARTIFACTS_DIRECTORY) Path artifactsDir) {
     this.serviceLoader = checkNotNull(serviceLoader);
     this.servicesFactory = checkNotNull(servicesFactory);
-    this.server = checkNotNull(server);
+    this.runtimeTransport = checkNotNull(runtimeTransport);
     this.artifactsDir = checkNotNull(artifactsDir);
+  }
 
-    // Start the server
-    server.start(serverPort);
+  /**
+   * Initializes the runtime with the given node. Starts the transport for Java services.
+   */
+  public void initialize(Node node) {
+    synchronized (lock) {
+      checkState(this.node == null, "Invalid attempt to replace already set node (%s) with %s",
+          this.node, node);
+      this.node = checkNotNull(node);
+
+      // Start the server
+      runtimeTransport.start();
+    }
   }
 
   /**
@@ -166,8 +173,10 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
-   * Creates a new service instance with the given specification, and performs its
-   * initial configuration.
+   * Starts registration of a new service instance with the given specification.
+   * It involves the initial configuration of the service instance with the given parameters.
+   * The instance is not registered until {@link #commitService(ServiceInstanceSpec)}
+   * is invoked.
    *
    * @param fork a database view to apply configuration
    * @param instanceSpec a service instance specification; must reference a deployed artifact
@@ -178,7 +187,8 @@ public final class ServiceRuntime implements AutoCloseable {
    * @throws RuntimeException if it failed to instantiate the service;
    *     or if the service initialization failed
    */
-  public void addService(Fork fork, ServiceInstanceSpec instanceSpec, byte[] configuration) {
+  public void startAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
+      byte[] configuration) {
     try {
       synchronized (lock) {
         // Create a new service
@@ -186,39 +196,41 @@ public final class ServiceRuntime implements AutoCloseable {
 
         // Initialize it
         service.initialize(fork, new ServiceConfiguration(configuration));
-
-        // Register it in the runtime
-        registerService(service);
       }
 
-      // Log the instantiation event
-      logger.info("Added a new service: {}", instanceSpec);
+      // Log the initialization event
+      logger.info("Initialized a new service: {}", instanceSpec);
     } catch (Exception e) {
-      logger.error("Failed to add a service {} instance with parameters {}",
+      logger.error("Failed to initialize a service {} instance with parameters {}",
           instanceSpec, configuration, e);
       throw e;
     }
   }
 
   /**
-   * Starts a service that has been previously added to this runtime after runtime restart.
+   * Adds a service instance to the runtime after it has been successfully initialized
+   * in {@link #startAddingService(Fork, ServiceInstanceSpec, byte[])}. This operation
+   * completes the service instance registration, allowing subsequent operations on it:
+   * transactions, API requests.
    *
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @throws IllegalArgumentException if the service is already started; or its artifact
    *     is not deployed
    */
-  public void restartService(ServiceInstanceSpec instanceSpec) {
+  public void commitService(ServiceInstanceSpec instanceSpec) {
     try {
       synchronized (lock) {
         // Create a previously added service
         ServiceWrapper service = createService(instanceSpec);
         // Register it in the runtime
         registerService(service);
+        // Connect its API
+        connectServiceApi(service);
       }
 
-      logger.info("Restarted a service: {}", instanceSpec);
+      logger.info("Added a service: {}", instanceSpec);
     } catch (Exception e) {
-      logger.error("Failed to restart a service {} instance", instanceSpec, e);
+      logger.error("Failed to add a service {} instance", instanceSpec, e);
       throw e;
     }
   }
@@ -235,7 +247,7 @@ public final class ServiceRuntime implements AutoCloseable {
         .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
     // Instantiate the service
-    return servicesFactory.createService(serviceDefinition, instanceSpec);
+    return servicesFactory.createService(serviceDefinition, instanceSpec, node);
   }
 
   private void registerService(ServiceWrapper service) {
@@ -244,6 +256,22 @@ public final class ServiceRuntime implements AutoCloseable {
 
     int id = service.getId();
     servicesById.put(id, service);
+  }
+
+  /**
+   * Connects the API of a started service to the web-server.
+   */
+  private void connectServiceApi(ServiceWrapper service) {
+    try {
+      runtimeTransport.connectServiceApi(service);
+    } catch (Exception e) {
+      // The core currently requires not to propagate the exception to it, but handle it
+      // in the runtime. Such behaviour is user-hostile as we hide the error in logs instead
+      // of communicating it immediately and prominently (by stopping the service).
+      // It is to be reconsidered when service termination is implemented.
+      logger.error("Failed to connect service {} public API. "
+          + "Its HTTP handlers will likely be inaccessible", service.getName(), e);
+    }
   }
 
   /**
@@ -311,26 +339,19 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
-   * Performs the before commit operation for all services in the runtime.
+   * Performs the before commit operation on the specified service in this runtime.
    *
+   * @param serviceId the id of the service on which to perform the operation
    * @param fork a fork allowing the runtime and the service to modify the database state.
-   *             Must allow checkpoints and rollbacks.
    */
-  public void beforeCommit(Fork fork) {
+  public void beforeCommit(int serviceId, Fork fork) {
     synchronized (lock) {
+      ServiceWrapper service = getServiceById(serviceId);
       try {
-        for (ServiceWrapper service : services.values()) {
-          fork.createCheckpoint();
-          try {
-            service.beforeCommit(fork);
-          } catch (Exception e) {
-            logger.error("Service {} threw exception in beforeCommit. Any changes are rolled-back",
-                service.getName(), e);
-            fork.rollback();
-          }
-        }
+        service.beforeCommit(fork);
       } catch (Exception e) {
-        logger.error("Unexpected exception in beforeCommit", e);
+        logger.error("Service {} threw exception in beforeCommit. Any changes will be rolled-back",
+            service.getName(), e);
         throw e;
       }
     }
@@ -366,24 +387,6 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
-   * Connects the API of successfully started and configured services to the web-server.
-   *
-   * @param serviceIds the ids of the services to connect; must not be empty
-   * @param node a node allowing to access the database state and submit transactions
-   */
-  public void connectServiceApis(int[] serviceIds, Node node) {
-    checkArgument(serviceIds.length != 0, "ServiceRuntime native proxy must not invoke this "
-        + "method each block as that would result in <blockchain height> nodes and, eventually, "
-        + "an OutOfMemoryError");
-    // todo: [ECR-2334] Ensure the Node is properly destroyed when each service is stopped
-    synchronized (lock) {
-      for (Integer serviceId : serviceIds) {
-        connectServiceApi(serviceId, node);
-      }
-    }
-  }
-
-  /**
    * Verifies that an Exonum raw transaction can be correctly converted to an executable
    * transaction of given service.
    *
@@ -401,57 +404,6 @@ public final class ServiceRuntime implements AutoCloseable {
       ServiceWrapper service = getServiceById(serviceId);
       service.convertTransaction(txId, arguments);
     }
-  }
-
-  private void connectServiceApi(Integer serviceId, Node node) {
-    ServiceWrapper service = getServiceById(serviceId);
-
-    try {
-      // Create the service API handlers
-      Router router = server.createRouter();
-      service.createPublicApiHandlers(node, router);
-
-      // Mount the service handlers
-      String serviceApiPath = createServiceApiPath(service);
-      server.mountSubRouter(serviceApiPath, router);
-
-      // Log the endpoints
-      logApiMountEvent(service, serviceApiPath, router);
-    } catch (Exception e) {
-      // The core currently requires not to propagate the exception to it, but handle it
-      // in the runtime. Such behaviour is user-hostile as we hide the error in logs instead
-      // of communicating it immediately and prominently (by stopping the service).
-      // It is to be reconsidered when service termination is implemented.
-      logger.error("Failed to connect service {} public API. "
-          + "Its HTTP handlers will likely be inaccessible", service.getName(), e);
-    }
-  }
-
-  private static String createServiceApiPath(ServiceWrapper service) {
-    String servicePathFragment = service.getPublicApiRelativePath();
-    return API_ROOT_PATH + "/" + servicePathFragment;
-  }
-
-  private void logApiMountEvent(ServiceWrapper service, String serviceApiPath, Router router) {
-    List<Route> serviceRoutes = router.getRoutes();
-    if (serviceRoutes.isEmpty()) {
-      // The service has no API: nothing to log
-      return;
-    }
-
-    String serviceName = service.getName();
-    int port = server.getActualPort().orElse(0);
-    // Currently the API is mounted on *all* interfaces, see VertxServer#start
-    logger.info("Service {} API is mounted at :{}{}", serviceName, port, serviceApiPath);
-
-    // Log the full path to one of the service endpoint
-    serviceRoutes.stream()
-        .map(Route::getPath)
-        .filter(Objects::nonNull) // null routes are possible in failure handlers, for instance
-        .findAny()
-        .ifPresent(someRoute ->
-            logger.info("    E.g.: http://127.0.0.1:{}{}", port, serviceApiPath + someRoute)
-        );
   }
 
   /**
@@ -486,16 +438,15 @@ public final class ServiceRuntime implements AutoCloseable {
   private void stopServer() throws InterruptedException {
     try {
       logger.info("Requesting the HTTP server to stop");
-      server.stop().get();
+      runtimeTransport.close();
       logger.info("Stopped the HTTP server");
     } catch (InterruptedException e) {
       // An interruption was requested
       logger.warn("Interrupted before completion");
       throw e;
-    } catch (ExecutionException e) {
+    } catch (Exception e) {
       // Log and go on — such exceptions shall not affect the process
-      Throwable stopException = e.getCause();
-      logger.error("Exception occurred whilst stopping the server", stopException);
+      logger.error("Exception occurred whilst stopping the server", e);
     }
   }
 
