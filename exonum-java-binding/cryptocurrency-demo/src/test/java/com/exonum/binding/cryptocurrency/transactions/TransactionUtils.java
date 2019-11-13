@@ -16,8 +16,6 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-import com.exonum.binding.common.crypto.CryptoFunction;
-import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -29,8 +27,6 @@ import com.google.protobuf.ByteString;
  * Helper class to create transaction messages from raw transactions.
  */
 public class TransactionUtils {
-
-  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
 
   static final long DEFAULT_INITIAL_BALANCE = 100L;
 
@@ -102,7 +98,7 @@ public class TransactionUtils {
         .serviceId(rawTransaction.getServiceId())
         .transactionId(rawTransaction.getTransactionId())
         .payload(rawTransaction.getPayload())
-        .sign(keyPair, CRYPTO_FUNCTION);
+        .sign(keyPair);
   }
 
   private TransactionUtils() {

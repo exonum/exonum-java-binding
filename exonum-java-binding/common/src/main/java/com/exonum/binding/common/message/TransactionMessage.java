@@ -18,6 +18,7 @@
 package com.exonum.binding.common.message;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
@@ -110,9 +111,12 @@ public interface TransactionMessage {
    * Builder for the binary transaction message.
    */
   class Builder {
+    private static CryptoFunction DEFAULT_CRYPTO_FUNCTION = CryptoFunctions.ed25519();
     private Integer serviceId;
     private Integer transactionId;
     private ByteString payload;
+    private KeyPair keys;
+    private CryptoFunction cryptoFunction;
 
     /**
      * Sets service identifier to the transaction message.
@@ -160,16 +164,51 @@ public interface TransactionMessage {
     }
 
     /**
+     * Sets the Ed25519 key pair to use to sign the message.
+     *
+     * @param keys a key pair with a private and public keys. The public key is included
+     *     in the message as an author key of the message. The private key is used for signing
+     *     the message, but not included in it
+     */
+    public Builder signedWith(KeyPair keys) {
+      return signedWith(keys, DEFAULT_CRYPTO_FUNCTION);
+    }
+
+    /**
+     * Sets the key pair and the crypto function to use to sign the message.
+     *
+     * @param keys a key pair with a private and public keys. The public key is included
+     *     in the message as an author key of the message. The private key is used for signing
+     *     the message, but not included in it
+     * @param crypto a cryptographic function to use
+     */
+    public Builder signedWith(KeyPair keys, CryptoFunction crypto) {
+      this.keys = checkNotNull(keys);
+      this.cryptoFunction = checkNotNull(crypto);
+      return this;
+    }
+
+    /**
+     * Signs the message with the given key, creating a new signed binary transaction message.
+     * A shorthand for {@code signedWith(keys).build()}.
+     *
+     * @param keys a key pair to {@linkplain #signedWith(KeyPair) sign} the message
+     * @return a new signed binary transaction message
+     * @throws IllegalStateException if any field weren't set
+     * @throws IllegalArgumentException if the public key has wrong size
+     */
+    public TransactionMessage sign(KeyPair keys) {
+      return signedWith(keys).build();
+    }
+
+    /**
      * Signs the message, creating a new signed binary transaction message.
      *
-     * @param keys key pair with private and public keys. Public key is used as an author key of the
-     *        message and private key is used for signing the message.
-     * @param crypto a cryptographic function to use
      * @return a new signed binary transaction message
-     * @throws IllegalStateException if serviceId or transactionId or payload weren't set
-     * @throws IllegalArgumentException if public key has wrong size
+     * @throws IllegalStateException if any field weren't set
+     * @throws IllegalArgumentException if the public key has wrong size
      */
-    public TransactionMessage sign(KeyPair keys, CryptoFunction crypto) {
+    public TransactionMessage build() {
       checkRequiredFieldsSet();
       PublicKey authorPublicKey = keys.getPublicKey();
       checkArgument(authorPublicKey.size() == Ed25519.PUBLIC_KEY_BYTES,
@@ -187,7 +226,7 @@ public interface TransactionMessage {
           .build()
           .toByteArray();
 
-      byte[] signature = crypto.signMessage(exonumMessage, keys.getPrivateKey());
+      byte[] signature = cryptoFunction.signMessage(exonumMessage, keys.getPrivateKey());
 
       Consensus.SignedMessage signedMessage = Consensus.SignedMessage.newBuilder()
           .setAuthor(Types.PublicKey.newBuilder()
@@ -219,6 +258,7 @@ public interface TransactionMessage {
       undefinedFields =
           transactionId == null ? undefinedFields + " transactionId" : undefinedFields;
       undefinedFields = payload == null ? undefinedFields + " payload" : undefinedFields;
+      undefinedFields = keys == null ? undefinedFields + " keys" : undefinedFields;
       if (!undefinedFields.isEmpty()) {
         throw new IllegalStateException(
             "Following field(s) are required but weren't set: " + undefinedFields);

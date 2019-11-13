@@ -42,7 +42,7 @@ class ProtobufReflectiveSerializer<MessageT extends MessageLite> implements Seri
   private final MethodHandle messageParseFrom;
 
   ProtobufReflectiveSerializer(Class<MessageT> messageType) {
-    MethodHandles.Lookup lookup = MethodHandles.publicLookup();
+    MethodHandles.Lookup lookup = MethodHandles.publicLookup().in(messageType);
     try {
       messageParseFrom = lookup
           .findStatic(messageType, "parseFrom", MethodType.methodType(messageType, byte[].class));
