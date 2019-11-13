@@ -83,6 +83,24 @@ class VertxServerIntegrationTest {
   }
 
   @Test
+  void start_WillCommunicateStartFailure()
+      throws ExecutionException, InterruptedException, TimeoutException {
+    try {
+      // Occupy a port
+      int actualPort = server.start(ANY_PORT).get();
+
+      // Create another server
+      Server server2 = new VertxServer();
+      // Try to start on the same port as server1
+      CompletableFuture<Integer> startFuture = server2.start(actualPort);
+      // Verify that server 2 won't start on the same port and will throw an exception
+      assertThrows(ExecutionException.class, startFuture::get);
+    } finally {
+      blockingStop();
+    }
+  }
+
+  @Test
   void getActualPort_BeforeStart() {
     assertThat(server.getActualPort(), equalTo(OptionalInt.empty()));
   }
@@ -119,7 +137,7 @@ class VertxServerIntegrationTest {
     try {
       // Start a server.
       int port = findFreePort();
-      server.start(port);
+      server.start(port).get();
 
       // Check the port
       assertThat(server.getActualPort(), equalTo(OptionalInt.of(port)));
