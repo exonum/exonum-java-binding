@@ -37,7 +37,7 @@ use java_bindings::{
     },
     exonum_merkledb::TemporaryDB,
     jni::JavaVM,
-    Executor, NodeContext,
+    Executor, Node,
 };
 
 lazy_static! {
@@ -92,12 +92,14 @@ fn create_raw_transaction(instance_id: u32) -> AnyTx {
     }
 }
 
-fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<ExternalMessage>) {
+fn create_node(keypair: (PublicKey, SecretKey)) -> (Node, Receiver<ExternalMessage>) {
     let api_channel = mpsc::channel(128);
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     let storage = TemporaryDB::new();
-    let api_context = ApiContext::new(storage.into(), keypair, app_tx.clone());
-    let node = NodeContext::new(EXECUTOR.clone(), api_context);
+
+    let api_context = ApiContext::new(storage, keypair, app_tx.clone());
+    let node = Node::new(api_context);
+
     (node, app_rx)
 }

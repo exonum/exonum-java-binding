@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.ServiceModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -42,12 +43,12 @@ final class GuiceServicesFactory implements ServicesFactory {
 
   @Override
   public ServiceWrapper createService(LoadedServiceDefinition definition,
-      ServiceInstanceSpec instanceSpec) {
+      ServiceInstanceSpec instanceSpec, Node node) {
     // Take the user-supplied module configuring service bindings
     Supplier<ServiceModule> serviceModuleSupplier = definition.getModuleSupplier();
     Module serviceModule = serviceModuleSupplier.get();
     // Create a framework-supplied module with per-service bindings
-    Module serviceFrameworkModule = new ServiceFrameworkModule(instanceSpec);
+    Module serviceFrameworkModule = new ServiceFrameworkModule(instanceSpec, node);
     // Create a new service
     // todo: [ECR-3433] Reconsider the relationships between the framework injector and the child.
     //   Currently the child injector sees everything from the parent, but it does not

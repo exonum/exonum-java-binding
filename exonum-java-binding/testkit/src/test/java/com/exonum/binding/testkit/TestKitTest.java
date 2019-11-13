@@ -365,7 +365,8 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   @Test
   void createEmptyBlock(TestKit testKit) {
     Block block = testKit.createBlock();
-    assertThat(block.getNumTransactions()).isEqualTo(0);
+    // A transaction submitted by the service instance in after_commit
+    assertThat(block.getNumTransactions()).isEqualTo(1);
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);

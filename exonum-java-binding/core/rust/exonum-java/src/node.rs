@@ -18,7 +18,7 @@ use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
     create_java_vm, create_service_runtime,
     exonum::{
-        blockchain::{Blockchain, BlockchainBuilder, InstanceCollection},
+        blockchain::{Blockchain, BlockchainBuilder, BlockchainMut, InstanceCollection},
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel},
         runtime::rust::ServiceFactory,
@@ -58,20 +58,28 @@ fn create_node(config: Config) -> Result<Node, failure::Error> {
     ))
 }
 
-fn create_blockchain(config: &Config, channel: &NodeChannel) -> Result<Blockchain, failure::Error> {
+fn create_blockchain(
+    config: &Config,
+    channel: &NodeChannel,
+) -> Result<BlockchainMut, failure::Error> {
     let node_config = &config.run_config.node_config;
     let service_factories = standard_exonum_service_factories();
     let database = create_database(config)?;
     let keypair = node_config.service_keypair();
     let api_sender = ApiSender::new(channel.api_requests.0.clone());
-    let internal_requests = channel.internal_requests.0.clone();
+    let api_endpoints = channel.endpoints.0.clone();
 
     let java_runtime = create_java_runtime(&config);
 
-    BlockchainBuilder::new(database, node_config.consensus.clone(), keypair)
+    let blockchain = Blockchain::new(database, keypair, api_sender);
+
+    BlockchainBuilder::new(blockchain, node_config.consensus.clone())
         .with_additional_runtime(java_runtime)
-        .with_rust_runtime(service_factories.into_iter().map(InstanceCollection::new))
-        .finalize(api_sender, internal_requests)
+        .with_rust_runtime(
+            api_endpoints,
+            service_factories.into_iter().map(InstanceCollection::new),
+        )
+        .build()
 }
 
 fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
