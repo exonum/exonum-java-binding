@@ -16,12 +16,15 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkProofKey;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.serialization.Serializer;
 
 /**
- * A serializer decorator that checks proof map keys are not null.
+ * A serializer decorator that checks proof map keys for correctness.
+ *
+ * @see StoragePreconditions#checkProofKey(byte[])
  */
 final class ProofMapKeyCheckingSerializerDecorator<T> implements Serializer<T> {
 
@@ -46,12 +49,12 @@ final class ProofMapKeyCheckingSerializerDecorator<T> implements Serializer<T> {
   @Override
   public byte[] toBytes(T proofKey) {
     byte[] dbValue = delegate.toBytes(proofKey);
-    return checkNotNull(dbValue);
+    return checkProofKey(dbValue);
   }
 
   @Override
   public T fromBytes(byte[] serializedProofKey) {
-    checkNotNull(serializedProofKey);
+    checkProofKey(serializedProofKey);
     return delegate.fromBytes(serializedProofKey);
   }
 }

@@ -46,13 +46,27 @@ import java.util.function.LongSupplier;
  *
  * <p>This map is implemented as a Merkle-Patricia tree. It does not permit null keys and values.
  *
- * <p>This map can be instantiated in two ways - either with keys hashing with methods
+ * <p>The Merkle-Patricia tree backing the proof map uses internal 32-byte keys. The tree balance
+ * relies on the internal keys being uniformly distributed.
+ *
+ * <h3><a name="key-hashing">Key hashing in proof maps</a></h3>
+ *
+ * <p>By default, when creating the proof map using methods
  * {@link #newInstance(String, View, Serializer, Serializer)} and
- * {@link #newInGroupUnsafe(String, byte[], View, Serializer, Serializer)} or with no key hashing
- * with methods {@link #newInstanceNoKeyHashing(String, View, Serializer, Serializer)} and
- * {@link #newInGroupUnsafeNoKeyHashing(String, byte[], View, Serializer, Serializer)}. In case of
- * no key hashing keys are required to be 32-byte long. Note that the former option is considered
- * a default one.
+ * {@link #newInGroupUnsafe(String, byte[], View, Serializer, Serializer)}, the user keys are
+ * converted into internal keys through hashing. This allows to use keys of arbitrary size and
+ * ensures the balance of the internal tree. It is also possible to create a proof map that will
+ * not hash keys with methods {@link #newInstanceNoKeyHashing(String, View, Serializer, Serializer)}
+ * and {@link #newInGroupUnsafeNoKeyHashing(String, byte[], View, Serializer, Serializer)}. In this
+ * mode, the map will use the user keys as internal tree keys. Such mode of operation is
+ * appropriate iff all of the following conditions hold:
+ *
+ * <ul>
+ *   <li>All keys are 32-byte long</li>
+ *   <li>The keys are uniformly distributed</li>
+ *   <li>The keys come from a trusted source that cannot influence their distribution and affect
+ *       the tree balance.</li>
+ * </ul>
  *
  * <p>The "destructive" methods of the map, i.e., the one that change the map contents,
  * are specified to throw {@link UnsupportedOperationException} if
@@ -71,7 +85,7 @@ import java.util.function.LongSupplier;
  */
 public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
 
-  private final ProofMapKeyCheckingSerializerDecorator<K> keySerializer;
+  private final Serializer<K> keySerializer;
   private final CheckingSerializerDecorator<V> valueSerializer;
 
   /**
@@ -99,8 +113,9 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   }
 
   /**
-   * Creates a ProofMapIndexProxy with no key hashing. Requires that keys are 32-byte long.
+   * Creates a non-key-hashing ProofMapIndexProxy. Requires that keys are 32-byte long.
    *
+   * <p>See more on <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
    * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
@@ -112,7 +127,6 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name is empty
    * @see StandardSerializers
-   * @see ProofMapIndexProxy
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInstanceNoKeyHashing(
       String name, View view, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
@@ -153,10 +167,12 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   }
 
   /**
-   * Creates a new proof map in a <a href="package-summary.html#families">collection group</a>
+   * Creates a new non-key-hashing proof map in a <a href="package-summary.html#families">collection group</a>
    * with the given name. Requires that keys are 32-byte long.
    *
    * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
+   *
+   * <p>See more on <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
    *
    * @param groupName a name of the collection group
    * @param mapId an identifier of this collection in the group, see the caveats
@@ -169,7 +185,6 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @throws IllegalStateException if the view is not valid
    * @throws IllegalArgumentException if the name or index id is empty
    * @see StandardSerializers
-   * @see ProofMapIndexProxy
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInGroupUnsafeNoKeyHashing(
       String groupName, byte[] mapId, View view, Serializer<K> keySerializer,
@@ -200,7 +215,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   private static <K, V> ProofMapIndexProxy<K, V> newMapIndexProxy(IndexAddress address, View view,
       Serializer<K> keySerializer, Serializer<V> valueSerializer,
       LongSupplier nativeMapConstructor, boolean keyHashing) {
-    ProofMapKeyCheckingSerializerDecorator<K> ks = decorateKeySerializer(keySerializer, keyHashing);
+    Serializer<K> ks = decorateKeySerializer(keySerializer, keyHashing);
     CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
 
     NativeHandle mapNativeHandle = createNativeMap(view, nativeMapConstructor);
@@ -210,14 +225,12 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     return map;
   }
 
-  private static <K> ProofMapKeyCheckingSerializerDecorator<K> decorateKeySerializer(
+  private static <K> Serializer<K> decorateKeySerializer(
       Serializer<K> keySerializer, boolean keyHashing) {
     if (!keyHashing) {
-      ProofMapKeySizeCheckingSerializerDecorator<K> sizeCheckingSerializerDecorator =
-          ProofMapKeySizeCheckingSerializerDecorator.from(keySerializer);
-      return ProofMapKeyCheckingSerializerDecorator.from(sizeCheckingSerializerDecorator);
-    } else {
       return ProofMapKeyCheckingSerializerDecorator.from(keySerializer);
+    } else {
+      return CheckingSerializerDecorator.from(keySerializer);
     }
   }
 
@@ -236,7 +249,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
                                                  long viewNativeHandle, boolean keyHashing);
 
   private ProofMapIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
-                             ProofMapKeyCheckingSerializerDecorator<K> keySerializer,
+                             Serializer<K> keySerializer,
                              CheckingSerializerDecorator<V> valueSerializer) {
     super(nativeHandle, address, view);
     this.keySerializer = keySerializer;
@@ -258,7 +271,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @param value a storage value to associate with the key
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of the key is not 32 bytes (in case of a
-   *     no key hashing proof map)
+   *     non-key-hashing proof map, see
+   *     <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>)
    * @throws UnsupportedOperationException if this map is read-only
    */
   @Override
@@ -302,7 +316,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @param otherKeys other proof map keys which might be mapped to some values
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
-   *     no key hashing proof map)
+   *     non-key-hashing proof map, see
+   *     <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>)
    */
   public UncheckedMapProof getProof(K key, K... otherKeys) {
     if (otherKeys.length == 0) {
@@ -320,7 +335,9 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @param keys proof map keys which might be mapped to some values
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
-   *     no key hashing proof map) or keys collection is empty
+   *     non-key-hashing proof map, see
+   *     <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>) or keys
+   *     collection is empty
    */
   public UncheckedMapProof getProof(Collection<? extends K> keys) {
     checkArgument(!keys.isEmpty(), "Keys collection should not be empty");

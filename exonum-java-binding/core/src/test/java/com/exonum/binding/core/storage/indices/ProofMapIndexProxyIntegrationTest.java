@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 class ProofMapIndexProxyIntegrationTest
-    extends BaseProofMapIndexProxyIntegrationTest {
+    extends BaseProofMapIndexProxyIntegrationTestable {
 
   private static final List<HashCode> PROOF_KEYS = Stream.of(
       Bytes.bytes(0x00),

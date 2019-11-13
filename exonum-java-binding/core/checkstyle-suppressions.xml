@@ -15,7 +15,7 @@
     <!-- Do not require Javadoc for native adapters -->
     <suppress files="service/adapters.+.java" checks="JavadocMethod"/>
 
-    <suppress files="ProofMapIndexProxyIntegrationTest\.java"
+    <suppress files="ProofMapIndexProxyNoKeyHashingIntegrationTest\.java"
         checks="Javadoc.*"/>
 
     <!-- Allow `aBlock` name -->

@@ -20,33 +20,28 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K3;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
 import com.google.common.collect.ImmutableMap;
 
-class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<HashCode> {
-
-  private static final HashCode PK1 = HashCode.fromString(K1);
-  private static final HashCode PK2 = HashCode.fromString(K2);
-  private static final HashCode PK3 = HashCode.fromString(K3);
+class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String> {
 
   private static final String GROUP_NAME = "proof_map_group_IT";
 
   @Override
-  ImmutableMap<String, ImmutableMap<HashCode, String>> getTestEntriesById() {
-    return ImmutableMap.<String, ImmutableMap<HashCode, String>>builder()
+  ImmutableMap<String, ImmutableMap<String, String>> getTestEntriesById() {
+    return ImmutableMap.<String, ImmutableMap<String, String>>builder()
         .put("1", ImmutableMap.of())
-        .put("2", ImmutableMap.of(PK1, "V1"))
-        .put("3", ImmutableMap.of(PK2, "V2", PK3, "V3"))
-        .put("4", ImmutableMap.of(PK3, "V3", PK2, "V2"))
-        .put("5", ImmutableMap.of(PK1, "V5", PK2, "V6", PK3, "V7"))
+        .put("2", ImmutableMap.of(K1, "V1"))
+        .put("3", ImmutableMap.of(K2, "V2", K3, "V3"))
+        .put("4", ImmutableMap.of(K3, "V3", K2, "V2"))
+        .put("5", ImmutableMap.of(K1, "V5", K2, "V6", K3, "V7"))
         .build();
   }
 
   @Override
-  ProofMapIndexProxy<HashCode, String> createInGroup(byte[] mapId, View view) {
+  ProofMapIndexProxy<String, String> createInGroup(byte[] mapId, View view) {
     return ProofMapIndexProxy.newInGroupUnsafe(GROUP_NAME, mapId, view,
-        StandardSerializers.hash(), StandardSerializers.string());
+        StandardSerializers.string(), StandardSerializers.string());
   }
 }
