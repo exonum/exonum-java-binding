@@ -42,6 +42,10 @@ class ProtobufReflectiveSerializer<MessageT extends MessageLite> implements Seri
   private final MethodHandle messageParseFrom;
 
   ProtobufReflectiveSerializer(Class<MessageT> messageType) {
+    // As the same message class may be loaded by multiple classloaders (e.g., several PF4J
+    // classloaders if several instances of the same artifact are loaded; or PF4J and TestKit
+    // classloaders), the lookup object must use the message class as its lookup class to satisfy
+    // linkage constraints.
     MethodHandles.Lookup lookup = MethodHandles.publicLookup()
         .in(messageType);
     try {
