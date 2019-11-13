@@ -125,24 +125,25 @@ class ServiceRuntimeAdapterTest {
     byte[] configuration = bytes(1, 2);
 
     // Initialize the service
-    serviceRuntimeAdapter.addService(forkHandle, instanceSpec, configuration);
+    serviceRuntimeAdapter.startAddingService(forkHandle, instanceSpec, configuration);
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
         ServiceArtifactId.newJavaId(javaArtifactName));
-    verify(serviceRuntime).addService(fork, expected, configuration);
+    verify(serviceRuntime).startAddingService(fork, expected, configuration);
   }
 
   @Test
   void beforeCommit() throws CloseFailuresException {
+    int serviceId = 1;
     long forkHandle = 0x110b;
     Fork fork = mock(Fork.class);
     when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
-    serviceRuntimeAdapter.beforeCommit(forkHandle);
+    serviceRuntimeAdapter.beforeCommit(serviceId, forkHandle);
 
-    verify(serviceRuntime).beforeCommit(fork);
+    verify(serviceRuntime).beforeCommit(serviceId, fork);
   }
 
   @Test

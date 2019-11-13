@@ -63,6 +63,17 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
+   * Initializes the runtime.
+   *
+   * @param nodeNativeHandle the native handle to the Node object
+   * @see ServiceRuntime#initialize(Node)
+   */
+  void initialize(long nodeNativeHandle) {
+    Node node = new NodeProxy(nodeNativeHandle);
+    serviceRuntime.initialize(node);
+  }
+
+  /**
    * Deploys the Java service artifact.
    *
    * @param name the Java service artifact name in format "groupId:artifactId:version"
@@ -101,37 +112,38 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
-   * Creates a new instance of an already deployed service and performs its initial configuration.
+   * Starts registration of a new service instance with the given specification.
    *
    * @param forkHandle a handle to a native fork object
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
    * @param configuration the service initial configuration parameters as a serialized protobuf
    *     message
-   * @see ServiceRuntime#addService(Fork, ServiceInstanceSpec, byte[])
+   * @see ServiceRuntime#startAddingService(Fork, ServiceInstanceSpec, byte[])
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    */
-  void addService(long forkHandle, byte[] instanceSpec, byte[] configuration)
+  void startAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
       ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
 
-      serviceRuntime.addService(fork, javaInstanceSpec, configuration);
+      serviceRuntime.startAddingService(fork, javaInstanceSpec, configuration);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
   }
 
   /**
-   * Restarts the service instance that has been successfully added to the blockchain.
+   * Adds a service instance to the runtime after it has been successfully initialized.
    *
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
+   * @see ServiceRuntime#commitService(ServiceInstanceSpec)
    */
-  void restartService(byte[] instanceSpec) {
+  void commitService(byte[] instanceSpec) {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
-    serviceRuntime.restartService(javaInstanceSpec);
+    serviceRuntime.commitService(javaInstanceSpec);
   }
 
   private static ServiceInstanceSpec parseInstanceSpec(byte[] instanceSpec) {
@@ -202,12 +214,12 @@ public class ServiceRuntimeAdapter {
    * @param forkHandle a handle to the native fork object, which must support checkpoints
    *                   and rollbacks
    * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#beforeCommit(Fork)
+   * @see ServiceRuntime#beforeCommit(int, Fork)
    */
-  void beforeCommit(long forkHandle) throws CloseFailuresException {
+  void beforeCommit(int serviceId, long forkHandle) throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("beforeCommit")) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
-      serviceRuntime.beforeCommit(fork);
+      serviceRuntime.beforeCommit(serviceId, fork);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
@@ -236,17 +248,6 @@ public class ServiceRuntimeAdapter {
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
-  }
-
-  /**
-   * Mounts the APIs of services with the given ids to the Java web-server.
-   *
-   * @param serviceIds the numeric ids of services to connect; must not be empty
-   * @param nodeNativeHandle the native handle to the Node object
-   */
-  void connectServiceApis(int[] serviceIds, long nodeNativeHandle) {
-    Node node = new NodeProxy(nodeNativeHandle);
-    serviceRuntime.connectServiceApis(serviceIds, node);
   }
 
   /**

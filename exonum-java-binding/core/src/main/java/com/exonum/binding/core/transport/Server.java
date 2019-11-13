@@ -58,11 +58,13 @@ public interface Server {
   void mountSubRouter(String mountPoint, Router subRouter);
 
   /**
-   * Starts listening on the given TCP port.
+   * Requests the server to start listening on the given TCP port.
    *
    * @param port a port to listen on
+   * @return a future that is completed when the server is started or failed to do so;
+   *     on success, will have the actual TCP port on which this server is currently listening
    */
-  void start(int port);
+  CompletableFuture<Integer> start(int port);
 
   /**
    * Returns a port this server is listening at, or {@link OptionalInt#empty()} if it does not
