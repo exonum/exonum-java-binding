@@ -16,6 +16,7 @@
 
 package com.exonum.binding.fakes.services.invalidservice;
 
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
@@ -28,8 +29,8 @@ public class NonInstantiableService extends AbstractService {
   private static final String NAME = "non-instantiable-service";
   private static final short ID = 128;
 
-  NonInstantiableService() {
-    super(ID, NAME, /* Will cause NPE: */ null);
+  NonInstantiableService(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
   }
 
   @Override

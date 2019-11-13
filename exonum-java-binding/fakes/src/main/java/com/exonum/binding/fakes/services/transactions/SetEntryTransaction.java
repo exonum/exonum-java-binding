@@ -20,6 +20,7 @@ import static com.exonum.binding.common.serialization.StandardSerializers.hash;
 import static com.exonum.binding.common.serialization.StandardSerializers.publicKey;
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -27,6 +28,7 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.fakes.services.service.TestService;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -36,6 +38,8 @@ import com.google.common.annotations.VisibleForTesting;
  * <p>Such transaction is supposed to be used in TransactionProxy integration tests.
  */
 public final class SetEntryTransaction implements Transaction {
+
+  public final static int ID = 1;
 
   @VisibleForTesting
   static final String ENTRY_NAME = "test_entry";
@@ -73,6 +77,10 @@ public final class SetEntryTransaction implements Transaction {
   @Override
   public String info() {
     return info;
+  }
+
+  public static Transaction fromArguments(byte[] arguments) {
+    return new SetEntryTransaction("value", "info");
   }
 
   private EntryIndexProxy<String> createTestEntry(Fork view) {

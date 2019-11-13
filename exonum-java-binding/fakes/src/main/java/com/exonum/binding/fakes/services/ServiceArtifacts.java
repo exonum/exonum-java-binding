@@ -41,14 +41,15 @@ public final class ServiceArtifacts {
    * can be loaded by the {@link ServiceRuntime} and
    * the service can be instantiated.
    * @param artifactId the artifact id
+   * @param version the artifact version
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
-  public static void createValidArtifact(ServiceArtifactId artifactId, Path artifactLocation)
+  public static void createValidArtifact(ServiceArtifactId artifactId, String version, Path artifactLocation)
       throws IOException {
     new ServiceArtifactBuilder()
-        .setPluginId(artifactId.toString())
-        .setPluginVersion(artifactId.getVersion())
+        .setPluginId(artifactId.getName())
+        .setPluginVersion(version)
         .addClasses(PutValueTransaction.class, SchemaFactory.class, TestSchema.class,
             TestService.class)
         .addExtensionClass(TestServiceModule.class)
@@ -76,14 +77,16 @@ public final class ServiceArtifacts {
    * Writes a service artifact that can be loaded, but with a service that cannot be
    * {@linkplain ServiceRuntime#addService(Fork, ServiceInstanceSpec, byte[])}  instantiated}.
    * @param artifactId the artifact id
+   * @param version the artifact version
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
   public static void createWithUninstantiableService(ServiceArtifactId artifactId,
+      String version,
       Path artifactLocation) throws IOException {
     new ServiceArtifactBuilder()
-        .setPluginId(artifactId.toString())
-        .setPluginVersion(artifactId.getVersion())
+        .setPluginId(artifactId.getName())
+        .setPluginVersion(version)
         .addClasses(NonInstantiableService.class)
         .addExtensionClass(NonInstantiableServiceModule.class)
         .writeTo(artifactLocation);
