@@ -12,6 +12,7 @@ crate-type = ["dylib"]
 
 [dependencies]
 exonum-testkit = "0.12"
+tokio-core = "0.1.17"
 failure = "0.1"
 futures = "0.1"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855)

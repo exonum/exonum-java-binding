@@ -27,7 +27,7 @@ use JavaRuntimeProxy;
 
 const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_ADAPTER_SIGNATURE: &str =
-    "(L/java/lang/String;I)Lcom/exonum/binding/core/runtime/ServiceRuntimeAdapter;";
+    "(Ljava/lang/String;I)Lcom/exonum/binding/core/runtime/ServiceRuntimeAdapter;";
 
 /// Instantiates JavaRuntimeProxy using provided Executor and runtime configuration parameters.
 pub fn create_service_runtime(

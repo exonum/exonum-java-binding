@@ -68,6 +68,11 @@ impl JavaRuntimeProxy {
         }
     }
 
+    /// Provides the same `Executor` with runtime
+    pub fn get_executor(&self) -> &Executor {
+        &self.exec
+    }
+
     fn parse_artifact(&self, artifact: &ArtifactId) -> Result<JavaArtifactId, ExecutionError> {
         if artifact.runtime_id != Self::RUNTIME_ID as u32 {
             Err(Error::IncorrectArtifactId.into())
@@ -453,6 +458,14 @@ impl fmt::Display for JavaArtifactId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }
+}
+
+/// Artifact deploy parameters for JavaRuntime
+#[derive(Serialize, Deserialize, Clone, ProtobufConvert, BinaryValue, PartialEq)]
+#[protobuf_convert(source = "proto::DeployArguments")]
+pub struct DeployArguments {
+    /// Artifact file-name
+    pub artifact_filename: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]

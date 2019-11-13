@@ -22,37 +22,77 @@ use tempfile::{self, TempPath};
 const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
 
 /// Creates valid service artifact.
-pub fn create_service_artifact_valid(executor: &Executor) -> TempPath {
-    create_service_artifact(executor, "createValidServiceArtifact")
+pub fn create_service_artifact_valid(
+    executor: &Executor,
+    artifact_id: &str,
+    artifact_version: &str,
+) -> TempPath {
+    create_service_artifact(
+        executor,
+        "createValidServiceArtifact",
+        artifact_id,
+        artifact_version,
+    )
 }
 
 /// Creates service artifact that fails loading.
-pub fn create_service_artifact_non_loadable(executor: &Executor) -> TempPath {
-    create_service_artifact(executor, "createUnloadableServiceArtifact")
+pub fn create_service_artifact_non_loadable(
+    executor: &Executor,
+    artifact_id: &str,
+    artifact_version: &str,
+) -> TempPath {
+    create_service_artifact(
+        executor,
+        "createUnloadableServiceArtifact",
+        artifact_id,
+        artifact_version,
+    )
 }
 
 /// Creates service artifact that provides service that is not possible to instantiate.
-pub fn create_service_artifact_non_instantiable_service(executor: &Executor) -> TempPath {
-    create_service_artifact(executor, "createServiceArtifactWithNonInstantiableService")
+pub fn create_service_artifact_non_instantiable_service(
+    executor: &Executor,
+    artifact_id: &str,
+    artifact_version: &str,
+) -> TempPath {
+    create_service_artifact(
+        executor,
+        "createServiceArtifactWithNonInstantiableService",
+        artifact_id,
+        artifact_version,
+    )
 }
 
 // Does the actual communication with the Java part.
-fn create_service_artifact(executor: &Executor, method_name: &str) -> TempPath {
+fn create_service_artifact(
+    executor: &Executor,
+    method_name: &str,
+    artifact_id: &str,
+    artifact_version: &str,
+) -> TempPath {
     unwrap_jni(executor.with_attached(|env| {
-        let artifact_path = tempfile::Builder::new()
-            .prefix("artifact")
+        let name = artifact_id.to_string().replace(":", "_");
+        let mut artifact_path = tempfile::Builder::new()
+            .prefix(&name)
             .suffix(".jar")
             .tempfile()
             .unwrap()
             .into_temp_path();
+
         let artifact_path_obj: JObject = env.new_string(artifact_path.to_str().unwrap())?.into();
+        let artifact_id_obj: JObject = env.new_string(artifact_id)?.into();
+        let artifact_version_obj: JObject = env.new_string(artifact_version)?.into();
         panic_on_exception(
             env,
             env.call_static_method(
                 NATIVE_FACADE_CLASS,
                 method_name,
-                "(Ljava/lang/String;)V",
-                &[JValue::from(artifact_path_obj)],
+                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+                &[
+                    JValue::from(artifact_id_obj),
+                    JValue::from(artifact_version_obj),
+                    JValue::from(artifact_path_obj),
+                ],
             )?
             .v(),
         );

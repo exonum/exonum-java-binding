@@ -17,5 +17,6 @@ extern crate lazy_static;
 extern crate tempfile;
 
 pub mod example_proxy;
+pub mod fake_runtime;
 pub mod fake_service;
 pub mod vm;

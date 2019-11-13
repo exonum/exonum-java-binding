@@ -30,7 +30,6 @@ use futures::{
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::{
     exonum::{
-        api::ApiContext,
         blockchain::Blockchain,
         crypto::{gen_keypair, PublicKey, SecretKey},
         node::{ApiSender, ExternalMessage},
