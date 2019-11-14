@@ -30,7 +30,7 @@ use futures::{
 use integration_tests::vm::create_vm_for_tests_with_fake_classes;
 use java_bindings::{
     exonum::{
-        api::ApiContext,
+        blockchain::Blockchain,
         crypto::{gen_keypair, PublicKey, SecretKey},
         node::{ApiSender, ExternalMessage},
         runtime::{AnyTx, CallInfo},
@@ -97,9 +97,8 @@ fn create_node(keypair: (PublicKey, SecretKey)) -> (Node, Receiver<ExternalMessa
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     let storage = TemporaryDB::new();
-
-    let api_context = ApiContext::new(storage, keypair, app_tx.clone());
-    let node = Node::new(api_context);
+    let blockchain = Blockchain::new(storage, keypair, app_tx.clone());
+    let node = Node::new(blockchain);
 
     (node, app_rx)
 }
