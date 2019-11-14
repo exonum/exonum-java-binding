@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 class ProofMapIndexProxyNoKeyHashingIntegrationTest
     extends BaseProofMapIndexProxyIntegrationTestable {
 
-  static final List<HashCode> PROOF_KEYS = Stream.of(
+  static final List<HashCode> SORTED_TEST_KEYS = Stream.of(
       Bytes.bytes(0x00),
       Bytes.bytes(0x01),
       Bytes.bytes(0x02),
@@ -71,8 +71,8 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   private static final HashCode INVALID_PROOF_KEY = HashCode.fromString("1234");
 
   @Override
-  List<HashCode> getProofKeys() {
-    return PROOF_KEYS;
+  List<HashCode> getTestKeys() {
+    return SORTED_TEST_KEYS;
   }
 
   @Override
@@ -424,8 +424,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
    * [(00…0PK1, V1), (00…0PK2, V2), … (00…0PKi, Vi)].
    */
   List<MapEntry<HashCode, String>> createSortedMapEntries() {
-    // Use PROOF_KEYS which are already sorted.
-    return createMapEntries(getProofKeys().stream());
+    return createMapEntries(SORTED_TEST_KEYS.stream());
   }
 
   /**

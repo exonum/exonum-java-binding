@@ -22,13 +22,16 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.Bytes;
+import org.junit.jupiter.api.Disabled;
+
 import java.util.List;
 import java.util.stream.Stream;
 
+@Disabled("Disabled until native support is implemented - ECR-3765")
 class ProofMapIndexProxyIntegrationTest
     extends BaseProofMapIndexProxyIntegrationTestable {
 
-  private static final List<HashCode> PROOF_KEYS = Stream.of(
+  private static final List<HashCode> TEST_KEYS = Stream.of(
       Bytes.bytes(0x00),
       Bytes.bytes(0x01),
       Bytes.bytes(0x02),
@@ -48,8 +51,8 @@ class ProofMapIndexProxyIntegrationTest
       .collect(toList());
 
   @Override
-  List<HashCode> getProofKeys() {
-    return PROOF_KEYS;
+  List<HashCode> getTestKeys() {
+    return TEST_KEYS;
   }
 
   @Override

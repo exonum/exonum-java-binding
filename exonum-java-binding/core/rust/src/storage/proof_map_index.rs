@@ -62,6 +62,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     _: JClass,
     name: JString,
     view_handle: Handle,
+    // TODO: to be used in ECR-3765
+    _key_hashing: jboolean,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
@@ -85,6 +87,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     group_name: JString,
     map_id: jbyteArray,
     view_handle: Handle,
+    // TODO: to be used in ECR-3765
+    _key_hashing: jboolean,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;

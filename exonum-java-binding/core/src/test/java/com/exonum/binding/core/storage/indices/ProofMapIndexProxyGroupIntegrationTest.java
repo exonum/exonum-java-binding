@@ -23,7 +23,9 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.K3;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Disabled;
 
+@Disabled("Disabled until native support is implemented - ECR-3765")
 class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String> {
 
   private static final String GROUP_NAME = "proof_map_group_IT";

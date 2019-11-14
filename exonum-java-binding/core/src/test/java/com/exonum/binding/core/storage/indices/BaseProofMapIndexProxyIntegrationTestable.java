@@ -73,14 +73,14 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   private static final String MAP_NAME = "test_proof_map";
 
-  private final HashCode key1 = getProofKeys().get(0);
-  private final HashCode key2 = getProofKeys().get(1);
-  private final HashCode key3 = getProofKeys().get(2);
+  private final HashCode key1 = getTestKeys().get(0);
+  private final HashCode key2 = getTestKeys().get(1);
+  private final HashCode key3 = getTestKeys().get(2);
 
   private static final HashCode EMPTY_MAP_INDEX_HASH = HashCode.fromString(
           "7324b5c72b51bb5d4c180f1109cfd347b60473882145841c39f3e584576296f9");
 
-  abstract List<HashCode> getProofKeys();
+  abstract List<HashCode> getTestKeys();
 
   @Test
   void containsKey() {
@@ -465,7 +465,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   List<MapEntry<HashCode, String>> createMapEntries() {
-    return createMapEntries(getProofKeys().stream());
+    return createMapEntries(getTestKeys().stream());
   }
 
   /**
