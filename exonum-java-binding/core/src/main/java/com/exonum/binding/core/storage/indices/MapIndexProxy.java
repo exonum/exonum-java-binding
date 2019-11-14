@@ -232,7 +232,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   /**
    * {@inheritDoc}
    *
-   * The keys are ordered in lexicographical order.
+   * <p>The keys are ordered in lexicographical order.
    */
   @Override
   public Iterator<K> keys() {
@@ -249,7 +249,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   /**
    * {@inheritDoc}
    *
-   * The values are ordered in lexicographical order of <em>keys</em>.
+   * <p>The values are ordered in lexicographical order of <em>keys</em>.
    */
   @Override
   public Iterator<V> values() {
@@ -266,7 +266,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   /**
    * {@inheritDoc}
    *
-   * The entries are ordered by keys in lexicographical order.
+   * <p>The entries are ordered by keys in lexicographical order.
    */
   @Override
   public Iterator<MapEntry<K, V>> entries() {

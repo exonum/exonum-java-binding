@@ -396,7 +396,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   /**
    * {@inheritDoc}
    *
-   * The keys are ordered in lexicographical order if this
+   * <p>The keys are ordered in lexicographical order if this
    * map is a non-key-hashing proof map, see
    * <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
    */
@@ -421,7 +421,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   /**
    * {@inheritDoc}
    *
-   * The values are ordered in lexicographical order of
+   * <p>The values are ordered in lexicographical order of
    * <em>keys</em> if this map is a non-key-hashing proof map, see
    * <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
    */
@@ -446,7 +446,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   /**
    * {@inheritDoc}
    *
-   * The entries are ordered by keys in lexicographical order if this map is a non-key-hashing
+   * <p>The entries are ordered by keys in lexicographical order if this map is a non-key-hashing
    * proof map, see <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
    */
   @Override
