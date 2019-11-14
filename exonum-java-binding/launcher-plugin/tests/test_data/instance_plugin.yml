@@ -1,0 +1,25 @@
+networks:
+  - host: "127.0.0.1"
+    ssl: false
+    public-api-port: 8080
+    private-api-port: 8081
+
+plugins:
+  artifact:
+    cryptocurrency: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
+
+deadline_height: 20000
+
+artifacts:
+  timestamping:
+    runtime: rust
+    name: "exonum-timestamping:0.12.0"
+
+instances:
+  timestamping:
+    artifact: timestamping
+    config:
+      sources: "test_data/proto_sources"
+      module_name: "service"
+      data:
+        time_service_name: "testing"
