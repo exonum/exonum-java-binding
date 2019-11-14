@@ -18,8 +18,10 @@ package com.exonum.binding.core.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.core.service.AbstractServiceModule;
+import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.google.inject.ConfigurationException;
@@ -49,9 +51,10 @@ class GuiceServicesFactoryTest {
         .newInstance(artifactId, TestServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
+    Node node = mock(Node.class);
 
     // Create the service
-    ServiceWrapper service = factory.createService(serviceDefinition, instanceSpec);
+    ServiceWrapper service = factory.createService(serviceDefinition, instanceSpec, node);
 
     // Check the created service
     assertThat(service.getName()).isEqualTo(TEST_NAME);
@@ -65,10 +68,11 @@ class GuiceServicesFactoryTest {
         .newInstance(artifactId, IncompleteServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
+    Node node = mock(Node.class);
 
     // Try to create the service
     Exception e = assertThrows(ConfigurationException.class,
-        () -> factory.createService(serviceDefinition, instanceSpec));
+        () -> factory.createService(serviceDefinition, instanceSpec, node));
 
     // Check the message indicates missing bindings
     assertThat(e).hasMessageContaining(Service.class.getSimpleName())

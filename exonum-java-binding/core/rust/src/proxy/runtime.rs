@@ -15,17 +15,13 @@
  */
 
 use exonum::{
-    api::ApiContext,
-    blockchain::Schema as CoreSchema,
-    crypto::{Hash, PublicKey, SecretKey},
-    exonum_merkledb::{self, Fork, Snapshot},
-    helpers::ValidatorId,
+    blockchain::{Blockchain, Schema as CoreSchema},
+    crypto::{Hash, PublicKey},
+    exonum_merkledb::{self, Snapshot},
     messages::BinaryValue,
-    node::ApiSender,
     runtime::{
-        dispatcher::{DispatcherRef, DispatcherSender},
-        ApiChange, ArtifactId, ArtifactProtobufSpec, CallInfo, ErrorKind, ExecutionContext,
-        ExecutionError, InstanceId, InstanceSpec, Runtime, RuntimeIdentifier, StateHashAggregator,
+        ArtifactId, ArtifactProtobufSpec, CallInfo, ErrorKind, ExecutionContext, ExecutionError,
+        InstanceId, InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, StateHashAggregator,
     },
 };
 use futures::{Future, IntoFuture};
@@ -34,8 +30,6 @@ use jni::{
     signature::{JavaType, Primitive},
     Executor, JNIEnv,
 };
-use proto;
-use proxy::node::NodeContext;
 use runtime::Error;
 use std::fmt;
 use storage::View;
@@ -48,12 +42,17 @@ use utils::{
 use JniError;
 use JniErrorKind;
 use JniResult;
+use {proto, Node};
+
+/// Default validator ID. -1 is used as not-a-value in Java runtime.
+const DEFAULT_VALIDATOR_ID: i32 = -1;
 
 /// A proxy for `ServiceRuntimeAdapter`s.
 #[derive(Clone)]
 pub struct JavaRuntimeProxy {
     exec: Executor,
     runtime_adapter: GlobalRef,
+    blockchain: Option<Blockchain>,
 }
 
 impl JavaRuntimeProxy {
@@ -65,6 +64,7 @@ impl JavaRuntimeProxy {
         JavaRuntimeProxy {
             exec: executor,
             runtime_adapter: adapter,
+            blockchain: None,
         }
     }
 
@@ -76,16 +76,12 @@ impl JavaRuntimeProxy {
         }
     }
 
-    /// If the current node is a validator, returns `Some(validator_id)`, for other nodes return `None`.
-    fn validator_id(snapshot: &dyn Snapshot, pub_key: &PublicKey) -> Option<ValidatorId> {
+    /// If the current node is a validator, returns its ID, otherwise returns `-1`.
+    fn validator_id(snapshot: &dyn Snapshot, pub_key: &PublicKey) -> i32 {
         CoreSchema::new(snapshot)
             .consensus_config()
             .find_validator(|validator_keys| *pub_key == validator_keys.service_key)
-    }
-
-    /// If the current node is a validator, return its identifier, for other nodes return `default`.
-    fn validator_id_or(snapshot: &dyn Snapshot, pub_key: &PublicKey, default: i32) -> i32 {
-        Self::validator_id(snapshot, pub_key).map_or(default, |id| i32::from(id.0))
+            .map_or(DEFAULT_VALIDATOR_ID, |id| i32::from(id.0))
     }
 
     /// Handles and clears any Java exceptions or other JNI errors.
@@ -185,11 +181,27 @@ impl JavaRuntimeProxy {
 }
 
 impl Runtime for JavaRuntimeProxy {
+    fn initialize(&mut self, blockchain: &Blockchain) {
+        self.blockchain = Some(blockchain.clone());
+
+        unwrap_jni(self.exec.with_attached(|env| {
+            let node_handle = to_handle(Node::new(blockchain.clone()));
+
+            env.call_method_unchecked(
+                self.runtime_adapter.as_obj(),
+                runtime_adapter::initialize_id(),
+                JavaType::Primitive(Primitive::Void),
+                &[JValue::from(node_handle)],
+            )
+            .and_then(JValue::v)
+        }))
+    }
+
     fn deploy_artifact(
         &mut self,
         artifact: ArtifactId,
         deploy_spec: Vec<u8>,
-    ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
+    ) -> Box<dyn Future<Item = ArtifactProtobufSpec, Error = ExecutionError>> {
         let id = match self.parse_artifact(&artifact) {
             Ok(id) => id.to_string(),
             Err(err) => return Box::new(Err(err).into_future()),
@@ -208,7 +220,11 @@ impl Runtime for JavaRuntimeProxy {
             .and_then(JValue::v)
         });
 
-        Box::new(result.into_future())
+        Box::new(
+            result
+                .map(|_| ArtifactProtobufSpec::default())
+                .into_future(),
+        )
     }
 
     fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
@@ -235,19 +251,47 @@ impl Runtime for JavaRuntimeProxy {
         }))
     }
 
-    fn artifact_protobuf_spec(&self, _id: &ArtifactId) -> Option<ArtifactProtobufSpec> {
-        Some(ArtifactProtobufSpec::default())
-    }
-
-    fn restart_service(&mut self, spec: &InstanceSpec) -> Result<(), ExecutionError> {
+    fn start_adding_service(
+        &self,
+        context: ExecutionContext<'_>,
+        spec: &InstanceSpec,
+        parameters: Vec<u8>,
+    ) -> Result<(), ExecutionError> {
         let serialized_instance_spec: Vec<u8> = spec.to_bytes();
 
         self.jni_call_default(|env| {
+            let fork_handle = to_handle(View::from_ref_mut_fork(context.fork));
             let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
+            let configuration = JObject::from(env.byte_array_from_slice(&parameters)?);
+
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::restart_service_id(),
+                runtime_adapter::start_adding_service_id(),
+                JavaType::Primitive(Primitive::Void),
+                &[
+                    JValue::from(fork_handle),
+                    JValue::from(instance_spec),
+                    JValue::from(configuration),
+                ],
+            )
+            .and_then(JValue::v)
+        })
+    }
+
+    fn commit_service(
+        &mut self,
+        _snapshot: &dyn Snapshot,
+        instance_spec: &InstanceSpec,
+    ) -> Result<(), ExecutionError> {
+        let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
+        self.jni_call_default(|env| {
+            let instance_spec =
+                JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
+
+            env.call_method_unchecked(
+                self.runtime_adapter.as_obj(),
+                runtime_adapter::commit_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[JValue::from(instance_spec)],
             )
@@ -255,36 +299,9 @@ impl Runtime for JavaRuntimeProxy {
         })
     }
 
-    fn add_service(
-        &mut self,
-        fork: &mut Fork,
-        instance_spec: &InstanceSpec,
-        parameters: Vec<u8>,
-    ) -> Result<(), ExecutionError> {
-        let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
-        self.jni_call_default(|env| {
-            let instance_spec =
-                JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
-            let view_handle = to_handle(View::from_ref_fork(fork));
-            let params = JObject::from(env.byte_array_from_slice(&parameters)?);
-
-            env.call_method_unchecked(
-                self.runtime_adapter.as_obj(),
-                runtime_adapter::add_service_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[
-                    JValue::from(view_handle),
-                    JValue::from(instance_spec),
-                    JValue::from(params),
-                ],
-            )
-            .and_then(JValue::v)
-        })
-    }
-
     fn execute(
         &self,
-        context: &ExecutionContext,
+        context: ExecutionContext,
         call_info: &CallInfo,
         arguments: &[u8],
     ) -> Result<(), ExecutionError> {
@@ -350,9 +367,13 @@ impl Runtime for JavaRuntimeProxy {
             .into()
     }
 
-    fn before_commit(&self, _dispatcher: &DispatcherRef, fork: &mut Fork) {
-        unwrap_jni(self.exec.with_attached(|env| {
-            let view_handle = to_handle(View::from_ref_mut_fork(fork));
+    fn before_commit(
+        &self,
+        context: ExecutionContext,
+        instance_id: InstanceId,
+    ) -> Result<(), ExecutionError> {
+        self.jni_call_default(|env| {
+            let view_handle = to_handle(View::from_ref_mut_fork(context.fork));
 
             panic_on_exception(
                 env,
@@ -360,23 +381,23 @@ impl Runtime for JavaRuntimeProxy {
                     self.runtime_adapter.as_obj(),
                     runtime_adapter::before_commit_id(),
                     JavaType::Primitive(Primitive::Void),
-                    &[JValue::from(view_handle)],
+                    &[JValue::from(instance_id as i32), JValue::from(view_handle)],
                 ),
             );
             Ok(())
-        }));
+        })
     }
 
-    fn after_commit(
-        &self,
-        _dispatcher: &DispatcherSender,
-        snapshot: &Snapshot,
-        service_keypair: &(PublicKey, SecretKey),
-        _tx_sender: &ApiSender,
-    ) {
+    fn after_commit(&mut self, snapshot: &dyn Snapshot, _mailbox: &mut Mailbox) {
         unwrap_jni(self.exec.with_attached(|env| {
             let view_handle = to_handle(View::from_ref_snapshot(snapshot));
-            let validator_id = Self::validator_id_or(snapshot, &service_keypair.0, -1);
+            let public_key = self
+                .blockchain
+                .as_ref()
+                .expect("afterCommit called before initialize")
+                .service_keypair()
+                .0;
+            let validator_id = Self::validator_id(snapshot, &public_key);
             let height: u64 = CoreSchema::new(snapshot).height().into();
 
             panic_on_exception(
@@ -396,44 +417,7 @@ impl Runtime for JavaRuntimeProxy {
         }));
     }
 
-    fn notify_api_changes(&self, context: &ApiContext, changes: &[ApiChange]) {
-        let added_instances_ids: Vec<i32> = changes
-            .iter()
-            .filter_map(|change| {
-                if let ApiChange::InstanceAdded(instance_id) = change {
-                    Some(*instance_id as i32)
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        if added_instances_ids.is_empty() {
-            return;
-        }
-
-        let node = NodeContext::new(self.exec.clone(), context.clone());
-
-        unwrap_jni(self.exec.with_attached(|env| {
-            let node_handle = to_handle(node);
-            let ids_array = env.new_int_array(added_instances_ids.len() as i32)?;
-            env.set_int_array_region(ids_array, 0, &added_instances_ids)?;
-            let service_ids = JObject::from(ids_array);
-
-            panic_on_exception(
-                env,
-                env.call_method_unchecked(
-                    self.runtime_adapter.as_obj(),
-                    runtime_adapter::connect_apis_id(),
-                    JavaType::Primitive(Primitive::Void),
-                    &[JValue::from(service_ids), JValue::from(node_handle)],
-                ),
-            );
-            Ok(())
-        }));
-    }
-
-    fn shutdown(&self) {
+    fn shutdown(&mut self) {
         unwrap_jni(self.exec.with_attached(|env| {
             panic_on_exception(
                 env,

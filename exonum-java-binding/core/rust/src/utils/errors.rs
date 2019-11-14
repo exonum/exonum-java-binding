@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use exonum::exonum_merkledb::Error as DatabaseError;
 use jni::objects::JObject;
 use jni::JNIEnv;
 
@@ -186,6 +187,8 @@ pub fn any_to_string(any: &Box<dyn Any + Send>) -> String {
         s.clone()
     } else if let Some(error) = any.downcast_ref::<Box<dyn Error + Send>>() {
         error.description().to_string()
+    } else if let Some(error) = any.downcast_ref::<DatabaseError>() {
+        error.to_string()
     } else {
         "Unknown error occurred".to_string()
     }
@@ -218,6 +221,13 @@ mod tests {
         let description = error.description().to_owned();
         let error = panic_error(error);
         assert_eq!(description, any_to_string(&error));
+    }
+
+    #[test]
+    fn database_error_any() {
+        let error = DatabaseError::new("Database error");
+        let error = panic_error(error);
+        assert_eq!("Database error", any_to_string(&error));
     }
 
     #[test]

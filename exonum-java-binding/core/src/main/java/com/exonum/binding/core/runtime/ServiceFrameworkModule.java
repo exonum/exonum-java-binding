@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import com.exonum.binding.core.service.Node;
 import com.google.inject.AbstractModule;
 
 /**
@@ -25,9 +26,11 @@ import com.google.inject.AbstractModule;
 class ServiceFrameworkModule extends AbstractModule {
 
   private final ServiceInstanceSpec instanceSpec;
+  private final Node node;
 
-  ServiceFrameworkModule(ServiceInstanceSpec instanceSpec) {
+  ServiceFrameworkModule(ServiceInstanceSpec instanceSpec, Node node) {
     this.instanceSpec = instanceSpec;
+    this.node = node;
   }
 
   @Override
@@ -35,5 +38,6 @@ class ServiceFrameworkModule extends AbstractModule {
     // todo: consider named bindings for the name and id — they will require publicly
     //   accessible key names.
     bind(ServiceInstanceSpec.class).toInstance(instanceSpec);
+    bind(Node.class).toInstance(node);
   }
 }
