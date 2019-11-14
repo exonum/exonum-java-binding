@@ -52,7 +52,8 @@ runtimes:
 
 plugins:
   runtime: {}
-  artifact: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
+  artifact: 
+    service_instance_name: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
 ```
 
 To instantiate a service with a custom configuration you need to create Protobuf
@@ -62,7 +63,7 @@ of the message must be `Config`:
   ```proto
   syntax = "proto3";
   
-  package exonum.examples.timestamping;
+  package exonum.examples.service_name;
   
   message Config {
       string time_service_name = 1;
@@ -79,8 +80,8 @@ is located. In our example we use `service.proto` file.
 
 ```yaml
 instances:
-  timestamping:
-    artifact: timestamping
+  service_instance_name:
+    artifact: service_artifact_name
     config:
       sources: "proto_sources"
       module_name: "service"
