@@ -189,7 +189,7 @@ impl RunDev {
         generate_config.execute()?;
 
         let finalize = Finalize {
-            secret_config_path: secret_config_path,
+            secret_config_path,
             output_config_path: node_config_path.clone(),
             public_configs: vec![public_config_path],
             public_api_address: Some(public_api_address),
@@ -265,7 +265,7 @@ impl EjbCommand for RunDev {
         let db_path = concat_path(self.blockchain_path.clone(), "db");
         let node_config_path = self.generate_node_configuration_if_needed()?;
 
-        let EJB_PORT = 6400;
+        let ejb_port = 6400;
 
         let standard_run = StandardRun {
             node_config: node_config_path,
@@ -277,7 +277,7 @@ impl EjbCommand for RunDev {
 
         let run = Run {
             standard: standard_run,
-            ejb_port: EJB_PORT,
+            ejb_port,
             artifacts_path: self.artifacts_path,
             ejb_log_config_path: self.ejb_log_config_path,
             ejb_override_java_library_path: None,
