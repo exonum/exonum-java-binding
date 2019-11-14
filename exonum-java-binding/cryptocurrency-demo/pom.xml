@@ -18,6 +18,7 @@
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
+    <artifactFilename>${artifactId}-${version}-artifact</artifactFilename>
   </properties>
 
   <dependencyManagement>
@@ -144,9 +145,11 @@
         <configuration>
           <argLine>
             ${jacoco.args}
-            -Djava.library.path=${ejb-core.nativeLibPath}
             ${java.vm.assertionFlag}
           </argLine>
+          <excludes>
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
         </configuration>
       </plugin>
 
@@ -182,7 +185,7 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${project.artifactId}-${project.version}-artifact</finalName>
+          <finalName>${artifactFilename}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <!-- Do not use the produced artifact jar file as a main jar
                i.e. do not install it in the local repo -->
@@ -204,6 +207,34 @@
         <configuration>
           <skip>true</skip>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+          <argLine>${jacoco.it.args}
+             -Djava.library.path=${ejb-core.nativeLibPath}
+            ${java.vm.assertionFlag}
+          </argLine>
+          <systemPropertyVariables>
+            <it.artifactFilename>${artifactFilename}.jar</it.artifactFilename>
+            <it.artifactId>${groupId}:${artifactId}:${version}</it.artifactId>
+            <it.artifactsDirectory>${project.build.directory}</it.artifactsDirectory>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <extensions>
