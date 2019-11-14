@@ -229,6 +229,11 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
     nativeRemove(getNativeHandle(), dbKey);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * The keys are ordered in lexicographical order.
+   */
   @Override
   public Iterator<K> keys() {
     return StorageIterators.createIterator(
@@ -241,6 +246,11 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
     );
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * The values are ordered in lexicographical order of <em>keys</em>.
+   */
   @Override
   public Iterator<V> values() {
     return StorageIterators.createIterator(
@@ -253,6 +263,11 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
     );
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * The entries are ordered by keys in lexicographical order.
+   */
   @Override
   public Iterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(

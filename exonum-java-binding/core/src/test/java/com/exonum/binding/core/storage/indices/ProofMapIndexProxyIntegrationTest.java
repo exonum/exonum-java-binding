@@ -22,10 +22,9 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.Bytes;
-import org.junit.jupiter.api.Disabled;
-
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 
 @Disabled("Disabled until native support is implemented - ECR-3765")
 class ProofMapIndexProxyIntegrationTest
