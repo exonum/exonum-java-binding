@@ -17,6 +17,11 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +33,6 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -38,12 +42,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @RequiresNativeLibrary
-class TransferTxHistoryTest {
+class TransferTxHistoryIntegrationTest {
 
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
-          .withService(CryptocurrencyServiceModule.class));
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+          .withArtifactsDirectory(artifactsDirectory));
 
   private static final KeyPair ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
@@ -54,29 +60,29 @@ class TransferTxHistoryTest {
     // Create source and target wallets with the same initial balance
     long initialBalance = 100L;
     TransactionMessage createFromWalletTx1 =
-        newCreateWalletTransaction(initialBalance, ACCOUNT_1);
+        newCreateWalletTransaction(initialBalance, ACCOUNT_1, SERVICE_ID);
     TransactionMessage createFromWalletTx2 =
-        newCreateWalletTransaction(initialBalance, ACCOUNT_2);
+        newCreateWalletTransaction(initialBalance, ACCOUNT_2, SERVICE_ID);
     testKit.createBlockWithTransactions(createFromWalletTx1, createFromWalletTx2);
 
     // Create and execute 1st transaction
     long seed1 = 1L;
     long transferSum1 = 40L;
     TransactionMessage transferTx1 = newTransferTransaction(
-        seed1, ACCOUNT_1, ACCOUNT_2.getPublicKey(), transferSum1);
+        seed1, ACCOUNT_1, ACCOUNT_2.getPublicKey(), transferSum1, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx1);
 
     // Create and execute 2nd transaction
     long seed2 = 2L;
     long transferSum2 = 10L;
     TransactionMessage transferTx2 = newTransferTransaction(
-        seed2, ACCOUNT_2, ACCOUNT_1.getPublicKey(), transferSum2);
+        seed2, ACCOUNT_2, ACCOUNT_1.getPublicKey(), transferSum2, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx2);
 
     Snapshot view = testKit.getSnapshot();
 
     // Check that wallets have correct balances
-    CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    CryptocurrencySchema schema = new CryptocurrencySchema(view, SERVICE_NAME);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
     assertThat(wallets.get(ACCOUNT_1.getPublicKey()).getBalance())

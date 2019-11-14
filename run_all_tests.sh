@@ -24,7 +24,7 @@ echo "Start building the project with running all Java test"
 mvn install \
   --activate-profiles ci-build \
   -Drust.compiler.version="${RUST_COMPILER_VERSION}" \
-  -pl exonum-light-client,exonum-java-binding/core,exonum-java-binding/fake-service,exonum-java-binding/integration-tests,exonum-java-binding/qa-service \
+  -pl exonum-light-client,exonum-java-binding/core,exonum-java-binding/fake-service,exonum-java-binding/integration-tests,exonum-java-binding/cryptocurrency-demo,exonum-java-binding/qa-service \
   -am
 
 # Skip running native ITs as they are broken till the JavaServiceRuntime is implemented
