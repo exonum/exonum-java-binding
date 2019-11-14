@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-extern crate exonum_testkit;
 extern crate integration_tests;
 extern crate java_bindings;
 
@@ -24,7 +23,6 @@ use java_bindings::{
     create_java_vm, create_service_runtime, Executor, InternalConfig, JvmConfig, RuntimeConfig,
 };
 
-use exonum_testkit::TestKitBuilder;
 use std::{path::PathBuf, sync::Arc};
 
 #[test]
@@ -54,10 +52,5 @@ fn bootstrap() {
     let java_vm = create_java_vm(&jvm_config, &runtime_config, internal_config);
     let executor = Executor::new(Arc::new(java_vm));
 
-    let runtime = create_service_runtime(executor, &runtime_config);
-
-    let mut testkit = TestKitBuilder::validator()
-        .with_additional_runtime(runtime)
-        .create();
-    testkit.create_block();
+    let _runtime: Box<dyn Runtime> = create_service_runtime(executor, &runtime_config);
 }
