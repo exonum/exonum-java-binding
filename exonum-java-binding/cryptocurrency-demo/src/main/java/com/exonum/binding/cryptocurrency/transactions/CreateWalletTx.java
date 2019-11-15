@@ -19,13 +19,11 @@ package com.exonum.binding.cryptocurrency.transactions;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
@@ -37,7 +35,7 @@ import java.util.Objects;
 /** A transaction that creates a new named wallet with default balance. */
 public final class CreateWalletTx implements Transaction {
 
-  static final short ID = 1;
+  static final int ID = 1;
   private static final Serializer<TxMessageProtos.CreateWalletTx> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.CreateWalletTx.class);
   private final long initialBalance;
@@ -51,14 +49,10 @@ public final class CreateWalletTx implements Transaction {
   }
 
   /**
-   * Creates a create wallet transaction from the serialized transaction data.
-   * @param rawTransaction a raw transaction
+   * Creates a create wallet transaction given transaction id and the serialized transaction data.
    */
-  static CreateWalletTx fromRawTransaction(RawTransaction rawTransaction) {
-    checkTransaction(rawTransaction, ID);
-
-    TxMessageProtos.CreateWalletTx body =
-        PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
+  static CreateWalletTx from(byte[] arguments) {
+    TxMessageProtos.CreateWalletTx body = PROTO_SERIALIZER.fromBytes(arguments);
 
     long initialBalance = body.getInitialBalance();
     return new CreateWalletTx(initialBalance);
@@ -68,7 +62,8 @@ public final class CreateWalletTx implements Transaction {
   public void execute(TransactionContext context) throws TransactionExecutionException {
     PublicKey ownerPublicKey = context.getAuthorPk();
 
-    CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
+    CryptocurrencySchema schema =
+        new CryptocurrencySchema(context.getFork(), context.getServiceName());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
     if (wallets.containsKey(ownerPublicKey)) {

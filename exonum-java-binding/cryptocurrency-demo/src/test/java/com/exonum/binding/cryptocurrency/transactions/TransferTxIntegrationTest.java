@@ -18,13 +18,18 @@ package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferRawTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTxPayload;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -35,16 +40,14 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.CryptocurrencyServiceModule;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -53,26 +56,29 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class TransferTxTest {
+class TransferTxIntegrationTest {
 
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
-          .withService(CryptocurrencyServiceModule.class));
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+          .withArtifactsDirectory(artifactsDirectory));
 
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
 
   @Test
-  void fromRawTransaction() {
+  void from() {
     long seed = 1;
-    long amount = 50L;
+    long sum = 50L;
     PublicKey recipientKey = TO_KEY_PAIR.getPublicKey();
-    RawTransaction raw = newTransferRawTransaction(seed, amount, recipientKey);
 
-    TransferTx tx = TransferTx.fromRawTransaction(raw);
+    byte[] arguments = newTransferTxPayload(seed, recipientKey, sum);
 
-    assertThat(tx).isEqualTo(new TransferTx(seed, recipientKey, amount));
+    TransferTx tx = TransferTx.from(arguments);
+
+    assertThat(tx).isEqualTo(new TransferTx(seed, recipientKey, sum));
   }
 
   @ParameterizedTest
@@ -84,11 +90,10 @@ class TransferTxTest {
   })
   void fromRawTransactionRejectsNonPositiveBalance(long transferAmount) {
     long seed = 1;
-    RawTransaction tx =
-        newTransferRawTransaction(seed, transferAmount, TO_KEY_PAIR.getPublicKey());
+    byte[] arguments = newTransferTxPayload(seed, TO_KEY_PAIR.getPublicKey(), transferAmount);
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransferTx.fromRawTransaction(tx));
+        () -> TransferTx.from(arguments));
 
     assertThat(e.getMessage()).contains("transfer amount")
         .contains(Long.toString(transferAmount));
@@ -100,22 +105,22 @@ class TransferTxTest {
     // Create source and target wallets with the same initial balance
     long initialBalance = 100L;
     TransactionMessage createFromWalletTx =
-        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR, SERVICE_ID);
     TransactionMessage createToWalletTx =
-        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR, SERVICE_ID);
     testKit.createBlockWithTransactions(createFromWalletTx, createToWalletTx);
 
     // Create and execute the transaction
     long seed = 1L;
     long transferSum = 40L;
     TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
 
     // Check that wallets have correct balances
-    CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    CryptocurrencySchema schema = new CryptocurrencySchema(view, SERVICE_NAME);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     long expectedFromValue = initialBalance - transferSum;
     assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance())
@@ -138,13 +143,13 @@ class TransferTxTest {
     // Create a receiver’s wallet with the given initial balance
     long initialBalance = 50L;
     TransactionMessage createToWalletTx =
-        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR, SERVICE_ID);
     testKit.createBlockWithTransactions(createToWalletTx);
 
     long seed = 1L;
     long transferSum = 50L;
     TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -160,13 +165,13 @@ class TransferTxTest {
     // Create a receiver’s wallet with the given initial balance
     long initialBalance = 50L;
     TransactionMessage createFromWalletTx =
-        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR, SERVICE_ID);
     testKit.createBlockWithTransactions(createFromWalletTx);
 
     long seed = 1L;
     long transferSum = 50L;
     TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -182,7 +187,7 @@ class TransferTxTest {
     long seed = 1L;
     long transferSum = 50L;
     TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey(), transferSum);
+        seed, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -198,9 +203,9 @@ class TransferTxTest {
     // Create source and target wallets with the same initial balance
     long initialBalance = 50L;
     TransactionMessage createFromWalletTx =
-        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR);
+        newCreateWalletTransaction(initialBalance, FROM_KEY_PAIR, SERVICE_ID);
     TransactionMessage createToWalletTx =
-        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR);
+        newCreateWalletTransaction(initialBalance, TO_KEY_PAIR, SERVICE_ID);
     testKit.createBlockWithTransactions(createFromWalletTx, createToWalletTx);
 
     // Create and execute the transaction that attempts to transfer an amount exceeding the
@@ -208,7 +213,7 @@ class TransferTxTest {
     long seed = 1L;
     long transferSum = initialBalance + 50L;
     TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum);
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
