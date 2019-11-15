@@ -57,15 +57,14 @@ plugins:
 ```
 
 To instantiate a service with a custom configuration you need to take a Protobuf
-source of the configuration message and place it in specific directory. The name 
-of the message must be `Config`:
+source of the configuration message and place it in specific directory:
 
   ```proto
   syntax = "proto3";
   
   package exonum.examples.service_name;
   
-  message Config {
+  message ServiceConfig {
       string time_service_name = 1;
   }
   ```
@@ -74,9 +73,11 @@ To instantiate a service, add the following fields to the instance `config`:
 
 - `sources`. Points to a directory with Protobuf-sources of service configuration 
 message. We use `proto_sources` directory.
-- `module_name`. A name (without extension) of the file where `Config` message 
+- `module_name`. A name (without extension) of the file where `message_name` message 
 is located. In our example we use `service.proto` file.
-- `data`. Your actual configuration in the format corresponding to `Config` message.
+- `message_name`. A name of the Protobuf message used to represent service configuration.
+  Optional, defaults to `Config`.
+- `data`. Your actual configuration in the format corresponding to `message_name` message.
 
 ```yaml
 instances:
@@ -85,6 +86,7 @@ instances:
     config:
       sources: "proto_sources"
       module_name: "service"
+      message_name: "ServiceConfig"
       data:
         time_service_name: "testing"
 ```

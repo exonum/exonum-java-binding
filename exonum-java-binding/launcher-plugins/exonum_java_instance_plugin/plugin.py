@@ -29,6 +29,7 @@ from exonum_launcher.configuration import Instance
 _PROTOBUF_SOURCES_FIELD_NAME = "sources"
 _PYTHON_MODULES_NAME = "service_modules"
 _MODULE_NAME_FIELD_NAME = "module_name"
+_CONFIG_MESSAGE_FIELD_NAME = "message_name"
 _DATA_FIELD_NAME = "data"
 
 
@@ -60,7 +61,8 @@ class JavaInstanceSpecLoader(InstanceSpecLoader):
             service_module = import_module(service_module_path)
 
             # Build encoder (serializer) for `Config` message from imported module
-            config_class = service_module.Config
+            config_class_name = instance.config.get(_CONFIG_MESSAGE_FIELD_NAME, "Config")
+            config_class = getattr(service_module, config_class_name)
             config_encoder = build_encoder_function(config_class)
             result = config_encoder(instance.config[_DATA_FIELD_NAME])
 
@@ -68,6 +70,11 @@ class JavaInstanceSpecLoader(InstanceSpecLoader):
 
     @staticmethod
     def cleanup(tmp_dir) -> None:
+        # Unload any previously loaded modules from other tests:
+        loaded_modules = list(sys.modules.keys())
+        for module in loaded_modules:
+            if module.startswith(_PYTHON_MODULES_NAME):
+                del sys.modules[module]
         sys.path.remove(tmp_dir)
         shutil.rmtree(tmp_dir)
 
