@@ -20,12 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 class SystemTimeProviderTest {
 
-  @RepeatedTest(2)
-  void systemTime() {
+  @Test
+  void systemTimeProvidesCurrentTimeInUtc() {
     TimeProvider systemTime = TimeProvider.systemTime();
 
     ZonedDateTime before = ZonedDateTime.now(ZoneOffset.UTC);
