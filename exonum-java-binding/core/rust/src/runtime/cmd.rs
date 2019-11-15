@@ -140,7 +140,7 @@ pub struct RunDev {
     /// Database is located in <blockchain_path>/db directory, node configuration files
     /// are located in <blockchain_path>/config directory. Existing files and directories are
     /// reused. To generate new node configuration and start a new blockchain, the user must
-    /// manually delete existing <blockchain_path> directory.
+    /// manually delete existing <blockchain_path> directory or specify a new one.
     #[structopt(long)]
     blockchain_path: PathBuf,
     /// Path to log4j configuration file.
