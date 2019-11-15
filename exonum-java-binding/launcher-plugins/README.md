@@ -73,7 +73,7 @@ To instantiate a service, add the following fields to the instance `config`:
 
 - `sources`. Points to a directory with Protobuf-sources of service configuration 
 message. We use `proto_sources` directory.
-- `module_name`. A name (without extension) of the file where `message_name` message 
+- `config_message_source`. A file name where `message_name` message 
 is located. In our example we use `service.proto` file.
 - `message_name`. A name of the Protobuf message used to represent service configuration.
   Optional, defaults to `Config`.
@@ -85,7 +85,7 @@ instances:
     artifact: service_artifact_name
     config:
       sources: "proto_sources"
-      module_name: "service"
+      config_message_source: "service.proto"
       message_name: "ServiceConfig"
       data:
         time_service_name: "testing"

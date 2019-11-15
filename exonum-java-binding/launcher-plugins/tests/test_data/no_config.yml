@@ -21,7 +21,7 @@ instances:
   no_sources:
     artifact: timestamping
     config:
-      module_name: "service"
+      config_message_source: "service.proto"
       data:
         time_service_name: "testing"
   no_module_name:
@@ -34,4 +34,4 @@ instances:
     artifact: timestamping
     config:
       sources: "proto_sources"
-      module_name: "service"
+      config_message_source: "service.proto"

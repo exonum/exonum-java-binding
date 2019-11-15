@@ -20,7 +20,7 @@ instances:
     artifact: timestamping
     config:
       sources: "test_data/proto_sources"
-      module_name: "custom_message_name"
+      config_message_source: "custom_message_name.proto"
       message_name: "InitialConfig"
       data:
         time_service_name: "testing"
