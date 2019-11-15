@@ -269,7 +269,7 @@ impl EjbCommand for RunDev {
 
         let standard_run = StandardRun {
             node_config: node_config_path,
-            db_path: db_path,
+            db_path,
             public_api_address: None,
             private_api_address: None,
             master_key_pass: Some(FromStr::from_str("pass:").unwrap()),
