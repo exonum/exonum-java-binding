@@ -189,8 +189,8 @@ public interface TransactionMessage {
     }
 
     /**
-     * Signs the message with the given key, creating a new signed binary transaction message.
-     * A shorthand for {@code signedWith(keys).build()}.
+     * Signs the message with the given Ed25519 keys, creating a new signed binary
+     * transaction message. A shorthand for {@code signedWith(keys).build()}.
      *
      * @param keys a key pair to {@linkplain #signedWith(KeyPair) sign} the message
      * @return a new signed binary transaction message
