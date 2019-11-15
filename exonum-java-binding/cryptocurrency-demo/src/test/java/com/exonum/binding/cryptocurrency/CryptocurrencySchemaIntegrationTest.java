@@ -16,6 +16,11 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -34,7 +39,9 @@ class CryptocurrencySchemaIntegrationTest {
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
-          .withService(CryptocurrencyServiceModule.class));
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+          .withArtifactsDirectory(artifactsDirectory));
 
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
@@ -42,7 +49,7 @@ class CryptocurrencySchemaIntegrationTest {
   @Test
   void getStateHashes(TestKit testKit) {
     Snapshot view = testKit.getSnapshot();
-    CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    CryptocurrencySchema schema = new CryptocurrencySchema(view, SERVICE_NAME);
 
     HashCode walletsMerkleRoot = schema.wallets().getIndexHash();
     ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
@@ -53,7 +60,7 @@ class CryptocurrencySchemaIntegrationTest {
   @Test
   void walletHistoryNoRecords(TestKit testKit) {
     Snapshot view = testKit.getSnapshot();
-    CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    CryptocurrencySchema schema = new CryptocurrencySchema(view, SERVICE_NAME);
 
     assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
   }
