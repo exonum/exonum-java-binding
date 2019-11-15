@@ -53,10 +53,10 @@ runtimes:
 plugins:
   runtime: {}
   artifact: 
-    service_instance_name: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
+    service_artifact_name: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
 ```
 
-To instantiate a service with a custom configuration you need to create Protobuf
+To instantiate a service with a custom configuration you need to take a Protobuf
 source of the configuration message and place it in specific directory. The name 
 of the message must be `Config`:
 
