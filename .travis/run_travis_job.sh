@@ -36,6 +36,7 @@ else
     # Set CI Maven arguments. They enable parallel builds, and parallel tests (Linux only).
     # TODO: Remove this when macos builds use newer JDK that does not hang up when
     #   parallel tests are enabled.
+    PARALLEL_TESTS_ENABLED="true"
     if [[ ${TRAVIS_OS_NAME} == "osx" ]]; then
       PARALLEL_TESTS_ENABLED="false"
     fi
