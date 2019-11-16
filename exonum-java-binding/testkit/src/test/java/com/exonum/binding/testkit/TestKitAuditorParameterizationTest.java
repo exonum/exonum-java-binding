@@ -23,10 +23,8 @@ import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_ID;
 import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_NAME;
 import static com.exonum.binding.testkit.TestKitTestUtils.createTestServiceArtifact;
 import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.nio.file.Path;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -35,6 +33,7 @@ import org.junit.jupiter.api.io.TempDir;
 class TestKitAuditorParameterizationTest {
 
   @TempDir
+  @SuppressWarnings("WeakerAccess") // @TempDir can't be private
   static Path artifactsDirectory;
 
   @RegisterExtension

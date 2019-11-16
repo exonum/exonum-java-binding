@@ -26,11 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Consumer;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -43,6 +41,7 @@ class TestKitParameterizationTest {
   private static final short NEW_VALIDATOR_COUNT = 8;
 
   @TempDir
+  @SuppressWarnings("WeakerAccess") // @TempDir can't be private
   static Path artifactsDirectory;
 
   @RegisterExtension
