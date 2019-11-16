@@ -113,9 +113,9 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   }
 
   /**
-   * Creates a non-key-hashing ProofMapIndexProxy. Requires that keys are 32-byte long.
+   * Creates a <a href="ProofMapIndexProxy.html#key-hashing">ProofMapIndexProxy that uses non-hashed keys</a>.
+   * Requires that keys are 32-byte long.
    *
-   * <p>See more on <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
    * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
    *             [a-zA-Z0-9_]
    * @param view a database view. Must be valid.
@@ -167,12 +167,11 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   }
 
   /**
-   * Creates a new non-key-hashing proof map in a <a href="package-summary.html#families">collection group</a>
-   * with the given name. Requires that keys are 32-byte long.
+   * Creates a new <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>
+   * in a <a href="package-summary.html#families">collection group</a> with the given name.
+   * Requires that keys are 32-byte long.
    *
    * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
-   *
-   * <p>See more on <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
    *
    * @param groupName a name of the collection group
    * @param mapId an identifier of this collection in the group, see the caveats
@@ -271,8 +270,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @param value a storage value to associate with the key
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of the key is not 32 bytes (in case of a
-   *     non-key-hashing proof map, see
-   *     <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>)
+   *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>)
    * @throws UnsupportedOperationException if this map is read-only
    */
   @Override
@@ -316,8 +314,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @param otherKeys other proof map keys which might be mapped to some values
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
-   *     non-key-hashing proof map, see
-   *     <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>)
+   *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>)
    */
   public UncheckedMapProof getProof(K key, K... otherKeys) {
     if (otherKeys.length == 0) {
@@ -335,9 +332,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @param keys proof map keys which might be mapped to some values
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
-   *     non-key-hashing proof map, see
-   *     <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>) or keys
-   *     collection is empty
+   *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>) or
+   *     keys collection is empty
    */
   public UncheckedMapProof getProof(Collection<? extends K> keys) {
     checkArgument(!keys.isEmpty(), "Keys collection should not be empty");
@@ -397,8 +393,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * {@inheritDoc}
    *
    * <p>The keys are ordered in lexicographical order if this
-   * map is a non-key-hashing proof map, see
-   * <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
+   * map is a
+   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   @Override
   public Iterator<K> keys() {
@@ -421,9 +417,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   /**
    * {@inheritDoc}
    *
-   * <p>The values are ordered in lexicographical order of
-   * <em>keys</em> if this map is a non-key-hashing proof map, see
-   * <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
+   * <p>The values are ordered in lexicographical order of <em>keys</em> if this map is a
+   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   @Override
   public Iterator<V> values() {
@@ -446,8 +441,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   /**
    * {@inheritDoc}
    *
-   * <p>The entries are ordered by keys in lexicographical order if this map is a non-key-hashing
-   * proof map, see <a href="ProofMapIndexProxy.html#key-hashing">key hashing in proof maps</a>.
+   * <p>The entries are ordered by keys in lexicographical order if this map is a
+   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   @Override
   public Iterator<MapEntry<K, V>> entries() {
