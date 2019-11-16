@@ -16,12 +16,26 @@
 
 package com.exonum.binding.testkit;
 
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_FILENAME;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_CONFIGURATION;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_NAME;
+import static com.exonum.binding.testkit.TestKitTestUtils.createTestServiceArtifact;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
-class TestKitAuditorParameterizationTest extends TestKitTestWithArtifactsCreated {
+class TestKitAuditorParameterizationTest {
+
+  @TempDir
+  static Path artifactsDirectory;
 
   @RegisterExtension
   TestKitExtension testKitAuditorExtension = new TestKitExtension(
@@ -30,6 +44,11 @@ class TestKitAuditorParameterizationTest extends TestKitTestWithArtifactsCreated
           .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
           .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
           .withArtifactsDirectory(artifactsDirectory));
+
+  @BeforeAll
+  static void setUp() throws IOException {
+    createTestServiceArtifact(artifactsDirectory);
+  }
 
   @Test
   void testTestKitValidator(@Validator TestKit testKit) {

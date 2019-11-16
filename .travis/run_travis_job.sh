@@ -36,8 +36,6 @@ else
     # Set CI Maven arguments. They enable parallel builds, and parallel tests (Linux only).
     # TODO: Remove this when macos builds use newer JDK that does not hang up when
     #   parallel tests are enabled.
-    # TODO: Reenable when the broken testkit tests are fixed: ECR-3797
-    PARALLEL_TESTS_ENABLED="false"
     if [[ ${TRAVIS_OS_NAME} == "osx" ]]; then
       PARALLEL_TESTS_ENABLED="false"
     fi

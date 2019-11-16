@@ -27,10 +27,8 @@ import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.core.messages.Runtime.InstanceSpec;
 import java.io.IOException;
 import java.nio.file.Path;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.io.TempDir;
 
-class TestKitTestWithArtifactsCreated {
+class TestKitTestUtils {
 
   static final String ARTIFACT_FILENAME = "test-service.jar";
   private static final String ARTIFACT_VERSION = "1.0.0";
@@ -50,24 +48,13 @@ class TestKitTestWithArtifactsCreated {
   static final String SERVICE_NAME_2 = "test-service2";
   static final int SERVICE_ID_2 = 48;
 
-  static Path artifactsDirectory;
-
-  @BeforeAll
-  static void setUp(@TempDir Path tmp) throws IOException {
-    artifactsDirectory = tmp;
-    createTestServiceArtifact();
-    // Although this artifact is needed only for some tests, it is created here so that tests
-    // wouldn't create artifacts in the shared directory
-    createTestService2Artifact();
-  }
-
-  private static void createTestServiceArtifact() throws IOException {
+  static void createTestServiceArtifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);
     createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
         TestTransaction.class, TestSchema.class, TestService.class);
   }
 
-  private static void createTestService2Artifact() throws IOException {
+  static void createTestService2Artifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME_2);
     createArtifact(artifactLocation, ARTIFACT_ID_2, ARTIFACT_VERSION_2, TestServiceModule2.class,
         TestTransaction.class, TestSchema.class, TestService2.class);
