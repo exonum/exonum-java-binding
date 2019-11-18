@@ -28,7 +28,7 @@ import com.exonum.core.messages.Runtime.InstanceSpec;
 import java.io.IOException;
 import java.nio.file.Path;
 
-class TestKitTestUtils {
+final class TestKitTestUtils {
 
   static final String ARTIFACT_FILENAME = "test-service.jar";
   private static final String ARTIFACT_VERSION = "1.0.0";
@@ -47,6 +47,8 @@ class TestKitTestUtils {
       ServiceArtifactId.newJavaId("com.exonum.binding:test-service-2:" + ARTIFACT_VERSION_2);
   static final String SERVICE_NAME_2 = "test-service2";
   static final int SERVICE_ID_2 = 48;
+
+  private TestKitTestUtils() {}
 
   static void createTestServiceArtifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);

@@ -45,6 +45,15 @@ import org.junit.platform.testkit.engine.Events;
 
 class TestKitExtensionTest {
 
+  @TempDir
+  @SuppressWarnings("WeakerAccess") // @TempDir can't be private
+  static Path artifactsDirectory;
+
+  @BeforeAll
+  static void setUp() throws IOException {
+    createTestServiceArtifact(artifactsDirectory);
+  }
+
   @Test
   @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void testKitInstantiationTestCase() {
@@ -117,9 +126,6 @@ class TestKitExtensionTest {
 
   static class TestKitInstantiationTestCase {
 
-    @TempDir
-    static Path artifactsDirectory;
-
     @RegisterExtension
     TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
@@ -127,11 +133,6 @@ class TestKitExtensionTest {
         .withArtifactsDirectory(artifactsDirectory));
 
     static TestKit instantiatedTestKit;
-
-    @BeforeAll
-    static void setUp() throws IOException {
-      createTestServiceArtifact(artifactsDirectory);
-    }
 
     @BeforeEach
     void beforeEachTestKitInject(TestKit testKit) {
@@ -158,19 +159,11 @@ class TestKitExtensionTest {
 
   static class BeforeEachInstantiationTestCase {
 
-    @TempDir
-    static Path artifactsDirectory;
-
     @RegisterExtension
     TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory));
-
-    @BeforeAll
-    static void setUp() throws IOException {
-      createTestServiceArtifact(artifactsDirectory);
-    }
 
     @BeforeEach
     void beforeEach(TestKit testKit) {
@@ -185,19 +178,11 @@ class TestKitExtensionTest {
 
   static class AfterEachInstantiationTestCase {
 
-    @TempDir
-    static Path artifactsDirectory;
-
     @RegisterExtension
     TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
         .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withArtifactsDirectory(artifactsDirectory));
-
-    @BeforeAll
-    static void setUp() throws IOException {
-      createTestServiceArtifact(artifactsDirectory);
-    }
 
     @AfterEach
     void afterEach(@ValidatorCount(8) TestKit testKit) {
@@ -212,9 +197,6 @@ class TestKitExtensionTest {
 
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   static class BeforeAllInstantiationTestCase {
-
-    // No need for a valid directory as the TestKit won't be built
-    static Path artifactsDirectory;
 
     @RegisterExtension
     TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
@@ -235,9 +217,6 @@ class TestKitExtensionTest {
 
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   static class AfterAllInstantiationTestCase {
-
-    // No need for a valid directory as the TestKit won't be built
-    static Path artifactsDirectory;
 
     @RegisterExtension
     TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
