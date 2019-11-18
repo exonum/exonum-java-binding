@@ -1,0 +1,43 @@
+networks:
+  - host: "127.0.0.1"
+    ssl: false
+  public-api-port: 8080
+  private-api-port: 8081
+
+deadline_height: 20000
+
+runtimes:
+  java: 1
+
+plugins:
+  runtime:
+  java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
+  artifact:
+    timestamping: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
+
+artifacts:
+  cryptocurrency:
+    runtime: java
+    name: "com.exonum.examples:cryptocurrency:0.9.0-SNAPSHOT"
+    spec:
+      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.9.0-SNAPSHOT-artifact.jar"
+  time:
+    runtime: rust
+    name: "exonum-time:0.12.0"
+  timestamping:
+    runtime: rust
+    name: "exonum-timestamping:0.12.0"
+
+instances:
+  cryptocurrency:
+    artifact: cryptocurrency
+  time:
+    artifact: time
+  timestamping:
+    artifact: timestamping
+    config:
+      sources: "proto_sources"
+      config_message_source: "service.proto"
+      message_name: "Config"
+      data:
+        time_service_name: "time"

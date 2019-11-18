@@ -13,6 +13,12 @@ mvn generate-sources -pl core
 python3 -m pip install -e launcher-plugins
 ```
 
+## Purpose
+
+- Java Runtime Plugin allows to deploy and start Java services.
+- Java Instance Plugin allows to use an arbitrary Protobuf message for service 
+  initial configuration parameters. The plugin can be used for both Java and Rust services.
+
 ## Usage
 
 TODO: Move the entire section to the EJB App tutorial.
@@ -35,11 +41,11 @@ To load service artifact, provide a filename of the service artifact, for exampl
 
 ```yaml
 artifacts:
-  cryptocurrency:
+  service_artifact_name:
     runtime: java
-    name: "com.exonum.examples:cryptocurrency:0.9.0-SNAPSHOT"
+    name: "com.exonum.examples:service-name:0.9.0-SNAPSHOT"
     spec:
-      artifact_filename: "cryptocurrency-0.9.0-SNAPSHOT-artifact.jar"
+      artifact_filename: "service-artifact-filename.jar"
 ```
 
 ### Java Instance Plugin
@@ -90,6 +96,14 @@ instances:
       data:
         time_service_name: "testing"
 ```
+
+### Example
+
+See [sample-config.yml](sample-config.yml) for an example of usage for both Runtime
+and Instance plugins. The example configuration describes three services: Java
+`cryptocurrency-demo`, Rust `timestamping` and `time` services. Java Instance plugin
+is used to configure `timestamping` service, while Java Runtime plugin is used to
+deploy and start `cryptocurrency-demo`.
 
 # License
 
