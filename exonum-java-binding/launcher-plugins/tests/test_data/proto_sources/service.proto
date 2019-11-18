@@ -17,6 +17,5 @@ syntax = "proto3";
 package exonum.examples.timestamping;
 
 message Config {
-    // Corresponds to https://developers.google.com/protocol-buffers/docs/encoding#strings
-    string time_service_name = 2;
+    string time_service_name = 1;
 }
