@@ -21,18 +21,18 @@ class TestInstancePlugin(unittest.TestCase):
         self.assertEqual(len(config.instances), 1)
         instance_loader = JavaInstanceSpecLoader()
 
-        for instance in config.instances:
-            spec = instance_loader.load_spec(None, instance)
-            self.assertEqual(spec, b"\n\x07\x74\x65\x73\x74\x69\x6e\x67")
+        instance = config.instances[0]
+        spec = instance_loader.load_spec(None, instance)
+        self.assertEqual(spec, b"\n\x07\x74\x65\x73\x74\x69\x6e\x67")
 
     def test_plugin_custom_message_name(self) -> None:
         config = self.load_config("custom_message_name.yml")
         self.assertEqual(len(config.instances), 1)
         instance_loader = JavaInstanceSpecLoader()
 
-        for instance in config.instances:
-            spec = instance_loader.load_spec(None, instance)
-            self.assertEqual(spec, b"\n\x07\x74\x65\x73\x74\x69\x6e\x67")
+        instance = config.instances[0]
+        spec = instance_loader.load_spec(None, instance)
+        self.assertEqual(spec, b"\n\x07\x74\x65\x73\x74\x69\x6e\x67")
 
     def test_plugin_errors_no_config_field(self) -> None:
         config = self.load_config("no_config.yml")
