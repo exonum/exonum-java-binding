@@ -17,72 +17,40 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
+import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
 import static com.exonum.binding.common.hash.Hashing.sha256;
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.TransactionUtils.toTransactionMessage;
-import static com.exonum.binding.qaservice.transactions.CreateCounterTx.converter;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
+import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
+import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
+import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.binding.qaservice.transactions.TransactionError.COUNTER_ALREADY_EXISTS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.binding.qaservice.Integration;
+import com.exonum.binding.qaservice.QaArtifactInfo;
 import com.exonum.binding.qaservice.QaSchema;
-import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.qaservice.QaServiceImpl;
-import com.exonum.binding.qaservice.QaServiceModule;
-import com.exonum.binding.test.Bytes;
-import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.google.gson.reflect.TypeToken;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class CreateCounterTxIntegrationTest {
+@Integration
+class CreateCounterTxTest {
 
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withService(QaServiceModule.class));
-
-  @Test
-  void converterRejectsWrongServiceId() {
-    RawTransaction tx = txTemplate()
-        .serviceId((short) -1)
-        .build();
-
-    assertThrows(IllegalArgumentException.class, () -> converter().fromRawTransaction(tx));
-  }
-
-  @Test
-  void converterRejectsWrongTxId() {
-    RawTransaction tx = txTemplate()
-        .transactionId((short) -1)
-        .build();
-
-    assertThrows(IllegalArgumentException.class, () -> converter().fromRawTransaction(tx));
-  }
-
-  @Test
-  void converterRoundtrip() {
-    String name = "counter";
-    CreateCounterTx tx = new CreateCounterTx(name);
-
-    RawTransaction raw = converter().toRawTransaction(tx);
-    CreateCounterTx txFromRaw = converter().fromRawTransaction(raw);
-
-    assertThat(txFromRaw).isEqualTo(tx);
-  }
+      QaArtifactInfo.createQaServiceTestkit()
+  );
 
   @Test
   void rejectsEmptyName() {
@@ -94,15 +62,13 @@ class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  @RequiresNativeLibrary
   void executeNewCounter(TestKit testKit) {
-    QaServiceImpl service = testKit.getService(QaService.ID, QaServiceImpl.class);
     String counterName = "counter";
-    service.submitCreateCounter(counterName);
-    testKit.createBlock();
+    TransactionMessage tx = createCreateCounterTx(counterName, QA_SERVICE_ID);
+    testKit.createBlockWithTransactions(tx);
 
     Snapshot view = testKit.getSnapshot();
-    QaSchema schema = new QaSchema(view);
+    QaSchema schema = new QaSchema(view, QA_SERVICE_NAME);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> counterNames = schema.counterNames();
     HashCode counterId = sha256().hashString(counterName, UTF_8);
@@ -112,11 +78,13 @@ class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  @RequiresNativeLibrary
   void executeAlreadyExistingCounter(TestKit testKit) {
     String counterName = "counter";
-    TransactionMessage transactionMessage = createCreateCounterTransaction(counterName);
-    TransactionMessage transactionMessage2 = createCreateCounterTransaction(counterName);
+    KeyPair key1 = ed25519().generateKeyPair();
+    KeyPair key2 = ed25519().generateKeyPair();
+    TransactionMessage transactionMessage = createCreateCounterTx(counterName, QA_SERVICE_ID, key1);
+    TransactionMessage transactionMessage2 = createCreateCounterTx(counterName, QA_SERVICE_ID,
+        key2);
     testKit.createBlockWithTransactions(transactionMessage);
     testKit.createBlockWithTransactions(transactionMessage2);
 
@@ -128,36 +96,9 @@ class CreateCounterTxIntegrationTest {
   }
 
   @Test
-  void info() {
-    String name = "counter";
-    CreateCounterTx tx = new CreateCounterTx(name);
-
-    String info = tx.info();
-
-    AnyTransaction<CreateCounterTx> txParams = json().fromJson(info,
-        new TypeToken<AnyTransaction<CreateCounterTx>>(){}.getType()
-    );
-    assertThat(txParams.service_id).isEqualTo(QaService.ID);
-    assertThat(txParams.message_id).isEqualTo(CREATE_COUNTER.id());
-    assertThat(txParams.body).isEqualTo(tx);
-  }
-
-  @Test
   void equals() {
     EqualsVerifier.forClass(CreateCounterTx.class)
         .verify();
   }
 
-  private TransactionMessage createCreateCounterTransaction(String counterName) {
-    CreateCounterTx createCounterTx = new CreateCounterTx(counterName);
-    RawTransaction rawTransaction = createCounterTx.toRawTransaction();
-    return toTransactionMessage(rawTransaction);
-  }
-
-  private static RawTransaction.Builder txTemplate() {
-    return RawTransaction.newBuilder()
-        .transactionId(CREATE_COUNTER.id())
-        .serviceId(QaService.ID)
-        .payload(Bytes.bytes());
-  }
 }

@@ -18,29 +18,31 @@ package com.exonum.binding.qaservice;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.core.messages.Blockchain.Config;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nullable;
 
 /**
  * A simple service for QA purposes.
  */
 public interface QaService extends Service {
 
-  short ID = 127;
-  String NAME = "qa";
-
-  HashCode submitCreateCounter(String counterName);
-
+  /**
+   * Creates a new self-signed 'increment counter' transaction and submits
+   * it through the {@link com.exonum.binding.core.service.Node}.
+   * Enables testing of {@link Node#submitTransaction(RawTransaction)}.
+   */
   HashCode submitIncrementCounter(long requestSeed, HashCode counterId);
 
-  HashCode submitValidThrowingTx(long requestSeed);
-
-  HashCode submitValidErrorTx(long requestSeed, byte errorCode, @Nullable String description);
-
+  /**
+   * Creates a new self-signed 'unknown' transaction and submits
+   * it through the {@link com.exonum.binding.core.service.Node}.
+   * Enables testing of {@link Node#submitTransaction(RawTransaction)}.
+   */
   HashCode submitUnknownTx();
 
   Optional<Counter> getValue(HashCode counterId);

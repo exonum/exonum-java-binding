@@ -479,7 +479,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .serviceId(SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
-        .sign(keyPair, CRYPTO_FUNCTION);
+        .sign(keyPair);
   }
 
   private void checkTransactionsCommittedSuccessfully(
@@ -503,7 +503,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .serviceId(wrongServiceId)
         .transactionId(TestTransaction.ID)
         .payload("Test message".getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+        .sign(KEY_PAIR);
     IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
         () -> testKit.createBlockWithTransactions(message));
     String expectedMessage = String.format("No service with id=%s in the Java runtime",
@@ -518,7 +518,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .serviceId(SERVICE_ID)
         .transactionId(wrongTransactionId)
         .payload("Test message".getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+        .sign(KEY_PAIR);
     IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
         () -> testKit.createBlockWithTransactions(message));
     assertThat(thrownException.getMessage())

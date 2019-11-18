@@ -61,7 +61,8 @@ class TransactionMessageBuilderTest {
         .serviceId(SERVICE_ID)
         .transactionId(TRANSACTION_ID)
         .payload(payload)
-        .sign(keys, cryptoFunction);
+        .signedWith(keys, cryptoFunction)
+        .build();
 
     // Check the message has correct attributes
     assertThat(message.getServiceId(), is(SERVICE_ID));
@@ -82,7 +83,7 @@ class TransactionMessageBuilderTest {
     KeyPair keys = KeyPair.createKeyPair(Bytes.bytes(0x00, 0x01), publicKeyBytes);
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> messageBuilder.sign(keys, CRYPTO));
+        () -> messageBuilder.sign(keys));
 
     assertThat(e.getMessage(), allOf(
         containsString(String.valueOf(publicKeyBytes.length)),
@@ -105,7 +106,7 @@ class TransactionMessageBuilderTest {
         .serviceId(SERVICE_ID)
         .transactionId(TRANSACTION_ID)
         .payload(payloadBuffer)
-        .sign(CRYPTO.generateKeyPair(), CRYPTO);
+        .sign(CRYPTO.generateKeyPair());
 
     assertThat(message.getPayload().toByteArray(), is(payload));
   }
@@ -123,25 +124,31 @@ class TransactionMessageBuilderTest {
     return ImmutableList.of(
         () -> TransactionMessage.builder()
             .serviceId(SERVICE_ID)
-            .sign(keyPair, CRYPTO),
+            .signedWith(keyPair)
+            .build(),
         () -> TransactionMessage.builder()
             .serviceId(SERVICE_ID)
             .transactionId(TRANSACTION_ID)
-            .sign(keyPair, CRYPTO),
+            .signedWith(keyPair)
+            .build(),
         () -> TransactionMessage.builder()
             .transactionId(TRANSACTION_ID)
-            .sign(keyPair, CRYPTO),
+            .signedWith(keyPair)
+            .build(),
         () -> TransactionMessage.builder()
             .serviceId(SERVICE_ID)
             .payload(payload)
-            .sign(keyPair, CRYPTO),
+            .signedWith(keyPair)
+            .build(),
         () -> TransactionMessage.builder()
             .transactionId(TRANSACTION_ID)
             .payload(payload)
-            .sign(keyPair, CRYPTO),
+            .signedWith(keyPair)
+            .build(),
         () -> TransactionMessage.builder()
             .payload(payload)
-            .sign(keyPair, CRYPTO)
+            .signedWith(keyPair)
+            .build()
     );
   }
 
