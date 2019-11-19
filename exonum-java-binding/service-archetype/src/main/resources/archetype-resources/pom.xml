@@ -20,6 +20,7 @@
     <hamcrest.version>2.1</hamcrest.version>
     <mockito.version>3.1.0</mockito.version>
     <exonum.version>0.9.0-SNAPSHOT</exonum.version>
+    <artifactFilename>${artifactId}-${version}-artifact</artifactFilename>
   </properties>
 
   <dependencyManagement>
@@ -123,10 +124,36 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.22.2</version>
         <configuration>
-          <argLine>
-            -Djava.library.path=${nativeLibPath}
-          </argLine>
+          <excludes>
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.22.2</version>
+        <configuration>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+          <argLine>-Djava.library.path=${nativeLibPath}</argLine>
+          <systemPropertyVariables>
+            <it.artifactFilename>${artifactFilename}.jar</it.artifactFilename>
+            <it.artifactId>${groupId}:${artifactId}:${version}</it.artifactId>
+            <it.artifactsDirectory>${project.build.directory}</it.artifactsDirectory>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>

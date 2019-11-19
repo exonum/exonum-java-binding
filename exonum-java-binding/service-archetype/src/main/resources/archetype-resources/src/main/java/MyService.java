@@ -16,6 +16,7 @@
 
 package ${package};
 
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
@@ -24,31 +25,21 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
-
 import java.util.Optional;
 
 public final class MyService extends AbstractService {
 
-  public static final short ID = 42;
-  static final String NAME = "${serviceName}";
-  static final String INITIAL_SERVICE_CONFIGURATION = "{ \"version\": 0.1 }";
-
   @Inject
-  public MyService(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
+  public MyService(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
   }
 
   @Override
   protected Schema createDataSchema(View view) {
-    return new MySchema(view);
+    String name = getName();
+    return new MySchema(view, name);
   }
 
   @Override
-  public Optional<String> initialize(Fork fork) {
-    return Optional.of(INITIAL_SERVICE_CONFIGURATION);
-  }
-
-  @Override
-  public void createPublicApiHandlers(Node node, Router router) {
-  }
+  public void createPublicApiHandlers(Node node, Router router) {}
 }
