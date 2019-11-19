@@ -94,7 +94,7 @@ public final class RuntimeTransport implements AutoCloseable {
     String serviceName = service.getName();
     int port = server.getActualPort().orElse(0);
     // Currently the API is mounted on *all* interfaces, see VertxServer#start
-    logger.info("Service {} API is mounted at :{}{}", serviceName, port, serviceApiPath);
+    logger.info("Service {} API is mounted at <host>::{}{}", serviceName, port, serviceApiPath);
 
     // Log the full path to one of the service endpoint
     serviceRoutes.stream()

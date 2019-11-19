@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,20 @@
 package com.exonum.binding.qaservice;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.junit.jupiter.api.Tag;
 
 /**
- * Indicates that it might make sense to promote the annotated element
- * to the core Exonum Java Binding library.
+ * Indicates that a test is an integration test. Tags the annotated test with "integration"
+ * tag.
  */
-@Target({
-    ElementType.TYPE,
-    ElementType.METHOD
-})
-public @interface PromoteToCore {
-  /**
-   * Why the element might be promoted to the core library.
-   */
-  String value() default "";
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Tag("integration")
+public @interface Integration {
+
 }
