@@ -14,6 +14,7 @@
 
 /// List of possible Java runtime errors.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, IntoExecutionError)]
+#[execution_error(kind = "runtime")]
 pub enum Error {
     /// Unable to parse artifact identifier or specified artifact has non-empty spec.
     IncorrectArtifactId = 0,

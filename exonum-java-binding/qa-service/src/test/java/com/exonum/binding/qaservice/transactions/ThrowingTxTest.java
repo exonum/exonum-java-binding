@@ -77,7 +77,7 @@ class ThrowingTxTest {
     ExecutionStatus txResult = blockchain.getTxResult(throwingTx.hash()).get();
     assertTrue(txResult.hasError());
     ExecutionError error = txResult.getError();
-    assertThat(error.getKind()).isEqualTo(ErrorKind.SERVICE);
+    assertThat(error.getKind()).isEqualTo(ErrorKind.RUNTIME);
     assertThat(error.getDescription()).contains("#execute of this transaction always throws");
   }
 
