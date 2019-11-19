@@ -389,13 +389,6 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
 
   private native void nativeRemove(long nativeHandle, byte[] key);
 
-  /**
-   * {@inheritDoc}
-   *
-   * <p>The keys are ordered in lexicographical order if this
-   * map is a
-   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
-   */
   @Override
   public Iterator<K> keys() {
     return StorageIterators.createIterator(
@@ -414,12 +407,6 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
 
   private native void nativeKeysIterFree(long iterNativeHandle);
 
-  /**
-   * {@inheritDoc}
-   *
-   * <p>The values are ordered in lexicographical order of <em>keys</em> if this map is a
-   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
-   */
   @Override
   public Iterator<V> values() {
     return StorageIterators.createIterator(
@@ -438,12 +425,6 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
 
   private native void nativeValuesIterFree(long iterNativeHandle);
 
-  /**
-   * {@inheritDoc}
-   *
-   * <p>The entries are ordered by keys in lexicographical order if this map is a
-   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
-   */
   @Override
   public Iterator<MapEntry<K, V>> entries() {
     return StorageIterators.createIterator(

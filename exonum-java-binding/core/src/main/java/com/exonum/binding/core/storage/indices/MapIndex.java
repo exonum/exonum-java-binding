@@ -94,21 +94,22 @@ public interface MapIndex<K, V> extends StorageIndex {
   void remove(K key);
   
   /**
-   * Returns an iterator over the map keys.
+   * Returns an iterator over the map keys. The keys are ordered in lexicographical order.
    *
    * @throws IllegalStateException if this map is not valid
    */
   Iterator<K> keys();
 
   /**
-   * Returns an iterator over the map values.
+   * Returns an iterator over the map values. The values are ordered in lexicographical order of
+   * <em>keys</em>.
    *
    * @throws IllegalStateException if this map is not valid
    */
   Iterator<V> values();
 
   /**
-   * Returns an iterator over the map entries.
+   * Returns an iterator over the map entries. The entries are ordered by keys in lexicographical order.
    *
    * @throws IllegalStateException if this map is not valid
    */
