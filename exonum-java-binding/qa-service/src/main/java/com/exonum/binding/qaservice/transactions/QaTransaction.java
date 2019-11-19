@@ -16,9 +16,6 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import com.google.common.primitives.Shorts;
-
-
 /**
  * All known QA service transactions.
  *
@@ -33,14 +30,14 @@ public enum QaTransaction {
   VALID_THROWING(12),
   VALID_ERROR(13);
 
-  private final short id;
+  private final int id;
 
   QaTransaction(int id) {
-    this.id = Shorts.checkedCast(id);
+    this.id = id;
   }
 
   /** Returns the unique id of this transaction. */
-  public short id() {
+  public int id() {
     return id;
   }
 

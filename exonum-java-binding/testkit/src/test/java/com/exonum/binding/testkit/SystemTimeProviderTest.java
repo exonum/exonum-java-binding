@@ -16,24 +16,23 @@
 
 package com.exonum.binding.testkit;
 
-import java.time.Clock;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import org.junit.jupiter.api.Test;
 
-/**
- * Time provider for service testing. Used as a time source by TestKit time service.
- */
-public interface TimeProvider {
+class SystemTimeProviderTest {
 
-  /**
-   * Returns the current time of this time provider in UTC time zone.
-   */
-  ZonedDateTime getTime();
+  @Test
+  void systemTimeProvidesCurrentTimeInUtc() {
+    TimeProvider systemTime = TimeProvider.systemTime();
 
-  /**
-   * Returns a provider that uses the {@linkplain Clock#system system time}.
-   */
-  static TimeProvider systemTime() {
-    return () -> ZonedDateTime.now(ZoneOffset.UTC);
+    ZonedDateTime before = ZonedDateTime.now(ZoneOffset.UTC);
+    ZonedDateTime provided = systemTime.getTime();
+    ZonedDateTime after = ZonedDateTime.now(ZoneOffset.UTC);
+
+    // Check that the provided time uses the UTC time zone and the current time
+    assertThat(provided).isBetween(before, after);
   }
 }

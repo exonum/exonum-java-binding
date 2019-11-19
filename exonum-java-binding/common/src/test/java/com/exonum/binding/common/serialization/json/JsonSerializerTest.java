@@ -83,7 +83,7 @@ class JsonSerializerTest {
         .serviceId(1)
         .transactionId(2)
         .payload(bytes())
-        .sign(keyPair, cryptoFunction);
+        .sign(keyPair);
   }
 
   private static class Wrapper<T> {

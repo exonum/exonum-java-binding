@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package exonum.qa;
+
+option java_package = "com.exonum.binding.qaservice";
+
+message InitialConfiguration {
+  // The name of a time oracle service instance to use.
+  string time_oracle_name = 1;
+}

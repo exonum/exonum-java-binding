@@ -60,12 +60,12 @@ class TransactionMessageGsonSerializerTest {
             .serviceId(Short.MIN_VALUE)
             .transactionId(Short.MAX_VALUE)
             .payload(bytes())
-            .sign(keys, ed25519()),
+            .sign(keys),
         TransactionMessage.builder()
             .serviceId((short) 0)
             .transactionId((short) 127)
             .payload(bytes(0x00, 0x01, 0x02))
-            .sign(keys, ed25519())
+            .sign(keys)
     );
   }
 

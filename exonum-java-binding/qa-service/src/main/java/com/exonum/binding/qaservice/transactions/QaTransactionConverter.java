@@ -20,10 +20,8 @@ import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COU
 import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERROR;
 import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
-import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkServiceId;
 
 import com.exonum.binding.core.service.TransactionConverter;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -33,23 +31,20 @@ import java.util.function.Function;
 public final class QaTransactionConverter implements TransactionConverter {
 
   @VisibleForTesting
-  static final ImmutableMap<Short, Function<RawTransaction, Transaction>> TRANSACTION_FACTORIES =
-      ImmutableMap.<Short, Function<RawTransaction, Transaction>>builder()
-          .put(INCREMENT_COUNTER.id(), IncrementCounterTx.converter()::fromRawTransaction)
-          .put(CREATE_COUNTER.id(), CreateCounterTx.converter()::fromRawTransaction)
-          .put(VALID_THROWING.id(), ThrowingTx.converter()::fromRawTransaction)
-          .put(VALID_ERROR.id(), ErrorTx.converter()::fromRawTransaction)
+  static final ImmutableMap<Integer, Function<byte[], Transaction>> TRANSACTION_FACTORIES =
+      ImmutableMap.<Integer, Function<byte[], Transaction>>builder()
+          .put(INCREMENT_COUNTER.id(), IncrementCounterTx::fromBytes)
+          .put(CREATE_COUNTER.id(), CreateCounterTx::fromBytes)
+          .put(VALID_THROWING.id(), ThrowingTx::fromBytes)
+          .put(VALID_ERROR.id(), ErrorTx::fromBytes)
           .build();
 
   @Override
-  public Transaction toTransaction(RawTransaction rawTransaction) {
-    checkServiceId(rawTransaction);
-
-    short txId = rawTransaction.getTransactionId();
-    return TRANSACTION_FACTORIES.getOrDefault(txId, (m) -> {
+  public Transaction toTransaction(int txId, byte[] arguments) {
+    return TRANSACTION_FACTORIES.getOrDefault(txId, (args) -> {
       throw new IllegalArgumentException("Unknown transaction id: " + txId);
     })
-        .apply(rawTransaction);
+        .apply(arguments);
   }
 
 }
