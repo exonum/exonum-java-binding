@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Entry, Fork, ObjectHash, Snapshot};
+use exonum_merkledb::{access::FromAccess, Entry, Fork, ObjectHash, Snapshot};
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray},
@@ -44,10 +44,14 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
         let name = utils::convert_to_string(&env, name)?;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
-                }
-                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::from_access(snapshot, name.into())
+                        .expect("Index type does not match specified one"),
+                ),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(
+                    Index::from_access(fork, name.into())
+                        .expect("Index type does not match specified one"),
+                ),
             },
         ))
     });

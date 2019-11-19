@@ -22,11 +22,12 @@ use std::{panic, ptr};
 
 use exonum::crypto::Hash;
 use exonum_merkledb::{
+    access::FromAccess,
     proof_map_index::{
         MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
         PROOF_MAP_KEY_SIZE,
     },
-    Fork, ObjectHash, ProofMapIndex, Snapshot,
+    Fork, IndexAddress, ObjectHash, ProofMapIndex, Snapshot,
 };
 
 use handle::{self, Handle};
@@ -67,10 +68,14 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         let name = utils::convert_to_string(&env, name)?;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
-                }
-                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                    Index::from_access(snapshot, name.into())
+                        .expect("Index type does not match specified one"),
+                ),
+                ViewRef::Fork(fork) => IndexType::ForkIndex(
+                    Index::from_access(fork, name.into())
+                        .expect("Index type does not match specified one"),
+                ),
             },
         ))
     });
@@ -89,14 +94,16 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let map_id = env.convert_byte_array(map_id)?;
+        let address = IndexAddress::with_root(group_name).append_bytes(&map_id);
         let view_ref = handle::cast_handle::<View>(view_handle).get();
         Ok(handle::to_handle(match view_ref {
-            ViewRef::Snapshot(snapshot) => {
-                IndexType::SnapshotIndex(Index::new_in_family(group_name, &map_id, &*snapshot))
-            }
-            ViewRef::Fork(fork) => {
-                IndexType::ForkIndex(Index::new_in_family(group_name, &map_id, fork))
-            }
+            ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
+                Index::from_access(snapshot, address)
+                    .expect("Index type does not match specified one"),
+            ),
+            ViewRef::Fork(fork) => IndexType::ForkIndex(
+                Index::from_access(fork, address).expect("Index type does not match specified one"),
+            ),
         }))
     });
     utils::unwrap_exc_or_default(&env, res)

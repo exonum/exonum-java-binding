@@ -13,7 +13,8 @@
 // limitations under the License.
 
 use exonum::blockchain::Schema;
-use exonum_merkledb::{BinaryValue, Fork, Snapshot};
+use exonum::runtime::{BlockchainData, InstanceDescriptor, SnapshotExt};
+use exonum_merkledb::{BinaryValue, ReadonlyFork, Snapshot};
 use handle::{self, Handle};
 use jni::{
     objects::JClass,
@@ -26,9 +27,12 @@ use utils;
 
 type CoreSchema<T> = Schema<T>;
 
+/// TODO: remove this
+static FAKE_INSTANCE_DESCRIPTOR_NAME: &str = "fake_name";
+
 enum SchemaType {
     SnapshotSchema(CoreSchema<&'static dyn Snapshot>),
-    ForkSchema(CoreSchema<&'static Fork>),
+    ForkSchema(CoreSchema<ReadonlyFork<'static>>),
 }
 
 /// Returns pointer to created CoreSchemaProxy object
@@ -40,8 +44,19 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_n
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let schema_type = match handle::cast_handle::<View>(view_handle).get() {
-            ViewRef::Snapshot(snapshot) => SchemaType::SnapshotSchema(Schema::new(snapshot)),
-            ViewRef::Fork(fork) => SchemaType::ForkSchema(Schema::new(fork)),
+            ViewRef::Snapshot(snapshot) => SchemaType::SnapshotSchema(snapshot.for_core()),
+            ViewRef::Fork(fork) => {
+                // Creating CoreSchema from fork is not possible without such hack
+                let fake_instance_descriptor = InstanceDescriptor {
+                    id: 0,
+                    name: FAKE_INSTANCE_DESCRIPTOR_NAME,
+                };
+                let blockchain_data = BlockchainData::new(
+                    fork,
+                    fake_instance_descriptor,
+                );
+                SchemaType::ForkSchema(blockchain_data.for_core())
+            }
         };
         Ok(handle::to_handle(schema_type))
     });
