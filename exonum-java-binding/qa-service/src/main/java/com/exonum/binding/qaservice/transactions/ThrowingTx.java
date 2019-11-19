@@ -17,27 +17,28 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
-import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.QaSchema;
-import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ThrowingTxBody;
 import java.util.Objects;
 
 public final class ThrowingTx implements Transaction {
 
-  private static final short ID = QaTransaction.VALID_THROWING.id();
   private static final Serializer<ThrowingTxBody> PROTO_SERIALIZER =
       protobuf(ThrowingTxBody.class);
 
   private final long seed;
 
-  public ThrowingTx(long seed) {
+  ThrowingTx(long seed) {
     this.seed = seed;
+  }
+
+  static ThrowingTx fromBytes(byte[] bytes) {
+    long seed = PROTO_SERIALIZER.fromBytes(bytes).getSeed();
+    return new ThrowingTx(seed);
   }
 
   /**
@@ -47,22 +48,13 @@ public final class ThrowingTx implements Transaction {
    */
   @Override
   public void execute(TransactionContext context) {
-    QaSchema schema = new QaSchema(context.getFork());
+    QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.
     schema.clearAll();
 
     // Throw an exception. Framework must revert the changes made above.
     throw new IllegalStateException("#execute of this transaction always throws: " + this);
-  }
-
-  @Override
-  public String info() {
-    return QaTransactionJson.toJson(ID, this);
-  }
-
-  public RawTransaction toRawTransaction() {
-    return converter().toRawTransaction(this);
   }
 
   @Override
@@ -81,39 +73,4 @@ public final class ThrowingTx implements Transaction {
   public int hashCode() {
     return Objects.hashCode(seed);
   }
-
-  public static BiDirectionTransactionConverter<ThrowingTx> converter() {
-    return Converter.INSTANCE;
-  }
-
-  private enum Converter implements BiDirectionTransactionConverter<ThrowingTx> {
-    INSTANCE;
-
-    @Override
-    public ThrowingTx fromRawTransaction(RawTransaction rawTransaction) {
-      checkRawTransaction(rawTransaction);
-
-      long seed = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload())
-          .getSeed();
-      return new ThrowingTx(seed);
-    }
-
-    @Override
-    public RawTransaction toRawTransaction(ThrowingTx transaction) {
-      byte[] payload = PROTO_SERIALIZER.toBytes(ThrowingTxBody.newBuilder()
-          .setSeed(transaction.seed)
-          .build());
-
-      return RawTransaction.newBuilder()
-          .serviceId(QaService.ID)
-          .transactionId(ID)
-          .payload(payload)
-          .build();
-    }
-
-    private void checkRawTransaction(RawTransaction rawTransaction) {
-      checkTransaction(rawTransaction, ID);
-    }
-  }
-
 }

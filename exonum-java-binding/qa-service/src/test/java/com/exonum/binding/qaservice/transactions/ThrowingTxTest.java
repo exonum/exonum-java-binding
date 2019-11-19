@@ -16,12 +16,14 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
+import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
+import static com.exonum.binding.qaservice.TransactionMessages.createThrowingTx;
 import static com.exonum.binding.qaservice.TransactionUtils.createCounter;
-import static com.exonum.binding.qaservice.TransactionUtils.createThrowingTransaction;
 import static com.exonum.binding.qaservice.TransactionUtils.newContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
@@ -30,70 +32,33 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.core.messages.Runtime.ExecutionError;
-import com.exonum.core.messages.Runtime.ErrorKind;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.binding.qaservice.Integration;
+import com.exonum.binding.qaservice.QaArtifactInfo;
 import com.exonum.binding.qaservice.QaSchema;
-import com.exonum.binding.qaservice.QaService;
-import com.exonum.binding.qaservice.QaServiceModule;
-import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.google.gson.reflect.TypeToken;
-import java.util.Optional;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-class ThrowingTxIntegrationTest {
+@Integration
+class ThrowingTxTest {
 
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withService(QaServiceModule.class));
+      QaArtifactInfo.createQaServiceTestkit());
 
   @Test
-  void converterRoundtrip() {
-    long seed = 10L;
-    ThrowingTx tx = new ThrowingTx(seed);
-
-    RawTransaction message = ThrowingTx.converter().toRawTransaction(tx);
-
-    ThrowingTx txFromRaw = ThrowingTx.converter().fromRawTransaction(message);
-
-    assertThat(txFromRaw).isEqualTo(tx);
-  }
-
-  @Test
-  void info() {
-    long seed = 10L;
-    ThrowingTx tx = new ThrowingTx(seed);
-    String info = tx.info();
-
-    AnyTransaction<ThrowingTx> txParams = json().fromJson(info,
-        new TypeToken<AnyTransaction<ThrowingTx>>(){}.getType());
-
-    assertThat(txParams.service_id).isEqualTo(QaService.ID);
-    assertThat(txParams.message_id).isEqualTo(QaTransaction.VALID_THROWING.id());
-    assertThat(txParams.body).isEqualTo(tx);
-  }
-
-  @Test
-  @RequiresNativeLibrary
   void executeThrows(TestKit testKit) {
-    TransactionMessage throwingTx = createThrowingTransaction(0L);
+    TransactionMessage throwingTx = createThrowingTx(0L, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(throwingTx);
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    ExecutionStatus expectedTxResult = ExecutionStatus.newBuilder()
-        .setError(ExecutionError.newBuilder()
-            .setKind(ErrorKind.RUNTIME) // fixme: the actual kind is not yet known: ECR-3588
-            .setDescription("#execute of this transaction always throws")
-            .build())
-        .build();
     /*
      todo: In tests it might be useful not only to be able to easily create expected
       results (which is relatively easy with a combination of factory methods and a builder),
@@ -109,33 +74,37 @@ class ThrowingTxIntegrationTest {
             .getDescription();
         assertThat(description).containsIgnoringCase("foo");
      */
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(throwingTx.hash());
-    assertThat(txResult).hasValue(expectedTxResult);
+    ExecutionStatus txResult = blockchain.getTxResult(throwingTx.hash()).get();
+    assertTrue(txResult.hasError());
+    ExecutionError error = txResult.getError();
+    assertThat(error.getKind()).isEqualTo(ErrorKind.RUNTIME);
+    assertThat(error.getDescription()).contains("#execute of this transaction always throws");
   }
 
   @Test
-  @RequiresNativeLibrary
   void executeClearsQaServiceData() throws CloseFailuresException {
     try (TemporaryDb db = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork view = db.createFork(cleaner);
+      QaSchema schema = new QaSchema(view, QA_SERVICE_NAME);
 
       // Initialize storage with a counter equal to 10
       String name = "counter";
       long value = 10L;
-      createCounter(view, name, value);
+      createCounter(schema, name, value);
 
       // Create the transaction
       ThrowingTx tx = new ThrowingTx(0L);
 
       // Execute the transaction
-      // TODO: use service name and service id when creating TransactionContext
-      TransactionContext context = newContext(view);
+      TransactionContext context = newContext(view)
+          .serviceName(QA_SERVICE_NAME)
+          .serviceId(QA_SERVICE_ID)
+          .build();
       IllegalStateException expected = assertThrows(IllegalStateException.class,
           () -> tx.execute(context));
 
       // Check that execute cleared the maps
-      QaSchema schema = new QaSchema(view);
       assertThat(schema.counters().isEmpty()).isTrue();
       assertThat(schema.counterNames().isEmpty()).isTrue();
 

@@ -46,7 +46,8 @@ class TransactionMessageSerializerTest {
         .serviceId((short) 1)
         .transactionId((short) 2)
         .payload(payload)
-        .sign(keys, cryptoFunction);
+        .signedWith(keys, cryptoFunction)
+        .build();
 
     roundTripTest(message, serializer);
   }
