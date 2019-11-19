@@ -21,8 +21,8 @@ import com.exonum.binding.core.annotations.AutoGenerationCandidate;
 import com.exonum.binding.core.transaction.Transaction;
 
 /**
- * A converter of a raw Exonum transaction, which contains transaction data,
- * into an executable transaction.
+ * A converter of a transaction type id and serialized transaction arguments into an executable
+ * transaction.
  *
  * @see TransactionMessage
  */
@@ -32,7 +32,8 @@ import com.exonum.binding.core.transaction.Transaction;
 public interface TransactionConverter {
 
   /**
-   * Converts an Exonum raw transaction to an executable transaction of some service.
+   * Converts a transaction type id and serialized transaction arguments to an executable
+   * transaction of some service.
    *
    * @param txId the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}
    *     within the service
