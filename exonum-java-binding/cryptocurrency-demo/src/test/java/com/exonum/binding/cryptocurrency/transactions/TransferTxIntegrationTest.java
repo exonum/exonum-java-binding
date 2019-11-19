@@ -17,7 +17,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
@@ -40,7 +39,6 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
 import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
 import com.exonum.binding.cryptocurrency.Wallet;
@@ -48,7 +46,6 @@ import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
-import com.google.common.reflect.TypeToken;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -221,20 +218,6 @@ class TransferTxIntegrationTest {
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
     ExecutionStatus expectedTransactionResult = serviceError(INSUFFICIENT_FUNDS.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
-  }
-
-  @Test
-  void info() {
-    long seed = Long.MAX_VALUE - 1L;
-    TransferTx tx =  new TransferTx(seed, TO_KEY_PAIR.getPublicKey(), 50L);
-
-    String info = tx.info();
-
-    // Check the transaction parameters in JSON
-    Transaction txParameters = json().fromJson(info, new TypeToken<TransferTx>() {
-    }.getType());
-
-    assertThat(txParameters).isEqualTo(tx);
   }
 
   @Test

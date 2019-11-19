@@ -17,7 +17,6 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
@@ -117,18 +116,6 @@ class CreateWalletTxIntegrationTest {
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(transactionMessage2.hash());
     ExecutionStatus expectedTransactionResult = serviceError(WALLET_ALREADY_EXISTS.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
-  }
-
-  @Test
-  void info() {
-    CreateWalletTx tx = new CreateWalletTx(DEFAULT_INITIAL_BALANCE);
-
-    String info = tx.info();
-
-    CreateWalletTx txParams = json()
-        .fromJson(info, CreateWalletTx.class);
-
-    assertThat(txParams).isEqualTo(tx);
   }
 
   @Test
