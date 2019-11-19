@@ -51,10 +51,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_CoreSchemaProxy_n
                     id: 0,
                     name: FAKE_INSTANCE_DESCRIPTOR_NAME,
                 };
-                let blockchain_data = BlockchainData::new(
-                    fork,
-                    fake_instance_descriptor,
-                );
+                let blockchain_data = BlockchainData::new(fork, fake_instance_descriptor);
                 SchemaType::ForkSchema(blockchain_data.for_core())
             }
         };
