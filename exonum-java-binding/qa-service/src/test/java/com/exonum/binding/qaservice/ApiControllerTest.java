@@ -18,11 +18,8 @@ package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_CONSENSUS_CONFIGURATION_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -35,8 +32,6 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -78,6 +73,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+@Integration
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
@@ -85,7 +81,7 @@ import org.mockito.quality.Strictness;
 // own thread pool, which drives the delays up.
 @Execution(ExecutionMode.SAME_THREAD)
 @SuppressWarnings("WeakerAccess")
-class ApiControllerIntegrationTest {
+class ApiControllerTest {
 
   private static final String HOST = "0.0.0.0";
 
@@ -131,49 +127,6 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void submitCreateCounter(VertxTestContext context) {
-    String counterName = "counter 1";
-    MultiMap params = multiMap("name", counterName);
-
-    when(qaService.submitCreateCounter(eq(counterName)))
-        .thenReturn(EXPECTED_TX_HASH);
-
-    post(SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
-  }
-
-  @Test
-  void submitCreateCounter_NoParameter(VertxTestContext context) {
-    post(SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(MultiMap.caseInsensitiveMultiMap(), context.succeeding(response -> {
-          context.verify(() -> {
-            assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-
-            assertThat(response.bodyAsString())
-                .contains("No required key (name) in request parameters:");
-
-            context.completeNow();
-          });
-        }));
-  }
-
-  @Test
-  void submitCreateCounter_IllegalArgumentSomewhere(VertxTestContext context) {
-    String counterName = "counter 1";
-    MultiMap params = multiMap("name", counterName);
-
-    Throwable error = mock(IllegalArgumentException.class);
-    when(qaService.submitCreateCounter(counterName))
-        .thenThrow(error);
-
-    post(SUBMIT_CREATE_COUNTER_TX_PATH)
-        .sendForm(params, context.succeeding(response -> context.verify(() -> {
-          assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-          context.completeNow();
-        })));
-  }
-
-  @Test
   void submitIncrementCounter(VertxTestContext context) {
     long seed = 1L;
     HashCode counterId = HASH_1;
@@ -188,46 +141,21 @@ class ApiControllerIntegrationTest {
   }
 
   @Test
-  void submitValidThrowing(VertxTestContext context) {
-    long seed = 10L;
+  void submitIncrementCounter_NoParameter(VertxTestContext context) {
+    // No required seed in the request
+    MultiMap params = multiMap("counterId", String.valueOf(HASH_1));
 
-    when(qaService.submitValidThrowingTx(seed))
-        .thenReturn(EXPECTED_TX_HASH);
+    post(SUBMIT_INCREMENT_COUNTER_TX_PATH)
+        .sendForm(params, context.succeeding(response -> {
+          context.verify(() -> {
+            assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
 
-    MultiMap form = multiMap("seed", Long.toString(seed));
+            assertThat(response.bodyAsString())
+                .contains("No required key (seed) in request parameters:");
 
-    post(SUBMIT_VALID_THROWING_TX_PATH)
-        .sendForm(form, checkCreatedTransaction(context, EXPECTED_TX_HASH));
-  }
-
-  @Test
-  void submitValidError(VertxTestContext context) {
-    long seed = 1L;
-    byte errorCode = 2;
-    String description = "Boom";
-    MultiMap params = multiMap("seed", Long.toString(seed),
-        "errorCode", Byte.toString(errorCode),
-        "errorDescription", description);
-
-    when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), eq(description)))
-        .thenReturn(EXPECTED_TX_HASH);
-
-    post(SUBMIT_VALID_ERROR_TX_PATH)
-        .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
-  }
-
-  @Test
-  void submitValidErrorNoDescription(VertxTestContext context) {
-    long seed = 1L;
-    byte errorCode = 2;
-    MultiMap params = multiMap("seed", Long.toString(seed),
-        "errorCode", Byte.toString(errorCode));
-
-    when(qaService.submitValidErrorTx(eq(seed), eq(errorCode), isNull()))
-        .thenReturn(EXPECTED_TX_HASH);
-
-    post(SUBMIT_VALID_ERROR_TX_PATH)
-        .sendForm(params, checkCreatedTransaction(context, EXPECTED_TX_HASH));
+            context.completeNow();
+          });
+        }));
   }
 
   @Test
@@ -391,7 +319,7 @@ class ApiControllerIntegrationTest {
     return webClient.get(port, HOST, requestPath);
   }
 
-  private static MultiMap multiMap(String k1, String v1, String... entries) {
+  static MultiMap multiMap(String k1, String v1, String... entries) {
     checkArgument(entries.length % 2 == 0);
 
     MultiMap params = MultiMap.caseInsensitiveMultiMap()

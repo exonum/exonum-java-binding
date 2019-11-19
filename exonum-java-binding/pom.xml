@@ -566,6 +566,8 @@
                 <exclude>**/DeployArguments*</exclude>
                 <exclude>com/exonum/core/messages/*</exclude>
                 <exclude>com/exonum/binding/fakeservice/Transactions*</exclude>
+                <exclude>com/exonum/binding/qaservice/Config*</exclude>
+                <exclude>com/exonum/binding/qaservice/transactions/TxMessageProtos*</exclude>
               </excludes>
             </configuration>
             <executions>

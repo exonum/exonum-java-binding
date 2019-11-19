@@ -30,10 +30,10 @@ class QaTransactionTest {
   void hasUniqueIds() {
     QaTransaction[] elements = QaTransaction.values();
 
-    Multimap<Short, QaTransaction> elementsById = Multimaps.index(Arrays.asList(elements),
+    Multimap<Integer, QaTransaction> elementsById = Multimaps.index(Arrays.asList(elements),
         QaTransaction::id);
 
-    for (Short id : elementsById.keySet()) {
+    for (Integer id : elementsById.keySet()) {
       Collection<QaTransaction> transactionsWithId = elementsById.get(id);
       assertThat(transactionsWithId)
           .as("There must be a single transaction with id (%d), but: %s",

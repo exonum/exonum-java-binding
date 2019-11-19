@@ -16,30 +16,28 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-@RequiresNativeLibrary
-class QaSchemaIntegrationTest {
+@Integration
+class QaSchemaTest {
 
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withService(QaServiceModule.class));
+      QaArtifactInfo.createQaServiceTestkit());
 
   @Test
   void getStateHashesEmptyDb(TestKit testKit) {
     Snapshot view = testKit.getSnapshot();
-    QaSchema schema = new QaSchema(view);
+    QaSchema schema = new QaSchema(view, QA_SERVICE_NAME);
 
     List<HashCode> stateHashes = schema.getStateHashes();
 

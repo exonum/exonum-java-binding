@@ -18,6 +18,10 @@
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
+    <!-- Artifact name, used to identify the artifact during deploy -->
+    <artifactName>${project.groupId}:${project.artifactId}:${project.version}</artifactName>
+    <!-- Artifact JAR name (w/o extension) -->
+    <artifactFileName>${project.artifactId}-${project.version}-artifact</artifactFileName>
   </properties>
 
   <dependencyManagement>
@@ -181,12 +185,45 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <!-- Exclude integration tests as they require a `package`d artifact
+               and some special configuration. -->
+          <excludedGroups>integration</excludedGroups>
           <argLine>
             ${jacoco.args}
+            ${java.vm.assertionFlag}
+          </argLine>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <!-- Use tag-based filtering: include all the *Test.java files that have 'integration'
+               tag. -->
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <groups>integration</groups>
+          <systemPropertyVariables>
+            <it.artifactsDir>${project.build.directory}</it.artifactsDir>
+            <it.artifactFilename>${artifactFileName}.jar</it.artifactFilename>
+            <it.artifactName>${artifactName}</it.artifactName>
+          </systemPropertyVariables>
+          <argLine>
+            ${jacoco.it.args}
             -Djava.library.path=${ejb-core.nativeLibPath}
             ${java.vm.assertionFlag}
           </argLine>
         </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -205,14 +242,14 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${project.artifactId}-${project.version}-artifact</finalName>
+          <finalName>${artifactFileName}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <!-- Do not use the produced artifact jar file as a main jar
                i.e. do not install it in the local repo -->
           <attach>false</attach>
           <archive>
             <manifestEntries>
-              <Plugin-Id>${project.groupId}:${project.artifactId}:${project.version}</Plugin-Id>
+              <Plugin-Id>${artifactName}</Plugin-Id>
               <Plugin-Version>${project.version}</Plugin-Version>
               <Plugin-Provider>${project.groupId}</Plugin-Provider>
             </manifestEntries>

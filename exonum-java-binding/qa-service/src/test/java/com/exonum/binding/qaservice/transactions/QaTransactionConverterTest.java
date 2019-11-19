@@ -17,16 +17,24 @@
 package com.exonum.binding.qaservice.transactions;
 
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
-import static com.exonum.binding.test.Bytes.bytes;
+import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
+import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
+import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERROR;
+import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.qaservice.QaService;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTxBody;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.ThrowingTxBody;
+import com.google.protobuf.ByteString;
 import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +58,7 @@ class QaTransactionConverterTest {
   void hasFactoriesForEachTransaction(QaTransaction tx) {
     // Check that the QaTransaction enum is kept in sync with the map of transaction factories,
     // i.e., each transaction type is mapped to the corresponding factory.
-    short id = tx.id();
+    int id = tx.id();
 
     assertThat(QaTransactionConverter.TRANSACTION_FACTORIES)
         .as("No entry for transaction %s with id=%d", tx, id)
@@ -58,50 +66,29 @@ class QaTransactionConverterTest {
   }
 
   @Test
-  void toTransactionTransactionOfAnotherService() {
-    RawTransaction tx = RawTransaction.newBuilder()
-        .serviceId((short) (QaService.ID + 1))
-        .transactionId(QaTransaction.INCREMENT_COUNTER.id())
-        .payload(bytes())
-        .build();
-
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> converter.toTransaction(tx));
-    assertThat(e).hasMessageMatching("This transaction \\(.+\\) does not belong "
-        + "to this service: wrong service id \\(\\d+\\), must be " + QaService.ID);
-  }
-
-  @Test
   void toTransactionUnknownTransaction() {
-    RawTransaction raw = UnknownTx.createRawTransaction();
+    RawTransaction raw = UnknownTx.newRawTransaction(1);
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> converter.toTransaction(raw));
-    assertThat(e).hasMessageStartingWith("Unknown transaction");
+        () -> converter.toTransaction(UnknownTx.ID, raw.getPayload()));
+    assertThat(e.getMessage()).startsWith("Unknown transaction")
+        .contains(Integer.toString(UnknownTx.ID));
   }
 
   @ParameterizedTest
   @MethodSource("transactions")
-  void toTransaction(Class<? extends Transaction> expectedType, RawTransaction tx) {
-    Transaction transaction = converter.toTransaction(tx);
+  void toTransaction(int txId, byte[] arguments, Transaction expectedTx) {
+    Transaction transaction = converter.toTransaction(txId, arguments);
 
-    assertThat(transaction).isInstanceOf(expectedType);
+    assertThat(transaction).isEqualTo(expectedTx);
   }
 
   private static Collection<Arguments> transactions() {
     List<Arguments> transactionTemplates = asList(
-        arguments(CreateCounterTx.class,
-            new CreateCounterTx("name").toRawTransaction()),
-
-        arguments(IncrementCounterTx.class,
-            new IncrementCounterTx(10L, defaultHashFunction().hashString("name", UTF_8))
-                .toRawTransaction()),
-
-        arguments(ThrowingTx.class,
-            new ThrowingTx(10L).toRawTransaction()),
-
-        arguments(ErrorTx.class,
-            new ErrorTx(10L, (byte) 1, "some error").toRawTransaction())
+        createCounterArgs(),
+        incrementCounterArgs(),
+        throwingTxArgs(),
+        errorTxArgs()
     );
 
     // Check that the test data includes all known transactions.
@@ -110,4 +97,49 @@ class QaTransactionConverterTest {
     return transactionTemplates;
   }
 
+  private static Arguments createCounterArgs() {
+    String name = "name";
+    return arguments(CREATE_COUNTER.id(),
+        CreateCounterTxBody.newBuilder()
+            .setName(name)
+            .build()
+            .toByteArray(),
+        new CreateCounterTx(name));
+  }
+
+  private static Arguments incrementCounterArgs() {
+    long seed = 10L;
+    HashCode id = defaultHashFunction().hashString("name", UTF_8);
+    return arguments(INCREMENT_COUNTER.id(),
+        IncrementCounterTxBody.newBuilder()
+            .setSeed(10L)
+            .setCounterId(ByteString.copyFrom(id.asBytes()))
+            .build()
+            .toByteArray(),
+        new IncrementCounterTx(seed, id));
+  }
+
+  private static Arguments throwingTxArgs() {
+    long seed = 1L;
+    return arguments(VALID_THROWING.id(),
+        ThrowingTxBody.newBuilder()
+            .setSeed(seed)
+            .build()
+            .toByteArray(),
+        new ThrowingTx(seed));
+  }
+
+  private static Arguments errorTxArgs() {
+    long seed = 10L;
+    byte errorCode = (byte) 1;
+    String description = "some error";
+    return arguments(VALID_ERROR.id(),
+        ErrorTxBody.newBuilder()
+            .setSeed(seed)
+            .setErrorCode(errorCode)
+            .setErrorDescription(description)
+            .build()
+            .toByteArray(),
+        new ErrorTx(seed, errorCode, description));
+  }
 }

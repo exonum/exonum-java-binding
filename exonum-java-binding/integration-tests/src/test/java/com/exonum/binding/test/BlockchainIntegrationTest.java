@@ -450,7 +450,7 @@ class BlockchainIntegrationTest {
             .setKey(key)
             .setValue(value)
             .build())
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+        .sign(KEY_PAIR);
   }
 
   /**

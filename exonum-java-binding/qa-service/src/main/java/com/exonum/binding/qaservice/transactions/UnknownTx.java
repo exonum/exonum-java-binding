@@ -19,7 +19,6 @@ package com.exonum.binding.qaservice.transactions;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.qaservice.QaService;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -46,9 +45,9 @@ public final class UnknownTx implements Transaction {
   /**
    * Returns raw transaction.
    */
-  public static RawTransaction createRawTransaction() {
+  public static RawTransaction newRawTransaction(int serviceId) {
     return RawTransaction.newBuilder()
-        .serviceId(QaService.ID)
+        .serviceId(serviceId)
         .transactionId(ID)
         .payload(new byte[0])
         .build();
