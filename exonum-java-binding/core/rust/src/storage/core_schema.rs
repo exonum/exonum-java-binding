@@ -27,7 +27,7 @@ use utils;
 
 type CoreSchema<T> = Schema<T>;
 
-/// TODO: remove this
+/// TODO: remove this (ECR-3865)
 static FAKE_INSTANCE_DESCRIPTOR_NAME: &str = "fake_name";
 
 enum SchemaType {
