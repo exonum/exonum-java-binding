@@ -49,11 +49,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
                     Index::from_access(snapshot, name.into())
-                        .expect("Index type does not match specified one"),
+                        .unwrap(),
                 ),
                 ViewRef::Fork(fork) => IndexType::ForkIndex(
                     Index::from_access(fork, name.into())
-                        .expect("Index type does not match specified one"),
+                        .unwrap(),
                 ),
             },
         ))
@@ -78,10 +78,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
         Ok(handle::to_handle(match view_ref {
             ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
                 Index::from_access(snapshot, address)
-                    .expect("Index type does not match specified one"),
+                    .unwrap(),
             ),
             ViewRef::Fork(fork) => IndexType::ForkIndex(
-                Index::from_access(fork, address).expect("Index type does not match specified one"),
+                Index::from_access(fork, address).unwrap(),
             ),
         }))
     });

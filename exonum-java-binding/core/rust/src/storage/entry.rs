@@ -46,11 +46,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
                     Index::from_access(snapshot, name.into())
-                        .expect("Index type does not match specified one"),
+                        .unwrap(),
                 ),
                 ViewRef::Fork(fork) => IndexType::ForkIndex(
                     Index::from_access(fork, name.into())
-                        .expect("Index type does not match specified one"),
+                        .unwrap(),
                 ),
             },
         ))
