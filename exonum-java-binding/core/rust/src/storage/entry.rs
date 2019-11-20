@@ -44,14 +44,12 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
         let name = utils::convert_to_string(&env, name)?;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::from_access(snapshot, name.into())
-                        .unwrap(),
-                ),
-                ViewRef::Fork(fork) => IndexType::ForkIndex(
-                    Index::from_access(fork, name.into())
-                        .unwrap(),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::from_access(snapshot, name.into()).unwrap())
+                }
+                ViewRef::Fork(fork) => {
+                    IndexType::ForkIndex(Index::from_access(fork, name.into()).unwrap())
+                }
             },
         ))
     });

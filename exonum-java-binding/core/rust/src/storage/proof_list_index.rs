@@ -47,14 +47,12 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
         let name = utils::convert_to_string(&env, name)?;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                    Index::from_access(snapshot, name.into())
-                        .unwrap(),
-                ),
-                ViewRef::Fork(fork) => IndexType::ForkIndex(
-                    Index::from_access(fork, name.into())
-                        .unwrap(),
-                ),
+                ViewRef::Snapshot(snapshot) => {
+                    IndexType::SnapshotIndex(Index::from_access(snapshot, name.into()).unwrap())
+                }
+                ViewRef::Fork(fork) => {
+                    IndexType::ForkIndex(Index::from_access(fork, name.into()).unwrap())
+                }
             },
         ))
     });
@@ -76,13 +74,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
         let address = IndexAddress::with_root(group_name).append_bytes(&list_id);
         let view_ref = handle::cast_handle::<View>(view_handle).get();
         Ok(handle::to_handle(match view_ref {
-            ViewRef::Snapshot(snapshot) => IndexType::SnapshotIndex(
-                Index::from_access(snapshot, address)
-                    .unwrap(),
-            ),
-            ViewRef::Fork(fork) => IndexType::ForkIndex(
-                Index::from_access(fork, address).unwrap(),
-            ),
+            ViewRef::Snapshot(snapshot) => {
+                IndexType::SnapshotIndex(Index::from_access(snapshot, address).unwrap())
+            }
+            ViewRef::Fork(fork) => IndexType::ForkIndex(Index::from_access(fork, address).unwrap()),
         }))
     });
     utils::unwrap_exc_or_default(&env, res)
