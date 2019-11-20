@@ -138,6 +138,12 @@ type ExceptionResult<T> = thread::Result<result::Result<T, JniError>>;
 
 /// Returns value or "throws" exception. `error_val` is returned, because exception will be thrown
 /// at the Java side. So this function should be used only for the `panic::catch_unwind` result.
+///
+/// The function accepts `Result<JniResult, Error>`, where outer `Result<..., Error>` corresponds
+/// to a return type of `panic::catch_unwind` and is `Err` in case of catched panic; inner
+/// `JniResult` represents the errors during Rust-Java interoperability. Therefore, the function
+/// can't be used for handling __any__ user-defined error type, but supports only a set of
+/// JNI-related errors and also handles unexpected panics.
 pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> T {
     match res {
         Ok(val) => {
