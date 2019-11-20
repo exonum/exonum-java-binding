@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.ServiceWrapper.DEFAULT_INTERFACE_NAME;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.collect.Comparators.isInStrictOrder;
 import static java.util.Arrays.asList;
@@ -383,7 +384,8 @@ class ServiceRuntimeIntegrationTest {
         serviceRuntime.executeTransaction(TEST_ID, txId, arguments, fork, TEST_HASH,
             TEST_PUBLIC_KEY);
 
-        verify(serviceWrapper).executeTransaction(txId, arguments, expectedContext);
+        verify(serviceWrapper).executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments,
+            expectedContext);
       }
     }
 
@@ -394,7 +396,7 @@ class ServiceRuntimeIntegrationTest {
 
       serviceRuntime.verifyTransaction(TEST_ID, txId, arguments);
 
-      verify(serviceWrapper).convertTransaction(txId, arguments);
+      verify(serviceWrapper).convertTransaction(DEFAULT_INTERFACE_NAME, txId, arguments);
     }
 
     @Test

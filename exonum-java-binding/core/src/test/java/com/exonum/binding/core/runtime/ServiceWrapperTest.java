@@ -16,6 +16,9 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.ServiceWrapper.APPLY_CONFIGURATION_TX_ID;
+import static com.exonum.binding.core.runtime.ServiceWrapper.CONFIGURE_INTERFACE_NAME;
+import static com.exonum.binding.core.runtime.ServiceWrapper.VERIFY_CONFIGURATION_TX_ID;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,9 +27,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
+import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.core.service.Configurable;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
@@ -37,6 +47,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -46,12 +57,15 @@ class ServiceWrapperTest {
 
   private static final ServiceArtifactId TEST_ARTIFACT_ID =
       ServiceArtifactId.newJavaId("com.acme:foo:1.2.3");
+  private static final String TEST_SERVICE_NAME = "test-service";
+  private static final int TEST_SERVICE_ID = 1;
+  private static final String DEFAULT_INTERFACE = "";
 
-  final ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance("test-service",
-      1, TEST_ARTIFACT_ID);
+  final ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_SERVICE_NAME,
+      TEST_SERVICE_ID, TEST_ARTIFACT_ID);
 
   @Mock
-  Service service;
+  ConfigurableService service;
 
   @Mock
   TransactionConverter txConverter;
@@ -67,7 +81,7 @@ class ServiceWrapperTest {
   }
 
   @Test
-  void executeTransaction() throws TransactionExecutionException {
+  void executeTransactionDefaultInterface() throws TransactionExecutionException {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
     Transaction executableTx = mock(Transaction.class);
@@ -76,7 +90,7 @@ class ServiceWrapperTest {
         .thenReturn(executableTx);
 
     TransactionContext context = mock(TransactionContext.class);
-    serviceWrapper.executeTransaction(txId, arguments, context);
+    serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, context);
 
     verify(txConverter).toTransaction(txId, arguments);
     verify(executableTx).execute(context);
@@ -91,9 +105,92 @@ class ServiceWrapperTest {
         .when(txConverter)
         .toTransaction(txId, arguments);
 
-    TransactionContext context = mock(TransactionContext.class);
+    TransactionContext context = anyContext().build();
     assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(txId, arguments, context));
+        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, context));
+  }
+
+  @Test
+  void executeVerifyConfiguration() throws TransactionExecutionException {
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    int txId = VERIFY_CONFIGURATION_TX_ID;
+    byte[] arguments = bytes(1, 2, 3);
+
+    Fork fork = mock(Fork.class);
+    TransactionContext context = anyContext()
+        .fork(fork)
+        .build();
+
+    serviceWrapper.executeTransaction(interfaceName, txId, arguments, context);
+
+    Configuration expected = new ServiceConfiguration(arguments);
+    verify(service).verifyConfiguration(fork, expected);
+  }
+
+  @Test
+  void executeApplyConfiguration() throws TransactionExecutionException {
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    int txId = APPLY_CONFIGURATION_TX_ID;
+    byte[] arguments = bytes(1, 2, 3);
+
+    Fork fork = mock(Fork.class);
+    TransactionContext context = anyContext()
+        .fork(fork)
+        .build();
+
+    serviceWrapper.executeTransaction(interfaceName, txId, arguments, context);
+
+    Configuration expected = new ServiceConfiguration(arguments);
+    verify(service).applyConfiguration(fork, expected);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 2, 3})
+  void executeUnknownConfigurableMethod(int txId) throws TransactionExecutionException {
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    byte[] arguments = bytes(1, 2, 3);
+
+    TransactionContext context = anyContext().build();
+
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, context));
+    assertThat(e.getMessage()).containsIgnoringCase("Unknown txId")
+        .contains(Integer.toString(txId));
+  }
+
+  @Test
+  void executeVerifyConfigurationUnconfigurableService() {
+    Service service = mock(Service.class); // Does not implement Configurable
+    serviceWrapper = new ServiceWrapper(service, txConverter, instanceSpec, node);
+
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    int txId = VERIFY_CONFIGURATION_TX_ID;
+    byte[] arguments = bytes(1, 2, 3);
+    TransactionContext context = anyContext().build();
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, context));
+
+    assertThat(e.getMessage()).containsIgnoringCase("Doesn't implement Configurable")
+        .contains(TEST_SERVICE_NAME);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      " ",
+      "exonum.Erc20",
+      "TimeOracle"
+  })
+  void executeInvalidTransactionUnknownInterface(String interfaceName) {
+    int txId = 2;
+    byte[] arguments = bytes(1, 2, 3);
+
+    TransactionContext context = anyContext().build();
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, context));
+
+    assertThat(e.getMessage()).containsIgnoringCase("Unknown interface")
+        .contains(interfaceName);
   }
 
   @Test
@@ -105,13 +202,13 @@ class ServiceWrapperTest {
         .thenReturn(executableTx);
 
     TransactionExecutionException e = new TransactionExecutionException((byte) 1);
-    TransactionContext context = mock(TransactionContext.class);
+    TransactionContext context = anyContext().build();
     doThrow(e)
         .when(executableTx)
         .execute(context);
 
     TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
-        () -> serviceWrapper.executeTransaction(txId, arguments, context));
+        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, context));
 
     assertThat(actual).isSameAs(e);
   }
@@ -130,4 +227,15 @@ class ServiceWrapperTest {
 
     assertThat(serviceWrapper.getPublicApiRelativePath()).isEqualTo(expectedPathFragment);
   }
+
+  private static TransactionContext.Builder anyContext() {
+    return TransactionContext.builder()
+        .serviceName(TEST_SERVICE_NAME)
+        .serviceId(TEST_SERVICE_ID)
+        .authorPk(PublicKey.fromBytes(new byte[Ed25519.PUBLIC_KEY_BYTES]))
+        .txMessageHash(HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]))
+        .fork(mock(Fork.class));
+  }
+
+  private interface ConfigurableService extends Service, Configurable {}
 }

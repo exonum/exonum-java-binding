@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.ServiceWrapper.DEFAULT_INTERFACE_NAME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -298,7 +299,7 @@ public final class ServiceRuntime implements AutoCloseable {
           .serviceId(serviceId)
           .build();
       try {
-        service.executeTransaction(txId, arguments, context);
+        service.executeTransaction(/* todo: */ "", txId, arguments, context);
       } catch (Exception e) {
         logger.info("Transaction execution failed (service={}, txId={}, txMessageHash={})",
             service.getName(), txId, context.getTransactionMessageHash(), e);
@@ -402,7 +403,7 @@ public final class ServiceRuntime implements AutoCloseable {
   public void verifyTransaction(int serviceId, int txId, byte[] arguments) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
-      service.convertTransaction(txId, arguments);
+      service.convertTransaction(DEFAULT_INTERFACE_NAME, txId, arguments);
     }
   }
 
