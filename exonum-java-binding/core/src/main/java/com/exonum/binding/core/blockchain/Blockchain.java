@@ -139,7 +139,8 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a map with a key-value pair of a transaction hash and execution result.
+   * Returns a map with a key-value pair of a transaction hash and execution result. Note that this
+   * is a <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   public ProofMapIndexProxy<HashCode, ExecutionStatus> getTxResults() {
     return schema.getTxResults();

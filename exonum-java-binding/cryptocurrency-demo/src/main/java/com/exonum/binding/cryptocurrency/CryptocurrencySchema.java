@@ -49,11 +49,12 @@ public final class CryptocurrencySchema implements Schema {
   }
 
   /**
-   * Returns a proof map of wallets.
+   * Returns a proof map of wallets. Note that this is a
+   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   public ProofMapIndexProxy<PublicKey, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.publicKey(),
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, view, StandardSerializers.publicKey(),
         WalletSerializer.INSTANCE);
   }
 

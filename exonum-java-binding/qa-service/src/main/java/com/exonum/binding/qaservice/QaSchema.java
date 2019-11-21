@@ -70,11 +70,12 @@ public final class QaSchema implements Schema {
   }
 
   /**
-   * Returns a proof map of counter values.
+   * Returns a proof map of counter values. Note that this is a
+   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   public ProofMapIndexProxy<HashCode, Long> counters() {
     String name = fullIndexName("counters");
-    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, view, StandardSerializers.hash(),
         StandardSerializers.uint64());
   }
 
