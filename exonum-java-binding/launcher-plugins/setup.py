@@ -16,16 +16,16 @@
 
 from distutils.core import setup
 
-install_requires = []  # Since `exonum-launcher` is not on pypi yet, suppose we have it pre-installed.
+install_requires = ["exonum-launcher"]
 
 python_requires = ">=3.6"
 
 setup(
-    name="exonum_java_runtime_plugin",
+    name="exonum_java_plugins",
     version="0.9.0-SNAPSHOT",
-    description="Exonum Java runtime plugin for exonum_launcher",
+    description="Exonum Java plugins for exonum_launcher",
     url="https://github.com/exonum/exonum-java-binding",
-    packages=["exonum_java_runtime_plugin"],
+    packages=["exonum_java_runtime_plugin", "exonum_instance_configuration_plugin"],
     install_requires=install_requires,
     python_requires=python_requires,
 )
