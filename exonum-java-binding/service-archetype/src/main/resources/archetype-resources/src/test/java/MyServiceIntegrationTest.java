@@ -16,14 +16,26 @@
 
 package ${package};
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.testkit.TestKit;
+import com.google.common.base.Strings;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
-class ServiceModuleTest {
+class MyServiceIntegrationTest {
+
+  public static final String ARTIFACT_FILENAME = getRequiredProperty("it.artifactFilename");
+  public static final ServiceArtifactId ARTIFACT_ID =
+      ServiceArtifactId.newJavaId(getRequiredProperty("it.artifactId"));
+  public static Path artifactsDirectory = Paths.get(getRequiredProperty("it.artifactsDirectory"));
+  public static final String SERVICE_NAME = "my-service";
+  public static final int SERVICE_ID = 42;
 
   /**
    * This is an example service integration test with Exonum Testkit. It simply verifies
@@ -35,15 +47,24 @@ class ServiceModuleTest {
    * https://exonum.com/doc/version/latest/get-started/java-binding/#after-install
    */
   @Test
-  void testServiceInstantiation() {
-    try (TestKit testKit = TestKit.forService(ServiceModule.class)) {
-      MyService service = testKit.getService(MyService.ID, MyService.class);
-
+  void testGenesisBlockCommit() {
+    try (TestKit testKit = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withArtifactsDirectory(artifactsDirectory)
+        .build()) {
       // Check that genesis block was committed
       testKit.withSnapshot((view) -> {
         Blockchain blockchain = Blockchain.newInstance(view);
         assertThat(blockchain.getBlockHashes().size(), equalTo(1L));
       });
     }
+  }
+
+  private static String getRequiredProperty(String key) {
+    String property = System.getProperty(key);
+    checkState(!Strings.isNullOrEmpty(property),
+        "Absent property: %s=%s", key, property);
+    return property;
   }
 }
