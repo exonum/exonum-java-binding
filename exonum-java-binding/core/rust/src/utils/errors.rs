@@ -146,9 +146,12 @@ type ExceptionResult<T> = thread::Result<result::Result<T, JniError>>;
 /// JNI-related errors and also handles unexpected panics.
 pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> T {
     match res {
-        Ok(val) => {
-            match val {
+        // No panic
+        Ok(jni_result) => {
+            match jni_result {
+                // No JNI error
                 Ok(val) => val,
+                // JNI error
                 Err(jni_error) => {
                     // Do nothing if there is a pending Java-exception that will be thrown
                     // automatically by the JVM when the native method returns.
@@ -160,8 +163,9 @@ pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> 
                 }
             }
         }
-        Err(ref e) => {
-            throw(env, &any_to_string(e));
+        // Panic occurred
+        Err(panic_occurred) => {
+            throw(env, &any_to_string(&panic_occurred));
             error_val
         }
     }
