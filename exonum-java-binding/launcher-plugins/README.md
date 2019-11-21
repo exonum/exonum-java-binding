@@ -40,7 +40,9 @@ networks:
     private-api-port: 8081
 ```
 
-You need to specify every node in the network.
+You need to specify every node for which you have an access to its private API port. If you
+do not have an access to every node in the network, the administrators of other nodes must
+run `exonum-launcher` with the same configuration file (with a different list of available nodes).
 
 Deadline height describes the maximum blockchain height for the deployment process. Make sure to
 specify the value larger than the current blockchain height.
