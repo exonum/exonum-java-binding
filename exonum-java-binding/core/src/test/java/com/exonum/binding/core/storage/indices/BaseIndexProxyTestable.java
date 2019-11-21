@@ -194,9 +194,8 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       // Try to create an index of other type with the same name as the index above
       Exception e = assertThrows(RuntimeException.class, () -> createOfOtherType(name, snapshot));
 
-      // TODO: Change message after https://jira.bf.local/browse/ECR-3354
       Assertions.assertThat(e.getMessage())
-          .containsIgnoringCase("Index type does not match specified one");
+          .containsIgnoringCase("WrongIndexType");
     }
   }
 
