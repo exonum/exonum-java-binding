@@ -1,7 +1,7 @@
-# Java Runtime Plugins for [Exonum Launcher](https://github.com/exonum/exonum-launcher)
+# Java Plugins for [Exonum Launcher](https://github.com/exonum/exonum-launcher)
 
 - Java Runtime Plugin allows to deploy and start Java services.
-- Java Instance Plugin allows to use an arbitrary Protobuf message for service 
+- Instance Configuration Plugin allows to use an arbitrary Protobuf message for service 
   initial configuration parameters. The plugin can be used for both Java and Rust services.
 
 ## Installation
@@ -79,19 +79,19 @@ artifacts:
     name: "exonum-timestamping:0.12.0"
 ```
 
-Add a `plugins` section to enable both Java Runtime plugin and Java Instance plugin. Runtime plugin is
-enabled for a specific runtime (`java` in our example), while Instance plugin is enabled for a
-specific artifact name alias (`timestamping` in our example).
+Add a `plugins` section to enable both Java Runtime plugin and Instance Configuration plugin.
+Runtime plugin is enabled for a specific runtime (`java` in our example), while Instance
+Configuration plugin is enabled for a specific artifact name alias (`timestamping` in our example).
 
 ```yaml
 plugins:
   runtime:
     java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
   artifact:
-    timestamping: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
+    timestamping: "exonum_instance_configuration_plugin.InstanceSpecLoader"
 ```
 
-In our example we will use the Java Instance plugin to serialize initial configuration parameters of
+In our example we will use the Instance Configuration plugin to serialize initial configuration parameters of
 the `timestamping` service in Protobuf. We need to take a `service.proto` file with the message
 description from the service sources and place it inside some known directory.
 
@@ -107,8 +107,8 @@ description from the service sources and place it inside some known directory.
 
 Finally, add an `instances` section that describes the list of service instances you want to
 start in the blockchain. For each instance you need to specify its artifact name alias.
-Java Instance plugin also requires a list of additional parameters, which we provide for
-the `timestamping` instance:
+Instance Configuration plugin also requires a list of additional parameters, which we
+provide for the `timestamping` instance:
 
 - `sources`. Points to a directory with the Protobuf sources of the service configuration 
 message. We use the `proto_sources` directory.

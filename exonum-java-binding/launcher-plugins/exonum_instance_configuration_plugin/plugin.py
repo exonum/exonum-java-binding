@@ -23,7 +23,7 @@ from contextlib import contextmanager
 from exonum_client.proofs import build_encoder_function
 from exonum_client.protobuf_loader import ProtobufLoader
 from exonum_client.protoc import Protoc
-from exonum_launcher.instances import InstanceSpecLoader, InstanceSpecLoadError
+from exonum_launcher.instances import InstanceSpecLoader as BaseInstanceSpecLoader, InstanceSpecLoadError
 from exonum_launcher.configuration import Instance
 
 _PROTOBUF_SOURCES_FIELD_NAME = "sources"
@@ -33,7 +33,7 @@ _CONFIG_MESSAGE_FIELD_NAME = "message_name"
 _DATA_FIELD_NAME = "data"
 
 
-class JavaInstanceSpecLoader(InstanceSpecLoader):
+class InstanceSpecLoader(BaseInstanceSpecLoader):
     """Instance spec loader for Java runtime
     Compiles and loads protobuf messages provided by user to serialize service
     configuration parameters.

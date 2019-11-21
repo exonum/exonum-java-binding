@@ -4,7 +4,7 @@ import unittest
 from exonum_launcher.configuration import Configuration
 from exonum_launcher.instances import InstanceSpecLoadError
 
-from exonum_java_instance_plugin import JavaInstanceSpecLoader
+from exonum_instance_configuration_plugin import InstanceSpecLoader
 
 _DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -19,7 +19,7 @@ class TestInstancePlugin(unittest.TestCase):
     def test_plugin_encodes_config_correctly(self) -> None:
         config = self.load_config("instance_plugin.yml")
         self.assertEqual(len(config.instances), 1)
-        instance_loader = JavaInstanceSpecLoader()
+        instance_loader = InstanceSpecLoader()
 
         instance = config.instances[0]
         serialized_parameters = instance_loader.load_spec(None, instance)
@@ -28,7 +28,7 @@ class TestInstancePlugin(unittest.TestCase):
     def test_plugin_custom_message_name(self) -> None:
         config = self.load_config("custom_message_name.yml")
         self.assertEqual(len(config.instances), 1)
-        instance_loader = JavaInstanceSpecLoader()
+        instance_loader = InstanceSpecLoader()
 
         instance = config.instances[0]
         serialized_parameters = instance_loader.load_spec(None, instance)
@@ -37,7 +37,7 @@ class TestInstancePlugin(unittest.TestCase):
     def test_plugin_errors_no_config_field(self) -> None:
         config = self.load_config("no_config.yml")
         self.assertEqual(len(config.instances), 4)
-        instance_loader = JavaInstanceSpecLoader()
+        instance_loader = InstanceSpecLoader()
 
         for instance in config.instances:
             with self.assertRaisesRegex(InstanceSpecLoadError, instance.name):

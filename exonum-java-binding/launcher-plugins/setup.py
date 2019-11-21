@@ -25,7 +25,7 @@ setup(
     version="0.9.0-SNAPSHOT",
     description="Exonum Java plugins for exonum_launcher",
     url="https://github.com/exonum/exonum-java-binding",
-    packages=["exonum_java_runtime_plugin", "exonum_java_instance_plugin"],
+    packages=["exonum_java_runtime_plugin", "exonum_instance_configuration_plugin"],
     install_requires=install_requires,
     python_requires=python_requires,
 )

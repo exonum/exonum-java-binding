@@ -13,7 +13,7 @@ plugins:
   runtime:
   java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
   artifact:
-    timestamping: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
+    timestamping: "exonum_instance_configuration_plugin.InstanceSpecLoader"
 
 artifacts:
   cryptocurrency:

@@ -6,7 +6,7 @@ networks:
 
 plugins:
   artifact:
-    cryptocurrency: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
+    timestamping: "exonum_instance_configuration_plugin.InstanceSpecLoader"
 
 deadline_height: 20000
 
