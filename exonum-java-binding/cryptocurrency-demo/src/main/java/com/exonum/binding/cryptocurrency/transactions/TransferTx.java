@@ -17,19 +17,16 @@
 package com.exonum.binding.cryptocurrency.transactions;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
@@ -44,7 +41,7 @@ import java.util.Objects;
  */
 public final class TransferTx implements Transaction {
 
-  static final short ID = 2;
+  static final int ID = 2;
   private static final Serializer<TxMessageProtos.TransferTx> PROTO_SERIALIZER =
       protobuf(TxMessageProtos.TransferTx.class);
 
@@ -61,13 +58,10 @@ public final class TransferTx implements Transaction {
   }
 
   /**
-   * Creates a new transfer transaction from the serialized transaction data.
+   * Creates a new transfer transaction given transaction id and the serialized transaction data.
    */
-  static TransferTx fromRawTransaction(RawTransaction rawTransaction) {
-    checkTransaction(rawTransaction, ID);
-
-    TxMessageProtos.TransferTx body =
-        PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
+  static TransferTx from(byte[] arguments) {
+    TxMessageProtos.TransferTx body = PROTO_SERIALIZER.fromBytes(arguments);
 
     long seed = body.getSeed();
     PublicKey toWallet = toPublicKey(body.getToWallet());
@@ -85,7 +79,8 @@ public final class TransferTx implements Transaction {
     PublicKey fromWallet = context.getAuthorPk();
     checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
 
-    CryptocurrencySchema schema = new CryptocurrencySchema(context.getFork());
+    CryptocurrencySchema schema =
+        new CryptocurrencySchema(context.getFork(), context.getServiceName());
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
     checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
@@ -112,11 +107,6 @@ public final class TransferTx implements Transaction {
     if (!precondition) {
       throw new TransactionExecutionException(errorCode);
     }
-  }
-
-  @Override
-  public String info() {
-    return json().toJson(this);
   }
 
   @Override

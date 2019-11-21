@@ -15,7 +15,7 @@
     <!-- Do not require Javadoc for native adapters -->
     <suppress files="service/adapters.+.java" checks="JavadocMethod"/>
 
-    <suppress files="ProofMapIndexProxyIntegrationTest\.java"
+    <suppress files="ProofMapIndexProxyNoKeyHashingIntegrationTest\.java"
         checks="Javadoc.*"/>
 
     <!-- Allow `aBlock` name -->
@@ -23,5 +23,8 @@
     <suppress files="BlockTest\.java" checks="MethodName"/>
 
     <!-- Suppress indentation as there is a bug with lambdas -->
-    <suppress files="UserServiceAdapter.java" checks="Indentation"/>
+    <suppress files="RuntimeTransport.java" checks="Indentation"/>
+
+    <!-- Allow constant names in inner classes (they can't have static final members) -->
+    <suppress files="ServiceRuntimeIntegrationTest\.java" checks="(AbbreviationAsWordInName)|(MemberName)"/>
 </suppressions>

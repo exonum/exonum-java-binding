@@ -39,7 +39,9 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +57,7 @@ import org.pf4j.PluginManager;
 abstract class Pf4jServiceLoaderIntegrationTestable {
 
   private static final String PLUGIN_ID = "com.acme:foo-service:1.0.1";
+  private static final String PLUGIN_ID_2 = "org.acme:bar-service:3.2.1";
   private static final Map<String, Class<?>> TEST_DEPENDENCY_REFERENCE_CLASSES = ImmutableMap.of(
       "exonum-java-binding", Service.class,
       "vertx", Vertx.class,
@@ -91,8 +94,8 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
 
     // Check the definition
-    ServiceId serviceId = serviceDefinition.getId();
-    ServiceId expectedId = ServiceId.parseFrom(pluginId);
+    ServiceArtifactId serviceId = serviceDefinition.getId();
+    ServiceArtifactId expectedId = ServiceArtifactId.newJavaId(pluginId);
     assertThat(serviceId).isEqualTo(expectedId);
     Supplier<ServiceModule> moduleSupplier = serviceDefinition.getModuleSupplier();
     ServiceModule module = moduleSupplier.get();
@@ -120,7 +123,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     assertThat(e).hasMessageContaining("Failed to load the service from");
 
     // Check the definition is inaccessible
-    ServiceId serviceId = ServiceId.parseFrom(PLUGIN_ID);
+    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId(PLUGIN_ID);
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
   }
 
@@ -150,7 +153,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     assertThat(e).hasMessageContaining("Failed to start the plugin");
 
     // Check the definition is inaccessible
-    ServiceId serviceId = ServiceId.parseFrom(pluginId);
+    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId(pluginId);
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
 
     // Check it is unloaded if failed to start
@@ -241,7 +244,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
 
     // Try to unload the service
-    ServiceId serviceId = serviceDefinition.getId();
+    ServiceArtifactId serviceId = serviceDefinition.getId();
     serviceLoader.unloadService(serviceId);
 
     // Check properly unloaded
@@ -250,16 +253,41 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
 
   @Test
   void unloadServiceNonLoaded() {
-    ServiceId unknownPluginId = ServiceId.parseFrom(PLUGIN_ID);
+    ServiceArtifactId unknownPluginId = ServiceArtifactId.newJavaId(PLUGIN_ID);
     assertThrows(IllegalArgumentException.class,
         () -> serviceLoader.unloadService(unknownPluginId));
   }
 
   @Test
   void findServiceNonLoaded() {
-    ServiceId unknownPluginId = ServiceId.parseFrom(PLUGIN_ID);
+    ServiceArtifactId unknownPluginId = ServiceArtifactId.newJavaId(PLUGIN_ID);
     Optional<?> serviceDefinition = serviceLoader.findService(unknownPluginId);
     assertThat(serviceDefinition).isEmpty();
+  }
+
+  @Test
+  void loadsUnloadsAll(@TempDir Path tmp) throws Exception {
+    Map<String, Path> pluginLocationsById = ImmutableMap.of(PLUGIN_ID, tmp.resolve("p1.jar"),
+        PLUGIN_ID_2, tmp.resolve("p2.jar"));
+
+    // Prepare the artifact files
+    for (Entry<String, Path> e : pluginLocationsById.entrySet()) {
+      anArtifact()
+          .setPluginId(e.getKey())
+          .writeTo(e.getValue());
+    }
+
+    // Load the plugins
+    for (Path location : pluginLocationsById.values()) {
+      serviceLoader.loadService(location);
+    }
+
+    // Unload all
+    serviceLoader.unloadAll();
+
+    // Verify each is unloaded
+    Set<String> pluginIds = pluginLocationsById.keySet();
+    pluginIds.forEach(this::verifyUnloaded);
   }
 
   /**
@@ -276,7 +304,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   private void verifyUnloaded(String pluginId) {
     verify(pluginManager).unloadPlugin(pluginId);
 
-    ServiceId serviceId = ServiceId.parseFrom(pluginId);
+    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId(pluginId);
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
   }
 

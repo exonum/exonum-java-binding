@@ -30,18 +30,17 @@ import java.util.List;
 
 /**
  * A schema of the cryptocurrency service.
- *
- * <p>Has one collection: Wallets (names and values) (Merkelized)
  */
 public final class CryptocurrencySchema implements Schema {
 
   /** A namespace of cryptocurrency service collections. */
-  private static final String NAMESPACE = CryptocurrencyService.NAME.replace('-', '_');
+  private final String namespace;
 
   private final View view;
 
-  public CryptocurrencySchema(View view) {
+  public CryptocurrencySchema(View view, String serviceName) {
     this.view = checkNotNull(view);
+    this.namespace = serviceName + ".";
   }
 
   @Override
@@ -50,11 +49,12 @@ public final class CryptocurrencySchema implements Schema {
   }
 
   /**
-   * Returns a proof map of wallets.
+   * Returns a proof map of wallets. Note that this is a
+   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   public ProofMapIndexProxy<PublicKey, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.publicKey(),
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, view, StandardSerializers.publicKey(),
         WalletSerializer.INSTANCE);
   }
 
@@ -72,7 +72,7 @@ public final class CryptocurrencySchema implements Schema {
         StandardSerializers.hash());
   }
 
-  private static String fullIndexName(String name) {
-    return NAMESPACE + "__" + name;
+  private String fullIndexName(String name) {
+    return namespace + name;
   }
 }

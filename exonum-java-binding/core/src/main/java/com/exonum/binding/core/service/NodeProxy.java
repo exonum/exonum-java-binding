@@ -58,8 +58,8 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
   @Override
   public HashCode submitTransaction(RawTransaction rawTransaction) {
     byte[] payload = rawTransaction.getPayload();
-    short serviceId = rawTransaction.getServiceId();
-    short transactionId = rawTransaction.getTransactionId();
+    int serviceId = rawTransaction.getServiceId();
+    int transactionId = rawTransaction.getTransactionId();
     byte[] txMessageHash = nativeSubmit(getNativeHandle(), payload, serviceId, transactionId);
 
     return HashCode.fromBytes(txMessageHash);
@@ -73,8 +73,9 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @param serviceId an identifier of the service
    * @param transactionId an identifier of the transaction
    */
-  private static native byte[] nativeSubmit(long nodeHandle, byte[] payload, short serviceId,
-      short transactionId);
+  // todo: fix the native impl to work with int ids
+  private static native byte[] nativeSubmit(long nodeHandle, byte[] payload, int serviceId,
+      int transactionId);
 
   /**
    * {@inheritDoc}

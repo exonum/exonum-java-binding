@@ -17,10 +17,10 @@
 package com.exonum.binding.fakes.services;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.app.ServiceRuntimeBootstrap;
+import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceLoadingException;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.service.adapters.UserServiceAdapter;
@@ -29,6 +29,7 @@ import com.exonum.binding.test.CiOnly;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -37,39 +38,51 @@ import org.junit.jupiter.api.io.TempDir;
 @RequiresNativeLibrary
 class ServiceArtifactsIntegrationTest {
 
+  private static final String ARTIFACT_FILENAME = "test-service.jar";
   private Path artifactLocation;
   private ServiceRuntime serviceRuntime;
 
   @BeforeEach
   void setUp(@TempDir Path tmp) {
-    artifactLocation = tmp.resolve("test-service.jar");
-    serviceRuntime = ServiceRuntimeBootstrap.createServiceRuntime(0);
+    artifactLocation = tmp.resolve(ARTIFACT_FILENAME);
+    serviceRuntime = ServiceRuntimeBootstrap.createServiceRuntime(tmp.toString(), 0);
+  }
+
+  @AfterEach
+  void tearDown() throws InterruptedException {
+    serviceRuntime.close();
   }
 
   @Test
   void createValidArtifact() throws IOException, ServiceLoadingException {
-    ServiceArtifacts.createValidArtifact(artifactLocation);
+    ServiceArtifactId id =
+        ServiceArtifactId.newJavaId("com.exonum.binding:valid-test-service:1.0.0");
+    ServiceArtifacts.createValidArtifact(id, artifactLocation);
 
-    String artifactId = serviceRuntime.loadArtifact(artifactLocation.toString());
+    serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
 
-    UserServiceAdapter service = serviceRuntime.createService(artifactId);
+    UserServiceAdapter service = serviceRuntime.addService(fork, id.toString(), configuration);
 
     assertThat(service.getId(), equalTo(TestService.ID));
   }
 
   @Test
   void createUnloadableArtifact() throws IOException {
-    ServiceArtifacts.createUnloadableArtifact(artifactLocation);
+    String id = "1:com.exonum.binding:unloadable-test-service:1.0.0";
+    ServiceArtifacts.createUnloadableArtifact(id, artifactLocation);
     assertThrows(ServiceLoadingException.class,
-        () -> serviceRuntime.loadArtifact(artifactLocation.toString()));
+        () -> serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), ARTIFACT_FILENAME));
   }
 
   @Test
   void createWithUninstantiableService() throws IOException, ServiceLoadingException {
-    ServiceArtifacts.createWithUninstantiableService(artifactLocation);
+    ServiceArtifactId id =
+        ServiceArtifactId.newJavaId("com.exonum.binding:uninstantiable-test-service:1.0.0");
+    ServiceArtifacts.createWithUninstantiableService(id, artifactLocation);
 
-    String artifactId = serviceRuntime.loadArtifact(artifactLocation.toString());
+    serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
 
-    assertThrows(RuntimeException.class, () -> serviceRuntime.createService(artifactId));
+    assertThrows(RuntimeException.class, () -> serviceRuntime.addService(fork, id.toString(),
+        configuration));
   }
 }

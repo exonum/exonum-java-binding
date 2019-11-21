@@ -16,31 +16,24 @@
 
 package com.exonum.binding.fakeservice;
 
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.View;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
-import java.util.Collections;
 
-final class FakeService extends AbstractService  {
-
-  @VisibleForTesting
-  static final short ID = 1;
-  private static final String NAME = "fake-service";
+final class FakeService extends AbstractService {
 
   @Inject
-  FakeService(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
+  FakeService(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
-    // No schema
-    return Collections::emptyList;
+  protected FakeSchema createDataSchema(View view) {
+    String name = getName();
+    return new FakeSchema(name, view);
   }
 
   @Override

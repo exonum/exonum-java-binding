@@ -17,7 +17,7 @@
 package com.exonum.binding.common.proofs.list;
 
 /**
- * A proof that some elements exist in a proof list. You must
+ * A proof that some elements exist in a proof list of a certain size. You must
  * {@link #check} its structure and index hash before accessing the elements.
  */
 public interface UncheckedListProof {

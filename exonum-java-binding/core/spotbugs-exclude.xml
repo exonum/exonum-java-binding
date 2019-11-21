@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<FindBugsFilter>
+  <!-- Spotbugs does not support @CanIgnoreReturnValue properly -->
+  <Match>
+    <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"/>
+  </Match>
+
+  <!-- Seems to be a false-positive, nullable is perfectly valid there. -->
+  <Match>
+    <Class name="~.*TransactionResult"/>
+    <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
+  </Match>
+
+  <!-- Use \n in the message that might be recorded in the blockchain instead of %n, which
+       is resolved to a platform-dependent value. -->
+  <Match>
+    <Class name="~.*ServiceWrapper"/>
+    <Method name="convertTransaction"/>
+    <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
+  </Match>
+
+  <!-- Exclude the auto-generated files.
+       Remove the rules below once https://github.com/spotbugs/spotbugs/issues/694 is resolved
+       and released (targets 4.0.0). -->
+
+  <!-- It is good, hashCode is specified in the parent, which is *the* way
+       to configure it in AutoValue -->
+  <Match>
+    <Class name="~.*AutoValue_Block"/>
+    <Bug pattern="HE_EQUALS_NO_HASHCODE"/>
+  </Match>
+
+  <Match>
+    <Class name="~.*AutoValue_Block.GsonTypeAdapter"/>
+    <Bug pattern="RV_RETURN_VALUE_IGNORED"/>
+  </Match>
+
+  <!--  Auto-generated Protobuf-messages -->
+  <Match>
+    <Source name="~.*ServiceRuntimeProtos\.java"/>
+  </Match>
+  <Match>
+    <Source name="~.*DeployArguments\.java"/>
+  </Match>
+</FindBugsFilter>

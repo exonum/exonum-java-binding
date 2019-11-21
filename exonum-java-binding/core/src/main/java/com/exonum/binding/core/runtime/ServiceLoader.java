@@ -41,9 +41,9 @@ interface ServiceLoader {
 
   /**
    * Returns a loaded service with the given id; or {@link Optional#empty()} if there is no such.
-   * @param serviceId the identifier of the service
+   * @param artifactId the identifier of the service artifact
    */
-  Optional<LoadedServiceDefinition> findService(ServiceId serviceId);
+  Optional<LoadedServiceDefinition> findService(ServiceArtifactId artifactId);
 
   /**
    * Unloads a previously {@linkplain #loadService(Path) loaded} service. The clients <b>must
@@ -52,8 +52,20 @@ interface ServiceLoader {
    * <p>Once the service is unloaded, its definition shall no longer be used to create any new
    * service instances.
    *
-   * @param serviceId the identifier of the loaded service
+   * @param artifactId the identifier of the loaded service artifact
    * @throws IllegalStateException if the service identified by the given id is not currently loaded
    */
-  void unloadService(ServiceId serviceId);
+  void unloadService(ServiceArtifactId artifactId);
+
+  /**
+   * Unloads all previously loaded services. The clients <b>must not</b> unload the services
+   * while any of them are in use (there are active instances of them).
+   *
+   * <p>This method will attempt to unload each service, and communicate any exceptions
+   * afterwards.
+   *
+   * @throws IllegalStateException if any service failed to unload, the exceptions they
+   *     had thrown will be in the list of suppressed exceptions
+   */
+  void unloadAll();
 }

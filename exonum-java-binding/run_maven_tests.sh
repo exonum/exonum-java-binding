@@ -16,4 +16,6 @@ source tests_profile
 # See build definitions of the modules for more.
 mvn install \
   --activate-profiles ci-build \
-  -Drust.compiler.version="${RUST_COMPILER_VERSION}"
+  -Drust.compiler.version="${RUST_COMPILER_VERSION}" \
+  `# Keep the list of active services in sync with run_all_tests.sh in the root` \
+  -pl core,fake-service,integration-tests,cryptocurrency-demo,qa-service,bom,service-archetype -am

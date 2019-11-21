@@ -22,8 +22,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <lazysodium-java.version>4.0.1</lazysodium-java.version>
-    <auto-value.version>1.6.6</auto-value.version>
+    <lazysodium-java.version>4.2.2</lazysodium-java.version>
+    <auto-value.version>1.7</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
   </properties>
 
@@ -142,10 +142,12 @@
         <executions>
           <execution>
             <goals>
+              <goal>compile</goal>
               <goal>test-compile</goal>
             </goals>
             <configuration>
               <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+              <protoSourceRoot>${basedir}/src/main/proto/src</protoSourceRoot>
             </configuration>
           </execution>
         </executions>
@@ -214,7 +216,7 @@
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-        <version>1.6.2</version>
+        <version>${os-maven-plugin.version}</version>
       </extension>
     </extensions>
   </build>

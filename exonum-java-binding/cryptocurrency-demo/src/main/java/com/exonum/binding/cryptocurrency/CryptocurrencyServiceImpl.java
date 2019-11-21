@@ -23,11 +23,9 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -46,18 +44,14 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   @Nullable private Node node;
 
   @Inject
-  public CryptocurrencyServiceImpl(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
+  public CryptocurrencyServiceImpl(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
-    return new CryptocurrencySchema(view);
-  }
-
-  @Override
-  public Optional<String> initialize(Fork fork) {
-    return Optional.empty();
+  protected CryptocurrencySchema createDataSchema(View view) {
+    String name = getName();
+    return new CryptocurrencySchema(view, name);
   }
 
   @Override
@@ -74,7 +68,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      CryptocurrencySchema schema = createDataSchema(view);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       return Optional.ofNullable(wallets.get(ownerKey));
@@ -86,7 +80,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkBlockchainInitialized();
 
     return node.withSnapshot(view -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+      CryptocurrencySchema schema = createDataSchema(view);
       ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
@@ -99,8 +93,6 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   private HistoryEntity createTransferHistoryEntry(TransactionMessage txMessage) {
-    checkState(txMessage.getServiceId() == getId(),
-        "Service ID mismatch: message contains %s, expected %s", txMessage.getServiceId(), getId());
     try {
       TxMessageProtos.TransferTx txBody = TxMessageProtos.TransferTx
           .parseFrom(txMessage.getPayload());

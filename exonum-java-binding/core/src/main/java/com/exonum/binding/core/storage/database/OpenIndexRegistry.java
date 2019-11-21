@@ -44,4 +44,8 @@ class OpenIndexRegistry {
   Optional<StorageIndex> findIndex(IndexAddress address) {
     return Optional.ofNullable(indexes.get(address));
   }
+
+  void clear() {
+    indexes.clear();
+  }
 }

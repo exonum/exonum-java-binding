@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,16 @@ package com.exonum.binding.fakes.services.service;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 /**
  * A test service for integration tests.
@@ -38,15 +40,15 @@ public final class TestService extends AbstractService {
   public static final short ID = 0x110B;
   public static final String NAME = "experimentalTestService";
 
-  static final String INITIAL_CONFIGURATION = "{ \"version\": \"0.2.0\" }";
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("initial key", StandardCharsets.UTF_8);
   static final String INITIAL_ENTRY_VALUE = "initial value";
 
   private static final SchemaFactory<TestSchema> SCHEMA_FACTORY = TestSchema::new;
 
-  public TestService() {
-    super(ID, NAME, (rawTx) -> PutValueTransaction.from(rawTx, SCHEMA_FACTORY));
+  @Inject
+  public TestService(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
   }
 
   @Override
@@ -55,14 +57,13 @@ public final class TestService extends AbstractService {
   }
 
   /**
-   * Always puts the same value identified by the same key and returns the same configuration.
+   * Always puts the same value identified by the same key.
    */
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public void initialize(Fork fork, Configuration configuration) {
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
-    return Optional.of(INITIAL_CONFIGURATION);
   }
 
   @Override

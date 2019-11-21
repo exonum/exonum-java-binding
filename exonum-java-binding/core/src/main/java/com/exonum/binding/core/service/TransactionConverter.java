@@ -16,13 +16,15 @@
 
 package com.exonum.binding.core.service;
 
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.annotations.AutoGenerationCandidate;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 
 /**
- * A converter of a raw Exonum transaction, which contains transaction data,
- * into an executable transaction.
+ * A converter of a transaction type id and serialized transaction arguments into an executable
+ * transaction.
+ *
+ * @see TransactionMessage
  */
 @FunctionalInterface
 @AutoGenerationCandidate(reason = "Perfectly viable given a service id "
@@ -30,13 +32,17 @@ import com.exonum.binding.core.transaction.Transaction;
 public interface TransactionConverter {
 
   /**
-   * Converts an Exonum raw transaction to an executable transaction of some service.
+   * Converts a transaction type id and serialized transaction arguments to an executable
+   * transaction of some service.
    *
-   * @param rawTransaction a raw transaction to be converted
-   * @return an executable transaction of some service
-   * @throws IllegalArgumentException if the raw transaction is malformed,
-   *         or a transaction of an unknown service
-   * @throws NullPointerException if the raw transaction is null
+   * @param txId the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}
+   *     within the service
+   * @param arguments the {@linkplain TransactionMessage#getPayload() serialized transaction
+   *     arguments}
+   * @return an executable transaction of the service
+   * @throws IllegalArgumentException if the transaction is not known to the service,
+   *     or the arguments are not valid: e.g., cannot be deserialized, or do not meet
+   *     the preconditions
    */
-  Transaction toTransaction(RawTransaction rawTransaction);
+  Transaction toTransaction(int txId, byte[] arguments);
 }

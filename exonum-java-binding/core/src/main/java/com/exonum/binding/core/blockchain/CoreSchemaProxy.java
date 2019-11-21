@@ -16,23 +16,22 @@
 
 package com.exonum.binding.core.blockchain;
 
-import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
-import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
-import com.exonum.binding.core.blockchain.serialization.TransactionResultSerializer;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
@@ -41,6 +40,8 @@ import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.util.LibraryLoader;
+import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -60,10 +61,12 @@ final class CoreSchemaProxy {
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final Serializer<TransactionLocation> TRANSACTION_LOCATION_SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
-  private static final Serializer<TransactionResult> TRANSACTION_RESULT_SERIALIZER =
-      TransactionResultSerializer.INSTANCE;
+  private static final Serializer<ExecutionStatus> EXECUTION_STATUS_SERIALIZER =
+      protobuf(ExecutionStatus.class);
   private static final Serializer<TransactionMessage> TRANSACTION_MESSAGE_SERIALIZER =
       StandardSerializers.transactionMessage();
+  private static final Serializer<Config> CONSENSUS_CONFIG_SERIALIZER =
+      StandardSerializers.protobuf(Config.class);
 
   private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
     this.nativeHandle = nativeHandle;
@@ -146,11 +149,12 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a map with a key-value pair of a transaction hash and execution result.
+   * Returns a map with a key-value pair of a transaction hash and execution result. Note that this
+   * is a <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
-  ProofMapIndexProxy<HashCode, TransactionResult> getTxResults() {
-    return ProofMapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_RESULTS, dbView,
-        StandardSerializers.hash(), TRANSACTION_RESULT_SERIALIZER);
+  ProofMapIndexProxy<HashCode, ExecutionStatus> getTxResults() {
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(CoreIndex.TRANSACTIONS_RESULTS, dbView,
+        StandardSerializers.hash(), EXECUTION_STATUS_SERIALIZER);
   }
 
   /**
@@ -175,14 +179,16 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns the configuration for the latest height of the blockchain.
+   * Returns the current consensus configuration of the network.
    *
-   * @throws RuntimeException if the "genesis block" was not created
+   * @throws IllegalStateException if the "genesis block" was not created
    */
-  StoredConfiguration getActualConfiguration() {
-    String rawConfiguration = nativeGetActualConfiguration(nativeHandle.get());
-
-    return json().fromJson(rawConfiguration, StoredConfiguration.class);
+  Config getConsensusConfiguration() {
+    EntryIndexProxy<Config> configEntry = EntryIndexProxy.newInstance(CoreIndex.CONSENSUS_CONFIG,
+        dbView, CONSENSUS_CONFIG_SERIALIZER);
+    checkState(configEntry.isPresent(), "No consensus configuration: requesting the configuration "
+        + "before the genesis block was created");
+    return configEntry.get();
   }
 
   private static native long nativeCreate(long viewNativeHandle);
@@ -190,8 +196,6 @@ final class CoreSchemaProxy {
   private static native void nativeFree(long nativeHandle);
 
   private static native long nativeGetHeight(long nativeHandle);
-
-  private static native String nativeGetActualConfiguration(long nativeHandle);
 
   /**
    * Returns the latest committed block.
@@ -211,6 +215,7 @@ final class CoreSchemaProxy {
    * Mapping for Exonum core indexes by name.
    */
   private static final class CoreIndex {
+
     private static final String PREFIX = "core.";
     private static final String BLOCK_TRANSACTIONS = PREFIX + "block_transactions";
     private static final String ALL_BLOCK_HASHES = PREFIX + "block_hashes_by_height";
@@ -219,6 +224,6 @@ final class CoreSchemaProxy {
     private static final String TRANSACTIONS_RESULTS = PREFIX + "transaction_results";
     private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
     private static final String TRANSACTIONS_POOL = PREFIX + "transactions_pool";
+    private static final String CONSENSUS_CONFIG = PREFIX + "consensus.config";
   }
-
 }

@@ -57,8 +57,9 @@ class CoreSchemaProxyIntegrationTest {
   }
 
   @Test
-  void getActiveConfigurationBeforeGenesisBlock() {
-    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getActualConfiguration));
+  void getConsensusConfigurationBeforeGenesisBlock() {
+    assertSchema((schema) ->
+        assertThrows(IllegalStateException.class, schema::getConsensusConfiguration));
   }
 
   @Test

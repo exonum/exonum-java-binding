@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,32 +17,32 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.qaservice.transactions.CreateCounterTx;
-import com.exonum.binding.qaservice.transactions.ErrorTx;
+import com.exonum.binding.qaservice.Config.InitialConfiguration;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
-import com.exonum.binding.qaservice.transactions.ThrowingTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.time.TimeSchema;
+import com.exonum.core.messages.Blockchain.Config;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -71,9 +71,6 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   private static final Logger logger = LogManager.getLogger(QaService.class);
 
   @VisibleForTesting
-  static final String INITIAL_SERVICE_CONFIGURATION = "{ \"version\": 0.1 }";
-
-  @VisibleForTesting
   static final String DEFAULT_COUNTER_NAME = "default";
 
   @VisibleForTesting
@@ -83,13 +80,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   private Node node;
 
   @Inject
-  public QaServiceImpl(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
+  public QaServiceImpl(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
-    return new QaSchema(view);
+  protected QaSchema createDataSchema(View view) {
+    return new QaSchema(view, getName());
   }
 
   @Override
@@ -102,18 +99,33 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public Optional<String> initialize(Fork fork) {
+  public void initialize(Fork fork, Configuration configuration) {
+    // Init the time oracle
+    initTimeOracle(fork, configuration);
+
     // Add a default counter to the blockchain.
     createCounter(DEFAULT_COUNTER_NAME, fork);
 
     // Add an afterCommit counter that will be incremented after each block committed event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
+  }
 
-    return Optional.of(INITIAL_SERVICE_CONFIGURATION);
+  private void initTimeOracle(Fork fork, Configuration configuration) {
+    QaSchema schema = createDataSchema(fork);
+    InitialConfiguration config = configuration.getAsMessage(InitialConfiguration.class);
+    String timeOracleName = config.getTimeOracleName();
+    // Check the time oracle name is non-empty.
+    // We do *not* check if the time oracle is active to (a) allow running this service with
+    // reduced read functionality without time oracle; (b) testing time schema when it is not
+    // active.
+    checkArgument(!Strings.isNullOrEmpty(timeOracleName), "Empty time oracle name: %s",
+        timeOracleName);
+    // Save the configuration
+    schema.timeOracleName().set(timeOracleName);
   }
 
   private void createCounter(String name, Fork fork) {
-    QaSchema schema = new QaSchema(fork);
+    QaSchema schema = createDataSchema(fork);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
 
@@ -145,38 +157,15 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public HashCode submitCreateCounter(String counterName) {
-    CreateCounterTx tx = new CreateCounterTx(counterName);
-
-    return submitTransaction(tx.toRawTransaction());
-  }
-
-  @Override
   public HashCode submitIncrementCounter(long requestSeed, HashCode counterId) {
-    IncrementCounterTx tx = new IncrementCounterTx(requestSeed, counterId);
+    RawTransaction tx = IncrementCounterTx.newRawTransaction(requestSeed, counterId, getId());
 
-    return submitTransaction(tx.toRawTransaction());
-  }
-
-
-  @Override
-  public HashCode submitValidThrowingTx(long requestSeed) {
-    ThrowingTx tx = new ThrowingTx(requestSeed);
-
-    return submitTransaction(tx.toRawTransaction());
-  }
-
-  @Override
-  public HashCode submitValidErrorTx(long requestSeed, byte errorCode,
-      @Nullable String description) {
-    ErrorTx tx = new ErrorTx(requestSeed, errorCode, description);
-
-    return submitTransaction(tx.toRawTransaction());
+    return submitTransaction(tx);
   }
 
   @Override
   public HashCode submitUnknownTx() {
-    return submitTransaction(UnknownTx.createRawTransaction());
+    return submitTransaction(UnknownTx.newRawTransaction(getId()));
   }
 
   @Override
@@ -185,7 +174,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
-      QaSchema schema = new QaSchema(view);
+      QaSchema schema = createDataSchema(view);
       MapIndex<HashCode, Long> counters = schema.counters();
       if (!counters.containsKey(counterId)) {
         return Optional.empty();
@@ -199,13 +188,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public StoredConfiguration getActualConfiguration() {
+  public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
       Blockchain blockchain = Blockchain.newInstance(view);
 
-      return blockchain.getActualConfiguration();
+      return blockchain.getConsensusConfiguration();
     });
   }
 
@@ -213,7 +202,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Optional<ZonedDateTime> getTime() {
     return node.withSnapshot(s -> {
-      TimeSchema timeOracle = TimeSchema.newInstance(s);
+      TimeSchema timeOracle = createDataSchema(s).timeSchema();
       EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
       return currentTime.toOptional();
     });
@@ -223,7 +212,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
     return node.withSnapshot(s -> {
-      TimeSchema timeOracle = TimeSchema.newInstance(s);
+      TimeSchema timeOracle = createDataSchema(s).timeSchema();
       MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
       return toMap(validatorsTimes);
     });

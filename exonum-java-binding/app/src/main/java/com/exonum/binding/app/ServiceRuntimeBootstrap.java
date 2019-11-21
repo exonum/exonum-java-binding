@@ -18,7 +18,7 @@ package com.exonum.binding.app;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.runtime.FrameworkModule;
-import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.binding.time.TimeSchema;
@@ -31,6 +31,7 @@ import com.google.inject.Stage;
 import io.vertx.core.Vertx;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -49,7 +50,13 @@ public final class ServiceRuntimeBootstrap {
    */
   private static final Stage APP_STAGE = Stage.PRODUCTION;
 
-  private static final ImmutableMap<String, Class<?>> DEPENDENCY_REFERENCE_CLASSES =
+  /**
+   * Dependency reference classes used to validate that service artifacts don't contain copies of
+   * the classes used in Exonum public APIs and loaded by the application classloader.
+   *
+   * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#using-libraries">Exonum dependencies</a>
+   */
+  public static final ImmutableMap<String, Class<?>> DEPENDENCY_REFERENCE_CLASSES =
       ImmutableMap.<String, Class<?>>builder()
           .put("exonum-java-binding-core", Service.class)
           .put("exonum-java-binding-common", HashCode.class)
@@ -67,10 +74,13 @@ public final class ServiceRuntimeBootstrap {
   /**
    * Bootstraps a Java service runtime.
    *
+   * @param serviceArtifactsDir the directory in which administrators place and from which
+   *     the service runtime loads service artifacts
    * @param serverPort a port for the web server providing transport to Java services
    * @return a new service runtime
    */
-  public static ServiceRuntime createServiceRuntime(int serverPort) {
+  public static ServiceRuntimeAdapter createServiceRuntime(String serviceArtifactsDir,
+                                                           int serverPort) {
     try {
       // Log the information about the runtime and environment
       logRuntimeInfo();
@@ -79,10 +89,11 @@ public final class ServiceRuntimeBootstrap {
       LibraryLoader.load();
 
       // Create the framework injector
-      Module frameworkModule = new FrameworkModule(serverPort, DEPENDENCY_REFERENCE_CLASSES);
+      Module frameworkModule = new FrameworkModule(Paths.get(serviceArtifactsDir), serverPort,
+          DEPENDENCY_REFERENCE_CLASSES);
       Injector frameworkInjector = Guice.createInjector(APP_STAGE, frameworkModule);
 
-      return frameworkInjector.getInstance(ServiceRuntime.class);
+      return frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
     } catch (Throwable t) {
       logger.fatal("Failed to create the Java Service Runtime", t);
       throw t;

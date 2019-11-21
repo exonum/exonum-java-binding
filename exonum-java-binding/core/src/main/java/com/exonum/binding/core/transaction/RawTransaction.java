@@ -17,7 +17,7 @@
 package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.TransactionConverter;
 import com.google.auto.value.AutoValue;
 
@@ -30,23 +30,26 @@ import com.google.auto.value.AutoValue;
  * <p>A raw transaction is converted to an {@linkplain Transaction executable transaction}
  * by the framework using an implementation of {@link TransactionConverter}.
  */
+// todo: [ECR-3438] Reconsider (split into CallInfo and the payload)? It is currently used
+//  in Node#submitTransaction. Will it make #submitTransaction easier or harder to use?
 @AutoValue
 public abstract class RawTransaction {
 
   /**
    * Returns a service identifier which the transaction belongs to.
-   * @see Service#getId()
+   * @see ServiceInstanceSpec#getId()
    */
-  public abstract short getServiceId();
+  public abstract int getServiceId();
 
   /**
    * Returns the type of this transaction within a service. Unique within the service.
    * @see TransactionMessage#getTransactionId
    */
-  public abstract short getTransactionId();
+  public abstract int getTransactionId();
 
   /**
    * Returns the transaction payload which contains actual transaction data.
+   * @see TransactionMessage#getPayload()
    */
   public abstract byte[] getPayload();
 
@@ -66,7 +69,7 @@ public abstract class RawTransaction {
     return newBuilder()
         .serviceId(txMessage.getServiceId())
         .transactionId(txMessage.getTransactionId())
-        .payload(txMessage.getPayload())
+        .payload(txMessage.getPayload().toByteArray())
         .build();
   }
 
@@ -76,12 +79,12 @@ public abstract class RawTransaction {
     /**
      * Sets the identifier of the service this transaction belongs to.
      */
-    public abstract Builder serviceId(short serviceId);
+    public abstract Builder serviceId(int serviceId);
 
     /**
      * Sets the identifier of the transaction within a service.
      */
-    public abstract Builder transactionId(short transactionId);
+    public abstract Builder transactionId(int transactionId);
 
     /**
      * Sets the payload of the transaction.

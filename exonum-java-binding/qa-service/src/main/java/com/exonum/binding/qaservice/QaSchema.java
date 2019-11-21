@@ -22,9 +22,11 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.time.TimeSchema;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,13 +39,13 @@ import java.util.List;
  */
 public final class QaSchema implements Schema {
 
-  /** A namespace of QA service collections. */
-  private static final String NAMESPACE = QaService.NAME.replace('-', '_');
-
   private final View view;
+  /** A namespace of QA service collections. */
+  private final String namespace;
 
-  public QaSchema(View view) {
+  public QaSchema(View view, String serviceName) {
     this.view = checkNotNull(view);
+    namespace = serviceName;
   }
 
   @Override
@@ -52,11 +54,28 @@ public final class QaSchema implements Schema {
   }
 
   /**
-   * Returns a proof map of counter values.
+   * Returns the index containing the name of the time oracle to use.
+   */
+  public EntryIndexProxy<String> timeOracleName() {
+    String name = fullIndexName("time_oracle_name");
+    return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
+  }
+
+  /**
+   * Returns the time schema of the time oracle this qa service uses.
+   * {@link #timeOracleName()} must be non-empty.
+   */
+  public TimeSchema timeSchema() {
+    return TimeSchema.newInstance(view, timeOracleName().get());
+  }
+
+  /**
+   * Returns a proof map of counter values. Note that this is a
+   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   public ProofMapIndexProxy<HashCode, Long> counters() {
     String name = fullIndexName("counters");
-    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, view, StandardSerializers.hash(),
         StandardSerializers.uint64());
   }
 
@@ -75,7 +94,7 @@ public final class QaSchema implements Schema {
     counterNames().clear();
   }
 
-  private static String fullIndexName(String name) {
-    return NAMESPACE + "__" + name;
+  private String fullIndexName(String name) {
+    return namespace + "." + name;
   }
 }

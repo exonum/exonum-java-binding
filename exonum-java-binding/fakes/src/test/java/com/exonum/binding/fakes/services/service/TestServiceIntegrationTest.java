@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.exonum.binding.fakes.services.service;
 
-import static com.exonum.binding.fakes.services.service.TestService.INITIAL_CONFIGURATION;
 import static com.exonum.binding.fakes.services.service.TestService.INITIAL_ENTRY_KEY;
 import static com.exonum.binding.fakes.services.service.TestService.INITIAL_ENTRY_VALUE;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -31,7 +30,6 @@ import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 
 class TestServiceIntegrationTest {
@@ -42,12 +40,9 @@ class TestServiceIntegrationTest {
     try (Cleaner cleaner = new Cleaner();
         TemporaryDb temporaryDb = TemporaryDb.newInstance()) {
       Fork fork = temporaryDb.createFork(cleaner);
-      TestService service = new TestService();
+      TestService service = new TestService(instanceSpec);
 
       Optional<String> initialConfig = service.initialize(fork);
-
-      Optional<String> expectedConfig = Optional.of(INITIAL_CONFIGURATION);
-      assertThat(initialConfig, equalTo(expectedConfig));
 
       ProofMapIndexProxy<HashCode, String> testMap = new TestSchema(fork).testMap();
 

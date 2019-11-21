@@ -11,7 +11,7 @@ set -eu -o pipefail
 set -x
 
 # Run rust code checks if CHECK_RUST is true, or java tests if it's not
-if [ "$CHECK_RUST" = true ] 
+if [ "$CHECK_RUST" = true ]
 then
     # Install clippy and rustfmt.
     rustup component add clippy

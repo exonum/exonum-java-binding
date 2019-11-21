@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::crypto::Hash;
 use exonum_merkledb::{
-    proof_list_index::{ListProof, ProofListIndexIter, ProofOfAbsence},
-    Fork, ObjectHash, ProofListIndex, Snapshot,
+    access::FromAccess, proof_list_index::ProofListIndexIter, Fork, IndexAddress, ObjectHash,
+    ProofListIndex, Snapshot,
 };
 use jni::{
-    errors::Result,
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray, jint, jlong, jobject},
     JNIEnv,
@@ -50,9 +48,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                    IndexType::SnapshotIndex(Index::from_access(snapshot, name.into()).unwrap())
                 }
-                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => {
+                    IndexType::ForkIndex(Index::from_access(fork, name.into()).unwrap())
+                }
             },
         ))
     });
@@ -71,14 +71,13 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let list_id = env.convert_byte_array(list_id)?;
+        let address = IndexAddress::with_root(group_name).append_bytes(&list_id);
         let view_ref = handle::cast_handle::<View>(view_handle).get();
         Ok(handle::to_handle(match view_ref {
             ViewRef::Snapshot(snapshot) => {
-                IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
+                IndexType::SnapshotIndex(Index::from_access(snapshot, address).unwrap())
             }
-            ViewRef::Fork(fork) => {
-                IndexType::ForkIndex(Index::new_in_family(group_name, &list_id, fork))
-            }
+            ViewRef::Fork(fork) => IndexType::ForkIndex(Index::from_access(fork, address).unwrap()),
         }))
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -206,25 +205,21 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
 
 /// Returns Java representation of the proof that an element exists at the specified index.
 #[no_mangle]
+// fixme: ECR-3614
+#[allow(unused_variables)]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetProof(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
     index: jlong,
 ) -> jobject {
-    let res = panic::catch_unwind(|| {
-        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
-            IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
-        };
-        let length = get_list_length(list_handle);
-        make_java_proof_root(&env, &proof, length).map(|x| x.into_inner())
-    });
-    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+    ptr::null_mut()
 }
 
 /// Returns Java representation of the proof that some elements exists in the specified range.
 #[no_mangle]
+// fixme: ECR-3614
+#[allow(unused_variables)]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
     env: JNIEnv,
     _: JObject,
@@ -232,15 +227,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     from: jlong,
     to: jlong,
 ) -> jobject {
-    let res = panic::catch_unwind(|| {
-        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
-            IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64..to as u64),
-            IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64..to as u64),
-        };
-        let length = get_list_length(list_handle);
-        make_java_proof_root(&env, &proof, length).map(|x| x.into_inner())
-    });
-    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+    // fixme: ECR-3614
+    ptr::null_mut()
 }
 
 /// Returns pointer to the iterator over list.
@@ -367,90 +355,4 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     iter_handle: Handle,
 ) {
     handle::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
-}
-
-fn make_java_proof_root<'a>(
-    env: &JNIEnv<'a>,
-    proof: &ListProof<Value>,
-    length: u64,
-) -> Result<JObject<'a>> {
-    let root = make_java_proof(env, proof)?;
-    env.new_object(
-        "com/exonum/binding/common/proofs/list/UncheckedListProofAdapter",
-        "(Lcom/exonum/binding/common/proofs/list/ListProofNode;J)V",
-        &[root.into(), (length as jlong).into()],
-    )
-}
-
-fn make_java_proof<'a>(env: &JNIEnv<'a>, proof: &ListProof<Value>) -> Result<JObject<'a>> {
-    match *proof {
-        ListProof::Full(ref left, ref right) => {
-            let left = make_java_proof(env, left.as_ref())?;
-            let right = make_java_proof(env, right.as_ref())?;
-            make_java_proof_branch(env, left, right)
-        }
-        ListProof::Left(ref left, ref hash) => {
-            let left = make_java_proof(env, left.as_ref())?;
-            let right = hash.map_or(Ok((ptr::null_mut() as jobject).into()), |hash| {
-                make_java_hash_node(env, &hash)
-            })?;
-            make_java_proof_branch(env, left, right)
-        }
-        ListProof::Right(ref hash, ref right) => {
-            let left = make_java_hash_node(env, hash)?;
-            let right = make_java_proof(env, right.as_ref())?;
-            make_java_proof_branch(env, left, right)
-        }
-        ListProof::Leaf(ref value) => make_java_proof_element(env, value),
-        ListProof::Absent(ref proof_of_absence) => {
-            make_java_proof_of_absence(env, proof_of_absence)
-        }
-    }
-}
-
-// TODO: Remove attribute (https://github.com/rust-lang-nursery/rust-clippy/issues/1981).
-#[allow(clippy::ptr_arg)]
-fn make_java_proof_element<'a>(env: &JNIEnv<'a>, value: &Value) -> Result<JObject<'a>> {
-    let value = env.auto_local(env.byte_array_from_slice(value)?.into());
-    env.new_object(
-        "com/exonum/binding/common/proofs/list/ListProofElement",
-        "([B)V",
-        &[value.as_obj().into()],
-    )
-}
-
-fn make_java_proof_branch<'a>(
-    env: &JNIEnv<'a>,
-    left: JObject,
-    right: JObject,
-) -> Result<JObject<'a>> {
-    let left = env.auto_local(left);
-    let right = env.auto_local(right);
-    env.new_object(
-        "com/exonum/binding/common/proofs/list/ListProofBranch",
-        "(Lcom/exonum/binding/common/proofs/list/ListProofNode;\
-         Lcom/exonum/binding/common/proofs/list/ListProofNode;)V",
-        &[left.as_obj().into(), right.as_obj().into()],
-    )
-}
-
-fn make_java_hash_node<'a>(env: &JNIEnv<'a>, hash: &Hash) -> Result<JObject<'a>> {
-    let hash = env.auto_local(utils::convert_hash(env, hash)?.into());
-    env.new_object(
-        "com/exonum/binding/common/proofs/list/ListProofHashNode",
-        "([B)V",
-        &[hash.as_obj().into()],
-    )
-}
-
-fn make_java_proof_of_absence<'a>(
-    env: &JNIEnv<'a>,
-    proof_of_absence: &ProofOfAbsence,
-) -> Result<JObject<'a>> {
-    let hash = env.auto_local(utils::convert_hash(env, &proof_of_absence.merkle_root())?.into());
-    env.new_object(
-        "com/exonum/binding/common/proofs/list/ListProofOfAbsence",
-        "([B)V",
-        &[hash.as_obj().into()],
-    )
 }

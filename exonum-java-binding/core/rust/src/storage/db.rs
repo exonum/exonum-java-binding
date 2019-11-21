@@ -110,8 +110,6 @@ impl View {
     /// SIGINT will occur.
     ///
     /// Both indexes mutability and `&mut self` methods of `Fork` available.
-    // TODO: remove dead_code after implementing beforeCommit
-    #[allow(dead_code)]
     pub fn from_ref_mut_fork(fork: &mut Fork) -> Self {
         View::RefMutFork(unsafe { std::mem::transmute(fork) })
     }
@@ -205,7 +203,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 #[cfg(test)]
 mod tests {
     use super::*;
-    use exonum_merkledb::{Database, Entry, IndexAccess, TemporaryDB};
+    use exonum_merkledb::{
+        access::{Access, FromAccess, RawAccess},
+        Database, Entry, TemporaryDB,
+    };
 
     const FIRST_TEST_VALUE: i32 = 42;
     const SECOND_TEST_VALUE: i32 = 57;
@@ -336,10 +337,10 @@ mod tests {
         assert_eq!(Some(expected), value);
     }
 
-    fn entry<T>(view: T) -> Entry<T, i32>
+    fn entry<T>(view: T) -> Entry<T::Base, i32>
     where
-        T: IndexAccess,
+        T: Access + RawAccess,
     {
-        Entry::new("test", view)
+        Entry::from_access(view, "test".into()).unwrap()
     }
 }

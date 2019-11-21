@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-use std::fmt;
+use exonum_cli::command::run::NodeRunConfig;
+
+use std::{fmt, path::PathBuf};
+
+use {absolute_library_path, system_classpath};
 
 /// Full configuration of the EJB runtime and JVM.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
-    /// JVM-specific configuration parameters.
+    /// Node configuration parameters used in Exonum Core.
+    pub run_config: NodeRunConfig,
+    /// JVM configuration parameters.
     pub jvm_config: JvmConfig,
-    /// EJB runtime-specific configuration parameters.
+    /// Java runtime configuration parameters.
     pub runtime_config: RuntimeConfig,
 }
 
@@ -50,8 +55,10 @@ pub struct JvmConfig {
 /// These parameters are private and can be unique for every node.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct RuntimeConfig {
+    /// Path to the directory containing service artifacts.
+    pub artifacts_path: PathBuf,
     /// Path to `log4j` configuration file.
-    pub log_config_path: String,
+    pub log_config_path: PathBuf,
     /// A port of the HTTP server for Java services.
     /// Must be distinct from the ports used by Exonum.
     pub port: i32,
@@ -67,6 +74,16 @@ pub struct InternalConfig {
     pub system_class_path: String,
     /// EJB library path.
     pub system_lib_path: String,
+}
+
+impl InternalConfig {
+    /// Returns InternalConfig with system paths intended for Exonum Java App.
+    pub fn app_config() -> Self {
+        Self {
+            system_class_path: system_classpath(),
+            system_lib_path: absolute_library_path(),
+        }
+    }
 }
 
 /// Error returned while validating user-specified additional parameters for JVM.

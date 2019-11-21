@@ -16,14 +16,13 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.exonum.binding.common.message.TransactionMessage.AUTHOR_PUBLIC_KEY_SIZE;
-import static com.exonum.binding.common.message.TransactionMessage.SIGNATURE_SIZE;
 import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.CryptoFunction;
+import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.test.Bytes;
@@ -37,9 +36,9 @@ class TransactionMessageSerializerTest {
   @Test
   void roundTrip() {
     byte[] payload = Bytes.randomBytes(100);
-    byte[] publicKey = Bytes.randomBytes(AUTHOR_PUBLIC_KEY_SIZE);
+    byte[] publicKey = Bytes.randomBytes(Ed25519.PUBLIC_KEY_BYTES);
     KeyPair keys = KeyPair.createKeyPair(Bytes.bytes(0x00), publicKey);
-    byte[] signature = Bytes.randomBytes(SIGNATURE_SIZE);
+    byte[] signature = Bytes.randomBytes(Ed25519.SIGNATURE_BYTES);
     CryptoFunction cryptoFunction = Mockito.mock(CryptoFunction.class);
     when(cryptoFunction.signMessage(any(), eq(keys.getPrivateKey()))).thenReturn(signature);
 
@@ -47,7 +46,8 @@ class TransactionMessageSerializerTest {
         .serviceId((short) 1)
         .transactionId((short) 2)
         .payload(payload)
-        .sign(keys, cryptoFunction);
+        .signedWith(keys, cryptoFunction)
+        .build();
 
     roundTripTest(message, serializer);
   }

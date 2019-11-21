@@ -18,31 +18,30 @@ package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.COUNTER_ID_PARAM;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_ACTUAL_CONFIGURATION_PATH;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_CONSENSUS_CONFIGURATION_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_COUNTER_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_CREATE_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_TX_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_ERROR_TX_PATH;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_VALID_THROWING_TX_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static com.google.common.net.HttpHeaders.LOCATION;
+import static com.google.common.net.MediaType.OCTET_STREAM;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
-import com.exonum.binding.common.configuration.StoredConfiguration;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.core.messages.Blockchain.Config;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
@@ -74,13 +73,10 @@ final class ApiController {
     // Mount the handlers of each request
     ImmutableMap<String, Handler<RoutingContext>> handlers =
         ImmutableMap.<String, Handler<RoutingContext>>builder()
-            .put(SUBMIT_CREATE_COUNTER_TX_PATH, this::submitCreateCounter)
             .put(SUBMIT_INCREMENT_COUNTER_TX_PATH, this::submitIncrementCounter)
-            .put(SUBMIT_VALID_THROWING_TX_PATH, this::submitValidThrowingTx)
-            .put(SUBMIT_VALID_ERROR_TX_PATH, this::submitValidErrorTx)
             .put(SUBMIT_UNKNOWN_TX_PATH, this::submitUnknownTx)
             .put(GET_COUNTER_PATH, this::getCounter)
-            .put(GET_ACTUAL_CONFIGURATION_PATH, this::getActualConfiguration)
+            .put(GET_CONSENSUS_CONFIGURATION_PATH, this::getConsensusConfiguration)
             .put(TIME_PATH, this::getTime)
             .put(VALIDATORS_TIMES_PATH, this::getValidatorsTimes)
             .build();
@@ -90,38 +86,12 @@ final class ApiController {
     );
   }
 
-  private void submitCreateCounter(RoutingContext rc) {
-    MultiMap parameters = rc.request().params();
-    String name = getRequiredParameter(parameters, "name");
-
-    HashCode txHash = service.submitCreateCounter(name);
-    replyTxSubmitted(rc, txHash);
-  }
-
   private void submitIncrementCounter(RoutingContext rc) {
     MultiMap parameters = rc.request().params();
     long seed = getRequiredParameter(parameters, "seed", Long::parseLong);
     HashCode counterId = getRequiredParameter(parameters, COUNTER_ID_PARAM, HashCode::fromString);
 
     HashCode txHash = service.submitIncrementCounter(seed, counterId);
-    replyTxSubmitted(rc, txHash);
-  }
-
-  private void submitValidThrowingTx(RoutingContext rc) {
-    MultiMap parameters = rc.request().params();
-    long seed = getRequiredParameter(parameters, "seed", Long::parseLong);
-
-    HashCode txHash = service.submitValidThrowingTx(seed);
-    replyTxSubmitted(rc, txHash);
-  }
-
-  private void submitValidErrorTx(RoutingContext rc) {
-    MultiMap parameters = rc.request().params();
-    long seed = getRequiredParameter(parameters, "seed", Long::parseLong);
-    byte errorCode = getRequiredParameter(parameters, "errorCode", Byte::parseByte);
-    String description = parameters.get("errorDescription");
-
-    HashCode txHash = service.submitValidErrorTx(seed, errorCode, description);
     replyTxSubmitted(rc, txHash);
   }
 
@@ -138,9 +108,12 @@ final class ApiController {
     respondWithJson(rc, counter);
   }
 
-  private void getActualConfiguration(RoutingContext rc) {
-    StoredConfiguration configuration = service.getActualConfiguration();
-    respondWithJson(rc, configuration);
+  private void getConsensusConfiguration(RoutingContext rc) {
+    Config configuration = service.getConsensusConfiguration();
+
+    rc.response()
+        .putHeader(CONTENT_TYPE, OCTET_STREAM.toString())
+        .end(Buffer.buffer(configuration.toByteArray()));
   }
 
   private void getTime(RoutingContext rc) {
@@ -151,10 +124,6 @@ final class ApiController {
   private void getValidatorsTimes(RoutingContext rc) {
     Map<PublicKey, ZonedDateTime> validatorsTimes = service.getValidatorsTimes();
     respondWithJson(rc, validatorsTimes);
-  }
-
-  private static String getRequiredParameter(MultiMap parameters, String key) {
-    return getRequiredParameter(parameters, key, String::toString);
   }
 
   private static <T> T getRequiredParameter(HttpServerRequest request, String key,
@@ -244,19 +213,13 @@ final class ApiController {
 
   static class QaPaths {
     @VisibleForTesting
-    static final String SUBMIT_CREATE_COUNTER_TX_PATH = "/submit-create-counter";
-    @VisibleForTesting
     static final String SUBMIT_INCREMENT_COUNTER_TX_PATH = "/submit-increment-counter";
-    @VisibleForTesting
-    static final String SUBMIT_VALID_THROWING_TX_PATH = "/submit-valid-throwing";
-    @VisibleForTesting
-    static final String SUBMIT_VALID_ERROR_TX_PATH = "/submit-valid-error";
     @VisibleForTesting
     static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
     static final String COUNTER_ID_PARAM = "counterId";
     static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
     @VisibleForTesting
-    static final String GET_ACTUAL_CONFIGURATION_PATH = "/actualConfiguration";
+    static final String GET_CONSENSUS_CONFIGURATION_PATH = "/consensusConfiguration";
     @VisibleForTesting
     static final String TIME_PATH = "/time";
     @VisibleForTesting
