@@ -15,15 +15,16 @@
  */
 
 use exonum::{
-    blockchain::{Blockchain, Schema as CoreSchema},
+    blockchain::Blockchain,
     crypto::{Hash, PublicKey},
     exonum_merkledb::{self, Snapshot},
     messages::BinaryValue,
     runtime::{
-        ArtifactId, ArtifactProtobufSpec, CallInfo, ErrorKind, ExecutionContext, ExecutionError,
-        InstanceId, InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, StateHashAggregator,
+        ArtifactId, CallInfo, ErrorKind, ExecutionContext, ExecutionError, InstanceId,
+        InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, StateHashAggregator,
     },
 };
+use exonum_proto::ProtobufConvert;
 use futures::{Future, IntoFuture};
 use jni::{
     objects::{GlobalRef, JObject, JValue},
@@ -78,7 +79,8 @@ impl JavaRuntimeProxy {
 
     /// If the current node is a validator, returns its ID, otherwise returns `-1`.
     fn validator_id(snapshot: &dyn Snapshot, pub_key: &PublicKey) -> i32 {
-        CoreSchema::new(snapshot)
+        snapshot
+            .for_core()
             .consensus_config()
             .find_validator(|validator_keys| *pub_key == validator_keys.service_key)
             .map_or(DEFAULT_VALIDATOR_ID, |id| i32::from(id.0))
@@ -201,7 +203,7 @@ impl Runtime for JavaRuntimeProxy {
         &mut self,
         artifact: ArtifactId,
         deploy_spec: Vec<u8>,
-    ) -> Box<dyn Future<Item = ArtifactProtobufSpec, Error = ExecutionError>> {
+    ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
         let id = match self.parse_artifact(&artifact) {
             Ok(id) => id.to_string(),
             Err(err) => return Box::new(Err(err).into_future()),
@@ -220,11 +222,7 @@ impl Runtime for JavaRuntimeProxy {
             .and_then(JValue::v)
         });
 
-        Box::new(
-            result
-                .map(|_| ArtifactProtobufSpec::default())
-                .into_future(),
-        )
+        Box::new(result.map(|_| ()).into_future())
     }
 
     fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
@@ -398,7 +396,7 @@ impl Runtime for JavaRuntimeProxy {
                 .service_keypair()
                 .0;
             let validator_id = Self::validator_id(snapshot, &public_key);
-            let height: u64 = CoreSchema::new(snapshot).height().into();
+            let height: u64 = snapshot.for_core().height().into();
 
             panic_on_exception(
                 env,

@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{list_index::ListIndexIter, Fork, ListIndex, Snapshot};
+use exonum_merkledb::{
+    access::FromAccess, list_index::ListIndexIter, Fork, IndexAddress, ListIndex, Snapshot,
+};
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray, jlong},
@@ -45,9 +47,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
+                    IndexType::SnapshotIndex(Index::from_access(snapshot, name.into()).unwrap())
                 }
-                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
+                ViewRef::Fork(fork) => {
+                    IndexType::ForkIndex(Index::from_access(fork, name.into()).unwrap())
+                }
             },
         ))
     });
@@ -66,14 +70,13 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let list_id = env.convert_byte_array(list_id)?;
+        let address = IndexAddress::with_root(group_name).append_bytes(&list_id);
         let view_ref = handle::cast_handle::<View>(view_handle).get();
         Ok(handle::to_handle(match view_ref {
             ViewRef::Snapshot(snapshot) => {
-                IndexType::SnapshotIndex(Index::new_in_family(group_name, &list_id, &*snapshot))
+                IndexType::SnapshotIndex(Index::from_access(snapshot, address).unwrap())
             }
-            ViewRef::Fork(fork) => {
-                IndexType::ForkIndex(Index::new_in_family(group_name, &list_id, fork))
-            }
+            ViewRef::Fork(fork) => IndexType::ForkIndex(Index::from_access(fork, address).unwrap()),
         }))
     });
     utils::unwrap_exc_or_default(&env, res)
