@@ -21,7 +21,7 @@ python3 -m pip install -e launcher-plugins
 
 TODO: Move the entire section to the EJB App tutorial.
 
-To deploy and start a specific list of services, use the following command with a
+To deploy and start a specific list of services, use the following command with the
 prepared `config.yml` file:
 
 ```bash
@@ -42,8 +42,8 @@ networks:
 
 You need to specify every node in the network.
 
-Deadline height describes the maximum blockchain height for deployment process. Make sure to
-specify the value larger than current blockchain height.
+Deadline height describes the maximum blockchain height for the deployment process. Make sure to
+specify the value larger than the current blockchain height.
 
 ```yaml
 deadline_height: 20000
@@ -56,11 +56,11 @@ runtimes:
   java: 1
 ```
 
-Add artifacts to be deployed. For each artifact, you need to specify its name alias (as YAML key) 
-and its runtime (using `runtime` field). Name aliases are used in other parts of configuration
-for readability and easier refactoring. Java artifacts also need name of the `jar` file in 
-`spec: artifact_filename` field. In our example we add Java `cryptocurrency-demo` service, and two
-Rust services - `timestamping` and `time` oracle service.
+Add artifacts you want to deploy. For each artifact, you need to specify its name alias
+(as YAML key) and its runtime (using `runtime` field). Name aliases are used in other parts
+of configuration for readability and easier refactoring. Java artifacts also need name of the
+`jar` file in the `spec: artifact_filename` field. In our example we add the Java
+`cryptocurrency-demo` service, and two Rust services - the `timestamping` and `time` oracle services.
 
 ```yaml
 artifacts:
@@ -77,7 +77,7 @@ artifacts:
     name: "exonum-timestamping:0.12.0"
 ```
 
-Add `plugins` section to enable both Java Runtime plugin and Java Instance plugin. Runtime plugin is
+Add a `plugins` section to enable both Java Runtime plugin and Java Instance plugin. Runtime plugin is
 enabled for a specific runtime (`java` in our example), while Instance plugin is enabled for a
 specific artifact name alias (`timestamping` in our example).
 
@@ -89,9 +89,9 @@ plugins:
     timestamping: "exonum_java_instance_plugin.JavaInstanceSpecLoader"
 ```
 
-In our example we will use Java Instance plugin to serialize initial configuration parameters of
-`timestamping` service in Protobuf. We need to take a `service.proto` file with message
-description from service sources and place it inside some known directory.
+In our example we will use the Java Instance plugin to serialize initial configuration parameters of
+the `timestamping` service in Protobuf. We need to take a `service.proto` file with the message
+description from the service sources and place it inside some known directory.
 
   ```proto
   syntax = "proto3";
@@ -103,17 +103,18 @@ description from service sources and place it inside some known directory.
   }
   ```
 
-Finally, add `instances` section that describes the list of service instances to be started in the
-blockchain. For each instance you need to specify artifact name alias. Java Instance plugin also
-requires a list of additional parameters, which we provide for `timestamping` instance:
+Finally, add an `instances` section that describes the list of service instances you want to
+start in the blockchain. For each instance you need to specify its artifact name alias.
+Java Instance plugin also requires a list of additional parameters, which we provide for
+the `timestamping` instance:
 
-- `sources`. Points to a directory with Protobuf-sources of service configuration 
-message. We use `proto_sources` directory.
-- `config_message_source`. A file name where `message_name` message 
-is located. In our example we use `service.proto` file.
-- `message_name`. A name of the Protobuf message used to represent service configuration.
+- `sources`. Points to a directory with the Protobuf sources of the service configuration 
+message. We use the `proto_sources` directory.
+- `config_message_source`. A file name where the `message_name` message 
+is located. In our example we use the `service.proto` file.
+- `message_name`. A name of the Protobuf message used to represent the service configuration.
   Optional, defaults to `Config`.
-- `data`. Your actual configuration in the format corresponding to `message_name` message.
+- `data`. Your actual configuration in the format corresponding to the `message_name` message.
 
 ```yaml
 instances:
@@ -131,7 +132,7 @@ instances:
         time_service_name: "time"
 ```
 
-See [sample-config.yml](sample-config.yml) for the final state of configuration file.
+See [sample-config.yml](sample-config.yml) for the final state of the configuration file.
 
 # License
 
