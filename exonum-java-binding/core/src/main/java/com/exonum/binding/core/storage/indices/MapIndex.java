@@ -109,7 +109,8 @@ public interface MapIndex<K, V> extends StorageIndex {
   Iterator<V> values();
 
   /**
-   * Returns an iterator over the map entries. The entries are ordered by keys in lexicographical order.
+   * Returns an iterator over the map entries. The entries are ordered by keys in lexicographical
+   * order.
    *
    * @throws IllegalStateException if this map is not valid
    */
