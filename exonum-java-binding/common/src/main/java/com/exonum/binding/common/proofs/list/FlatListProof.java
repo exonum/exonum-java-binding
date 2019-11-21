@@ -47,7 +47,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * A flat list proof. It proves that certain elements are present in a proof list
  * of a certain size.
  */
-class FlatListProof {
+public class FlatListProof {
   /*
     Proof lists are represented as BSTs, where all leaf elements are at the same height.
     Here is a tree for a three-element proof list:
@@ -97,14 +97,14 @@ class FlatListProof {
   private final List<ListProofHashedEntry> proof;
   private final long size;
 
-  FlatListProof(List<ListProofElementEntry> elements,
+  public FlatListProof(List<ListProofElementEntry> elements,
       List<ListProofHashedEntry> proof, long size) {
     this.elements = checkNotNull(elements);
     this.proof = checkNotNull(proof);
     this.size = size;
   }
 
-  CheckedListProof<byte[]> verify() {
+  public CheckedListProof<byte[]> verify() {
     // Check the size
     if (size < 0 || MAX_SIZE < size) {
       throw new InvalidProofException(String.format("Invalid size (%s), must be in range [0; 2^56]",
