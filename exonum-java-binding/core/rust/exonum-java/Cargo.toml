@@ -12,6 +12,7 @@ failure = "0.1.5"
 # in a correct application early, it is currently required in the application
 # because some public APIs in Java permit passing arbitrary pointers (e.g., Snapshot#newInstance).
 java_bindings = { path = "..", features = ["invocation", "resource-manager"] }
+exonum-supervisor = "0.12"
 log = "0.4"
 serde = "1.0"
 serde_derive = "1.0"
