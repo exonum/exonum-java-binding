@@ -101,27 +101,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public void initialize(Fork fork, Configuration configuration) {
     // Init the time oracle
-    initTimeOracle(fork, configuration);
+    updateTimeOracle(fork, configuration);
 
     // Add a default counter to the blockchain.
     createCounter(DEFAULT_COUNTER_NAME, fork);
 
     // Add an afterCommit counter that will be incremented after each block committed event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
-  }
-
-  private void initTimeOracle(Fork fork, Configuration configuration) {
-    QaSchema schema = createDataSchema(fork);
-    InitialConfiguration config = configuration.getAsMessage(InitialConfiguration.class);
-    String timeOracleName = config.getTimeOracleName();
-    // Check the time oracle name is non-empty.
-    // We do *not* check if the time oracle is active to (a) allow running this service with
-    // reduced read functionality without time oracle; (b) testing time schema when it is not
-    // active.
-    checkArgument(!Strings.isNullOrEmpty(timeOracleName), "Empty time oracle name: %s",
-        timeOracleName);
-    // Save the configuration
-    schema.timeOracleName().set(timeOracleName);
   }
 
   private void createCounter(String name, Fork fork) {
@@ -230,5 +216,38 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   private void checkBlockchainInitialized() {
     checkState(node != null, "Service has not been fully initialized yet");
+  }
+
+  @Override
+  public void verifyConfiguration(Fork fork, Configuration configuration) {
+    InitialConfiguration config = configuration.getAsMessage(InitialConfiguration.class);
+    checkConfiguration(config);
+  }
+
+  @Override
+  public void applyConfiguration(Fork fork, Configuration configuration) {
+    updateTimeOracle(fork, configuration);
+  }
+
+  private void checkConfiguration(InitialConfiguration config) {
+    String timeOracleName = config.getTimeOracleName();
+    // Check the time oracle name is non-empty.
+    // We do *not* check if the time oracle is active to (a) allow running this service with
+    // reduced read functionality without time oracle; (b) testing time schema when it is not
+    // active.
+    checkArgument(!Strings.isNullOrEmpty(timeOracleName), "Empty time oracle name: %s",
+        timeOracleName);
+  }
+
+  private void updateTimeOracle(Fork fork, Configuration configuration) {
+    QaSchema schema = createDataSchema(fork);
+    InitialConfiguration config = configuration.getAsMessage(InitialConfiguration.class);
+
+    // Verify the configuration
+    checkConfiguration(config);
+
+    // Save the configuration
+    String timeOracleName = config.getTimeOracleName();
+    schema.timeOracleName().set(timeOracleName);
   }
 }
