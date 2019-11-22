@@ -22,6 +22,14 @@ import com.exonum.binding.core.storage.database.Fork;
  * A configurable Exonum service. Allows services to update their configuration through
  * the supervisor service during their operation.
  *
+ * <p>The configuration update process includes the following steps: a proposal
+ * of a new configuration; verification of its correctness; approval of the proposal;
+ * and application of the new configuration. The protocol of the proposal and approval steps
+ * is determined by the installed supervisor service. The verification and application
+ * of the parameters are implemented by the service with
+ * {@link #verifyConfiguration(Fork, Configuration)}
+ * and {@link #applyConfiguration(Fork, Configuration)} methods.
+ *
  * <p>Services may use the same configuration parameters as
  * in {@link Service#initialize(Fork, Configuration)}, or different.
  * TODO: Link the appropriate documentation section on updating the service configuration
