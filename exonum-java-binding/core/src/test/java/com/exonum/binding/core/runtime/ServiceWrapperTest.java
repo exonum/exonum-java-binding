@@ -18,6 +18,7 @@ package com.exonum.binding.core.runtime;
 
 import static com.exonum.binding.core.runtime.ServiceWrapper.APPLY_CONFIGURATION_TX_ID;
 import static com.exonum.binding.core.runtime.ServiceWrapper.CONFIGURE_INTERFACE_NAME;
+import static com.exonum.binding.core.runtime.ServiceWrapper.SUPERVISOR_SERVICE_ID;
 import static com.exonum.binding.core.runtime.ServiceWrapper.VERIFY_CONFIGURATION_TX_ID;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,7 +91,7 @@ class ServiceWrapperTest {
         .thenReturn(executableTx);
 
     TransactionContext context = mock(TransactionContext.class);
-    serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, context);
+    serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, 0, context);
 
     verify(txConverter).toTransaction(txId, arguments);
     verify(executableTx).execute(context);
@@ -107,7 +108,7 @@ class ServiceWrapperTest {
 
     TransactionContext context = anyContext().build();
     assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, context));
+        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, 0, context));
   }
 
   @Test
@@ -121,7 +122,8 @@ class ServiceWrapperTest {
         .fork(fork)
         .build();
 
-    serviceWrapper.executeTransaction(interfaceName, txId, arguments, context);
+    serviceWrapper.executeTransaction(interfaceName, txId, arguments,
+        SUPERVISOR_SERVICE_ID, context);
 
     Configuration expected = new ServiceConfiguration(arguments);
     verify(service).verifyConfiguration(fork, expected);
@@ -138,22 +140,45 @@ class ServiceWrapperTest {
         .fork(fork)
         .build();
 
-    serviceWrapper.executeTransaction(interfaceName, txId, arguments, context);
+    serviceWrapper.executeTransaction(interfaceName, txId, arguments,
+        SUPERVISOR_SERVICE_ID, context);
 
     Configuration expected = new ServiceConfiguration(arguments);
     verify(service).applyConfiguration(fork, expected);
   }
 
   @ParameterizedTest
+  @ValueSource(ints = {-1, 1, 2})
+  void executeConfigurableOperationInvalidCallerId(int callerServiceId) {
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    int txId = VERIFY_CONFIGURATION_TX_ID;
+    byte[] arguments = bytes(1, 2, 3);
+
+    Fork fork = mock(Fork.class);
+    TransactionContext context = anyContext()
+        .fork(fork)
+        .build();
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, callerServiceId,
+            context));
+
+    assertThat(e.getMessage()).containsIgnoringCase("Invalid caller service id")
+        .contains(Integer.toString(callerServiceId))
+        .contains(Integer.toString(SUPERVISOR_SERVICE_ID));
+  }
+
+  @ParameterizedTest
   @ValueSource(ints = {-1, 2, 3})
-  void executeUnknownConfigurableMethod(int txId) throws TransactionExecutionException {
+  void executeUnknownConfigurableMethod(int txId) {
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     byte[] arguments = bytes(1, 2, 3);
 
     TransactionContext context = anyContext().build();
 
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, context));
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
+            SUPERVISOR_SERVICE_ID, context));
     assertThat(e.getMessage()).containsIgnoringCase("Unknown txId")
         .contains(Integer.toString(txId));
   }
@@ -169,7 +194,8 @@ class ServiceWrapperTest {
     TransactionContext context = anyContext().build();
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, context));
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
+            SUPERVISOR_SERVICE_ID, context));
 
     assertThat(e.getMessage()).containsIgnoringCase("Doesn't implement Configurable")
         .contains(TEST_SERVICE_NAME);
@@ -187,7 +213,7 @@ class ServiceWrapperTest {
 
     TransactionContext context = anyContext().build();
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, context));
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, 0, context));
 
     assertThat(e.getMessage()).containsIgnoringCase("Unknown interface")
         .contains(interfaceName);
@@ -208,7 +234,7 @@ class ServiceWrapperTest {
         .execute(context);
 
     TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
-        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, context));
+        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, 0, context));
 
     assertThat(actual).isSameAs(e);
   }

@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.core.runtime.ServiceWrapper.DEFAULT_INTERFACE_NAME;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -277,16 +276,22 @@ public final class ServiceRuntime implements AutoCloseable {
 
   /**
    * Executes a transaction belonging to the given service.
+   *
    * @param serviceId the numeric identifier of the service instance to which the transaction
    *     belongs
+   * @param interfaceName a fully-qualified name of the interface in which the transaction
+   *     is defined, or empty string if it is defined in the service directly (implicit interface)
    * @param txId the transaction type identifier
    * @param arguments the serialized transaction arguments
    * @param fork a native fork object
+   * @param callerServiceId the id of the caller service if transaction is invoked by other
+   *     service. Currently only applicable to invocations of Configure interface methods
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    */
-  public void executeTransaction(int serviceId, int txId, byte[] arguments,
-                                 Fork fork, HashCode txMessageHash, PublicKey authorPublicKey)
+  public void executeTransaction(int serviceId, String interfaceName, int txId,
+      byte[] arguments, Fork fork, int callerServiceId, HashCode txMessageHash,
+      PublicKey authorPublicKey)
       throws TransactionExecutionException {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
@@ -299,7 +304,7 @@ public final class ServiceRuntime implements AutoCloseable {
           .serviceId(serviceId)
           .build();
       try {
-        service.executeTransaction(/* todo: */ "", txId, arguments, context);
+        service.executeTransaction(interfaceName, txId, arguments, callerServiceId, context);
       } catch (Exception e) {
         logger.info("Transaction execution failed (service={}, txId={}, txMessageHash={})",
             service.getName(), txId, context.getTransactionMessageHash(), e);
@@ -403,7 +408,7 @@ public final class ServiceRuntime implements AutoCloseable {
   public void verifyTransaction(int serviceId, int txId, byte[] arguments) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
-      service.convertTransaction(DEFAULT_INTERFACE_NAME, txId, arguments);
+      service.convertTransaction(txId, arguments);
     }
   }
 

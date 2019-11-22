@@ -120,7 +120,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
         "executeTransaction",
-        "(II[BJ[B[B)V",
+        "(ILjava/lang/String;I[BJI[B[B)V",
     );
     RUNTIME_ADAPTER_STATE_HASHES = get_method_id(
         &env,

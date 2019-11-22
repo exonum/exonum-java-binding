@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use exonum::runtime::Caller;
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
@@ -26,6 +27,7 @@ use exonum::{
 };
 use exonum_proto::ProtobufConvert;
 use futures::{Future, IntoFuture};
+use jni::sys::jint;
 use jni::{
     objects::{GlobalRef, JObject, JValue},
     signature::{JavaType, Primitive},
@@ -303,10 +305,17 @@ impl Runtime for JavaRuntimeProxy {
         call_info: &CallInfo,
         arguments: &[u8],
     ) -> Result<(), ExecutionError> {
-        let tx = match context.caller.as_transaction() {
-            Some((hash, pub_key)) => (hash.to_bytes(), pub_key.to_bytes()),
-            None => {
-                // TODO (ECR-3702): caller is Service (not Transaction) is not supported yet
+        // todo: Replace this abomination (8-parameter method, arguments that make sense only
+        //   in some cases) with a single protobuf message or other alternative [ECR-3872]
+        let tx_info: (InstanceId, Hash, PublicKey) = match context.caller {
+            Caller::Transaction {
+                hash: message_hash,
+                author: author_pk,
+            } => (0, message_hash, author_pk),
+            Caller::Service {
+                instance_id: caller_id,
+            } => (caller_id, Hash::default(), PublicKey::default()),
+            Caller::Blockchain => {
                 return Err(Error::NotSupportedOperation.into());
             }
         };
@@ -318,11 +327,15 @@ impl Runtime for JavaRuntimeProxy {
             )],
             |env| {
                 let service_id = call_info.instance_id as i32;
+                let interface_name = JObject::from(env.new_string(context.interface_name)?);
                 let tx_id = call_info.method_id as i32;
                 let args = JObject::from(env.byte_array_from_slice(arguments)?);
                 let view_handle = to_handle(View::from_ref_fork(context.fork));
-                let hash = JObject::from(env.byte_array_from_slice(&tx.0)?);
-                let pub_key = JObject::from(env.byte_array_from_slice(&tx.1)?);
+                let caller_id = tx_info.0;
+                let message_hash = tx_info.1.to_bytes();
+                let message_hash = JObject::from(env.byte_array_from_slice(&message_hash)?);
+                let author_pk = tx_info.2.to_bytes();
+                let author_pk = JObject::from(env.byte_array_from_slice(&author_pk)?);
 
                 env.call_method_unchecked(
                     self.runtime_adapter.as_obj(),
@@ -330,11 +343,13 @@ impl Runtime for JavaRuntimeProxy {
                     JavaType::Primitive(Primitive::Void),
                     &[
                         JValue::from(service_id),
+                        JValue::from(interface_name),
                         JValue::from(tx_id),
                         JValue::from(args),
                         JValue::from(view_handle),
-                        JValue::from(hash),
-                        JValue::from(pub_key),
+                        JValue::from(caller_id as jint),
+                        JValue::from(message_hash),
+                        JValue::from(author_pk),
                     ],
                 )
                 .and_then(JValue::v)
