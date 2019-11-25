@@ -350,7 +350,7 @@
         <!-- Use newer version of the standard plugins by default. -->
         <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.0.0-M2</version>
+          <version>3.0.0-M3</version>
         </plugin>
 
         <plugin>
