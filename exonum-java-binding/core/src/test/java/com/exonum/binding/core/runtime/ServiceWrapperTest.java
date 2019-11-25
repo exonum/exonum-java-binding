@@ -18,6 +18,7 @@ package com.exonum.binding.core.runtime;
 
 import static com.exonum.binding.core.runtime.ServiceWrapper.APPLY_CONFIGURATION_TX_ID;
 import static com.exonum.binding.core.runtime.ServiceWrapper.CONFIGURE_INTERFACE_NAME;
+import static com.exonum.binding.core.runtime.ServiceWrapper.DEFAULT_INTERFACE_NAME;
 import static com.exonum.binding.core.runtime.ServiceWrapper.SUPERVISOR_SERVICE_ID;
 import static com.exonum.binding.core.runtime.ServiceWrapper.VERIFY_CONFIGURATION_TX_ID;
 import static com.exonum.binding.test.Bytes.bytes;
@@ -60,7 +61,6 @@ class ServiceWrapperTest {
       ServiceArtifactId.newJavaId("com.acme:foo:1.2.3");
   private static final String TEST_SERVICE_NAME = "test-service";
   private static final int TEST_SERVICE_ID = 1;
-  private static final String DEFAULT_INTERFACE = "";
 
   final ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_SERVICE_NAME,
       TEST_SERVICE_ID, TEST_ARTIFACT_ID);
@@ -91,7 +91,7 @@ class ServiceWrapperTest {
         .thenReturn(executableTx);
 
     TransactionContext context = mock(TransactionContext.class);
-    serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, 0, context);
+    serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0, context);
 
     verify(txConverter).toTransaction(txId, arguments);
     verify(executableTx).execute(context);
@@ -108,7 +108,8 @@ class ServiceWrapperTest {
 
     TransactionContext context = anyContext().build();
     assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, 0, context));
+        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0,
+            context));
   }
 
   @Test
@@ -234,7 +235,8 @@ class ServiceWrapperTest {
         .execute(context);
 
     TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
-        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE, txId, arguments, 0, context));
+        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0,
+            context));
 
     assertThat(actual).isSameAs(e);
   }
