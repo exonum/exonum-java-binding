@@ -12,7 +12,6 @@ crate-type = ["dylib"]
 
 [dependencies]
 exonum-testkit = "0.12"
-tokio-core = "0.1.17"
 failure = "0.1"
 futures = "0.1"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855)
@@ -22,3 +21,7 @@ rand = "0.7"
 serde = "1.0"
 serde_derive = "1.0"
 tempfile = "3.1"
+
+[dev-dependencies]
+hex = "0.4.0"
+tokio-core = "0.1.17"

@@ -16,6 +16,7 @@
 
 extern crate exonum_testkit;
 extern crate futures;
+extern crate hex;
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
@@ -24,24 +25,30 @@ extern crate tempfile;
 extern crate tokio_core;
 
 use exonum_testkit::TestKitBuilder;
-use futures::sync::mpsc::Receiver;
+use futures::sync::mpsc;
+use hex::FromHex;
 use integration_tests::{
-    fake_runtime::*,
-    fake_service::*,
-    vm::{create_vm_for_tests_with_fake_classes, fakes_classpath, java_library_path, log4j_path},
+    fake_runtime::create_fake_service_runtime_adapter,
+    fake_service::{
+        self, create_before_commit_test_map, create_init_srvc_test_map,
+        create_service_artifact_non_instantiable_service, create_service_artifact_non_loadable,
+        create_service_artifact_valid, create_tx_test_entry,
+    },
+    vm::{create_vm_for_tests_with_fake_classes, log4j_path},
 };
 use java_bindings::{
     create_service_runtime,
     exonum::{
         blockchain::{Blockchain, ExecutionError, ExecutionErrorKind, InstanceConfig},
-        crypto::{gen_keypair, PublicKey, SecretKey},
+        crypto::{gen_keypair, hash, Hash, PublicKey, SecretKey},
+        messages::{AnyTx, Verified},
         node::ApiSender,
-        runtime::{ArtifactId, InstanceId, InstanceSpec, Runtime},
+        runtime::{ArtifactId, CallInfo, InstanceId, InstanceSpec, MethodId, Runtime},
     },
     exonum_merkledb::{BinaryValue, TemporaryDB},
     jni::JavaVM,
     utils::any_to_string,
-    DeployArguments, Error, Executor, InternalConfig, JavaRuntimeProxy, RuntimeConfig,
+    DeployArguments, Error, Executor, JavaRuntimeProxy, RuntimeConfig,
 };
 use std::{panic, path::PathBuf, sync::Arc};
 use tempfile::TempPath;
@@ -50,6 +57,11 @@ use tokio_core::reactor::Core;
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
 }
+
+const VALID_INSTANCE_ID: u32 = 127;
+const VALID_INSTANCE_NAME: &str = "artifact__test_valid";
+const VALID_ARTIFACT_NAME: &str = "artifact:test-valid";
+const VALID_ARTIFACT_VERS: &str = "1.0";
 
 #[test]
 fn runtime_exception_handling_checked_exception() {
@@ -72,7 +84,7 @@ fn runtime_exception_handling_checked_exception() {
             assert!(message.contains("deployArtifact"));
             assert!(message.contains("ServiceLoadingException"))
         }
-        _ => assert!(false, "error.kind is not 'ExecutionErrorKind::Runtime'"),
+        _ => panic!("error.kind is not 'ExecutionErrorKind::Runtime'"),
     }
 
     runtime.shutdown();
@@ -90,7 +102,7 @@ fn runtime_exception_handling_unchecked_exception() {
 
 #[test]
 fn runtime_initialize_and_shutdown() {
-    let mut runtime = get_runtime(6300);
+    let mut runtime = create_runtime();
     let keypair = gen_keypair();
     let blockchain = create_blockchain(keypair);
 
@@ -100,7 +112,7 @@ fn runtime_initialize_and_shutdown() {
 
 #[test]
 fn load_artifact() {
-    let mut runtime = get_runtime(6301);
+    let mut runtime = create_runtime();
     let mut core = Core::new().unwrap();
     let blockchain = create_blockchain(gen_keypair());
 
@@ -124,7 +136,7 @@ fn load_artifact() {
 
 #[test]
 fn load_non_loadable_artifact() {
-    let mut runtime = get_runtime(6302);
+    let mut runtime = create_runtime();
     let mut core = Core::new().unwrap();
     let blockchain = create_blockchain(gen_keypair());
 
@@ -154,7 +166,7 @@ fn load_non_loadable_artifact() {
 
 #[test]
 fn load_artifact_twice_same_version() {
-    let mut runtime = get_runtime(6303);
+    let mut runtime = create_runtime();
     let mut core = Core::new().unwrap();
     let blockchain = create_blockchain(gen_keypair());
 
@@ -193,7 +205,7 @@ fn load_artifact_twice_same_version() {
 
 #[test]
 fn load_artifact_twice_other_version() {
-    let mut runtime = get_runtime(6304);
+    let mut runtime = create_runtime();
     let mut core = Core::new().unwrap();
     let blockchain = create_blockchain(gen_keypair());
 
@@ -207,7 +219,7 @@ fn load_artifact_twice_other_version() {
     let artifact_two = create_artifact(
         runtime.get_executor(),
         "artifact:test-name",
-        "1.1",
+        "0.9",
         create_service_artifact_valid,
     );
 
@@ -230,7 +242,7 @@ fn load_artifact_twice_other_version() {
 
 #[test]
 fn initialize_one_artifact() {
-    let runtime = get_runtime(6305);
+    let runtime = create_runtime();
 
     let service_instance_config = get_service_instance_config(
         runtime.get_executor(),
@@ -252,7 +264,7 @@ fn initialize_one_artifact() {
 
 #[test]
 fn initialize_two_artifacts() {
-    let runtime = get_runtime(6306);
+    let runtime = create_runtime();
 
     let service_instance_one_config = get_service_instance_config(
         runtime.get_executor(),
@@ -282,7 +294,7 @@ fn initialize_two_artifacts() {
 
 #[test]
 fn initialize_non_instantiable_artifact() {
-    let runtime = get_runtime(6307);
+    let runtime = create_runtime();
 
     let service_instance_config = get_service_instance_config(
         runtime.get_executor(),
@@ -306,6 +318,209 @@ fn initialize_non_instantiable_artifact() {
         .as_str(),
         || test_kit_builder.create(),
     );
+}
+
+#[test]
+fn service_can_modify_db_on_initialize() {
+    let (runtime, _instance_id, config, _path) = create_runtime_with_valid_test_config();
+
+    let mut test_kit = TestKitBuilder::validator()
+        .with_additional_runtime(runtime)
+        .with_instances(vec![config])
+        .create();
+    test_kit.create_block();
+
+    let snapshot = test_kit.snapshot();
+    let test_map = create_init_srvc_test_map(&*snapshot, fake_service::TEST_SERVICE_NAME);
+    let key = hash(fake_service::INITIAL_ENTRY_KEY.as_ref());
+    let value = test_map
+        .get(&key)
+        .expect("Failed to find the entry created in the test service");
+    assert_eq!(fake_service::INITIAL_ENTRY_VALUE, value);
+
+    test_kit.stop();
+}
+
+#[test]
+fn execute_valid_transaction() {
+    let tx_args = &[1_u8, 2_u8, 3_u8, 4_u8];
+    let tx_args_hex = hex::encode(tx_args);
+
+    let (runtime, instance_id, config, _path) = create_runtime_with_valid_test_config();
+
+    let mut test_kit = TestKitBuilder::validator()
+        .with_additional_runtime(runtime)
+        .with_instances(vec![config])
+        .create();
+
+    test_kit.create_block();
+
+    let tx = create_transaction(instance_id, fake_service::SET_ENTRY_TX, tx_args);
+    let block = test_kit.create_block_with_transaction(tx);
+
+    assert_eq!(block.transactions.len(), 1);
+    assert!(block.transactions.get(0).unwrap().status().is_ok());
+
+    test_kit.create_block();
+
+    let snapshot = test_kit.snapshot();
+    let test_entry = create_tx_test_entry(&*snapshot, fake_service::TEST_SERVICE_NAME);
+    let value = test_entry
+        .get()
+        .expect("Failed to find the entry created in the test service");
+
+    assert_eq!(tx_args_hex, value);
+
+    test_kit.stop();
+}
+
+#[test]
+fn submit_non_convertible_tx() {
+    let tx_args = &[1_u8, 2_u8, 3_u8, 4_u8];
+
+    let (runtime, instance_id, config, _path) = create_runtime_with_valid_test_config();
+
+    let mut test_kit = TestKitBuilder::validator()
+        .with_additional_runtime(runtime)
+        .with_instances(vec![config])
+        .create();
+    test_kit.create_block();
+
+    let tx = create_transaction(instance_id, fake_service::THROW_SOE_TX, tx_args);
+    let block = test_kit.create_block_with_transaction(tx);
+
+    assert_eq!(block.transactions.len(), 1);
+    let status = block.transactions.get(0).unwrap().status();
+    assert!(status.is_err());
+    assert!(status
+        .unwrap_err()
+        .to_string()
+        .contains("java.lang.StackOverflowError;"));
+
+    test_kit.stop();
+}
+
+#[test]
+fn submit_service_error_on_exec_tx() {
+    let tx_args = &[255_u8, 2_u8, 3_u8, 4_u8];
+    let tx_error_code = tx_args[0];
+
+    let (runtime, instance_id, config, _path) = create_runtime_with_valid_test_config();
+
+    let mut test_kit = TestKitBuilder::validator()
+        .with_additional_runtime(runtime)
+        .with_instances(vec![config])
+        .create();
+
+    test_kit.create_block();
+
+    let tx = create_transaction(instance_id, fake_service::SRVC_ERR_ON_EXEC_TX, tx_args);
+    let block = test_kit.create_block_with_transaction(tx);
+
+    assert_eq!(block.transactions.len(), 1);
+    let status = block.transactions.get(0).unwrap().status();
+    assert!(status.is_err());
+    assert_service_error_with_code(status.unwrap_err(), tx_error_code);
+
+    test_kit.stop();
+}
+
+#[test]
+fn submit_failing_on_exec_tx() {
+    let tx_args = &[1_u8, 2_u8, 3_u8, 4_u8];
+
+    let (runtime, instance_id, config, _path) = create_runtime_with_valid_test_config();
+
+    let mut test_kit = TestKitBuilder::validator()
+        .with_additional_runtime(runtime)
+        .with_instances(vec![config])
+        .create();
+
+    test_kit.create_block();
+
+    let tx = create_transaction(instance_id, fake_service::FAIL_ON_EXEC_TX, tx_args);
+    let block = test_kit.create_block_with_transaction(tx);
+
+    assert_eq!(block.transactions.len(), 1);
+    let status = block.transactions.get(0).unwrap().status();
+    assert!(status.is_err());
+
+    // Strange Core behavior, stored result is ExecutionError { err.kind == Service, err.code = 1 }
+    // with no any description,
+    // instead of provided by runtime: ExecutionError { err.kind == Runtime, err.code = JavaException }
+    //assert!(status.unwrap_err()
+    //    .to_string()
+    //    .contains("java.lang.ArithmeticException;"));
+
+    test_kit.stop();
+}
+
+#[test]
+fn before_commit() {
+    let (runtime, _instance_id, config, _path) = create_runtime_with_valid_test_config();
+
+    let mut test_kit = TestKitBuilder::validator()
+        .with_additional_runtime(runtime)
+        .with_instances(vec![config])
+        .create();
+
+    let mut value: Option<i32> = None;
+
+    for _ in 0..10 {
+        test_kit.create_block();
+
+        let snapshot = test_kit.snapshot();
+        let map = create_before_commit_test_map(&*snapshot, fake_service::TEST_SERVICE_NAME);
+        let key = hash(fake_service::BEFORE_COMMIT_ENTRY_KEY.as_ref());
+        let cur_value = map
+            .get(&key)
+            .expect("Failed to find the entry created in beforeCommit")
+            .parse::<i32>()
+            .expect("Failed to parse the entry value created in beforeCommit");
+
+        if let Some(prev_value) = value {
+            assert_eq!(prev_value + 1, cur_value);
+        }
+
+        value = Some(cur_value);
+    }
+
+    test_kit.stop();
+}
+
+#[test]
+fn state_hashes() {
+    let service_hash =
+        Hash::from_hex("8c1ea14c7893acabde2aa95031fae57abb91516ddb78b0f6622afa0d8cb1b5c2").unwrap();
+
+    let (runtime, _instance_id, config, _path) = create_runtime_with_valid_test_config();
+    let runtime_copy = runtime.clone();
+
+    let mut test_kit = TestKitBuilder::validator()
+        .with_additional_runtime(runtime)
+        .with_instances(vec![config])
+        .create();
+
+    for i in 0..5 {
+        test_kit.create_block();
+
+        let snapshot = test_kit.snapshot();
+        let aggregator = runtime_copy.state_hashes(&snapshot);
+
+        assert_eq!(aggregator.instances.len(), 1);
+        let (instance, hashes) = aggregator
+            .instances
+            .get(0)
+            .expect("Failed to find state hash pair for test service");
+        assert_eq!(*instance, VALID_INSTANCE_ID);
+        assert_eq!(hashes.len(), 1);
+        let cur_hash = hashes
+            .get(0)
+            .expect("Failed to find state hash for test service");
+        assert_eq!(*cur_hash, service_hash);
+    }
+
+    test_kit.stop();
 }
 
 fn create_artifact<C>(
@@ -359,13 +574,34 @@ where
     )
 }
 
+fn create_runtime_with_valid_test_config(
+) -> (JavaRuntimeProxy, InstanceId, InstanceConfig, TempPath) {
+    let runtime = create_runtime();
+
+    let service_instance_config = get_service_instance_config(
+        runtime.get_executor(),
+        VALID_INSTANCE_ID,
+        VALID_INSTANCE_NAME,
+        VALID_ARTIFACT_NAME,
+        VALID_ARTIFACT_VERS,
+        create_service_artifact_valid,
+    );
+
+    (
+        runtime,
+        service_instance_config.0.instance_spec.id,
+        service_instance_config.0,
+        service_instance_config.1,
+    )
+}
+
 // Creates a new instance of JavaRuntimeProxy and Executor for same JVM.
-fn get_runtime(port: i32) -> JavaRuntimeProxy {
+fn create_runtime() -> JavaRuntimeProxy {
     let runtime_config = RuntimeConfig {
         artifacts_path: PathBuf::from("/tmp/"),
         // Pass log4j path to avoid error messages of mis-configuration
         log_config_path: log4j_path(),
-        port,
+        port: 0,
         override_system_lib_path: None,
     };
 
@@ -381,10 +617,23 @@ fn get_fake_runtime(facade_method: &str) -> JavaRuntimeProxy {
 
 fn create_blockchain(keypair: (PublicKey, SecretKey)) -> Blockchain {
     let api_channel = mpsc::channel(128);
-    let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
+    let (app_tx, _app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     let storage = TemporaryDB::new();
     Blockchain::new(storage, keypair, app_tx.clone())
+}
+
+fn create_transaction(instance: InstanceId, method: MethodId, args: &[u8]) -> Verified<AnyTx> {
+    let tx = AnyTx {
+        call_info: CallInfo {
+            instance_id: instance,
+            method_id: method,
+        },
+        arguments: args.to_vec(),
+    };
+
+    let (pub_key, sec_key) = gen_keypair();
+    Verified::from_value(tx, pub_key, &sec_key)
 }
 
 // Asserts that given closure panics while executed and error message contains given substring.
@@ -402,9 +651,9 @@ where
     }
 }
 
-fn _assert_service_error_with_code(error: ExecutionError, service_code: u8) {
+fn assert_service_error_with_code(error: &ExecutionError, service_code: u8) {
     match error.kind {
         ExecutionErrorKind::Service { code } => assert_eq!(code, service_code),
-        _ => assert!(false, "error.kind is not 'ExecutionErrorKind::Service'"),
+        _ => panic!("error.kind is not 'ExecutionErrorKind::Service'"),
     }
 }

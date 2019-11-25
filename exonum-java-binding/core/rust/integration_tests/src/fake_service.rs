@@ -13,11 +13,26 @@
 // limitations under the License.
 
 use java_bindings::{
+    exonum::crypto::Hash,
+    exonum_merkledb::{proof_map_index::ProofMapIndex, Entry, IndexAccess},
     jni::objects::{JObject, JValue},
     utils::{panic_on_exception, unwrap_jni},
     Executor,
 };
 use tempfile::{self, TempPath};
+
+pub const TEST_SERVICE_NAME: &str = "experimentalTestService";
+pub const INITIAL_ENTRY_KEY: &str = "initial key";
+pub const INITIAL_ENTRY_VALUE: &str = "initial value";
+pub const BEFORE_COMMIT_ENTRY_KEY: &str = "bc key";
+pub const INIT_MAP_NAME: &str = "init_map";
+pub const BEFORE_COMMIT_MAP_NAME: &str = "before_commit_map";
+pub const TX_ENTRY_NAME: &str = "test_entry";
+
+pub const SET_ENTRY_TX: u32 = 1;
+pub const THROW_SOE_TX: u32 = 2;
+pub const SRVC_ERR_ON_EXEC_TX: u32 = 3;
+pub const FAIL_ON_EXEC_TX: u32 = 3;
 
 const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
 
@@ -72,7 +87,7 @@ fn create_service_artifact(
 ) -> TempPath {
     unwrap_jni(executor.with_attached(|env| {
         let name = artifact_id.to_string().replace(":", "_");
-        let mut artifact_path = tempfile::Builder::new()
+        let artifact_path = tempfile::Builder::new()
             .prefix(&name)
             .suffix(".jar")
             .tempfile()
@@ -98,4 +113,28 @@ fn create_service_artifact(
         );
         Ok(artifact_path)
     }))
+}
+
+pub fn create_init_srvc_test_map<V>(view: V, service_name: &str) -> ProofMapIndex<V, Hash, String>
+where
+    V: IndexAccess,
+{
+    ProofMapIndex::new(format!("{}_{}", service_name, INIT_MAP_NAME), view)
+}
+
+pub fn create_before_commit_test_map<V>(
+    view: V,
+    service_name: &str,
+) -> ProofMapIndex<V, Hash, String>
+where
+    V: IndexAccess,
+{
+    ProofMapIndex::new(format!("{}_{}", service_name, BEFORE_COMMIT_MAP_NAME), view)
+}
+
+pub fn create_tx_test_entry<V>(view: V, _service_name: &str) -> Entry<V, String>
+where
+    V: IndexAccess,
+{
+    Entry::new(format!("{}", TX_ENTRY_NAME), view)
 }

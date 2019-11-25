@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use java_bindings::{
-    jni::objects::JObject, utils::unwrap_jni, Executor, JavaRuntimeProxy, RuntimeConfig,
-};
+use java_bindings::{utils::unwrap_jni, Executor, JavaRuntimeProxy};
 
 const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
 const CREATE_FAKE_RUNTIME_ADAPTER_SIGNATURE: &str =
