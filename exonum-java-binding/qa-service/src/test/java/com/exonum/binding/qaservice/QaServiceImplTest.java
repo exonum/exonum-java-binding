@@ -38,7 +38,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -47,16 +46,12 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.qaservice.Config.InitialConfiguration;
-import com.exonum.binding.qaservice.Service.ConfigChange;
-import com.exonum.binding.qaservice.Service.ConfigPropose;
-import com.exonum.binding.qaservice.Service.ServiceConfig;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.testkit.TimeProvider;
 import com.exonum.core.messages.Blockchain.Config;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import io.vertx.core.MultiMap;
@@ -140,47 +135,6 @@ class QaServiceImplTest {
                 .build());
 
     assertThrows(RuntimeException.class, testKitBuilder::build);
-  }
-
-  @Test
-  void reconfigureService(TestKit testKit) {
-    KeyPair serviceKeyPair = testKit.getEmulatedNode().getServiceKeyPair();
-    // Determine the config application height
-    long nextHeight = 1 + testKit.applySnapshot(s -> Blockchain.newInstance(s)
-        .getHeight());
-
-    // Propose the config change
-    String newTimeOracleName = "mars-time";
-    ConfigPropose propose = ConfigPropose.newBuilder()
-        .setActualFrom(nextHeight)
-        .addChanges(ConfigChange.newBuilder()
-            .setService(ServiceConfig.newBuilder()
-                .setInstanceId(QA_SERVICE_ID)
-                .setParams(InitialConfiguration.newBuilder()
-                    .setTimeOracleName(newTimeOracleName)
-                    .build()
-                    .toByteString())
-                .build())
-            .build())
-        .build();
-    TransactionMessage proposeTx = TransactionMessage.builder()
-        // fixme: constants
-        .serviceId(0)
-        .transactionId(2)
-        .payload(propose.toByteArray())
-        .sign(serviceKeyPair);
-    testKit.createBlockWithTransactions(proposeTx);
-
-    // Check the proposal status
-    Snapshot s = testKit.getSnapshot();
-    Optional<ExecutionStatus> proposalStatus = Blockchain.newInstance(s)
-        .getTxResult(proposeTx.hash());
-    assertThat(proposalStatus).hasValue(ExecutionStatuses.success());
-
-    // Check the application status
-    QaSchema qaSchema = new QaSchema(s, QA_SERVICE_NAME);
-    Optional<String> actualTimeOracle = qaSchema.timeOracleName().toOptional();
-    assertThat(actualTimeOracle).hasValue(newTimeOracleName);
   }
 
   @Test

@@ -172,7 +172,6 @@
           <execution>
             <goals>
               <goal>compile</goal>
-              <goal>test-compile</goal>
             </goals>
             <configuration>
               <protocArtifact>
