@@ -30,6 +30,7 @@ import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.fakes.services.service.TestService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.BaseEncoding;
 
 /**
  * A transaction whose behaviour can be configured. It's not a mock: it writes a given value
@@ -49,18 +50,14 @@ public final class SetEntryTransaction implements Transaction {
   static final String AUTHOR_PK_NAME = "author_pk";
 
   private final String value;
-  private final String info;
 
   /**
    * Creates a transaction with a pre-configured behaviour.
    *
    * @param value a value to put into an entry {@link #ENTRY_NAME}
-   * @param info a value to be returned as this transaction text representation
-   *     {@link Transaction#info()}
    */
-  public SetEntryTransaction(String value, String info) {
+  public SetEntryTransaction(String value) {
     this.value = checkNotNull(value);
-    this.info = checkNotNull(info);
   }
 
   @Override
@@ -76,11 +73,11 @@ public final class SetEntryTransaction implements Transaction {
 
   @Override
   public String info() {
-    return info;
+    return value;
   }
 
   public static Transaction fromArguments(byte[] arguments) {
-    return new SetEntryTransaction("value", "info");
+    return new SetEntryTransaction(BaseEncoding.base16().encode(arguments));
   }
 
   private EntryIndexProxy<String> createTestEntry(Fork view) {

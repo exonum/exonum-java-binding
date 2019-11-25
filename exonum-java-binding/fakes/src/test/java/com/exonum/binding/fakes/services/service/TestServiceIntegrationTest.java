@@ -44,7 +44,7 @@ class TestServiceIntegrationTest {
 
       Optional<String> initialConfig = service.initialize(fork);
 
-      ProofMapIndexProxy<HashCode, String> testMap = new TestSchema(fork).testMap();
+      ProofMapIndexProxy<HashCode, String> testMap = new TestSchema(fork).initializeServiceMap();
 
       assertTrue(testMap.containsKey(INITIAL_ENTRY_KEY));
       assertThat(testMap.get(INITIAL_ENTRY_KEY), equalTo(INITIAL_ENTRY_VALUE));

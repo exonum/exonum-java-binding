@@ -26,7 +26,9 @@ import java.util.List;
 
 public final class TestSchema implements Schema {
   @SuppressWarnings("WeakerAccess")
-  static final String TEST_MAP_NAME = TestService.NAME + "_test_map";
+  static final String INIT_SERVICE_MAP_NAME = TestService.NAME + "_init_map";
+  @SuppressWarnings("WeakerAccess")
+  static final String BEFORE_COMMIT_MAP_NAME = TestService.NAME + "_before_commit_map";
 
   private final View view;
 
@@ -34,14 +36,21 @@ public final class TestSchema implements Schema {
     this.view = view;
   }
 
-  public ProofMapIndexProxy<HashCode, String> testMap() {
-    return ProofMapIndexProxy.newInstance(TEST_MAP_NAME, view, StandardSerializers.hash(),
+  public ProofMapIndexProxy<HashCode, String> initializeServiceMap() {
+    return ProofMapIndexProxy.newInstance(INIT_SERVICE_MAP_NAME, view, StandardSerializers.hash(),
         StandardSerializers.string());
+  }
+
+  public ProofMapIndexProxy<HashCode, String> beforeCommitMap() {
+    return ProofMapIndexProxy.newInstance(BEFORE_COMMIT_MAP_NAME, view, StandardSerializers.hash(),
+            StandardSerializers.string());
   }
 
   @Override
   public List<HashCode> getStateHashes() {
-    HashCode rootHash = testMap().getIndexHash();
+    // exclude beforeCommitMap
+    // `8c1ea14c7893acabde2aa95031fae57abb91516ddb78b0f6622afa0d8cb1b5c2 after init`
+    HashCode rootHash = initializeServiceMap().getIndexHash();
     return Collections.singletonList(rootHash);
   }
 }

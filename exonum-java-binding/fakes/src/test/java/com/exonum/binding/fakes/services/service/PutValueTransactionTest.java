@@ -76,7 +76,7 @@ class PutValueTransactionTest {
     Fork fork = mock(Fork.class);
     TestSchema schema = mock(TestSchema.class);
     ProofMapIndexProxy testMap = mock(ProofMapIndexProxy.class);
-    when(schema.testMap()).thenReturn(testMap);
+    when(schema.initializeServiceMap()).thenReturn(testMap);
 
     PutValueTransaction tx = PutValueTransaction.from(transaction,
         createTestSchemaFactory(fork, schema));

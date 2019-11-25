@@ -75,7 +75,7 @@ public final class PutValueTransaction implements Transaction {
   @Override
   public void execute(TransactionContext context) {
     TestSchema schema = schemaFactory.from(context.getFork());
-    ProofMapIndexProxy<HashCode, String> map = schema.testMap();
+    ProofMapIndexProxy<HashCode, String> map = schema.initializeServiceMap();
     map.put(getKey(), value);
   }
 
