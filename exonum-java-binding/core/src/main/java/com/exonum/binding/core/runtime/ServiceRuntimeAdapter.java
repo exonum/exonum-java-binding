@@ -168,7 +168,7 @@ public class ServiceRuntimeAdapter {
    * @param arguments the transaction arguments
    * @param forkNativeHandle a handle to a native fork object
    * @param callerServiceId the id of the service which invoked the transaction (in case of
-   *      inner transactions; or 0 when the caller is an external message
+   *      inner transactions); or 0 when the caller is an external message
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    * @throws TransactionExecutionException if the transaction execution failed
