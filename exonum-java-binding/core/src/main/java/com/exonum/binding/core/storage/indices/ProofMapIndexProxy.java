@@ -52,14 +52,16 @@ import java.util.function.LongSupplier;
  * <h3><a name="key-hashing">Key hashing in proof maps</a></h3>
  *
  * <p>By default, when creating the proof map using methods
- * {@link #newInstance(String, View, Serializer, Serializer)} and
- * {@link #newInGroupUnsafe(String, byte[], View, Serializer, Serializer)}, the user keys are
- * converted into internal keys through hashing. This allows to use keys of arbitrary size and
- * ensures the balance of the internal tree. It is also possible to create a proof map that will
- * not hash keys with methods {@link #newInstanceNoKeyHashing(String, View, Serializer, Serializer)}
- * and {@link #newInGroupUnsafeNoKeyHashing(String, byte[], View, Serializer, Serializer)}. In this
- * mode, the map will use the user keys as internal tree keys. Such mode of operation is
- * appropriate iff all of the following conditions hold:
+ * {@link #newInstance(String, View, Serializer, Serializer) #newInstance} and
+ * {@link #newInGroupUnsafe(String, byte[], View, Serializer, Serializer) #newInGroupUnsafe},
+ * the user keys are converted into internal keys through hashing. This allows to use keys of
+ * arbitrary size and ensures the balance of the internal tree.
+ * It is also possible to create a proof map that will not hash keys with methods
+ * {@link #newInstanceNoKeyHashing(String, View, Serializer, Serializer) #newInstanceNoKeyHashing}
+ * and {@link #newInGroupUnsafeNoKeyHashing(String, byte[], View, Serializer, Serializer)
+ * #newInGroupUnsafeNoKeyHashing}. In this mode, the map will use the user keys as internal
+ * tree keys. Such mode of operation is appropriate iff <em>all</em> of the following conditions
+ * hold:
  *
  * <ul>
  *   <li>All keys are 32-byte long</li>
@@ -67,6 +69,8 @@ import java.util.function.LongSupplier;
  *   <li>The keys come from a trusted source that cannot influence their distribution and affect
  *       the tree balance.</li>
  * </ul>
+ *
+ * <hr>
  *
  * <p>The "destructive" methods of the map, i.e., the one that change the map contents,
  * are specified to throw {@link UnsupportedOperationException} if

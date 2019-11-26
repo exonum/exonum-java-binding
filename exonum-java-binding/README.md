@@ -10,6 +10,7 @@ configure a network of nodes and run your services in it.
 
 For more information see the relevant documentation on the tool:
   - [User Guide](https://exonum.com/doc/version/0.12/get-started/java-binding/)
+  - [Javadocs](https://exonum.com/doc/api/java-binding/0.8.0/index.html)
   - [Cryptocurrency Example Service](cryptocurrency-demo)
 
 ## License
