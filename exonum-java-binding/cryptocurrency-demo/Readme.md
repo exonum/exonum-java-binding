@@ -42,7 +42,7 @@ $ mvn -P with-installed-app install
 
 Start the node:
 ```sh
-$ ./start-cryptocurrency-demo.sh
+$ ./start-node.sh
 ```
 
 Start the service:

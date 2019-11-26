@@ -40,8 +40,6 @@ echo "PROJ_ROOT=${EJB_ROOT}"
 
 source "${EJB_ROOT}/tests_profile"
 
-java_library_path="${EJB_ROOT}/core/rust/target/debug/deps"
-
 ARTIFACTS_PATH=""
 
 if [[ $# -eq 0 ]] ; then
@@ -90,8 +88,7 @@ cargo +${RUST_COMPILER_VERSION} build
 
 # Enable predefined native logging configuration,
 # unless it is already set to any value (incl. null)
-# Use jni=error as we currently have some warnings (see ECR-2482).
-export RUST_LOG="${RUST_LOG-warn,exonum=info,exonum-java=info,java_bindings=info,jni=error}"
+export RUST_LOG="${RUST_LOG-warn,exonum=info,exonum-java=info,java_bindings=info}"
 
 header "GENERATE COMMON CONFIG"
 cargo +${RUST_COMPILER_VERSION} run -- generate-template \
