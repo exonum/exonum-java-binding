@@ -56,3 +56,4 @@ exonum-build = { git = "https://github.com/exonum/exonum", rev = "6d7cc3a9c6" }
 exonum-derive = { git = "https://github.com/exonum/exonum", rev = "6d7cc3a9c6" }
 exonum-cli = { git = "https://github.com/exonum/exonum", rev = "6d7cc3a9c6" }
 exonum-proto = { git = "https://github.com/exonum/exonum", rev = "6d7cc3a9c6" }
+exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "6d7cc3a9c6" }
