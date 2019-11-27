@@ -61,7 +61,7 @@
 
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.8.0</ejb.version>
+    <ejb.version>0.9.0-SNAPSHOT</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -69,6 +69,7 @@
     <!-- Project dependencies -->
     <okhttp.version>4.2.2</okhttp.version>
     <lombok.version>1.18.10</lombok.version>
+    <protobuf.version>3.10.0</protobuf.version>
     <!--Test dependencies-->
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
     <mockito.version>3.1.0</mockito.version>
@@ -115,6 +116,13 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>${protobuf.version}</version>
       <scope>provided</scope>
     </dependency>
 

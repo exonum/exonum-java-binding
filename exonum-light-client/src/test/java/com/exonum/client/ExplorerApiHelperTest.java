@@ -31,8 +31,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
@@ -108,7 +108,7 @@ class ExplorerApiHelperTest {
 
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
     assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(), is(TransactionResult.successful()));
+    assertThat(transactionResponse.getExecutionResult(), is(ExecutionStatuses.success()));
     assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(11L, 0L)));
   }
 
@@ -144,41 +144,7 @@ class ExplorerApiHelperTest {
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
     assertThat(transactionResponse.getMessage(), is(expectedMessage));
     assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.error(errorCode, errorDescription)));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
-  }
-
-  @Test
-  void parseGetTxResponseCommittedWithPanic() {
-    TransactionMessage expectedMessage = createTransactionMessage();
-    String errorDescription = "panic happens";
-    String json = "{\n"
-        + "    'type': 'committed',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'amount': 1,\n"
-        + "            'seed': 5019726028924803177\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    },\n"
-        + "    'location': {\n"
-        + "        'block_height': 1,\n"
-        + "        'position_in_block': 0\n"
-        + "    },\n"
-        + "    'location_proof': {\n"
-        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
-        + "    },\n"
-        + "    'status': {\n"
-        + "        'type': 'panic',\n"
-        + "        'description': '" + errorDescription + "'"
-        + "    }\n"
-        + "}";
-    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
-
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.unexpectedError(errorDescription)));
+        is(ExecutionStatuses.serviceError(errorCode, errorDescription)));
     assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
   }
 

@@ -20,8 +20,8 @@ package com.exonum.client;
 import static com.exonum.client.ExonumApi.JSON;
 import static java.util.stream.Collectors.toList;
 
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
@@ -29,6 +29,7 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
@@ -58,7 +59,7 @@ final class ExplorerApiHelper {
 
   static TransactionResponse parseGetTxResponse(String json) {
     GetTxResponse response = JSON.fromJson(json, GetTxResponse.class);
-    TransactionResult executionResult = getTransactionResult(response.getStatus());
+    ExecutionStatus executionResult = getExecutionStatus(response.getStatus());
 
     return new TransactionResponse(
         response.getType(),
@@ -87,19 +88,17 @@ final class ExplorerApiHelper {
     );
   }
 
-  private static TransactionResult getTransactionResult(
+  private static ExecutionStatus getExecutionStatus(
       GetTxResponseExecutionResult executionStatus) {
     if (executionStatus == null) {
       return null;
     }
     switch (executionStatus.getType()) {
       case SUCCESS:
-        return TransactionResult.successful();
+        return ExecutionStatuses.success();
       case ERROR:
-        return TransactionResult.error(executionStatus.getCode(),
+        return ExecutionStatuses.serviceError(executionStatus.getCode(),
             executionStatus.getDescription());
-      case PANIC:
-        return TransactionResult.unexpectedError(executionStatus.getDescription());
       default:
         throw new IllegalStateException("Unexpected transaction execution status: "
             + executionStatus.getType());
@@ -166,9 +165,7 @@ final class ExplorerApiHelper {
     @SerializedName("success")
     SUCCESS,
     @SerializedName("error")
-    ERROR,
-    @SerializedName("panic")
-    PANIC
+    ERROR
   }
 
   @Value

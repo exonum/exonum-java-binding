@@ -70,10 +70,10 @@ class ExonumHttpClientIntegrationTest {
     // Create request
     KeyPair keys = ed25519().generateKeyPair();
     TransactionMessage txMessage = TransactionMessage.builder()
-        .serviceId((short) 1)
-        .transactionId((short) 2)
+        .serviceId(1)
+        .transactionId(2)
         .payload(new byte[]{0x00, 0x01, 0x02})
-        .sign(keys, ed25519());
+        .sign(keys);
     // Mock response
     String hash = "f128c720e04b8243";
     String mockResponse = "{\"tx_hash\":\"" + hash + "\"}";
