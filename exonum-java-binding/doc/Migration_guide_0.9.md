@@ -10,10 +10,10 @@ and updated features.
 ## Dynamic Services Overview
 
 Dynamic Java services are packaged in an _artifact_: a JAR archive with some metadata. An Exonum
-artifact has a runtime-specific _name_ and globally-unique _identifier_. Java services must
-use name in the format 'groupId:artifactId:version', where each component of the name corresponds
+artifact has a runtime-specific _name_. Java services must use name in the format 
+'groupId:artifactId:version', where each component of the name corresponds
 to a Maven project coordinate, for example: 'com.exonum.example:timestamping:1.0.2' is a valid
-artifact name.
+artifact name. Rust service names are usually in format '<crate-name>:<version>'.
 The format of the metadata has not changed since 0.6.0.
 
 Artifacts are _deployed_ to the Exonum blockchain network; and then used to instantiate
@@ -84,7 +84,7 @@ If it doesn't — please migrate your schema to use the new default one.
 #### Disable Proofs
 
 Proofs are temporarily disabled. Creating proofs is _not_ supported in this release.
-They  will be re-enabled in one of the next releases.
+They will be re-enabled in one of the next releases.
 
 ### Update the Transactions
 
@@ -133,6 +133,9 @@ Finally, if the integration tests using the testkit are located in the same modu
 they need to be bound to `verify` Maven phase so that a service artifact built during `package` 
 phase is available.
 
+See the [updated section on testing](https://exonum.com/doc/version/0.13-rc1/get-started/java-binding/#testing)
+for extra examples.
+
 ### Use Example
 
 See a complete diff of changes applied to the cryptocurrency-demo service
@@ -164,7 +167,7 @@ Update the light client to a compatible version to interact with the newer Exonu
 In Exonum 0.13/Exonum Java 0.9 a transaction message format has been changed. 
 `TransactionMessage.Builder` supports this newest format.
 
-Also, the clients gave to be configured with the instance name and id to be able
+Also, the clients have to be configured with the instance name and id to be able
 to submit transactions to a correct instance. 
 
 ## Explore the New Features
