@@ -15,7 +15,7 @@
 use exonum_merkledb::{
     access::{FromAccess, RawAccess},
     proof_map_index::{
-        ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, PROOF_MAP_KEY_SIZE,
+        Hashed, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, PROOF_MAP_KEY_SIZE,
     },
     Fork, IndexAddress, ObjectHash, ProofMapIndex, RawProofMapIndex, Snapshot,
 };
@@ -68,6 +68,18 @@ trait ToRawKey {
     fn to_raw(&self) -> RawKey;
 }
 
+impl<T: RawAccess> From<ProofMapIndex<T, Key, Value>> for Index<T> {
+    fn from(map: ProofMapIndex<T, Key, Value>) -> Self {
+        Index::Hashed(map)
+    }
+}
+
+impl<T: RawAccess> From<RawProofMapIndex<T, RawKey, Value>> for Index<T> {
+    fn from(map: RawProofMapIndex<T, RawKey, Value>) -> Self {
+        Index::Raw(map)
+    }
+}
+
 impl ToRawKey for Key {
     fn to_raw(&self) -> RawKey {
         assert_eq!(
@@ -96,26 +108,28 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    if key_is_hashed {
-                        IndexType::SnapshotIndex(Index::Hashed(
-                            ProofMapIndex::from_access(snapshot, name.into()).unwrap(),
-                        ))
+                    let index = if key_is_hashed {
+                        ProofMapIndex::<_, _, _, Hashed>::from_access(snapshot, name.into())
+                            .unwrap()
+                            .into()
                     } else {
-                        IndexType::SnapshotIndex(Index::Raw(
-                            RawProofMapIndex::from_access(snapshot, name.into()).unwrap(),
-                        ))
-                    }
+                        RawProofMapIndex::from_access(snapshot, name.into())
+                            .unwrap()
+                            .into()
+                    };
+                    IndexType::SnapshotIndex(index)
                 }
                 ViewRef::Fork(fork) => {
-                    if key_is_hashed {
-                        IndexType::ForkIndex(Index::Hashed(
-                            ProofMapIndex::from_access(fork, name.into()).unwrap(),
-                        ))
+                    let index = if key_is_hashed {
+                        ProofMapIndex::<_, _, _, Hashed>::from_access(fork, name.into())
+                            .unwrap()
+                            .into()
                     } else {
-                        IndexType::ForkIndex(Index::Raw(
-                            RawProofMapIndex::from_access(fork, name.into()).unwrap(),
-                        ))
-                    }
+                        RawProofMapIndex::from_access(fork, name.into())
+                            .unwrap()
+                            .into()
+                    };
+                    IndexType::ForkIndex(index)
                 }
             },
         ))
@@ -141,26 +155,26 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    if key_is_hashed {
-                        IndexType::SnapshotIndex(Index::Hashed(
-                            ProofMapIndex::from_access(snapshot, address).unwrap(),
-                        ))
+                    let index = if key_is_hashed {
+                        ProofMapIndex::<_, _, _, Hashed>::from_access(snapshot, address)
+                            .unwrap()
+                            .into()
                     } else {
-                        IndexType::SnapshotIndex(Index::Raw(
-                            RawProofMapIndex::from_access(snapshot, address).unwrap(),
-                        ))
-                    }
+                        RawProofMapIndex::from_access(snapshot, address)
+                            .unwrap()
+                            .into()
+                    };
+                    IndexType::SnapshotIndex(index)
                 }
                 ViewRef::Fork(fork) => {
-                    if key_is_hashed {
-                        IndexType::ForkIndex(Index::Hashed(
-                            ProofMapIndex::from_access(fork, address).unwrap(),
-                        ))
+                    let index = if key_is_hashed {
+                        ProofMapIndex::<_, _, _, Hashed>::from_access(fork, address)
+                            .unwrap()
+                            .into()
                     } else {
-                        IndexType::ForkIndex(Index::Raw(
-                            RawProofMapIndex::from_access(fork, address).unwrap(),
-                        ))
-                    }
+                        RawProofMapIndex::from_access(fork, address).unwrap().into()
+                    };
+                    IndexType::ForkIndex(index)
                 }
             },
         ))
@@ -313,29 +327,25 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let iter_handle = match *handle::cast_handle::<IndexType>(map_handle) {
+        let iter = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref index) => match index {
                 Index::Raw(ref map) => {
-                    handle::to_handle(Iter::Raw(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?))
+                    Iter::Raw(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?)
                 }
-                Index::Hashed(ref map) => handle::to_handle(Iter::Hashed(PairIter::new(
-                    &env,
-                    map.iter(),
-                    MAP_ENTRY_INTERNAL_FQN,
-                )?)),
+                Index::Hashed(ref map) => {
+                    Iter::Hashed(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?)
+                }
             },
             IndexType::ForkIndex(ref index) => match index {
                 Index::Raw(ref map) => {
-                    handle::to_handle(Iter::Raw(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?))
+                    Iter::Raw(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?)
                 }
-                Index::Hashed(ref map) => handle::to_handle(Iter::Hashed(PairIter::new(
-                    &env,
-                    map.iter(),
-                    MAP_ENTRY_INTERNAL_FQN,
-                )?)),
+                Index::Hashed(ref map) => {
+                    Iter::Hashed(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?)
+                }
             },
         };
-        Ok(iter_handle)
+        Ok(handle::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -348,16 +358,17 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(KeysIter::Raw(map.keys())),
-                Index::Hashed(map) => handle::to_handle(KeysIter::Hashed(map.keys())),
+        let keys_iter = match handle::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(index) => match index {
+                Index::Raw(map) => KeysIter::Raw(map.keys()),
+                Index::Hashed(map) => KeysIter::Hashed(map.keys()),
             },
-            IndexType::ForkIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(KeysIter::Raw(map.keys())),
-                Index::Hashed(map) => handle::to_handle(KeysIter::Hashed(map.keys())),
+            IndexType::ForkIndex(index) => match index {
+                Index::Raw(map) => KeysIter::Raw(map.keys()),
+                Index::Hashed(map) => KeysIter::Hashed(map.keys()),
             },
-        })
+        };
+        Ok(handle::to_handle(keys_iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -394,33 +405,33 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key)?;
-        let iter_handle = match *handle::cast_handle::<IndexType>(map_handle) {
+        let iter = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(Iter::Raw(PairIter::new(
+                Index::Raw(map) => Iter::Raw(PairIter::new(
                     &env,
                     map.iter_from(&key.to_raw()),
                     MAP_ENTRY_INTERNAL_FQN,
-                )?)),
-                Index::Hashed(map) => handle::to_handle(Iter::Hashed(PairIter::new(
+                )?),
+                Index::Hashed(map) => Iter::Hashed(PairIter::new(
                     &env,
                     map.iter_from(&key),
                     MAP_ENTRY_INTERNAL_FQN,
-                )?)),
+                )?),
             },
             IndexType::ForkIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(Iter::Raw(PairIter::new(
+                Index::Raw(map) => Iter::Raw(PairIter::new(
                     &env,
                     map.iter_from(&key.to_raw()),
                     MAP_ENTRY_INTERNAL_FQN,
-                )?)),
-                Index::Hashed(map) => handle::to_handle(Iter::Hashed(PairIter::new(
+                )?),
+                Index::Hashed(map) => Iter::Hashed(PairIter::new(
                     &env,
                     map.iter_from(&key),
                     MAP_ENTRY_INTERNAL_FQN,
-                )?)),
+                )?),
             },
         };
-        Ok(iter_handle)
+        Ok(handle::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -435,16 +446,17 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key)?;
-        Ok(match *handle::cast_handle::<IndexType>(map_handle) {
+        let iter = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(KeysIter::Raw(map.keys_from(&key.to_raw()))),
-                Index::Hashed(map) => handle::to_handle(KeysIter::Hashed(map.keys_from(&key))),
+                Index::Raw(map) => KeysIter::Raw(map.keys_from(&key.to_raw())),
+                Index::Hashed(map) => KeysIter::Hashed(map.keys_from(&key)),
             },
             IndexType::ForkIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(KeysIter::Raw(map.keys_from(&key.to_raw()))),
-                Index::Hashed(map) => handle::to_handle(KeysIter::Hashed(map.keys_from(&key))),
+                Index::Raw(map) => KeysIter::Raw(map.keys_from(&key.to_raw())),
+                Index::Hashed(map) => KeysIter::Hashed(map.keys_from(&key)),
             },
-        })
+        };
+        Ok(handle::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
