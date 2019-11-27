@@ -23,7 +23,7 @@ use exonum_proto::ProtobufConvert;
 use handle::{self, Handle};
 use jni::{
     objects::{GlobalRef, JClass, JMethodID, JObject, JString},
-    sys::{jboolean, jbyteArray, jobject, jobjectArray, JNI_FALSE},
+    sys::{jboolean, jbyteArray, jobject, jobjectArray, JNI_TRUE},
     JNIEnv,
 };
 use protobuf::Message;
@@ -38,6 +38,9 @@ use std::{panic, ptr};
 
 type RawKey = [u8; PROOF_MAP_KEY_SIZE];
 
+// Wrapper for an underlying ProofMapIndex that supports two types of keys:
+//  1. RawKey - fixed-length 256 bits key that won't be hashed by ProofMapIndex
+//  2. Key - variable-length array of bytes that will be hashed by ProofMapIndex
 enum Index<T>
 where
     T: RawAccess,
@@ -104,7 +107,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
-        let key_is_hashed = key_hashing != JNI_FALSE;
+        let key_is_hashed = key_hashing == JNI_TRUE;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
@@ -151,7 +154,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         let group_name = utils::convert_to_string(&env, group_name)?;
         let map_id = env.convert_byte_array(map_id)?;
         let address = IndexAddress::with_root(group_name).append_bytes(&map_id);
-        let key_is_hashed = key_hashing != JNI_FALSE;
+        let key_is_hashed = key_hashing == JNI_TRUE;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
