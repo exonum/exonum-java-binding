@@ -58,7 +58,8 @@ replaces the configuration service.
 [service]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/core/service/Service.html
 [service-initialize]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/core/service/Service.html#initialize-com.exonum.binding.core.storage.database.Fork-com.exonum.binding.core.service.Configuration-
 [configurable]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/core/service/Configurable.html
-[supervisor]: todo
+<!-- todo: Check the anchor when the docs land -->
+[supervisor]: https://exonum.com/doc/version/0.13-rc1/get-started/java-binding/#deploy-and-start-service
 
 ### Update the Schema
 
