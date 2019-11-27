@@ -7,7 +7,7 @@ and multiple instances of the same service.
 This guide provides instructions on updating existing services to be compatible with the new
 and updated features.
 
-## Dynamic Services 101
+## Dynamic Services Overview
 
 Dynamic Java services are packaged in an _artifact_: a JAR archive with some metadata. An Exonum
 artifact has a runtime-specific _name_ and globally-unique _identifier_. Java services must
