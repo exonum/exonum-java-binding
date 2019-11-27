@@ -103,8 +103,7 @@ fn runtime_exception_handling_unchecked_exception() {
 #[test]
 fn runtime_initialize_and_shutdown() {
     let mut runtime = create_runtime();
-    let keypair = gen_keypair();
-    let blockchain = create_blockchain(keypair);
+    let blockchain = create_blockchain();
 
     runtime.initialize(&blockchain);
     runtime.shutdown();
@@ -114,7 +113,7 @@ fn runtime_initialize_and_shutdown() {
 fn load_artifact() {
     let mut runtime = create_runtime();
     let mut core = Core::new().unwrap();
-    let blockchain = create_blockchain(gen_keypair());
+    let blockchain = create_blockchain();
 
     let artifact = create_artifact(
         runtime.get_executor(),
@@ -138,7 +137,7 @@ fn load_artifact() {
 fn load_non_loadable_artifact() {
     let mut runtime = create_runtime();
     let mut core = Core::new().unwrap();
-    let blockchain = create_blockchain(gen_keypair());
+    let blockchain = create_blockchain();
 
     let artifact = create_artifact(
         runtime.get_executor(),
@@ -168,7 +167,7 @@ fn load_non_loadable_artifact() {
 fn load_artifact_twice_same_version() {
     let mut runtime = create_runtime();
     let mut core = Core::new().unwrap();
-    let blockchain = create_blockchain(gen_keypair());
+    let blockchain = create_blockchain();
 
     let artifact_one = create_artifact(
         runtime.get_executor(),
@@ -207,7 +206,7 @@ fn load_artifact_twice_same_version() {
 fn load_artifact_twice_other_version() {
     let mut runtime = create_runtime();
     let mut core = Core::new().unwrap();
-    let blockchain = create_blockchain(gen_keypair());
+    let blockchain = create_blockchain();
 
     let artifact_one = create_artifact(
         runtime.get_executor(),
@@ -615,7 +614,8 @@ fn get_fake_runtime(facade_method: &str) -> JavaRuntimeProxy {
     create_fake_service_runtime_adapter(executor, facade_method)
 }
 
-fn create_blockchain(keypair: (PublicKey, SecretKey)) -> Blockchain {
+fn create_blockchain() -> Blockchain {
+    let keypair: (PublicKey, SecretKey) = gen_keypair();
     let api_channel = mpsc::channel(128);
     let (app_tx, _app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 

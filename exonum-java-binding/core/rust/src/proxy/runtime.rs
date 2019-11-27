@@ -464,7 +464,7 @@ impl fmt::Display for JavaArtifactId {
 #[derive(Serialize, Deserialize, Clone, ProtobufConvert, BinaryValue, PartialEq)]
 #[protobuf_convert(source = "proto::DeployArguments")]
 pub struct DeployArguments {
-    /// Artifact file-name
+    /// Artifact filename
     pub artifact_filename: String,
 }
 
