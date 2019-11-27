@@ -332,20 +332,12 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     let res = panic::catch_unwind(|| {
         let iter = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref index) => match index {
-                Index::Raw(ref map) => {
-                    Iter::Raw(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?)
-                }
-                Index::Hashed(ref map) => {
-                    Iter::Hashed(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?)
-                }
+                Index::Raw(ref map) => Iter::Raw(create_pair_iter(&env, map.iter())?),
+                Index::Hashed(ref map) => Iter::Hashed(create_pair_iter(&env, map.iter())?),
             },
             IndexType::ForkIndex(ref index) => match index {
-                Index::Raw(ref map) => {
-                    Iter::Raw(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?)
-                }
-                Index::Hashed(ref map) => {
-                    Iter::Hashed(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?)
-                }
+                Index::Raw(ref map) => Iter::Raw(create_pair_iter(&env, map.iter())?),
+                Index::Hashed(ref map) => Iter::Hashed(create_pair_iter(&env, map.iter())?),
             },
         };
         Ok(handle::to_handle(iter))
@@ -410,28 +402,12 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         let key = env.convert_byte_array(key)?;
         let iter = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref index) => match index {
-                Index::Raw(map) => Iter::Raw(PairIter::new(
-                    &env,
-                    map.iter_from(&key.to_raw()),
-                    MAP_ENTRY_INTERNAL_FQN,
-                )?),
-                Index::Hashed(map) => Iter::Hashed(PairIter::new(
-                    &env,
-                    map.iter_from(&key),
-                    MAP_ENTRY_INTERNAL_FQN,
-                )?),
+                Index::Raw(map) => Iter::Raw(create_pair_iter(&env, map.iter_from(&key.to_raw()))?),
+                Index::Hashed(map) => Iter::Hashed(create_pair_iter(&env, map.iter_from(&key))?),
             },
             IndexType::ForkIndex(ref index) => match index {
-                Index::Raw(map) => Iter::Raw(PairIter::new(
-                    &env,
-                    map.iter_from(&key.to_raw()),
-                    MAP_ENTRY_INTERNAL_FQN,
-                )?),
-                Index::Hashed(map) => Iter::Hashed(PairIter::new(
-                    &env,
-                    map.iter_from(&key),
-                    MAP_ENTRY_INTERNAL_FQN,
-                )?),
+                Index::Raw(map) => Iter::Raw(create_pair_iter(&env, map.iter_from(&key.to_raw()))?),
+                Index::Hashed(map) => Iter::Hashed(create_pair_iter(&env, map.iter_from(&key))?),
             },
         };
         Ok(handle::to_handle(iter))
@@ -692,4 +668,9 @@ fn create_element(
     Ok(env
         .new_object_unchecked(class, constructor, &[key.into(), value.into()])?
         .into_inner())
+}
+
+// Creates PairIter for corresponding iterator and map entry.
+fn create_pair_iter<I: Iterator>(env: &JNIEnv, iter: I) -> JniResult<PairIter<I>> {
+    PairIter::new(&env, iter, MAP_ENTRY_INTERNAL_FQN)
 }
