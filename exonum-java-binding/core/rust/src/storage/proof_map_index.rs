@@ -36,7 +36,7 @@ use JniResult;
 
 use std::{panic, ptr};
 
-type RawKey = [u8; 32];
+type RawKey = [u8; PROOF_MAP_KEY_SIZE];
 
 enum Index<T>
 where
@@ -46,7 +46,7 @@ where
     Hashed(ProofMapIndex<T, Key, Value>),
 }
 
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
+const MAP_ENTRY_INTERNAL_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
 
 enum IndexType {
     SnapshotIndex(Index<&'static dyn Snapshot>),
@@ -316,22 +316,22 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         let iter_handle = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref index) => match index {
                 Index::Raw(ref map) => {
-                    handle::to_handle(Iter::Raw(PairIter::new(&env, map.iter(), JAVA_ENTRY_FQN)?))
+                    handle::to_handle(Iter::Raw(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?))
                 }
                 Index::Hashed(ref map) => handle::to_handle(Iter::Hashed(PairIter::new(
                     &env,
                     map.iter(),
-                    JAVA_ENTRY_FQN,
+                    MAP_ENTRY_INTERNAL_FQN,
                 )?)),
             },
             IndexType::ForkIndex(ref index) => match index {
                 Index::Raw(ref map) => {
-                    handle::to_handle(Iter::Raw(PairIter::new(&env, map.iter(), JAVA_ENTRY_FQN)?))
+                    handle::to_handle(Iter::Raw(PairIter::new(&env, map.iter(), MAP_ENTRY_INTERNAL_FQN)?))
                 }
                 Index::Hashed(ref map) => handle::to_handle(Iter::Hashed(PairIter::new(
                     &env,
                     map.iter(),
-                    JAVA_ENTRY_FQN,
+                    MAP_ENTRY_INTERNAL_FQN,
                 )?)),
             },
         };
@@ -399,24 +399,24 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
                 Index::Raw(map) => handle::to_handle(Iter::Raw(PairIter::new(
                     &env,
                     map.iter_from(&key.to_raw()),
-                    JAVA_ENTRY_FQN,
+                    MAP_ENTRY_INTERNAL_FQN,
                 )?)),
                 Index::Hashed(map) => handle::to_handle(Iter::Hashed(PairIter::new(
                     &env,
                     map.iter_from(&key),
-                    JAVA_ENTRY_FQN,
+                    MAP_ENTRY_INTERNAL_FQN,
                 )?)),
             },
             IndexType::ForkIndex(ref index) => match index {
                 Index::Raw(map) => handle::to_handle(Iter::Raw(PairIter::new(
                     &env,
                     map.iter_from(&key.to_raw()),
-                    JAVA_ENTRY_FQN,
+                    MAP_ENTRY_INTERNAL_FQN,
                 )?)),
                 Index::Hashed(map) => handle::to_handle(Iter::Hashed(PairIter::new(
                     &env,
                     map.iter_from(&key),
-                    JAVA_ENTRY_FQN,
+                    MAP_ENTRY_INTERNAL_FQN,
                 )?)),
             },
         };
