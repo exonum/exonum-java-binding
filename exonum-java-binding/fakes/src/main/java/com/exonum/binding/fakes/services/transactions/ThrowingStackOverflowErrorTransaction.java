@@ -44,11 +44,6 @@ public final class ThrowingStackOverflowErrorTransaction implements Transaction 
 
   }
 
-  @Override
-  public String info() {
-    return "Non-convertable transaction";
-  }
-
   public static Transaction fromArguments(byte[] arguments) {
     fromArguments(arguments);
     return new ThrowingStackOverflowErrorTransaction();

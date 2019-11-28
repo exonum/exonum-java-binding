@@ -50,11 +50,6 @@ public final class ThrowingRuntimeExceptionTransaction implements Transaction {
     throw new ArithmeticException("on execute");
   }
 
-  @Override
-  public String info() {
-    return BaseEncoding.base16().encode(value);
-  }
-
   public static Transaction fromArguments(byte[] arguments) {
     return new ThrowingRuntimeExceptionTransaction(arguments);
   }

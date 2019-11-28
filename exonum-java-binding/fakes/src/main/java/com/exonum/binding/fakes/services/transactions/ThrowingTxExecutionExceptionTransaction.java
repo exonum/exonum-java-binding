@@ -55,11 +55,6 @@ public final class ThrowingTxExecutionExceptionTransaction implements Transactio
     throw new TransactionExecutionException(value[0]);
   }
 
-  @Override
-  public String info() {
-    return BaseEncoding.base16().encode(value);
-  }
-
   public static Transaction fromArguments(byte[] arguments) {
     return new ThrowingTxExecutionExceptionTransaction(arguments);
   }

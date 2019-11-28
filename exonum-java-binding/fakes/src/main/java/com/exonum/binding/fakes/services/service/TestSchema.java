@@ -21,10 +21,14 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public final class TestSchema implements Schema {
+  @SuppressWarnings("WeakerAccess")
+  static final String TEST_MAP_NAME = TestService.NAME + "_test_map";
   @SuppressWarnings("WeakerAccess")
   static final String INIT_SERVICE_MAP_NAME = TestService.NAME + "_init_map";
   @SuppressWarnings("WeakerAccess")
@@ -34,6 +38,11 @@ public final class TestSchema implements Schema {
 
   public TestSchema(View view) {
     this.view = view;
+  }
+
+  public ProofMapIndexProxy<HashCode, String> testMap() {
+    return ProofMapIndexProxy.newInstance(TEST_MAP_NAME, view, StandardSerializers.hash(),
+            StandardSerializers.string());
   }
 
   public ProofMapIndexProxy<HashCode, String> initializeServiceMap() {
@@ -48,9 +57,12 @@ public final class TestSchema implements Schema {
 
   @Override
   public List<HashCode> getStateHashes() {
+    // `8c1ea14c7893acabde2aa95031fae57abb91516ddb78b0f6622afa0d8cb1b5c2` after init
+    HashCode initMapHash = initializeServiceMap().getIndexHash();
+    // `7324b5c72b51bb5d4c180f1109cfd347b60473882145841c39f3e584576296f9` after init
+    HashCode testMapHash = testMap().getIndexHash();
+
     // exclude beforeCommitMap
-    // `8c1ea14c7893acabde2aa95031fae57abb91516ddb78b0f6622afa0d8cb1b5c2 after init`
-    HashCode rootHash = initializeServiceMap().getIndexHash();
-    return Collections.singletonList(rootHash);
+    return Arrays.asList(new HashCode[] {initMapHash, testMapHash});
   }
 }

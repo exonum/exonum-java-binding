@@ -443,7 +443,8 @@ fn submit_failing_on_exec_tx() {
     assert_eq!(block.transactions.len(), 1);
     let status = block.transactions.get(0).unwrap().status();
     assert!(status.is_err());
-    assert!(status.unwrap_err()
+    assert!(status
+        .unwrap_err()
         .to_string()
         .contains("java.lang.ArithmeticException;"));
 
@@ -485,8 +486,10 @@ fn before_commit() {
 
 #[test]
 fn state_hashes() {
-    let service_hash =
-        Hash::from_hex("8c1ea14c7893acabde2aa95031fae57abb91516ddb78b0f6622afa0d8cb1b5c2").unwrap();
+    let service_hash = &[
+        Hash::from_hex("8c1ea14c7893acabde2aa95031fae57abb91516ddb78b0f6622afa0d8cb1b5c2").unwrap(),
+        Hash::from_hex("7324b5c72b51bb5d4c180f1109cfd347b60473882145841c39f3e584576296f9").unwrap(),
+    ];
 
     let (runtime, _instance_id, config, _path) = create_runtime_with_valid_test_config();
     let runtime_copy = runtime.clone();
@@ -508,11 +511,16 @@ fn state_hashes() {
             .get(0)
             .expect("Failed to find state hash pair for test service");
         assert_eq!(*instance, VALID_INSTANCE_ID);
-        assert_eq!(hashes.len(), 1);
-        let cur_hash = hashes
+
+        assert_eq!(hashes.len(), 2);
+        let hash = hashes
             .get(0)
-            .expect("Failed to find state hash for test service");
-        assert_eq!(*cur_hash, service_hash);
+            .expect("Failed to find state_hash[0] for test-service");
+        assert_eq!(*hash, service_hash[0]);
+        let hash = hashes
+            .get(1)
+            .expect("Failed to find state_hash[1] for test-service");
+        assert_eq!(*hash, service_hash[1]);
     }
 
     test_kit.stop();
@@ -610,6 +618,7 @@ fn get_fake_runtime(facade_method: &str) -> JavaRuntimeProxy {
     create_fake_service_runtime_adapter(executor, facade_method)
 }
 
+// Creates a new Blockchain instance.
 fn create_blockchain() -> Blockchain {
     let keypair: (PublicKey, SecretKey) = gen_keypair();
     let api_channel = mpsc::channel(128);
@@ -619,6 +628,7 @@ fn create_blockchain() -> Blockchain {
     Blockchain::new(storage, keypair, app_tx.clone())
 }
 
+// Creates a new signed transaction containing `args` for given service instance.
 fn create_transaction(instance: InstanceId, method: MethodId, args: &[u8]) -> Verified<AnyTx> {
     let tx = AnyTx {
         call_info: CallInfo {
@@ -647,6 +657,8 @@ where
     }
 }
 
+// Asserts that given `ExecutionError`
+// has kind `ExecutionErrorKind::Service` and given `service_code`
 fn assert_service_error_with_code(error: &ExecutionError, service_code: u8) {
     match error.kind {
         ExecutionErrorKind::Service { code } => assert_eq!(code, service_code),

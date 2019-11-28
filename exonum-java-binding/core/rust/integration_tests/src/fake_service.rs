@@ -14,7 +14,11 @@
 
 use java_bindings::{
     exonum::crypto::Hash,
-    exonum_merkledb::{proof_map_index::ProofMapIndex, Entry, IndexAccess},
+    exonum_merkledb::{
+        access::{FromAccess, RawAccess},
+        proof_map_index::ProofMapIndex,
+        Entry,
+    },
     jni::objects::{JObject, JValue},
     utils::{panic_on_exception, unwrap_jni},
     Executor,
@@ -115,11 +119,14 @@ fn create_service_artifact(
     }))
 }
 
-pub fn create_init_service_test_map<V>(view: V, service_name: &str) -> ProofMapIndex<V, Hash, String>
+pub fn create_init_service_test_map<V>(
+    view: V,
+    service_name: &str,
+) -> ProofMapIndex<V, Hash, String>
 where
-    V: IndexAccess,
+    V: RawAccess,
 {
-    ProofMapIndex::new(format!("{}_{}", service_name, INIT_MAP_NAME), view)
+    ProofMapIndex::from_access(view, format!("{}_{}", service_name, INIT_MAP_NAME).into()).unwrap()
 }
 
 pub fn create_before_commit_test_map<V>(
@@ -127,14 +134,18 @@ pub fn create_before_commit_test_map<V>(
     service_name: &str,
 ) -> ProofMapIndex<V, Hash, String>
 where
-    V: IndexAccess,
+    V: RawAccess,
 {
-    ProofMapIndex::new(format!("{}_{}", service_name, BEFORE_COMMIT_MAP_NAME), view)
+    ProofMapIndex::from_access(
+        view,
+        format!("{}_{}", service_name, BEFORE_COMMIT_MAP_NAME).into(),
+    )
+    .unwrap()
 }
 
 pub fn create_tx_test_entry<V>(view: V, _service_name: &str) -> Entry<V, String>
 where
-    V: IndexAccess,
+    V: RawAccess,
 {
-    Entry::new(format!("{}", TX_ENTRY_NAME), view)
+    Entry::from_access(view, format!("{}", TX_ENTRY_NAME).into()).unwrap()
 }
