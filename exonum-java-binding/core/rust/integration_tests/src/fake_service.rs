@@ -147,5 +147,5 @@ pub fn create_tx_test_entry<V>(view: V, _service_name: &str) -> Entry<V, String>
 where
     V: RawAccess,
 {
-    Entry::from_access(view, format!("{}", TX_ENTRY_NAME).into()).unwrap()
+    Entry::from_access(view, TX_ENTRY_NAME.into()).unwrap()
 }
