@@ -82,11 +82,17 @@ The following example shows how to create the transaction message.
 In addition please read about [transaction message structure][exonum-tx-message-builder].
 ```java
     TransactionMessage txMessage = TransactionMessage.builder()
-        .serviceId(1)
+        .serviceId(serviceId)
         .transactionId(2)
         .payload(data)
         .sign(keys);
 ```
+* `serviceId` can be obtained, if needed, by the service name:
+  ```
+  int serviceId = exonumClient.findServiceInfoByName(serviceName)
+      .map(ServiceInfo::getId)
+      .orElseThrow(() -> new IllegalStateException("No service with the given name found: " + serviceName);
+  ```
 * `data` is a bytes array which contains transactional information/parameters
 in a service-defined format.
 It can be any object which should be serialized to bytes in advance.
@@ -94,9 +100,8 @@ We recommend to use [Google Protobuf][protobuf] for serialization,
 but it is always an option of your choice.
 Also, _common_ package provides [`StandardSerializers`][standard-serializers]
 utility class which can be helpful for serialization.  
-* `keys` is a key pair of private and public keys which is used for message signature.  
-* `ed25519` is the cryptographic function for signing.
- 
+* `keys` is a key pair of private and public keys which is used for message signature.
+
 ### Sending Transaction
 To send the transaction just call a `submitTransaction`.  
 Make notice that it works in a blocking way i.e. your thread will be 
@@ -126,7 +131,7 @@ Optional<TransactionResponse> response = exonumClient.getTransaction(txHash);
 To build a transaction, service id is needed. It can be obtained with either
 retrieving service info by its name:
 ```java
-Optional<ServiceInfo> response = exonumClient.getServiceInfoByName(serviceName);
+Optional<ServiceInfo> response = exonumClient.findServiceInfoByName(serviceName);
 ```
 or retrieving the list of all started service instances:
 ```java

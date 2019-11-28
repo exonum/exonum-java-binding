@@ -16,17 +16,24 @@
 
 package com.exonum.client.response;
 
+import com.exonum.binding.common.message.TransactionMessage;
 import lombok.Value;
 
 @Value
 public class ServiceInfo {
+
   /**
-   * Service name.
+   * Returns the name of the service instance. It serves as the primary identifier of this service
+   * in most operations. It is assigned by the network administrators.
    */
   String name;
 
   /**
-   * Service id.
+   * Returns the numeric id of the service instance. Exonum assigns it to the service
+   * on instantiation. It is mainly used to route the transaction messages belonging
+   * to this instance.
+   *
+   * @see TransactionMessage#getServiceId()
    */
   int id;
 }
