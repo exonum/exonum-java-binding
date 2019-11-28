@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - `ExonumClient#getServiceInfoByName(String)` to retrieve a service id by its
   name and `ExonumClient#getServiceInfoList` to retrieve the list of all
-  started services - their names and ids.
+  started services - their names and ids. (#1247)
 
 ### Changed
 - `TransactionResponse#getExecutionResult` now returns `ExecutionStatus`
