@@ -38,9 +38,11 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
+import com.exonum.client.response.ServiceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import java.time.ZonedDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ExplorerApiHelperTest {
@@ -206,4 +208,29 @@ class ExplorerApiHelperTest {
     assertThat(response.getBlocksRangeEnd(), is(288L));
   }
 
+  @Test
+  void parseServicesResponse() {
+    String serviceName1 = "service-name-1";
+    String serviceName2 = "service-name-2";
+    int serviceId1 = 1;
+    int serviceId2 = 2;
+    ServiceInfo serviceInfo1 = new ServiceInfo(serviceName1, serviceId1);
+    ServiceInfo serviceInfo2 = new ServiceInfo(serviceName2, serviceId2);
+    List<ServiceInfo> expected = List.of(serviceInfo1, serviceInfo2);
+    String json = "{\n"
+        + "    \"services\": [\n"
+        + "      {\n"
+        + "          \"name\": \"" + serviceName1 + "\",\n"
+        + "          \"id\": " + serviceId1 + "\n"
+        + "      },\n"
+        + "      {\n"
+        + "          \"name\": \"" + serviceName2 + "\",\n"
+        + "          \"id\": " + serviceId2 + "\n"
+        + "      }\n"
+        + "    ]\n"
+        + "}";
+
+    List<ServiceInfo> actual = ExplorerApiHelper.parseServicesResponse(json);
+    assertThat(actual, contains(expected.toArray()));
+  }
 }

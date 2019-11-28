@@ -25,6 +25,7 @@ import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,9 +36,11 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.ServiceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -47,6 +50,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ExonumHttpClientIntegrationTest {
+
+  private static String SERVICE_NAME = "service-name";
+  private static int SERVICE_ID = 1;
+
   private MockWebServer server;
   private ExonumClient exonumClient;
 
@@ -209,4 +216,89 @@ class ExonumHttpClientIntegrationTest {
     assertThat(recordedRequest, hasQueryParam("hash", id));
   }
 
+  @Test
+  void getServiceInfoByName() throws InterruptedException {
+    ServiceInfo serviceInfo = new ServiceInfo(SERVICE_NAME, SERVICE_ID);
+    // Mock response
+    String mockResponse = "{\n"
+        + "    \"services\": [\n"
+        + "      {\n"
+        + "          \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "          \"id\": " + SERVICE_ID + "\n"
+        + "      }\n"
+        + "    ]\n"
+        + "}";
+    server.enqueue(new MockResponse().setBody(mockResponse));
+
+    // Call
+    Optional<ServiceInfo> response = exonumClient.getServiceInfoByName(SERVICE_NAME);
+
+    // Assert response
+    assertTrue(response.isPresent());
+    ServiceInfo actualResponse = response.get();
+    assertThat(actualResponse, is(serviceInfo));
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest, hasPath("api/explorer/v1/services"));
+  }
+
+  @Test
+  void getServiceInfoByInvalidName() throws InterruptedException {
+    // Mock response
+    String mockResponse = "{\n"
+        + "    \"services\": [\n"
+        + "      {\n"
+        + "          \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "          \"id\": " + SERVICE_ID + "\n"
+        + "      }\n"
+        + "    ]\n"
+        + "}";
+    server.enqueue(new MockResponse().setBody(mockResponse));
+
+    // Call
+    Optional<ServiceInfo> response = exonumClient.getServiceInfoByName("invalid-service-name");
+
+    // Assert response
+    assertFalse(response.isPresent());
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest, hasPath("api/explorer/v1/services"));
+  }
+
+  @Test
+  void getServiceInfoList() throws InterruptedException {
+    String serviceName2 = "service-name-2";
+    int serviceId2 = 2;
+    ServiceInfo serviceInfo1 = new ServiceInfo(SERVICE_NAME, SERVICE_ID);
+    ServiceInfo serviceInfo2 = new ServiceInfo(serviceName2, serviceId2);
+    // Mock response
+    String mockResponse = "{\n"
+        + "    \"services\": [\n"
+        + "      {\n"
+        + "          \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "          \"id\": " + SERVICE_ID + "\n"
+        + "      },\n"
+        + "      {\n"
+        + "          \"name\": \"" + serviceName2 + "\",\n"
+        + "          \"id\": " + serviceId2 + "\n"
+        + "      }\n"
+        + "    ]\n"
+        + "}";
+    server.enqueue(new MockResponse().setBody(mockResponse));
+
+    // Call
+    List<ServiceInfo> response = exonumClient.getServiceInfoList();
+
+    // Assert response
+    assertThat(response, contains(serviceInfo1, serviceInfo2));
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest, hasPath("api/explorer/v1/services"));
+  }
 }

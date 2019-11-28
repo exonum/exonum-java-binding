@@ -121,7 +121,18 @@ if available, transaction location and result:
 Optional<TransactionResponse> response = exonumClient.getTransaction(txHash);
 ```
 * `txHash` is a hash of the transaction to search.
-  
+
+### Retrieving service info
+To build a transaction, service id is needed. It can be obtained with either
+retrieving service info by its name:
+```java
+Optional<ServiceInfo> response = exonumClient.getServiceInfoByName(serviceName);
+```
+or retrieving the list of all started service instances:
+```java
+List<ServiceInfo> response = exonumClient.getServiceInfoList();
+```
+
 ## How to Build
 To build the client locally, clone the repository, and
 run next commands from the project's root 
