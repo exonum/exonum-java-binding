@@ -40,6 +40,7 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.exonum.core.messages.Runtime.ErrorKind;
 import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
@@ -113,7 +114,115 @@ class ExplorerApiHelperTest {
   }
 
   @Test
-  void parseGetTxResponseCommittedWithError() {
+  void parseGetTxResponseCommittedWithPanic() {
+    TransactionMessage expectedMessage = createTransactionMessage();
+    String errorDescription = "Unexpected error";
+    String json = "{\n"
+        + "    'type': 'committed',\n"
+        + "    'content': {\n"
+        + "        'debug': {\n"
+        + "            'amount': 1,\n"
+        + "            'seed': 5019726028924803177\n"
+        + "        },\n"
+        + "        'message': '" + toHex(expectedMessage) + "'\n"
+        + "    },\n"
+        + "    'location': {\n"
+        + "        'block_height': 1,\n"
+        + "        'position_in_block': 0\n"
+        + "    },\n"
+        + "    'location_proof': {\n"
+        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
+        + "    },\n"
+        + "    'status': {\n"
+        + "        'type': 'panic',\n"
+        + "        'description': \"" + errorDescription + "\""
+        + "    }\n"
+        + "}";
+    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
+
+    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
+    assertThat(transactionResponse.getMessage(), is(expectedMessage));
+    assertThat(transactionResponse.getExecutionResult(),
+        is(ExplorerApiHelper.buildPanicExecutionStatus(errorDescription)));
+    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+  }
+
+  @Test
+  void parseGetTxResponseCommittedWithDispatcherError() {
+    TransactionMessage expectedMessage = createTransactionMessage();
+    int errorCode = 2;
+    String errorDescription = "Dispatcher error";
+    String json = "{\n"
+        + "    'type': 'committed',\n"
+        + "    'content': {\n"
+        + "        'debug': {\n"
+        + "            'amount': 1,\n"
+        + "            'seed': 5019726028924803177\n"
+        + "        },\n"
+        + "        'message': '" + toHex(expectedMessage) + "'\n"
+        + "    },\n"
+        + "    'location': {\n"
+        + "        'block_height': 1,\n"
+        + "        'position_in_block': 0\n"
+        + "    },\n"
+        + "    'location_proof': {\n"
+        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
+        + "    },\n"
+        + "    'status': {\n"
+        + "        'type': 'dispatcher_error',\n"
+        + "        'code': " + errorCode + ",\n"
+        + "        'description': \"" + errorDescription + "\""
+        + "    }\n"
+        + "}";
+    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
+
+    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
+    assertThat(transactionResponse.getMessage(), is(expectedMessage));
+    assertThat(transactionResponse.getExecutionResult(),
+        is(ExplorerApiHelper.buildExecutionStatus(ErrorKind.DISPATCHER, errorCode,
+            errorDescription)));
+    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+  }
+
+  @Test
+  void parseGetTxResponseCommittedWithRuntimeError() {
+    TransactionMessage expectedMessage = createTransactionMessage();
+    int errorCode = 2;
+    String errorDescription = "Runtime error";
+    String json = "{\n"
+        + "    'type': 'committed',\n"
+        + "    'content': {\n"
+        + "        'debug': {\n"
+        + "            'amount': 1,\n"
+        + "            'seed': 5019726028924803177\n"
+        + "        },\n"
+        + "        'message': '" + toHex(expectedMessage) + "'\n"
+        + "    },\n"
+        + "    'location': {\n"
+        + "        'block_height': 1,\n"
+        + "        'position_in_block': 0\n"
+        + "    },\n"
+        + "    'location_proof': {\n"
+        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
+        + "    },\n"
+        + "    'status': {\n"
+        + "        'type': 'runtime_error',\n"
+        + "        'code': " + errorCode + ",\n"
+        + "        'description': \"" + errorDescription + "\""
+        + "    }\n"
+        + "}";
+    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
+
+    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
+    assertThat(transactionResponse.getMessage(), is(expectedMessage));
+    assertThat(transactionResponse.getExecutionResult(),
+        is(ExplorerApiHelper.buildExecutionStatus(ErrorKind.RUNTIME, errorCode,
+            errorDescription)));
+    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+  }
+
+  @Test
+  void parseGetTxResponseCommittedWithServiceError() {
     TransactionMessage expectedMessage = createTransactionMessage();
     int errorCode = 2;
     String errorDescription = "Receiver doesn't exist";
@@ -134,7 +243,7 @@ class ExplorerApiHelperTest {
         + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
         + "    },\n"
         + "    'status': {\n"
-        + "        'type': 'error',\n"
+        + "        'type': 'service_error',\n"
         + "        'code': " + errorCode + ",\n"
         + "        'description': \"" + errorDescription + "\""
         + "    }\n"

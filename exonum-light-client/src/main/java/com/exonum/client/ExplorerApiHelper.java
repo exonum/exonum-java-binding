@@ -18,6 +18,7 @@
 package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.JSON;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.blockchain.ExecutionStatuses;
@@ -29,6 +30,8 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -96,13 +99,38 @@ final class ExplorerApiHelper {
     switch (executionStatus.getType()) {
       case SUCCESS:
         return ExecutionStatuses.success();
-      case ERROR:
+      case PANIC:
+        return buildPanicExecutionStatus(executionStatus.getDescription());
+      case DISPATCHER_ERROR:
+        return buildExecutionStatus(ErrorKind.DISPATCHER, executionStatus.getCode(),
+            executionStatus.getDescription());
+      case RUNTIME_ERROR:
+        return buildExecutionStatus(ErrorKind.RUNTIME, executionStatus.getCode(),
+            executionStatus.getDescription());
+      case SERVICE_ERROR:
         return ExecutionStatuses.serviceError(executionStatus.getCode(),
             executionStatus.getDescription());
       default:
         throw new IllegalStateException("Unexpected transaction execution status: "
             + executionStatus.getType());
     }
+  }
+
+  @VisibleForTesting
+  static ExecutionStatus buildPanicExecutionStatus(String description) {
+    return buildExecutionStatus(ErrorKind.PANIC, 0, description);
+  }
+
+  @VisibleForTesting
+  static ExecutionStatus buildExecutionStatus(ErrorKind errorKind, int code,
+      String description) {
+    checkArgument(0 <= code, "Error code (%s) must be non-negative", code);
+    return ExecutionStatus.newBuilder()
+        .setError(ExecutionError.newBuilder()
+            .setKind(errorKind)
+            .setCode(code)
+            .setDescription(description))
+        .build();
   }
 
   /**
@@ -136,7 +164,7 @@ final class ExplorerApiHelper {
   }
 
   /**
-   * Json object wrapper for get transaction response content i.e.
+   * Json object wrapper for get transaction response content, i.e.,
    * {@code "$.content"}.
    */
   @Value
@@ -147,7 +175,7 @@ final class ExplorerApiHelper {
   }
 
   /**
-   * Json object wrapper for transaction execution result i.e.
+   * Json object wrapper for transaction execution result, i.e.,
    * {@code "$.status"}.
    */
   @Value
@@ -158,14 +186,20 @@ final class ExplorerApiHelper {
   }
 
   /**
-   * Json object wrapper for transaction execution status i.e.
+   * Json object wrapper for transaction execution status, i.e.,
    * {@code "$.status.type"}.
    */
   private enum GetTxResponseExecutionStatus {
     @SerializedName("success")
     SUCCESS,
-    @SerializedName("error")
-    ERROR
+    @SerializedName("panic")
+    PANIC,
+    @SerializedName("dispatcher_error")
+    DISPATCHER_ERROR,
+    @SerializedName("runtime_error")
+    RUNTIME_ERROR,
+    @SerializedName("service_error")
+    SERVICE_ERROR
   }
 
   @Value
