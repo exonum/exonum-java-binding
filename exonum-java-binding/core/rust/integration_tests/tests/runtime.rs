@@ -30,7 +30,7 @@ use hex::FromHex;
 use integration_tests::{
     fake_runtime::create_fake_service_runtime_adapter,
     fake_service::{
-        self, create_before_commit_test_map, create_init_srvc_test_map,
+        self, create_before_commit_test_map, create_init_service_test_map,
         create_service_artifact_non_instantiable_service, create_service_artifact_non_loadable,
         create_service_artifact_valid, create_tx_test_entry,
     },
@@ -61,7 +61,7 @@ lazy_static! {
 const VALID_INSTANCE_ID: u32 = 127;
 const VALID_INSTANCE_NAME: &str = "artifact__test_valid";
 const VALID_ARTIFACT_NAME: &str = "artifact:test-valid";
-const VALID_ARTIFACT_VERS: &str = "1.0";
+const VALID_ARTIFACT_VERSION: &str = "1.0";
 
 #[test]
 fn runtime_exception_handling_checked_exception() {
@@ -330,7 +330,7 @@ fn service_can_modify_db_on_initialize() {
     test_kit.create_block();
 
     let snapshot = test_kit.snapshot();
-    let test_map = create_init_srvc_test_map(&*snapshot, fake_service::TEST_SERVICE_NAME);
+    let test_map = create_init_service_test_map(&*snapshot, fake_service::TEST_SERVICE_NAME);
     let key = hash(fake_service::INITIAL_ENTRY_KEY.as_ref());
     let value = test_map
         .get(&key)
@@ -443,13 +443,9 @@ fn submit_failing_on_exec_tx() {
     assert_eq!(block.transactions.len(), 1);
     let status = block.transactions.get(0).unwrap().status();
     assert!(status.is_err());
-
-    // Strange Core behavior, stored result is ExecutionError { err.kind == Service, err.code = 1 }
-    // with no any description,
-    // instead of provided by runtime: ExecutionError { err.kind == Runtime, err.code = JavaException }
-    //assert!(status.unwrap_err()
-    //    .to_string()
-    //    .contains("java.lang.ArithmeticException;"));
+    assert!(status.unwrap_err()
+        .to_string()
+        .contains("java.lang.ArithmeticException;"));
 
     test_kit.stop();
 }
@@ -500,7 +496,7 @@ fn state_hashes() {
         .with_instances(vec![config])
         .create();
 
-    for i in 0..5 {
+    for _ in 0..5 {
         test_kit.create_block();
 
         let snapshot = test_kit.snapshot();
@@ -582,7 +578,7 @@ fn create_runtime_with_valid_test_config(
         VALID_INSTANCE_ID,
         VALID_INSTANCE_NAME,
         VALID_ARTIFACT_NAME,
-        VALID_ARTIFACT_VERS,
+        VALID_ARTIFACT_VERSION,
         create_service_artifact_valid,
     );
 

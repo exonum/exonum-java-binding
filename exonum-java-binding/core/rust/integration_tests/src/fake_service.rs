@@ -32,7 +32,7 @@ pub const TX_ENTRY_NAME: &str = "test_entry";
 pub const SET_ENTRY_TX: u32 = 1;
 pub const THROW_SOE_TX: u32 = 2;
 pub const SRVC_ERR_ON_EXEC_TX: u32 = 3;
-pub const FAIL_ON_EXEC_TX: u32 = 3;
+pub const FAIL_ON_EXEC_TX: u32 = 4;
 
 const NATIVE_FACADE_CLASS: &str = "com/exonum/binding/fakes/NativeFacade";
 
@@ -115,7 +115,7 @@ fn create_service_artifact(
     }))
 }
 
-pub fn create_init_srvc_test_map<V>(view: V, service_name: &str) -> ProofMapIndex<V, Hash, String>
+pub fn create_init_service_test_map<V>(view: V, service_name: &str) -> ProofMapIndex<V, Hash, String>
 where
     V: IndexAccess,
 {
