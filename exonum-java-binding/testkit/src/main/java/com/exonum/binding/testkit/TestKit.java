@@ -44,6 +44,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transport.Server;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -109,39 +110,53 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   // Set 0 as a server port so it will assign a random suitable port by default
   private static final int SERVER_PORT = 0;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
+
   private final ServiceRuntime serviceRuntime;
   private final Integer timeServiceId;
+  private final int port;
 
   @VisibleForTesting
   final Cleaner snapshotCleaner = new Cleaner("TestKit#getSnapshot");
 
   private TestKit(long nativeHandle, @Nullable TimeServiceSpec timeServiceSpec,
-                  ServiceRuntime serviceRuntime) {
+      ServiceRuntime serviceRuntime, int port) {
     super(nativeHandle, true);
     this.serviceRuntime = serviceRuntime;
     timeServiceId = timeServiceSpec == null ? null : timeServiceSpec.serviceId;
+    this.port = port;
   }
 
   private static TestKit newInstance(TestKitServiceInstances[] serviceInstances,
                                      EmulatedNodeType nodeType, short validatorCount,
                                      @Nullable TimeServiceSpec timeServiceSpec,
                                      Path artifactsDirectory) {
+    // Create the test network
+    Injector frameworkInjector = createTestRuntimeInjector(artifactsDirectory);
     ServiceRuntimeAdapter serviceRuntimeAdapter =
-        createServiceRuntimeAdapter(artifactsDirectory);
+        frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
     long nativeHandle = nativeCreateTestKit(serviceInstances, isAuditorNode, validatorCount,
         timeServiceSpec, serviceRuntimeAdapter);
-    ServiceRuntime serviceRuntime = serviceRuntimeAdapter.getServiceRuntime();
-    return new TestKit(nativeHandle, timeServiceSpec, serviceRuntime);
+
+    try {
+      // Get the actual port: it must have been set as testkit initialized the runtimes.
+      Server serviceServer = frameworkInjector.getInstance(Server.class);
+      int port = serviceServer.getActualPort()
+          .orElseThrow(() -> new IllegalStateException(
+              "No port set after testkit has been created"));
+      ServiceRuntime serviceRuntime = serviceRuntimeAdapter.getServiceRuntime();
+      return new TestKit(nativeHandle, timeServiceSpec, serviceRuntime, port);
+    } catch (Exception e) {
+      // Free the native object and re-throw
+      nativeFreeTestKit(nativeHandle);
+      throw e;
+    }
   }
 
-  private static ServiceRuntimeAdapter createServiceRuntimeAdapter(
-      Path artifactsDirectory) {
+  private static Injector createTestRuntimeInjector(Path artifactsDirectory) {
     Module frameworkModule = new FrameworkModule(artifactsDirectory, SERVER_PORT,
         DEPENDENCY_REFERENCE_CLASSES);
-    Injector frameworkInjector = Guice.createInjector(frameworkModule);
-
-    return frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
+    return Guice.createInjector(frameworkModule);
   }
 
   /**
@@ -333,6 +348,13 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     return nativeGetEmulatedNode(nativeHandle.get());
   }
 
+  /**
+   * Returns the TCP port on which the service REST API is mounted.
+   */
+  public int getPort() {
+    return port;
+  }
+
   @Override
   protected void disposeInternal() {
     try {
@@ -357,7 +379,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private native EmulatedNode nativeGetEmulatedNode(long nativeHandle);
 
-  private native void nativeFreeTestKit(long nativeHandle);
+  private static native void nativeFreeTestKit(long nativeHandle);
 
   /**
    * Creates a new builder for the TestKit. Note that this builder creates a single validator

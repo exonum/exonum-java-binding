@@ -21,13 +21,13 @@ import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.service.TransactionConverter;
 
 /**
- * {@code MyTransactionConverter} converts raw transactions of {@link MyService}
+ * {@code MyTransactionConverter} converts transaction id and serialized transaction arguments
  * into {@linkplain Transaction executable transactions} of this service.
  */
 public final class MyTransactionConverter implements TransactionConverter {
 
   @Override
-  public Transaction toTransaction(RawTransaction rawTransaction) {
+  public Transaction toTransaction(int txId, byte[] arguments) {
     // TODO: implement transaction conversion
     throw new UnsupportedOperationException("Unimplemented");
   }

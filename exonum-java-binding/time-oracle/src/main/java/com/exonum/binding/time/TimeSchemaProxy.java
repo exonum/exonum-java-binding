@@ -73,7 +73,7 @@ class TimeSchemaProxy implements TimeSchema {
 
   @Override
   public ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes() {
-    return ProofMapIndexProxy.newInstance(indexName(TimeIndex.VALIDATORS_TIMES), view,
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(indexName(TimeIndex.VALIDATORS_TIMES), view,
         PUBLIC_KEY_SERIALIZER, ZONED_DATE_TIME_SERIALIZER);
   }
 

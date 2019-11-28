@@ -149,10 +149,11 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a map with a key-value pair of a transaction hash and execution result.
+   * Returns a map with a key-value pair of a transaction hash and execution result. Note that this
+   * is a <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
   ProofMapIndexProxy<HashCode, ExecutionStatus> getTxResults() {
-    return ProofMapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_RESULTS, dbView,
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(CoreIndex.TRANSACTIONS_RESULTS, dbView,
         StandardSerializers.hash(), EXECUTION_STATUS_SERIALIZER);
   }
 

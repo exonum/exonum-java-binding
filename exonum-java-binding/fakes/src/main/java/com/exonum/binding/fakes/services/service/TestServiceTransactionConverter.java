@@ -18,7 +18,7 @@ package com.exonum.binding.fakes.services.service;
 
 import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.fakes.services.transactions.SetEntryTransaction;
+import com.exonum.binding.fakes.services.transactions.ValidSetEntryTransaction;
 import com.exonum.binding.fakes.services.transactions.ThrowingRuntimeExceptionTransaction;
 import com.exonum.binding.fakes.services.transactions.ThrowingStackOverflowErrorTransaction;
 import com.exonum.binding.fakes.services.transactions.ThrowingTxExecutionExceptionTransaction;
@@ -33,7 +33,7 @@ public final class TestServiceTransactionConverter implements TransactionConvert
   @VisibleForTesting
   static final ImmutableMap<Integer, Function<byte[], Transaction>> TRANSACTION_FACTORIES =
       ImmutableMap.<Integer, Function<byte[], Transaction>>builder()
-          .put(SetEntryTransaction.ID, SetEntryTransaction::fromArguments)
+          .put(ValidSetEntryTransaction.ID, ValidSetEntryTransaction::fromArguments)
           .put(ThrowingStackOverflowErrorTransaction.ID, ThrowingStackOverflowErrorTransaction::fromArguments)
           .put(ThrowingTxExecutionExceptionTransaction.ID, ThrowingTxExecutionExceptionTransaction::fromArguments)
           .put(ThrowingRuntimeExceptionTransaction.ID, ThrowingRuntimeExceptionTransaction::fromArguments)

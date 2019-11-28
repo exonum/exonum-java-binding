@@ -16,13 +16,13 @@
 
 package ${package};
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
 import java.util.Collections;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * {@code MySchema} provides access to the tables of {@link MyService},
@@ -33,9 +33,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class MySchema implements Schema {
 
   private final View view;
+  private final String namespace;
 
-  public MySchema(View view) {
+  public MySchema(View view, String serviceName) {
     this.view = checkNotNull(view);
+    this.namespace = serviceName + ".";
   }
 
   @Override

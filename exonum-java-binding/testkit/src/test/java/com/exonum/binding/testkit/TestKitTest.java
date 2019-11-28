@@ -18,6 +18,20 @@ package com.exonum.binding.testkit;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.success;
 import static com.exonum.binding.testkit.TestKit.MAX_SERVICE_INSTANCE_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_FILENAME;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_FILENAME_2;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_ID_2;
+import static com.exonum.binding.testkit.TestKitTestUtils.CONFIGURATION_VALUE;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_CONFIGURATION;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_ID_2;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_NAME;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_NAME_2;
+import static com.exonum.binding.testkit.TestKitTestUtils.checkIfServiceEnabled;
+import static com.exonum.binding.testkit.TestKitTestUtils.createInvalidArtifact;
+import static com.exonum.binding.testkit.TestKitTestUtils.createTestService2Artifact;
+import static com.exonum.binding.testkit.TestKitTestUtils.createTestServiceArtifact;
 import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
 import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
@@ -48,12 +62,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -61,7 +77,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class TestKitTest extends TestKitTestWithArtifactsCreated {
+class TestKitTest {
   private static final String TIME_SERVICE_NAME = "time-service";
   private static final int TIME_SERVICE_ID = 10;
 
@@ -70,12 +86,22 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
   private static final ZonedDateTime TIME =
       ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
+  @TempDir
+  @SuppressWarnings("WeakerAccess") // @TempDir can't be private
+  static Path artifactsDirectory;
+
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
           .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
           .withArtifactsDirectory(artifactsDirectory));
+
+  @BeforeAll
+  static void setUp() throws IOException {
+    createTestServiceArtifact(artifactsDirectory);
+    createTestService2Artifact(artifactsDirectory);
+  }
 
   @Test
   @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
@@ -479,7 +505,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .serviceId(SERVICE_ID)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
-        .sign(keyPair, CRYPTO_FUNCTION);
+        .sign(keyPair);
   }
 
   private void checkTransactionsCommittedSuccessfully(
@@ -503,7 +529,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .serviceId(wrongServiceId)
         .transactionId(TestTransaction.ID)
         .payload("Test message".getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+        .sign(KEY_PAIR);
     IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
         () -> testKit.createBlockWithTransactions(message));
     String expectedMessage = String.format("No service with id=%s in the Java runtime",
@@ -518,7 +544,7 @@ class TestKitTest extends TestKitTestWithArtifactsCreated {
         .serviceId(SERVICE_ID)
         .transactionId(wrongTransactionId)
         .payload("Test message".getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
+        .sign(KEY_PAIR);
     IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
         () -> testKit.createBlockWithTransactions(message));
     assertThat(thrownException.getMessage())
