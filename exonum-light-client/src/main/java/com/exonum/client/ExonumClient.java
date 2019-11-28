@@ -186,7 +186,7 @@ public interface ExonumClient {
 
   /**
    * Returns the service info of a started service instance with a given name; or
-   * {@code Optional.empty()} if there is no service instance with such name
+   * {@code Optional.empty()} if there is no service instance with such name.
    *
    * @param serviceName the name of a service instance
    */
