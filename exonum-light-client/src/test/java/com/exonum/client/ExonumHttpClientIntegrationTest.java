@@ -217,7 +217,7 @@ class ExonumHttpClientIntegrationTest {
   }
 
   @Test
-  void findServiceInfoByName() throws InterruptedException {
+  void findServiceInfo() throws InterruptedException {
     ServiceInfo serviceInfo = new ServiceInfo(SERVICE_NAME, SERVICE_ID);
     // Mock response
     String mockResponse = "{\n"
@@ -231,7 +231,7 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<ServiceInfo> response = exonumClient.findServiceInfoByName(SERVICE_NAME);
+    Optional<ServiceInfo> response = exonumClient.findServiceInfo(SERVICE_NAME);
 
     // Assert response
     assertTrue(response.isPresent());
@@ -245,7 +245,7 @@ class ExonumHttpClientIntegrationTest {
   }
 
   @Test
-  void findServiceInfoByNameNotFound() throws InterruptedException {
+  void findServiceInfoNotFound() throws InterruptedException {
     // Mock response
     String mockResponse = "{\n"
         + "    \"services\": [\n"
@@ -258,7 +258,7 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<ServiceInfo> response = exonumClient.findServiceInfoByName("invalid-service-name");
+    Optional<ServiceInfo> response = exonumClient.findServiceInfo("invalid-service-name");
 
     // Assert response
     assertFalse(response.isPresent());

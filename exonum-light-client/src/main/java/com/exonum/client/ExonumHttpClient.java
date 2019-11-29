@@ -282,7 +282,7 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public Optional<ServiceInfo> findServiceInfoByName(String serviceName) {
+  public Optional<ServiceInfo> findServiceInfo(String serviceName) {
     return getServiceInfoList().stream()
         .filter(s -> s.getName().equals(serviceName))
         .findFirst();

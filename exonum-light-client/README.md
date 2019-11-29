@@ -89,7 +89,7 @@ In addition please read about [transaction message structure][exonum-tx-message-
 ```
 * `serviceId` can be obtained, if needed, by the service name:
   ```
-  int serviceId = exonumClient.findServiceInfoByName(serviceName)
+  int serviceId = exonumClient.findServiceInfo(serviceName)
       .map(ServiceInfo::getId)
       .orElseThrow(() -> new IllegalStateException("No service with the given name found: " + serviceName);
   ```
@@ -128,12 +128,7 @@ Optional<TransactionResponse> response = exonumClient.getTransaction(txHash);
 * `txHash` is a hash of the transaction to search.
 
 ### Retrieving service info
-To build a transaction, service id is needed. It can be obtained with either
-retrieving service info by its name:
-```java
-Optional<ServiceInfo> response = exonumClient.findServiceInfoByName(serviceName);
-```
-or retrieving the list of all started service instances:
+To retrieve the list of all started service instances:
 ```java
 List<ServiceInfo> response = exonumClient.getServiceInfoList();
 ```

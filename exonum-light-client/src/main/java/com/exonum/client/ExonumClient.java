@@ -190,12 +190,12 @@ public interface ExonumClient {
    *
    * @param serviceName the name of a service instance
    */
-  Optional<ServiceInfo> findServiceInfoByName(String serviceName);
+  Optional<ServiceInfo> findServiceInfo(String serviceName);
 
   /**
    * Returns information on all started service instances.
    *
-   * @see #findServiceInfoByName
+   * @see #findServiceInfo
    */
   List<ServiceInfo> getServiceInfoList();
 

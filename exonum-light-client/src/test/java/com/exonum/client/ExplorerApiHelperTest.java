@@ -43,8 +43,6 @@ import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 
 class ExplorerApiHelperTest {
@@ -234,8 +232,5 @@ class ExplorerApiHelperTest {
 
     List<ServiceInfo> actual = ExplorerApiHelper.parseServicesResponse(json);
     assertThat(actual, contains(expected.toArray()));
-    int serviceId = Optional.of(serviceInfo1)
-        .map(ServiceInfo::getId)
-        .orElseThrow(() -> new IllegalStateException("No service with the given name found: " + serviceName);
   }
 }

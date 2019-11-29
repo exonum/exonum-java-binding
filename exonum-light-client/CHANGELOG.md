@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## Unreleased
 
 ### Added
-- `ExonumClient#findServiceInfoByName(String)` to retrieve a service id by its
+- `ExonumClient#findServiceInfo(String)` to retrieve a service id by its
   name and `ExonumClient#getServiceInfoList` to retrieve the list of all
   started services - their names and ids. (#1247)
 
