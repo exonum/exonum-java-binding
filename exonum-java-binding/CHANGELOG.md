@@ -15,13 +15,45 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.9.0-rc1] - 2019-TBD
+
+### Overview
+
+The main feature of this release is support for dynamic services, i.e. services that can be added
+to the blockchain network after it has been started; and multiple instances of the same service.
+`TestKit` integration tests format is updated accordingly, see
+[documentation][testkit-documentation] on more details and examples.
+`TransactionMessage` format was updated.
+The default `ProofMapIndexProxy` implementation has been changed to hash user keys to produce an
+internal key. The implementation that does not hashes the keys (and uses them as internal keys)
+is still supported, see [documentation][proof-map-non-hashing].
+Proofs are temporarily disabled. Creating proofs is not supported in this release. They will be
+re-enabled in one of the following releases.
+
+This release is based on Exonum 0.12.1.
+
+*If you are upgrading an existing Java service, consult
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.9.0-rc1/exonum-java-binding/doc/Migration_guide_0.9.md).*
+
+[proof-map-non-hashing]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/core/storage/indices/ProofMapIndexProxy.html#key-hashing
+[testkit-documentation]: https://exonum.com/doc/version/0.12/get-started/java-binding/#testing
+
+### Added
+- `TestKit` support for dynamic services. (#1145)
+- Support for flat list proofs, the new compact proof format for `ProofList`. (#1156)
+- `serviceName` and `serviceId` were added to `TransactionContext`. They might be used for creating
+  schemas with unique namespaces. (#1181)
+
 ### Changed
-- MapProof to enforce 32-byte long hash codes. 
+- Support the new, protobuf-based, `TransactionMessage` format. (#1085)
+- `TransactionResult` is replaced with `ExecutionStatus`. (#1174)
+- `MapProof` to enforce 32-byte long hash codes. (#1191)
 
 ### Removed
-- Replaced Blockchain#getActualConfiguration with Blockchain#getConsensusConfiguration,
+- Replaced `Blockchain#getActualConfiguration` with `Blockchain#getConsensusConfiguration`,
   returning only the consensus configuration (now also containing the validator public keys)
-  as a protobuf message.
+  as a protobuf message. (#1185)
+- `Transaction#info` method is removed as it is no longed used by the framework. (#1225)
 
 ## [0.8.0] - 2019-09-09
 
