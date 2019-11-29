@@ -18,7 +18,7 @@ use exonum_cli::command::run::NodeRunConfig;
 
 use std::{fmt, path::PathBuf};
 
-use {absolute_library_path, system_classpath};
+use {absolute_library_path, system_classpath, SupervisorMode};
 
 /// Full configuration of the EJB runtime and JVM.
 pub struct Config {
@@ -28,6 +28,8 @@ pub struct Config {
     pub jvm_config: JvmConfig,
     /// Java runtime configuration parameters.
     pub runtime_config: RuntimeConfig,
+    /// Mode of the Supervisor service.
+    pub supervisor_mode: SupervisorMode,
 }
 
 /// JVM-specific configuration parameters.

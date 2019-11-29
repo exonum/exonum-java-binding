@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use exonum_supervisor::SimpleSupervisor;
+use exonum_supervisor::{DecentralizedSupervisor, SimpleSupervisor};
 use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
     create_java_vm, create_service_runtime,
@@ -24,6 +24,7 @@ use java_bindings::{
         node::{ApiSender, Node, NodeChannel},
     },
     Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
+    SupervisorMode,
 };
 
 use std::sync::Arc;
@@ -63,7 +64,7 @@ fn create_blockchain(
     channel: &NodeChannel,
 ) -> Result<BlockchainMut, failure::Error> {
     let node_config = &config.run_config.node_config;
-    let service_factories = standard_exonum_service_factories();
+    let service_factories = standard_exonum_service_factories(config.supervisor_mode);
     let database = create_database(config)?;
     let keypair = node_config.service_keypair();
     let api_sender = ApiSender::new(channel.api_requests.0.clone());
@@ -97,10 +98,15 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
     Ok(database)
 }
 
-fn standard_exonum_service_factories() -> Vec<InstanceCollection> {
+fn standard_exonum_service_factories(supervisor_mode: SupervisorMode) -> Vec<InstanceCollection> {
     // TODO(ECR-3714): add anchoring service
+    info!("Using {:?} supervisor service mode", supervisor_mode);
+    let supervisor_service = match supervisor_mode {
+        SupervisorMode::Simple => InstanceCollection::from(SimpleSupervisor::new()),
+        SupervisorMode::Decentralized => InstanceCollection::from(DecentralizedSupervisor::new()),
+    };
     vec![
         InstanceCollection::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
-        InstanceCollection::from(SimpleSupervisor::new()),
+        supervisor_service,
     ]
 }
