@@ -361,10 +361,6 @@
             <excludedGroups>
               ${excludeTags}
             </excludedGroups>
-            <systemPropertyVariables>
-<!--              TODO: Remove across the project when Mockito is updated to 3.1.13+ -->
-              <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
-            </systemPropertyVariables>
           </configuration>
         </plugin>
 
@@ -376,9 +372,6 @@
             <excludedGroups>
               ${excludeTags}
             </excludedGroups>
-            <systemPropertyVariables>
-              <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
-            </systemPropertyVariables>
           </configuration>
         </plugin>
 
