@@ -40,7 +40,7 @@ else
     if [[ ${TRAVIS_OS_NAME} == "osx" ]]; then
       PARALLEL_TESTS_ENABLED="false"
     fi
-    echo "--threads 1C -Djunit.jupiter.execution.parallel.enabled=${PARALLEL_TESTS_ENABLED} \
+    echo "-Djunit.jupiter.execution.parallel.enabled=${PARALLEL_TESTS_ENABLED} \
           -Djunit.jupiter.execution.parallel.mode.default=concurrent \
           --batch-mode" > \
       .mvn/maven.config
