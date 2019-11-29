@@ -253,9 +253,6 @@
               junit.jupiter.execution.parallel.config.dynamic.factor = 1.5
             </configurationParameters>
           </properties>
-          <systemPropertyVariables>
-            <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
-          </systemPropertyVariables>
         </configuration>
       </plugin>
 
