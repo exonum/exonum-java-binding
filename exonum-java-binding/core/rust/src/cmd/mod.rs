@@ -491,6 +491,7 @@ fn concat_path<P: AsRef<Path>>(first: P, second: &str) -> PathBuf {
 mod tests {
     use super::*;
     use exonum::blockchain::ValidatorKeys;
+    use exonum_cli::config::NodePublicConfig;
 
     #[test]
     fn run_node_with_simple_supervisor() {
