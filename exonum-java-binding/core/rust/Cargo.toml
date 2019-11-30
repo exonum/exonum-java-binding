@@ -15,7 +15,7 @@ resource-manager = []
 invocation = ["jni/invocation"]
 
 [dependencies]
-chrono = "0.4.9"
+chrono = "0.4.10"
 exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
 exonum-cli = "0.12"
 exonum-derive = "0.12"
