@@ -25,14 +25,14 @@ use jni::{
     sys::{jint, JNI_VERSION_1_8},
     JNIEnv, JavaVM,
 };
-use parking_lot::{Once, ONCE_INIT};
+use parking_lot::Once;
 use std::{os::raw::c_void, panic::catch_unwind};
 
 /// Invalid JNI version constant, signifying JNI_OnLoad failure.
 const INVALID_JNI_VERSION: jint = 0;
 const SERVICE_RUNTIME_ADAPTER_CLASS: &str = "com/exonum/binding/core/runtime/ServiceRuntimeAdapter";
 
-static INIT: Once = ONCE_INIT;
+static INIT: Once = Once::new();
 
 static mut OBJECT_GET_CLASS: Option<JMethodID> = None;
 static mut CLASS_GET_NAME: Option<JMethodID> = None;
