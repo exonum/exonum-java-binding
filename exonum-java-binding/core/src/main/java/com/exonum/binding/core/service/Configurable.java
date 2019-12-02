@@ -32,8 +32,11 @@ import com.exonum.binding.core.storage.database.Fork;
  *
  * <p>Services may use the same configuration parameters as
  * in {@link Service#initialize(Fork, Configuration)}, or different.
+ * <!--
  * TODO: Link the appropriate documentation section on updating the service configuration
- *   through the supervisor
+ *   through the supervisor when it becomes available (ideally, on the site; or in published
+ *   Rust docs)
+ *   -->
  */
 public interface Configurable {
 
