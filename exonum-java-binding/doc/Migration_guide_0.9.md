@@ -155,7 +155,7 @@ git diff ejb/v0.8.0 ejb/v0.9.0-rc1 .
 using exonum-launcher or an alternative tool — see 
 the reference below.
 2. Specify the artifacts directory when starting a node using the `artifacts-path` argument.
-3. Copy the artifacts to be deployed in that directory on each node in the network.
+3. Copy the artifacts to be deployed into that directory on each node in the network.
 
 See the updated node and application configuration [documentation][node-config] on the site
 for the detailed instructions.
