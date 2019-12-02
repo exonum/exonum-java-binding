@@ -68,7 +68,7 @@ public class ServiceRuntimeAdapter {
    * @param nodeNativeHandle the native handle to the Node object
    * @see ServiceRuntime#initialize(Node)
    */
-  void initialize(long nodeNativeHandle) {
+  protected void initialize(long nodeNativeHandle) {
     Node node = new NodeProxy(nodeNativeHandle);
     serviceRuntime.initialize(node);
   }
@@ -84,7 +84,7 @@ public class ServiceRuntimeAdapter {
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
    * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
    */
-  void deployArtifact(String name, byte[] deploySpec) throws ServiceLoadingException {
+  protected void deployArtifact(String name, byte[] deploySpec) throws ServiceLoadingException {
     DeployArguments deployArguments = parseDeployArgs(name, deploySpec);
     String artifactFilename = deployArguments.getArtifactFilename();
 
@@ -96,7 +96,7 @@ public class ServiceRuntimeAdapter {
    * false — otherwise.
    * @param name the service artifact name in format "groupId:artifactId:version"
    */
-  boolean isArtifactDeployed(String name) {
+  protected boolean isArtifactDeployed(String name) {
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId(name);
     return serviceRuntime.isArtifactDeployed(artifactId);
   }
@@ -122,7 +122,7 @@ public class ServiceRuntimeAdapter {
    * @see ServiceRuntime#startAddingService(Fork, ServiceInstanceSpec, byte[])
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    */
-  void startAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
+  protected void startAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
@@ -141,7 +141,7 @@ public class ServiceRuntimeAdapter {
    *     protobuf message
    * @see ServiceRuntime#commitService(ServiceInstanceSpec)
    */
-  void commitService(byte[] instanceSpec) {
+  protected void commitService(byte[] instanceSpec) {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
     serviceRuntime.commitService(javaInstanceSpec);
   }
@@ -172,7 +172,7 @@ public class ServiceRuntimeAdapter {
    * @see ServiceRuntime#executeTransaction(int, int, byte[], Fork, HashCode, PublicKey)
    * @see com.exonum.binding.core.transaction.Transaction#execute(TransactionContext)
    */
-  void executeTransaction(int serviceId, int txId, byte[] arguments,
+  protected void executeTransaction(int serviceId, int txId, byte[] arguments,
       long forkNativeHandle, byte[] txMessageHash, byte[] authorPublicKey)
       throws TransactionExecutionException, CloseFailuresException {
 
@@ -196,7 +196,7 @@ public class ServiceRuntimeAdapter {
    * @see ServiceRuntime#getStateHashes(Snapshot)
    * @see ServiceRuntimeStateHashes
    */
-  byte[] getStateHashes(long snapshotHandle) throws CloseFailuresException {
+  protected byte[] getStateHashes(long snapshotHandle) throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("getStateHashes")) {
       Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
       ServiceRuntimeStateHashes stateHashes = serviceRuntime.getStateHashes(snapshot);
@@ -216,7 +216,7 @@ public class ServiceRuntimeAdapter {
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#beforeCommit(int, Fork)
    */
-  void beforeCommit(int serviceId, long forkHandle) throws CloseFailuresException {
+  protected void beforeCommit(int serviceId, long forkHandle) throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("beforeCommit")) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
       serviceRuntime.beforeCommit(serviceId, fork);
@@ -234,7 +234,7 @@ public class ServiceRuntimeAdapter {
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#afterCommit(BlockCommittedEvent)
    */
-  void afterCommit(long snapshotHandle, int validatorId, long height)
+  protected void afterCommit(long snapshotHandle, int validatorId, long height)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("afterCommit")) {
       Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
@@ -255,7 +255,7 @@ public class ServiceRuntimeAdapter {
    *
    * @see ServiceRuntime#shutdown()
    */
-  void shutdown() throws InterruptedException {
+  protected void shutdown() throws InterruptedException {
     serviceRuntime.shutdown();
   }
 

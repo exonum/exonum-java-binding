@@ -19,7 +19,9 @@ package com.exonum.binding.fakes;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.util.LibraryLoader;
+import com.exonum.binding.fakes.runtimes.FakeRuntimeThrowingExceptions;
 import com.exonum.binding.fakes.services.ServiceArtifacts;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -42,11 +44,12 @@ public final class NativeFacade {
    * can be loaded by the {@link ServiceRuntime} and
    * the service can be instantiated.
    * @param artifactId the id of the artifact
+   * @param version the version of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
-  public static void createValidServiceArtifact(String artifactId, String path) throws IOException {
-    ServiceArtifacts.createValidArtifact(ServiceArtifactId.parseFrom(artifactId), Paths.get(path));
+  public static void createValidServiceArtifact(String artifactId, String version, String path) throws IOException {
+    ServiceArtifacts.createValidArtifact(ServiceArtifactId.parseFrom(artifactId), version, Paths.get(path));
   }
 
   /**
@@ -57,7 +60,7 @@ public final class NativeFacade {
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
-  public static void createUnloadableServiceArtifact(String artifactId, String path)
+  public static void createUnloadableServiceArtifact(String artifactId, String version, String path)
       throws IOException {
     ServiceArtifacts.createUnloadableArtifact(artifactId, Paths.get(path));
   }
@@ -66,13 +69,18 @@ public final class NativeFacade {
    * Writes a service artifact that can be loaded, but with a service that cannot be
    * {@linkplain ServiceRuntime#addService(com.exonum.binding.core.storage.database.Fork, ServiceInstanceSpec, byte[]) instantiated}.
    * @param artifactId the id of the artifact
+   * @param version the version of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
-  public static void createServiceArtifactWithNonInstantiableService(String artifactId, String path)
+  public static void createServiceArtifactWithNonInstantiableService(String artifactId, String version, String path)
       throws IOException {
-    ServiceArtifacts.createWithUninstantiableService(ServiceArtifactId.parseFrom(artifactId),
+    ServiceArtifacts.createWithUninstantiableService(ServiceArtifactId.parseFrom(artifactId), version,
         Paths.get(path));
+  }
+
+  public static ServiceRuntimeAdapter createRuntimeThrowingExceptions() {
+    return new FakeRuntimeThrowingExceptions();
   }
 
   private NativeFacade() {}
