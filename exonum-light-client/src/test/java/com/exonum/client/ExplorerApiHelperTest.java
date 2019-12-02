@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
@@ -190,17 +191,15 @@ class ExplorerApiHelperTest {
         + "}\n";
 
     return Stream.of(
-        Arguments.of(ExecutionStatuses.success(), successStatus),
-        Arguments.of(ExecutionStatuses.serviceError(errorCode, errorDescription),
-            serviceErrorStatus),
-        Arguments.of(ExplorerApiHelper.buildExecutionStatus(ErrorKind.DISPATCHER, errorCode,
+        arguments(ExecutionStatuses.success(), successStatus),
+        arguments(ExecutionStatuses.serviceError(errorCode, errorDescription), serviceErrorStatus),
+        arguments(ExplorerApiHelper.buildExecutionStatus(ErrorKind.DISPATCHER, errorCode,
             errorDescription),
             dispatcherErrorStatus),
-        Arguments.of(ExplorerApiHelper.buildExecutionStatus(ErrorKind.RUNTIME, errorCode,
+        arguments(ExplorerApiHelper.buildExecutionStatus(ErrorKind.RUNTIME, errorCode,
             errorDescription),
             runtimeErrorStatus),
-        Arguments.of(ExplorerApiHelper.buildPanicExecutionStatus(errorDescription),
-            panicStatus)
+        arguments(ExplorerApiHelper.buildPanicExecutionStatus(errorDescription), panicStatus)
     );
   }
 }
