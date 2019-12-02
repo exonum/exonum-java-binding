@@ -25,7 +25,7 @@ instances of the same service.
 Creating proofs is not supported in this release. They will be re-enabled in one of the following
 releases.
 
-This release is based on Exonum <version TBD>.
+This release is based on Exonum <version TBD + link their release page>.
 
 *If you are upgrading an existing Java service, consult
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.9.0-rc1/exonum-java-binding/doc/Migration_guide_0.9.md).*
