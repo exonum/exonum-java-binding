@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.ServiceWrapper.DEFAULT_INTERFACE_NAME;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.collect.Comparators.isInStrictOrder;
 import static java.util.Arrays.asList;
@@ -366,9 +367,11 @@ class ServiceRuntimeIntegrationTest {
     void executeTransaction() throws Exception {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
+        String interfaceName = DEFAULT_INTERFACE_NAME;
         int txId = 1;
         byte[] arguments = bytes(127);
         Fork fork = database.createFork(cleaner);
+        int callerServiceId = 0;
         TransactionContext expectedContext = TransactionContext.builder()
             .fork(fork)
             .txMessageHash(TEST_HASH)
@@ -377,10 +380,11 @@ class ServiceRuntimeIntegrationTest {
             .serviceId(TEST_ID)
             .build();
 
-        serviceRuntime.executeTransaction(TEST_ID, txId, arguments, fork, TEST_HASH,
-            TEST_PUBLIC_KEY);
+        serviceRuntime.executeTransaction(TEST_ID, interfaceName, txId, arguments, fork,
+            callerServiceId, TEST_HASH, TEST_PUBLIC_KEY);
 
-        verify(serviceWrapper).executeTransaction(txId, arguments, expectedContext);
+        verify(serviceWrapper).executeTransaction(interfaceName, txId, arguments,
+            callerServiceId, expectedContext);
       }
     }
 
@@ -401,10 +405,11 @@ class ServiceRuntimeIntegrationTest {
         int serviceId = TEST_ID + 1;
         int txId = 1;
         byte[] arguments = bytes(127);
+        Fork fork = database.createFork(cleaner);
 
         Exception e = assertThrows(IllegalArgumentException.class,
-            () -> serviceRuntime.executeTransaction(serviceId, txId, arguments,
-                database.createFork(cleaner), TEST_HASH, TEST_PUBLIC_KEY));
+            () -> serviceRuntime.executeTransaction(serviceId, DEFAULT_INTERFACE_NAME, txId,
+                arguments, fork, 0, TEST_HASH, TEST_PUBLIC_KEY));
 
         assertThat(e).hasMessageContaining(String.valueOf(serviceId));
       }
