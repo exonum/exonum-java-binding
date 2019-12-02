@@ -49,7 +49,6 @@ final class ServiceWrapper {
   /**
    * Default interface comprised of transactions defined in the service implementation
    * (intrinsic to this service).
-   * todo: @slowli What's the proper term for this interface (intrinsic, implicit, default)?
    */
   static final String DEFAULT_INTERFACE_NAME = "";
   /**
