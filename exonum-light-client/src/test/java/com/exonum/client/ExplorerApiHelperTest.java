@@ -58,17 +58,23 @@ class ExplorerApiHelperTest {
 
   private static String TEMPLATE_TRANSACTION_MESSAGE_JSON = "{\n"
       + "    'type': 'committed',\n"
-      + "    'content': {\n"
-      + "        'message': '" + toHex(TRANSACTION_MESSAGE) + "'\n"
-      + "    },\n"
+      + "    'content': '" + toHex(TRANSACTION_MESSAGE) + "',\n"
       + "    'location': {\n"
       + "        'block_height': " + BLOCK_HEIGHT + ",\n"
       + "        'position_in_block': " + INDEX_IN_BLOCK + "\n"
       + "    },\n"
       + "    'location_proof': {\n"
-      + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
+      + "        'entries': [\n"
+      + "            [\n"
+      + "                0,\n"
+      + "                'd27f4ae6692fc00caf4e51ca7c072bab35487bb0d56272e08b6069ebadb52100'\n"
+      + "            ]\n"
+      + "        ],\n"
+      + "        'length': 1,\n"
+      + "        'proof': []\n"
       + "    },\n"
-      + "%s"
+      + "    %s,\n"
+      + "    'time': '2019-12-02T21:51:36.439431Z'"
       + "}";
 
   @Test
@@ -82,17 +88,14 @@ class ExplorerApiHelperTest {
 
   @Test
   void parseGetTxResponseInPool() {
-    TransactionMessage expectedMessage = createTransactionMessage();
     String json = "{\n"
         + "    'type': 'in-pool',\n"
-        + "    'content': {\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    }\n"
+        + "    'content': '" + toHex(TRANSACTION_MESSAGE) + "'\n"
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.IN_POOL));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
+    assertThat(transactionResponse.getMessage(), is(TRANSACTION_MESSAGE));
     assertThrows(IllegalStateException.class, transactionResponse::getExecutionResult);
     assertThrows(IllegalStateException.class, transactionResponse::getLocation);
   }

@@ -160,16 +160,7 @@ class ExonumHttpClientIntegrationTest {
     TransactionMessage expectedMessage = createTransactionMessage();
     String mockResponse = "{\n"
         + "    'type': 'in-pool',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'to': {\n"
-        + "                'data': []\n"
-        + "            },\n"
-        + "            'amount': 10,\n"
-        + "            'seed': 9587307158524814255\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    }\n"
+        + "    'content': '" + toHex(expectedMessage) + "'\n"
         + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
