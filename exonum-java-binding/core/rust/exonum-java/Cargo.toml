@@ -5,6 +5,7 @@ authors = ["Exonum team <contact@exonum.com>"]
 
 [dependencies]
 env_logger = "0.7.1"
+exonum-supervisor = "0.12"
 exonum-time = "0.12"
 failure = "0.1.5"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).

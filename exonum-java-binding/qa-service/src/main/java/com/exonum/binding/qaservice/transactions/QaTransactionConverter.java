@@ -42,7 +42,8 @@ public final class QaTransactionConverter implements TransactionConverter {
   @Override
   public Transaction toTransaction(int txId, byte[] arguments) {
     return TRANSACTION_FACTORIES.getOrDefault(txId, (args) -> {
-      throw new IllegalArgumentException("Unknown transaction id: " + txId);
+      throw new IllegalArgumentException("Unknown transaction id (" + txId + "), "
+          + "must be one of " + TRANSACTION_FACTORIES.keySet());
     })
         .apply(arguments);
   }

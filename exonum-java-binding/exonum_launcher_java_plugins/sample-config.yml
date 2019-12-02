@@ -11,7 +11,7 @@ runtimes:
 
 plugins:
   runtime:
-  java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
+    java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
   artifact:
     timestamping: "exonum_instance_configuration_plugin.InstanceSpecLoader"
 
