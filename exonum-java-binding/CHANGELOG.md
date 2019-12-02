@@ -53,7 +53,8 @@ the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.
   [documentation][proof-map-non-hashing]. (#1222)
 
 ### Removed
-- `Service#getId` and `Service#getName` are removed. (#1065)
+- `Service#getId` and `Service#getName` are removed. `AbstractService` now provides 
+  similar methods that can be used as replacements. (#1065)
 - `Blockchain#getActualConfiguration` has been replaced with
   `Blockchain#getConsensusConfiguration`, returning only the consensus configuration (now also
   containing the validator public keys) as a Protobuf message. (#1185)
