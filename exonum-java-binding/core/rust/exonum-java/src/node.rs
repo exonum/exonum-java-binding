@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use exonum_supervisor::SimpleSupervisor;
 use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
     create_java_vm, create_service_runtime,
@@ -21,7 +22,6 @@ use java_bindings::{
         blockchain::{Blockchain, BlockchainBuilder, BlockchainMut, InstanceCollection},
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel},
-        runtime::rust::ServiceFactory,
     },
     Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
 };
@@ -75,10 +75,7 @@ fn create_blockchain(
 
     BlockchainBuilder::new(blockchain, node_config.consensus.clone())
         .with_additional_runtime(java_runtime)
-        .with_rust_runtime(
-            api_endpoints,
-            service_factories.into_iter().map(InstanceCollection::new),
-        )
+        .with_rust_runtime(api_endpoints, service_factories.into_iter())
         .build()
 }
 
@@ -100,9 +97,10 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
     Ok(database)
 }
 
-fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
+fn standard_exonum_service_factories() -> Vec<InstanceCollection> {
     // TODO(ECR-3714): add anchoring service
-    vec![Box::new(TimeServiceFactory::with_provider(
-        SystemTimeProvider,
-    ))]
+    vec![
+        InstanceCollection::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
+        InstanceCollection::from(SimpleSupervisor::new()),
+    ]
 }

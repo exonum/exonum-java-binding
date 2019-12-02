@@ -41,7 +41,7 @@
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->
     <build.cargoFlag></build.cargoFlag>
     <protobuf.python.outputDirectory>
-      ${project.parent.basedir}/launcher-plugin/exonum_java_runtime_plugin/proto
+      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_java_runtime_plugin/proto
     </protobuf.python.outputDirectory>
   </properties>
 

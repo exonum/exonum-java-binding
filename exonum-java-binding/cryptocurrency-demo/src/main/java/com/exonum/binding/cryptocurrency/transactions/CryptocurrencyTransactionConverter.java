@@ -36,7 +36,8 @@ public final class CryptocurrencyTransactionConverter implements TransactionConv
         .getOrDefault(
             txId,
             (a) -> {
-              throw new IllegalArgumentException("Unknown transaction id: " + txId);
+              throw new IllegalArgumentException("Unknown transaction id (" + txId + "), "
+                  + "must be one of " + TRANSACTION_FACTORIES.keySet());
             })
         .apply(arguments);
   }

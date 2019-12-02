@@ -42,9 +42,6 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <!-- Optional for it is only needed for protobuf serializers support — if you don't
-           use them, you don't need the protobuf. -->
-      <optional>true</optional>
     </dependency>
 
     <dependency>
