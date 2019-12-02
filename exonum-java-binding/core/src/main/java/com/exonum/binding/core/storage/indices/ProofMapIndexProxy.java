@@ -55,11 +55,11 @@ import java.util.function.LongSupplier;
  * {@link #newInstance(String, View, Serializer, Serializer) #newInstance} and
  * {@link #newInGroupUnsafe(String, byte[], View, Serializer, Serializer) #newInGroupUnsafe},
  * the user keys are converted into internal keys through hashing. This allows to use keys of
- * arbitrary size and ensures the balance of the internal tree.
+ * an arbitrary size and ensures the balance of the internal tree.
  * It is also possible to create a proof map that will not hash keys with methods
  * {@link #newInstanceNoKeyHashing(String, View, Serializer, Serializer) #newInstanceNoKeyHashing}
  * and {@link #newInGroupUnsafeNoKeyHashing(String, byte[], View, Serializer, Serializer)
- * #newInGroupUnsafeNoKeyHashing}. In this mode, the map will use the user keys as internal
+ * #newInGroupUnsafeNoKeyHashing}. In this mode the map will use the user keys as internal
  * tree keys. Such mode of operation is appropriate iff <em>all</em> of the following conditions
  * hold:
  *
