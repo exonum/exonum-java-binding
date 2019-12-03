@@ -65,8 +65,32 @@ replaces the configuration service.
 
 #### Isolate Collections via Namespaces
 
-Use a unique for each service instance namespace for service collections (e.g., a service name,
-or an ID).
+Use a namespace for service collections that is unique for each service instance
+(e.g., a service name, or an ID).
+
+```java
+class FooSchema implements Schema {
+
+  private final String namespace;
+  private final View view;
+
+  FooSchema(String serviceName, View view) {
+    this.namespace = serviceName;
+    this.view = view;
+  }
+
+  MapIndexProxy<String, String> testMap() {
+    String fullName = fullIndexName("test-map");
+    return MapIndexProxy.newInstance(fullName, view, string(), string());
+  }
+
+  // ...
+
+  private String fullIndexName(String name) {
+    return namespace + "." + name;
+  }
+}
+```
 
 #### Update ProofMaps
 
