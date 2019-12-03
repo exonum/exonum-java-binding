@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.5.0 — 2019-12-TBD
+
+The new release of the light client brings support for dynamic services.
+
+### Versions Support
+- Exonum version, <version TBD>
+- Exonum Java Binding version, 0.9.0
+
+### Added
+- Java 13 support.
+
 ## 0.4.0 — 2019-10-09
 
 The new release of the light client brings support for Exonum 0.12
@@ -87,4 +98,3 @@ This release brings:
 
 [system-api-public]: https://exonum.com/doc/version/0.12/advanced/node-management/#public-endpoints
 [explorer-api]: https://exonum.com/doc/version/0.12/advanced/node-management/#explorer-api-endpoints
-
