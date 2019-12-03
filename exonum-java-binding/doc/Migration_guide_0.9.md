@@ -74,7 +74,7 @@ The default [`ProofMap`][proof-map] implementation has been changed to hash user
 That allows _any_ type to be used as a key. But the new implementation adds an extra hashing operation for every insert
 operation and changes how proofs need to be verified.
 
-In some cases (rarer than is usually considered), it might be needed to **not** hash the keys
+In some rare cases, it might be needed to **omit** hashing the keys
 and use them as _internal_ keys. Such `ProofMap` variant is still supported. See if your
 service implementation fits the [*requirements*][proof-map-non-hashing] to keep using it.
 If it does not — please migrate your schema to use the new default one.
