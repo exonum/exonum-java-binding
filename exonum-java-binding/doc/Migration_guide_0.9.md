@@ -37,7 +37,7 @@ and ID.
     [`com.exonum.binding.core.service.AbstractService`][abstract-service] —
     pass the `instanceSpec` to the superclass constructor and use the provided `AbstractService#getId`,
     `getName`, and `getInstanceSpec` methods
-    - If it implements `Service` directly — save the needed information to fields.
+    - If it implements `Service` directly — save the needed information to the fields.
 
 ```java
 public final class FooService extends AbstractService {
