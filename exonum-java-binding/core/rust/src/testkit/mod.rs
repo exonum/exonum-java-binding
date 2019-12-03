@@ -153,8 +153,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let testkit = cast_handle::<TestKit>(handle);
-        let mut raw_transactions = Vec::new();
         let transactions_count = env.get_array_length(transactions)?;
+        let mut raw_transactions = Vec::with_capacity(transactions_count as usize);
         for i in 0..transactions_count {
             let serialized_tx_object =
                 env.auto_local(env.get_object_array_element(transactions, i as _)?);
