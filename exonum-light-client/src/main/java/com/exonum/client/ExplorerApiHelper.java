@@ -168,7 +168,6 @@ final class ExplorerApiHelper {
     TransactionLocation location;
     JsonObject locationProof; //TODO: in scope of LC P3
     GetTxResponseExecutionResult status;
-    String time;
   }
 
   /**
