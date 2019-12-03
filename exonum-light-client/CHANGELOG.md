@@ -21,7 +21,7 @@ The new release of the light client brings support for dynamic services.
 
 ### Versions Support
 - Exonum version, <version TBD>
-- Exonum Java Binding version, 0.9.0
+- Exonum Java Binding version, 0.9.0-rc1
 
 ### Added
 - Java 13 support.

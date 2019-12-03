@@ -27,7 +27,7 @@ The following table shows versions compatibility:
 
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
-| 0.5.0        | 0.TBD.* | 0.9.0       |
+| 0.5.0        | 0.TBD.* | 0.9.0-rc1       |
 | 0.4.0        | 0.12.* | 0.8.0       |
 | 0.3.0        | 0.11.* | 0.6.0-0.7.0 |
 | 0.2.0        | 0.11.* | 0.6.0       |
@@ -139,9 +139,9 @@ which is required for the client.
 Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 
 [exonum]: https://github.com/exonum/exonum
-[ejb-documentation]: https://exonum.com/doc/api/java-binding/0.9.0/index.html
-[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding/0.9.0/com/exonum/binding/common/message/TransactionMessage.Builder.html
+[ejb-documentation]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/index.html
+[exonum-tx-message-builder]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/common/message/TransactionMessage.Builder.html
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
-[standard-serializers]: https://exonum.com/doc/api/java-binding/0.9.0/com/exonum/binding/common/serialization/StandardSerializers.html
+[standard-serializers]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/common/serialization/StandardSerializers.html
 [send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
 [exonum-client]: https://exonum.com/doc/api/java-light-client/0.5.0/com/exonum/client/ExonumClient.html
