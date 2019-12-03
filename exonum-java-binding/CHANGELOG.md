@@ -15,13 +15,54 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.9.0-rc1] - 2019-12-TBD
+
+### Overview
+
+The main feature of this release is support for dynamic services. Dynamic services can be added
+to the blockchain network after it has been started. Since this release EJB also supports multiple
+instances of the same service.
+Creating proofs is not supported in this release. They will be re-enabled in one of the following
+releases.
+
+This release is based on Exonum <version TBD + link their release page>.
+
+*If you are upgrading an existing Java service, consult
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.9.0-rc1/exonum-java-binding/doc/Migration_guide_0.9.md).*
+
+### Added
+- Dynamic services support. (#1065, #1145, #1183)
+- Exonum protobuf messages to `common` module. (#1085)
+- `Service#beforeCommit` handler. (#1132)
+- `TestKit` support for dynamic services. (#1145)
+- Support for flat list proofs, the new compact proof format for `ProofList`. Not introduced to
+  `ProofListIndexProxy` for now. (#1156)
+- Java runtime plugin for exonum-launcher. (#1171)
+- `serviceName` and `serviceId` were added to `TransactionContext`. They are used for creating
+  schemas with unique namespaces. (#1181)
+- Implement `run-dev` command support for running the node in development mode. (#1217)
+- `Configurable` interface corresponding to `exonum.Configure`. (#1234)
+- Java 13 support.
+
 ### Changed
-- MapProof to enforce 32-byte long hash codes. 
+- Support for the new protobuf-based `TransactionMessage` format is provided. (#1085)
+- `TimeSchema` supports multiple time service instances. (#1136)
+- `TransactionResult` is replaced with `ExecutionStatus`. (#1174)
+- `MapProof` enforces 32-byte long hash codes. (#1191)
+- The default `ProofMapIndexProxy` implementation has been changed to hash user keys to produce an
+  internal key. The implementation that does not hash the keys is still supported, see
+  [documentation][proof-map-non-hashing]. (#1222)
 
 ### Removed
-- Replaced Blockchain#getActualConfiguration with Blockchain#getConsensusConfiguration,
-  returning only the consensus configuration (now also containing the validator public keys)
-  as a protobuf message.
+- `Service#getId` and `Service#getName` are removed. `AbstractService` now provides 
+  similar methods that can be used as replacements. (#1065)
+- `Blockchain#getActualConfiguration` has been replaced with
+  `Blockchain#getConsensusConfiguration`, returning only the consensus configuration (now also
+  containing the validator public keys) as a Protobuf message. (#1185)
+- `Transaction#info` method is removed as it is no longer used by the framework. (#1225)
+- `ProofMapIndexProxy#getProof` and `ProofListIndexProxy#getProof` are disabled in this release.
+
+[proof-map-non-hashing]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/core/storage/indices/ProofMapIndexProxy.html#key-hashing
 
 ## [0.8.0] - 2019-09-09
 

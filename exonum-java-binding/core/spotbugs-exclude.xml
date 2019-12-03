@@ -12,11 +12,10 @@
     <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
   </Match>
 
-  <!-- Use \n in the message that might be recorded in the blockchain instead of %n, which
-       is resolved to a platform-dependent value. -->
+  <!-- Use \n in the exception message that might be recorded in the blockchain instead of %n,
+       which is resolved to a platform-dependent value. -->
   <Match>
     <Class name="~.*ServiceWrapper"/>
-    <Method name="convertTransaction"/>
     <Bug pattern="VA_FORMAT_STRING_USES_NEWLINE"/>
   </Match>
 
