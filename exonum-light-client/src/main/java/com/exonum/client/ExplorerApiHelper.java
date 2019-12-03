@@ -68,7 +68,7 @@ final class ExplorerApiHelper {
 
     return new TransactionResponse(
         response.getType(),
-        response.getContent().getMessage(),
+        response.getContent(),
         executionResult,
         response.getLocation()
     );
@@ -164,21 +164,11 @@ final class ExplorerApiHelper {
     @NonNull
     TransactionStatus type;
     @NonNull
-    GetTxResponseContent content;
+    TransactionMessage content;
     TransactionLocation location;
     JsonObject locationProof; //TODO: in scope of LC P3
     GetTxResponseExecutionResult status;
-  }
-
-  /**
-   * Json object wrapper for get transaction response content, i.e.,
-   * {@code "$.content"}.
-   */
-  @Value
-  private static class GetTxResponseContent {
-    JsonObject debug; // contains executable tx in json. currently not supported
-    @NonNull
-    TransactionMessage message;
+    String time;
   }
 
   /**
