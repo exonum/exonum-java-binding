@@ -16,9 +16,13 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
+
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
@@ -28,6 +32,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
@@ -40,6 +45,25 @@ import java.util.List;
  * user-facing, interface from the <em>runtime</em>, internal, interface.
  */
 final class ServiceWrapper {
+
+  /**
+   * Default interface comprised of transactions defined in the service implementation
+   * (intrinsic to this service).
+   */
+  static final String DEFAULT_INTERFACE_NAME = "";
+  /**
+   * The id of the supervisor service instance, allowed to invoke configuration operations.
+   *
+   * <p>See SUPERVISOR_INSTANCE_ID in Exonum.
+   */
+  static final int SUPERVISOR_SERVICE_ID = 0;
+
+  // These constants are defined in this class till a generic approach to invoke interface
+  // methods is implemented.
+  // See Configure trait in Exonum.
+  @VisibleForTesting static final String CONFIGURE_INTERFACE_NAME = "exonum.Configure";
+  @VisibleForTesting static final int VERIFY_CONFIGURATION_TX_ID = 0;
+  @VisibleForTesting static final int APPLY_CONFIGURATION_TX_ID = 1;
 
   private final Service service;
   private final TransactionConverter txConverter;
@@ -80,7 +104,24 @@ final class ServiceWrapper {
     service.initialize(view, configuration);
   }
 
-  void executeTransaction(int txId, byte[] arguments, TransactionContext context)
+  void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
+      TransactionContext context)
+      throws TransactionExecutionException {
+    switch (interfaceName) {
+      case DEFAULT_INTERFACE_NAME: {
+        executeIntrinsicTransaction(txId, arguments, context);
+        break;
+      }
+      case CONFIGURE_INTERFACE_NAME: {
+        executeConfigurableTransaction(txId, arguments, callerServiceId, context);
+        break;
+      }
+      default: throw new IllegalArgumentException(
+          format("Unknown interface (name=%s, txId=%d)", interfaceName, txId));
+    }
+  }
+
+  private void executeIntrinsicTransaction(int txId, byte[] arguments, TransactionContext context)
       throws TransactionExecutionException {
     // Decode the transaction data into an executable transaction
     Transaction transaction = convertTransaction(txId, arguments);
@@ -100,16 +141,46 @@ final class ServiceWrapper {
    *     arguments are not valid: e.g., cannot be deserialized, or do not meet the preconditions
    */
   Transaction convertTransaction(int txId, byte[] arguments) {
+    return convertIntrinsicTransaction(txId, arguments);
+  }
+
+  private Transaction convertIntrinsicTransaction(int txId, byte[] arguments) {
     Transaction transaction = txConverter.toTransaction(txId, arguments);
     if (transaction == null) {
       // Use \n in the format string to ensure the message (which is likely recorded
       // to the blockchain) stays the same on any platform
-      throw new NullPointerException(String.format("Invalid service implementation: "
+      throw new NullPointerException(format("Invalid service implementation: "
           + "TransactionConverter#toTransaction must never return null.\n"
           + "Throw an exception if your service does not recognize this message id (%s) "
           + "or arguments (%s)", txId, BaseEncoding.base16().encode(arguments)));
     }
     return transaction;
+  }
+
+  private void executeConfigurableTransaction(int txId, byte[] arguments, int callerServiceId,
+      TransactionContext context) {
+    // Check the service implements Configurable
+    checkArgument(service instanceof Configurable, "Service (%s) doesn't implement Configurable",
+        getName());
+    // Check the caller is the supervisor
+    checkArgument(callerServiceId == SUPERVISOR_SERVICE_ID, "Invalid caller service id (%s). "
+        + "Operations in Configurable interface may only be invoked by the supervisor service (%s)",
+        callerServiceId, SUPERVISOR_SERVICE_ID);
+    // Invoke the Configurable operation
+    Configurable configurable = (Configurable) service;
+    Fork fork = context.getFork();
+    Configuration config = new ServiceConfiguration(arguments);
+    switch (txId) {
+      case VERIFY_CONFIGURATION_TX_ID:
+        configurable.verifyConfiguration(fork, config);
+        break;
+      case APPLY_CONFIGURATION_TX_ID:
+        configurable.applyConfiguration(fork, config);
+        break;
+      default:
+        throw new IllegalArgumentException(
+            format("Unknown txId (%d) in Configurable interface", txId));
+    }
   }
 
   List<HashCode> getStateHashes(Snapshot snapshot) {
