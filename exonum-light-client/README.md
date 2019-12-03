@@ -15,12 +15,13 @@ functions for _hashing_, _cryptography_, _serialization_, etc.
 ## Capabilities
 By using the client you are able to perform the following operations:
 - Submit transactions to the node
-- Receive transaction information 
-- Receive blockchain blocks information 
-- Receive node system information 
-- Receive node status information  
-_*Please refer to [the documentation][exonum-client] for details._  
-Also, see [examples](#examples). 
+- Receive transaction information
+- Receive blockchain blocks information
+- Receive node system information
+- Receive node status information
+- Receive list of started service instances
+_*Please refer to [the documentation][exonum-client] for details._
+Also, see [examples](#examples).
 
 ## Compatibility
 The following table shows versions compatibility:  
