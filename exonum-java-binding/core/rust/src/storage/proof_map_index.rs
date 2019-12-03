@@ -643,7 +643,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 // Converts array of Java bytes arrays to the vector of keys.
 fn convert_to_keys(env: &JNIEnv, array: jobjectArray) -> JniResult<Vec<Key>> {
     let num_elements = env.get_array_length(array)?;
-    let mut keys = vec![];
+    let mut keys = Vec::with_capacity(num_elements as usize);
     for i in 0..num_elements {
         let byte_array: jbyteArray = env.get_object_array_element(array, i)?.into_inner();
         let key = env.convert_byte_array(byte_array)?;
