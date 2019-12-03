@@ -376,16 +376,17 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(map_handle) {
+        let values = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(map.values()),
-                Index::Hashed(map) => handle::to_handle(map.values()),
+                Index::Raw(map) => map.values(),
+                Index::Hashed(map) => map.values(),
             },
             IndexType::ForkIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(map.values()),
-                Index::Hashed(map) => handle::to_handle(map.values()),
+                Index::Raw(map) => map.values(),
+                Index::Hashed(map) => map.values(),
             },
-        })
+        };
+        Ok(handle::to_handle(values))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -450,16 +451,17 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let key = env.convert_byte_array(key)?;
-        Ok(match *handle::cast_handle::<IndexType>(map_handle) {
+        let values = match *handle::cast_handle::<IndexType>(map_handle) {
             IndexType::SnapshotIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(map.values_from(&key.to_raw())),
-                Index::Hashed(map) => handle::to_handle(map.values_from(&key)),
+                Index::Raw(map) => map.values_from(&key.to_raw()),
+                Index::Hashed(map) => map.values_from(&key),
             },
             IndexType::ForkIndex(ref index) => match index {
-                Index::Raw(map) => handle::to_handle(map.values_from(&key.to_raw())),
-                Index::Hashed(map) => handle::to_handle(map.values_from(&key)),
+                Index::Raw(map) => map.values_from(&key.to_raw()),
+                Index::Hashed(map) => map.values_from(&key),
             },
-        })
+        };
+        Ok(handle::to_handle(values))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
