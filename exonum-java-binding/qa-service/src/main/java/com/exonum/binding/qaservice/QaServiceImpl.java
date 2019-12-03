@@ -36,7 +36,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.qaservice.Config.InitialConfiguration;
+import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.time.TimeSchema;
@@ -220,7 +220,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   public void verifyConfiguration(Fork fork, Configuration configuration) {
-    InitialConfiguration config = configuration.getAsMessage(InitialConfiguration.class);
+    QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
     checkConfiguration(config);
   }
 
@@ -229,7 +229,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     updateTimeOracle(fork, configuration);
   }
 
-  private void checkConfiguration(InitialConfiguration config) {
+  private void checkConfiguration(QaConfiguration config) {
     String timeOracleName = config.getTimeOracleName();
     // Check the time oracle name is non-empty.
     // We do *not* check if the time oracle is active to (a) allow running this service with
@@ -241,7 +241,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   private void updateTimeOracle(Fork fork, Configuration configuration) {
     QaSchema schema = createDataSchema(fork);
-    InitialConfiguration config = configuration.getAsMessage(InitialConfiguration.class);
+    QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
 
     // Verify the configuration
     checkConfiguration(config);
