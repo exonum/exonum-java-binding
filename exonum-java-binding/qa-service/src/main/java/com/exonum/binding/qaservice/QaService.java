@@ -18,6 +18,7 @@ package com.exonum.binding.qaservice;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.transaction.RawTransaction;
@@ -29,7 +30,7 @@ import java.util.Optional;
 /**
  * A simple service for QA purposes.
  */
-public interface QaService extends Service {
+public interface QaService extends Service, Configurable {
 
   /**
    * Creates a new self-signed 'increment counter' transaction and submits
