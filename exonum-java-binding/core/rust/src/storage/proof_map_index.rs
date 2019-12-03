@@ -645,8 +645,8 @@ fn convert_to_keys(env: &JNIEnv, array: jobjectArray) -> JniResult<Vec<Key>> {
     let num_elements = env.get_array_length(array)?;
     let mut keys = Vec::with_capacity(num_elements as usize);
     for i in 0..num_elements {
-        let byte_array: jbyteArray = env.get_object_array_element(array, i)?.into_inner();
-        let key = env.convert_byte_array(byte_array)?;
+        let array_element = env.auto_local(env.get_object_array_element(array, i)?);
+        let key = env.convert_byte_array(array_element.as_obj().into_inner())?;
         keys.push(key);
     }
     Ok(keys)
