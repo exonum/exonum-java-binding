@@ -20,7 +20,7 @@ use jni::{
 
 use std::{panic, ptr};
 
-use exonum::crypto::{hash, Hash};
+use exonum::crypto::Hash;
 use exonum_merkledb::{
     access::FromAccess,
     proof_map_index::{
@@ -44,7 +44,7 @@ type Index<T> = ProofMapIndex<T, Key, Value>;
 
 impl ObjectHash for Key {
     fn object_hash(&self) -> Hash {
-        hash(&self.0)
+        Hash::from_slice(&self.0).unwrap()
     }
 }
 
@@ -638,9 +638,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
     let bytes = env.convert_byte_array(array)?;
     assert_eq!(PROOF_MAP_KEY_SIZE, bytes.len());
-
-    let key = Key::read(&bytes);
-    Ok(key)
+    Ok(Key::read(&bytes))
 }
 
 fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
@@ -649,9 +647,7 @@ fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
 
     let keys = bytes
         .chunks(PROOF_MAP_KEY_SIZE)
-        .map(|bytes| {
-            Key::read(&bytes)
-        })
+        .map(|bytes| Key::read(&bytes))
         .collect();
     Ok(keys)
 }
