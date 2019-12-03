@@ -650,8 +650,7 @@ fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
     let keys = bytes
         .chunks(PROOF_MAP_KEY_SIZE)
         .map(|bytes| {
-            let key = Key::read(&bytes);
-            key
+            Key::read(&bytes)
         })
         .collect();
     Ok(keys)
