@@ -48,7 +48,15 @@ $ source exonum-java-binding/tests_profile
 ```
 Then run:
 ```$sh
-$ mvn install
+$ ./run_all_tests.sh
+```
+
+---
+
+⚠️ Some maven modules have not been migrated to dynamic services and
+have to be excluded when executing `mvn` directly:
+```sh
+mvn -pl '!fakes' <commands>
 ```
 
 #### Building Exonum Java App
