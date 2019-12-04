@@ -38,8 +38,9 @@ use storage::{
 use utils;
 use JniResult;
 
-#[derive(Clone, Default)]
-struct Key([u8; PROOF_MAP_KEY_SIZE]);
+type RawKey = [u8; PROOF_MAP_KEY_SIZE];
+#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Default)]
+struct Key(RawKey);
 type Index<T> = ProofMapIndex<T, Key, Value>;
 
 impl ObjectHash for Key {
@@ -58,9 +59,7 @@ impl BinaryKey for Key {
     }
 
     fn read(buffer: &[u8]) -> Self::Owned {
-        let mut value = [0_u8; PROOF_MAP_KEY_SIZE];
-        value.copy_from_slice(buffer);
-        Key(value)
+        Key(RawKey::read(buffer))
     }
 }
 
