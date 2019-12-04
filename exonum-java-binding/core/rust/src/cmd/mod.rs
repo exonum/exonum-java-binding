@@ -15,20 +15,21 @@
  */
 
 use exonum_cli::command::{
-    finalize::Finalize,
-    generate_config::{GenerateConfig, PUB_CONFIG_FILE_NAME, SEC_CONFIG_FILE_NAME},
-    generate_template::GenerateTemplate,
-    maintenance::Maintenance,
-    run::Run as StandardRun,
-    ExonumCommand, StandardResult,
+    finalize::Finalize, generate_config::GenerateConfig, generate_template::GenerateTemplate,
+    maintenance::Maintenance, ExonumCommand, StandardResult,
 };
 use failure;
-use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
-use std::{path::PathBuf, str::FromStr};
+use std::path::PathBuf;
 
-use super::{executable_directory, Config, JvmConfig, RuntimeConfig};
+use super::Config;
+
+mod run;
+mod run_dev;
+
+pub use self::run::*;
+pub use self::run_dev::*;
 
 /// Exonum Java Bindings Application.
 ///
@@ -82,127 +83,6 @@ impl EjbCommand for Command {
     }
 }
 
-/// EJB-specific `run` command which collects standard Exonum Core parameters and
-/// also additional Java runtime and JVM configuration parameters.
-#[derive(Debug, StructOpt, Serialize, Deserialize)]
-#[structopt(rename_all = "kebab-case")]
-pub struct Run {
-    #[structopt(flatten)]
-    #[serde(flatten)]
-    standard: StandardRun,
-    /// A port of the HTTP server for Java services.
-    ///
-    /// Must be distinct from the ports used by Exonum.
-    #[structopt(long)]
-    ejb_port: i32,
-    /// Path to the directory containing Java service artifacts.
-    #[structopt(long)]
-    artifacts_path: PathBuf,
-    /// Path to log4j configuration file.
-    #[structopt(long)]
-    ejb_log_config_path: Option<PathBuf>,
-    /// Overrides the standard path to native libraries, enabling running the non-packaged
-    /// exonum-java application.
-    ///
-    /// Mostly for internal usage.
-    #[structopt(long)]
-    ejb_override_java_library_path: Option<PathBuf>,
-    /// Allows JVM being remotely debugged.
-    ///
-    /// Takes a socket address as a parameter in form of `HOSTNAME:PORT`.
-    /// For example, `localhost:8000`
-    #[structopt(long)]
-    jvm_debug: Option<String>,
-    /// Additional parameters for JVM that precede the rest of arguments.
-    ///
-    /// Must not have a leading dash. For example, `Xmx2G`.
-    #[structopt(long)]
-    jvm_args_prepend: Vec<String>,
-    /// Additional parameters for JVM that get appended to the rest of arguments.
-    ///
-    /// Must not have a leading dash. For example, `Xmx2G`.
-    #[structopt(long)]
-    jvm_args_append: Vec<String>,
-}
-
-/// EJB-specific `run-dev` command.
-///
-/// Automatically generates node configuration for one
-/// validator and runs it using provided `artifacts_path` as a directory for Java service artifacts.
-#[derive(Debug, StructOpt, Serialize, Deserialize)]
-#[structopt(rename_all = "kebab-case")]
-pub struct RunDev {
-    /// Path to the directory containing Java service artifacts.
-    #[structopt(long)]
-    artifacts_path: PathBuf,
-    /// Path to a directory for blockchain database and configuration files.
-    ///
-    /// Database is located in <blockchain_path>/db directory, node configuration files
-    /// are located in <blockchain_path>/config directory. Existing files and directories are
-    /// reused. To generate new node configuration and start a new blockchain, the user must
-    /// manually delete existing <blockchain_path> directory or specify a new one.
-    #[structopt(long)]
-    blockchain_path: PathBuf,
-    /// Path to log4j configuration file.
-    #[structopt(long)]
-    ejb_log_config_path: Option<PathBuf>,
-}
-
-impl RunDev {
-    /// Automatically generates node configuration and returns a path to node configuration file.
-    ///
-    /// Does not alter existing configuration files.
-    fn generate_node_configuration_if_needed(&self) -> Result<PathBuf, failure::Error> {
-        let config_directory = concat_path(self.blockchain_path.clone(), "config");
-        let node_config_path = concat_path(config_directory.clone(), "node.toml");
-
-        // Configuration files exist, skip generation.
-        if config_directory.exists() {
-            return Ok(node_config_path);
-        }
-
-        let validators_count = 1;
-        let peer_address = "127.0.0.1:6200".parse().unwrap();
-        let public_api_address = "127.0.0.1:8080".parse().unwrap();
-        let private_api_address = "127.0.0.1:8081".parse().unwrap();
-        let public_allow_origin = "http://127.0.0.1:8080, http://localhost:8080".into();
-        let private_allow_origin = "http://127.0.0.1:8081, http://localhost:8081".into();
-        let common_config_path = concat_path(config_directory.clone(), "template.toml");
-        let public_config_path = concat_path(config_directory.clone(), PUB_CONFIG_FILE_NAME);
-        let secret_config_path = concat_path(config_directory.clone(), SEC_CONFIG_FILE_NAME);
-
-        let generate_template = GenerateTemplate {
-            common_config: common_config_path.clone(),
-            validators_count,
-        };
-        generate_template.execute()?;
-
-        let generate_config = GenerateConfig {
-            common_config: common_config_path.clone(),
-            output_dir: config_directory.clone(),
-            peer_address,
-            listen_address: None,
-            no_password: true,
-            master_key_pass: None,
-            master_key_path: None,
-        };
-        generate_config.execute()?;
-
-        let finalize = Finalize {
-            secret_config_path,
-            output_config_path: node_config_path.clone(),
-            public_configs: vec![public_config_path],
-            public_api_address: Some(public_api_address),
-            private_api_address: Some(private_api_address),
-            public_allow_origin: Some(public_allow_origin),
-            private_allow_origin: Some(private_allow_origin),
-        };
-        finalize.execute()?;
-
-        Ok(node_config_path)
-    }
-}
-
 /// Possible output of the Java Bindings CLI commands.
 pub enum EjbCommandResult {
     /// Output of the standard Exonum Core commands.
@@ -223,83 +103,8 @@ pub trait EjbCommand {
     fn execute(self) -> Result<EjbCommandResult, failure::Error>;
 }
 
-impl EjbCommand for Run {
-    fn execute(self) -> Result<EjbCommandResult, failure::Error> {
-        if let StandardResult::Run(node_run_config) = self.standard.execute()? {
-            let jvm_config = JvmConfig {
-                args_prepend: self.jvm_args_prepend,
-                args_append: self.jvm_args_append,
-                jvm_debug_socket: self.jvm_debug,
-            };
-
-            let log_config_path = self
-                .ejb_log_config_path
-                .unwrap_or_else(get_path_to_default_log_config);
-
-            let override_system_lib_path = self
-                .ejb_override_java_library_path
-                .map(|p| p.to_string_lossy().into_owned());
-
-            let runtime_config = RuntimeConfig {
-                artifacts_path: self.artifacts_path,
-                log_config_path,
-                port: self.ejb_port,
-                override_system_lib_path,
-            };
-
-            let config = Config {
-                run_config: node_run_config,
-                jvm_config,
-                runtime_config,
-            };
-
-            Ok(EjbCommandResult::EjbRun(config))
-        } else {
-            unreachable!("Standard run command returned invalid result")
-        }
-    }
-}
-
-impl EjbCommand for RunDev {
-    fn execute(self) -> Result<EjbCommandResult, failure::Error> {
-        let db_path = concat_path(self.blockchain_path.clone(), "db");
-        let node_config_path = self.generate_node_configuration_if_needed()?;
-
-        let ejb_port = 6400;
-
-        let standard_run = StandardRun {
-            node_config: node_config_path,
-            db_path,
-            public_api_address: None,
-            private_api_address: None,
-            master_key_pass: Some(FromStr::from_str("pass:").unwrap()),
-        };
-
-        let run = Run {
-            standard: standard_run,
-            ejb_port,
-            artifacts_path: self.artifacts_path,
-            ejb_log_config_path: self.ejb_log_config_path,
-            ejb_override_java_library_path: None,
-            jvm_debug: None,
-            jvm_args_prepend: vec![],
-            jvm_args_append: vec![],
-        };
-
-        run.execute()
-    }
-}
-
-/// Returns full path to the default log configuration file assuming the `exonum-java` app is
-/// packaged/installed.
-fn get_path_to_default_log_config() -> PathBuf {
-    let mut path = executable_directory();
-    path.push("log4j-fallback.xml");
-    path
-}
-
 /// Concatenates PathBuf and string. Useful to make a `PathBuf` to a file in the specific directory.
-fn concat_path(first: PathBuf, second: &str) -> PathBuf {
+pub fn concat_path(first: PathBuf, second: &str) -> PathBuf {
     let mut path = first;
     path.push(second);
     path

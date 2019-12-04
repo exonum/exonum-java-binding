@@ -51,8 +51,8 @@ extern crate tempfile;
 
 pub use exonum::exonum_merkledb;
 
-pub mod handle;
 mod cmd;
+pub mod handle;
 mod proto;
 mod proxy;
 mod runtime;
