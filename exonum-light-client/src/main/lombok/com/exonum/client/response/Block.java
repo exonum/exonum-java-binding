@@ -100,7 +100,6 @@ public class Block {
     return Optional.ofNullable(commitTime);
   }
 
-
   /**
    * Returns true if this block is empty:
    * contains no {@linkplain #getNumTransactions() transactions}.

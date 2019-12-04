@@ -82,10 +82,10 @@ The following example shows how to create the transaction message.
 In addition please read about [transaction message structure][exonum-tx-message-builder].
 ```java
     TransactionMessage txMessage = TransactionMessage.builder()
-        .serviceId((short) 1)
-        .transactionId((short) 2)
+        .serviceId(1)
+        .transactionId(2)
         .payload(data)
-        .sign(keys, CryptoFunctions.ed25519());
+        .sign(keys);
 ```
 * `data` is a bytes array which contains transactional information/parameters
 in a service-defined format.
