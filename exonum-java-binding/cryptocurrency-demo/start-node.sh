@@ -23,15 +23,9 @@ ARTIFACT_PATH="$(find ./target -type f -name exonum-java-binding-cryptocurrency-
 if [ -z "${ARTIFACT_PATH}" ];
 then
     mvn package
-    ARTIFACT_PATH="$(find ./target -type f -name exonum-java-binding-cryptocurrency-demo-*-artifact.jar)"
 fi
+ARTIFACT_PATH="target"
 echo "ARTIFACT_PATH=${ARTIFACT_PATH}"
-
-# Prepare the services configuration file.
-SERVICES_CONFIG_FILE="services.toml"
-SERVICE_NAME="cryptocurrency-demo"
-echo "[user_services]" > ${SERVICES_CONFIG_FILE}
-echo "${SERVICE_NAME} = '${ARTIFACT_PATH}'" >> ${SERVICES_CONFIG_FILE}
 
 # Clear test dir.
 rm -rf testnet
@@ -62,8 +56,9 @@ ${EXONUM_JAVA_APP} finalize \
 header "START TESTNET"
 ${EXONUM_JAVA_APP} run \
     --node-config testnet/node.toml \
+    --artifacts-path ${ARTIFACT_PATH} \
     --db-path testnet/db \
-    --consensus-key-pass pass \
-    --service-key-pass pass \
+    --master-key-pass pass \
     --public-api-address 127.0.0.1:3000 \
+    --private-api-address 127.0.0.1:3010 \
     --ejb-port 7000
