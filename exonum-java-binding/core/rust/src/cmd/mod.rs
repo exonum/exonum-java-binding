@@ -28,7 +28,7 @@ use structopt::StructOpt;
 
 use std::{path::PathBuf, str::FromStr};
 
-use super::{paths::executable_directory, Config, JvmConfig, RuntimeConfig};
+use super::{executable_directory, Config, JvmConfig, RuntimeConfig};
 
 /// Exonum Java Bindings Application.
 ///
