@@ -45,7 +45,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.qaservice.Config.InitialConfiguration;
+import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
@@ -96,7 +96,7 @@ class QaServiceImplTest {
         .withArtifactsDirectory(QaArtifactInfo.ARTIFACT_DIR)
         .withDeployedArtifact(QaArtifactInfo.ARTIFACT_ID, QaArtifactInfo.ARTIFACT_FILENAME)
         .withService(QaArtifactInfo.ARTIFACT_ID, serviceName, 1,
-            InitialConfiguration.newBuilder()
+            QaConfiguration.newBuilder()
                 .setTimeOracleName(timeServiceName)
                 .build())
         .withTimeService(timeServiceName, 2, TimeProvider.systemTime())
@@ -130,7 +130,7 @@ class QaServiceImplTest {
         .withArtifactsDirectory(QaArtifactInfo.ARTIFACT_DIR)
         .withDeployedArtifact(QaArtifactInfo.ARTIFACT_ID, QaArtifactInfo.ARTIFACT_FILENAME)
         .withService(QaArtifactInfo.ARTIFACT_ID, serviceName, 1,
-            InitialConfiguration.newBuilder()
+            QaConfiguration.newBuilder()
                 .setTimeOracleName(timeServiceName)
                 .build());
 

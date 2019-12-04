@@ -19,7 +19,7 @@ package com.exonum.binding.qaservice;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.core.runtime.ServiceArtifactId;
-import com.exonum.binding.qaservice.Config.InitialConfiguration;
+import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKit.Builder;
 import com.exonum.binding.testkit.TimeProvider;
@@ -40,8 +40,8 @@ public final class QaArtifactInfo {
   public static final int TIME_SERVICE_ID = 100;
   public static final String QA_SERVICE_NAME = "qa";
   public static final int QA_SERVICE_ID = 101;
-  public static final InitialConfiguration QA_SERVICE_INITIAL_CONFIG =
-      InitialConfiguration.newBuilder()
+  public static final QaConfiguration QA_SERVICE_INITIAL_CONFIG =
+      QaConfiguration.newBuilder()
           .setTimeOracleName(TIME_SERVICE_NAME)
           .build();
 
