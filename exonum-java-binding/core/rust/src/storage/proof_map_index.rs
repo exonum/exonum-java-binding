@@ -27,7 +27,7 @@ use exonum_merkledb::{
         MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
         PROOF_MAP_KEY_SIZE,
     },
-    Fork, IndexAddress, ObjectHash, ProofMapIndex, Snapshot,
+    BinaryKey, Fork, IndexAddress, ObjectHash, ProofMapIndex, Snapshot,
 };
 
 use handle::{self, Handle};
@@ -38,8 +38,30 @@ use storage::{
 use utils;
 use JniResult;
 
-type Key = [u8; PROOF_MAP_KEY_SIZE];
+type RawKey = [u8; PROOF_MAP_KEY_SIZE];
+#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Default)]
+struct Key(RawKey);
 type Index<T> = ProofMapIndex<T, Key, Value>;
+
+impl ObjectHash for Key {
+    fn object_hash(&self) -> Hash {
+        Hash::from_slice(&self.0).unwrap()
+    }
+}
+
+impl BinaryKey for Key {
+    fn size(&self) -> usize {
+        self.0.size()
+    }
+
+    fn write(&self, buffer: &mut [u8]) -> usize {
+        self.0.write(buffer)
+    }
+
+    fn read(buffer: &[u8]) -> Self::Owned {
+        Key(RawKey::read(buffer))
+    }
+}
 
 const JAVA_ENTRY_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
 const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapProofEntry";
@@ -295,7 +317,7 @@ fn create_java_map_entries<'a>(
 
 #[allow(clippy::ptr_arg)]
 fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
-    let key: JObject = env.byte_array_from_slice(key)?.into();
+    let key: JObject = env.byte_array_from_slice(&key.0)?.into();
     let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
     env.call_static_method(
         MAP_ENTRY,
@@ -321,7 +343,7 @@ fn create_java_missing_keys<'a>(
         env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
 
     for (i, key) in missing_keys.iter().enumerate() {
-        let java_key = env.byte_array_from_slice(key.as_ref())?.into();
+        let java_key = env.byte_array_from_slice(key.0.as_ref())?.into();
         env.set_object_array_element(java_missing_keys, i as jsize, java_key)?;
         env.delete_local_ref(java_key)?;
     }
@@ -531,13 +553,14 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         let iterWrapper = handle::cast_handle::<Iter>(iter_handle);
         match iterWrapper.iter.next() {
             Some(val) => {
-                let key: JObject = env.byte_array_from_slice(&val.0)?.into();
-                let value: JObject = env.byte_array_from_slice(&val.1)?.into();
+                let key = val.0;
+                let j_key: JObject = env.byte_array_from_slice(&key.0)?.into();
+                let j_value: JObject = env.byte_array_from_slice(&val.1)?.into();
                 Ok(env
                     .new_object_unchecked(
                         &iterWrapper.element_class,
                         iterWrapper.constructor_id,
-                        &[key.into(), value.into()],
+                        &[j_key.into(), j_value.into()],
                     )?
                     .into_inner())
             }
@@ -567,7 +590,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     let res = panic::catch_unwind(|| {
         let iter = handle::cast_handle::<ProofMapIndexKeys<Key>>(iter_handle);
         match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val),
+            Some(val) => env.byte_array_from_slice(&val.0),
             None => Ok(ptr::null_mut()),
         }
     });
@@ -614,10 +637,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
     let bytes = env.convert_byte_array(array)?;
     assert_eq!(PROOF_MAP_KEY_SIZE, bytes.len());
-
-    let mut key = Key::default();
-    key.copy_from_slice(&bytes);
-    Ok(key)
+    Ok(Key::read(&bytes))
 }
 
 fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
@@ -626,11 +646,7 @@ fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
 
     let keys = bytes
         .chunks(PROOF_MAP_KEY_SIZE)
-        .map(|bytes| {
-            let mut key = Key::default();
-            key.copy_from_slice(bytes);
-            key
-        })
+        .map(|bytes| Key::read(&bytes))
         .collect();
     Ok(keys)
 }
