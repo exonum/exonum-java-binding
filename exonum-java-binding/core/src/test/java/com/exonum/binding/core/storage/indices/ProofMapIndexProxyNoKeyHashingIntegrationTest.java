@@ -42,8 +42,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+@Disabled("Disabled until ECR-3666")
 class ProofMapIndexProxyNoKeyHashingIntegrationTest
     extends BaseProofMapIndexProxyIntegrationTestable {
 

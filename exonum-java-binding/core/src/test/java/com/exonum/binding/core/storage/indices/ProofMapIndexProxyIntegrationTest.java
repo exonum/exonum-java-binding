@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Disabled;
 
-@Disabled("Disabled until native support is implemented - ECR-3765")
+@Disabled("Disabled until ECR-3666")
 class ProofMapIndexProxyIntegrationTest
     extends BaseProofMapIndexProxyIntegrationTestable {
 
