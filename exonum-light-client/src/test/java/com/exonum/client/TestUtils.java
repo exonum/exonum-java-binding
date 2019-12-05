@@ -26,10 +26,10 @@ final class TestUtils {
 
   static TransactionMessage createTransactionMessage() {
     return TransactionMessage.builder()
-        .serviceId((short) 10)
-        .transactionId((short) 15)
+        .serviceId(10)
+        .transactionId(15)
         .payload(new byte[]{0x01, 0x02, 0x03})
-        .sign(ed25519().generateKeyPair(), ed25519());
+        .sign(ed25519().generateKeyPair());
   }
 
   static String toHex(TransactionMessage message) {
