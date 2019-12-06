@@ -20,21 +20,22 @@ use exonum_merkledb::{
     Fork, IndexAddress, ObjectHash, ProofMapIndex, RawProofMapIndex, Snapshot,
 };
 use exonum_proto::ProtobufConvert;
-use handle::{self, Handle};
 use jni::{
     objects::{GlobalRef, JClass, JMethodID, JObject, JString},
     sys::{jboolean, jbyteArray, jobject, jobjectArray, JNI_TRUE},
     JNIEnv,
 };
 use protobuf::Message;
+
+use std::{panic, ptr};
+
+use handle::{self, Handle};
 use storage::{
     db::{Key, Value, View, ViewRef},
     PairIter,
 };
 use utils;
 use JniResult;
-
-use std::{panic, ptr};
 
 type RawKey = [u8; PROOF_MAP_KEY_SIZE];
 
