@@ -177,7 +177,10 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @param index the element index
    * @throws IndexOutOfBoundsException if the index is invalid
    * @throws IllegalStateException if this list is not valid
+   * @deprecated Proofs are temporarily disabled since 0.9.0-rc1, and will be re-enabled
+   *     in a later release
    */
+  @Deprecated
   public UncheckedListProof getProof(long index) {
     return nativeGetProof(getNativeHandle(), index);
   }
@@ -193,7 +196,10 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @param to the index after the last element
    * @throws IndexOutOfBoundsException if the range is not valid
    * @throws IllegalStateException if this list is not valid
+   * @deprecated Proofs are temporarily disabled since 0.9.0-rc1, and will be re-enabled
+   *     in a later release
    */
+  @Deprecated
   public UncheckedListProof getRangeProof(long from, long to) {
     checkRange(from, to);
     return nativeGetRangeProof(getNativeHandle(), from, to);
