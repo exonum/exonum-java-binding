@@ -45,6 +45,7 @@ import com.exonum.client.response.TransactionStatus;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -181,7 +182,7 @@ class ExplorerApiHelperTest {
     int serviceId2 = 2;
     ServiceInfo serviceInfo1 = new ServiceInfo(serviceName1, serviceId1);
     ServiceInfo serviceInfo2 = new ServiceInfo(serviceName2, serviceId2);
-    List<ServiceInfo> expected = List.of(serviceInfo1, serviceInfo2);
+    List<ServiceInfo> expected = Arrays.asList(serviceInfo1, serviceInfo2);
     String json = "{\n"
         + "    \"services\": [\n"
         + "      {\n"
