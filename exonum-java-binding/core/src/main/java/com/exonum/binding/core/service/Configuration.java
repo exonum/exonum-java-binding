@@ -20,15 +20,19 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.google.protobuf.MessageLite;
 
 /**
- * Configuration parameters of Exonum service. Network administrators agree on and pass
- * the configuration parameters as a service-specific protobuf message in the transactions
- * which add that service instance to the network. After Exonum starts the service, it
+ * Configuration parameters of Exonum service.
+ *
+ * <p>Network administrators agree on and pass
+ * the configuration parameters as a service-specific protobuf message when adding
+ * that service instance to the network. After Exonum starts the service, it
  * {@linkplain Service#initialize(Fork, Configuration) passes the configuration parameters}
  * to the newly created service instance.
  *
- * <p>Service reconfiguration is not currently supported, but will be added soon.
+ * <p>Reconfiguration of a started service may be implemented with a supervisor service
+ * and {@link Configurable} interface.
  *
  * @see Service#initialize(Fork, Configuration)
+ * @see Configurable
  */
 public interface Configuration {
 
@@ -39,8 +43,7 @@ public interface Configuration {
    *     parameters are recorded in transactions starting the service instance
    * @throws IllegalArgumentException if the actual type of the configuration parameters does not
    *     match the given type. Such mismatch might mean either a configuration error, when
-   *     administrators include the wrong parameters in the start service transaction; or
-   *     an error in the service itself
+   *     administrators pass the wrong parameters; or an error in the service itself
    * @see com.exonum.binding.common.serialization.StandardSerializers#protobuf(Class)
    */
   <MessageT extends MessageLite> MessageT getAsMessage(Class<MessageT> parametersType);
