@@ -28,6 +28,8 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
+import com.exonum.client.response.ServiceInfo;
+import com.exonum.client.response.ServicesResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.exonum.core.messages.Runtime.ErrorKind;
@@ -89,6 +91,11 @@ final class ExplorerApiHelper {
         response.getRange().getStart(),
         response.getRange().getEnd()
     );
+  }
+
+  static List<ServiceInfo> parseServicesResponse(String json) {
+    ServicesResponse servicesResponse = JSON.fromJson(json, ServicesResponse.class);
+    return servicesResponse.getServices();
   }
 
   private static ExecutionStatus getExecutionStatus(
