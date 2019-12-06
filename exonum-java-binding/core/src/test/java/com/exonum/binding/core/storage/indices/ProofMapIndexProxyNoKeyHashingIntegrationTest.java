@@ -157,6 +157,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
 
@@ -178,6 +179,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
       Stream<HashCode> proofKeys = Stream.of(
@@ -198,6 +200,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
       byte[] key1 = createRawProofKey();
@@ -222,6 +225,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
       byte[] key1 = createRawProofKey();  // 000…0
@@ -245,6 +249,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_FourEntryMap_LastByte_Contains1() {
     runTestWithView(database::createFork, (map) -> {
 
@@ -264,6 +269,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_FourEntryMap_LastByte_Contains2() {
     runTestWithView(database::createFork, (map) -> {
       Stream<HashCode> proofKeys = Stream.of(
@@ -282,6 +288,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_FourEntryMap_FirstByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
       byte[] key1 = createRawProofKey();
@@ -304,6 +311,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_FourEntryMap_FirstAndLastByte_Contains() {
     runTestWithView(database::createFork, (map) -> {
       byte[] key1 = createRawProofKey();  // 000…0
@@ -325,6 +333,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_FourEntryMap_DoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       /*
