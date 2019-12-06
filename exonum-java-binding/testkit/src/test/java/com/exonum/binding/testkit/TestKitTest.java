@@ -588,7 +588,6 @@ class TestKitTest {
   }
 
   @Test
-  @Disabled("Till ProofMap in hashing flavour is implemented: ECR-3779")
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()

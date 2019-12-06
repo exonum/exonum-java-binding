@@ -48,7 +48,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @RequiresNativeLibrary
-@Disabled("Till ProofMap in hashing flavour is implemented: ECR-3779")
 class TimeSchemaProxyIntegrationTest {
 
   private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime
