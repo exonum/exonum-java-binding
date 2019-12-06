@@ -26,8 +26,10 @@ use java_bindings::{
     Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
 };
 
-use java_bindings::exonum::blockchain::config::GenesisConfigBuilder;
-use java_bindings::exonum::runtime::rust::{DefaultInstance, RustRuntime, ServiceFactory};
+use java_bindings::exonum::{
+    blockchain::config::GenesisConfigBuilder,
+    runtime::rust::{DefaultInstance, RustRuntime, ServiceFactory},
+};
 use std::sync::Arc;
 
 pub fn run_node(command: Command) -> Result<(), failure::Error> {

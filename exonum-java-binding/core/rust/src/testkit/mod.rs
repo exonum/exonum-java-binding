@@ -19,11 +19,11 @@
 use std::{panic, sync::Arc};
 
 use exonum::{
-    blockchain::{Block, InstanceCollection},
+    blockchain::{config::InstanceInitParams, Block, InstanceCollection},
     crypto::{PublicKey, SecretKey},
-    helpers::ValidatorId,
+    helpers::{ValidateInput, ValidatorId},
     merkledb::BinaryValue,
-    runtime::InstanceSpec,
+    runtime::{ArtifactId, InstanceSpec},
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
@@ -33,16 +33,14 @@ use jni::{
     Executor, JNIEnv,
 };
 
+use std::str::FromStr;
+
 use handle::{cast_handle, drop_handle, to_handle, Handle};
 use storage::View;
 use utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default};
 use {JavaRuntimeProxy, JniError, JniResult};
 
 use self::time_provider::JavaTimeProvider;
-use exonum::blockchain::config::InstanceInitParams;
-use exonum::helpers::ValidateInput;
-use exonum::runtime::ArtifactId;
-use std::str::FromStr;
 
 mod time_provider;
 
@@ -233,12 +231,6 @@ fn create_java_keypair<'a>(
     )
 }
 
-struct TestKitService {
-    pub artifact_id: ArtifactId,
-    pub deploy_args: Vec<u8>,
-    pub instances: Vec<InstanceInitParams>,
-}
-
 // Converts Java array of `TestKitServiceInstances` to vector of `TestKitService`.
 //
 // `TestKitServiceInstances` representation:
@@ -378,4 +370,11 @@ fn get_field_as_string(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResul
         env,
         env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?,
     )
+}
+
+/// DTO for TestKit services definitions.
+struct TestKitService {
+    pub artifact_id: ArtifactId,
+    pub deploy_args: Vec<u8>,
+    pub instances: Vec<InstanceInitParams>,
 }
