@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use exonum::runtime::Caller;
+use exonum::runtime::{Caller, WellKnownRuntime};
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
@@ -22,7 +22,7 @@ use exonum::{
     messages::BinaryValue,
     runtime::{
         ArtifactId, CallInfo, ErrorKind, ExecutionContext, ExecutionError, InstanceId,
-        InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, StateHashAggregator,
+        InstanceSpec, Mailbox, Runtime, SnapshotExt, StateHashAggregator,
     },
 };
 use exonum_proto::ProtobufConvert;
@@ -60,7 +60,7 @@ pub struct JavaRuntimeProxy {
 
 impl JavaRuntimeProxy {
     /// Runtime Identifier
-    pub const RUNTIME_ID: RuntimeIdentifier = RuntimeIdentifier::Java;
+    pub const RUNTIME_ID: u32 = 1;
 
     /// Creates new `JavaRuntimeProxy` for given `ServiceRuntimeAdapter` object
     pub fn new(executor: Executor, adapter: GlobalRef) -> Self {
@@ -452,10 +452,8 @@ impl fmt::Debug for JavaRuntimeProxy {
     }
 }
 
-impl From<JavaRuntimeProxy> for (u32, Box<dyn Runtime>) {
-    fn from(r: JavaRuntimeProxy) -> Self {
-        (JavaRuntimeProxy::RUNTIME_ID as u32, Box::new(r))
-    }
+impl WellKnownRuntime for JavaRuntimeProxy {
+    const ID: u32 = JavaRuntimeProxy::RUNTIME_ID;
 }
 
 /// Artifact identification properties within `JavaRuntimeProxy`

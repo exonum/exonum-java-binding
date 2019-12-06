@@ -26,6 +26,8 @@ use java_bindings::{
     Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
 };
 
+use java_bindings::exonum::blockchain::config::GenesisConfigBuilder;
+use java_bindings::exonum::runtime::rust::{DefaultInstance, RustRuntime, ServiceFactory};
 use std::sync::Arc;
 
 pub fn run_node(command: Command) -> Result<(), failure::Error> {
@@ -73,9 +75,20 @@ fn create_blockchain(
 
     let blockchain = Blockchain::new(database, keypair, api_sender);
 
-    BlockchainBuilder::new(blockchain, node_config.consensus.clone())
-        .with_additional_runtime(java_runtime)
-        .with_rust_runtime(api_endpoints, service_factories.into_iter())
+    let supervisor_service = SimpleSupervisor::new();
+    let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus.clone())
+        .with_artifact(supervisor_service.artifact_id())
+        .with_instance(supervisor_service.default_instance())
+        .build();
+
+    let rust_runtime = service_factories.into_iter().fold(
+        RustRuntime::new(channel.endpoints.0.clone()),
+        |runtime, factory| runtime.with_factory(factory),
+    );
+
+    BlockchainBuilder::new(blockchain, genesis_config)
+        .with_runtime(java_runtime)
+        .with_runtime(rust_runtime)
         .build()
 }
 
@@ -97,10 +110,9 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
     Ok(database)
 }
 
-fn standard_exonum_service_factories() -> Vec<InstanceCollection> {
+fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
     // TODO(ECR-3714): add anchoring service
-    vec![
-        InstanceCollection::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
-        InstanceCollection::from(SimpleSupervisor::new()),
-    ]
+    vec![Box::new(TimeServiceFactory::with_provider(
+        SystemTimeProvider,
+    ))]
 }
