@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # Builds an archive with Javadocs from published artifacts.
 # The archive is put in './target/site'
-#
-# Requires GNU tar (gnu-tar on brew).
 
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail
@@ -27,7 +25,7 @@ mvn javadoc:aggregate -Dmaven.javadoc.skip=false -DskipRustLibBuild \
 TARGET="${PWD}/target/site/"
 cd "${TARGET}"
 
-ARCHIVE_NAME="java-binding-apidocs.tgz"
-tar cvaf ${ARCHIVE_NAME} "apidocs/"
+ARCHIVE_NAME="java-binding-apidocs.zip"
+zip -r ${ARCHIVE_NAME} "apidocs"
 
 echo "[INFO] Javadoc archive created in ${TARGET}/${ARCHIVE_NAME}"
