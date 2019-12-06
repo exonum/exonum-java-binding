@@ -77,17 +77,17 @@ public final class TransferTx implements Transaction {
   @Override
   public void execute(TransactionContext context) throws TransactionExecutionException {
     PublicKey fromWallet = context.getAuthorPk();
-    checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
+    checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER);
 
     CryptocurrencySchema schema =
         new CryptocurrencySchema(context.getFork(), context.getServiceName());
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-    checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
-    checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
+    checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER);
+    checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER);
 
     Wallet from = wallets.get(fromWallet);
     Wallet to = wallets.get(toWallet);
-    checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
+    checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS);
 
     // Update the balances
     wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
@@ -102,7 +102,7 @@ public final class TransferTx implements Transaction {
   // todo: consider extracting in a TransactionPreconditions or
   //   TransactionExecutionException: ECR-2746.
   /** Checks a transaction execution precondition, throwing if it is false. */
-  private static void checkExecution(boolean precondition, byte errorCode)
+  private static void checkExecution(boolean precondition, TransactionError errorCode)
       throws TransactionExecutionException {
     if (!precondition) {
       throw new TransactionExecutionException(errorCode);
