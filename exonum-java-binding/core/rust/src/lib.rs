@@ -26,6 +26,7 @@ pub extern crate exonum;
 #[macro_use]
 extern crate exonum_derive;
 extern crate exonum_cli;
+extern crate exonum_proto;
 extern crate failure;
 pub extern crate jni;
 extern crate structopt;
@@ -50,6 +51,7 @@ extern crate tempfile;
 
 pub use exonum::exonum_merkledb;
 
+mod cmd;
 pub mod handle;
 mod proto;
 mod proxy;
@@ -59,6 +61,7 @@ mod testkit;
 pub mod utils;
 
 pub use self::handle::{cast_handle, drop_handle, to_handle, Handle};
+pub use cmd::*;
 pub use handle::resource_manager::*;
 pub use proxy::*;
 pub use runtime::*;

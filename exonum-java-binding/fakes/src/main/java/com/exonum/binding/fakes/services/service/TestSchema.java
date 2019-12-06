@@ -35,7 +35,7 @@ public final class TestSchema implements Schema {
   }
 
   public ProofMapIndexProxy<HashCode, String> testMap() {
-    return ProofMapIndexProxy.newInstance(TEST_MAP_NAME, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(TEST_MAP_NAME, view, StandardSerializers.hash(),
         StandardSerializers.string());
   }
 

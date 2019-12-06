@@ -16,9 +16,10 @@
 
 package com.exonum.binding.testkit;
 
+import static com.exonum.binding.app.ServiceRuntimeBootstrap.DEPENDENCY_REFERENCE_CLASSES;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -30,36 +31,41 @@ import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.runtime.ReflectiveModuleSupplier;
+import com.exonum.binding.core.runtime.DeployArguments;
+import com.exonum.binding.core.runtime.FrameworkModule;
+import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.core.runtime.ServiceRuntime;
+import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.ServiceModule;
-import com.exonum.binding.core.service.adapters.UserServiceAdapter;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transport.Server;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Streams;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.protobuf.Any;
+import com.google.protobuf.MessageLite;
 import io.vertx.ext.web.Router;
-import java.util.ArrayList;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /**
@@ -97,98 +103,85 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   public static final short MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE = 3;
   @VisibleForTesting
   static final short MAX_SERVICE_NUMBER = 256;
+  @VisibleForTesting
+  static final int MAX_SERVICE_INSTANCE_ID = 1023;
+  @VisibleForTesting
+  static final Any DEFAULT_CONFIGURATION = Any.getDefaultInstance();
+  // Set 0 as a server port so it will assign a random suitable port by default
+  private static final int SERVER_PORT = 0;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
-  private static final short TIME_SERVICE_ID = 4;
 
-  private final Map<Short, Service> services = new HashMap<>();
+  private final ServiceRuntime serviceRuntime;
+  private final Integer timeServiceId;
+  private final int port;
+
   @VisibleForTesting
   final Cleaner snapshotCleaner = new Cleaner("TestKit#getSnapshot");
 
-  private TestKit(long nativeHandle, Map<Short, UserServiceAdapter> serviceAdapters) {
+  private TestKit(long nativeHandle, @Nullable TimeServiceSpec timeServiceSpec,
+      ServiceRuntime serviceRuntime, int port) {
     super(nativeHandle, true);
-    populateServiceMap(serviceAdapters);
+    this.serviceRuntime = serviceRuntime;
+    timeServiceId = timeServiceSpec == null ? null : timeServiceSpec.serviceId;
+    this.port = port;
   }
 
-  private static TestKit newInstance(List<Class<? extends ServiceModule>> serviceModules,
+  private static TestKit newInstance(TestKitServiceInstances[] serviceInstances,
                                      EmulatedNodeType nodeType, short validatorCount,
-                                     @Nullable TimeProvider timeProvider) {
-    Injector frameworkInjector = Guice.createInjector(new TestKitFrameworkModule());
-    return newInstanceWithInjector(serviceModules, nodeType, validatorCount, timeProvider,
-        frameworkInjector);
-  }
-
-  private static TestKit newInstanceWithInjector(
-      List<Class<? extends ServiceModule>> serviceModules, EmulatedNodeType nodeType,
-      short validatorCount, @Nullable TimeProvider timeProvider, Injector frameworkInjector) {
-    Map<Short, UserServiceAdapter> serviceAdapters = toUserServiceAdapters(
-        serviceModules, frameworkInjector);
+                                     @Nullable TimeServiceSpec timeServiceSpec,
+                                     Path artifactsDirectory) {
+    // Create the test network
+    Injector frameworkInjector = createTestRuntimeInjector(artifactsDirectory);
+    ServiceRuntimeAdapter serviceRuntimeAdapter =
+        frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
-    UserServiceAdapter[] userServiceAdapters = serviceAdapters.values()
-        .toArray(new UserServiceAdapter[0]);
-    TimeProviderAdapter timeProviderAdapter =  timeProvider == null
-        ? null
-        : new TimeProviderAdapter(timeProvider);
-    long nativeHandle = nativeCreateTestKit(userServiceAdapters, isAuditorNode, validatorCount,
-        timeProviderAdapter);
-    return new TestKit(nativeHandle, serviceAdapters);
-  }
+    long nativeHandle = nativeCreateTestKit(serviceInstances, isAuditorNode, validatorCount,
+        timeServiceSpec, serviceRuntimeAdapter);
 
-  /**
-   * Returns a list of user service adapters created from given service modules.
-   */
-  private static Map<Short, UserServiceAdapter> toUserServiceAdapters(
-      List<Class<? extends ServiceModule>> serviceModules, Injector frameworkInjector) {
-    List<UserServiceAdapter> services = serviceModules.stream()
-        .map(s -> createUserServiceAdapter(s, frameworkInjector))
-        .collect(toList());
-    // UserServiceAdapters are removed, so this usage is a false signal for keeping getId()
-    return Maps.uniqueIndex(services, UserServiceAdapter::getId);
-  }
-
-  /**
-   * Instantiates a service given its module and wraps in a UserServiceAdapter for the native code.
-   */
-  private static UserServiceAdapter createUserServiceAdapter(
-      Class<? extends ServiceModule> moduleClass, Injector frameworkInjector) {
     try {
-      Supplier<ServiceModule> moduleSupplier = new ReflectiveModuleSupplier(moduleClass);
-      ServiceModule serviceModule = moduleSupplier.get();
-      Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule);
-      return serviceInjector.getInstance(UserServiceAdapter.class);
-    } catch (IllegalAccessException e) {
-      throw new IllegalArgumentException("Cannot access the no-arg module constructor", e);
-    } catch (NoSuchMethodException e) {
-      throw new IllegalArgumentException("No no-arg constructor", e);
+      // Get the actual port: it must have been set as testkit initialized the runtimes.
+      Server serviceServer = frameworkInjector.getInstance(Server.class);
+      int port = serviceServer.getActualPort()
+          .orElseThrow(() -> new IllegalStateException(
+              "No port set after testkit has been created"));
+      ServiceRuntime serviceRuntime = serviceRuntimeAdapter.getServiceRuntime();
+      return new TestKit(nativeHandle, timeServiceSpec, serviceRuntime, port);
+    } catch (Exception e) {
+      // Free the native object and re-throw
+      nativeFreeTestKit(nativeHandle);
+      throw e;
     }
   }
 
-  private void populateServiceMap(Map<Short, UserServiceAdapter> serviceAdapters) {
-    serviceAdapters.forEach((id, serviceAdapter) -> services.put(id, serviceAdapter.getService()));
+  private static Injector createTestRuntimeInjector(Path artifactsDirectory) {
+    Module frameworkModule = new FrameworkModule(artifactsDirectory, SERVER_PORT,
+        DEPENDENCY_REFERENCE_CLASSES);
+    return Guice.createInjector(frameworkModule);
   }
 
   /**
-   * Creates a TestKit network with a single validator node for a single service.
-   */
-  public static TestKit forService(Class<? extends ServiceModule> serviceModule) {
-    return newInstance(singletonList(serviceModule), EmulatedNodeType.VALIDATOR, (short) 1, null);
-  }
-
-  /**
-   * Returns an instance of a service with the given service id and service class. Only
-   * user-defined services can be requested, i.e., it is not possible to get an instance of a
-   * built-in service such as the time oracle.
+   * Deploys and creates a single service with no configuration and with a single validator node in
+   * this TestKit network.
    *
-   * @return the service instance or null if there is no service with such id
-   * @throws IllegalArgumentException if the service with given id was not found or could not be
-   *     cast to given class
+   * @param artifactId the id of the artifact
+   * @param artifactFilename a filename of the service artifact in the directory for artifacts
+   * @param serviceName the name of the service
+   * @param serviceId the id of the service, must be in range
+   *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
+   * @param artifactsDirectory the directory from which the service runtime loads service
+   *     artifacts
+   *
+   * @throws IllegalArgumentException if serviceId is not in range
+   *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
    */
-  public <T extends Service> T getService(short serviceId, Class<T> serviceClass) {
-    Service service = services.get(serviceId);
-    checkArgument(service != null, "Service with given id=%s was not found", serviceId);
-    checkArgument(service.getClass().equals(serviceClass),
-        "Service (id=%s, class=%s) cannot be cast to %s",
-        serviceId, service.getClass().getCanonicalName(), serviceClass.getCanonicalName());
-    return serviceClass.cast(service);
+  public static TestKit forService(ServiceArtifactId artifactId, String artifactFilename,
+                                   String serviceName, int serviceId, Path artifactsDirectory) {
+    return new Builder()
+        .withNodeType(EmulatedNodeType.VALIDATOR)
+        .withDeployedArtifact(artifactId, artifactFilename)
+        .withService(artifactId, serviceName, serviceId)
+        .withArtifactsDirectory(artifactsDirectory)
+        .build();
   }
 
   /**
@@ -241,28 +234,22 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   private void checkTransaction(TransactionMessage transactionMessage) {
-    short serviceId = transactionMessage.getServiceId();
-    // As transactions of time service might be submitted in TestKit that has that service
-    // activated, those transactions should be considered valid, even though time service is not
-    // contained in 'services'
-    if (serviceId == TIME_SERVICE_ID) {
+    Integer serviceId = transactionMessage.getServiceId();
+    // As transactions of time service might be submitted in TestKit that has this service
+    // activated, those transactions should be considered valid, as time service is not
+    // contained in Java runtime
+    if (serviceId.equals(timeServiceId)) {
       return;
     }
-    if (!services.containsKey(serviceId)) {
-      String message = String.format("Unknown service id (%s) in transaction (%s)",
-          serviceId, transactionMessage);
-      throw new IllegalArgumentException(message);
-    }
-    Service service = services.get(serviceId);
-    RawTransaction rawTransaction = RawTransaction.fromMessage(transactionMessage);
     try {
-      service.convertToTransaction(rawTransaction);
-    } catch (Throwable conversionError) {
-      String message = String.format("Service (%s) with id=%s failed to convert transaction (%s)."
+      serviceRuntime.verifyTransaction(serviceId,
+          transactionMessage.getTransactionId(), transactionMessage.getPayload().toByteArray());
+    } catch (Exception conversionException) {
+      String message = String.format("Service with id=%s failed to convert transaction (%s)."
           + " Make sure that the submitted transaction is correctly serialized, and the service's"
           + " TransactionConverter implementation is correct and handles this transaction as"
-          + " expected.", service.getName(), serviceId, transactionMessage);
-      throw new IllegalArgumentException(message, conversionError);
+          + " expected.", serviceId, transactionMessage);
+      throw new IllegalArgumentException(message, conversionException);
     }
   }
 
@@ -282,15 +269,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       Blockchain blockchain = Blockchain.newInstance(view);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
       KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
-      return stream(poolTxsHashes)
+      return poolTxsHashes.stream()
           .map(txMessages::get)
           .filter(predicate)
           .collect(toList());
     });
-  }
-
-  private static <T> Stream<T> stream(KeySetIndexProxy<T> setIndex) {
-    return Streams.stream(setIndex);
   }
 
   /**
@@ -365,6 +348,13 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     return nativeGetEmulatedNode(nativeHandle.get());
   }
 
+  /**
+   * Returns the TCP port on which the service REST API is mounted.
+   */
+  public int getPort() {
+    return port;
+  }
+
   @Override
   protected void disposeInternal() {
     try {
@@ -376,8 +366,10 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
   }
 
-  private static native long nativeCreateTestKit(UserServiceAdapter[] services, boolean auditor,
-      short withValidatorCount, TimeProviderAdapter timeProvider);
+  private static native long nativeCreateTestKit(TestKitServiceInstances[] services,
+                                                 boolean auditor, short withValidatorCount,
+                                                 TimeServiceSpec timeProviderSpec,
+                                                 ServiceRuntimeAdapter serviceRuntimeAdapter);
 
   private native long nativeCreateSnapshot(long nativeHandle);
 
@@ -387,7 +379,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
   private native EmulatedNode nativeGetEmulatedNode(long nativeHandle);
 
-  private native void nativeFreeTestKit(long nativeHandle);
+  private static native void nativeFreeTestKit(long nativeHandle);
 
   /**
    * Creates a new builder for the TestKit. Note that this builder creates a single validator
@@ -404,21 +396,27 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     private EmulatedNodeType nodeType = EmulatedNodeType.VALIDATOR;
     private short validatorCount = 1;
-    private final List<Class<? extends ServiceModule>> services = new ArrayList<>();
-    private TimeProvider timeProvider;
+    private Multimap<ServiceArtifactId, ServiceSpec> services = ArrayListMultimap.create();
+    private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
+    private Path artifactsDirectory;
+    private TimeServiceSpec timeServiceSpec;
 
-    private Builder() {
-    }
+    private Builder() {}
 
     /**
-     * Returns a copy of this TestKit builder.
+     * Returns a shallow copy of this TestKit builder.
+     *
+     * <p>Note that the remaining mutable state are {@linkplain TimeProvider time providers}.
      */
-    public Builder copy() {
-      return new Builder()
+    Builder shallowCopy() {
+      Builder builder = new Builder()
           .withNodeType(nodeType)
-          .withServices(services)
           .withValidators(validatorCount)
-          .withTimeService(timeProvider);
+          .withArtifactsDirectory(artifactsDirectory);
+      builder.timeServiceSpec = timeServiceSpec;
+      builder.services = MultimapBuilder.hashKeys().arrayListValues().build(services);
+      builder.serviceArtifactFilenames = new HashMap<>(serviceArtifactFilenames);
+      return builder;
     }
 
     /**
@@ -448,39 +446,102 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
 
     /**
-     * Adds a service with which the TestKit would be instantiated. Several services can be added.
+     * Adds a service artifact which would be deployed by the TestKit. Several service artifacts
+     * can be added.
+     *
+     * <p>Once the service artifact is deployed, the service instances can be added with
+     * {@link #withService(ServiceArtifactId, String, int, MessageLite)}.
      */
-    public Builder withService(Class<? extends ServiceModule> serviceModule) {
-      services.add(serviceModule);
+    public Builder withDeployedArtifact(
+        ServiceArtifactId serviceArtifactId, String artifactFilename) {
+      serviceArtifactFilenames.put(serviceArtifactId, artifactFilename);
       return this;
     }
 
     /**
-     * Adds services with which the TestKit would be instantiated.
+     * Sets artifact directory.
+     *
+     * @param artifactsDirectory the directory from which the service runtime loads service
+     *     artifacts
      */
-    @SafeVarargs
-    public final Builder withServices(Class<? extends ServiceModule> serviceModule,
-                                      Class<? extends ServiceModule>... serviceModules) {
-      return withServices(Lists.asList(serviceModule, serviceModules));
-    }
-
-    /**
-     * Adds services with which the TestKit would be instantiated.
-     */
-    public Builder withServices(Iterable<Class<? extends ServiceModule>> serviceModules) {
-      Iterables.addAll(services, serviceModules);
+    public Builder withArtifactsDirectory(Path artifactsDirectory) {
+      this.artifactsDirectory = artifactsDirectory;
       return this;
     }
 
     /**
-     * If called, will create a TestKit with time service enabled. The time service will use the
-     * given {@linkplain TimeProvider} as a time source.
+     * Adds a service specification with which the TestKit would create the corresponding service
+     * instance. Several service specifications can be added. All services are started and
+     * configured before the genesis block.
+     *
+     * <p>Note that the corresponding service artifact with equal serviceArtifactId should be
+     * deployed with {@link #withDeployedArtifact(ServiceArtifactId, String)}.
+     *
+     * @param serviceArtifactId the id of the artifact
+     * @param serviceName the name of the service
+     * @param serviceId the id of the service, must be in range
+     *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
+     * @param configuration the service configuration parameters
+     *
+     * @throws IllegalArgumentException if serviceId is not in range
+     *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
+     * @throws IllegalArgumentException if service artifact with equal serviceArtifactId
+     *     was not deployed
+     */
+    public Builder withService(ServiceArtifactId serviceArtifactId, String serviceName,
+                               int serviceId, MessageLite configuration) {
+      checkServiceId(serviceId, serviceName);
+      checkServiceArtifactIsDeployed(serviceArtifactId);
+      ServiceSpec serviceSpec = new ServiceSpec(serviceName, serviceId,
+          configuration.toByteArray());
+      services.put(serviceArtifactId, serviceSpec);
+      return this;
+    }
+
+    /**
+     * Adds a service specification with which the TestKit would create the corresponding service
+     * instance with no configuration. Several service specifications can be added. All
+     * services are started and configured before the genesis block.
+     *
+     * <p>Note that the corresponding service artifact with equal serviceArtifactId should be
+     * deployed with {@link #withDeployedArtifact(ServiceArtifactId, String)}.
+     *
+     * @param serviceArtifactId the id of the artifact
+     * @param serviceName the name of the service
+     * @param serviceId the id of the service, must be in range
+     *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
+     *
+     * @throws IllegalArgumentException if serviceId is not in range
+     *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
+     * @throws IllegalArgumentException if service artifact with equal serviceArtifactId
+     *     was not deployed
+     */
+    public Builder withService(ServiceArtifactId serviceArtifactId, String serviceName,
+                               int serviceId) {
+      return withService(serviceArtifactId, serviceName, serviceId, DEFAULT_CONFIGURATION);
+    }
+
+    private void checkServiceId(int serviceId, String serviceName) {
+      checkArgument(0 <= serviceId && serviceId <= MAX_SERVICE_INSTANCE_ID,
+          "Service (%s) id must be in range [0; %s], but was %s",
+          serviceName, MAX_SERVICE_INSTANCE_ID, serviceId);
+    }
+
+    private void checkServiceArtifactIsDeployed(ServiceArtifactId serviceArtifactId) {
+      checkArgument(serviceArtifactFilenames.containsKey(serviceArtifactId),
+          "Service %s should be deployed first in order to be created", serviceArtifactId);
+    }
+
+    /**
+     * Adds a time service specification with which the TestKit would create the corresponding
+     * time service instance. Only a single time service specification can be added.
      *
      * <p>Note that validator count should be
      * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
      */
-    public Builder withTimeService(TimeProvider timeProvider) {
-      this.timeProvider = timeProvider;
+    public Builder withTimeService(String serviceName, int serviceId, TimeProvider timeProvider) {
+      TimeProviderAdapter timeProviderAdapter = new TimeProviderAdapter(timeProvider);
+      timeServiceSpec = new TimeServiceSpec(serviceName, serviceId, timeProviderAdapter);
       return this;
     }
 
@@ -489,26 +550,71 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      *
      * @throws IllegalArgumentException if validator count is invalid
      * @throws IllegalArgumentException if service number is invalid
+     * @throws IllegalArgumentException if service artifacts were deployed, but no service
+     *     instances with same service artifact id were created
      */
     public TestKit build() {
       checkCorrectServiceNumber(services.size());
       checkCorrectValidatorNumber();
-      return newInstance(services, nodeType, validatorCount, timeProvider);
+      checkArtifactsDirectory();
+      TestKitServiceInstances[] testKitServiceInstances = mergeServiceSpecs();
+      return newInstance(testKitServiceInstances, nodeType, validatorCount,
+          timeServiceSpec, artifactsDirectory);
+    }
+
+    /**
+     * Turn collection of service instances into a list of
+     * {@linkplain TestKitServiceInstances} objects for native to work with.
+     */
+    private TestKitServiceInstances[] mergeServiceSpecs() {
+      checkDeployedArtifactsAreUsed();
+      return serviceArtifactFilenames.entrySet().stream()
+          .map(this::aggregateServiceSpecs)
+          .toArray(TestKitServiceInstances[]::new);
+    }
+
+    private void checkDeployedArtifactsAreUsed() {
+      Set<ServiceArtifactId> serviceArtifactIds = services.keySet();
+      Set<ServiceArtifactId> deployedArtifactIds = serviceArtifactFilenames.keySet();
+      Sets.SetView<ServiceArtifactId> unusedArtifacts =
+          Sets.difference(deployedArtifactIds, serviceArtifactIds);
+      checkArgument(unusedArtifacts.isEmpty(),
+          "Following service artifacts were deployed, but not used for service instantiation: %s",
+          unusedArtifacts);
+    }
+
+    /**
+     * Aggregates service instances specifications of a given service artifact id as a
+     * {@linkplain TestKitServiceInstances} object.
+     */
+    private TestKitServiceInstances aggregateServiceSpecs(
+        Map.Entry<ServiceArtifactId, String> serviceArtifact) {
+      ServiceArtifactId serviceArtifactId = serviceArtifact.getKey();
+      ServiceSpec[] serviceSpecs = services.get(serviceArtifactId).toArray(new ServiceSpec[0]);
+      DeployArguments deployArgs = DeployArguments.newBuilder()
+          .setArtifactFilename(serviceArtifact.getValue())
+          .build();
+      return new TestKitServiceInstances(
+          serviceArtifactId.toString(), deployArgs.toByteArray(), serviceSpecs);
     }
 
     private void checkCorrectValidatorNumber() {
-      if (timeProvider != null) {
+      if (timeServiceSpec != null) {
         checkArgument(validatorCount <= MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE,
             "Number of validators (%s) should be less than or equal to %s when TimeService is"
-                + " enabled.",
+                + " instantiated.",
             validatorCount, MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
       }
     }
 
     private void checkCorrectServiceNumber(int serviceCount) {
-      checkArgument(0 < serviceCount && serviceCount <= MAX_SERVICE_NUMBER,
-          "Number of services must be in range [1; %s], but was %s",
+      checkArgument(0 <= serviceCount && serviceCount <= MAX_SERVICE_NUMBER,
+          "Number of services must be in range [0; %s], but was %s",
           MAX_SERVICE_NUMBER, serviceCount);
+    }
+
+    private void checkArtifactsDirectory() {
+      checkState(artifactsDirectory != null, "Artifacts directory was not set.");
     }
   }
 }

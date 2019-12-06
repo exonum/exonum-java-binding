@@ -16,6 +16,8 @@
 
 package com.exonum.binding.core.runtime;
 
+import com.exonum.binding.core.service.Node;
+
 /**
  * A factory of Exonum services. It takes the service definition, the instance parameters,
  * and produces a service.
@@ -35,7 +37,8 @@ interface ServicesFactory {
    *
    * @param definition the loaded service definition
    * @param instanceSpec the service instance specification, including its parameters
+   * @param node a node for the service to use
    */
   ServiceWrapper createService(LoadedServiceDefinition definition,
-      ServiceInstanceSpec instanceSpec);
+      ServiceInstanceSpec instanceSpec, Node node);
 }

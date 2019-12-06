@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use exonum::exonum_merkledb::Error as DatabaseError;
 use jni::objects::JObject;
 use jni::JNIEnv;
 
@@ -137,11 +138,20 @@ type ExceptionResult<T> = thread::Result<result::Result<T, JniError>>;
 
 /// Returns value or "throws" exception. `error_val` is returned, because exception will be thrown
 /// at the Java side. So this function should be used only for the `panic::catch_unwind` result.
+///
+/// The function accepts `Result<JniResult, Error>`, where outer `Result<..., Error>` corresponds
+/// to a return type of `panic::catch_unwind` and is `Err` in case of catched panic; inner
+/// `JniResult` represents the errors during Rust-Java interoperability. Therefore, the function
+/// can't be used for handling __any__ user-defined error type, but supports only a set of
+/// JNI-related errors and also handles unexpected panics.
 pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> T {
     match res {
-        Ok(val) => {
-            match val {
+        // No panic
+        Ok(jni_result) => {
+            match jni_result {
+                // No JNI error
                 Ok(val) => val,
+                // JNI error
                 Err(jni_error) => {
                     // Do nothing if there is a pending Java-exception that will be thrown
                     // automatically by the JVM when the native method returns.
@@ -153,8 +163,9 @@ pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> 
                 }
             }
         }
-        Err(ref e) => {
-            throw(env, &any_to_string(e));
+        // Panic occurred
+        Err(panic_occurred) => {
+            throw(env, &any_to_string(&panic_occurred));
             error_val
         }
     }
@@ -186,6 +197,8 @@ pub fn any_to_string(any: &Box<dyn Any + Send>) -> String {
         s.clone()
     } else if let Some(error) = any.downcast_ref::<Box<dyn Error + Send>>() {
         error.description().to_string()
+    } else if let Some(error) = any.downcast_ref::<DatabaseError>() {
+        error.to_string()
     } else {
         "Unknown error occurred".to_string()
     }
@@ -218,6 +231,13 @@ mod tests {
         let description = error.description().to_owned();
         let error = panic_error(error);
         assert_eq!(description, any_to_string(&error));
+    }
+
+    #[test]
+    fn database_error_any() {
+        let error = DatabaseError::new("Database error");
+        let error = panic_error(error);
+        assert_eq!("Database error", any_to_string(&error));
     }
 
     #[test]

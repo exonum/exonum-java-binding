@@ -35,13 +35,13 @@
     <build.nativeLibPath>${rust.build.directory}/${build.mode}</build.nativeLibPath>
     <!--A directory containing native dynamic libraries used by the App-->
     <packaging.native>${rust.build.directory}/${build.mode}/lib/native</packaging.native>
-    <auto-value.version>1.6.6</auto-value.version>
+    <auto-value.version>1.7</auto-value.version>
     <!-- Skip building Rust library for tests -->
     <skipRustLibBuild>false</skipRustLibBuild>
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->
     <build.cargoFlag></build.cargoFlag>
     <protobuf.python.outputDirectory>
-      ${project.parent.basedir}/launcher-plugin/exonum_java_runtime_plugin/proto
+      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_java_runtime_plugin/proto
     </protobuf.python.outputDirectory>
   </properties>
 
@@ -400,7 +400,7 @@
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-        <version>1.6.2</version>
+        <version>${os-maven-plugin.version}</version>
       </extension>
     </extensions>
   </build>

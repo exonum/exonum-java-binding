@@ -16,18 +16,17 @@
 
 package com.exonum.binding.core.blockchain;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
-import com.exonum.binding.core.blockchain.serialization.TransactionResultSerializer;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
@@ -41,7 +40,8 @@ import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.exonum.binding.messages.Blockchain.Config;
+import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -61,8 +61,8 @@ final class CoreSchemaProxy {
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final Serializer<TransactionLocation> TRANSACTION_LOCATION_SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
-  private static final Serializer<TransactionResult> TRANSACTION_RESULT_SERIALIZER =
-      TransactionResultSerializer.INSTANCE;
+  private static final Serializer<ExecutionStatus> EXECUTION_STATUS_SERIALIZER =
+      protobuf(ExecutionStatus.class);
   private static final Serializer<TransactionMessage> TRANSACTION_MESSAGE_SERIALIZER =
       StandardSerializers.transactionMessage();
   private static final Serializer<Config> CONSENSUS_CONFIG_SERIALIZER =
@@ -149,11 +149,12 @@ final class CoreSchemaProxy {
   }
 
   /**
-   * Returns a map with a key-value pair of a transaction hash and execution result.
+   * Returns a map with a key-value pair of a transaction hash and execution result. Note that this
+   * is a <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
-  ProofMapIndexProxy<HashCode, TransactionResult> getTxResults() {
-    return ProofMapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_RESULTS, dbView,
-        StandardSerializers.hash(), TRANSACTION_RESULT_SERIALIZER);
+  ProofMapIndexProxy<HashCode, ExecutionStatus> getTxResults() {
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(CoreIndex.TRANSACTIONS_RESULTS, dbView,
+        StandardSerializers.hash(), EXECUTION_STATUS_SERIALIZER);
   }
 
   /**
@@ -223,6 +224,6 @@ final class CoreSchemaProxy {
     private static final String TRANSACTIONS_RESULTS = PREFIX + "transaction_results";
     private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
     private static final String TRANSACTIONS_POOL = PREFIX + "transactions_pool";
-    private static final String CONSENSUS_CONFIG = PREFIX + "consensus.config";
+    private static final String CONSENSUS_CONFIG = PREFIX + "consensus_config";
   }
 }

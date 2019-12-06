@@ -37,8 +37,8 @@ import okhttp3.OkHttpClient;
 /**
  * Main interface for Exonum Light client.
  * Provides a convenient way for interaction with Exonum framework APIs.
- * All the methods of the interface work in a blocking way
- * i.e. invoke underlying request immediately, and block until the response can be processed
+ * All the methods of the interface work in a blocking way,
+ * i.e., invoke underlying request immediately, and block until the response can be processed
  * or an error occurs. In case the thread is interrupted, the blocked methods will complete
  * exceptionally.
  *
@@ -100,9 +100,8 @@ public interface ExonumClient {
    * Returns the information about the block with transaction hashes included at this block.
    * @param height blockchain height starting from 0 (genesis block)
    * @return block information response
-   * @throws RuntimeException if block is not found by the requested height,
-   *        i.e. the requested height is greater than actual blockchain height
-   * @throws IllegalArgumentException if the given height is negative
+   * @throws IllegalArgumentException if the given height is negative; or greater than
+   *        the actual blockchain height
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */
@@ -115,16 +114,14 @@ public interface ExonumClient {
    * @param fromHeight the height of the first block to include. Must be non-negative
    * @param toHeight the height of the last block to include. Must be greater than
    *        or equal to {@code fromHeight} and less than or equal to the blockchain height.
-   *        If the {@code toHeight} is greater than actual blockchain height then
-   *        the actual height will be used (such error-prone behaviour will be fixed
-   *        in Exonum 0.12)
    * @param blockFilter controls whether to skip blocks with no transactions
    * @param timeOption controls whether to include
    *        the {@linkplain Block#getCommitTime() block commit time}
    * @return blocks in the requested range
+   * @throws IllegalArgumentException if {@code fromHeight} or {@code toHeight} are not valid:
+   *        out of range {@code [0, blockchainHeight]}; {@code fromHeight} > {@code toHeight}
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
-   * @throws IllegalArgumentException if {@code fromHeight} or {@code toHeight} are not valid
    */
   List<Block> getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
       BlockTimeOption timeOption);
@@ -229,7 +226,8 @@ public interface ExonumClient {
      *
      * <p>This method provides a flexibility for the Exonum client configuration.
      * Can be helpful, for example, in case a network proxy configuration is needed
-     * or request/response logging.
+     * or <a href="https://github.com/square/okhttp/tree/master/okhttp-logging-interceptor">
+     *   request/response logging.</a>
      */
     public Builder setHttpClient(OkHttpClient client) {
       this.httpClient = checkNotNull(client);

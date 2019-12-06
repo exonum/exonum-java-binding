@@ -19,7 +19,6 @@ package com.exonum.binding.core.blockchain;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.storage.database.View;
@@ -28,7 +27,8 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.messages.Blockchain.Config;
+import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
 
@@ -139,9 +139,10 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a map with a key-value pair of a transaction hash and execution result.
+   * Returns a map with a key-value pair of a transaction hash and execution result. Note that this
+   * is a <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
    */
-  public ProofMapIndexProxy<HashCode, TransactionResult> getTxResults() {
+  public ProofMapIndexProxy<HashCode, ExecutionStatus> getTxResults() {
     return schema.getTxResults();
   }
 
@@ -151,9 +152,9 @@ public final class Blockchain {
    * @return a transaction execution result, or {@code Optional.empty()} if this transaction
    *         is unknown or was not yet executed
    */
-  public Optional<TransactionResult> getTxResult(HashCode messageHash) {
-    ProofMapIndexProxy<HashCode, TransactionResult> txResults = getTxResults();
-    TransactionResult transactionResult = txResults.get(messageHash);
+  public Optional<ExecutionStatus> getTxResult(HashCode messageHash) {
+    MapIndex<HashCode, ExecutionStatus> txResults = getTxResults();
+    ExecutionStatus transactionResult = txResults.get(messageHash);
     return Optional.ofNullable(transactionResult);
   }
 

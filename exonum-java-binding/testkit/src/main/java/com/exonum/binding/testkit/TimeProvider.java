@@ -16,6 +16,8 @@
 
 package com.exonum.binding.testkit;
 
+import java.time.Clock;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 /**
@@ -27,4 +29,11 @@ public interface TimeProvider {
    * Returns the current time of this time provider in UTC time zone.
    */
   ZonedDateTime getTime();
+
+  /**
+   * Returns a provider that uses the {@linkplain Clock#system system time}.
+   */
+  static TimeProvider systemTime() {
+    return () -> ZonedDateTime.now(ZoneOffset.UTC);
+  }
 }

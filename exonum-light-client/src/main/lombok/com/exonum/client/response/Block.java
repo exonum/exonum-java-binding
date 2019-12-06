@@ -17,6 +17,7 @@
 package com.exonum.client.response;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.google.gson.annotations.SerializedName;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.Builder;
@@ -32,6 +33,8 @@ import lombok.Value;
  *
  * <p>This structure only contains the amount of transactions and the transactions root hash as well
  * as other information, but not the transactions themselves.
+ *
+ * <p>The JSON representation of this class is compatible with the format used by Exonum.
  */
 @Value
 @Builder
@@ -40,6 +43,7 @@ public class Block {
   /**
    * Identifier of the leader node which has proposed the block.
    */
+  @SerializedName("proposer_id")
   int proposerId;
 
   /**
@@ -49,39 +53,45 @@ public class Block {
    *
    * <p>The height also identifies each block in the blockchain.
    */
+  @SerializedName("height")
   long height;
 
   /**
    * Number of transactions in this block.
    */
+  @SerializedName("tx_count")
   int numTransactions;
 
   /**
    * Hash link to the previous block in the blockchain.
    */
   @NonNull
+  @SerializedName("prev_hash")
   HashCode previousBlockHash;
 
   /**
    * Root hash of the Merkle tree of transactions in this block.
    */
   @NonNull
+  @SerializedName("tx_hash")
   HashCode txRootHash;
 
   /**
    * Hash of the blockchain state after applying transactions in the block.
    */
   @NonNull
+  @SerializedName("state_hash")
   HashCode stateHash;
 
   /**
    * Time when the block was committed to the blockchain.
    */
+  @SerializedName("time")
   ZonedDateTime commitTime;
 
   /**
    * Returns the time when the block was committed to the blockchain.
-   * The time is equal to the average time of submission of precommit messages confirming
+   * The time is equal to the median time of submission of precommit messages confirming
    * this block by the validators.
    *
    * <p>Can be empty if include time parameter is not specified in the request.
@@ -89,7 +99,6 @@ public class Block {
   public Optional<ZonedDateTime> getCommitTime() {
     return Optional.ofNullable(commitTime);
   }
-
 
   /**
    * Returns true if this block is empty:

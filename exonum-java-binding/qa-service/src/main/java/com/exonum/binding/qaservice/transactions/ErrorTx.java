@@ -16,17 +16,14 @@
 
 package com.exonum.binding.qaservice.transactions;
 
-import static com.exonum.binding.qaservice.transactions.TransactionPreconditions.checkTransaction;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.qaservice.QaSchema;
-import com.exonum.binding.qaservice.QaService;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
 import com.google.common.base.Strings;
 import java.util.Objects;
@@ -39,7 +36,6 @@ import javax.annotation.Nullable;
  */
 public final class ErrorTx implements Transaction {
 
-  private static final short ID = QaTransaction.VALID_ERROR.id();
   private static final Serializer<ErrorTxBody> PROTO_SERIALIZER =
       StandardSerializers.protobuf(ErrorTxBody.class);
 
@@ -58,7 +54,7 @@ public final class ErrorTx implements Transaction {
    * @throws IllegalArgumentException if the error code is not in range [0; 127]
    *     or error description is empty
    */
-  public ErrorTx(long seed, byte errorCode, @Nullable String errorDescription) {
+  ErrorTx(long seed, byte errorCode, @Nullable String errorDescription) {
     // Reject negative errorCodes so that there is no confusion between *signed* Java byte
     // and *unsigned* errorCode that Rust persists.
     checkArgument(errorCode >= 0, "error code (%s) must be in range [0; 127]", errorCode);
@@ -72,24 +68,25 @@ public final class ErrorTx implements Transaction {
     return errorDescription == null || !errorDescription.isEmpty();
   }
 
+  static ErrorTx fromBytes(byte[] bytes) {
+    ErrorTxBody body = PROTO_SERIALIZER.fromBytes(bytes);
+    long seed = body.getSeed();
+    byte errorCode = (byte) body.getErrorCode();
+    // Convert empty to null because unset error description will be deserialized
+    // as empty string.
+    String errorDescription = Strings.emptyToNull(body.getErrorDescription());
+    return new ErrorTx(seed, errorCode, errorDescription);
+  }
+
   @Override
   public void execute(TransactionContext context) throws TransactionExecutionException {
-    QaSchema schema = new QaSchema(context.getFork());
+    QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.
     schema.clearAll();
 
     // Throw an exception. Framework must revert the changes made above.
     throw new TransactionExecutionException(errorCode, errorDescription);
-  }
-
-  @Override
-  public String info() {
-    return QaTransactionJson.toJson(ID, this);
-  }
-
-  public RawTransaction toRawTransaction() {
-    return converter().toRawTransaction(this);
   }
 
   @Override
@@ -109,46 +106,6 @@ public final class ErrorTx implements Transaction {
   @Override
   public int hashCode() {
     return Objects.hash(seed, errorCode, errorDescription);
-  }
-
-  public static BiDirectionTransactionConverter<ErrorTx> converter() {
-    return Converter.INSTANCE;
-  }
-
-  private enum Converter implements BiDirectionTransactionConverter<ErrorTx> {
-    INSTANCE;
-
-    @Override
-    public ErrorTx fromRawTransaction(RawTransaction rawTransaction) {
-      checkRawTransaction(rawTransaction);
-
-      ErrorTxBody body = PROTO_SERIALIZER.fromBytes(rawTransaction.getPayload());
-      long seed = body.getSeed();
-      byte errorCode = (byte) body.getErrorCode();
-      // Convert empty to null because unset error description will be deserialized
-      // as empty string.
-      String errorDescription = Strings.emptyToNull(body.getErrorDescription());
-      return new ErrorTx(seed, errorCode, errorDescription);
-    }
-
-    @Override
-    public RawTransaction toRawTransaction(ErrorTx transaction) {
-      byte[] payload = PROTO_SERIALIZER.toBytes(ErrorTxBody.newBuilder()
-          .setSeed(transaction.seed)
-          .setErrorCode(transaction.errorCode)
-          .setErrorDescription(Strings.nullToEmpty(transaction.errorDescription))
-          .build());
-
-      return RawTransaction.newBuilder()
-          .serviceId(QaService.ID)
-          .transactionId(ID)
-          .payload(payload)
-          .build();
-    }
-
-    private void checkRawTransaction(RawTransaction rawTransaction) {
-      checkTransaction(rawTransaction, ID);
-    }
   }
 
 }

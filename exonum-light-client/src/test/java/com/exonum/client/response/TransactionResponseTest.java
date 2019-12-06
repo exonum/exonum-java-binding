@@ -24,9 +24,11 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +53,7 @@ class TransactionResponseTest {
     TransactionResponse response =
         new TransactionResponse(COMMITTED,
             withTxMessage(),
-            TransactionResult.successful(),
+            ExecutionStatuses.success(),
             withTxLocation());
 
     assertThat(response.toString(), allOf(
@@ -63,15 +65,19 @@ class TransactionResponseTest {
   @Test
   void equalsTest() {
     EqualsVerifier.forClass(TransactionResponse.class)
+        .withPrefabValues(
+            ByteString.class, ByteString.copyFromUtf8("a"), ByteString.copyFromUtf8("b"))
+        .withPrefabValues(
+            ExecutionStatus.class, ExecutionStatuses.success(), ExecutionStatuses.serviceError(1))
         .verify();
   }
 
   private static TransactionMessage withTxMessage() {
     return TransactionMessage.builder()
-        .serviceId((short) 1)
-        .transactionId((short) 1)
+        .serviceId(1)
+        .transactionId(1)
         .payload(new byte[]{})
-        .sign(ed25519().generateKeyPair(), ed25519());
+        .sign(ed25519().generateKeyPair());
   }
 
   private static TransactionLocation withTxLocation() {

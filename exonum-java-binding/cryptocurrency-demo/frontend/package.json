@@ -2,7 +2,7 @@
   "name": "exonum-java-binding-cryptocurrency-demo",
   "version": "1.0.0",
   "description": "Cryptocurrency demo for java binding",
-  "author": "Exonum Team <exonum@bitfury.com>",
+  "author": "Exonum Team <contact@exonum.com>",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

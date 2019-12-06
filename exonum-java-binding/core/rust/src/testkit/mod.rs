@@ -28,7 +28,7 @@ use exonum::{
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
 use jni::{
-    objects::{JObject, JValue},
+    objects::{JClass, JObject, JValue},
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
     Executor, JNIEnv,
 };
@@ -87,7 +87,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
 
             builder
         };
-        let testkit = builder.create();
+        let mut testkit = builder.create();
         // Mount API handlers
         testkit.api();
         Ok(to_handle(testkit))
@@ -100,7 +100,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeFreeTestKit(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     handle: Handle,
 ) {
     drop_handle::<TestKit>(&env, handle)

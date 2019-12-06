@@ -17,6 +17,7 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -24,26 +25,26 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.messages.Blockchain.Config;
-import com.exonum.binding.qaservice.transactions.CreateCounterTx;
-import com.exonum.binding.qaservice.transactions.ErrorTx;
+import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
-import com.exonum.binding.qaservice.transactions.ThrowingTx;
 import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.exonum.binding.time.TimeSchema;
+import com.exonum.core.messages.Blockchain.Config;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
@@ -78,9 +79,14 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Nullable
   private Node node;
 
+  @Inject
+  public QaServiceImpl(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
+  }
+
   @Override
-  protected Schema createDataSchema(View view) {
-    return new QaSchema(view);
+  protected QaSchema createDataSchema(View view) {
+    return new QaSchema(view, getName());
   }
 
   @Override
@@ -94,17 +100,18 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   public void initialize(Fork fork, Configuration configuration) {
+    // Init the time oracle
+    updateTimeOracle(fork, configuration);
+
     // Add a default counter to the blockchain.
     createCounter(DEFAULT_COUNTER_NAME, fork);
 
     // Add an afterCommit counter that will be incremented after each block committed event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
-
-    // todo [QA-service updates]: Use the configuration.
   }
 
   private void createCounter(String name, Fork fork) {
-    QaSchema schema = new QaSchema(fork);
+    QaSchema schema = createDataSchema(fork);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
 
@@ -136,38 +143,15 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public HashCode submitCreateCounter(String counterName) {
-    CreateCounterTx tx = new CreateCounterTx(counterName);
-
-    return submitTransaction(tx.toRawTransaction());
-  }
-
-  @Override
   public HashCode submitIncrementCounter(long requestSeed, HashCode counterId) {
-    IncrementCounterTx tx = new IncrementCounterTx(requestSeed, counterId);
+    RawTransaction tx = IncrementCounterTx.newRawTransaction(requestSeed, counterId, getId());
 
-    return submitTransaction(tx.toRawTransaction());
-  }
-
-
-  @Override
-  public HashCode submitValidThrowingTx(long requestSeed) {
-    ThrowingTx tx = new ThrowingTx(requestSeed);
-
-    return submitTransaction(tx.toRawTransaction());
-  }
-
-  @Override
-  public HashCode submitValidErrorTx(long requestSeed, byte errorCode,
-      @Nullable String description) {
-    ErrorTx tx = new ErrorTx(requestSeed, errorCode, description);
-
-    return submitTransaction(tx.toRawTransaction());
+    return submitTransaction(tx);
   }
 
   @Override
   public HashCode submitUnknownTx() {
-    return submitTransaction(UnknownTx.createRawTransaction());
+    return submitTransaction(UnknownTx.newRawTransaction(getId()));
   }
 
   @Override
@@ -176,7 +160,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     checkBlockchainInitialized();
 
     return node.withSnapshot((view) -> {
-      QaSchema schema = new QaSchema(view);
+      QaSchema schema = createDataSchema(view);
       MapIndex<HashCode, Long> counters = schema.counters();
       if (!counters.containsKey(counterId)) {
         return Optional.empty();
@@ -204,7 +188,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Optional<ZonedDateTime> getTime() {
     return node.withSnapshot(s -> {
-      TimeSchema timeOracle = TimeSchema.newInstance(s);
+      TimeSchema timeOracle = createDataSchema(s).timeSchema();
       EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
       return currentTime.toOptional();
     });
@@ -214,7 +198,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
     return node.withSnapshot(s -> {
-      TimeSchema timeOracle = TimeSchema.newInstance(s);
+      TimeSchema timeOracle = createDataSchema(s).timeSchema();
       MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
       return toMap(validatorsTimes);
     });
@@ -232,5 +216,38 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   private void checkBlockchainInitialized() {
     checkState(node != null, "Service has not been fully initialized yet");
+  }
+
+  @Override
+  public void verifyConfiguration(Fork fork, Configuration configuration) {
+    QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
+    checkConfiguration(config);
+  }
+
+  @Override
+  public void applyConfiguration(Fork fork, Configuration configuration) {
+    updateTimeOracle(fork, configuration);
+  }
+
+  private void checkConfiguration(QaConfiguration config) {
+    String timeOracleName = config.getTimeOracleName();
+    // Check the time oracle name is non-empty.
+    // We do *not* check if the time oracle is active to (a) allow running this service with
+    // reduced read functionality without time oracle; (b) testing time schema when it is not
+    // active.
+    checkArgument(!Strings.isNullOrEmpty(timeOracleName), "Empty time oracle name: %s",
+        timeOracleName);
+  }
+
+  private void updateTimeOracle(Fork fork, Configuration configuration) {
+    QaSchema schema = createDataSchema(fork);
+    QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
+
+    // Verify the configuration
+    checkConfiguration(config);
+
+    // Save the configuration
+    String timeOracleName = config.getTimeOracleName();
+    schema.timeOracleName().set(timeOracleName);
   }
 }

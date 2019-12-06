@@ -31,22 +31,16 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.messages.Runtime.ArtifactId;
-import com.exonum.binding.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.ArtifactId;
+import com.exonum.core.messages.Runtime.InstanceSpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-// todo: This extension is currently not thread-safe. This test is always broken with
-//  parallel execution. Remove everywhere once https://github.com/mockito/mockito/issues/1630
-//  is resolved.
 @ExtendWith(MockitoExtension.class)
-@Execution(ExecutionMode.SAME_THREAD) // MockitoExtension is not thread-safe: see mockito/1630
 class ServiceRuntimeAdapterTest {
 
   private static final long SNAPSHOT_HANDLE = 0x0A;
@@ -125,24 +119,25 @@ class ServiceRuntimeAdapterTest {
     byte[] configuration = bytes(1, 2);
 
     // Initialize the service
-    serviceRuntimeAdapter.addService(forkHandle, instanceSpec, configuration);
+    serviceRuntimeAdapter.startAddingService(forkHandle, instanceSpec, configuration);
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
         ServiceArtifactId.newJavaId(javaArtifactName));
-    verify(serviceRuntime).addService(fork, expected, configuration);
+    verify(serviceRuntime).startAddingService(fork, expected, configuration);
   }
 
   @Test
   void beforeCommit() throws CloseFailuresException {
+    int serviceId = 1;
     long forkHandle = 0x110b;
     Fork fork = mock(Fork.class);
     when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
-    serviceRuntimeAdapter.beforeCommit(forkHandle);
+    serviceRuntimeAdapter.beforeCommit(serviceId, forkHandle);
 
-    verify(serviceRuntime).beforeCommit(fork);
+    verify(serviceRuntime).beforeCommit(serviceId, fork);
   }
 
   @Test

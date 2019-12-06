@@ -18,12 +18,14 @@ package com.exonum.binding.fakes.services.service;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 
@@ -43,6 +45,11 @@ public final class TestService extends AbstractService {
   static final String INITIAL_ENTRY_VALUE = "initial value";
 
   private static final SchemaFactory<TestSchema> SCHEMA_FACTORY = TestSchema::new;
+
+  @Inject
+  public TestService(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
+  }
 
   @Override
   protected TestSchema createDataSchema(View view) {

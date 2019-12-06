@@ -20,6 +20,7 @@ import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
@@ -28,51 +29,53 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
+import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 
 final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
-      .hashString("initial key", StandardCharsets.UTF_8);
-  static final String INITIAL_ENTRY_VALUE = "initial value";
-
-  static final short SERVICE_ID = 46;
-  static final String SERVICE_NAME = "Test service";
+      .hashString("Initial key", StandardCharsets.UTF_8);
+  static final String THROWING_VALUE = "Incorrect value";
 
   private Node node;
 
-  public TestService() {
-    // todo: [testkit] bind TestTransaction::from in the TestServiceModule
-  }
-
-  Node getNode() {
-    return node;
+  @Inject
+  public TestService(ServiceInstanceSpec serviceSpec) {
+    super(serviceSpec);
   }
 
   @Override
   protected TestSchema createDataSchema(View view) {
-    return new TestSchema(view);
+    return new TestSchema(view, getId());
   }
 
   @Override
   public void initialize(Fork fork, Configuration configuration) {
+    TestConfiguration initialConfiguration = configuration.getAsMessage(TestConfiguration.class);
+    String configurationValue = initialConfiguration.getValue();
+    if (configurationValue.equals(THROWING_VALUE)) {
+      throw new IllegalArgumentException("Service configuration had an invalid value: "
+          + configurationValue);
+    }
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
-    testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
+    testMap.put(INITIAL_ENTRY_KEY, configurationValue);
   }
 
   @Override
   public void afterCommit(BlockCommittedEvent event) {
     long height = event.getHeight();
-    RawTransaction rawTransaction = constructAfterCommitTransaction(height);
+    RawTransaction rawTransaction = constructAfterCommitTransaction(getId(), height);
     node.submitTransaction(rawTransaction);
   }
 
-  static RawTransaction constructAfterCommitTransaction(long height) {
+  static RawTransaction constructAfterCommitTransaction(int serviceId, long height) {
     String payload = "Test message on height " + height;
     return RawTransaction.newBuilder()
-        .serviceId(SERVICE_ID)
+        .serviceId(serviceId)
         .transactionId(TestTransaction.ID)
         .payload(payload.getBytes(BODY_CHARSET))
         .build();

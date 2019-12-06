@@ -15,6 +15,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Changed
+- `TransactionResponse#getExecutionResult` now returns `ExecutionStatus`
+  instead of `TransactionResult`. (#1244)
+
+## 0.4.0 — 2019-10-09
+
+The new release of the light client brings support for Exonum 0.12
+and Exonum Java 0.8.
+
+### Versions Support
+- Exonum 0.12.*
+- Exonum Java 0.8.*
+
+### Changed
+- `ExonumClient#getBlockByHeight` and `#getBlocks` to throw
+  `IllegalArgumentException` when blocks with heights exceeding
+  the current blockchain height are requested (#1137)
+- `Block` JSON representation to be compatible with the one used
+  for blocks by the core. Applied `@SerializedName` annotation
+  to all fields. (#1137)
+- Updated project dependencies to the newest versions.
+
 ## 0.3.0 - 2019-07-22
 
 The third release of Exonum Java Light Client which improves

@@ -16,13 +16,23 @@
 
 package com.exonum.binding.testkit;
 
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_FILENAME;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_CONFIGURATION;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_NAME;
+import static com.exonum.binding.testkit.TestKitTestUtils.createTestServiceArtifact;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.function.Consumer;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 
 class TestKitParameterizationTest {
 
@@ -30,12 +40,23 @@ class TestKitParameterizationTest {
   private static final EmulatedNodeType TEMPLATE_NODE_TYPE = EmulatedNodeType.VALIDATOR;
   private static final short NEW_VALIDATOR_COUNT = 8;
 
+  @TempDir
+  @SuppressWarnings("WeakerAccess") // @TempDir can't be private
+  static Path artifactsDirectory;
+
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
           .withNodeType(TEMPLATE_NODE_TYPE)
-          .withService(TestServiceModule.class)
-          .withValidators(TEMPLATE_VALIDATOR_COUNT));
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+          .withValidators(TEMPLATE_VALIDATOR_COUNT)
+          .withArtifactsDirectory(artifactsDirectory));
+
+  @BeforeAll
+  static void setUp() throws IOException {
+    createTestServiceArtifact(artifactsDirectory);
+  }
 
   @Test
   void testDefaultTestKit(TestKit testKit) {

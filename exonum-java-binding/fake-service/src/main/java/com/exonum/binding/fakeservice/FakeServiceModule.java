@@ -28,14 +28,10 @@ import org.pf4j.Extension;
 @Extension
 public final class FakeServiceModule extends AbstractServiceModule {
 
-  private static final TransactionConverter THROWING_TX_CONVERTER = (tx) -> {
-    throw new IllegalStateException("No transactions in this service: " + tx);
-  };
-
   @Override
   protected void configure() {
     bind(Service.class).to(FakeService.class)
         .in(Singleton.class);
-    bind(TransactionConverter.class).toInstance(THROWING_TX_CONVERTER);
+    bind(TransactionConverter.class).to(FakeTxConverter.class);
   }
 }

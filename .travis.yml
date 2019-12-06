@@ -45,11 +45,10 @@ matrix:
       os: linux
       jdk: openjdk8
       env: CHECK_RUST=false
-    - name: "Linux JDK 12 CHECK_RUST=false"
+    - name: "Linux JDK 13 CHECK_RUST=false"
       os: linux
-      jdk: openjdk12
+      jdk: openjdk13
       env: CHECK_RUST=false
-  exclude: # Exclude macos builds till RocksDB is fixed: ECR-3772
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
       # Specify the image containing JDK 8

@@ -22,8 +22,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <lazysodium-java.version>4.0.1</lazysodium-java.version>
-    <auto-value.version>1.6.6</auto-value.version>
+    <lazysodium-java.version>4.2.3</lazysodium-java.version>
+    <auto-value.version>1.7</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
   </properties>
 
@@ -42,9 +42,6 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <!-- Optional for it is only needed for protobuf serializers support — if you don't
-           use them, you don't need the protobuf. -->
-      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -216,7 +213,7 @@
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-        <version>1.6.2</version>
+        <version>${os-maven-plugin.version}</version>
       </extension>
     </extensions>
   </build>
