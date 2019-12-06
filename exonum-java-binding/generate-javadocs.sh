@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Builds an archive with Javadocs from published artifacts.
 # The archive is put in './target/site'
+#
+# Requires GNU tar (gnu-tar on brew).
 
 # Fail immediately in case of errors and/or unset variables
 set -eu -o pipefail
