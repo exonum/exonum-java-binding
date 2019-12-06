@@ -39,11 +39,14 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
+import com.exonum.client.response.ServiceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -169,6 +172,32 @@ class ExplorerApiHelperTest {
     assertThat(response.getBlocks(), contains(BLOCK_1, BLOCK_2, BLOCK_3));
     assertThat(response.getBlocksRangeStart(), is(6L));
     assertThat(response.getBlocksRangeEnd(), is(288L));
+  }
+
+  @Test
+  void parseServicesResponse() {
+    String serviceName1 = "service-name-1";
+    String serviceName2 = "service-name-2";
+    int serviceId1 = 1;
+    int serviceId2 = 2;
+    ServiceInfo serviceInfo1 = new ServiceInfo(serviceName1, serviceId1);
+    ServiceInfo serviceInfo2 = new ServiceInfo(serviceName2, serviceId2);
+    List<ServiceInfo> expected = Arrays.asList(serviceInfo1, serviceInfo2);
+    String json = "{\n"
+        + "    \"services\": [\n"
+        + "      {\n"
+        + "          \"name\": \"" + serviceName1 + "\",\n"
+        + "          \"id\": " + serviceId1 + "\n"
+        + "      },\n"
+        + "      {\n"
+        + "          \"name\": \"" + serviceName2 + "\",\n"
+        + "          \"id\": " + serviceId2 + "\n"
+        + "      }\n"
+        + "    ]\n"
+        + "}";
+
+    List<ServiceInfo> actual = ExplorerApiHelper.parseServicesResponse(json);
+    assertThat(actual, contains(expected.toArray()));
   }
 
   private static Stream<Arguments> testData() {
