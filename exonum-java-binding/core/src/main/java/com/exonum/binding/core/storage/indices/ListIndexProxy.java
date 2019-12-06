@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
@@ -28,7 +27,6 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
-import java.util.NoSuchElementException;
 import java.util.function.LongSupplier;
 
 /**
@@ -161,40 +159,6 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
     super(nativeHandle, address, view, serializer);
   }
 
-  /**
-   * Removes the last element of the list and returns it.
-   *
-   * @return the last element of the list.
-   * @throws NoSuchElementException if the list is empty
-   * @throws IllegalStateException if this list is not valid
-   * @throws UnsupportedOperationException if this list is read-only
-   */
-  public E removeLast() {
-    notifyModified();
-    byte[] e = nativeRemoveLast(getNativeHandle());
-    if (e == null) {
-      throw new NoSuchElementException("List is empty");
-    }
-    return serializer.fromBytes(e);
-  }
-
-  /**
-   * Truncates the list, reducing its size to {@code newSize}.
-   *
-   * <p>If {@code newSize < size()}, keeps the first {@code newSize} elements, removing the rest.
-   * If {@code newSize >= size()}, has no effect.
-   *
-   * @param newSize the maximum number of elements to keep
-   * @throws IllegalArgumentException if the new size is negative
-   * @throws IllegalStateException if this list is not valid
-   * @throws UnsupportedOperationException if this list is read-only
-   */
-  public void truncate(long newSize) {
-    checkArgument(newSize >= 0, "New size must be non-negative: %s", newSize);
-    notifyModified();
-    nativeTruncate(getNativeHandle(), newSize);
-  }
-
   private static native long nativeCreate(String listName, long viewNativeHandle);
 
   private static native long nativeCreateInGroup(String groupName, byte[] listId,
@@ -214,8 +178,10 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
   @Override
   native byte[] nativeGetLast(long nativeHandle);
 
+  @Override
   native byte[] nativeRemoveLast(long nativeHandle);
 
+  @Override
   native void nativeTruncate(long nativeHandle, long newSize);
 
   @Override

@@ -40,8 +40,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Contains tests of ProofListIndexProxy methods
- * that are not present in {@link ListIndex} interface.
+ * Inherits base tests of ListIndex interface methods and also contains tests
+ * of ProofListIndexProxy methods that are not present in {@link ListIndex} interface.
  */
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
