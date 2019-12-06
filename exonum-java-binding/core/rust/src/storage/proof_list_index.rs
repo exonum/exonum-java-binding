@@ -16,11 +16,13 @@ use exonum_merkledb::{
     access::FromAccess, proof_list_index::ProofListIndexIter, Fork, IndexAddress, ObjectHash,
     ProofListIndex, Snapshot,
 };
+use exonum_proto::ProtobufConvert;
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray, jint, jlong},
     JNIEnv,
 };
+use protobuf::Message;
 
 use std::{panic, ptr};
 
@@ -217,7 +219,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
             IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
         };
-        env.byte_array_from_slice(&proof.to_bytes())
+        env.byte_array_from_slice(&proof.to_pb().write_to_bytes().unwrap())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -237,7 +239,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64..to as u64),
             IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64..to as u64),
         };
-        env.byte_array_from_slice(&proof.to_bytes())
+        env.byte_array_from_slice(&proof.to_pb().write_to_bytes().unwrap())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -367,12 +369,3 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
 ) {
     handle::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
 }
-
-// TODO: Stub code that is a workaround for compilation error for ListProof#to_bytes(). Should be removed when #1479 is merged.
-trait ToBytes {
-    fn to_bytes(&self) -> Vec<u8> {
-        vec![1, 2, 3]
-    }
-}
-
-impl<V> ToBytes for ListProof<V> {}
