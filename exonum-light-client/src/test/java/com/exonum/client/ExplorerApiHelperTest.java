@@ -39,7 +39,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
-import com.exonum.client.response.ServiceInfo;
+import com.exonum.client.response.InstanceSpec;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.exonum.core.messages.Runtime.ErrorKind;
@@ -180,23 +180,28 @@ class ExplorerApiHelperTest {
     String serviceName2 = "service-name-2";
     int serviceId1 = 1;
     int serviceId2 = 2;
-    ServiceInfo serviceInfo1 = new ServiceInfo(serviceName1, serviceId1);
-    ServiceInfo serviceInfo2 = new ServiceInfo(serviceName2, serviceId2);
-    List<ServiceInfo> expected = Arrays.asList(serviceInfo1, serviceInfo2);
+    InstanceSpec instanceSpec1 = new InstanceSpec(serviceName1, serviceId1);
+    InstanceSpec instanceSpec2 = new InstanceSpec(serviceName2, serviceId2);
+    List<InstanceSpec> expected = Arrays.asList(instanceSpec1, instanceSpec2);
     String json = "{\n"
-        + "    \"services\": [\n"
-        + "      {\n"
-        + "          \"name\": \"" + serviceName1 + "\",\n"
-        + "          \"id\": " + serviceId1 + "\n"
-        + "      },\n"
-        + "      {\n"
-        + "          \"name\": \"" + serviceName2 + "\",\n"
-        + "          \"id\": " + serviceId2 + "\n"
-        + "      }\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + serviceName1 + "\",\n"
+        + "            \"id\": " + serviceId1 + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        },\n"
+        + "        {\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + serviceName2 + "\",\n"
+        + "            \"id\": " + serviceId2 + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
         + "    ]\n"
         + "}";
 
-    List<ServiceInfo> actual = ExplorerApiHelper.parseServicesResponse(json);
+    List<InstanceSpec> actual = ExplorerApiHelper.parseServicesResponse(json);
     assertThat(actual, contains(expected.toArray()));
   }
 

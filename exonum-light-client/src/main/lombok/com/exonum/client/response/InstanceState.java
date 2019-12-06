@@ -16,14 +16,13 @@
 
 package com.exonum.client.response;
 
-import java.util.List;
 import lombok.Value;
 
 @Value
-public class ServicesResponse {
+public class InstanceState {
 
   /**
-   * List of started service instances.
+   * Service instance spec - its name and id.
    */
-  List<InstanceState> services;
+  InstanceSpec spec;
 }
