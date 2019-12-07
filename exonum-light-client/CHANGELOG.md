@@ -15,12 +15,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+<<<<<<<<< Temporary merge branch 1
 ## 0.5.0 — 2019-12-TBD
 
 The new release of the light client brings support for dynamic services.
 
 ### Versions Support
-- Exonum version, <version TBD>
+- Exonum version, 0.13.0-rc.1
 - Exonum Java Binding version, 0.9.0-rc1
 
 ### Added
