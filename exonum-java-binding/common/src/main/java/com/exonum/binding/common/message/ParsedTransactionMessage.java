@@ -58,7 +58,7 @@ final class ParsedTransactionMessage implements TransactionMessage {
     // Decode the transaction
     ExonumMessage payload = parsedMessage.getPayload();
     checkArgument(payload.hasAnyTx(), "SignedMessage does not contain a transaction "
-        + "in its payload but %s", payload.getMessageCase());
+        + "in its payload but %s", payload.getKindCase());
 
     this.tx = payload.getAnyTx();
   }

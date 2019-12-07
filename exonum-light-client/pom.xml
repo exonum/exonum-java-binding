@@ -61,7 +61,7 @@
 
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.8.0</ejb.version>
+    <ejb.version>0.9.0-SNAPSHOT</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -347,15 +347,10 @@
                 <!--
                 Exclude lombok annotated classes which are located at `src/main/lombok`,
                 because the plugin can't be configured to look for sources there.
+
+                We ignore the whole package as there are little to no non-lombok classes.
                 -->
-                <exclude>com/exonum/client/response/Block.class</exclude>
-                <exclude>com/exonum/client/response/Block*BlockBuilder.class</exclude>
-                <exclude>com/exonum/client/response/BlockResponse.class</exclude>
-                <exclude>com/exonum/client/response/BlocksRange.class</exclude>
-                <exclude>com/exonum/client/response/BlocksResponse.class</exclude>
-                <exclude>com/exonum/client/response/HealthCheckInfo.class</exclude>
-                <exclude>com/exonum/client/response/SystemStatistics.class</exclude>
-                <exclude>com/exonum/client/response/TransactionResponse.class</exclude>
+                <exclude>com/exonum/client/response/*</exclude>
               </excludes>
             </configuration>
             <executions>

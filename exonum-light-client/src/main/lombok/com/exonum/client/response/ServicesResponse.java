@@ -12,26 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.exonum.client.response;
 
-/**
- * Consensus status of a particular node.
- */
-public enum ConsensusStatus {
+import java.util.List;
+import lombok.Value;
+
+@Value
+public class ServicesResponse {
   /**
-   * Shows that consensus is active,
-   * i.e., it is enabled and the node has enough connected peers.
+   * List of started service instances.
    */
-  ACTIVE,
-  /**
-   * Shows that consensus is enabled on the node.
-   */
-  ENABLED,
-  /**
-   * Shows that consensus is disabled on the node.
-   */
-  DISABLED
+  List<ServiceInfo> services;
 }
