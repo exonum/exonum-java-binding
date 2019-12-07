@@ -45,8 +45,9 @@ class TransactionMethodExtractorTest {
         ValidService.class.getMethod("transactionMethod", byte[].class, TransactionContext.class);
     MethodHandles.Lookup lookup = MethodHandles.lookup();
     MethodHandle methodHandle = lookup.unreflect(transactionMethod);
-    // TODO: improve validating method handlers equality
-    assertThat(transactions).containsExactly(entry(ValidService.TRANSACTION_ID, methodHandle));
+    assertThat(transactions).hasSize(1);
+    MethodHandle actualMethodHandle = transactions.get(ValidService.TRANSACTION_ID);
+    assertThat(actualMethodHandle.toString()).isEqualTo(methodHandle.toString());
   }
 
   @Test

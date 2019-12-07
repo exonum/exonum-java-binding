@@ -31,9 +31,10 @@ import java.util.Map;
  */
 final class TransactionMethodExtractor {
 
-  // TODO: improve Javadoc
   /**
    * Returns a map of transaction ids to transaction methods found in a service class.
+   *
+   * @see TransactionMethod
    */
   static Map<Integer, MethodHandle> extractTransactionMethods(Class<?> serviceClass) {
     Map<Integer, MethodHandle> transactions = new HashMap<>();
@@ -45,11 +46,12 @@ final class TransactionMethodExtractor {
           TransactionMethod annotation = method.getAnnotation(TransactionMethod.class);
           int transactionId = annotation.id();
           validateTransactionMethod(method, serviceClass, transactions, transactionId);
-          MethodHandle methodHandle = null;
+          MethodHandle methodHandle;
           try {
             methodHandle = lookup.unreflect(method);
           } catch (IllegalAccessException e) {
-            // TODO: throw an appropriate exception
+            throw new IllegalArgumentException(
+                String.format("Couldn't access method %s", method.getName()), e);
           }
           transactions.put(transactionId, methodHandle);
         }
