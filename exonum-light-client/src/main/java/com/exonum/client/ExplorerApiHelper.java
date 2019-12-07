@@ -18,17 +18,23 @@
 package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.JSON;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
 
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
+import com.exonum.client.response.ServiceInfo;
+import com.exonum.client.response.ServicesResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
@@ -58,11 +64,11 @@ final class ExplorerApiHelper {
 
   static TransactionResponse parseGetTxResponse(String json) {
     GetTxResponse response = JSON.fromJson(json, GetTxResponse.class);
-    TransactionResult executionResult = getTransactionResult(response.getStatus());
+    ExecutionStatus executionResult = getExecutionStatus(response.getStatus());
 
     return new TransactionResponse(
         response.getType(),
-        response.getContent().getMessage(),
+        response.getContent(),
         executionResult,
         response.getLocation()
     );
@@ -87,23 +93,51 @@ final class ExplorerApiHelper {
     );
   }
 
-  private static TransactionResult getTransactionResult(
+  static List<ServiceInfo> parseServicesResponse(String json) {
+    ServicesResponse servicesResponse = JSON.fromJson(json, ServicesResponse.class);
+    return servicesResponse.getServices();
+  }
+
+  private static ExecutionStatus getExecutionStatus(
       GetTxResponseExecutionResult executionStatus) {
     if (executionStatus == null) {
       return null;
     }
     switch (executionStatus.getType()) {
       case SUCCESS:
-        return TransactionResult.successful();
-      case ERROR:
-        return TransactionResult.error(executionStatus.getCode(),
-            executionStatus.getDescription());
+        return ExecutionStatuses.success();
       case PANIC:
-        return TransactionResult.unexpectedError(executionStatus.getDescription());
+        return buildPanicExecutionStatus(executionStatus.getDescription());
+      case DISPATCHER_ERROR:
+        return buildExecutionStatus(ErrorKind.DISPATCHER, executionStatus.getCode(),
+            executionStatus.getDescription());
+      case RUNTIME_ERROR:
+        return buildExecutionStatus(ErrorKind.RUNTIME, executionStatus.getCode(),
+            executionStatus.getDescription());
+      case SERVICE_ERROR:
+        return ExecutionStatuses.serviceError(executionStatus.getCode(),
+            executionStatus.getDescription());
       default:
         throw new IllegalStateException("Unexpected transaction execution status: "
             + executionStatus.getType());
     }
+  }
+
+  @VisibleForTesting
+  static ExecutionStatus buildPanicExecutionStatus(String description) {
+    return buildExecutionStatus(ErrorKind.PANIC, 0, description);
+  }
+
+  @VisibleForTesting
+  static ExecutionStatus buildExecutionStatus(ErrorKind errorKind, int code,
+      String description) {
+    checkArgument(0 <= code, "Error code (%s) must be non-negative", code);
+    return ExecutionStatus.newBuilder()
+        .setError(ExecutionError.newBuilder()
+            .setKind(errorKind)
+            .setCode(code)
+            .setDescription(description))
+        .build();
   }
 
   /**
@@ -130,25 +164,14 @@ final class ExplorerApiHelper {
     @NonNull
     TransactionStatus type;
     @NonNull
-    GetTxResponseContent content;
+    TransactionMessage content;
     TransactionLocation location;
     JsonObject locationProof; //TODO: in scope of LC P3
     GetTxResponseExecutionResult status;
   }
 
   /**
-   * Json object wrapper for get transaction response content i.e.
-   * {@code "$.content"}.
-   */
-  @Value
-  private static class GetTxResponseContent {
-    JsonObject debug; // contains executable tx in json. currently not supported
-    @NonNull
-    TransactionMessage message;
-  }
-
-  /**
-   * Json object wrapper for transaction execution result i.e.
+   * Json object wrapper for transaction execution result, i.e.,
    * {@code "$.status"}.
    */
   @Value
@@ -159,16 +182,20 @@ final class ExplorerApiHelper {
   }
 
   /**
-   * Json object wrapper for transaction execution status i.e.
+   * Json object wrapper for transaction execution status, i.e.,
    * {@code "$.status.type"}.
    */
   private enum GetTxResponseExecutionStatus {
     @SerializedName("success")
     SUCCESS,
-    @SerializedName("error")
-    ERROR,
     @SerializedName("panic")
-    PANIC
+    PANIC,
+    @SerializedName("dispatcher_error")
+    DISPATCHER_ERROR,
+    @SerializedName("runtime_error")
+    RUNTIME_ERROR,
+    @SerializedName("service_error")
+    SERVICE_ERROR
   }
 
   @Value

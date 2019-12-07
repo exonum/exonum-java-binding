@@ -51,6 +51,7 @@ extern crate tempfile;
 
 pub use exonum::exonum_merkledb;
 
+mod cmd;
 pub mod handle;
 mod proto;
 mod proxy;
@@ -60,6 +61,7 @@ mod testkit;
 pub mod utils;
 
 pub use self::handle::{cast_handle, drop_handle, to_handle, Handle};
+pub use cmd::*;
 pub use handle::resource_manager::*;
 pub use proxy::*;
 pub use runtime::*;

@@ -319,7 +319,10 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
    *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>)
+   * @deprecated Proofs are temporarily disabled since 0.9.0-rc1, and will be re-enabled
+   *     in a later release
    */
+  @Deprecated
   public UncheckedMapProof getProof(K key, K... otherKeys) {
     if (otherKeys.length == 0) {
       return getSingleKeyProof(key);
@@ -338,7 +341,10 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
    *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>) or
    *     keys collection is empty
+   * @deprecated Proofs are temporarily disabled since 0.9.0-rc1, and will be re-enabled
+   *     in a later release
    */
+  @Deprecated
   public UncheckedMapProof getProof(Collection<? extends K> keys) {
     checkArgument(!keys.isEmpty(), "Keys collection should not be empty");
     if (keys.size() == 1) {

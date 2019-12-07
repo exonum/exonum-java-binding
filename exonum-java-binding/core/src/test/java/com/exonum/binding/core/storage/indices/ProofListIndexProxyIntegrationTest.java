@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,7 +43,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Contains tests of ProofListIndexProxy methods
  * that are not present in {@link ListIndex} interface.
  */
-@Disabled("ECR-3608")
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   private static final HashCode EMPTY_LIST_INDEX_HASH =
@@ -97,6 +95,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
@@ -106,6 +105,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getProofOfAbsenceEmptyList() {
     runTestWithView(database::createFork, (list) -> {
       assertThat(list, provesAbsence(0));
@@ -113,6 +113,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getProofOfAbsenceSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
@@ -122,6 +123,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getRangeProofOfAbsenceEmptyList() {
     runTestWithView(database::createFork, (list) -> {
       assertThat(list, provesAbsence(0, 1));
@@ -129,6 +131,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getRangeProofOfAbsenceSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
@@ -138,6 +141,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getRangeProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
@@ -147,6 +151,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @ParameterizedTest
+  @DisabledProofTest
   @ValueSource(ints = {2, 3, 4, 5, 7, 8, 9})
   void getProofMultipleItemList(int size) {
     runTestWithView(database::createFork, (list) -> {
@@ -161,6 +166,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getRangeProofMultipleItemList_FullRange() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
@@ -171,6 +177,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getRangeProofMultipleItemList_1stHalf() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
@@ -183,6 +190,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   @Test
+  @DisabledProofTest
   void getRangeProofMultipleItemList_2ndHalf() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
@@ -196,6 +204,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3, 4})
+  @DisabledProofTest
   @Disabled("ECR-3673: empty ranges are not supported with the current tree format; "
       + "need a flat one")
   void getRangeProofMultipleItemList_EmptyRange(int size) {

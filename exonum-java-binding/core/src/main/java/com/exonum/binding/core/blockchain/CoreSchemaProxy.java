@@ -224,6 +224,6 @@ final class CoreSchemaProxy {
     private static final String TRANSACTIONS_RESULTS = PREFIX + "transaction_results";
     private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
     private static final String TRANSACTIONS_POOL = PREFIX + "transactions_pool";
-    private static final String CONSENSUS_CONFIG = PREFIX + "consensus.config";
+    private static final String CONSENSUS_CONFIG = PREFIX + "consensus_config";
   }
 }

@@ -12,26 +12,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.exonum.client.response;
+package com.exonum.binding.core.storage.indices;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.junit.jupiter.api.Disabled;
 
 /**
- * Consensus status of a particular node.
+ * Indicates that a test is a test of a proof method, temporarily disabled
+ * till the new protobuf-based format is fully supported.
+ *
+ * <p>See ECR-3666 and the epic https://jira.bf.local/browse/ECR-2545
  */
-public enum ConsensusStatus {
-  /**
-   * Shows that consensus is active,
-   * i.e., it is enabled and the node has enough connected peers.
-   */
-  ACTIVE,
-  /**
-   * Shows that consensus is enabled on the node.
-   */
-  ENABLED,
-  /**
-   * Shows that consensus is disabled on the node.
-   */
-  DISABLED
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD})
+@Disabled
+public @interface DisabledProofTest {
 }
