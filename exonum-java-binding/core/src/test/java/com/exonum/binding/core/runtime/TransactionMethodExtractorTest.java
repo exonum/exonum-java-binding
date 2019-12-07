@@ -17,7 +17,6 @@
 package com.exonum.binding.core.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -27,13 +26,13 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionMethod;
 import io.vertx.ext.web.Router;
-import org.junit.jupiter.api.Test;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 
 class TransactionMethodExtractorTest {
 
@@ -82,7 +81,8 @@ class TransactionMethodExtractorTest {
         () -> TransactionMethodExtractor
             .extractTransactionMethods(InvalidTransactionMethodArgumentsService.class));
     Method transactionMethod =
-        InvalidTransactionMethodArgumentsService.class.getMethod("transactionMethod", byte[].class, String.class);
+        InvalidTransactionMethodArgumentsService.class.getMethod(
+            "transactionMethod", byte[].class, String.class);
     String errorMessage = String.format("Method %s in a service class %s annotated with"
             + " @TransactionMethod should have precisely two parameters of the following types:"
             + " \"byte[]\" and \"com.exonum.binding.core.transaction.TransactionContext\"",
