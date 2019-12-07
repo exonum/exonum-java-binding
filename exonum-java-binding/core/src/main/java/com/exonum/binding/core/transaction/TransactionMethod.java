@@ -21,9 +21,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-// TODO: rename to Transaction after migration?
+/**
+ * Indicates that a method is a transaction method. The annotated method should:
+ * <ul>
+ *   <li>be public
+ *   <li>have exactly two parameters of types 'byte[]' and '{@link TransactionContext}'
+ * </ul>
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+// TODO: rename to Transaction after migration?
 public @interface TransactionMethod {
 
   /**
