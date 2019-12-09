@@ -66,7 +66,7 @@ public final class CreateWalletTx implements Transaction {
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
     if (wallets.containsKey(ownerPublicKey)) {
-      throw new TransactionExecutionException(WALLET_ALREADY_EXISTS.errorCode);
+      throw new TransactionExecutionException(WALLET_ALREADY_EXISTS);
     }
 
     Wallet wallet = new Wallet(initialBalance);

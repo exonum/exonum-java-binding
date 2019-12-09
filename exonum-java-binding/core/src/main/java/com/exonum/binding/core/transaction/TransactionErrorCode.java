@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,12 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency.transactions;
+package com.exonum.binding.core.transaction;
 
-import com.exonum.binding.core.transaction.TransactionErrorCode;
+public interface TransactionErrorCode {
+  byte getErrorCode();
 
-enum TransactionError implements TransactionErrorCode {
-  WALLET_ALREADY_EXISTS(0),
-  UNKNOWN_RECEIVER(1),
-  UNKNOWN_SENDER(2),
-  INSUFFICIENT_FUNDS(3),
-  SAME_SENDER_AND_RECEIVER(4);
-
-  final byte errorCode;
-
-  TransactionError(int errorCode) {
-    this.errorCode = (byte) errorCode;
-  }
-
-  @Override
-  public byte getErrorCode() {
-    return errorCode;
+  static TransactionErrorCode fromInt(byte errorCode) {
+    return () -> errorCode;
   }
 }

@@ -44,6 +44,10 @@ public class TransactionExecutionException extends Exception {
   // TODO: Consider using enums and taking their ordinal as the error code: ECR-2006?
   private final byte errorCode;
 
+  public TransactionExecutionException(TransactionErrorCode errorCode) {
+    this(errorCode.getErrorCode());
+  }
+
   /**
    * Constructs a new transaction exception with no description.
    *
