@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static java.util.stream.Collectors.toList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -45,7 +45,7 @@ class ProofMapIndexProxyIntegrationTest
       Bytes.bytes(0x10, 0x10)
   )
       .map(HashCode::fromBytes)
-      .collect(toList());
+      .collect(toImmutableList());
 
   @Override
   List<HashCode> getTestKeys() {
