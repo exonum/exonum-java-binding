@@ -79,8 +79,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
             builder = builder.with_additional_runtime(runtime);
 
             // TODO: Rewrite with protobuf: ECR-3689
-            let testkit_services = testkit_services_from_java_array(&env, services)?;
-            for service in testkit_services {
+            let java_services = testkit_services_from_java_array(&env, services)?;
+            for service in java_services {
                 builder =
                     builder.with_parametric_artifact(service.artifact_id, service.deploy_args);
                 for param in service.instances {
@@ -240,7 +240,7 @@ fn create_java_keypair<'a>(
 fn testkit_services_from_java_array(
     env: &JNIEnv,
     service_artifact_specs: jobjectArray,
-) -> JniResult<Vec<TestKitService>> {
+) -> JniResult<Vec<TestKitServices>> {
     let num_artifacts = env.get_array_length(service_artifact_specs)?;
     let mut services = Vec::with_capacity(num_artifacts as usize);
     for i in 0..num_artifacts {
@@ -260,7 +260,7 @@ fn testkit_services_from_java_array(
                 .l()?
                 .into_inner();
             let instance_params = parse_service_specs(env, service_specs_obj, artifact_id.clone())?;
-            let testkit_service = TestKitService {
+            let testkit_service = TestKitServices {
                 artifact_id,
                 deploy_args,
                 instances: instance_params,
@@ -281,12 +281,11 @@ fn parse_service_specs(
 ) -> JniResult<Vec<InstanceInitParams>> {
     let num_specs = env.get_array_length(specs_array)?;
 
-    let mut instances = vec![];
+    let mut instances = Vec::with_capacity(num_specs as usize);
     for i in 0..num_specs {
         env.with_local_frame(8, || {
             let service_spec = env.get_object_array_element(specs_array, i)?;
-            let (spec, constructor) = parse_instance_spec(&env, service_spec, artifact_id.clone())?;
-            let params = InstanceInitParams::new(spec.id, spec.name, spec.artifact, constructor);
+            let params = parse_instance_spec(&env, service_spec, artifact_id.clone())?;
             instances.push(params);
 
             Ok(JObject::null())
@@ -306,15 +305,15 @@ fn parse_instance_spec(
     env: &JNIEnv,
     service_spec_obj: JObject,
     artifact_id: ArtifactId,
-) -> JniResult<(InstanceSpec, Vec<u8>)> {
+) -> JniResult<InstanceInitParams> {
     let (service_id, service_name) = get_service_id_and_name(env, service_spec_obj)?;
 
-    let spec = InstanceSpec {
+    let instance_spec = InstanceSpec {
         id: service_id,
         name: service_name,
         artifact: artifact_id,
     };
-    spec.validate().map_err(|err| {
+    instance_spec.validate().map_err(|err| {
         JniError::from(format!(
             "Unable to create instance specification for the service with id {}: {}",
             service_id, err
@@ -325,9 +324,14 @@ fn parse_instance_spec(
         .get_field(service_spec_obj, "configuration", "[B")?
         .l()?
         .into_inner();
-    let config = env.convert_byte_array(config_params)?;
+    let config_params = env.convert_byte_array(config_params)?;
 
-    Ok((spec, config))
+    let instance_init_parameters = InstanceInitParams {
+        instance_spec,
+        constructor: config_params,
+    };
+
+    Ok(instance_init_parameters)
 }
 
 // Creates `InstanceCollection` from `TimeServiceSpec` object.
@@ -373,7 +377,7 @@ fn get_field_as_string(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResul
 }
 
 /// DTO for TestKit services definitions.
-struct TestKitService {
+struct TestKitServices {
     pub artifact_id: ArtifactId,
     pub deploy_args: Vec<u8>,
     pub instances: Vec<InstanceInitParams>,
