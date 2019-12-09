@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -277,7 +276,6 @@ class QaServiceImplTest {
     }
 
     @Test
-    @Disabled("Disabled till proof map keys are fixed")
     void getTimeNotYetAvailable(VertxTestContext context) {
       get(TIME_PATH)
           .send(context.succeeding(response -> context.verify(() -> {
@@ -287,7 +285,6 @@ class QaServiceImplTest {
           })));
     }
 
-    @Disabled("Disabled till proof map keys are fixed")
     @Nested
     class WithConsolidatedTime {
 
