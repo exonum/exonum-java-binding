@@ -125,12 +125,13 @@ cp ./core/rust/exonum-java/TUTORIAL.md "${PACKAGING_ETC_DIR}"
 
 # We use static linkage for RocksDB because in case of dynamic linking
 # the resulting app has a dependency on a _particular_
-# `install_name` of the RocksDB library. In case of RocksDB, `install_name`
-# corresponds to the minor version of the library in terms of Semantic Versioning
-# and is updated for every breaking change. As `install_name` is stored inside
-# Exonum Java binary, even minor updates of RocksDB package in the system
+# `SONAME` of the RocksDB library (On Mac, `install_name` is used instead of
+# `SONAME`; there are almost no differences between them). In case of RocksDB,
+# `SONAME` corresponds to the minor version of the library in terms of Semantic
+# Versioning and is updated for every breaking change. As `SONAME` is stored
+# inside Exonum Java binary, even minor updates of RocksDB package in the system
 # package managers would prevent the application from linking against
-# it and require a new release of the Exonum Java with updated `install_name`.
+# it and require a new release of the Exonum Java with updated `SONAME`.
 export ROCKSDB_STATIC=1
 
 # Check if ROCKSDB_LIB_DIR is set. It is needed for faster and more predictable
