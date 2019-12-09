@@ -18,10 +18,12 @@ extern crate integration_tests;
 extern crate java_bindings;
 
 use integration_tests::vm::{fakes_classpath, java_library_path, log4j_path};
-use java_bindings::exonum::runtime::Runtime;
 use java_bindings::{
-    create_java_vm, create_service_runtime, Executor, InternalConfig, JavaRuntimeProxy, JvmConfig,
-    RuntimeConfig,
+    proxy::runtime::JAVA_RUNTIME_ID,
+    {
+        create_java_vm, create_service_runtime, exonum::runtime::Runtime, Executor, InternalConfig,
+        JavaRuntimeProxy, JvmConfig, RuntimeConfig,
+    },
 };
 
 use std::{path::PathBuf, sync::Arc};
@@ -55,5 +57,5 @@ fn bootstrap() {
 
     let runtime: (u32, Box<dyn Runtime>) = create_service_runtime(executor, &runtime_config).into();
 
-    assert_eq!(runtime.0, JavaRuntimeProxy::RUNTIME_ID as u32);
+    assert_eq!(runtime.0, JAVA_RUNTIME_ID);
 }
