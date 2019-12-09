@@ -19,17 +19,14 @@ use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
     create_java_vm, create_service_runtime,
     exonum::{
-        blockchain::{Blockchain, BlockchainBuilder, BlockchainMut},
+        blockchain::{config::GenesisConfigBuilder, Blockchain, BlockchainBuilder, BlockchainMut},
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel},
+        runtime::rust::{DefaultInstance, RustRuntime, ServiceFactory},
     },
     Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
 };
 
-use java_bindings::exonum::{
-    blockchain::config::GenesisConfigBuilder,
-    runtime::rust::{DefaultInstance, RustRuntime, ServiceFactory},
-};
 use std::sync::Arc;
 
 pub fn run_node(command: Command) -> Result<(), failure::Error> {
