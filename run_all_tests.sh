@@ -28,9 +28,9 @@ mvn install \
   -am
 
 # Skip running native ITs as they are broken till the JavaServiceRuntime is implemented
-exit 0
 echo "Start running EJB native tests"
 cd exonum-java-binding
-# Run native integration tests that require prepared classpaths for fake classes.
+
+# Run native integration tests that require a JVM and/or prepared classpaths for fake classes.
 ./run_native_integration_tests.sh --skip-compile
 ./run_app_tests.sh
