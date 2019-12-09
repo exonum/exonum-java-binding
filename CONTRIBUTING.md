@@ -54,7 +54,11 @@ $ ./run_all_tests.sh
 ---
 
 ⚠️ Some maven modules have not been migrated to dynamic services and
-have to be excluded when executing `mvn` directly:
+have to be excluded when executing `mvn` directly (from the project root):
+```sh
+mvn -pl '!exonum-java-binding/fakes' <commands>
+```
+or, when running `mvn` from the `exonum-java-binding` directory:
 ```sh
 mvn -pl '!fakes' <commands>
 ```
