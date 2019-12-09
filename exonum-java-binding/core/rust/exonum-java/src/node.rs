@@ -67,13 +67,9 @@ fn create_blockchain(
     channel: &NodeChannel,
 ) -> Result<BlockchainMut, failure::Error> {
     let node_config = &config.run_config.node_config;
-    let service_factories = standard_exonum_service_factories();
     let database = create_database(config)?;
     let keypair = node_config.service_keypair();
     let api_sender = ApiSender::new(channel.api_requests.0.clone());
-    let api_endpoints = channel.endpoints.0.clone();
-
-    let java_runtime = create_java_runtime(&config);
 
     let blockchain = Blockchain::new(database, keypair, api_sender);
 
@@ -83,15 +79,21 @@ fn create_blockchain(
         .with_instance(supervisor_service.default_instance())
         .build();
 
-    let rust_runtime = service_factories.into_iter().fold(
-        RustRuntime::new(channel.endpoints.0.clone()),
-        |runtime, factory| runtime.with_factory(factory),
-    );
+    let rust_runtime = create_rust_runtime(channel);
+    let java_runtime = create_java_runtime(&config);
 
     BlockchainBuilder::new(blockchain, genesis_config)
-        .with_runtime(java_runtime)
         .with_runtime(rust_runtime)
+        .with_runtime(java_runtime)
         .build()
+}
+
+fn create_rust_runtime(channel: &NodeChannel) -> RustRuntime {
+    let service_factories = standard_exonum_service_factories();
+    service_factories.into_iter().fold(
+        RustRuntime::new(channel.endpoints.0.clone()),
+        |runtime, factory| runtime.with_factory(factory),
+    )
 }
 
 fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
