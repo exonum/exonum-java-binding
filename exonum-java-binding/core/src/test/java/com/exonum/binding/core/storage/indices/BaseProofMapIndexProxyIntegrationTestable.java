@@ -186,6 +186,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProof_EmptyMapDoesNotContainSingleKey() {
     runTestWithView(database::createSnapshot,
         (map) -> assertThat(map, provesThatAbsent(key1))
@@ -193,6 +194,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProof_SingletonMapContains() {
     runTestWithView(database::createFork, (map) -> {
       HashCode key = key1;
@@ -204,6 +206,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProof_SingletonMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
@@ -213,6 +216,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProof_MultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createMapEntries();
@@ -225,6 +229,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_MultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createMapEntries();
@@ -235,6 +240,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProof_MultiEntryMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createMapEntries();
@@ -257,12 +263,14 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_EmptyMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createSnapshot, (map) ->
         assertThat(map, provesThatAbsent(key1, key2)));
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_SingletonMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
@@ -272,6 +280,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_SingletonMapBothContainsAndDoesNot() {
     runTestWithView(database::createFork, (map) -> {
       ImmutableMap<HashCode, String> source = ImmutableMap.of(
@@ -285,6 +294,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getMultiProof_TwoElementMapContains() {
     runTestWithView(database::createFork, (map) -> {
       ImmutableMap<HashCode, String> source = ImmutableMap.of(
@@ -357,6 +367,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProofFromSingleKey() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
@@ -369,6 +380,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProofFromVarargs() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
@@ -383,6 +395,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProofFromEmptyCollection() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
@@ -396,6 +409,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  @DisabledProofTest
   void getProofFromCollection() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
