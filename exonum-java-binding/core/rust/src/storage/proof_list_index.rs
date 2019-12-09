@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{panic, ptr};
-
 use exonum_merkledb::{
     access::FromAccess, proof_list_index::ProofListIndexIter, Fork, IndexAddress, ObjectHash,
     ProofListIndex, Snapshot,
@@ -23,6 +21,8 @@ use jni::{
     sys::{jboolean, jbyteArray, jint, jlong, jobject},
     JNIEnv,
 };
+
+use std::{panic, ptr};
 
 use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
