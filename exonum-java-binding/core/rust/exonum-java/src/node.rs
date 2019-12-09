@@ -19,7 +19,7 @@ use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
     create_java_vm, create_service_runtime,
     exonum::{
-        blockchain::{Blockchain, BlockchainBuilder, BlockchainMut, InstanceCollection},
+        blockchain::{Blockchain, BlockchainBuilder, BlockchainMut},
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel},
     },
