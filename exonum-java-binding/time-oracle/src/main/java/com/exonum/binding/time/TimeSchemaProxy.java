@@ -57,6 +57,7 @@ class TimeSchemaProxy implements TimeSchema {
     checkArgument(serviceInstances.containsKey(name), "No time service instance "
         + "with the given name (%s) started.", name);
 
+    // TODO(ECR-3953): check instance status
     InstanceSpec serviceSpec = serviceInstances.get(name).getSpec();
     ArtifactId artifactId = serviceSpec.getArtifact();
     checkArgument(isTimeOracleInstance(artifactId), "Service with the given name (%s) is not "
