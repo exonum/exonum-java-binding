@@ -1,6 +1,6 @@
 [package]
 name = "java_bindings"
-version = "0.9.0-SNAPSHOT"
+version = "0.9.0-rc1"
 authors = ["Exonum Team <contact@exonum.com>"]
 
 [workspace]

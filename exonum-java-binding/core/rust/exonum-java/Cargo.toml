@@ -1,6 +1,6 @@
 [package]
 name = "exonum-java"
-version = "0.9.0-SNAPSHOT"
+version = "0.9.0-rc1"
 authors = ["Exonum team <contact@exonum.com>"]
 
 [dependencies]
