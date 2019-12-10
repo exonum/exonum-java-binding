@@ -328,6 +328,8 @@ class QaServiceImplTest {
               Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, INITIAL_TIME);
 
               assertThat(actual).isEqualTo(expected);
+
+              context.completeNow();
             })));
       }
     }
