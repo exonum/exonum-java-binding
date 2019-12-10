@@ -137,6 +137,46 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
+/// Removes the last element from a list and returns it, or null pointer if it is empty.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeRemoveLast(
+    env: JNIEnv,
+    _: JObject,
+    list_handle: Handle,
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let val = match *handle::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(_) => panic!("Unable to modify snapshot."),
+            IndexType::ForkIndex(ref mut list) => list.pop(),
+        };
+        match val {
+            Some(val) => env.byte_array_from_slice(&val),
+            None => Ok(ptr::null_mut()),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+/// Shortens the list, keeping the first len elements and dropping the rest.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeTruncate(
+    env: JNIEnv,
+    _: JObject,
+    list_handle: Handle,
+    len: jlong,
+) {
+    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
+            panic!("Unable to modify snapshot.");
+        }
+        IndexType::ForkIndex(ref mut list) => {
+            list.truncate(len as u64);
+            Ok(())
+        }
+    });
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Returns `true` if the list is empty.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeIsEmpty(

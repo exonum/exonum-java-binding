@@ -24,9 +24,17 @@ You need to install the following dependencies:
   * The [system dependencies](https://exonum.com/doc/version/0.12/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
 
-  __Important__: On Mac OS it is necessary to install RocksDB
+  __Important__: It is necessary to install RocksDB
   package and to set the environment variable `ROCKSDB_LIB_DIR`.
-  To install the package via Homebrew:
+  To install the package on Ubuntu:
+  
+  ```bash
+  sudo add-apt-repository ppa:exonum/rocksdb
+  sudo apt-get update && sudo apt-get install librocksdb6.2
+  export ROCKSDB_LIB_DIR=/usr/lib
+  ```
+  
+  To install the package via Homebrew on Mac:
   
   ```bash
   brew install rocksdb

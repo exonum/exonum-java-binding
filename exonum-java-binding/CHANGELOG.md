@@ -42,6 +42,7 @@ the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.
   schemas with unique namespaces. (#1181)
 - Implement `run-dev` command support for running the node in development mode. (#1217)
 - `Configurable` interface corresponding to `exonum.Configure`. (#1234)
+- `ProofMapIndexProxy#truncate` and `#removeLast`. (#1272)
 - Java 13 support.
 
 ### Changed
