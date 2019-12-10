@@ -57,3 +57,5 @@ exonum-derive = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2"
 exonum-cli = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
 exonum-proto = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
 exonum-supervisor = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-crypto = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-merkledb = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
