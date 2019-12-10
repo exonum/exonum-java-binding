@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use exonum_btc_anchoring::BtcAnchoringService;
 use exonum_supervisor::SimpleSupervisor;
 use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
@@ -112,8 +113,8 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
 }
 
 fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
-    // TODO(ECR-3714): add anchoring service
-    vec![Box::new(TimeServiceFactory::with_provider(
-        SystemTimeProvider,
-    ))]
+    vec![
+        Box::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
+        Box::new(BtcAnchoringService),
+    ]
 }
