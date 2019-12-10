@@ -37,6 +37,7 @@ import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
@@ -81,7 +82,7 @@ import javax.annotation.Nullable;
  * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized — service instances are
- * {@linkplain Service#configure(Fork) initialized} and genesis block is committed.
+ * {@linkplain Service#initialize(Fork, Configuration) initialized} and genesis block is committed.
  * Then the {@linkplain Service#createPublicApiHandlers(Node, Router) public API handlers} are
  * created.
  *
