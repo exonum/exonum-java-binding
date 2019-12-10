@@ -33,6 +33,8 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.singletonList;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -58,12 +60,12 @@ import com.google.common.collect.Streams;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -367,6 +369,52 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
+  void keysTest() {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
+
+      putAll(map, entries);
+
+      Iterator<HashCode> keysIterator = map.keys();
+      List<HashCode> keysFromIter = ImmutableList.copyOf(keysIterator);
+      List<HashCode> keysInMap = MapEntries.extractKeys(entries);
+
+      // Keys must appear in a lexicographical order.
+      assertThat(keysFromIter, equalTo(keysInMap));
+    });
+  }
+
+  @Test
+  void valuesTest() {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
+
+      putAll(map, entries);
+
+      Iterator<String> valuesIterator = map.values();
+      List<String> valuesFromIter = ImmutableList.copyOf(valuesIterator);
+      List<String> valuesInMap = MapEntries.extractValues(entries);
+
+      // Values must appear in a lexicographical order of keys.
+      assertThat(valuesFromIter, equalTo(valuesInMap));
+    });
+  }
+
+  @Test
+  void entriesTest() {
+    runTestWithView(database::createFork, (map) -> {
+      List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
+
+      putAll(map, entries);
+
+      Iterator<MapEntry<HashCode, String>> entriesIterator = map.entries();
+      List<MapEntry> entriesFromIter = ImmutableList.copyOf(entriesIterator);
+      // Entries must appear in a lexicographical order of keys.
+      assertThat(entriesFromIter, equalTo(entries));
+    });
+  }
+
+  @Test
   @DisabledProofTest
   void getProofFromSingleKey() {
     runTestWithView(database::createFork, (map) -> {
@@ -478,7 +526,17 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
     index.put(key1, V1);
   }
 
-  List<MapEntry<HashCode, String>> createMapEntries() {
+  /**
+   * Creates `numOfEntries` map entries, sorted by key in lexicographical order:
+   * [(key0, V1), (key2, V2), … (key_i, Vi)].
+   */
+  private List<MapEntry<HashCode, String>> createSortedMapEntries() {
+    Stream<HashCode> sortedKeys = getTestKeys().stream()
+        .sorted(comparing(HashCode::asBytes, UnsignedBytes.lexicographicalComparator()));
+    return createMapEntries(sortedKeys);
+  }
+
+  private List<MapEntry<HashCode, String>> createMapEntries() {
     return createMapEntries(getTestKeys().stream());
   }
 
@@ -491,6 +549,6 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
     Stream<String> roundRobinValues = IntStream.range(0, Integer.MAX_VALUE)
         .mapToObj(i -> values.get(i % values.size()));
     return Streams.zip(keys, roundRobinValues, MapEntry::valueOf)
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 }

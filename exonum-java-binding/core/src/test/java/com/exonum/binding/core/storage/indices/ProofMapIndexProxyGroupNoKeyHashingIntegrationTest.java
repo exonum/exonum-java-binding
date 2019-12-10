@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.ProofMapIndexProxyNoKeyHashingIntegrationTest.SORTED_TEST_KEYS;
+import static com.exonum.binding.core.storage.indices.ProofMapIndexProxyNoKeyHashingIntegrationTest.TEST_KEYS;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -26,9 +26,9 @@ import com.google.common.collect.ImmutableMap;
 class ProofMapIndexProxyGroupNoKeyHashingIntegrationTest
     extends BaseMapIndexGroupTestable<HashCode> {
 
-  private static final HashCode PK1 = SORTED_TEST_KEYS.get(0);
-  private static final HashCode PK2 = SORTED_TEST_KEYS.get(1);
-  private static final HashCode PK3 = SORTED_TEST_KEYS.get(2);
+  private static final HashCode PK1 = TEST_KEYS.get(0);
+  private static final HashCode PK2 = TEST_KEYS.get(1);
+  private static final HashCode PK3 = TEST_KEYS.get(2);
 
   private static final String GROUP_NAME = "proof_map_group_IT";
 
