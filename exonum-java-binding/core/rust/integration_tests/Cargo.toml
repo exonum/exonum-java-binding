@@ -11,7 +11,7 @@ crate-type = ["dylib"]
 [features]
 
 [dependencies]
-exonum-testkit = "0.12"
+exonum-testkit = "0.13.0-rc.2"
 failure = "0.1"
 futures = "0.1"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855)

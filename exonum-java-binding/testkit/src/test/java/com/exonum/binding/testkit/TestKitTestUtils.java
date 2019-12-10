@@ -25,6 +25,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.core.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.InstanceState;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -71,11 +72,11 @@ final class TestKitTestUtils {
 
   static void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {
     View view = testKit.getSnapshot();
-    MapIndex<String, InstanceSpec> serviceInstances =
+    MapIndex<String, InstanceState> serviceInstances =
         new DispatcherSchema(view).serviceInstances();
     assertThat(serviceInstances.containsKey(serviceName)).isTrue();
 
-    InstanceSpec serviceSpec = serviceInstances.get(serviceName);
+    InstanceSpec serviceSpec = serviceInstances.get(serviceName).getSpec();
     int actualServiceId = serviceSpec.getId();
     assertThat(actualServiceId).isEqualTo(serviceId);
   }

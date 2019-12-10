@@ -19,11 +19,11 @@
 use std::{panic, sync::Arc};
 
 use exonum::{
-    blockchain::{Block, InstanceCollection, InstanceConfig},
+    blockchain::{config::InstanceInitParams, Block, InstanceCollection},
     crypto::{PublicKey, SecretKey},
-    helpers::ValidatorId,
+    helpers::{ValidateInput, ValidatorId},
     merkledb::BinaryValue,
-    runtime::InstanceSpec,
+    runtime::{ArtifactId, InstanceSpec},
 };
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
@@ -32,6 +32,8 @@ use jni::{
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
     Executor, JNIEnv,
 };
+
+use std::str::FromStr;
 
 use handle::{cast_handle, drop_handle, to_handle, Handle};
 use storage::View;
@@ -74,15 +76,28 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
 
             let runtime =
                 JavaRuntimeProxy::new(executor.clone(), env.new_global_ref(runtime_adapter)?);
-            builder = builder
-                .with_additional_runtime(runtime)
-                // TODO: Rewrite with protobuf: ECR-3689
-                .with_instances(instance_configs_from_java_array(&env, services)?);
+            builder = builder.with_additional_runtime(runtime);
 
-            if let Some(instance) =
+            // TODO: Rewrite with protobuf: ECR-3689
+            let java_services = testkit_services_from_java_array(&env, services)?;
+            for service in java_services {
+                builder =
+                    builder.with_parametric_artifact(service.artifact_id, service.deploy_args);
+                for param in service.instances {
+                    builder = builder.with_instance(param);
+                }
+            }
+
+            if let Some(service) =
                 time_service_instance_from_java(&env, executor.clone(), time_service_spec)?
             {
-                builder = builder.with_rust_service(instance);
+                // We always have exactly one time service instance.
+                let instance = service.instances[0].clone();
+                let artifact_id = service.factory.artifact_id();
+                builder = builder
+                    .with_rust_service(service.factory)
+                    .with_artifact(artifact_id)
+                    .with_instance(instance);
             }
 
             builder
@@ -153,8 +168,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateBlock
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let testkit = cast_handle::<TestKit>(handle);
-        let mut raw_transactions = Vec::new();
         let transactions_count = env.get_array_length(transactions)?;
+        let mut raw_transactions = Vec::with_capacity(transactions_count as usize);
         for i in 0..transactions_count {
             let serialized_tx_object =
                 env.auto_local(env.get_object_array_element(transactions, i as _)?);
@@ -216,23 +231,25 @@ fn create_java_keypair<'a>(
     )
 }
 
-// Converts Java array of `TestKitServiceInstances` to vector of `InstanceConfig`.
+// Converts Java array of `TestKitServiceInstances` to vector of `TestKitService`.
 //
 // `TestKitServiceInstances` representation:
 //      String artifactId;
 //      byte[] deployArguments;
 //      ServiceSpec[] serviceSpecs;
-fn instance_configs_from_java_array(
+fn testkit_services_from_java_array(
     env: &JNIEnv,
     service_artifact_specs: jobjectArray,
-) -> JniResult<Vec<InstanceConfig>> {
-    let mut instance_configs = vec![];
+) -> JniResult<Vec<TestKitServices>> {
     let num_artifacts = env.get_array_length(service_artifact_specs)?;
+    let mut services = Vec::with_capacity(num_artifacts as usize);
     for i in 0..num_artifacts {
         env.with_local_frame(8, || {
             let artifact_spec_obj = env.get_object_array_element(service_artifact_specs, i)?;
 
-            let artifact_id = get_field_as_string(env, artifact_spec_obj, "artifactId")?;
+            let artifact_id: ArtifactId =
+                FromStr::from_str(&get_field_as_string(env, artifact_spec_obj, "artifactId")?)
+                    .unwrap();
             let deploy_args: jbyteArray = env
                 .get_field(artifact_spec_obj, "deployArguments", "[B")?
                 .l()?
@@ -242,38 +259,40 @@ fn instance_configs_from_java_array(
                 .get_field(artifact_spec_obj, "serviceSpecs", SERVICE_SPECS_FIELD_TYPE)?
                 .l()?
                 .into_inner();
-            // TODO: Avoid deploy arguments duplication after ECR-3690
-            let configs = parse_service_specs(env, service_specs_obj, artifact_id, deploy_args)?;
-            instance_configs.extend(configs);
+            let instance_params = parse_service_specs(env, service_specs_obj, artifact_id.clone())?;
+            let testkit_service = TestKitServices {
+                artifact_id,
+                deploy_args,
+                instances: instance_params,
+            };
+            services.push(testkit_service);
 
             Ok(JObject::null())
         })?;
     }
-    Ok(instance_configs)
+    Ok(services)
 }
 
-// Converts Java array of `ServiceSpec` instances into vector of `InstanceConfig` for specific artifact.
+// Converts Java array of `ServiceSpec` instances into vector of `InstanceInitParams` for specific artifact.
 fn parse_service_specs(
     env: &JNIEnv,
     specs_array: jobjectArray,
-    artifact_id: String,
-    deploy_args: Vec<u8>,
-) -> JniResult<Vec<InstanceConfig>> {
+    artifact_id: ArtifactId,
+) -> JniResult<Vec<InstanceInitParams>> {
     let num_specs = env.get_array_length(specs_array)?;
 
-    let mut instance_configs = vec![];
+    let mut instances = Vec::with_capacity(num_specs as usize);
     for i in 0..num_specs {
         env.with_local_frame(8, || {
             let service_spec = env.get_object_array_element(specs_array, i)?;
-            let (spec, config) = parse_instance_spec(&env, service_spec, &artifact_id)?;
-            let cfg = InstanceConfig::new(spec, Some(deploy_args.to_bytes()), config);
-            instance_configs.push(cfg);
+            let params = parse_instance_spec(&env, service_spec, artifact_id.clone())?;
+            instances.push(params);
 
             Ok(JObject::null())
         })?;
     }
 
-    Ok(instance_configs)
+    Ok(instances)
 }
 
 // Parses the `ServiceSpec` instance.
@@ -285,22 +304,34 @@ fn parse_service_specs(
 fn parse_instance_spec(
     env: &JNIEnv,
     service_spec_obj: JObject,
-    artifact_id: impl AsRef<str>,
-) -> JniResult<(InstanceSpec, Vec<u8>)> {
+    artifact_id: ArtifactId,
+) -> JniResult<InstanceInitParams> {
     let (service_id, service_name) = get_service_id_and_name(env, service_spec_obj)?;
-    let config_params: jbyteArray = env
-        .get_field(service_spec_obj, "configuration", "[B")?
-        .l()?
-        .into_inner();
-    let config = env.convert_byte_array(config_params)?;
-    let spec = InstanceSpec::new(service_id, service_name, artifact_id).map_err(|err| {
+
+    let instance_spec = InstanceSpec {
+        id: service_id,
+        name: service_name,
+        artifact: artifact_id,
+    };
+    instance_spec.validate().map_err(|err| {
         JniError::from(format!(
             "Unable to create instance specification for the service with id {}: {}",
             service_id, err
         ))
     })?;
 
-    Ok((spec, config))
+    let config_params: jbyteArray = env
+        .get_field(service_spec_obj, "configuration", "[B")?
+        .l()?
+        .into_inner();
+    let config_params = env.convert_byte_array(config_params)?;
+
+    let instance_init_parameters = InstanceInitParams {
+        instance_spec,
+        constructor: config_params,
+    };
+
+    Ok(instance_init_parameters)
 }
 
 // Creates `InstanceCollection` from `TimeServiceSpec` object.
@@ -343,4 +374,11 @@ fn get_field_as_string(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResul
         env,
         env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?,
     )
+}
+
+/// DTO for TestKit services definitions.
+struct TestKitServices {
+    pub artifact_id: ArtifactId,
+    pub deploy_args: Vec<u8>,
+    pub instances: Vec<InstanceInitParams>,
 }

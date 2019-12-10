@@ -13,20 +13,23 @@
 // limitations under the License.
 
 use exonum_merkledb::{
-    access::FromAccess, proof_list_index::ProofListIndexIter, Fork, IndexAddress, ObjectHash,
-    ProofListIndex, Snapshot,
+    access::FromAccess, proof_list_index::ProofListIndexIter, Fork, IndexAddress, ListProof,
+    ObjectHash, ProofListIndex, Snapshot,
 };
+use exonum_proto::ProtobufConvert;
 use jni::{
     objects::{JClass, JObject, JString},
-    sys::{jboolean, jbyteArray, jint, jlong, jobject},
+    sys::{jboolean, jbyteArray, jint, jlong},
     JNIEnv,
 };
+use protobuf::Message;
 
 use std::{panic, ptr};
 
 use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
 use utils;
+use JniResult;
 
 type Index<T> = ProofListIndex<T, Value>;
 
@@ -243,32 +246,43 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Returns Java representation of the proof that an element exists at the specified index.
+/// Returns the proof that an element exists at the specified index. The proof is serialized in
+/// the protobuf format.
 #[no_mangle]
-// fixme: ECR-3614
-#[allow(unused_variables)]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetProof(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
     index: jlong,
-) -> jobject {
-    ptr::null_mut()
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
+            IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
+        };
+        proof_to_bytes(&env, proof)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Returns Java representation of the proof that some elements exists in the specified range.
+/// Returns the proof that some elements exists in the specified range. The proof is serialized in
+/// the protobuf format.
 #[no_mangle]
-// fixme: ECR-3614
-#[allow(unused_variables)]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
     from: jlong,
     to: jlong,
-) -> jobject {
-    // fixme: ECR-3614
-    ptr::null_mut()
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64..to as u64),
+            IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64..to as u64),
+        };
+        proof_to_bytes(&env, proof)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Returns pointer to the iterator over list.
@@ -395,4 +409,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     iter_handle: Handle,
 ) {
     handle::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
+}
+
+// Serializes `ListProof` into protobuf format and converts to the Java bytes array.
+fn proof_to_bytes(env: &JNIEnv, proof: ListProof<Value>) -> JniResult<jbyteArray> {
+    env.byte_array_from_slice(&proof.to_pb().write_to_bytes().unwrap())
 }
