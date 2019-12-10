@@ -12,71 +12,90 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use exonum_merkledb::{
+    access::{FromAccess, RawAccess},
+    proof_map_index::{
+        Hashed, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, PROOF_MAP_KEY_SIZE,
+    },
+    Fork, IndexAddress, ObjectHash, ProofMapIndex, RawProofMapIndex, Snapshot,
+};
+use exonum_proto::ProtobufConvert;
 use jni::{
-    objects::{JClass, JObject, JString},
-    sys::{jboolean, jbyteArray, jobject, jsize},
+    objects::{GlobalRef, JClass, JMethodID, JObject, JString},
+    sys::{jboolean, jbyteArray, jobject, jobjectArray, JNI_TRUE},
     JNIEnv,
 };
+use protobuf::Message;
 
 use std::{panic, ptr};
 
-use exonum::crypto::Hash;
-use exonum_merkledb::{
-    access::FromAccess,
-    proof_map_index::{
-        MapProof, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, ProofPath,
-        PROOF_MAP_KEY_SIZE,
-    },
-    BinaryKey, Fork, IndexAddress, ObjectHash, ProofMapIndex, Snapshot,
-};
-
 use handle::{self, Handle};
 use storage::{
-    db::{Value, View, ViewRef},
+    db::{Key, Value, View, ViewRef},
     PairIter,
 };
 use utils;
 use JniResult;
 
 type RawKey = [u8; PROOF_MAP_KEY_SIZE];
-#[derive(PartialEq, Eq, Clone, Copy, PartialOrd, Ord, Default)]
-struct Key(RawKey);
-type Index<T> = ProofMapIndex<T, Key, Value>;
 
-impl ObjectHash for Key {
-    fn object_hash(&self) -> Hash {
-        Hash::from_slice(&self.0).unwrap()
-    }
+// Wrapper for an underlying ProofMapIndex that supports two types of keys:
+//  1. RawKey - fixed-length 256 bits key that won't be hashed by ProofMapIndex
+//  2. Key - variable-length array of bytes that will be hashed by ProofMapIndex
+enum Index<T>
+where
+    T: RawAccess,
+{
+    Raw(RawProofMapIndex<T, RawKey, Value>),
+    Hashed(ProofMapIndex<T, Key, Value>),
 }
 
-impl BinaryKey for Key {
-    fn size(&self) -> usize {
-        self.0.size()
-    }
-
-    fn write(&self, buffer: &mut [u8]) -> usize {
-        self.0.write(buffer)
-    }
-
-    fn read(buffer: &[u8]) -> Self::Owned {
-        Key(RawKey::read(buffer))
-    }
-}
-
-const JAVA_ENTRY_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
-const MAP_PROOF_ENTRY: &str = "com/exonum/binding/common/proofs/map/MapProofEntry";
-const MAP_ENTRY: &str = "com/exonum/binding/common/collect/MapEntry";
-const UNCHECKED_FLAT_MAP_PROOF: &str = "com/exonum/binding/common/proofs/map/UncheckedFlatMapProof";
-const UNCHECKED_FLAT_MAP_PROOF_SIG: &str =
-    "([Lcom/exonum/binding/common/proofs/map/MapProofEntry;[Lcom/exonum/binding/common/collect/MapEntry;[[B)Lcom/exonum/binding/common/proofs/map/UncheckedFlatMapProof;";
-const BYTE_ARRAY: &str = "[B";
+const MAP_ENTRY_INTERNAL_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
 
 enum IndexType {
     SnapshotIndex(Index<&'static dyn Snapshot>),
     ForkIndex(Index<&'static Fork>),
 }
 
-type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
+enum Iter<'a> {
+    Raw(PairIter<ProofMapIndexIter<'a, RawKey, Value>>),
+    Hashed(PairIter<ProofMapIndexIter<'a, Key, Value>>),
+}
+
+enum KeysIter<'a> {
+    Raw(ProofMapIndexKeys<'a, RawKey>),
+    Hashed(ProofMapIndexKeys<'a, Key>),
+}
+
+// For easy conversion to RawKey.
+trait ToRawKey {
+    fn to_raw(&self) -> RawKey;
+}
+
+impl<T: RawAccess> From<ProofMapIndex<T, Key, Value>> for Index<T> {
+    fn from(map: ProofMapIndex<T, Key, Value>) -> Self {
+        Index::Hashed(map)
+    }
+}
+
+impl<T: RawAccess> From<RawProofMapIndex<T, RawKey, Value>> for Index<T> {
+    fn from(map: RawProofMapIndex<T, RawKey, Value>) -> Self {
+        Index::Raw(map)
+    }
+}
+
+impl ToRawKey for Key {
+    fn to_raw(&self) -> RawKey {
+        assert_eq!(
+            self.len(),
+            PROOF_MAP_KEY_SIZE,
+            "Key size should be 256 bits"
+        );
+        let mut result: RawKey = [0; 32];
+        result.copy_from_slice(self.as_slice());
+        result
+    }
+}
 
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
@@ -85,18 +104,36 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     _: JClass,
     name: JString,
     view_handle: Handle,
-    // TODO: to be used in ECR-3765
-    _key_hashing: jboolean,
+    key_hashing: jboolean,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let name = utils::convert_to_string(&env, name)?;
+        let key_is_hashed = key_hashing == JNI_TRUE;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::from_access(snapshot, name.into()).unwrap())
+                    let index = if key_is_hashed {
+                        ProofMapIndex::<_, _, _, Hashed>::from_access(snapshot, name.into())
+                            .unwrap()
+                            .into()
+                    } else {
+                        RawProofMapIndex::from_access(snapshot, name.into())
+                            .unwrap()
+                            .into()
+                    };
+                    IndexType::SnapshotIndex(index)
                 }
                 ViewRef::Fork(fork) => {
-                    IndexType::ForkIndex(Index::from_access(fork, name.into()).unwrap())
+                    let index = if key_is_hashed {
+                        ProofMapIndex::<_, _, _, Hashed>::from_access(fork, name.into())
+                            .unwrap()
+                            .into()
+                    } else {
+                        RawProofMapIndex::from_access(fork, name.into())
+                            .unwrap()
+                            .into()
+                    };
+                    IndexType::ForkIndex(index)
                 }
             },
         ))
@@ -112,20 +149,39 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     group_name: JString,
     map_id: jbyteArray,
     view_handle: Handle,
-    // TODO: to be used in ECR-3765
-    _key_hashing: jboolean,
+    key_hashing: jboolean,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let map_id = env.convert_byte_array(map_id)?;
         let address = IndexAddress::with_root(group_name).append_bytes(&map_id);
-        let view_ref = handle::cast_handle::<View>(view_handle).get();
-        Ok(handle::to_handle(match view_ref {
-            ViewRef::Snapshot(snapshot) => {
-                IndexType::SnapshotIndex(Index::from_access(snapshot, address).unwrap())
-            }
-            ViewRef::Fork(fork) => IndexType::ForkIndex(Index::from_access(fork, address).unwrap()),
-        }))
+        let key_is_hashed = key_hashing == JNI_TRUE;
+        Ok(handle::to_handle(
+            match handle::cast_handle::<View>(view_handle).get() {
+                ViewRef::Snapshot(snapshot) => {
+                    let index = if key_is_hashed {
+                        ProofMapIndex::<_, _, _, Hashed>::from_access(snapshot, address)
+                            .unwrap()
+                            .into()
+                    } else {
+                        RawProofMapIndex::from_access(snapshot, address)
+                            .unwrap()
+                            .into()
+                    };
+                    IndexType::SnapshotIndex(index)
+                }
+                ViewRef::Fork(fork) => {
+                    let index = if key_is_hashed {
+                        ProofMapIndex::<_, _, _, Hashed>::from_access(fork, address)
+                            .unwrap()
+                            .into()
+                    } else {
+                        RawProofMapIndex::from_access(fork, address).unwrap().into()
+                    };
+                    IndexType::ForkIndex(index)
+                }
+            },
+        ))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -149,8 +205,14 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let hash = match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.object_hash(),
-            IndexType::ForkIndex(ref map) => map.object_hash(),
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(map) => map.object_hash(),
+                Index::Hashed(map) => map.object_hash(),
+            },
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(map) => map.object_hash(),
+                Index::Hashed(map) => map.object_hash(),
+            },
         };
         utils::convert_hash(&env, &hash)
     });
@@ -166,10 +228,16 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     key: jbyteArray,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let key = convert_to_key(&env, key)?;
+        let key = env.convert_byte_array(key)?;
         let val = match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.get(&key),
-            IndexType::ForkIndex(ref map) => map.get(&key),
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(map) => map.get(&key.to_raw()),
+                Index::Hashed(map) => map.get(&key),
+            },
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(map) => map.get(&key.to_raw()),
+                Index::Hashed(map) => map.get(&key),
+            },
         };
         match val {
             Some(val) => env.byte_array_from_slice(&val),
@@ -188,181 +256,71 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     key: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let key = convert_to_key(&env, key)?;
+        let key = env.convert_byte_array(key)?;
         Ok(match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.contains(&key),
-            IndexType::ForkIndex(ref map) => map.contains(&key),
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(map) => map.contains(&key.to_raw()),
+                Index::Hashed(map) => map.contains(&key),
+            },
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(map) => map.contains(&key.to_raw()),
+                Index::Hashed(map) => map.contains(&key),
+            },
         } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns Java-proof object.
+/// Returns proof that is serialized in protobuf.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetProof(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
     key: jbyteArray,
-) -> jobject {
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let key = convert_to_key(&env, key)?;
-        let proof = match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.get_proof(key),
-            IndexType::ForkIndex(ref map) => map.get_proof(key),
+        let key = env.convert_byte_array(key)?;
+        let proof_proto = match *handle::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(ref map) => map.get_proof(key.to_raw()).to_pb(),
+                Index::Hashed(ref map) => map.get_proof(key).to_pb(),
+            },
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(ref map) => map.get_proof(key.to_raw()).to_pb(),
+                Index::Hashed(ref map) => map.get_proof(key).to_pb(),
+            },
         };
 
-        Ok(convert_to_java_proof(&env, proof)?.into_inner())
+        env.byte_array_from_slice(&proof_proto.write_to_bytes().unwrap())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Returns Java-proof object.
+/// Returns multiproof that is serialized in protobuf.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeGetMultiProof(
     env: JNIEnv,
     _: JObject,
     map_handle: Handle,
-    keys: jbyteArray,
-) -> jobject {
+    keys: jobjectArray,
+) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let keys = convert_to_keys(&env, keys)?;
-        let proof = match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.get_multiproof(keys),
-            IndexType::ForkIndex(ref map) => map.get_multiproof(keys),
+        let proof_proto = match *handle::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(ref map) => map.get_multiproof(convert_keys(keys)).to_pb(),
+                Index::Hashed(ref map) => map.get_multiproof(keys).to_pb(),
+            },
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(ref map) => map.get_multiproof(convert_keys(keys)).to_pb(),
+                Index::Hashed(ref map) => map.get_multiproof(keys).to_pb(),
+            },
         };
 
-        Ok(convert_to_java_proof(&env, proof)?.into_inner())
+        env.byte_array_from_slice(&proof_proto.write_to_bytes().unwrap())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
-}
-
-fn convert_to_java_proof<'a>(
-    env: &'a JNIEnv,
-    proof: MapProof<Key, Value>,
-) -> JniResult<JObject<'a>> {
-    let proof_nodes: JObject = create_java_proof_nodes(&env, &proof)?;
-
-    let native_entries: Vec<_> = proof.all_entries_unchecked().collect();
-
-    let map_entries: JObject = create_java_map_entries(&env, &native_entries)?;
-    let missing_keys: JObject = create_java_missing_keys(&env, &native_entries)?;
-
-    create_java_unchecked_map_proof(&env, proof_nodes, map_entries, missing_keys)
-}
-
-fn create_java_proof_nodes<'a>(
-    env: &'a JNIEnv,
-    map_proof: &MapProof<Key, Value>,
-) -> JniResult<JObject<'a>> {
-    let proof_entries = map_proof.proof_unchecked();
-    let java_entries = env.new_object_array(
-        proof_entries.len() as jsize,
-        MAP_PROOF_ENTRY,
-        JObject::null(),
-    )?;
-    for (i, (proof_path, value_hash)) in proof_entries.iter().enumerate() {
-        // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
-        //   consider using a single frame
-        env.with_local_frame(8, || {
-            let je = create_java_proof_node(env, &proof_path, &value_hash)?;
-            env.set_object_array_element(java_entries, i as jsize, je)?;
-            Ok(JObject::null())
-        })?;
-    }
-    Ok(java_entries.into())
-}
-
-/// Creates a proof node — a node in a proof contour that corresponds to a tree node
-/// that does not contain any of the requested keys.
-fn create_java_proof_node<'a>(
-    env: &'a JNIEnv,
-    proof_path: &ProofPath,
-    hash: &Hash,
-) -> JniResult<JObject<'a>> {
-    let proof_path: JObject = env.byte_array_from_slice(proof_path.as_bytes())?.into();
-    let hash: JObject = utils::convert_hash(env, hash)?.into();
-    env.new_object(
-        MAP_PROOF_ENTRY,
-        "([B[B)V",
-        &[proof_path.into(), hash.into()],
-    )
-}
-
-fn create_java_map_entries<'a>(
-    env: &'a JNIEnv,
-    entries: &[(&Key, Option<&Value>)],
-) -> JniResult<JObject<'a>> {
-    let existing_entries: Vec<(&Key, &Value)> = entries
-        .iter()
-        .filter_map(|e| match e {
-            (key, Some(value)) => Some((*key, *value)),
-            _ => None,
-        })
-        .collect();
-    let java_entries =
-        env.new_object_array(existing_entries.len() as jsize, MAP_ENTRY, JObject::null())?;
-
-    for (i, (key, value)) in existing_entries.iter().enumerate() {
-        // todo: [ECR-2360] Estimate precisely the upper bound on the number of references ^ and
-        //   consider using a single frame
-        env.with_local_frame(8, || {
-            let je = create_java_map_entry(env, key, value)?;
-            env.set_object_array_element(java_entries, i as jsize, je)?;
-            Ok(JObject::null())
-        })?;
-    }
-    Ok(java_entries.into())
-}
-
-#[allow(clippy::ptr_arg)]
-fn create_java_map_entry<'a>(env: &'a JNIEnv, key: &Key, value: &Value) -> JniResult<JObject<'a>> {
-    let key: JObject = env.byte_array_from_slice(&key.0)?.into();
-    let value: JObject = env.byte_array_from_slice(value.as_slice())?.into();
-    env.call_static_method(
-        MAP_ENTRY,
-        "valueOf",
-        format!("(Ljava/lang/Object;Ljava/lang/Object;)L{};", MAP_ENTRY),
-        &[key.into(), value.into()],
-    )?
-    .l()
-}
-
-fn create_java_missing_keys<'a>(
-    env: &'a JNIEnv,
-    entries: &[(&Key, Option<&Value>)],
-) -> JniResult<JObject<'a>> {
-    let missing_keys: Vec<&Key> = entries
-        .iter()
-        .filter_map(|e| match e {
-            (key, None) => Some(*key),
-            _ => None,
-        })
-        .collect();
-    let java_missing_keys =
-        env.new_object_array(missing_keys.len() as jsize, BYTE_ARRAY, JObject::null())?;
-
-    for (i, key) in missing_keys.iter().enumerate() {
-        let java_key = env.byte_array_from_slice(key.0.as_ref())?.into();
-        env.set_object_array_element(java_missing_keys, i as jsize, java_key)?;
-        env.delete_local_ref(java_key)?;
-    }
-    Ok(java_missing_keys.into())
-}
-
-fn create_java_unchecked_map_proof<'a>(
-    env: &'a JNIEnv,
-    proof_nodes: JObject,
-    map_entries: JObject,
-    missing_keys: JObject,
-) -> JniResult<JObject<'a>> {
-    let java_proof = env.call_static_method(
-        UNCHECKED_FLAT_MAP_PROOF,
-        "fromNative",
-        UNCHECKED_FLAT_MAP_PROOF_SIG,
-        &[proof_nodes.into(), map_entries.into(), missing_keys.into()],
-    )?;
-    java_proof.l()
 }
 
 /// Returns the pointer to the iterator over a map keys and values.
@@ -374,10 +332,15 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let iter = match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.iter(),
-            IndexType::ForkIndex(ref map) => map.iter(),
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(ref map) => Iter::Raw(create_pair_iter(&env, map.iter())?),
+                Index::Hashed(ref map) => Iter::Hashed(create_pair_iter(&env, map.iter())?),
+            },
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(ref map) => Iter::Raw(create_pair_iter(&env, map.iter())?),
+                Index::Hashed(ref map) => Iter::Hashed(create_pair_iter(&env, map.iter())?),
+            },
         };
-        let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
         Ok(handle::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -391,12 +354,17 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(handle::to_handle(
-            match *handle::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.keys(),
-                IndexType::ForkIndex(ref map) => map.keys(),
+        let keys_iter = match handle::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(index) => match index {
+                Index::Raw(map) => KeysIter::Raw(map.keys()),
+                Index::Hashed(map) => KeysIter::Hashed(map.keys()),
             },
-        ))
+            IndexType::ForkIndex(index) => match index {
+                Index::Raw(map) => KeysIter::Raw(map.keys()),
+                Index::Hashed(map) => KeysIter::Hashed(map.keys()),
+            },
+        };
+        Ok(handle::to_handle(keys_iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -409,12 +377,17 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     map_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(handle::to_handle(
-            match *handle::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.values(),
-                IndexType::ForkIndex(ref map) => map.values(),
+        let values = match *handle::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(map) => map.values(),
+                Index::Hashed(map) => map.values(),
             },
-        ))
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(map) => map.values(),
+                Index::Hashed(map) => map.values(),
+            },
+        };
+        Ok(handle::to_handle(values))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -428,12 +401,17 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let key = convert_to_key(&env, key)?;
+        let key = env.convert_byte_array(key)?;
         let iter = match *handle::cast_handle::<IndexType>(map_handle) {
-            IndexType::SnapshotIndex(ref map) => map.iter_from(&key),
-            IndexType::ForkIndex(ref map) => map.iter_from(&key),
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(map) => Iter::Raw(create_pair_iter(&env, map.iter_from(&key.to_raw()))?),
+                Index::Hashed(map) => Iter::Hashed(create_pair_iter(&env, map.iter_from(&key))?),
+            },
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(map) => Iter::Raw(create_pair_iter(&env, map.iter_from(&key.to_raw()))?),
+                Index::Hashed(map) => Iter::Hashed(create_pair_iter(&env, map.iter_from(&key))?),
+            },
         };
-        let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
         Ok(handle::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -448,13 +426,18 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let key = convert_to_key(&env, key)?;
-        Ok(handle::to_handle(
-            match *handle::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.keys_from(&key),
-                IndexType::ForkIndex(ref map) => map.keys_from(&key),
+        let key = env.convert_byte_array(key)?;
+        let iter = match *handle::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(map) => KeysIter::Raw(map.keys_from(&key.to_raw())),
+                Index::Hashed(map) => KeysIter::Hashed(map.keys_from(&key)),
             },
-        ))
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(map) => KeysIter::Raw(map.keys_from(&key.to_raw())),
+                Index::Hashed(map) => KeysIter::Hashed(map.keys_from(&key)),
+            },
+        };
+        Ok(handle::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -468,13 +451,18 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     key: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let key = convert_to_key(&env, key)?;
-        Ok(handle::to_handle(
-            match *handle::cast_handle::<IndexType>(map_handle) {
-                IndexType::SnapshotIndex(ref map) => map.values_from(&key),
-                IndexType::ForkIndex(ref map) => map.values_from(&key),
+        let key = env.convert_byte_array(key)?;
+        let values = match *handle::cast_handle::<IndexType>(map_handle) {
+            IndexType::SnapshotIndex(ref index) => match index {
+                Index::Raw(map) => map.values_from(&key.to_raw()),
+                Index::Hashed(map) => map.values_from(&key),
             },
-        ))
+            IndexType::ForkIndex(ref index) => match index {
+                Index::Raw(map) => map.values_from(&key.to_raw()),
+                Index::Hashed(map) => map.values_from(&key),
+            },
+        };
+        Ok(handle::to_handle(values))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -492,10 +480,13 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        IndexType::ForkIndex(ref mut map) => {
-            let key = convert_to_key(&env, key)?;
+        IndexType::ForkIndex(ref mut index) => {
+            let key = env.convert_byte_array(key)?;
             let value = env.convert_byte_array(value)?;
-            map.put(&key, value);
+            match index {
+                Index::Raw(map) => map.put(&key.to_raw(), value),
+                Index::Hashed(map) => map.put(&key, value),
+            }
             Ok(())
         }
     });
@@ -514,9 +505,12 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        IndexType::ForkIndex(ref mut map) => {
-            let key = convert_to_key(&env, key)?;
-            map.remove(&key);
+        IndexType::ForkIndex(ref mut index) => {
+            let key = env.convert_byte_array(key)?;
+            match index {
+                Index::Raw(map) => map.remove(&key.to_raw()),
+                Index::Hashed(map) => map.remove(&key),
+            }
             Ok(())
         }
     });
@@ -534,8 +528,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
         IndexType::SnapshotIndex(_) => {
             panic!("Unable to modify snapshot.");
         }
-        IndexType::ForkIndex(ref mut map) => {
-            map.clear();
+        IndexType::ForkIndex(ref mut index) => {
+            match index {
+                Index::Raw(map) => map.clear(),
+                Index::Hashed(map) => map.clear(),
+            }
             Ok(())
         }
     });
@@ -551,21 +548,29 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> jobject {
     let res = panic::catch_unwind(|| {
         let iterWrapper = handle::cast_handle::<Iter>(iter_handle);
-        match iterWrapper.iter.next() {
-            Some(val) => {
-                let key = val.0;
-                let j_key: JObject = env.byte_array_from_slice(&key.0)?.into();
-                let j_value: JObject = env.byte_array_from_slice(&val.1)?.into();
-                Ok(env
-                    .new_object_unchecked(
-                        &iterWrapper.element_class,
-                        iterWrapper.constructor_id,
-                        &[j_key.into(), j_value.into()],
-                    )?
-                    .into_inner())
-            }
-            None => Ok(ptr::null_mut()),
-        }
+
+        let result = match iterWrapper {
+            Iter::Raw(ref mut wrapper) => wrapper.iter.next().map(|(arr, val)| {
+                create_element(
+                    &env,
+                    &arr[..],
+                    &val,
+                    &wrapper.element_class,
+                    wrapper.constructor_id,
+                )
+            }),
+            Iter::Hashed(ref mut wrapper) => wrapper.iter.next().map(|(key, val)| {
+                create_element(
+                    &env,
+                    key.as_slice(),
+                    &val,
+                    &wrapper.element_class,
+                    wrapper.constructor_id,
+                )
+            }),
+        };
+
+        result.or(Some(Ok(ptr::null_mut()))).unwrap()
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -588,11 +593,13 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<ProofMapIndexKeys<Key>>(iter_handle);
-        match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val.0),
-            None => Ok(ptr::null_mut()),
-        }
+        let array = match *handle::cast_handle::<KeysIter>(iter_handle) {
+            KeysIter::Raw(ref mut iter) => iter.next().map(|val| env.byte_array_from_slice(&val)),
+            KeysIter::Hashed(ref mut iter) => {
+                iter.next().map(|val| env.byte_array_from_slice(&val))
+            }
+        };
+        array.or(Some(Ok(ptr::null_mut()))).unwrap()
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -604,7 +611,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<ProofMapIndexKeys<Key>>(&env, iter_handle);
+    handle::drop_handle::<KeysIter>(&env, iter_handle);
 }
 
 /// Return next value from the values-iterator. Returns null pointer when iteration is finished.
@@ -634,19 +641,39 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     handle::drop_handle::<ProofMapIndexValues<Value>>(&env, iter_handle);
 }
 
-fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
-    let bytes = env.convert_byte_array(array)?;
-    assert_eq!(PROOF_MAP_KEY_SIZE, bytes.len());
-    Ok(Key::read(&bytes))
+// Converts array of Java bytes arrays to the vector of keys.
+fn convert_to_keys(env: &JNIEnv, array: jobjectArray) -> JniResult<Vec<Key>> {
+    let num_elements = env.get_array_length(array)?;
+    let mut keys = Vec::with_capacity(num_elements as usize);
+    for i in 0..num_elements {
+        let array_element = env.auto_local(env.get_object_array_element(array, i)?);
+        let key = env.convert_byte_array(array_element.as_obj().into_inner())?;
+        keys.push(key);
+    }
+    Ok(keys)
 }
 
-fn convert_to_keys(env: &JNIEnv, array: jbyteArray) -> JniResult<Vec<Key>> {
-    let bytes = env.convert_byte_array(array)?;
-    assert_eq!(bytes.len() % PROOF_MAP_KEY_SIZE, 0);
+// Converts vector of Keys to Vector of RawKeys.
+fn convert_keys(keys: Vec<Key>) -> Vec<RawKey> {
+    keys.into_iter().map(|key| key.to_raw()).collect()
+}
 
-    let keys = bytes
-        .chunks(PROOF_MAP_KEY_SIZE)
-        .map(|bytes| Key::read(&bytes))
-        .collect();
-    Ok(keys)
+// Creates element for PairIter.
+fn create_element(
+    env: &JNIEnv,
+    key: &[u8],
+    value: &[u8],
+    class: &GlobalRef,
+    constructor: JMethodID,
+) -> JniResult<jobject> {
+    let key: JObject = env.byte_array_from_slice(key)?.into();
+    let value: JObject = env.byte_array_from_slice(value)?.into();
+    Ok(env
+        .new_object_unchecked(class, constructor, &[key.into(), value.into()])?
+        .into_inner())
+}
+
+// Creates PairIter for corresponding iterator and map entry.
+fn create_pair_iter<I: Iterator>(env: &JNIEnv, iter: I) -> JniResult<PairIter<I>> {
+    PairIter::new(&env, iter, MAP_ENTRY_INTERNAL_FQN)
 }
