@@ -235,6 +235,12 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   native byte[] nativeGetLast(long nativeHandle);
 
   @Override
+  native byte[] nativeRemoveLast(long nativeHandle);
+
+  @Override
+  native void nativeTruncate(long nativeHandle, long newSize);
+
+  @Override
   native void nativeClear(long nativeHandle);
 
   @Override
