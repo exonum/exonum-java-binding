@@ -28,8 +28,8 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
-import com.exonum.client.response.InstanceSpec;
-import com.exonum.client.response.InstanceState;
+import com.exonum.client.response.ServiceInstanceInfo;
+import com.exonum.client.response.ServiceInstanceState;
 import com.exonum.client.response.ServicesResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
@@ -94,10 +94,10 @@ final class ExplorerApiHelper {
     );
   }
 
-  static List<InstanceSpec> parseServicesResponse(String json) {
+  static List<ServiceInstanceInfo> parseServicesResponse(String json) {
     ServicesResponse servicesResponse = JSON.fromJson(json, ServicesResponse.class);
     return servicesResponse.getServices().stream()
-        .map(InstanceState::getSpec)
+        .map(ServiceInstanceState::getSpec)
         .collect(toList());
   }
 

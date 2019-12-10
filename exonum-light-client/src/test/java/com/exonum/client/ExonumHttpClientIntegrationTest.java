@@ -36,7 +36,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
-import com.exonum.client.response.InstanceSpec;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import java.io.IOException;
@@ -209,7 +209,7 @@ class ExonumHttpClientIntegrationTest {
 
   @Test
   void findServiceInfo() throws InterruptedException {
-    InstanceSpec instanceSpec = new InstanceSpec(SERVICE_NAME, SERVICE_ID);
+    ServiceInstanceInfo serviceInstanceInfo = new ServiceInstanceInfo(SERVICE_NAME, SERVICE_ID);
     // Mock response
     String mockResponse = "{\n"
         + "    \"services\": [{\n"
@@ -224,12 +224,12 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<InstanceSpec> response = exonumClient.findServiceInfo(SERVICE_NAME);
+    Optional<ServiceInstanceInfo> response = exonumClient.findServiceInfo(SERVICE_NAME);
 
     // Assert response
     assertTrue(response.isPresent());
-    InstanceSpec actualResponse = response.get();
-    assertThat(actualResponse, is(instanceSpec));
+    ServiceInstanceInfo actualResponse = response.get();
+    assertThat(actualResponse, is(serviceInstanceInfo));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
@@ -253,7 +253,7 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<InstanceSpec> response = exonumClient.findServiceInfo("invalid-service-name");
+    Optional<ServiceInstanceInfo> response = exonumClient.findServiceInfo("invalid-service-name");
 
     // Assert response
     assertFalse(response.isPresent());
@@ -268,8 +268,8 @@ class ExonumHttpClientIntegrationTest {
   void getServiceInfoList() throws InterruptedException {
     String serviceName2 = "service-name-2";
     int serviceId2 = 2;
-    InstanceSpec instanceSpec1 = new InstanceSpec(SERVICE_NAME, SERVICE_ID);
-    InstanceSpec instanceSpec2 = new InstanceSpec(serviceName2, serviceId2);
+    ServiceInstanceInfo serviceInstanceInfo1 = new ServiceInstanceInfo(SERVICE_NAME, SERVICE_ID);
+    ServiceInstanceInfo serviceInstanceInfo2 = new ServiceInstanceInfo(serviceName2, serviceId2);
     // Mock response
     String mockResponse = "{\n"
         + "    \"services\": [{\n"
@@ -291,10 +291,10 @@ class ExonumHttpClientIntegrationTest {
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    List<InstanceSpec> response = exonumClient.getServiceInfoList();
+    List<ServiceInstanceInfo> response = exonumClient.getServiceInfoList();
 
     // Assert response
-    assertThat(response, contains(instanceSpec1, instanceSpec2));
+    assertThat(response, contains(serviceInstanceInfo1, serviceInstanceInfo2));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();

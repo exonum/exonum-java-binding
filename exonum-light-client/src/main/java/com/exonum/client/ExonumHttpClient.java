@@ -47,7 +47,7 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
-import com.exonum.client.response.InstanceSpec;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.SystemStatistics;
 import com.exonum.client.response.TransactionResponse;
 import com.google.common.collect.ImmutableList;
@@ -282,14 +282,14 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   @Override
-  public Optional<InstanceSpec> findServiceInfo(String serviceName) {
+  public Optional<ServiceInstanceInfo> findServiceInfo(String serviceName) {
     return getServiceInfoList().stream()
         .filter(s -> s.getName().equals(serviceName))
         .findFirst();
   }
 
   @Override
-  public List<InstanceSpec> getServiceInfoList() {
+  public List<ServiceInstanceInfo> getServiceInfoList() {
     Request request = get(url(SERVICES));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseServicesResponse);

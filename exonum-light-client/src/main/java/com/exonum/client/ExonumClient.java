@@ -27,7 +27,7 @@ import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.HealthCheckInfo;
-import com.exonum.client.response.InstanceSpec;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -190,14 +190,14 @@ public interface ExonumClient {
    *
    * @param serviceName the name of a service instance
    */
-  Optional<InstanceSpec> findServiceInfo(String serviceName);
+  Optional<ServiceInstanceInfo> findServiceInfo(String serviceName);
 
   /**
    * Returns information on all started service instances.
    *
    * @see #findServiceInfo
    */
-  List<InstanceSpec> getServiceInfoList();
+  List<ServiceInstanceInfo> getServiceInfoList();
 
   /**
    * Returns Exonum client builder.

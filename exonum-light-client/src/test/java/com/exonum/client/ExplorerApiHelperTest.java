@@ -39,7 +39,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
-import com.exonum.client.response.InstanceSpec;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import com.exonum.core.messages.Runtime.ErrorKind;
@@ -180,9 +180,9 @@ class ExplorerApiHelperTest {
     String serviceName2 = "service-name-2";
     int serviceId1 = 1;
     int serviceId2 = 2;
-    InstanceSpec instanceSpec1 = new InstanceSpec(serviceName1, serviceId1);
-    InstanceSpec instanceSpec2 = new InstanceSpec(serviceName2, serviceId2);
-    List<InstanceSpec> expected = Arrays.asList(instanceSpec1, instanceSpec2);
+    ServiceInstanceInfo serviceInstanceInfo1 = new ServiceInstanceInfo(serviceName1, serviceId1);
+    ServiceInstanceInfo serviceInstanceInfo2 = new ServiceInstanceInfo(serviceName2, serviceId2);
+    List<ServiceInstanceInfo> expected = Arrays.asList(serviceInstanceInfo1, serviceInstanceInfo2);
     String json = "{\n"
         + "    \"services\": [{\n"
         + "        \"spec\": {\n"
@@ -201,7 +201,7 @@ class ExplorerApiHelperTest {
         + "    ]\n"
         + "}";
 
-    List<InstanceSpec> actual = ExplorerApiHelper.parseServicesResponse(json);
+    List<ServiceInstanceInfo> actual = ExplorerApiHelper.parseServicesResponse(json);
     assertThat(actual, contains(expected.toArray()));
   }
 

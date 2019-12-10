@@ -19,10 +19,10 @@ package com.exonum.client.response;
 import lombok.Value;
 
 @Value
-public class InstanceState {
+public class ServiceInstanceState {
 
   /**
    * Service instance spec - its name and id.
    */
-  InstanceSpec spec;
+  ServiceInstanceInfo spec;
 }

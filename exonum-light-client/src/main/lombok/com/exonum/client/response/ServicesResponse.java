@@ -25,5 +25,5 @@ public class ServicesResponse {
   /**
    * List of started service instances.
    */
-  List<InstanceState> services;
+  List<ServiceInstanceState> services;
 }
