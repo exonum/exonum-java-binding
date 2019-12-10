@@ -235,7 +235,7 @@ public final class Blockchain {
    * Returns the current consensus configuration of the network.
    *
    * @throws IllegalStateException if the "genesis block" was not created
-   * @see <a href="https://exonum.com/doc/version/0.12/architecture/configuration/">Exonum configuration</a> for
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/configuration/">Exonum configuration</a> for
    *     consensus configuration information.
    */
   public Config getConsensusConfiguration() {
@@ -247,7 +247,7 @@ public final class Blockchain {
    * Note that this pool represents the state as of the current snapshot, and its state is volatile
    * even between block commits.
    *
-   * @see <a href="https://exonum.com/doc/version/0.12/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   public KeySetIndexProxy<HashCode> getTransactionPool() {
     return schema.getTransactionPool();

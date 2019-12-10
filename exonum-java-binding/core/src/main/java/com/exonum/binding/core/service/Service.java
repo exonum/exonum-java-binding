@@ -94,7 +94,7 @@ public interface Service {
    * @param node a set-up Exonum node, providing an interface to access
    *             the current blockchain state and submit transactions
    * @param router a router responsible for handling requests to this service
-   * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#external-service-api">
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>
    */
   void createPublicApiHandlers(Node node, Router router);
