@@ -22,7 +22,7 @@ python_requires = ">=3.6"
 
 setup(
     name="exonum_launcher_java_plugins",
-    version="0.9.0-rc1",
+    version="0.10.0-SNAPSHOT",
     description="Exonum Java plugins for exonum_launcher",
     url="https://github.com/exonum/exonum-java-binding",
     packages=["exonum_java_runtime_plugin", "exonum_instance_configuration_plugin"],
