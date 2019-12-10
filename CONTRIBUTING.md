@@ -30,7 +30,7 @@ You need to install the following dependencies:
   
   ```bash
   sudo add-apt-repository ppa:exonum/rocksdb
-  sudo apt-get update && sudo apt-get install rocksdb
+  sudo apt-get update && sudo apt-get install librocksdb6.2
   export ROCKSDB_LIB_DIR=/usr/lib
   ```
   
