@@ -16,12 +16,12 @@ invocation = ["jni/invocation"]
 
 [dependencies]
 chrono = "0.4"
-exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
-exonum-cli = "0.12"
-exonum-derive = "0.12"
-exonum-proto = "0.12"
-exonum-testkit = "0.12"
-exonum-time = "0.12"
+exonum = { version = "0.13.0-rc.2", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
+exonum-cli = "0.13.0-rc.2"
+exonum-derive = "0.13.0-rc.2"
+exonum-proto = "0.13.0-rc.2"
+exonum-testkit = "0.13.0-rc.2"
+exonum-time = "0.13.0-rc.2"
 failure = "0.1"
 futures = "0.1"
 jni = { version = "0.14", features = ["invocation"] }
@@ -39,7 +39,7 @@ toml = "0.5"
 tempfile = "3"
 
 [build-dependencies]
-exonum-build = { version = "0.12" }
+exonum-build = { version = "0.13.0-rc.2" }
 
 [profile.dev]
 rpath = true
@@ -47,13 +47,13 @@ rpath = true
 [profile.release]
 rpath = true
 
-# FIXME: using git dependency until new Exonum with dynamic services will be released
+# FIXME: using git dependency until Exonum 1.0 is released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "d6144a4df4" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "d6144a4df4" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "d6144a4df4" }
-exonum-build = { git = "https://github.com/exonum/exonum", rev = "d6144a4df4" }
-exonum-derive = { git = "https://github.com/exonum/exonum", rev = "d6144a4df4" }
-exonum-cli = { git = "https://github.com/exonum/exonum", rev = "d6144a4df4" }
-exonum-proto = { git = "https://github.com/exonum/exonum", rev = "d6144a4df4" }
-exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "d6144a4df4" }
+exonum = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-time = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-build = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-derive = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-cli = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-proto = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum-supervisor = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
