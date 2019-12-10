@@ -20,8 +20,9 @@ By using the client you are able to perform the following operations:
 - Receive node system information
 - Receive node status information
 - Receive list of started service instances
-_*Please refer to [the documentation][exonum-client] for details._
-Also, see [examples](#examples).
+
+_Please see the [examples](#examples) below and the [Javadocs][exonum-client]
+for details._
 
 ## Compatibility
 The following table shows versions compatibility:  
