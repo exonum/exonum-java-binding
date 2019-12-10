@@ -14,41 +14,45 @@
  * limitations under the License.
  */
 
-use exonum::runtime::Caller;
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
     exonum_merkledb::{self, Snapshot},
     messages::BinaryValue,
     runtime::{
-        ArtifactId, CallInfo, ErrorKind, ExecutionContext, ExecutionError, InstanceId,
+        ArtifactId, CallInfo, Caller, ErrorKind, ExecutionContext, ExecutionError, InstanceId,
         InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, StateHashAggregator,
+        WellKnownRuntime,
     },
 };
 use exonum_proto::ProtobufConvert;
 use futures::{Future, IntoFuture};
-use jni::sys::jint;
 use jni::{
     objects::{GlobalRef, JObject, JValue},
     signature::{JavaType, Primitive},
+    sys::jint,
     Executor, JNIEnv,
 };
-use runtime::Error;
+
 use std::fmt;
-use storage::View;
-use to_handle;
-use utils::{
-    describe_java_exception, get_and_clear_java_exception, get_exception_message,
-    jni_cache::{classes_refs, runtime_adapter, tx_execution_exception},
-    panic_on_exception, unwrap_jni,
+
+use {
+    proto,
+    runtime::Error,
+    storage::View,
+    to_handle,
+    utils::{
+        describe_java_exception, get_and_clear_java_exception, get_exception_message,
+        jni_cache::{classes_refs, runtime_adapter, tx_execution_exception},
+        panic_on_exception, unwrap_jni,
+    },
+    JniError, JniErrorKind, JniResult, Node,
 };
-use JniError;
-use JniErrorKind;
-use JniResult;
-use {proto, Node};
 
 /// Default validator ID. -1 is used as not-a-value in Java runtime.
 const DEFAULT_VALIDATOR_ID: i32 = -1;
+/// Java Runtime ID.
+pub const JAVA_RUNTIME_ID: u32 = RuntimeIdentifier::Java as u32;
 
 /// A proxy for `ServiceRuntimeAdapter`s.
 #[derive(Clone)]
@@ -59,9 +63,6 @@ pub struct JavaRuntimeProxy {
 }
 
 impl JavaRuntimeProxy {
-    /// Runtime Identifier
-    pub const RUNTIME_ID: RuntimeIdentifier = RuntimeIdentifier::Java;
-
     /// Creates new `JavaRuntimeProxy` for given `ServiceRuntimeAdapter` object
     pub fn new(executor: Executor, adapter: GlobalRef) -> Self {
         JavaRuntimeProxy {
@@ -72,7 +73,7 @@ impl JavaRuntimeProxy {
     }
 
     fn parse_artifact(&self, artifact: &ArtifactId) -> Result<JavaArtifactId, ExecutionError> {
-        if artifact.runtime_id != Self::RUNTIME_ID as u32 {
+        if artifact.runtime_id != JAVA_RUNTIME_ID {
             Err(Error::IncorrectArtifactId.into())
         } else {
             Ok(JavaArtifactId(artifact.name.to_string()))
@@ -452,10 +453,8 @@ impl fmt::Debug for JavaRuntimeProxy {
     }
 }
 
-impl From<JavaRuntimeProxy> for (u32, Box<dyn Runtime>) {
-    fn from(r: JavaRuntimeProxy) -> Self {
-        (JavaRuntimeProxy::RUNTIME_ID as u32, Box::new(r))
-    }
+impl WellKnownRuntime for JavaRuntimeProxy {
+    const ID: u32 = JAVA_RUNTIME_ID;
 }
 
 /// Artifact identification properties within `JavaRuntimeProxy`

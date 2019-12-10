@@ -70,7 +70,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
@@ -104,7 +103,6 @@ class TestKitTest {
   }
 
   @Test
-  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitForSingleServiceWithDefaultConfiguration() {
     // Deploy service that ignores configuration and should initialize correctly
     // with the default one
@@ -115,7 +113,6 @@ class TestKitTest {
   }
 
   @Test
-  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitWithBuilderForSingleService() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
@@ -127,7 +124,6 @@ class TestKitTest {
   }
 
   @Test
-  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitWithTwoServiceInstancesSameArtifact() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
@@ -264,7 +260,6 @@ class TestKitTest {
   }
 
   @Test
-  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitWithBuilderForMultipleDifferentServices() {
     try (TestKit testKit = TestKit.builder()
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
@@ -279,7 +274,6 @@ class TestKitTest {
   }
 
   @Test
-  @Disabled("Disabled until ProofMapIndexProxy 32 byte key restriction is relaxed")
   void createTestKitWithTimeService() {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()
