@@ -50,6 +50,15 @@ Start the service:
 $ python3 -m exonum_launcher -i cryptocurrency-demo.yml
 ```
 
+---
+
+### 🛑
+
+*Frontend has not been updated to DS yet as of 0.9.0-rc1.
+Skip the subsequent instructions.*
+
+---
+
 Install frontend dependencies:
 
 ```sh
