@@ -17,7 +17,7 @@ This guide shows how to build the whole project only.
 ### System Dependencies
 You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
-  * [JDK 1.8+](https://jdk.java.net/12/).
+  * [JDK 1.8+](https://jdk.java.net/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
   * [Rust 1.36.0](https://www.rust-lang.org/).
   To install a specific Rust version, use `rustup install 1.36.0` command.
