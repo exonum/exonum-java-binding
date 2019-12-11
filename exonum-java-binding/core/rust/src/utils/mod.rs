@@ -30,7 +30,6 @@ pub use self::jni::{get_class_name, get_exception_message};
 
 /// Asserts that given closure panics while executed and the resulting error message contains given
 /// substring.
-#[cfg(test)]
 pub fn assert_panics<F, R>(err_substring: &str, f: F)
 where
     F: FnOnce() -> R,
