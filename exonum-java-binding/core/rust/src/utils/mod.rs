@@ -39,7 +39,12 @@ where
         Ok(_) => panic!("Panic expected"),
         Err(err) => {
             let err_msg = any_to_string(&err);
-            assert!(err_msg.contains(err_substring));
+            if !err_msg.contains(err_substring) {
+                panic!(
+                    "Expected a panic message containing \"{}\" but was:\n{}",
+                    err_substring, err_msg
+                )
+            }
         }
     }
 }
