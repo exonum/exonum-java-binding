@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -26,9 +27,8 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionMethod;
 import io.vertx.ext.web.Router;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,16 +37,14 @@ import org.junit.jupiter.api.Test;
 class TransactionMethodExtractorTest {
 
   @Test
-  void validServiceMethodExtraction() throws Exception {
-    Map<Integer, MethodHandle> transactions =
-        TransactionMethodExtractor.extractTransactionMethods(ValidService.class);
+  void findTransactionMethodsValidService() throws Exception {
+    Map<Integer, Method> transactions =
+        TransactionMethodExtractor.findTransactionMethods(ValidService.class);
+    assertThat(transactions).hasSize(1);
     Method transactionMethod =
         ValidService.class.getMethod("transactionMethod", byte[].class, TransactionContext.class);
-    MethodHandles.Lookup lookup = MethodHandles.lookup();
-    MethodHandle methodHandle = lookup.unreflect(transactionMethod);
-    assertThat(transactions).hasSize(1);
-    MethodHandle actualMethodHandle = transactions.get(ValidService.TRANSACTION_ID);
-    assertThat(actualMethodHandle.toString()).isEqualTo(methodHandle.toString());
+    assertThat(singletonList(transactionMethod))
+        .containsExactlyElementsOf(transactions.values());
   }
 
   @Test
@@ -55,83 +53,133 @@ class TransactionMethodExtractorTest {
         () -> TransactionMethodExtractor
             .extractTransactionMethods(DuplicateTransactionIdsService.class));
     assertThat(e.getMessage())
-        .contains(String.format("Service %s had more than one transaction with id: %s",
+        .contains(String.format("Service %s has more than one transaction with the same id (%s)",
             DuplicateTransactionIdsService.class.getName(),
-            DuplicateTransactionIdsService.TRANSACTION_ID));
+            DuplicateTransactionIdsService.TRANSACTION_ID),
+            "transactionMethod",
+            "anotherTransactionMethod");
   }
 
   @Test
-  void missingTransactionMethodArgumentsServiceMethodExtraction() throws Exception {
+  void missingTransactionMethodArgumentsServiceMethodExtraction() {
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> TransactionMethodExtractor
             .extractTransactionMethods(MissingTransactionMethodArgumentsService.class));
-    Method transactionMethod =
-        MissingTransactionMethodArgumentsService.class.getMethod("transactionMethod",
-            byte[].class);
+    String methodName = "transactionMethod";
     String errorMessage = String.format("Method %s in a service class %s annotated with"
             + " @TransactionMethod should have precisely two parameters of the following types:"
-            + " \"byte[]\" and \"com.exonum.binding.core.transaction.TransactionContext\"",
-        transactionMethod.getName(), MissingTransactionMethodArgumentsService.class.getName());
+            + " 'byte[]' and 'com.exonum.binding.core.transaction.TransactionContext'",
+        methodName, MissingTransactionMethodArgumentsService.class.getName());
     assertThat(e.getMessage()).contains(errorMessage);
   }
 
   @Test
-  void invalidTransactionMethodArgumentServiceMethodExtraction() throws Exception {
+  void invalidTransactionMethodArgumentServiceMethodExtraction() {
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> TransactionMethodExtractor
             .extractTransactionMethods(InvalidTransactionMethodArgumentsService.class));
-    Method transactionMethod =
-        InvalidTransactionMethodArgumentsService.class.getMethod(
-            "transactionMethod", byte[].class, String.class);
+    String methodName = "transactionMethod";
     String errorMessage = String.format("Method %s in a service class %s annotated with"
             + " @TransactionMethod should have precisely two parameters of the following types:"
-            + " \"byte[]\" and \"com.exonum.binding.core.transaction.TransactionContext\"",
-        transactionMethod.getName(), InvalidTransactionMethodArgumentsService.class.getName());
+            + " 'byte[]' and 'com.exonum.binding.core.transaction.TransactionContext'"
+            + ". But second parameter type was: " + String.class.getName(),
+        methodName, InvalidTransactionMethodArgumentsService.class.getName());
     assertThat(e.getMessage()).contains(errorMessage);
   }
-}
 
-class BasicService implements Service {
-
-  static final int TRANSACTION_ID = 1;
-
-  @Override
-  public List<HashCode> getStateHashes(Snapshot snapshot) {
-    return Collections.emptyList();
+  @Test
+  void duplicateTransactionMethodArgumentServiceMethodExtraction() {
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> TransactionMethodExtractor
+            .extractTransactionMethods(DuplicateTransactionMethodArgumentsService.class));
+    String methodName = "transactionMethod";
+    String errorMessage = String.format("Method %s in a service class %s annotated with"
+            + " @TransactionMethod should have precisely two parameters of the following types:"
+            + " 'byte[]' and 'com.exonum.binding.core.transaction.TransactionContext'"
+            + ". But second parameter type was: " + byte[].class.getName(),
+        methodName, DuplicateTransactionMethodArgumentsService.class.getName());
+    assertThat(e.getMessage()).contains(errorMessage);
   }
 
-  @Override
-  public void createPublicApiHandlers(Node node, Router router) {
-    // no-op
+  @Test
+  void findMethodsValidServiceInterfaceImplementation() throws Exception {
+    Map<Integer, Method> transactions =
+        TransactionMethodExtractor.findTransactionMethods(
+            ValidServiceInterfaceImplementation.class);
+    assertThat(transactions).hasSize(2);
+    Method transactionMethod = ValidServiceInterfaceImplementation.class.getMethod(
+        "transactionMethod", byte[].class, TransactionContext.class);
+    Method transactionMethod2 = ValidServiceInterfaceImplementation.class.getMethod(
+        "transactionMethod2", byte[].class, TransactionContext.class);
+    List<Method> actualMethods = Arrays.asList(transactionMethod, transactionMethod2);
+    assertThat(actualMethods).containsExactlyInAnyOrderElementsOf(transactions.values());
   }
-}
 
-class ValidService extends BasicService {
+  class BasicService implements Service {
 
-  @TransactionMethod(id = TRANSACTION_ID)
-  @SuppressWarnings("WeakerAccess") // Should be accessible
-  public void transactionMethod(byte[] arguments, TransactionContext context) {}
-}
+    static final int TRANSACTION_ID = 1;
 
-class DuplicateTransactionIdsService extends BasicService {
+    @Override
+    public List<HashCode> getStateHashes(Snapshot snapshot) {
+      return Collections.emptyList();
+    }
 
-  @TransactionMethod(id = TRANSACTION_ID)
-  public void transactionMethod(byte[] arguments, TransactionContext context) {}
+    @Override
+    public void createPublicApiHandlers(Node node, Router router) {
+      // no-op
+    }
+  }
 
-  @TransactionMethod(id = TRANSACTION_ID)
-  public void anotherTransactionMethod(byte[] arguments, TransactionContext context) {}
-}
+  class ValidService extends BasicService {
 
-class MissingTransactionMethodArgumentsService extends BasicService {
+    @TransactionMethod(TRANSACTION_ID)
+    @SuppressWarnings("WeakerAccess") // Should be accessible
+    public void transactionMethod(byte[] arguments, TransactionContext context) {}
+  }
 
-  @TransactionMethod(id = TRANSACTION_ID)
-  @SuppressWarnings("WeakerAccess") // Should be accessible
-  public void transactionMethod(byte[] arguments) {}
-}
+  class DuplicateTransactionIdsService extends BasicService {
 
-class InvalidTransactionMethodArgumentsService extends BasicService {
+    @TransactionMethod(TRANSACTION_ID)
+    public void transactionMethod(byte[] arguments, TransactionContext context) {}
 
-  @TransactionMethod(id = TRANSACTION_ID)
-  @SuppressWarnings("WeakerAccess") // Should be accessible
-  public void transactionMethod(byte[] arguments, String invalidArgument) {}
+    @TransactionMethod(TRANSACTION_ID)
+    public void anotherTransactionMethod(byte[] arguments, TransactionContext context) {}
+  }
+
+  class MissingTransactionMethodArgumentsService extends BasicService {
+
+    @TransactionMethod(TRANSACTION_ID)
+    public void transactionMethod(byte[] arguments) {}
+  }
+
+  class InvalidTransactionMethodArgumentsService extends BasicService {
+
+    @TransactionMethod(TRANSACTION_ID)
+    public void transactionMethod(byte[] arguments, String invalidArgument) {}
+  }
+
+  class DuplicateTransactionMethodArgumentsService extends BasicService {
+
+    @TransactionMethod(TRANSACTION_ID)
+    public void transactionMethod(byte[] arguments, byte[] context) {}
+  }
+
+  interface ServiceInterface {
+    int TRANSACTION_ID = 1;
+
+    @TransactionMethod(TRANSACTION_ID)
+    void transactionMethod(byte[] arguments, TransactionContext context);
+  }
+
+  class ValidServiceInterfaceImplementation implements ServiceInterface {
+
+    static final int TRANSACTION_ID_2 = 2;
+
+    @TransactionMethod(TRANSACTION_ID)
+    public void transactionMethod(byte[] arguments, TransactionContext context) {}
+
+    @TransactionMethod(TRANSACTION_ID_2)
+    @SuppressWarnings("WeakerAccess") // Should be accessible
+    public void transactionMethod2(byte[] arguments, TransactionContext context) {}
+  }
 }

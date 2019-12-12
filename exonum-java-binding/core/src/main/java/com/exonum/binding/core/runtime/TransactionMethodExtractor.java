@@ -17,11 +17,15 @@
 package com.exonum.binding.core.runtime;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionMethod;
+import com.google.common.annotations.VisibleForTesting;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,56 +41,69 @@ final class TransactionMethodExtractor {
    * @see TransactionMethod
    */
   static Map<Integer, MethodHandle> extractTransactionMethods(Class<?> serviceClass) {
-    Map<Integer, MethodHandle> transactions = new HashMap<>();
-    MethodHandles.Lookup lookup = MethodHandles.lookup();
+    Map<Integer, Method> transactionMethods = findTransactionMethods(serviceClass);
+    Lookup lookup = MethodHandles.lookup();
+    return transactionMethods.entrySet().stream()
+        .peek(tx -> validateTransactionMethod(tx.getValue(), serviceClass))
+        .collect(toMap(Map.Entry::getKey,
+            (e) -> toMethodHandle(e.getValue(), lookup)));
+  }
+
+  @VisibleForTesting
+  static Map<Integer, Method> findTransactionMethods(Class<?> serviceClass) {
+    Map<Integer, Method> transactionMethods = new HashMap<>();
     while (serviceClass != Object.class) {
       Method[] classMethods = serviceClass.getDeclaredMethods();
-      for (Method method: classMethods) {
+      for (Method method : classMethods) {
         if (method.isAnnotationPresent(TransactionMethod.class)) {
           TransactionMethod annotation = method.getAnnotation(TransactionMethod.class);
-          int transactionId = annotation.id();
-          validateTransactionMethod(method, serviceClass, transactions, transactionId);
-          MethodHandle methodHandle;
-          try {
-            methodHandle = lookup.unreflect(method);
-          } catch (IllegalAccessException e) {
-            throw new IllegalArgumentException(
-                String.format("Couldn't access method %s", method.getName()), e);
-          }
-          transactions.put(transactionId, methodHandle);
+          int transactionId = annotation.value();
+          checkDuplicates(transactionMethods, transactionId, serviceClass, method);
+          transactionMethods.put(transactionId, method);
         }
       }
       serviceClass = serviceClass.getSuperclass();
     }
-    return transactions;
+    return transactionMethods;
+  }
+
+  private static void checkDuplicates(Map<Integer, Method> transactionMethods, int transactionId,
+      Class<?> serviceClass, Method method) {
+    if (transactionMethods.containsKey(transactionId)) {
+      String errorMessage = String.format("Service %s has more than one transaction with the same"
+              + " id (%s): first: %s; second: %s",
+          serviceClass.getName(), transactionId, method.getName(),
+          transactionMethods.get(transactionId).getName());
+      throw new IllegalArgumentException(errorMessage);
+    }
   }
 
   /**
    * Checks that the given transaction method signature is correct.
    */
-  private static void validateTransactionMethod(Method transaction, Class<?> serviceClass,
-      Map<Integer, MethodHandle> transactions, int transactionId) {
-    checkArgument(!transactions.containsKey(transactionId),
-        "Service %s had more than one transaction with id: %s", serviceClass.getName(),
-        transactionId);
-
+  private static void validateTransactionMethod(Method transaction, Class<?> serviceClass) {
     String errorMessage = String.format("Method %s in a service class %s annotated with"
         + " @TransactionMethod should have precisely two parameters of the following types:"
-        + " \"byte[]\" and \"com.exonum.binding.core.transaction.TransactionContext\"",
+        + " 'byte[]' and 'com.exonum.binding.core.transaction.TransactionContext'",
         transaction.getName(), serviceClass.getName());
     checkArgument(transaction.getParameterCount() == 2, errorMessage);
-    for (Class<?> parameterType: transaction.getParameterTypes()) {
-      checkArgument(isParameterTypeValid(parameterType), errorMessage);
-    }
+    Class<?> firstParameter = transaction.getParameterTypes()[0];
+    Class<?> secondParameter = transaction.getParameterTypes()[1];
+    checkArgument(firstParameter == byte[].class,
+        String.format(errorMessage
+            + ". But first parameter type was: %s", firstParameter.getName()));
+    checkArgument(TransactionContext.class.isAssignableFrom(secondParameter),
+        String.format(errorMessage
+            + ". But second parameter type was: %s", secondParameter.getName()));
   }
 
-  /**
-   * Returns true if the parameter is either a byte array of an object of a class that implements
-   * TransactionContext; false otherwise.
-   */
-  private static boolean isParameterTypeValid(Class<?> parameterType) {
-    return parameterType == byte[].class
-        || TransactionContext.class.isAssignableFrom(parameterType);
+  private static MethodHandle toMethodHandle(Method method, Lookup lookup) {
+    try {
+      return lookup.unreflect(method);
+    } catch (IllegalAccessException e) {
+      throw new IllegalArgumentException(
+          String.format("Couldn't access method %s", method.getName()), e);
+    }
   }
 
   private TransactionMethodExtractor() {}
