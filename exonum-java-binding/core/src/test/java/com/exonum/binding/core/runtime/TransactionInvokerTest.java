@@ -18,7 +18,6 @@ package com.exonum.binding.core.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -33,28 +32,31 @@ import io.vertx.ext.web.Router;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 class TransactionInvokerTest {
+
+  private static final byte[] ARGUMENTS = new byte[0];
+  @Mock
+  private TransactionContext context;
 
   @Test
   void invokeValidServiceTransaction() throws Exception {
     ValidService service = spy(new ValidService());
     TransactionInvoker invoker = new TransactionInvoker(service);
-    byte[] arguments = new byte[0];
-    TransactionContext context = mock(TransactionContext.class);
-    invoker.invokeTransaction(ValidService.TRANSACTION_ID, arguments, context);
+    invoker.invokeTransaction(ValidService.TRANSACTION_ID, ARGUMENTS, context);
+    invoker.invokeTransaction(ValidService.TRANSACTION_ID_2, ARGUMENTS, context);
 
-    verify(service).transactionMethod(arguments, context);
+    verify(service).transactionMethod(ARGUMENTS, context);
+    verify(service).transactionMethod2(ARGUMENTS, context);
   }
 
   @Test
   void invokeInvalidTransactionId() {
     TransactionInvoker invoker = new TransactionInvoker(new ValidService());
-    byte[] arguments = new byte[0];
-    TransactionContext context = mock(TransactionContext.class);
-    int invalidTransactionId = ValidService.TRANSACTION_ID + 1;
+    int invalidTransactionId = Integer.MAX_VALUE;
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> invoker.invokeTransaction(invalidTransactionId, arguments, context));
+        () -> invoker.invokeTransaction(invalidTransactionId, ARGUMENTS, context));
     assertThat(e.getMessage())
         .contains(String.format("No method with transaction id (%s)", invalidTransactionId));
   }
@@ -62,10 +64,8 @@ class TransactionInvokerTest {
   @Test
   void invokeThrowingTransaction() {
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingService());
-    byte[] arguments = new byte[0];
-    TransactionContext context = mock(TransactionContext.class);
     TransactionExecutionException e = assertThrows(TransactionExecutionException.class,
-        () -> invoker.invokeTransaction(ThrowingService.TRANSACTION_ID, arguments, context));
+        () -> invoker.invokeTransaction(ThrowingService.TRANSACTION_ID, ARGUMENTS, context));
     assertThat(e.getErrorCode()).isEqualTo(ThrowingService.ERROR_CODE);
   }
 
@@ -86,9 +86,15 @@ class TransactionInvokerTest {
 
   class ValidService extends BasicService {
 
+    static final int TRANSACTION_ID_2 = 2;
+
     @TransactionMethod(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
     public void transactionMethod(byte[] arguments, TransactionContext context) {}
+
+    @TransactionMethod(TRANSACTION_ID_2)
+    @SuppressWarnings("WeakerAccess") // Should be accessible
+    public void transactionMethod2(byte[] arguments, TransactionContext context) {}
   }
 
   class ThrowingService extends BasicService {
