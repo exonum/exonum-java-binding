@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- A simple configuration to be used in unit and integration tests.
-     Any warnings go to stdout; debug entries from our code — to stdout and the list appender
-     to allow to check for specific entries. -->
+     Any warnings go to stdout; debug entries from our code — to stdout. -->
 <Configuration status="WARN">
     <Appenders>
-        <List name="ListAppender">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
-        </List>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
@@ -17,7 +13,6 @@
         </Root>
 
         <Logger name="com.exonum.binding" level="DEBUG" additivity="false">
-            <AppenderRef ref="ListAppender" />
             <AppenderRef ref="Console" />
         </Logger>
     </Loggers>

@@ -40,7 +40,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -48,7 +47,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @RequiresNativeLibrary
-@Disabled("Till ProofMap in hashing flavour is implemented: ECR-3779")
 class TimeSchemaProxyIntegrationTest {
 
   private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime

@@ -36,7 +36,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
-import com.exonum.client.response.ServiceInfo;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import java.io.IOException;
@@ -209,25 +209,27 @@ class ExonumHttpClientIntegrationTest {
 
   @Test
   void findServiceInfo() throws InterruptedException {
-    ServiceInfo serviceInfo = new ServiceInfo(SERVICE_NAME, SERVICE_ID);
+    ServiceInstanceInfo serviceInstanceInfo = new ServiceInstanceInfo(SERVICE_NAME, SERVICE_ID);
     // Mock response
     String mockResponse = "{\n"
-        + "    \"services\": [\n"
-        + "      {\n"
-        + "          \"name\": \"" + SERVICE_NAME + "\",\n"
-        + "          \"id\": " + SERVICE_ID + "\n"
-        + "      }\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "            \"id\": " + SERVICE_ID + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
         + "    ]\n"
         + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<ServiceInfo> response = exonumClient.findServiceInfo(SERVICE_NAME);
+    Optional<ServiceInstanceInfo> response = exonumClient.findServiceInfo(SERVICE_NAME);
 
     // Assert response
     assertTrue(response.isPresent());
-    ServiceInfo actualResponse = response.get();
-    assertThat(actualResponse, is(serviceInfo));
+    ServiceInstanceInfo actualResponse = response.get();
+    assertThat(actualResponse, is(serviceInstanceInfo));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
@@ -239,17 +241,19 @@ class ExonumHttpClientIntegrationTest {
   void findServiceInfoNotFound() throws InterruptedException {
     // Mock response
     String mockResponse = "{\n"
-        + "    \"services\": [\n"
-        + "      {\n"
-        + "          \"name\": \"" + SERVICE_NAME + "\",\n"
-        + "          \"id\": " + SERVICE_ID + "\n"
-        + "      }\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "            \"id\": " + SERVICE_ID + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
         + "    ]\n"
         + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    Optional<ServiceInfo> response = exonumClient.findServiceInfo("invalid-service-name");
+    Optional<ServiceInstanceInfo> response = exonumClient.findServiceInfo("invalid-service-name");
 
     // Assert response
     assertFalse(response.isPresent());
@@ -264,28 +268,33 @@ class ExonumHttpClientIntegrationTest {
   void getServiceInfoList() throws InterruptedException {
     String serviceName2 = "service-name-2";
     int serviceId2 = 2;
-    ServiceInfo serviceInfo1 = new ServiceInfo(SERVICE_NAME, SERVICE_ID);
-    ServiceInfo serviceInfo2 = new ServiceInfo(serviceName2, serviceId2);
+    ServiceInstanceInfo serviceInstanceInfo1 = new ServiceInstanceInfo(SERVICE_NAME, SERVICE_ID);
+    ServiceInstanceInfo serviceInstanceInfo2 = new ServiceInstanceInfo(serviceName2, serviceId2);
     // Mock response
     String mockResponse = "{\n"
-        + "    \"services\": [\n"
-        + "      {\n"
-        + "          \"name\": \"" + SERVICE_NAME + "\",\n"
-        + "          \"id\": " + SERVICE_ID + "\n"
-        + "      },\n"
-        + "      {\n"
-        + "          \"name\": \"" + serviceName2 + "\",\n"
-        + "          \"id\": " + serviceId2 + "\n"
-        + "      }\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "            \"id\": " + SERVICE_ID + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        },\n"
+        + "        {\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + serviceName2 + "\",\n"
+        + "            \"id\": " + serviceId2 + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
         + "    ]\n"
         + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
-    List<ServiceInfo> response = exonumClient.getServiceInfoList();
+    List<ServiceInstanceInfo> response = exonumClient.getServiceInfoList();
 
     // Assert response
-    assertThat(response, contains(serviceInfo1, serviceInfo2));
+    assertThat(response, contains(serviceInstanceInfo1, serviceInstanceInfo2));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();

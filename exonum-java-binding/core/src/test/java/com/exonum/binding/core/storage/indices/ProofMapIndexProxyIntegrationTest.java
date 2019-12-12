@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static java.util.stream.Collectors.toList;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -24,9 +24,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.Bytes;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Disabled;
 
-@Disabled("Disabled until native support is implemented - ECR-3765")
 class ProofMapIndexProxyIntegrationTest
     extends BaseProofMapIndexProxyIntegrationTestable {
 
@@ -47,7 +45,7 @@ class ProofMapIndexProxyIntegrationTest
       Bytes.bytes(0x10, 0x10)
   )
       .map(HashCode::fromBytes)
-      .collect(toList());
+      .collect(toImmutableList());
 
   @Override
   List<HashCode> getTestKeys() {

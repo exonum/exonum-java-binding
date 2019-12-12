@@ -23,7 +23,7 @@ import static com.exonum.binding.core.storage.indices.StoragePreconditions.PROOF
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.createPrefixed;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -33,21 +33,17 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.CiOnly;
-import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.UnsignedBytes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 class ProofMapIndexProxyNoKeyHashingIntegrationTest
     extends BaseProofMapIndexProxyIntegrationTestable {
 
-  static final List<HashCode> SORTED_TEST_KEYS = Stream.of(
+  static final List<HashCode> TEST_KEYS = Stream.of(
       Bytes.bytes(0x00),
       Bytes.bytes(0x01),
       Bytes.bytes(0x02),
@@ -64,15 +60,14 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
       Bytes.bytes(0x10, 0x10)
   )
       .map(BaseProofMapIndexProxyIntegrationTestable::createRawProofKey)
-      .sorted(UnsignedBytes.lexicographicalComparator())
       .map(HashCode::fromBytes)
-      .collect(Collectors.toList());
+      .collect(toImmutableList());
 
   private static final HashCode INVALID_PROOF_KEY = HashCode.fromString("1234");
 
   @Override
   List<HashCode> getTestKeys() {
-    return SORTED_TEST_KEYS;
+    return TEST_KEYS;
   }
 
   @Override
@@ -108,52 +103,6 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   void removeFailsIfInvalidKey() {
     runTestWithView(database::createFork,
         (map) -> assertThrows(IllegalArgumentException.class, () -> map.remove(INVALID_PROOF_KEY)));
-  }
-
-  @Test
-  void keysTest() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
-
-      putAll(map, entries);
-
-      Iterator<HashCode> keysIterator = map.keys();
-      List<HashCode> keysFromIter = ImmutableList.copyOf(keysIterator);
-      List<HashCode> keysInMap = MapEntries.extractKeys(entries);
-
-      // Keys must appear in a lexicographical order.
-      assertThat(keysFromIter, equalTo(keysInMap));
-    });
-  }
-
-  @Test
-  void valuesTest() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
-
-      putAll(map, entries);
-
-      Iterator<String> valuesIterator = map.values();
-      List<String> valuesFromIter = ImmutableList.copyOf(valuesIterator);
-      List<String> valuesInMap = MapEntries.extractValues(entries);
-
-      // Values must appear in a lexicographical order of keys.
-      assertThat(valuesFromIter, equalTo(valuesInMap));
-    });
-  }
-
-  @Test
-  void entriesTest() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<HashCode, String>> entries = createSortedMapEntries();
-
-      putAll(map, entries);
-
-      Iterator<MapEntry<HashCode, String>> entriesIterator = map.entries();
-      List<MapEntry> entriesFromIter = ImmutableList.copyOf(entriesIterator);
-      // Entries must appear in a lexicographical order of keys.
-      assertThat(entriesFromIter, equalTo(entries));
-    });
   }
 
   @Test
@@ -427,14 +376,6 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
       }
     }
     return createPrefixed(keyPrefixBits.toByteArray(), PROOF_MAP_KEY_SIZE);
-  }
-
-  /**
-   * Creates `numOfEntries` map entries, sorted by key:
-   * [(00…0PK1, V1), (00…0PK2, V2), … (00…0PKi, Vi)].
-   */
-  List<MapEntry<HashCode, String>> createSortedMapEntries() {
-    return createMapEntries(SORTED_TEST_KEYS.stream());
   }
 
   /**
