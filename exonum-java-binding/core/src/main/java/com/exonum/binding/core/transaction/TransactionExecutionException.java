@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
  *
  * <p>An external client will get the error code and description when requests a transaction
  * status of a failed transaction. See
- * <a href="https://exonum.com/doc/version/0.12/advanced/node-management/#transaction">the API endpoint documentation</a>
+ * <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/node-management/#transaction">the API endpoint documentation</a>
  * for more information.
  *
  * @see Blockchain#getTxResult(HashCode)

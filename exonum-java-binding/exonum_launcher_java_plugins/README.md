@@ -74,10 +74,10 @@ artifacts:
       artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-SNAPSHOT-artifact.jar"
   time:
     runtime: rust
-    name: "exonum-time:0.12.0"
+    name: "exonum-time:0.13.0-rc.2"
   timestamping:
     runtime: rust
-    name: "exonum-timestamping:0.12.0"
+    name: "exonum-timestamping:0.13.0-rc.2"
 ```
 
 Add a `plugins` section to enable both Java Runtime plugin and Instance Configuration plugin.

@@ -13,4 +13,4 @@ For more details and a guide on how to use TestKit in your tests, see
 Apache License (Version 2.0).
 See [LICENSE](../../LICENSE) for details.
 
-[exonum-testkit]: https://exonum.com/doc/version/0.12/get-started/java-binding/#testing
+[exonum-testkit]: https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#testing

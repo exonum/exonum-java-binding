@@ -28,7 +28,7 @@ import java.util.List;
  * {@code MySchema} provides access to the tables of {@link MyService},
  * given a database state: a {@link View}.
  *
- * @see <a href="https://exonum.com/doc/version/0.12/architecture/storage/#table-types">Exonum table types.</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/storage/#table-types">Exonum table types.</a>
  */
 public final class MySchema implements Schema {
 
@@ -44,7 +44,7 @@ public final class MySchema implements Schema {
   public List<HashCode> getStateHashes() {
     // You shall usually return a list of the state hashes
     // of all Merkelized collections of this service,
-    // see https://exonum.com/doc/version/0.12/architecture/storage/#merkelized-indices
+    // see https://exonum.com/doc/version/0.13-rc.2/architecture/storage/#merkelized-indices
     return Collections.emptyList();
   }
 }
