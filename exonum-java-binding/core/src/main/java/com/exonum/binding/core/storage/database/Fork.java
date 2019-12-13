@@ -117,7 +117,7 @@ public final class Fork extends View {
    * <p>Subsequent operations with the fork are prohibited.
    *
    * @return a handle to the patch obtained from this fork
-   * @see <a href="https://exonum.com/doc/version/0.12/architecture/merkledb/#patches">
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/merkledb/#patches">
    *   MerkleDB Patches</a>
    */
   NativeHandle intoPatch() {
