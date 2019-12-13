@@ -20,16 +20,24 @@ import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesAbsence;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
+import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
+import static com.exonum.binding.core.storage.indices.TestStorageItems.V3;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.View;
+import com.exonum.core.messages.ListProofOuterClass;
+import com.exonum.core.messages.ListProofOuterClass.ListProofEntry;
+import com.google.protobuf.ByteString;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -92,6 +100,74 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
       assertThat(indexHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
       assertThat(indexHash, not(equalTo(EMPTY_LIST_INDEX_HASH)));
     });
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, 1, 2})
+  void getProofThreeElementList(int index) {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> elements = asList(V1, V2, V3);
+      list.addAll(elements);
+
+      ListProof proof = list.getProof(index);
+
+      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getLength()).isEqualTo(3L);
+      ListProofEntry expectedEntry = listProofEntry(index, elements.get(index));
+      assertThat(asMessage.getEntriesList()).containsExactly(expectedEntry);
+    });
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {3, 4, Long.MAX_VALUE})
+  void getProofThreeElementListOutOfRange(long index) {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> elements = asList(V1, V2, V3);
+      list.addAll(elements);
+
+      ListProof proof = list.getProof(index);
+
+      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getLength()).isEqualTo(3L);
+      assertThat(asMessage.getEntriesList()).isEmpty();
+    });
+  }
+
+  @Test
+  void getRangeProofThreeElementListFullRange() {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> elements = asList(V1, V2, V3);
+      list.addAll(elements);
+
+      ListProof proof = list.getRangeProof(0, 3);
+
+      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getLength()).isEqualTo(3L);
+      assertThat(asMessage.getEntriesList()).containsExactlyInAnyOrder(
+          listProofEntry(0, V1), listProofEntry(1, V2), listProofEntry(2, V3));
+    });
+  }
+
+  @Test
+  void getRangeProofThreeElementListHalfInRange() {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> elements = asList(V1, V2, V3);
+      list.addAll(elements);
+
+      ListProof proof = list.getRangeProof(2, 4);
+
+      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getLength()).isEqualTo(3L);
+      assertThat(asMessage.getEntriesList()).containsExactly(listProofEntry(2, V3));
+    });
+  }
+
+  private static ListProofEntry listProofEntry(long index, String element) {
+    Serializer<String> serializer = StandardSerializers.string();
+    return ListProofEntry.newBuilder()
+        .setIndex(index)
+        .setValue(ByteString.copyFrom(serializer.toBytes(element)))
+        .build();
   }
 
   @Test

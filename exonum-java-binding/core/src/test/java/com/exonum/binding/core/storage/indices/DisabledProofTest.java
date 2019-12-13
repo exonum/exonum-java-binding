@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Disabled;
  * Indicates that a test is an integration test of proof <em>verification</em>.
  * Such tests are temporarily disabled till the proof verification is fully implemented.
  *
+ * <p>When it is implemented — reconsider both the ITs of proof <em>creation</em> and
+ * <em>verification</em>.
+ *
  * <p>See the epic https://jira.bf.local/browse/ECR-3784
  */
 @Retention(RetentionPolicy.RUNTIME)

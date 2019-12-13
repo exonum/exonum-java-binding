@@ -23,6 +23,7 @@ import com.exonum.binding.common.hash.HashCode;
 /**
  * An Adapter class used to simplify work with ListProof interfaces.
  */
+// todo: Remove the whole thing (LPNode, ...)?
 public class UncheckedListProofAdapter implements UncheckedListProof {
 
   private final ListProofNode rootNode;
