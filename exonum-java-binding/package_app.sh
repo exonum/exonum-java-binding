@@ -120,8 +120,8 @@ cp LICENSES-THIRD-PARTY.TXT "${PACKAGING_ETC_DIR}"
 # Copy fallback logger configuration
 cp ./core/rust/exonum-java/log4j-fallback.xml "${PACKAGING_ETC_DIR}"
 
-# Copy tutorial
-cp ./core/rust/exonum-java/TUTORIAL.md "${PACKAGING_ETC_DIR}"
+# Copy readme
+cp ./core/rust/exonum-java/README.md "${PACKAGING_ETC_DIR}"
 
 # We use static linkage for RocksDB because in case of dynamic linking
 # the resulting app has a dependency on a _particular_
