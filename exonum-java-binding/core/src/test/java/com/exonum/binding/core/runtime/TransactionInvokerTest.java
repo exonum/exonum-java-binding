@@ -62,16 +62,25 @@ class TransactionInvokerTest {
   }
 
   @Test
-  void invokeThrowingTransaction() {
+  void invokeThrowingTransactionExecutionException() {
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingService());
     TransactionExecutionException e = assertThrows(TransactionExecutionException.class,
         () -> invoker.invokeTransaction(ThrowingService.TRANSACTION_ID, ARGUMENTS, context));
     assertThat(e.getErrorCode()).isEqualTo(ThrowingService.ERROR_CODE);
   }
 
-  class BasicService implements Service {
+  @Test
+  void invokeThrowingServiceException() {
+    TransactionInvoker invoker = new TransactionInvoker(new ThrowingService());
+    RuntimeException e = assertThrows(RuntimeException.class,
+        () -> invoker.invokeTransaction(ThrowingService.TRANSACTION_ID_2, ARGUMENTS, context));
+    assertThat(e.getCause().getClass()).isEqualTo(IllegalArgumentException.class);
+  }
+
+  static class BasicService implements Service {
 
     static final int TRANSACTION_ID = 1;
+    static final int TRANSACTION_ID_2 = 2;
 
     @Override
     public List<HashCode> getStateHashes(Snapshot snapshot) {
@@ -84,27 +93,34 @@ class TransactionInvokerTest {
     }
   }
 
-  class ValidService extends BasicService {
-
-    static final int TRANSACTION_ID_2 = 2;
+  static class ValidService extends BasicService {
 
     @TransactionMethod(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod(byte[] arguments, TransactionContext context) {}
+    public void transactionMethod(byte[] arguments, TransactionContext context) {
+    }
 
     @TransactionMethod(TRANSACTION_ID_2)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod2(byte[] arguments, TransactionContext context) {}
+    public void transactionMethod2(byte[] arguments, TransactionContext context) {
+    }
   }
 
-  class ThrowingService extends BasicService {
+  static class ThrowingService extends BasicService {
 
     static final byte ERROR_CODE = 18;
+    static final String ERROR_MESSAGE = "Service originated exception";
 
     @TransactionMethod(TRANSACTION_ID)
     public void transactionMethod(byte[] arguments, TransactionContext context)
         throws TransactionExecutionException {
       throw new TransactionExecutionException(ERROR_CODE);
+    }
+
+    @TransactionMethod(TRANSACTION_ID_2)
+    public void transactionMethod2(byte[] arguments, TransactionContext context)
+        throws TransactionExecutionException {
+      throw new IllegalArgumentException(ERROR_MESSAGE);
     }
   }
 }

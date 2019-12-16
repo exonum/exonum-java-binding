@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.transaction;
 
+import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
 import java.lang.annotation.ElementType;
@@ -28,8 +29,11 @@ import java.lang.annotation.Target;
  * transaction, possibly modifying the blockchain state. The method should:
  * <ul>
  *   <li>be public
- *   <li>have exactly two parameters of types 'byte[]' and '{@link TransactionContext}' in this
- *       particular order
+ *   <li>have exactly two parameters - the
+ *       {@linkplain TransactionMessage#getPayload() serialized transaction arguments} of type
+ *       'byte[]' and a transaction execution context, which allows to access the information about
+ *       this transaction and modify the blockchain state through the included database fork of
+ *       type '{@link TransactionContext}' in this particular order
  * </ul>
  *
  * <p>The annotated method might throw {@linkplain TransactionExecutionException} if the
@@ -42,12 +46,12 @@ import java.lang.annotation.Target;
  * occurs. A correct transaction implementation must not throw such exceptions. The transaction
  * will be committed as failed (status "panic").
  *
- * @see <a href="https://exonum.com/doc/version/0.12/architecture/transactions">Exonum Transactions</a>
- * @see <a href="https://exonum.com/doc/version/0.12/architecture/services">Exonum Services</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/transactions">Exonum Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/services">Exonum Services</a>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-// TODO: rename to Transaction after migration?
+// TODO: rename to Transaction after migration
 public @interface TransactionMethod {
 
   /**

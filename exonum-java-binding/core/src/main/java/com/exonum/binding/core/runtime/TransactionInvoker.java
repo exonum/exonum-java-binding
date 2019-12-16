@@ -40,23 +40,17 @@ final class TransactionInvoker {
   }
 
   /**
-   * Execute the transaction, possibly modifying the blockchain state.
+   * Invoke the transaction method with a given transaction identifier.
    *
-   * @param context a transaction execution context, which allows to access the information about
-   *        this transaction and modify the blockchain state through the included database fork
+   * @param transactionId a transaction method identifier
+   * @param context a transaction execution context
    * @param arguments the serialized transaction arguments
    *
-   * @throws TransactionExecutionException if the transaction cannot be executed normally and has
-   *     to be rolled back. The transaction will be committed as failed (error kind
-   *     {@linkplain ErrorKind#SERVICE SERVICE}), the
-   *     {@linkplain ExecutionError#getCode() error code} with the optional description will be
-   *     saved into the storage. The client can request the error code to know the reason of the
-   *     failure
    * @throws IllegalArgumentException if there is no transaction method with given id in a
    *     corresponding service
-   * @throws RuntimeException if an unexpected error occurs. A correct transaction implementation
-   *     must not throw such exceptions. The transaction will be committed as failed
-   *     (status "panic")
+   * @throws TransactionExecutionException if {@link TransactionExecutionException} was thrown by
+   *     the transaction method, it is propagated
+   * @throws RuntimeException any other error is wrapped into a {@link RuntimeException}
    */
   void invokeTransaction(int transactionId, byte[] arguments, TransactionContext context)
       throws TransactionExecutionException {

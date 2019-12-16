@@ -115,7 +115,7 @@ class TransactionMethodExtractorTest {
     assertThat(actualMethods).containsExactlyInAnyOrderElementsOf(transactions.values());
   }
 
-  class BasicService implements Service {
+  static class BasicService implements Service {
 
     static final int TRANSACTION_ID = 1;
 
@@ -130,14 +130,14 @@ class TransactionMethodExtractorTest {
     }
   }
 
-  class ValidService extends BasicService {
+  static class ValidService extends BasicService {
 
     @TransactionMethod(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
     public void transactionMethod(byte[] arguments, TransactionContext context) {}
   }
 
-  class DuplicateTransactionIdsService extends BasicService {
+  static class DuplicateTransactionIdsService extends BasicService {
 
     @TransactionMethod(TRANSACTION_ID)
     public void transactionMethod(byte[] arguments, TransactionContext context) {}
@@ -146,19 +146,19 @@ class TransactionMethodExtractorTest {
     public void anotherTransactionMethod(byte[] arguments, TransactionContext context) {}
   }
 
-  class MissingTransactionMethodArgumentsService extends BasicService {
+  static class MissingTransactionMethodArgumentsService extends BasicService {
 
     @TransactionMethod(TRANSACTION_ID)
     public void transactionMethod(byte[] arguments) {}
   }
 
-  class InvalidTransactionMethodArgumentsService extends BasicService {
+  static class InvalidTransactionMethodArgumentsService extends BasicService {
 
     @TransactionMethod(TRANSACTION_ID)
     public void transactionMethod(byte[] arguments, String invalidArgument) {}
   }
 
-  class DuplicateTransactionMethodArgumentsService extends BasicService {
+  static class DuplicateTransactionMethodArgumentsService extends BasicService {
 
     @TransactionMethod(TRANSACTION_ID)
     public void transactionMethod(byte[] arguments, byte[] context) {}
@@ -171,11 +171,11 @@ class TransactionMethodExtractorTest {
     void transactionMethod(byte[] arguments, TransactionContext context);
   }
 
-  class ValidServiceInterfaceImplementation implements ServiceInterface {
+  static class ValidServiceInterfaceImplementation implements ServiceInterface {
 
     static final int TRANSACTION_ID_2 = 2;
 
-    @TransactionMethod(TRANSACTION_ID)
+    @Override
     public void transactionMethod(byte[] arguments, TransactionContext context) {}
 
     @TransactionMethod(TRANSACTION_ID_2)

@@ -42,7 +42,8 @@ final class TransactionMethodExtractor {
    */
   static Map<Integer, MethodHandle> extractTransactionMethods(Class<?> serviceClass) {
     Map<Integer, Method> transactionMethods = findTransactionMethods(serviceClass);
-    Lookup lookup = MethodHandles.lookup();
+    Lookup lookup = MethodHandles.publicLookup()
+        .in(serviceClass);
     return transactionMethods.entrySet().stream()
         .peek(tx -> validateTransactionMethod(tx.getValue(), serviceClass))
         .collect(toMap(Map.Entry::getKey,
@@ -70,10 +71,10 @@ final class TransactionMethodExtractor {
   private static void checkDuplicates(Map<Integer, Method> transactionMethods, int transactionId,
       Class<?> serviceClass, Method method) {
     if (transactionMethods.containsKey(transactionId)) {
+      String firstMethodName = transactionMethods.get(transactionId).getName();
       String errorMessage = String.format("Service %s has more than one transaction with the same"
               + " id (%s): first: %s; second: %s",
-          serviceClass.getName(), transactionId, method.getName(),
-          transactionMethods.get(transactionId).getName());
+          serviceClass.getName(), transactionId, firstMethodName, method.getName());
       throw new IllegalArgumentException(errorMessage);
     }
   }
