@@ -21,12 +21,18 @@ import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * A list proof. It proves that certain elements are present in a proof list
- * of a certain size.
+ * A view of a {@link ProofListIndexProxy}, i.e., a subset of its elements coupled
+ * with a <em>proof</em>, which jointly allow restoring the
+ * {@linkplain ProofListIndexProxy#getIndexHash() index hash} of the list. Apart from proving
+ * elements in the list, ListProof can assert that the list is shorter than the requested
+ * range of indexes.
  * <!--
  * TODO: Improve docs when the whole proof support is ready: explain their place in the
- *   full proof creation process.
+ *   full proof creation process. When verification arrives, explain how it is done.
  * -->
+ *
+ * @see ProofListIndexProxy#getProof(long)
+ * @see ProofListIndexProxy#getRangeProof(long, long)
  */
 @AutoValue
 public abstract class ListProof {

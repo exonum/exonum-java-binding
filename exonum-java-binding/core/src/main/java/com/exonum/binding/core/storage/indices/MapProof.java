@@ -21,11 +21,14 @@ import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * A proof that there are some values mapped to the keys or that there are no such
- * mappings.
+ * A view of a {@link ProofMapIndexProxy}, i.e., a subset of its entries coupled
+ * with a <em>proof</em>, which jointly allow restoring the
+ * {@linkplain ProofListIndexProxy#getIndexHash() index hash} of the map.
+ * Apart from proving the existing entries in the map, MapProof can assert absence of certain keys
+ * in the underlying index.
  * <!--
  * TODO: Improve docs when the whole proof support is ready: explain their place in the
- *   full proof creation process.
+ *   full proof creation process. When verification arrives, explain how it is done.
  * -->
  *
  * @see ProofMapIndexProxy#getProof(Object, Object[])
