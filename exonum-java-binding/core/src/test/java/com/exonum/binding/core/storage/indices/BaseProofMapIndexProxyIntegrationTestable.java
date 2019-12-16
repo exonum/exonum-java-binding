@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.CheckedMapProofMatcher.isValid;
 import static com.exonum.binding.core.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.core.storage.indices.MapTestEntry.absentEntry;
 import static com.exonum.binding.core.storage.indices.MapTestEntry.presentEntry;
@@ -32,9 +31,11 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.V4;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.values;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -48,18 +49,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.proofs.map.CheckedMapProof;
-import com.exonum.binding.common.proofs.map.UncheckedMapProof;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.View;
+import com.exonum.core.messages.MapProofOuterClass;
+import com.exonum.core.messages.MapProofOuterClass.OptionalEntry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import com.google.common.primitives.UnsignedBytes;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Empty;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +192,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getProof_EmptyMapDoesNotContainSingleKey() {
+  void verifyProof_EmptyMapDoesNotContainSingleKey() {
     runTestWithView(database::createSnapshot,
         (map) -> assertThat(map, provesThatAbsent(key1))
     );
@@ -197,7 +200,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getProof_SingletonMapContains() {
+  void verifyProof_SingletonMapContains() {
     runTestWithView(database::createFork, (map) -> {
       HashCode key = key1;
       String value = V1;
@@ -209,7 +212,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getProof_SingletonMapDoesNotContain() {
+  void verifyProof_SingletonMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
 
@@ -219,7 +222,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getProof_MultiEntryMapContains() {
+  void verifyProof_MultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createMapEntries();
       putAll(map, entries);
@@ -232,7 +235,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getMultiProof_MultiEntryMapContains() {
+  void verifyMultiProof_MultiEntryMapContains() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createMapEntries();
       putAll(map, entries);
@@ -243,7 +246,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getProof_MultiEntryMapDoesNotContain() {
+  void verifyProof_MultiEntryMapDoesNotContain() {
     runTestWithView(database::createFork, (map) -> {
       List<MapEntry<HashCode, String>> entries = createMapEntries();
       putAll(map, entries);
@@ -266,14 +269,14 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getMultiProof_EmptyMapDoesNotContainSeveralKeys() {
+  void verifyMultiProof_EmptyMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createSnapshot, (map) ->
         assertThat(map, provesThatAbsent(key1, key2)));
   }
 
   @Test
   @DisabledProofTest
-  void getMultiProof_SingletonMapDoesNotContainSeveralKeys() {
+  void verifyMultiProof_SingletonMapDoesNotContainSeveralKeys() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
 
@@ -283,7 +286,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getMultiProof_SingletonMapBothContainsAndDoesNot() {
+  void verifyMultiProof_SingletonMapBothContainsAndDoesNot() {
     runTestWithView(database::createFork, (map) -> {
       ImmutableMap<HashCode, String> source = ImmutableMap.of(
           key1, V1
@@ -297,7 +300,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   @DisabledProofTest
-  void getMultiProof_TwoElementMapContains() {
+  void verifyMultiProof_TwoElementMapContains() {
     runTestWithView(database::createFork, (map) -> {
       ImmutableMap<HashCode, String> source = ImmutableMap.of(
           key1, V1,
@@ -415,57 +418,78 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Test
-  @DisabledProofTest
   void getProofFromSingleKey() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
 
-      UncheckedMapProof proof = map.getProof(key1);
-      CheckedMapProof checkedProof = proof.check();
+      MapProof proof = map.getProof(key1);
+      MapProofOuterClass.MapProof asMessage = proof.getAsMessage();
 
-      assertThat(checkedProof, isValid(singletonList(presentEntry(key1, V1))));
+      assertThat(asMessage.getEntriesList()).containsExactly(presentOptEntry(key1, V1));
     });
   }
 
   @Test
-  @DisabledProofTest
-  void getProofFromVarargs() {
+  void getProofFromSingleMissingKey() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(key1, V1);
+
+      MapProof proof = map.getProof(key2);
+      MapProofOuterClass.MapProof asMessage = proof.getAsMessage();
+
+      assertThat(asMessage.getEntriesList()).containsExactly(absentOptEntry(key2));
+    });
+  }
+
+  @Test
+  void getProofFromVarargsPresentKeys() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
       map.put(key2, V2);
 
-      UncheckedMapProof proof = map.getProof(key1, key2);
-      CheckedMapProof checkedProof = proof.check();
+      MapProof proof = map.getProof(key1, key2);
 
-      assertThat(
-          checkedProof, isValid(Arrays.asList(presentEntry(key1, V1), presentEntry(key2, V2))));
+      MapProofOuterClass.MapProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getEntriesList()).containsExactlyInAnyOrder(
+          presentOptEntry(key1, V1), presentOptEntry(key2, V2));
     });
   }
 
   @Test
-  @DisabledProofTest
-  void getProofFromEmptyCollection() {
+  void getProofFromVarargsPresentAndMissingKeys() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
 
-      IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
-        UncheckedMapProof proof = map.getProof(Collections.emptyList());
-      });
-      assertThat(thrown.getLocalizedMessage(),
-          containsString("Keys collection should not be empty"));
+      MapProof proof = map.getProof(key1, key2);
+
+      MapProofOuterClass.MapProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getEntriesList()).containsExactlyInAnyOrder(
+          presentOptEntry(key1, V1), absentOptEntry(key2));
     });
   }
 
   @Test
-  @DisabledProofTest
   void getProofFromCollection() {
     runTestWithView(database::createFork, (map) -> {
       map.put(key1, V1);
 
-      UncheckedMapProof proof = map.getProof(singletonList(key1));
-      CheckedMapProof checkedProof = proof.check();
+      MapProof proof = map.getProof(singletonList(key1));
 
-      assertThat(checkedProof, isValid(singletonList(presentEntry(key1, V1))));
+      MapProofOuterClass.MapProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getEntriesList()).containsExactly(
+          presentOptEntry(key1, V1));
+    });
+  }
+
+  @Test
+  void getProofFromEmptyCollection() {
+    runTestWithView(database::createFork, (map) -> {
+      map.put(key1, V1);
+
+      IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+          () -> map.getProof(emptyList()));
+      assertThat(thrown.getLocalizedMessage(),
+          containsString("Keys collection should not be empty"));
     });
   }
 
@@ -550,5 +574,24 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
         .mapToObj(i -> values.get(i % values.size()));
     return Streams.zip(keys, roundRobinValues, MapEntry::valueOf)
         .collect(toList());
+  }
+
+  private static OptionalEntry presentOptEntry(HashCode key, String value) {
+    Serializer<String> stringSerializer = StandardSerializers.string();
+    return optEntryForKey(key)
+        .setValue(ByteString.copyFrom(stringSerializer.toBytes(value)))
+        .build();
+  }
+
+  private static OptionalEntry absentOptEntry(HashCode key) {
+    return optEntryForKey(key)
+        .setNoValue(Empty.getDefaultInstance())
+        .build();
+  }
+
+  private static OptionalEntry.Builder optEntryForKey(HashCode key) {
+    Serializer<HashCode> hashSerializer = StandardSerializers.hash();
+    return OptionalEntry.newBuilder()
+        .setKey(ByteString.copyFrom(hashSerializer.toBytes(key)));
   }
 }

@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ByteString;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
@@ -69,23 +68,6 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     this.missingKeys = missingKeys.stream()
         .map(ByteString::copyFrom)
         .collect(toList());
-  }
-
-  @SuppressWarnings("unused") // Native API
-  static UncheckedFlatMapProof fromNative(
-      MapProofEntry[] proofList,
-      MapEntry<byte[], byte[]>[] entries,
-      byte[][] missingKeys) {
-    List<MapProofEntry> proof = Arrays.asList(proofList);
-    List<MapEntry<ByteString, ByteString>> entriesList = Arrays.stream(entries)
-        .map(
-            e -> MapEntry.valueOf(
-                ByteString.copyFrom(e.getKey()),
-                ByteString.copyFrom(e.getValue()))
-        )
-        .collect(toList());
-    List<byte[]> missingKeysList = Arrays.asList(missingKeys);
-    return new UncheckedFlatMapProof(proof, entriesList, missingKeysList);
   }
 
   @Override
