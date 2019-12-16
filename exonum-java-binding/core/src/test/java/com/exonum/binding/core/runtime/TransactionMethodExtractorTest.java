@@ -175,7 +175,7 @@ class TransactionMethodExtractorTest {
 
     static final int TRANSACTION_ID_2 = 2;
 
-    @Override
+    @TransactionMethod(TRANSACTION_ID)
     public void transactionMethod(byte[] arguments, TransactionContext context) {}
 
     @TransactionMethod(TRANSACTION_ID_2)
