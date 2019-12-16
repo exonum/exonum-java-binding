@@ -21,7 +21,9 @@ mod errors;
 mod jni;
 pub mod jni_cache;
 
-pub use self::conversion::{convert_hash, convert_to_hash, convert_to_string};
+pub use self::conversion::{
+    convert_hash, convert_to_hash, java_arrays_to_rust, convert_to_string, proto_to_java_bytes,
+};
 pub use self::errors::{
     any_to_string, check_error_on_exception, describe_java_exception, get_and_clear_java_exception,
     panic_on_exception, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, unwrap_jni_verbose,
