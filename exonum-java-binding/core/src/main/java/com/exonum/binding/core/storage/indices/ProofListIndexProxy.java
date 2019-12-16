@@ -204,7 +204,7 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
 
   private static ListProof parseProof(byte[] proofMessage) {
     try {
-      return ListProof.newInstance(proofMessage);
+      return ListProof.parseFrom(proofMessage);
     } catch (InvalidProtocolBufferException e) {
       // Must never happen with the correct native
       throw new IllegalStateException("Non-decodable list proof", e);

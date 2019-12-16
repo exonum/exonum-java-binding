@@ -46,7 +46,7 @@ public abstract class MapProof {
    * @throws InvalidProtocolBufferException if the message is not
    *     {@link com.exonum.core.messages.MapProofOuterClass.MapProof}
    */
-  public static MapProof newInstance(byte[] mapProofMessage) throws InvalidProtocolBufferException {
+  public static MapProof parseFrom(byte[] mapProofMessage) throws InvalidProtocolBufferException {
     return newInstance(MapProofOuterClass.MapProof.parseFrom(mapProofMessage));
   }
 

@@ -47,8 +47,7 @@ public abstract class ListProof {
    * @throws InvalidProtocolBufferException if the message is not
    *     {@link com.exonum.core.messages.MapProofOuterClass.MapProof}
    */
-  // todo: Consider renaming both to `parseFrom`?
-  public static ListProof newInstance(byte[] proofMessage) throws InvalidProtocolBufferException {
+  public static ListProof parseFrom(byte[] proofMessage) throws InvalidProtocolBufferException {
     return newInstance(ListProofOuterClass.ListProof.parseFrom(proofMessage));
   }
 

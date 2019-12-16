@@ -372,7 +372,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
 
   private static MapProof decodeProofMessage(byte[] proofMessage) {
     try {
-      return MapProof.newInstance(proofMessage);
+      return MapProof.parseFrom(proofMessage);
     } catch (InvalidProtocolBufferException e) {
       // Must never happen with correct native code
       throw new IllegalStateException("Non-decodable proof message", e);
