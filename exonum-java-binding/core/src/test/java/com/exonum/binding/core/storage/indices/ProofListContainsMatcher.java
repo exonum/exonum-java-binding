@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.exonum.binding.common.proofs.list.CheckedListProof;
-import com.exonum.binding.common.proofs.list.UncheckedListProof;
 import com.google.protobuf.ByteString;
 import java.util.Collections;
 import java.util.List;
@@ -37,11 +36,11 @@ import org.hamcrest.TypeSafeMatcher;
 
 class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<String>> {
 
-  private final Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction;
+  private final Function<ProofListIndexProxy<String>, ListProof> proofFunction;
   private final Matcher<Map<Long, String>> elementsMatcher;
 
   private ProofListContainsMatcher(
-      Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction,
+      Function<ProofListIndexProxy<String>, ListProof> proofFunction,
       Map<Long, String> expectedProofElements) {
     this.proofFunction = proofFunction;
     this.elementsMatcher = equalTo(expectedProofElements);
@@ -53,8 +52,9 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
       return false;
     }
 
-    UncheckedListProof proof = proofFunction.apply(list);
-    CheckedListProof checkedProof = proof.check();
+    ListProof proof = proofFunction.apply(list);
+    // TODO: check the proof in 'Java Proofs P3' [ECR-3784]!
+    CheckedListProof checkedProof = null;
 
     Set<Map.Entry<Long, ByteString>> entrySet = checkedProof.getElements().entrySet();
     Map<Long, String> actualElements = entrySet.stream()
@@ -75,8 +75,9 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   @Override
   protected void describeMismatchSafely(ProofListIndexProxy<String> list,
                                         Description mismatchDescription) {
-    UncheckedListProof proof = proofFunction.apply(list);
-    CheckedListProof checkedProof = proof.check();
+    ListProof proof = proofFunction.apply(list);
+    // TODO: check the proof in 'Java Proofs P3' [ECR-3784]!
+    CheckedListProof checkedProof = null;
 
     if (!checkedProof.isValid()) {
       mismatchDescription.appendText("proof was not valid: ")
@@ -112,7 +113,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(0 <= index);
     checkNotNull(expectedValue);
 
-    Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
         (list) -> list.getProof(index);
 
     return new ProofListContainsMatcher(proofFunction,
@@ -137,7 +138,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(!expectedValues.isEmpty(), "Empty list of expected values");
 
     long to = from + expectedValues.size();
-    Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
         (list) -> list.getRangeProof(from, to);
 
     Map<Long, String> expectedProofElements = new TreeMap<>();
@@ -158,7 +159,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   public static ProofListContainsMatcher provesAbsence(long index) {
     checkArgument(0 <= index);
 
-    Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
         (list) -> list.getProof(index);
 
     return new ProofListContainsMatcher(proofFunction, emptyMap());
@@ -178,7 +179,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   public static ProofListContainsMatcher provesAbsence(long from, long to) {
     checkArgument(0 <= from, "Range start index (%s) is negative", from);
 
-    Function<ProofListIndexProxy<String>, UncheckedListProof> proofFunction =
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
         (list) -> list.getRangeProof(from, to);
 
     return new ProofListContainsMatcher(proofFunction, emptyMap());

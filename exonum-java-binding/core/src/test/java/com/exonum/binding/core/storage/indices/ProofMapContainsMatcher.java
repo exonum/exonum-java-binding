@@ -72,10 +72,12 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
         .map(MapTestEntry::getKey)
         .collect(toList());
 
-    UncheckedMapProof proof = map.getProof(keys);
+    MapProof proof = map.getProof(keys);
     assert proof != null : "The proof must not be null";
 
-    return proof.check();
+    // TODO: Fix in 'Java Proofs P3' [ECR-3784]
+    UncheckedMapProof uncheckedProof = null;
+    return uncheckedProof.check();
   }
 
   /**

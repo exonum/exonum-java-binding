@@ -14,18 +14,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from distutils.core import setup
+import setuptools
 
-install_requires = ["exonum-launcher"]
+INSTALL_REQUIRES = ["exonum-launcher"]
 
-python_requires = ">=3.6"
+PYTHON_REQUIRES = ">=3.6"
 
-setup(
+with open("README.md", "r") as readme:
+    LONG_DESCRIPTION = readme.read()
+
+setuptools.setup(
     name="exonum_launcher_java_plugins",
     version="0.10.0-SNAPSHOT",
-    description="Exonum Java plugins for exonum_launcher",
+    author="The Exonum team",
+    author_email="contact@exonum.com",
+    description="Exonum Java plugins for exonum-launcher",
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     url="https://github.com/exonum/exonum-java-binding",
-    packages=["exonum_java_runtime_plugin", "exonum_instance_configuration_plugin"],
-    install_requires=install_requires,
-    python_requires=python_requires,
+    packages=[
+        "exonum_java_runtime_plugin",
+        "exonum_java_runtime_plugin.proto",
+        "exonum_instance_configuration_plugin",
+    ],
+    install_requires=INSTALL_REQUIRES,
+    python_requires=PYTHON_REQUIRES,
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: OS Independent",
+        "Topic :: Security :: Cryptography",
+    ],
 )

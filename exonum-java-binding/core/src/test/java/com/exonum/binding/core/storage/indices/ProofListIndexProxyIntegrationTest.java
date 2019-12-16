@@ -20,16 +20,24 @@ import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesAbsence;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
+import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
+import static com.exonum.binding.core.storage.indices.TestStorageItems.V3;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.View;
+import com.exonum.core.messages.ListProofOuterClass;
+import com.exonum.core.messages.ListProofOuterClass.ListProofEntry;
+import com.google.protobuf.ByteString;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -94,9 +102,77 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
+  @ParameterizedTest
+  @ValueSource(ints = {0, 1, 2})
+  void getProofThreeElementList(int index) {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> elements = asList(V1, V2, V3);
+      list.addAll(elements);
+
+      ListProof proof = list.getProof(index);
+
+      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getLength()).isEqualTo(3L);
+      ListProofEntry expectedEntry = listProofEntry(index, elements.get(index));
+      assertThat(asMessage.getEntriesList()).containsExactly(expectedEntry);
+    });
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {3, 4, Long.MAX_VALUE})
+  void getProofThreeElementListOutOfRange(long index) {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> elements = asList(V1, V2, V3);
+      list.addAll(elements);
+
+      ListProof proof = list.getProof(index);
+
+      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getLength()).isEqualTo(3L);
+      assertThat(asMessage.getEntriesList()).isEmpty();
+    });
+  }
+
+  @Test
+  void getRangeProofThreeElementListFullRange() {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> elements = asList(V1, V2, V3);
+      list.addAll(elements);
+
+      ListProof proof = list.getRangeProof(0, 3);
+
+      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getLength()).isEqualTo(3L);
+      assertThat(asMessage.getEntriesList()).containsExactlyInAnyOrder(
+          listProofEntry(0, V1), listProofEntry(1, V2), listProofEntry(2, V3));
+    });
+  }
+
+  @Test
+  void getRangeProofThreeElementListHalfInRange() {
+    runTestWithView(database::createFork, (list) -> {
+      List<String> elements = asList(V1, V2, V3);
+      list.addAll(elements);
+
+      ListProof proof = list.getRangeProof(2, 4);
+
+      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+      assertThat(asMessage.getLength()).isEqualTo(3L);
+      assertThat(asMessage.getEntriesList()).containsExactly(listProofEntry(2, V3));
+    });
+  }
+
+  private static ListProofEntry listProofEntry(long index, String element) {
+    Serializer<String> serializer = StandardSerializers.string();
+    return ListProofEntry.newBuilder()
+        .setIndex(index)
+        .setValue(ByteString.copyFrom(serializer.toBytes(element)))
+        .build();
+  }
+
   @Test
   @DisabledProofTest
-  void getProofSingletonList() {
+  void verifyProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -106,7 +182,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   @DisabledProofTest
-  void getProofOfAbsenceEmptyList() {
+  void verifyProofOfAbsenceEmptyList() {
     runTestWithView(database::createFork, (list) -> {
       assertThat(list, provesAbsence(0));
     });
@@ -114,7 +190,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   @DisabledProofTest
-  void getProofOfAbsenceSingletonList() {
+  void verifyProofOfAbsenceSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -124,7 +200,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   @DisabledProofTest
-  void getRangeProofOfAbsenceEmptyList() {
+  void verifyRangeProofOfAbsenceEmptyList() {
     runTestWithView(database::createFork, (list) -> {
       assertThat(list, provesAbsence(0, 1));
     });
@@ -132,7 +208,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   @DisabledProofTest
-  void getRangeProofOfAbsenceSingletonList() {
+  void verifyRangeProofOfAbsenceSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -142,7 +218,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   @DisabledProofTest
-  void getRangeProofSingletonList() {
+  void verifyRangeProofSingletonList() {
     runTestWithView(database::createFork, (list) -> {
       list.add(V1);
 
@@ -153,7 +229,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   @ParameterizedTest
   @DisabledProofTest
   @ValueSource(ints = {2, 3, 4, 5, 7, 8, 9})
-  void getProofMultipleItemList(int size) {
+  void verifyProofMultipleItemList(int size) {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values.subList(0, size);
 
@@ -167,7 +243,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   @DisabledProofTest
-  void getRangeProofMultipleItemList_FullRange() {
+  void verifyRangeProofMultipleItemList_FullRange() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);
@@ -178,7 +254,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   @DisabledProofTest
-  void getRangeProofMultipleItemList_1stHalf() {
+  void verifyRangeProofMultipleItemList_1stHalf() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);
@@ -191,7 +267,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   @DisabledProofTest
-  void getRangeProofMultipleItemList_2ndHalf() {
+  void verifyRangeProofMultipleItemList_2ndHalf() {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values;
       list.addAll(values);
@@ -207,7 +283,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   @DisabledProofTest
   @Disabled("ECR-3673: empty ranges are not supported with the current tree format; "
       + "need a flat one")
-  void getRangeProofMultipleItemList_EmptyRange(int size) {
+  void verifyRangeProofMultipleItemList_EmptyRange(int size) {
     runTestWithView(database::createFork, (list) -> {
       List<String> values = TestStorageItems.values.subList(0, size);
 

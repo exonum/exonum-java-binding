@@ -15,6 +15,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Support of creation of Protobuf-based proofs for maps and lists.
+  Such proofs can be easily serialized using Protocol Buffers
+  and sent to the light clients.
+  See `ProofMapIndexProxy#getProof` and `MapProof`;
+  `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
+  `ListProof`.
+  
+### Removed
+- Classes supporting no longer used tree-like list proof representation.
+
+## 0.9.0-rc2 - 2019-12-17
+
+### Fixed
+- Published on Maven Central a missing dependency of a Testkit module 
+(exonum-java-app).
+
 ## [0.9.0-rc1] - 2019-12-12
 
 ### Overview
