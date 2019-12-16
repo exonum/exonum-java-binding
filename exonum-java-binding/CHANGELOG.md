@@ -16,7 +16,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Protobuf-based map proofs, see `ProofMapIndexProxy#getProof` and `MapProof`.
+- Support of creation of Protobuf-based proofs for maps and lists.
+  Such proofs can be easily serialized using Protocol Buffers
+  and sent to the light clients.
+  See `ProofMapIndexProxy#getProof` and `MapProof`;
+  `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
+  `ListProof`.
 
 ## [0.9.0-rc1] - 2019-12-TBD
 
