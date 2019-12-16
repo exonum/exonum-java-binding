@@ -21,8 +21,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
-import com.exonum.core.messages.Runtime.ErrorKind;
-import com.exonum.core.messages.Runtime.ExecutionError;
 import java.lang.invoke.MethodHandle;
 import java.util.Map;
 
