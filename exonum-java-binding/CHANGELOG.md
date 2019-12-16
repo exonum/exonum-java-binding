@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   See `ProofMapIndexProxy#getProof` and `MapProof`;
   `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
   `ListProof`.
+  
+### Removed
+- Classes supporting no longer used tree-like list proof representation.
 
 ## [0.9.0-rc1] - 2019-12-TBD
 
