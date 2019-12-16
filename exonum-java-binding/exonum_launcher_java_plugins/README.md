@@ -69,9 +69,9 @@ of configuration for readability and easier refactoring. Java artifacts also nee
 artifacts:
   cryptocurrency:
     runtime: java
-    name: "com.exonum.examples:cryptocurrency:0.9.0-rc1"
+    name: "com.exonum.examples:cryptocurrency:0.9.0-rc2"
     spec:
-      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.9.0-rc1-artifact.jar"
+      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.9.0-rc2-artifact.jar"
   time:
     runtime: rust
     name: "exonum-time:0.13.0-rc.2"
