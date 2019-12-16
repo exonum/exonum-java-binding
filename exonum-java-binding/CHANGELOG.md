@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## 0.9.0-rc2 - 2019-12-17
+
+### Fixed
+- Published on Maven Central a missing dependency of a Testkit module 
+(exonum-java-app).
+
 ## [0.9.0-rc1] - 2019-12-12
 
 ### Overview
