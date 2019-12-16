@@ -93,7 +93,7 @@ class TransactionInvokerTest {
     }
   }
 
-  static class ValidService extends BasicService {
+  public static class ValidService extends BasicService {
 
     @TransactionMethod(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
@@ -106,7 +106,7 @@ class TransactionInvokerTest {
     }
   }
 
-  static class ThrowingService extends BasicService {
+  public static class ThrowingService extends BasicService {
 
     static final byte ERROR_CODE = 18;
     static final String ERROR_MESSAGE = "Service originated exception";
