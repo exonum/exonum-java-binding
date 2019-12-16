@@ -27,3 +27,24 @@ pub use self::errors::{
     panic_on_exception, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, unwrap_jni_verbose,
 };
 pub use self::jni::{get_class_name, get_exception_message};
+
+/// Asserts that given closure panics while executed and the resulting error message contains given
+/// substring.
+pub fn assert_panics<F, R>(err_substring: &str, f: F)
+where
+    F: FnOnce() -> R,
+{
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f));
+    match result {
+        Ok(_) => panic!("Panic expected"),
+        Err(err) => {
+            let err_msg = any_to_string(&err);
+            if !err_msg.contains(err_substring) {
+                panic!(
+                    "Expected a panic message containing \"{}\" but was:\n{}",
+                    err_substring, err_msg
+                )
+            }
+        }
+    }
+}

@@ -116,5 +116,6 @@ fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
     vec![
         Box::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
         Box::new(BtcAnchoringService),
+        Box::new(SimpleSupervisor::new()),
     ]
 }

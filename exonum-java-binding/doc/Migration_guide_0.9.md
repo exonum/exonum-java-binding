@@ -23,7 +23,7 @@ An instance name is specified by the network administrators during the service i
 an ID is assigned by the framework automatically and can be [queried][service-id-lc-operation]
 using the light client.
 
-[service-id-lc-operation]: todo
+[service-id-lc-operation]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-light-client/README.md#creating-transaction-message
 
 ## Update the Service
 
@@ -59,7 +59,7 @@ replaces the configuration service.
 [service-initialize]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/core/service/Service.html#initialize-com.exonum.binding.core.storage.database.Fork-com.exonum.binding.core.service.Configuration-
 [configurable]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/core/service/Configurable.html
 <!-- todo: Check the anchor when the docs land -->
-[supervisor]: https://exonum.com/doc/version/0.13-rc1/get-started/java-binding/#deploy-and-start-service
+[supervisor]: https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#deploy-and-start-service
 
 ### Update the Schema
 
@@ -158,7 +158,7 @@ Finally, if the integration tests using the Testkit are located in the same modu
 bound them to the `verify` Maven phase. Then the service artifact built during the `package` 
 phase is available.
 
-See the [updated section on testing](https://exonum.com/doc/version/0.13-rc1/get-started/java-binding/#testing)
+See the [updated section on testing](https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#testing)
 for extra examples.
 
 ### Use Example
@@ -184,7 +184,7 @@ the reference below.
 See the updated node and application configuration [documentation][node-config] on the site
 for the detailed instructions.
 
-[node-config]: https://exonum.com/doc/version/0.13-rc1/get-started/java-binding/#node-configuration
+[node-config]: https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#node-configuration
 
 ## Update the Clients
 
@@ -201,7 +201,7 @@ to submit transactions to a correct instance.
 ## See Also
 
 - The 0.9.0 [release page][release-page] for the changelog and pre-built binaries.
-- [User Guide](https://exonum.com/doc/version/0.13-rc1/get-started/java-binding/)
+- [User Guide](https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/)
 - [Javadocs](https://exonum.com/doc/api/java-binding/0.9.0-rc1/index.html)
 
 [release-page]: https://github.com/exonum/exonum-java-binding/releases/tag/ejb/v0.9.0-rc1

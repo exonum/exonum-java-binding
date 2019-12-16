@@ -26,7 +26,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
 
-## [0.9.0-rc1] - 2019-12-TBD
+## 0.9.0-rc2 - 2019-12-17
+
+### Fixed
+- Published on Maven Central a missing dependency of a Testkit module 
+(exonum-java-app).
+
+## [0.9.0-rc1] - 2019-12-12
 
 ### Overview
 
@@ -36,7 +42,7 @@ instances of the same service.
 Creating proofs is not supported in this release. They will be re-enabled in one of the following
 releases.
 
-This release is based on Exonum <version TBD + link their release page>.
+This release is based on [*Exonum 0.13.0-rc.2*][exonum-0.13].
 
 *If you are upgrading an existing Java service, consult
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.9.0-rc1/exonum-java-binding/doc/Migration_guide_0.9.md).*
@@ -64,6 +70,10 @@ the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.
 - The default `ProofMapIndexProxy` implementation has been changed to hash user keys to produce an
   internal key. The implementation that does not hash the keys is still supported, see
   [documentation][proof-map-non-hashing]. (#1222)
+- Updated Exonum to 0.13.0-rc.2 — see [Exonum release page][exonum-0.13]
+for details.
+
+[exonum-0.13]: https://github.com/exonum/exonum/releases/tag/v0.13.0-rc.2
 
 ### Removed
 - `Service#getId` and `Service#getName` are removed. `AbstractService` now provides 
@@ -358,7 +368,8 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.8.0...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.9.0-rc1...HEAD
+[0.9.0-rc1]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.8.0...ejb/v0.9.0-rc1
 [0.8.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.7.0...ejb/v0.8.0
 [0.7.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...ejb/v0.7.0
 [0.6.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...ejb/v0.6.0
