@@ -16,21 +16,22 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.common.hash.HashCode;
-import java.util.List;
+import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
 /**
  * A schema of the collections (a.k.a. indices) of a service.
+ *
+ * <p>To verify the integrity of the database state on each node in the network,
+ * the core automatically tracks every Merkelized collection used by the user
+ * services. It aggregates state hashes of these collections into a single
+ * Merkelized meta-map. The hash of this meta-map is considered the hash of the
+ * entire blockchain state and is recorded as such in blocks and Precommit
+ * messages.
+ *
+ * @see ProofListIndexProxy#getIndexHash()
+ * @see ProofMapIndexProxy#getIndexHash()
  */
-public interface Schema {
 
-  /**
-   * Returns the root hashes of Merkelized tables in this database schema, as of the current
-   * state of the database. If there are no Merkelized tables, returns an empty list.
-   *
-   * <p>This list of root hashes represents the current service state. Lists of these hashes
-   * from each service are aggregated in a single <em>blockchain state hash</em> that reflects
-   * the state of all services in the blockchain.
-   */
-  List<HashCode> getStateHashes();
+public interface Schema {
 }

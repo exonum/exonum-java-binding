@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{access::FromAccess, Entry, Fork, ObjectHash, Snapshot};
+use exonum_merkledb::{access::FromAccess, Fork, ObjectHash, ProofEntry, Snapshot};
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray},
@@ -25,7 +25,8 @@ use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
 use utils;
 
-type Index<T> = Entry<T, Value>;
+// TODO(TBD)
+type Index<T> = ProofEntry<T, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static dyn Snapshot>),

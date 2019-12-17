@@ -49,13 +49,13 @@ rpath = true
 
 # FIXME: using git dependency until Exonum 1.0 is released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-time = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-build = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-derive = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-cli = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-proto = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-supervisor = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-crypto = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
-exonum-merkledb = { git = "https://github.com/exonum/exonum", tag = "v0.13.0-rc.2" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-build = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-derive = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-cli = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-proto = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-crypto = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }
+exonum-merkledb = { git = "https://github.com/exonum/exonum", rev = "7223ce6ebcf" }

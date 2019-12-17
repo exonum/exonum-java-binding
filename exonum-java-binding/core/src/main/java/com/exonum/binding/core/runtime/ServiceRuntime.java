@@ -19,17 +19,13 @@ package com.exonum.binding.core.runtime;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transport.Server;
@@ -37,11 +33,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.google.protobuf.ByteString;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
@@ -75,7 +69,7 @@ public final class ServiceRuntime implements AutoCloseable {
   /**
    * The active services indexed by their name. It is stored in a sorted map that offers
    * the same iteration order on all nodes with the same services, which is required
-   * for correct operation of beforeCommit and {@link #getStateHashes(Snapshot)}.
+   * for correct operation of state hash aggregation.
    */
   private final SortedMap<String, ServiceWrapper> services = new TreeMap<>();
   /**
@@ -311,37 +305,6 @@ public final class ServiceRuntime implements AutoCloseable {
         throw e;
       }
     }
-  }
-
-  /**
-   * Returns the state hashes of this runtime and the services registered in it as a protobuf
-   * message.
-   *
-   * @param snapshot the snapshot of the current database state
-   */
-  public ServiceRuntimeStateHashes getStateHashes(Snapshot snapshot) {
-    synchronized (lock) {
-      // Collect the service state hashes
-      List<ServiceStateHashes> serviceStateHashes = services.values().stream()
-          .map(service -> getServiceStateHashes(service, snapshot))
-          .collect(toList());
-
-      return ServiceRuntimeStateHashes.newBuilder()
-              // The runtime itself does not have any state hashes at the moment.
-              .addAllServiceStateHashes(serviceStateHashes)
-              .build();
-    }
-  }
-
-  private ServiceStateHashes getServiceStateHashes(ServiceWrapper service, Snapshot snapshot) {
-    List<HashCode> stateHashes = service.getStateHashes(snapshot);
-    List<ByteString> stateHashesAsBytes = stateHashes.stream()
-        .map(hash -> ByteString.copyFrom(hash.asBytes()))
-        .collect(toList());
-    return ServiceStateHashes.newBuilder()
-        .setInstanceId(service.getId())
-        .addAllStateHashes(stateHashesAsBytes)
-        .build();
   }
 
   /**

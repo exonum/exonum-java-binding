@@ -16,13 +16,8 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
-import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import io.vertx.ext.web.Router;
-import java.util.List;
 
 /**
  * An Exonum service.
@@ -54,26 +49,6 @@ public interface Service {
   default void initialize(Fork fork, Configuration configuration) {
     // No configuration
   }
-
-  /**
-   * Returns a list of hashes representing the state of this service, as of the given snapshot
-   * of the blockchain state. Usually, it includes the hashes of all Merkelized collections
-   * defined by this service.
-   *
-   * <p>The core uses this list to verify that the service on each node in the network has the same
-   * database state. To do so efficiently, it aggregates state hashes of all services
-   * into a single Merkelized meta-map. The hash of this meta-map is considered the hash
-   * of the entire blockchain state and is recorded as such in blocks and Precommit messages.
-   *
-   * <p>Please note that if this service does not provide any state hashes,
-   * the framework will not be able to verify that its transactions cause the same results
-   * on different nodes.
-   *
-   * @param snapshot a snapshot of the blockchain state. Not valid after this method returns
-   * @see ProofListIndexProxy#getIndexHash()
-   * @see ProofMapIndexProxy#getIndexHash()
-   */
-  List<HashCode> getStateHashes(Snapshot snapshot);
 
   /**
    * Creates handlers that make up the public HTTP API of this service.

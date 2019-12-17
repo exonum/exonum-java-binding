@@ -31,7 +31,6 @@ import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -48,7 +47,6 @@ import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -87,15 +85,6 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   protected QaSchema createDataSchema(View view) {
     return new QaSchema(view, getName());
-  }
-
-  @Override
-  public List<HashCode> getStateHashes(Snapshot snapshot) {
-    List<HashCode> stateHashes = super.getStateHashes(snapshot);
-    // Log the state hashes, so that the values passed to the native part of the framework
-    // are known.
-    logger.info("state hashes: {}", stateHashes);
-    return stateHashes;
   }
 
   @Override

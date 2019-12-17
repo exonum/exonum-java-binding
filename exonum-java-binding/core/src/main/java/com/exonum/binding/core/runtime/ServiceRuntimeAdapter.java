@@ -20,7 +20,6 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
 import com.exonum.binding.core.service.Node;
@@ -189,27 +188,6 @@ public class ServiceRuntimeAdapter {
           callerServiceId, hash, authorPk);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
-    }
-  }
-
-  /**
-   * Returns the state hashes of this runtime. The state hashes are serialized in protobuf,
-   * see {@link ServiceRuntimeStateHashes} for message specification.
-   *
-   * @param snapshotHandle a handle to the native snapshot object
-   * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#getStateHashes(Snapshot)
-   * @see ServiceRuntimeStateHashes
-   */
-  byte[] getStateHashes(long snapshotHandle) throws CloseFailuresException {
-    try (Cleaner cleaner = new Cleaner("getStateHashes")) {
-      Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
-      ServiceRuntimeStateHashes stateHashes = serviceRuntime.getStateHashes(snapshot);
-      return stateHashes.toByteArray();
-    } catch (CloseFailuresException e) {
-      handleCloseFailure(e);
-      // unreachable, ^ throws
-      return null;
     }
   }
 

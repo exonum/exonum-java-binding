@@ -17,13 +17,10 @@
 package com.exonum.binding.fakeservice;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
-import static java.util.Collections.emptyList;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndexProxy;
-import java.util.List;
 
 class FakeSchema implements Schema {
 
@@ -33,11 +30,6 @@ class FakeSchema implements Schema {
   FakeSchema(String serviceName, View view) {
     this.namespace = serviceName;
     this.view = view;
-  }
-
-  @Override
-  public List<HashCode> getStateHashes() {
-    return emptyList();
   }
 
   MapIndexProxy<String, String> testMap() {

@@ -17,15 +17,13 @@
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
-    exonum_merkledb::{self, Snapshot},
+    exonum_merkledb::Snapshot,
     messages::BinaryValue,
     runtime::{
         ArtifactId, CallInfo, Caller, ErrorKind, ExecutionContext, ExecutionError, InstanceId,
-        InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, StateHashAggregator,
-        WellKnownRuntime,
+        InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
     },
 };
-use exonum_proto::ProtobufConvert;
 use futures::{Future, IntoFuture};
 use jni::{
     objects::{GlobalRef, JObject, JValue},
@@ -37,7 +35,6 @@ use jni::{
 use std::fmt;
 
 use {
-    proto,
     runtime::Error,
     storage::View,
     to_handle,
@@ -116,7 +113,8 @@ impl JavaRuntimeProxy {
 
                 ExceptionHandlers::DEFAULT(env, exception)
             }
-            _ => (Error::OtherJniError, err).into(),
+            // TODO(TBD)
+            _ => ExecutionError::new(ErrorKind::Runtime { code: 3 }, err.to_string()),
         }
     }
 
@@ -174,11 +172,11 @@ impl JavaRuntimeProxy {
                     assert!(result.is_some());
                     Ok(result.unwrap())
                 }
-                Err(err) => Err((
-                    Error::OtherJniError,
+                // TODO(TBD)
+                Err(err) => Err(ExecutionError::new(
+                    ErrorKind::Runtime { code: 3 },
                     format!("Unexpected JNI error: {:?}", err),
-                )
-                    .into()),
+                )),
             },
             Some(error) => Err(error),
         }
@@ -358,30 +356,7 @@ impl Runtime for JavaRuntimeProxy {
         )
     }
 
-    fn state_hashes(&self, snapshot: &dyn Snapshot) -> StateHashAggregator {
-        let bytes = unwrap_jni(self.exec.with_attached(|env| {
-            let view_handle = to_handle(View::from_ref_snapshot(snapshot));
-            let java_runtime_hashes = panic_on_exception(
-                env,
-                env.call_method_unchecked(
-                    self.runtime_adapter.as_obj(),
-                    runtime_adapter::state_hashes_id(),
-                    JavaType::Array(Box::new(JavaType::Primitive(Primitive::Byte))),
-                    &[JValue::from(view_handle)],
-                ),
-            );
-            let byte_array = java_runtime_hashes.l()?.into_inner();
-            let data = env.convert_byte_array(byte_array)?;
-
-            Ok(data)
-        }));
-
-        ServiceRuntimeStateHashes::from_bytes(bytes.into())
-            .unwrap()
-            .into()
-    }
-
-    fn before_commit(
+    fn before_transactions(
         &self,
         context: ExecutionContext,
         instance_id: InstanceId,
@@ -400,6 +375,15 @@ impl Runtime for JavaRuntimeProxy {
             );
             Ok(())
         })
+    }
+
+    fn after_transactions(
+        &self,
+        _context: ExecutionContext,
+        _instance_id: InstanceId,
+    ) -> Result<(), ExecutionError> {
+        // TODO(TBD): implement
+        Ok(())
     }
 
     fn after_commit(&mut self, snapshot: &dyn Snapshot, _mailbox: &mut Mailbox) {
@@ -467,60 +451,6 @@ impl fmt::Display for JavaArtifactId {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
-#[protobuf_convert(source = "proto::ServiceStateHashes")]
-struct ServiceStateHashes {
-    instance_id: u32,
-    state_hashes: Vec<Vec<u8>>,
-}
-
-impl From<&ServiceStateHashes> for (InstanceId, Vec<Hash>) {
-    fn from(value: &ServiceStateHashes) -> Self {
-        let hashes: Vec<Hash> = value
-            .state_hashes
-            .iter()
-            .map(|bytes| to_hash(bytes))
-            .collect();
-        (value.instance_id, hashes)
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, ProtobufConvert, BinaryValue, PartialEq)]
-#[protobuf_convert(source = "proto::ServiceRuntimeStateHashes")]
-struct ServiceRuntimeStateHashes {
-    runtime_state_hashes: Vec<Vec<u8>>,
-    service_state_hashes: Vec<ServiceStateHashes>,
-}
-
-impl ServiceRuntimeStateHashes {
-    fn runtime(&self) -> Vec<Hash> {
-        self.runtime_state_hashes
-            .iter()
-            .map(|bytes| to_hash(bytes))
-            .collect()
-    }
-
-    fn instances(&self) -> Vec<(InstanceId, Vec<Hash>)> {
-        self.service_state_hashes
-            .iter()
-            .map(|service| service.into())
-            .collect()
-    }
-}
-
-impl From<ServiceRuntimeStateHashes> for StateHashAggregator {
-    fn from(value: ServiceRuntimeStateHashes) -> Self {
-        StateHashAggregator {
-            runtime: value.runtime(),
-            instances: value.instances(),
-        }
-    }
-}
-
-fn to_hash(bytes: &[u8]) -> Hash {
-    Hash::from_bytes(bytes.into()).unwrap()
-}
-
 type ExceptionHandler = Fn(&JNIEnv, JObject) -> ExecutionError;
 struct ExceptionHandlers;
 
@@ -528,14 +458,15 @@ impl ExceptionHandlers {
     const DEFAULT: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let message = describe_java_exception(env, exception);
-        (Error::JavaException, message).into()
+        // TODO(TBD):
+        ExecutionError::new(ErrorKind::Runtime { code: 1 }, message)
     };
 
     const TX_EXECUTION: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let code = unwrap_jni(Self::get_tx_error_code(env, exception)) as u8;
         let msg = unwrap_jni(get_exception_message(env, exception)).unwrap_or_default();
-        ExecutionError::new(ErrorKind::service(code), msg)
+        ExecutionError::service(code, msg)
     };
 
     fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {

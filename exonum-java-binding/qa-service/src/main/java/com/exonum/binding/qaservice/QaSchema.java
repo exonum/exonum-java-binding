@@ -27,8 +27,6 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.time.TimeSchema;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A schema of the QA service.
@@ -46,11 +44,6 @@ public final class QaSchema implements Schema {
   public QaSchema(View view, String serviceName) {
     this.view = checkNotNull(view);
     namespace = serviceName;
-  }
-
-  @Override
-  public List<HashCode> getStateHashes() {
-    return Collections.singletonList(counters().getIndexHash());
   }
 
   /**

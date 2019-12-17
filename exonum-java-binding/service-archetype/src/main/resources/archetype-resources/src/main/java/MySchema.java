@@ -39,12 +39,4 @@ public final class MySchema implements Schema {
     this.view = checkNotNull(view);
     this.namespace = serviceName + ".";
   }
-
-  @Override
-  public List<HashCode> getStateHashes() {
-    // You shall usually return a list of the state hashes
-    // of all Merkelized collections of this service,
-    // see https://exonum.com/doc/version/0.13-rc.2/architecture/storage/#merkelized-indices
-    return Collections.emptyList();
-  }
 }

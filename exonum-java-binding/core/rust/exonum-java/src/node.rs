@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-use exonum_btc_anchoring::BtcAnchoringService;
-use exonum_supervisor::SimpleSupervisor;
+use exonum_supervisor::Supervisor;
 use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
     create_java_vm, create_service_runtime,
     exonum::{
-        blockchain::{config::GenesisConfigBuilder, Blockchain, BlockchainBuilder, BlockchainMut},
+        blockchain::{
+            config::{GenesisConfigBuilder, InstanceInitParams},
+            Blockchain, BlockchainBuilder, BlockchainMut,
+        },
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel},
         runtime::rust::{DefaultInstance, RustRuntime, ServiceFactory},
@@ -71,10 +73,10 @@ fn create_blockchain(
 
     let blockchain = Blockchain::new(database, keypair, api_sender);
 
-    let supervisor_service = SimpleSupervisor::new();
+    let supervisor_service = supervisor_service();
     let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus.clone())
-        .with_artifact(supervisor_service.artifact_id())
-        .with_instance(supervisor_service.default_instance())
+        .with_artifact(Supervisor.artifact_id())
+        .with_instance(supervisor_service)
         .build();
 
     let rust_runtime = create_rust_runtime(channel);
@@ -115,7 +117,10 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
 fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
     vec![
         Box::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
-        Box::new(BtcAnchoringService),
-        Box::new(SimpleSupervisor::new()),
+        Box::new(Supervisor),
     ]
+}
+
+fn supervisor_service() -> InstanceInitParams {
+    Supervisor::simple()
 }
