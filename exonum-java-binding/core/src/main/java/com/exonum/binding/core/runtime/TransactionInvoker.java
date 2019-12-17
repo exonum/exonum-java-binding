@@ -18,18 +18,20 @@ package com.exonum.binding.core.runtime;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import java.lang.invoke.MethodHandle;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Stores ids of transaction methods and their method handles of a corresponding service.
  */
 final class TransactionInvoker {
   private final Service service;
-  private final Map<Integer, MethodHandle> transactionMethods;
+  private final Map<Integer, TransactionMethodObject> transactionMethods;
 
   TransactionInvoker(Service service) {
     this.service = service;
@@ -54,9 +56,14 @@ final class TransactionInvoker {
       throws TransactionExecutionException {
     checkArgument(transactionMethods.containsKey(transactionId),
         "No method with transaction id (%s)", transactionId);
+    TransactionMethodObject transactionMethodObject = transactionMethods.get(transactionId);
+    Optional<Serializer> argumentsSerializer = transactionMethodObject.getArgumentsSerializer();
+    Object argumentsObject = argumentsSerializer
+        .map(serializer -> serializer.fromBytes(arguments))
+        .orElse(arguments);
+    MethodHandle methodHandle = transactionMethodObject.getMethodHandle();
     try {
-      MethodHandle methodHandle = transactionMethods.get(transactionId);
-      methodHandle.invoke(service, arguments, context);
+      methodHandle.invoke(service, argumentsObject, context);
     } catch (Throwable throwable) {
       if (throwable instanceof TransactionExecutionException) {
         throw (TransactionExecutionException) throwable;
