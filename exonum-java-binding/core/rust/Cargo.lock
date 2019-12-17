@@ -1466,6 +1466,7 @@ dependencies = [
  "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?tag=v0.13.0-rc.2)",
  "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?tag=v0.13.0-rc.2)",
  "exonum-cli 0.13.0-rc.2 (git+https://github.com/exonum/exonum?tag=v0.13.0-rc.2)",
+ "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?tag=v0.13.0-rc.2)",
  "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?tag=v0.13.0-rc.2)",
  "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?tag=v0.13.0-rc.2)",
  "exonum-testkit 0.13.0-rc.2 (git+https://github.com/exonum/exonum?tag=v0.13.0-rc.2)",
