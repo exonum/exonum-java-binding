@@ -22,6 +22,8 @@ mod map_index;
 mod pair_iter;
 mod proof_list_index;
 mod proof_map_index;
+mod proof_map_index_next;
+mod raw_proof_map_index;
 mod temporarydb;
 mod value_set_index;
 
@@ -35,5 +37,7 @@ pub use self::map_index::*;
 pub use self::pair_iter::PairIter;
 pub use self::proof_list_index::*;
 pub use self::proof_map_index::*;
+pub use self::proof_map_index_next::*;
+pub use self::raw_proof_map_index::*;
 pub use self::temporarydb::*;
 pub use self::value_set_index::*;

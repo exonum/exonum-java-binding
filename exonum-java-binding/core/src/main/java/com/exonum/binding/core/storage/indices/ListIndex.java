@@ -52,8 +52,8 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
    * <p>If the collection contains an invalid element, this list is not modified.
    *
    * @param elements elements to add to this list
-   * @throws NullPointerException if the collection is null or it contains null elements.
-   *                              In this case the collection is not modified.
+   * @throws NullPointerException if the source collection is null or it contains null elements.
+   *                              In this case this list is not modified.
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
