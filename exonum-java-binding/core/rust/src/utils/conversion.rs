@@ -48,7 +48,7 @@ pub fn proto_to_java_bytes(
     env.byte_array_from_slice(&bytes)
 }
 
-/// Converts array of Java bytes arrays to the vector of Rust array representation.
+/// Converts array of Java bytes arrays (`byte[][]`) to the vector of Rust array representation.
 pub fn java_arrays_to_rust<T, F>(
     env: &JNIEnv,
     array: jobjectArray,

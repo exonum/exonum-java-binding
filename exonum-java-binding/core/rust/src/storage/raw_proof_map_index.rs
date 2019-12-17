@@ -474,8 +474,9 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
     assert_eq!(
         key.len(),
         PROOF_MAP_KEY_SIZE,
-        "Key size expected to be {} bits",
-        PROOF_MAP_KEY_SIZE * 8
+        "Key size expected to be {} bytes, found {} bytes",
+        PROOF_MAP_KEY_SIZE,
+        key.len()
     );
     let mut result: Key = [0; PROOF_MAP_KEY_SIZE];
     result.copy_from_slice(key.as_slice());
