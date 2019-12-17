@@ -147,7 +147,7 @@ class BlockchainIntegrationTest {
     @Test
     void getHeight() {
       testKitTest((blockchain) -> {
-        long expectedHeight = 1;
+        long expectedHeight = 1L;
         assertThat(blockchain.getHeight()).isEqualTo(expectedHeight);
       });
     }

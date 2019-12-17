@@ -42,10 +42,10 @@ import java.util.Optional;
  */
 public final class Blockchain {
 
-  private final CoreSchemaProxy schema;
+  private final CoreSchema schema;
 
   @VisibleForTesting
-  Blockchain(CoreSchemaProxy schema) {
+  Blockchain(CoreSchema schema) {
     this.schema = schema;
   }
 
@@ -53,7 +53,7 @@ public final class Blockchain {
    * Constructs a new blockchain instance for the given database view.
    */
   public static Blockchain newInstance(View view) {
-    CoreSchemaProxy coreSchema = CoreSchemaProxy.newInstance(view);
+    CoreSchema coreSchema = CoreSchema.newInstance(view);
     return new Blockchain(coreSchema);
   }
 
@@ -225,7 +225,7 @@ public final class Blockchain {
   /**
    * Returns the latest committed block.
    *
-   * @throws RuntimeException if the "genesis block" was not created
+   * @throws IllegalStateException if the "genesis block" was not created
    */
   public Block getLastBlock() {
     return schema.getLastBlock();

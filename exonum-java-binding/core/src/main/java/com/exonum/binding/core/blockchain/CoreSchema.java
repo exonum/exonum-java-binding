@@ -27,9 +27,6 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
-import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.proxy.NativeHandle;
-import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
@@ -39,24 +36,22 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * A proxy class for the blockchain::Schema struct maintained by Exonum core.
- * Please refer to the
- * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">doc</a> for details.
+ * Information schema for indices maintained by the Exonum core logic.
+ *
+ * <p>Indices defined by this schema are present in the blockchain regardless of the deployed
+ * services and store general-purpose information, such as committed transactions.
+ *
+ * @see <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">
+ *     Definition in Exonum</a>
  */
-final class CoreSchemaProxy {
+final class CoreSchema {
 
-  static {
-    LibraryLoader.load();
-  }
-
-  private final NativeHandle nativeHandle;
   private final View dbView;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final Serializer<TransactionLocation> TRANSACTION_LOCATION_SERIALIZER =
@@ -68,32 +63,28 @@ final class CoreSchemaProxy {
   private static final Serializer<Config> CONSENSUS_CONFIG_SERIALIZER =
       StandardSerializers.protobuf(Config.class);
 
-  private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
-    this.nativeHandle = nativeHandle;
+  private CoreSchema(View dbView) {
     this.dbView = dbView;
   }
 
   /**
-   * Constructs a schema proxy for a given dbView.
+   * Constructs a schema for a given dbView.
    */
-  static CoreSchemaProxy newInstance(View dbView) {
-    long nativePointer = nativeCreate(dbView.getViewNativeHandle());
-    NativeHandle nativeHandle = new NativeHandle(nativePointer);
-
-    Cleaner cleaner = dbView.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, nativeHandle, CoreSchemaProxy.class,
-        CoreSchemaProxy::nativeFree);
-
-    return new CoreSchemaProxy(nativeHandle, dbView);
+  static CoreSchema newInstance(View dbView) {
+    return new CoreSchema(dbView);
   }
 
   /**
    * Returns the height of the latest committed block.
    *
-   * @throws RuntimeException if the "genesis block" was not created
+   * @throws IllegalStateException if the "genesis block" was not created
    */
   long getHeight() {
-    return nativeGetHeight(nativeHandle.get());
+    // The blockchain height is equal to the number of blocks (incl. genesis) minus one
+    ListIndex<HashCode> blockHashes = getBlockHashes();
+    checkState(!blockHashes.isEmpty(),
+        "No genesis block created yet (block hashes list is empty)");
+    return blockHashes.size() - 1;
   }
 
   /**
@@ -134,10 +125,15 @@ final class CoreSchemaProxy {
   /**
    * Returns the latest committed block.
    *
-   * @throws RuntimeException if the "genesis block" was not created
+   * @throws IllegalStateException if the "genesis block" was not created
    */
   Block getLastBlock() {
-    return BLOCK_SERIALIZER.fromBytes(nativeGetLastBlock(nativeHandle.get()));
+    // todo: push to Blockchain?
+    ListIndex<HashCode> blockHashes = getBlockHashes();
+    checkState(!blockHashes.isEmpty(),
+        "No genesis block created yet (block hashes list is empty)");
+    HashCode lastBlockHash = blockHashes.getLast();
+    return getBlocks().get(lastBlockHash);
   }
 
   /**
@@ -190,19 +186,6 @@ final class CoreSchemaProxy {
         + "before the genesis block was created");
     return configEntry.get();
   }
-
-  private static native long nativeCreate(long viewNativeHandle);
-
-  private static native void nativeFree(long nativeHandle);
-
-  private static native long nativeGetHeight(long nativeHandle);
-
-  /**
-   * Returns the latest committed block.
-   *
-   * @throws RuntimeException if the "genesis block" was not created
-   */
-  private static native byte[] nativeGetLastBlock(long nativeHandle);
 
   private byte[] toCoreStorageKey(long value) {
     return ByteBuffer.allocate(Long.BYTES)

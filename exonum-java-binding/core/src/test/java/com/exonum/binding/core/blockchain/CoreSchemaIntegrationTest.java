@@ -33,11 +33,11 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
-class CoreSchemaProxyIntegrationTest {
+class CoreSchemaIntegrationTest {
 
   @Test
   void getHeightBeforeGenesisBlockTest() {
-    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getHeight));
+    assertSchema((schema) -> assertThrows(IllegalStateException.class, schema::getHeight));
   }
 
   @Test
@@ -69,7 +69,7 @@ class CoreSchemaProxyIntegrationTest {
 
   @Test
   void getLastBlockBeforeGenesisBlockTest() {
-    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getLastBlock));
+    assertSchema((schema) -> assertThrows(IllegalStateException.class, schema::getLastBlock));
   }
 
   @Test
@@ -95,10 +95,10 @@ class CoreSchemaProxyIntegrationTest {
     });
   }
 
-  private static void assertSchema(Consumer<CoreSchemaProxy> assertion) {
+  private static void assertSchema(Consumer<CoreSchema> assertion) {
     try (TemporaryDb db = TemporaryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
-      assertion.accept(CoreSchemaProxy.newInstance(view));
+      assertion.accept(CoreSchema.newInstance(view));
     } catch (CloseFailuresException e) {
       fail(e.getLocalizedMessage());
     }
