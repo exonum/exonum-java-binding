@@ -47,7 +47,7 @@ enum IndexType {
 
 type Iter<'a> = PairIter<ProofMapIndexIter<'a, Key, Value>>;
 
-/// Returns a pointer to the created `ProofMapIndex` object.
+/// Returns a pointer to the created `RawProofMapIndex` object.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapIndexProxy_nativeCreate(
     env: JNIEnv,
@@ -71,7 +71,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Returns a pointer to the created `ProofMapIndex` instance in an index family (= group).
+/// Returns a pointer to the created `RawProofMapIndex` instance in an index family (= group).
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapIndexProxy_nativeCreateInGroup(
     env: JNIEnv,
@@ -95,7 +95,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     utils::unwrap_exc_or_default(&env, res)
 }
 
-/// Destroys the underlying `ProofMapIndex` object and frees memory.
+/// Destroys the underlying `RawProofMapIndex` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapIndexProxy_nativeFree(
     env: JNIEnv,
@@ -404,7 +404,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys the underlying `ProofMapIndex` iterator object and frees memory.
+/// Destroys the underlying `RawProofMapIndex` iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapIndexProxy_nativeEntriesIterFree(
     env: JNIEnv,
@@ -431,7 +431,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys the underlying `ProofMapIndex` keys-iterator object and frees memory.
+/// Destroys the underlying `RawProofMapIndex` keys-iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapIndexProxy_nativeKeysIterFree(
     env: JNIEnv,
@@ -458,7 +458,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Destroys the underlying `ProofMapIndex` values-iterator object and frees memory.
+/// Destroys the underlying `RawProofMapIndex` values-iterator object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapIndexProxy_nativeValuesIterFree(
     env: JNIEnv,
@@ -474,7 +474,7 @@ fn convert_to_key(env: &JNIEnv, array: jbyteArray) -> JniResult<Key> {
     assert_eq!(
         key.len(),
         PROOF_MAP_KEY_SIZE,
-        "Key size should be {} bits",
+        "Key size expected to be {} bits",
         PROOF_MAP_KEY_SIZE * 8
     );
     let mut result: Key = [0; PROOF_MAP_KEY_SIZE];
