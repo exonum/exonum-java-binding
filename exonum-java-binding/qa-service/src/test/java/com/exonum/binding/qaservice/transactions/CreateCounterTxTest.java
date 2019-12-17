@@ -79,7 +79,7 @@ class CreateCounterTxTest {
   }
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   void executeAlreadyExistingCounter(TestKit testKit) {
     String counterName = "counter";
     KeyPair key1 = ed25519().generateKeyPair();

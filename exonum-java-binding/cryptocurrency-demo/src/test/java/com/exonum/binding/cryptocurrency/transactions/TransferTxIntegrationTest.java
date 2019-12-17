@@ -136,7 +136,7 @@ class TransferTxIntegrationTest {
   }
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeTransfer_NoSuchFromWallet(TestKit testKit) {
     // Create a receiver’s wallet with the given initial balance
@@ -159,7 +159,7 @@ class TransferTxIntegrationTest {
   }
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeTransfer_NoSuchToWallet(TestKit testKit) {
     // Create a receiver’s wallet with the given initial balance
@@ -182,7 +182,7 @@ class TransferTxIntegrationTest {
   }
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeTransfer_RejectsSameSenderAndReceiver(TestKit testKit) {
     long seed = 1L;
@@ -199,7 +199,7 @@ class TransferTxIntegrationTest {
   }
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeTransfer_InsufficientFunds(TestKit testKit) {
     // Create source and target wallets with the same initial balance

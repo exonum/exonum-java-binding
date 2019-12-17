@@ -98,7 +98,7 @@ class CreateWalletTxIntegrationTest {
   }
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeAlreadyExistingWalletTx(TestKit testKit) {
     // Create a new wallet

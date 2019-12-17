@@ -69,6 +69,7 @@ class ErrorTxTest {
   }
 
   @Test
+  @Disabled("ECR-4014")
   void executeNoDescription(TestKit testKit) {
     byte errorCode = 1;
     TransactionMessage errorTx = createErrorTransaction(errorCode, null);
@@ -78,12 +79,11 @@ class ErrorTxTest {
     Blockchain blockchain = Blockchain.newInstance(view);
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(errorTx.hash());
     ExecutionStatus expectedTransactionResult = serviceError(errorCode);
-    // TODO
-    // assertThat(txResult).hasValue(expectedTransactionResult);
+    assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   void executeWithDescription(TestKit testKit) {
     byte errorCode = 1;
     String errorDescription = "Test";

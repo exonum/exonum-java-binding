@@ -54,7 +54,7 @@ class ThrowingTxTest {
       QaArtifactInfo.createQaServiceTestkit());
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   void executeThrows(TestKit testKit) {
     TransactionMessage throwingTx = createThrowingTx(0L, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(throwingTx);

@@ -268,7 +268,7 @@ class BlockchainIntegrationTest {
     }
 
     @Test
-    @Disabled("TODO")
+    @Disabled("ECR-4014")
     void getTxResults() {
       testKitTest((blockchain) -> {
         ProofMapIndexProxy<HashCode, ExecutionStatus> txResults = blockchain.getTxResults();
@@ -280,7 +280,7 @@ class BlockchainIntegrationTest {
     }
 
     @Test
-    @Disabled("TODO")
+    @Disabled("ECR-4014")
     void getTxResult() {
       testKitTest((blockchain) -> {
         Optional<ExecutionStatus> txResult =

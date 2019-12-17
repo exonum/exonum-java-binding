@@ -74,7 +74,7 @@ class IncrementCounterTxTest {
   }
 
   @Test
-  @Disabled("TODO")
+  @Disabled("ECR-4014")
   void executeNoSuchCounter(TestKit testKit) {
     String counterName = "unknown-counter";
     HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);

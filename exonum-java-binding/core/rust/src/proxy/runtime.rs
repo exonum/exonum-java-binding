@@ -113,7 +113,7 @@ impl JavaRuntimeProxy {
 
                 ExceptionHandlers::DEFAULT(env, exception)
             }
-            // TODO(TBD)
+            // TODO(ECR-4015)
             _ => ExecutionError::new(ErrorKind::Runtime { code: 3 }, err.to_string()),
         }
     }
@@ -172,7 +172,7 @@ impl JavaRuntimeProxy {
                     assert!(result.is_some());
                     Ok(result.unwrap())
                 }
-                // TODO(TBD)
+                // TODO(ECR-4015)
                 Err(err) => Err(ExecutionError::new(
                     ErrorKind::Runtime { code: 3 },
                     format!("Unexpected JNI error: {:?}", err),
@@ -382,7 +382,7 @@ impl Runtime for JavaRuntimeProxy {
         _context: ExecutionContext,
         _instance_id: InstanceId,
     ) -> Result<(), ExecutionError> {
-        // TODO(TBD): implement
+        // TODO(ECR-4016): implement
         Ok(())
     }
 
@@ -458,7 +458,7 @@ impl ExceptionHandlers {
     const DEFAULT: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let message = describe_java_exception(env, exception);
-        // TODO(TBD):
+        // TODO(ECR-4015):
         ExecutionError::new(ErrorKind::Runtime { code: 1 }, message)
     };
 

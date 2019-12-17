@@ -25,7 +25,7 @@ use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
 use utils;
 
-// TODO(TBD)
+// TODO(ECR-3979): replace with Entry
 type Index<T> = ProofEntry<T, Value>;
 
 enum IndexType {
