@@ -17,6 +17,7 @@
 package com.exonum.binding.core.blockchain;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.hash.HashCode;
@@ -228,7 +229,11 @@ public final class Blockchain {
    * @throws IllegalStateException if the "genesis block" was not created
    */
   public Block getLastBlock() {
-    return schema.getLastBlock();
+    ListIndex<HashCode> blockHashes = getBlockHashes();
+    checkState(!blockHashes.isEmpty(),
+        "No genesis block created yet (block hashes list is empty)");
+    HashCode lastBlockHash = blockHashes.getLast();
+    return getBlocks().get(lastBlockHash);
   }
 
   /**

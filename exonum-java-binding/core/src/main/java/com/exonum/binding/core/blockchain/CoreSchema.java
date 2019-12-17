@@ -123,20 +123,6 @@ final class CoreSchema {
   }
 
   /**
-   * Returns the latest committed block.
-   *
-   * @throws IllegalStateException if the "genesis block" was not created
-   */
-  Block getLastBlock() {
-    // todo: push to Blockchain?
-    ListIndex<HashCode> blockHashes = getBlockHashes();
-    checkState(!blockHashes.isEmpty(),
-        "No genesis block created yet (block hashes list is empty)");
-    HashCode lastBlockHash = blockHashes.getLast();
-    return getBlocks().get(lastBlockHash);
-  }
-
-  /**
    * Returns a map of transaction messages identified by their SHA-256 hashes.
    */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {

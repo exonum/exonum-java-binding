@@ -68,11 +68,6 @@ class CoreSchemaIntegrationTest {
   }
 
   @Test
-  void getLastBlockBeforeGenesisBlockTest() {
-    assertSchema((schema) -> assertThrows(IllegalStateException.class, schema::getLastBlock));
-  }
-
-  @Test
   void getTxMessagesTest() {
     assertSchema((schema) -> assertTrue(schema.getTxMessages().isEmpty()));
   }
