@@ -22,7 +22,7 @@ mod jni;
 pub mod jni_cache;
 
 pub use self::conversion::{
-    convert_hash, convert_to_hash, java_arrays_to_rust, convert_to_string, proto_to_java_bytes,
+    convert_hash, convert_to_hash, convert_to_string, java_arrays_to_rust, proto_to_java_bytes,
 };
 pub use self::errors::{
     any_to_string, check_error_on_exception, describe_java_exception, get_and_clear_java_exception,
