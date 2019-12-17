@@ -520,6 +520,7 @@ class BlockchainIntegrationTest {
   }
 
   private static HashCode toHashCode(Hash hash) {
+    // todo: Migrate to a single utility method in [ECR-3734]
     ByteString bytes = hash.getData();
     return HashCode.fromBytes(bytes.toByteArray());
   }
