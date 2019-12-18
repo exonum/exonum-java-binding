@@ -20,7 +20,7 @@ use exonum::{
     exonum_merkledb::Snapshot,
     messages::BinaryValue,
     runtime::{
-        ArtifactId, CallInfo, Caller, ErrorKind, ExecutionContext, ExecutionError, InstanceId,
+        ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, ExecutionFail, InstanceId,
         InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
     },
 };
@@ -113,8 +113,9 @@ impl JavaRuntimeProxy {
 
                 ExceptionHandlers::DEFAULT(env, exception)
             }
-            // TODO(ECR-4015)
-            _ => ExecutionError::new(ErrorKind::Runtime { code: 3 }, err.to_string()),
+            _ => Error::OtherJniError
+                .with_description(err.to_string())
+                .into(),
         }
     }
 
@@ -172,11 +173,9 @@ impl JavaRuntimeProxy {
                     assert!(result.is_some());
                     Ok(result.unwrap())
                 }
-                // TODO(ECR-4015)
-                Err(err) => Err(ExecutionError::new(
-                    ErrorKind::Runtime { code: 3 },
-                    format!("Unexpected JNI error: {:?}", err),
-                )),
+                Err(err) => Err(Error::OtherJniError
+                    .with_description(format!("Unexpected JNI error: {:?}", err))
+                    .into()),
             },
             Some(error) => Err(error),
         }
@@ -459,7 +458,7 @@ impl ExceptionHandlers {
         assert!(!exception.is_null(), "No exception thrown.");
         let message = describe_java_exception(env, exception);
         // TODO(ECR-4015):
-        ExecutionError::new(ErrorKind::Runtime { code: 1 }, message)
+        Error::JavaException.with_description(message).into()
     };
 
     const TX_EXECUTION: &'static ExceptionHandler = &|env, exception| {
