@@ -31,9 +31,9 @@ import java.lang.annotation.Target;
  *   <li>be public
  *   <li>have exactly two parameters - the
  *       {@linkplain TransactionMessage#getPayload() serialized transaction arguments} of type
- *       'byte[]' and a transaction execution context, which allows to access the information about
- *       this transaction and modify the blockchain state through the included database fork of
- *       type '{@link TransactionContext}' in this particular order
+ *       'byte[]' or a protobuf type and a transaction execution context, which allows to access
+ *       the information about this transaction and modify the blockchain state through the
+ *       included database fork of type '{@link TransactionContext}' in this particular order
  * </ul>
  *
  * <p>The annotated method might throw {@linkplain TransactionExecutionException} if the
