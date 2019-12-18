@@ -102,7 +102,7 @@ source ./tests_profile
 # Prepare directories
 PACKAGING_BASE_DIR="${EJB_RUST_DIR}/target/${BUILD_MODE}"
 PACKAGING_NATIVE_LIB_DIR="${PACKAGING_BASE_DIR}/lib/native"
-PACKAGING_ETC_DIR="${PACKAGING_BASE_DIR}/etc"
+export PACKAGING_ETC_DIR="${PACKAGING_BASE_DIR}/etc"
 mkdir -p "${PACKAGING_BASE_DIR}"
 mkdir -p "${PACKAGING_NATIVE_LIB_DIR}"
 mkdir -p "${PACKAGING_ETC_DIR}"
