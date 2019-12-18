@@ -41,6 +41,7 @@ import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Consensus.SignedMessage;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -65,8 +66,10 @@ final class CoreSchemaProxy {
       protobuf(ExecutionStatus.class);
   private static final Serializer<TransactionMessage> TRANSACTION_MESSAGE_SERIALIZER =
       StandardSerializers.transactionMessage();
+  private static final Serializer<SignedMessage> SIGNED_MESSAGE_SERIALIZER =
+      protobuf(SignedMessage.class);
   private static final Serializer<Config> CONSENSUS_CONFIG_SERIALIZER =
-      StandardSerializers.protobuf(Config.class);
+      protobuf(Config.class);
 
   private CoreSchemaProxy(NativeHandle nativeHandle, View dbView) {
     this.nativeHandle = nativeHandle;
@@ -179,6 +182,21 @@ final class CoreSchemaProxy {
   }
 
   /**
+   * Returns the precommit messages for the given block hash.
+   * Precommit messages signed by a particular validator confirm that that validator
+   * agreed to commit the block with such hash.
+   *
+   * @param blockHash a hash of the committed block for which to return precommits
+   * @return a list of precommits, empty if the block is unknown
+   */
+  ListIndexProxy<SignedMessage> getPrecommits(HashCode blockHash) {
+    byte[] listId = StandardSerializers.hash()
+        .toBytes(blockHash);
+    return ListIndexProxy.newInGroupUnsafe(CoreIndex.PRECOMMITS, listId, dbView,
+        SIGNED_MESSAGE_SERIALIZER);
+  }
+
+  /**
    * Returns the current consensus configuration of the network.
    *
    * @throws IllegalStateException if the "genesis block" was not created
@@ -224,6 +242,7 @@ final class CoreSchemaProxy {
     private static final String TRANSACTIONS_RESULTS = PREFIX + "transaction_results";
     private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
     private static final String TRANSACTIONS_POOL = PREFIX + "transactions_pool";
+    private static final String PRECOMMITS = PREFIX + "precommits";
     private static final String CONSENSUS_CONFIG = PREFIX + "consensus_config";
   }
 }

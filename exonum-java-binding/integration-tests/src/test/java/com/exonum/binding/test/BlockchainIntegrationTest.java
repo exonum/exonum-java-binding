@@ -39,6 +39,7 @@ import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
+import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
@@ -46,10 +47,18 @@ import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Blockchain.ValidatorKeys;
+import com.exonum.core.messages.Consensus.ExonumMessage;
+import com.exonum.core.messages.Consensus.ExonumMessage.KindCase;
+import com.exonum.core.messages.Consensus.Precommit;
+import com.exonum.core.messages.Consensus.SignedMessage;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.core.messages.Types;
+import com.exonum.core.messages.Types.Hash;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -392,6 +401,43 @@ class BlockchainIntegrationTest {
     }
 
     @Test
+    void getPrecommits() {
+      testKitTest((blockchain -> {
+        HashCode blockHash = block.getBlockHash();
+
+        ListIndexProxy<SignedMessage> precommits = blockchain.getPrecommits(blockHash);
+
+        // Check the number of precommits
+        assertThat(precommits.size()).isEqualTo(VALIDATOR_COUNT);
+        // Verify the first message
+        SignedMessage signedPrecommit = precommits.get(0);
+        // Check the message is signed by one of the validators
+        List<Types.PublicKey> consensusKeys = blockchain.getConsensusConfiguration()
+            .getValidatorKeysList()
+            .stream()
+            .map(ValidatorKeys::getConsensusKey)
+            .collect(toList());
+        assertThat(consensusKeys)
+            .describedAs("Signed message must be signed by a validator key")
+            .contains(signedPrecommit.getAuthor());
+
+        // Check the message is indeed a precommit
+        ExonumMessage exonumMessage;
+        try {
+          exonumMessage = ExonumMessage.parseFrom(signedPrecommit.getPayload());
+        } catch (InvalidProtocolBufferException e) {
+          throw new AssertionError("payload must be an Exonum message", e);
+        }
+        KindCase messageKind = exonumMessage.getKindCase();
+        assertThat(messageKind).isEqualTo(KindCase.PRECOMMIT);
+        Precommit precommit = exonumMessage.getPrecommit();
+        assertThat(precommit.getHeight()).isEqualTo(block.getHeight());
+        HashCode blockHashInPrecommit = toHashCode(precommit.getBlockHash());
+        assertThat(blockHashInPrecommit).isEqualTo(blockHash);
+      }));
+    }
+
+    @Test
     void getConsensusConfiguration() {
       testKitTest((blockchain) -> {
         Config configuration = blockchain.getConsensusConfiguration();
@@ -471,5 +517,11 @@ class BlockchainIntegrationTest {
         .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
         .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
         .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8));
+  }
+
+  private static HashCode toHashCode(Hash hash) {
+    // todo: Migrate to a single utility method in [ECR-3734]
+    ByteString bytes = hash.getData();
+    return HashCode.fromBytes(bytes.toByteArray());
   }
 }

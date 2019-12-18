@@ -24,10 +24,12 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
+import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Consensus.SignedMessage;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
@@ -229,6 +231,23 @@ public final class Blockchain {
    */
   public Block getLastBlock() {
     return schema.getLastBlock();
+  }
+
+  /**
+   * Returns the precommit messages for the given block hash.
+   * Precommit messages signed by a particular validator confirm that that validator
+   * agreed to commit the block with such hash.
+   *
+   * @param blockHash a hash of the committed block for which to return precommits
+   * @return a list of signed messages containing
+   *     {@linkplain com.exonum.core.messages.Consensus.Precommit precommits};
+   *     an empty list if the block is unknown
+   * @see <a href="https://docs.rs/exonum/0.13.0-rc.2/exonum/messages/struct.Precommit.html">
+   *      Precommit message Rustdoc</a>
+   * @see com.exonum.core.messages.Consensus.Precommit Precommit message protobuf type
+   */
+  public ListIndexProxy<SignedMessage> getPrecommits(HashCode blockHash) {
+    return schema.getPrecommits(blockHash);
   }
 
   /**
