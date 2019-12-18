@@ -49,10 +49,9 @@ class CoreSchemaIntegrationTest {
   void getBlockTransactionsTest() {
     assertSchema((schema) -> {
       long height = 0L;
-      Exception e = assertThrows(RuntimeException.class,
+      Exception e = assertThrows(IllegalStateException.class,
           () -> schema.getBlockTransactions(height));
-      assertThat(e).hasMessageContaining("An attempt to get the actual `height` "
-          + "during creating the genesis block");
+      assertThat(e).hasMessageContaining("No genesis block created");
     });
   }
 
