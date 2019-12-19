@@ -39,4 +39,6 @@ public final class MySchema implements Schema {
     this.view = checkNotNull(view);
     this.namespace = serviceName + ".";
   }
+
+  // TODO: Add index factories here.
 }
