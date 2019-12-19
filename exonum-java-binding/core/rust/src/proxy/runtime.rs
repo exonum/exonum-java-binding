@@ -457,7 +457,6 @@ impl ExceptionHandlers {
     const DEFAULT: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let message = describe_java_exception(env, exception);
-        // TODO(ECR-4015):
         Error::JavaException.with_description(message).into()
     };
 
