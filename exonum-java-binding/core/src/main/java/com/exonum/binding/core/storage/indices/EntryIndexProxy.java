@@ -170,6 +170,9 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
     return serializer.fromBytes(value);
   }
 
+  // TODO(dt): add getHash when you clarify why on Earth it returns a default (= zero) hash when
+  // value is not present.
+
   /**
    * Removes a value from this entry.
    *
@@ -213,6 +216,9 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
   private native boolean nativeIsPresent(long nativeHandle);
 
   private native byte[] nativeGet(long nativeHandle);
+
+  @SuppressWarnings("unused")
+  private native byte[] nativeGetHash(long nativeHandle);
 
   private native void nativeRemove(long nativeHandle);
 
