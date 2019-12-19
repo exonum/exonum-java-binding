@@ -18,8 +18,6 @@ package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.serialization.Serializer;
 import java.lang.invoke.MethodHandle;
-import java.util.Optional;
-import javax.annotation.Nullable;
 
 /**
  * Stores a method handle of a transaction and a protobuf serializer in case of a protobuf type
@@ -28,9 +26,9 @@ import javax.annotation.Nullable;
 // TODO: rename to TransactionMethod after migration? Another name?
 class TransactionMethodObject {
   private final MethodHandle methodHandle;
-  private final Serializer argumentsSerializer;
+  private final Serializer<?> argumentsSerializer;
 
-  TransactionMethodObject(MethodHandle methodHandle, @Nullable Serializer argumentsSerializer) {
+  TransactionMethodObject(MethodHandle methodHandle, Serializer<?> argumentsSerializer) {
     this.methodHandle = methodHandle;
     this.argumentsSerializer = argumentsSerializer;
   }
@@ -39,7 +37,7 @@ class TransactionMethodObject {
     return methodHandle;
   }
 
-  Optional<Serializer> getArgumentsSerializer() {
-    return Optional.ofNullable(argumentsSerializer);
+  Object serializeArguments(byte[] arguments) {
+    return argumentsSerializer.fromBytes(arguments);
   }
 }

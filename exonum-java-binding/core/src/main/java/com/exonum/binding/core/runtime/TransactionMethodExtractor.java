@@ -31,7 +31,6 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Finds and validates transaction methods in a service.
@@ -103,7 +102,7 @@ final class TransactionMethodExtractor {
   }
 
   private static TransactionMethodObject toTransactionMethodObject(Method method, Lookup lookup) {
-    Serializer argumentsSerializer = null;
+    Serializer<?> argumentsSerializer = StandardSerializers.bytes();
     Class parameterType = method.getParameterTypes()[0];
     if (isProtobufArgument(parameterType)) {
       argumentsSerializer = StandardSerializers.protobuf(parameterType);
