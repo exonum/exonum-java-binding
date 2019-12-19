@@ -354,6 +354,15 @@ impl Runtime for JavaRuntimeProxy {
 
     fn before_transactions(
         &self,
+        _context: ExecutionContext,
+        _instance_id: InstanceId,
+    ) -> Result<(), ExecutionError> {
+        // TODO(ECR-4016): implement
+        Ok(())
+    }
+
+    fn after_transactions(
+        &self,
         context: ExecutionContext,
         instance_id: InstanceId,
     ) -> Result<(), ExecutionError> {
@@ -371,15 +380,6 @@ impl Runtime for JavaRuntimeProxy {
             );
             Ok(())
         })
-    }
-
-    fn after_transactions(
-        &self,
-        _context: ExecutionContext,
-        _instance_id: InstanceId,
-    ) -> Result<(), ExecutionError> {
-        // TODO(ECR-4016): implement
-        Ok(())
     }
 
     fn after_commit(&mut self, snapshot: &dyn Snapshot, _mailbox: &mut Mailbox) {

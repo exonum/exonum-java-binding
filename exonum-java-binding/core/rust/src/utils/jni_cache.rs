@@ -45,6 +45,7 @@ static mut RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_START_ADDING_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_COMMIT_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
+// TODO(ECR-4016): rename to RUNTIME_ADAPTER_AFTER_TRANSACTIONS
 static mut RUNTIME_ADAPTER_BEFORE_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_SHUTDOWN: Option<JMethodID> = None;
