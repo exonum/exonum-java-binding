@@ -61,6 +61,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class BlockchainIntegrationTest {
 
@@ -149,7 +151,7 @@ class BlockchainIntegrationTest {
     @Test
     void getHeight() {
       testKitTest((blockchain) -> {
-        long expectedHeight = 1;
+        long expectedHeight = 1L;
         assertThat(blockchain.getHeight()).isEqualTo(expectedHeight);
       });
     }
@@ -208,6 +210,18 @@ class BlockchainIntegrationTest {
                 "Height should be less or equal compared to blockchain height %s, but was %s",
                 block.getHeight(), invalidBlockHeight);
         assertThat(e).hasMessageContaining(expectedMessage);
+      });
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {-1, -2, Long.MIN_VALUE})
+    void getBlockTransactionsByNegativeHeight(long height) {
+      testKitTest((blockchain) -> {
+        Exception e = assertThrows(IllegalArgumentException.class,
+            () -> blockchain.getBlockTransactions(height));
+        assertThat(e.getMessage()).containsIgnoringCase("negative")
+            .containsIgnoringCase("height")
+            .contains(Long.toString(height));
       });
     }
 
