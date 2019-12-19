@@ -47,6 +47,8 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.binding.core.util.LibraryLoader;
+import com.exonum.binding.testkit.TestkitProtos.TestKitServiceInstances;
+import com.exonum.core.messages.Runtime;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -127,7 +129,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     this.port = port;
   }
 
-  private static TestKit newInstance(TestKitServiceInstances[] serviceInstances,
+  private static TestKit newInstance(TestKitServiceInstances serviceInstances,
                                      EmulatedNodeType nodeType, short validatorCount,
                                      @Nullable TimeServiceSpec timeServiceSpec,
                                      Path artifactsDirectory) {
@@ -136,8 +138,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     ServiceRuntimeAdapter serviceRuntimeAdapter =
         frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
-    long nativeHandle = nativeCreateTestKit(serviceInstances, isAuditorNode, validatorCount,
-        timeServiceSpec, serviceRuntimeAdapter);
+    long nativeHandle = nativeCreateTestKit(serviceInstances.toByteArray(), isAuditorNode,
+            validatorCount, timeServiceSpec, serviceRuntimeAdapter);
 
     try {
       // Get the actual port: it must have been set as testkit initialized the runtimes.
@@ -367,7 +369,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
   }
 
-  private static native long nativeCreateTestKit(TestKitServiceInstances[] services,
+  private static native long nativeCreateTestKit(byte[] services,
                                                  boolean auditor, short withValidatorCount,
                                                  TimeServiceSpec timeProviderSpec,
                                                  ServiceRuntimeAdapter serviceRuntimeAdapter);
@@ -397,7 +399,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     private EmulatedNodeType nodeType = EmulatedNodeType.VALIDATOR;
     private short validatorCount = 1;
-    private Multimap<ServiceArtifactId, ServiceSpec> services = ArrayListMultimap.create();
+    private Multimap<ServiceArtifactId, Runtime.InstanceInitParams> services =
+            ArrayListMultimap.create();
     private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
     private Path artifactsDirectory;
     private TimeServiceSpec timeServiceSpec;
@@ -493,9 +496,17 @@ public final class TestKit extends AbstractCloseableNativeProxy {
                                int serviceId, MessageLite configuration) {
       checkServiceId(serviceId, serviceName);
       checkServiceArtifactIsDeployed(serviceArtifactId);
-      ServiceSpec serviceSpec = new ServiceSpec(serviceName, serviceId,
-          configuration.toByteArray());
-      services.put(serviceArtifactId, serviceSpec);
+      Runtime.InstanceInitParams params = Runtime.InstanceInitParams
+              .newBuilder()
+              .setInstanceSpec(Runtime.InstanceSpec
+                      .newBuilder()
+                      .setId(serviceId)
+                      .setName(serviceName)
+                      .setArtifact(artifactIdToProto(serviceArtifactId))
+                      .build())
+              .setConstructor(configuration.toByteString())
+              .build();
+      services.put(serviceArtifactId, params);
       return this;
     }
 
@@ -558,20 +569,47 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkCorrectServiceNumber(services.size());
       checkCorrectValidatorNumber();
       checkArtifactsDirectory();
-      TestKitServiceInstances[] testKitServiceInstances = mergeServiceSpecs();
+      TestKitServiceInstances testKitServiceInstances = prepareServicesConfiguration();
       return newInstance(testKitServiceInstances, nodeType, validatorCount,
           timeServiceSpec, artifactsDirectory);
     }
 
     /**
-     * Turn collection of service instances into a list of
-     * {@linkplain TestKitServiceInstances} objects for native to work with.
+     * Turn collections of artifacts and service instances into a
+     * {@linkplain TestKitServiceInstances} object for native to work with.
      */
-    private TestKitServiceInstances[] mergeServiceSpecs() {
+    private TestKitServiceInstances prepareServicesConfiguration() {
       checkDeployedArtifactsAreUsed();
-      return serviceArtifactFilenames.entrySet().stream()
-          .map(this::aggregateServiceSpecs)
-          .toArray(TestKitServiceInstances[]::new);
+      TestKitServiceInstances.Builder builder = TestKitServiceInstances.newBuilder();
+
+      for (Map.Entry<ServiceArtifactId, String> entry: serviceArtifactFilenames.entrySet()) {
+        ServiceArtifactId artifactId = entry.getKey();
+        Runtime.ArtifactSpec artifactSpec = Runtime.ArtifactSpec
+                .newBuilder()
+                .setArtifact(artifactIdToProto(artifactId))
+                .setPayload(DeployArguments
+                        .newBuilder()
+                        .setArtifactFilename(entry.getValue())
+                        .build()
+                        .toByteString())
+                .build();
+
+        builder.addArtifactSpecs(artifactSpec);
+      }
+
+      for (Runtime.InstanceInitParams instanceInitParams: services.values()) {
+        builder.addServiceSpecs(instanceInitParams);
+      }
+
+      return builder.build();
+    }
+
+    private Runtime.ArtifactId artifactIdToProto(ServiceArtifactId artifactId) {
+      return Runtime.ArtifactId
+              .newBuilder()
+              .setRuntimeId(artifactId.getRuntimeId())
+              .setName(artifactId.getName())
+              .build();
     }
 
     private void checkDeployedArtifactsAreUsed() {
@@ -582,21 +620,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkArgument(unusedArtifacts.isEmpty(),
           "Following service artifacts were deployed, but not used for service instantiation: %s",
           unusedArtifacts);
-    }
-
-    /**
-     * Aggregates service instances specifications of a given service artifact id as a
-     * {@linkplain TestKitServiceInstances} object.
-     */
-    private TestKitServiceInstances aggregateServiceSpecs(
-        Map.Entry<ServiceArtifactId, String> serviceArtifact) {
-      ServiceArtifactId serviceArtifactId = serviceArtifact.getKey();
-      ServiceSpec[] serviceSpecs = services.get(serviceArtifactId).toArray(new ServiceSpec[0]);
-      DeployArguments deployArgs = DeployArguments.newBuilder()
-          .setArtifactFilename(serviceArtifact.getValue())
-          .build();
-      return new TestKitServiceInstances(
-          serviceArtifactId.toString(), deployArgs.toByteArray(), serviceSpecs);
     }
 
     private void checkCorrectValidatorNumber() {
