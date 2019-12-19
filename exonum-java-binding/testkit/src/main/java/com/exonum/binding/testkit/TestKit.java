@@ -47,7 +47,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.exonum.binding.testkit.TestkitProtos.TestKitServiceInstances;
+import com.exonum.binding.testkit.TestKitProtos.TestKitServiceInstances;
 import com.exonum.core.messages.Runtime;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -496,14 +496,15 @@ public final class TestKit extends AbstractCloseableNativeProxy {
                                int serviceId, MessageLite configuration) {
       checkServiceId(serviceId, serviceName);
       checkServiceArtifactIsDeployed(serviceArtifactId);
+      Runtime.InstanceSpec instanceSpec = Runtime.InstanceSpec
+              .newBuilder()
+              .setId(serviceId)
+              .setName(serviceName)
+              .setArtifact(artifactIdToProto(serviceArtifactId))
+              .build();
       Runtime.InstanceInitParams params = Runtime.InstanceInitParams
               .newBuilder()
-              .setInstanceSpec(Runtime.InstanceSpec
-                      .newBuilder()
-                      .setId(serviceId)
-                      .setName(serviceName)
-                      .setArtifact(artifactIdToProto(serviceArtifactId))
-                      .build())
+              .setInstanceSpec(instanceSpec)
               .setConstructor(configuration.toByteString())
               .build();
       services.put(serviceArtifactId, params);

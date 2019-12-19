@@ -25,7 +25,6 @@ use exonum::{
     helpers::ValidatorId,
     runtime::ArtifactSpec,
 };
-use exonum_derive::*;
 use exonum_proto::ProtobufConvert;
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};

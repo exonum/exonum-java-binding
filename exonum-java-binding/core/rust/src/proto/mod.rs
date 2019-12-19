@@ -17,8 +17,8 @@
 #![allow(bare_trait_objects)]
 #![allow(renamed_and_removed_lints)]
 
-pub use exonum::proto::schema::*;
 pub use self::service_runtime::*;
 pub use self::testkit::*;
+pub use exonum::proto::schema::*;
 
 include!(concat!(env!("OUT_DIR"), "/protobuf_mod.rs"));
