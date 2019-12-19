@@ -127,8 +127,8 @@ class TransactionMethodExtractorTest {
     Method transactionMethod =
         ValidServiceProtobufArgument.class.getMethod("transactionMethod",
             TestProtoMessages.Point.class, TransactionContext.class);
-    assertThat(singletonList(transactionMethod))
-        .containsExactlyElementsOf(transactions.values());
+    assertThat(transactions.values())
+        .containsExactlyElementsOf(singletonList(transactionMethod));
   }
 
   static class BasicService implements Service {
