@@ -60,6 +60,10 @@ class TransferTxIntegrationTest {
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
 
+  /*
+  Review: Keep as fromRawTransactionRejectsNonPositiveBalance -> executeTransferNegativeBalance
+as the condition moved from the constructor to execute
+   */
   @Test
   @RequiresNativeLibrary
   void executeTransfer(TestKit testKit) {

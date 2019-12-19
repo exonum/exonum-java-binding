@@ -30,6 +30,9 @@ public interface CryptocurrencyService extends Service {
 
   List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
 
+  /*
+  Review: I'd remove Tx suffix (just createWallet — a service operation).
+   */
   void createWalletTx(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
       throws TransactionExecutionException;
 

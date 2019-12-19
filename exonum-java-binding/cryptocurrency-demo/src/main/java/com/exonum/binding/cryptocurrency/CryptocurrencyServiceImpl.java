@@ -116,6 +116,9 @@ public final class CryptocurrencyServiceImpl extends AbstractService
         new CryptocurrencySchema(context.getFork(), context.getServiceName());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
+    /*
+    Review: May also use checkExecution(!wallets.containsKey(ownerPublicKey), WALLET_ALREADY_EXISTS.errorCode)
+     */
     if (wallets.containsKey(ownerPublicKey)) {
       throw new TransactionExecutionException(WALLET_ALREADY_EXISTS.errorCode);
     }

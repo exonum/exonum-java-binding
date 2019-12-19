@@ -70,6 +70,9 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   private static final Logger logger = LogManager.getLogger(QaService.class);
 
+  /*
+  Review: Duplicates the values in QaTransaction — shall probably re-use (or one of them — deleted)?
+   */
   private static int CREATE_COUNTER_TX_ID = 0;
   private static int INCREMENT_COUNTER_TX_ID = 1;
   private static int VALID_THROWING_TX_ID = 12;

@@ -16,6 +16,9 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+/*
+Review: It's the last class in this package — may keep package-private and move to its parent package.
+ */
 public enum TransactionError {
   WALLET_ALREADY_EXISTS(0),
   UNKNOWN_RECEIVER(1),
