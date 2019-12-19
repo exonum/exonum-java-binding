@@ -68,8 +68,8 @@ public final class ServiceRuntime implements AutoCloseable {
   private final Path artifactsDir;
   /**
    * The active services indexed by their name. It is stored in a sorted map that offers
-   * the same iteration order on all nodes with the same services, which is required
-   * for correct operation of state hash aggregation.
+   * the same iteration order on all nodes with the same services, which is useful
+   * for logging purposes.
    */
   private final SortedMap<String, ServiceWrapper> services = new TreeMap<>();
   /**
