@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{access::FromAccess, Fork, ObjectHash, ProofEntry, Snapshot};
+use exonum_merkledb::{access::FromAccess, Entry, Fork, Snapshot};
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray},
@@ -25,8 +25,7 @@ use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
 use utils;
 
-// TODO(ECR-3979): replace with Entry
-type Index<T> = ProofEntry<T, Value>;
+type Index<T> = Entry<T, Value>;
 
 enum IndexType {
     SnapshotIndex(Index<&'static dyn Snapshot>),
@@ -101,25 +100,6 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_n
         } as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns the hash of the value or default hash if value is absent.
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeGetHash(
-    env: JNIEnv,
-    _: JObject,
-    entry_handle: Handle,
-) -> jbyteArray {
-    let res = panic::catch_unwind(|| {
-        utils::convert_hash(
-            &env,
-            &match *handle::cast_handle::<IndexType>(entry_handle) {
-                IndexType::SnapshotIndex(ref entry) => entry.object_hash(),
-                IndexType::ForkIndex(ref entry) => entry.object_hash(),
-            },
-        )
-    });
-    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Inserts value to the entry.
