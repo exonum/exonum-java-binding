@@ -113,9 +113,7 @@ impl JavaRuntimeProxy {
 
                 ExceptionHandlers::DEFAULT(env, exception)
             }
-            _ => Error::OtherJniError
-                .with_description(err.to_string())
-                .into(),
+            _ => Error::OtherJniError.with_description(err.to_string()),
         }
     }
 
@@ -174,8 +172,7 @@ impl JavaRuntimeProxy {
                     Ok(result.unwrap())
                 }
                 Err(err) => Err(Error::OtherJniError
-                    .with_description(format!("Unexpected JNI error: {:?}", err))
-                    .into()),
+                    .with_description(format!("Unexpected JNI error: {:?}", err))),
             },
             Some(error) => Err(error),
         }
@@ -457,7 +454,7 @@ impl ExceptionHandlers {
     const DEFAULT: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let message = describe_java_exception(env, exception);
-        Error::JavaException.with_description(message).into()
+        Error::JavaException.with_description(message)
     };
 
     const TX_EXECUTION: &'static ExceptionHandler = &|env, exception| {
