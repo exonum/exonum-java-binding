@@ -16,14 +16,14 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
-enum TransactionError {
+public enum TransactionError {
   WALLET_ALREADY_EXISTS(0),
   UNKNOWN_RECEIVER(1),
   UNKNOWN_SENDER(2),
   INSUFFICIENT_FUNDS(3),
   SAME_SENDER_AND_RECEIVER(4);
 
-  final byte errorCode;
+  public final byte errorCode;
 
   TransactionError(int errorCode) {
     this.errorCode = (byte) errorCode;

@@ -16,6 +16,12 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
+import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 
@@ -29,8 +35,13 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.binding.core.transaction.TransactionMethod;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.inject.Inject;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.ext.web.Router;
 import java.util.List;
@@ -40,6 +51,9 @@ import javax.annotation.Nullable;
 /** A cryptocurrency demo service. */
 public final class CryptocurrencyServiceImpl extends AbstractService
     implements CryptocurrencyService {
+
+  public static final int CREATE_WALLET_TX_ID = 1;
+  public static final int TRANSFER_TX_ID = 2;
 
   @Nullable private Node node;
 
@@ -90,6 +104,74 @@ public final class CryptocurrencyServiceImpl extends AbstractService
           .map(this::createTransferHistoryEntry)
           .collect(toList());
     });
+  }
+
+  @Override
+  @TransactionMethod(CREATE_WALLET_TX_ID)
+  public void createWalletTx(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
+      throws TransactionExecutionException {
+    PublicKey ownerPublicKey = context.getAuthorPk();
+
+    CryptocurrencySchema schema =
+        new CryptocurrencySchema(context.getFork(), context.getServiceName());
+    MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+
+    if (wallets.containsKey(ownerPublicKey)) {
+      throw new TransactionExecutionException(WALLET_ALREADY_EXISTS.errorCode);
+    }
+
+    long initialBalance = arguments.getInitialBalance();
+    checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
+        initialBalance);
+    Wallet wallet = new Wallet(initialBalance);
+
+    wallets.put(ownerPublicKey, wallet);
+  }
+
+  @Override
+  @TransactionMethod(TRANSFER_TX_ID)
+  public void transferTx(TxMessageProtos.TransferTx arguments, TransactionContext context)
+      throws TransactionExecutionException {
+    PublicKey fromWallet = context.getAuthorPk();
+
+    PublicKey toWallet = toPublicKey(arguments.getToWallet());
+    long sum = arguments.getSum();
+    checkArgument(0 < sum, "Non-positive transfer amount: %s", sum);
+
+    checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
+
+    CryptocurrencySchema schema =
+        new CryptocurrencySchema(context.getFork(), context.getServiceName());
+    ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
+    checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
+    checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
+
+    Wallet from = wallets.get(fromWallet);
+    Wallet to = wallets.get(toWallet);
+    checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
+
+    // Update the balances
+    wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
+    wallets.put(toWallet, new Wallet(to.getBalance() + sum));
+
+    // Update the transaction history of each wallet
+    HashCode messageHash = context.getTransactionMessageHash();
+    schema.transactionsHistory(fromWallet).add(messageHash);
+    schema.transactionsHistory(toWallet).add(messageHash);
+  }
+
+  private static PublicKey toPublicKey(ByteString s) {
+    return PublicKey.fromBytes(s.toByteArray());
+  }
+
+  // todo: consider extracting in a TransactionPreconditions or
+  //   TransactionExecutionException: ECR-2746.
+  /** Checks a transaction execution precondition, throwing if it is false. */
+  private static void checkExecution(boolean precondition, byte errorCode)
+      throws TransactionExecutionException {
+    if (!precondition) {
+      throw new TransactionExecutionException(errorCode);
+    }
   }
 
   private HistoryEntity createTransferHistoryEntry(TransactionMessage txMessage) {

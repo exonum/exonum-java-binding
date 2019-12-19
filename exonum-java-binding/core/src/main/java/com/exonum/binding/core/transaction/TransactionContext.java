@@ -24,7 +24,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.exonum.binding.core.storage.database.Fork;
 
 /**
@@ -40,7 +39,7 @@ public interface TransactionContext {
 
   /**
    * Returns SHA-256 hash of the {@linkplain TransactionMessage transaction message} that
-   * carried the payload from which the transaction was {@linkplain TransactionConverter created}.
+   * carried the payload of the transaction.
    * Each transaction message is uniquely identified by its hash; the messages are persisted
    * in the {@linkplain Blockchain#getTxMessages() blockchain} and can be fetched by this hash.
    */

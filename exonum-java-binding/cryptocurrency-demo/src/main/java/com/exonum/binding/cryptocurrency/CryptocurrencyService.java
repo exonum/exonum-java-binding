@@ -18,6 +18,9 @@ package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +29,10 @@ public interface CryptocurrencyService extends Service {
   Optional<Wallet> getWallet(PublicKey ownerKey);
 
   List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
+
+  void createWalletTx(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
+      throws TransactionExecutionException;
+
+  void transferTx(TxMessageProtos.TransferTx arguments, TransactionContext context)
+      throws TransactionExecutionException;
 }

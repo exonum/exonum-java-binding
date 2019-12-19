@@ -18,8 +18,6 @@ package com.exonum.binding.qaservice.transactions;
 
 /**
  * All known QA service transactions.
- *
- * @implNote Keep in sync with {@link QaTransactionConverter#TRANSACTION_FACTORIES}.
  */
 public enum QaTransaction {
   // Well-behaved transactions.

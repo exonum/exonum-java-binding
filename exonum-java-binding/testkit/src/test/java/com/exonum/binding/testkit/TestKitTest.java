@@ -32,9 +32,10 @@ import static com.exonum.binding.testkit.TestKitTestUtils.checkIfServiceEnabled;
 import static com.exonum.binding.testkit.TestKitTestUtils.createInvalidArtifact;
 import static com.exonum.binding.testkit.TestKitTestUtils.createTestService2Artifact;
 import static com.exonum.binding.testkit.TestKitTestUtils.createTestServiceArtifact;
+import static com.exonum.binding.testkit.TestService.BODY_CHARSET;
+import static com.exonum.binding.testkit.TestService.TEST_TRANSACTION_ID;
 import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
-import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -497,7 +498,7 @@ class TestKitTest {
   private TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(SERVICE_ID)
-        .transactionId(TestTransaction.ID)
+        .transactionId(TEST_TRANSACTION_ID)
         .payload(payload.getBytes(BODY_CHARSET))
         .sign(keyPair);
   }
@@ -521,7 +522,7 @@ class TestKitTest {
     short wrongServiceId = SERVICE_ID + 1;
     TransactionMessage message = TransactionMessage.builder()
         .serviceId(wrongServiceId)
-        .transactionId(TestTransaction.ID)
+        .transactionId(TEST_TRANSACTION_ID)
         .payload("Test message".getBytes(BODY_CHARSET))
         .sign(KEY_PAIR);
     IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
@@ -533,7 +534,7 @@ class TestKitTest {
 
   @Test
   void createBlockWithTransactionWithWrongTransactionId(TestKit testKit) {
-    short wrongTransactionId = (short) (TestTransaction.ID + 1);
+    short wrongTransactionId = (short) (TEST_TRANSACTION_ID + 1);
     TransactionMessage message = TransactionMessage.builder()
         .serviceId(SERVICE_ID)
         .transactionId(wrongTransactionId)

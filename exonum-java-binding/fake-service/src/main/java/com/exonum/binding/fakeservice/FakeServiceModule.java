@@ -18,7 +18,6 @@ package com.exonum.binding.fakeservice;
 
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.google.inject.Singleton;
 import org.pf4j.Extension;
 
@@ -32,6 +31,5 @@ public final class FakeServiceModule extends AbstractServiceModule {
   protected void configure() {
     bind(Service.class).to(FakeService.class)
         .in(Singleton.class);
-    bind(TransactionConverter.class).to(FakeTxConverter.class);
   }
 }

@@ -16,6 +16,9 @@
 
 package com.exonum.binding.cryptocurrency.transactions;
 
+import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CREATE_WALLET_TX_ID;
+import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.TRANSFER_TX_ID;
+
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -37,14 +40,14 @@ public final class TransactionUtils {
     return TransactionMessage.builder()
         .payload(newCreateWalletTxPayload(initialBalance))
         .serviceId(serviceId)
-        .transactionId(CreateWalletTx.ID)
+        .transactionId(CREATE_WALLET_TX_ID)
         .sign(ownerKeyPair);
   }
 
   /**
    * Creates a CreateWalletTx transaction payload with a given initial balance.
    */
-  static byte[] newCreateWalletTxPayload(long initialBalance) {
+  private static byte[] newCreateWalletTxPayload(long initialBalance) {
     return TxMessageProtos.CreateWalletTx.newBuilder()
         .setInitialBalance(initialBalance)
         .build()
@@ -60,14 +63,14 @@ public final class TransactionUtils {
     return TransactionMessage.builder()
         .payload(newTransferTxPayload(seed, receiverKey, sum))
         .serviceId(serviceId)
-        .transactionId(TransferTx.ID)
+        .transactionId(TRANSFER_TX_ID)
         .sign(ownerKeyPair);
   }
 
   /**
    * Creates a TransferTx transaction payload with a given seed, receiver key and sum.
    */
-  static byte[] newTransferTxPayload(long seed, PublicKey receiverKey, long sum) {
+  private static byte[] newTransferTxPayload(long seed, PublicKey receiverKey, long sum) {
     return TxMessageProtos.TransferTx.newBuilder()
         .setSeed(seed)
         .setToWallet(fromPublicKey(receiverKey))

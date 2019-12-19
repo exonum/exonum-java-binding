@@ -25,9 +25,7 @@ import static com.exonum.binding.cryptocurrency.transactions.PredefinedServicePa
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.DEFAULT_INITIAL_BALANCE;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTxPayload;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
@@ -43,7 +41,6 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -57,26 +54,6 @@ class CreateWalletTxIntegrationTest {
           .withArtifactsDirectory(artifactsDirectory));
 
   private static final KeyPair OWNER_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
-
-  @Test
-  void from() {
-    long initialBalance = 100L;
-    byte[] arguments = newCreateWalletTxPayload(initialBalance);
-
-    CreateWalletTx tx = CreateWalletTx.from(arguments);
-
-    assertThat(tx).isEqualTo(new CreateWalletTx(initialBalance));
-  }
-
-  @Test
-  void constructorRejectsNegativeBalance() {
-    long initialBalance = -1L;
-
-    Throwable t = assertThrows(IllegalArgumentException.class,
-        () -> new CreateWalletTx(initialBalance));
-
-    assertThat(t.getMessage()).isEqualTo("The initial balance (-1) must not be negative.");
-  }
 
   @Test
   @RequiresNativeLibrary
@@ -117,12 +94,4 @@ class CreateWalletTxIntegrationTest {
     ExecutionStatus expectedTransactionResult = serviceError(WALLET_ALREADY_EXISTS.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
-
-  @Test
-  void verifyEquals() {
-    EqualsVerifier
-        .forClass(CreateWalletTx.class)
-        .verify();
-  }
-
 }

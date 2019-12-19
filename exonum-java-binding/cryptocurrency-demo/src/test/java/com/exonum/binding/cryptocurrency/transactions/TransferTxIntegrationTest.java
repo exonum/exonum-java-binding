@@ -28,9 +28,7 @@ import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UN
 import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTxPayload;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
@@ -47,11 +45,8 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class TransferTxIntegrationTest {
 
@@ -64,37 +59,6 @@ class TransferTxIntegrationTest {
 
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
-
-  @Test
-  void from() {
-    long seed = 1;
-    long sum = 50L;
-    PublicKey recipientKey = TO_KEY_PAIR.getPublicKey();
-
-    byte[] arguments = newTransferTxPayload(seed, recipientKey, sum);
-
-    TransferTx tx = TransferTx.from(arguments);
-
-    assertThat(tx).isEqualTo(new TransferTx(seed, recipientKey, sum));
-  }
-
-  @ParameterizedTest
-  @ValueSource(longs = {
-      Long.MIN_VALUE,
-      -100,
-      -1,
-      0
-  })
-  void fromRawTransactionRejectsNonPositiveBalance(long transferAmount) {
-    long seed = 1;
-    byte[] arguments = newTransferTxPayload(seed, TO_KEY_PAIR.getPublicKey(), transferAmount);
-
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransferTx.from(arguments));
-
-    assertThat(e.getMessage()).contains("transfer amount")
-        .contains(Long.toString(transferAmount));
-  }
 
   @Test
   @RequiresNativeLibrary
@@ -218,13 +182,5 @@ class TransferTxIntegrationTest {
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
     ExecutionStatus expectedTransactionResult = serviceError(INSUFFICIENT_FUNDS.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
-  }
-
-  @Test
-  void verifyEquals() {
-    EqualsVerifier
-        .forClass(TransferTx.class)
-        .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
-        .verify();
   }
 }

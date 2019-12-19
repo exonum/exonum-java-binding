@@ -70,6 +70,11 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   private static final Logger logger = LogManager.getLogger(QaService.class);
 
+  private static int CREATE_COUNTER_TX_ID = 0;
+  private static int INCREMENT_COUNTER_TX_ID = 1;
+  private static int VALID_THROWING_TX_ID = 12;
+  private static int VALID_ERROR_TX_ID = 13;
+
   @VisibleForTesting
   static final String DEFAULT_COUNTER_NAME = "default";
 

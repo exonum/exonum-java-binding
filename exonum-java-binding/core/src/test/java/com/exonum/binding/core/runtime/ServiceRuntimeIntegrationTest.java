@@ -389,16 +389,6 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
-    void verifyTransaction() {
-      int txId = 1;
-      byte[] arguments = bytes(127);
-
-      serviceRuntime.verifyTransaction(TEST_ID, txId, arguments);
-
-      verify(serviceWrapper).convertTransaction(txId, arguments);
-    }
-
-    @Test
     void executeTransactionUnknownService() throws Exception {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
@@ -413,19 +403,6 @@ class ServiceRuntimeIntegrationTest {
 
         assertThat(e).hasMessageContaining(String.valueOf(serviceId));
       }
-    }
-
-    @Test
-    void verifyTransactionUnknownService() {
-      int serviceId = TEST_ID + 1;
-      int txId = 1;
-      byte[] arguments = bytes(127);
-
-      Exception e = assertThrows(IllegalArgumentException.class,
-          () -> serviceRuntime.verifyTransaction(serviceId, txId, arguments));
-      String expectedMessage =
-          String.format("No service with id=%s in the Java runtime", serviceId);
-      assertThat(e).hasMessageContaining(expectedMessage);
     }
 
     @Test
