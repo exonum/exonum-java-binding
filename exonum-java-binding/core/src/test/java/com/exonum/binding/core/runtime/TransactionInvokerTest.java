@@ -21,16 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transaction.TransactionMethod;
 import io.vertx.ext.web.Router;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -81,11 +77,6 @@ class TransactionInvokerTest {
 
     static final int TRANSACTION_ID = 1;
     static final int TRANSACTION_ID_2 = 2;
-
-    @Override
-    public List<HashCode> getStateHashes(Snapshot snapshot) {
-      return Collections.emptyList();
-    }
 
     @Override
     public void createPublicApiHandlers(Node node, Router router) {

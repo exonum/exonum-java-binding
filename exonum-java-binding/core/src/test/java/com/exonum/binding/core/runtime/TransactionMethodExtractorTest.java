@@ -20,16 +20,13 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionMethod;
 import io.vertx.ext.web.Router;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -118,11 +115,6 @@ class TransactionMethodExtractorTest {
   static class BasicService implements Service {
 
     static final int TRANSACTION_ID = 1;
-
-    @Override
-    public List<HashCode> getStateHashes(Snapshot snapshot) {
-      return Collections.emptyList();
-    }
 
     @Override
     public void createPublicApiHandlers(Node node, Router router) {
