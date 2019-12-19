@@ -29,6 +29,10 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
  * entire blockchain state and is recorded as such in blocks and Precommit
  * messages.
  *
+ * <p>Please note that if the service does not use any Merkelized collections,
+ * the framework will not be able to verify that its transactions cause the same
+ * results on different nodes.
+ *
  * @see ProofListIndexProxy#getIndexHash()
  * @see ProofMapIndexProxy#getIndexHash()
  */
