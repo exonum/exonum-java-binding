@@ -22,10 +22,10 @@ import static com.exonum.binding.cryptocurrency.transactions.PredefinedServicePa
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
+import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
 import static org.assertj.core.api.Assertions.assertThat;

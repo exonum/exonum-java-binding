@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency.transactions;
+package com.exonum.binding.cryptocurrency;
 
-public enum TransactionError {
+enum TransactionError {
   WALLET_ALREADY_EXISTS(0),
   UNKNOWN_RECEIVER(1),
   UNKNOWN_SENDER(2),

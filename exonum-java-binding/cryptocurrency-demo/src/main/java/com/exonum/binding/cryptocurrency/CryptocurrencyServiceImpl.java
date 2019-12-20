@@ -16,11 +16,11 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
+import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
+import static com.exonum.binding.cryptocurrency.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
