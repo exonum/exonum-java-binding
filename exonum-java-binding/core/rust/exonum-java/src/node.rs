@@ -25,7 +25,7 @@ use java_bindings::{
         },
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel},
-        runtime::rust::{DefaultInstance, RustRuntime, ServiceFactory},
+        runtime::rust::{RustRuntime, ServiceFactory},
     },
     Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
 };
