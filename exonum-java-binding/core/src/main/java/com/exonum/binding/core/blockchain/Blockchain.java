@@ -17,6 +17,7 @@
 package com.exonum.binding.core.blockchain;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.hash.HashCode;
@@ -42,10 +43,10 @@ import java.util.Optional;
  */
 public final class Blockchain {
 
-  private final CoreSchemaProxy schema;
+  private final CoreSchema schema;
 
   @VisibleForTesting
-  Blockchain(CoreSchemaProxy schema) {
+  Blockchain(CoreSchema schema) {
     this.schema = schema;
   }
 
@@ -53,7 +54,7 @@ public final class Blockchain {
    * Constructs a new blockchain instance for the given database view.
    */
   public static Blockchain newInstance(View view) {
-    CoreSchemaProxy coreSchema = CoreSchemaProxy.newInstance(view);
+    CoreSchema coreSchema = CoreSchema.newInstance(view);
     return new Blockchain(coreSchema);
   }
 
@@ -225,17 +226,21 @@ public final class Blockchain {
   /**
    * Returns the latest committed block.
    *
-   * @throws RuntimeException if the "genesis block" was not created
+   * @throws IllegalStateException if the "genesis block" was not created
    */
   public Block getLastBlock() {
-    return schema.getLastBlock();
+    ListIndex<HashCode> blockHashes = getBlockHashes();
+    checkState(!blockHashes.isEmpty(),
+        "No genesis block created yet (block hashes list is empty)");
+    HashCode lastBlockHash = blockHashes.getLast();
+    return getBlocks().get(lastBlockHash);
   }
 
   /**
    * Returns the current consensus configuration of the network.
    *
    * @throws IllegalStateException if the "genesis block" was not created
-   * @see <a href="https://exonum.com/doc/version/0.12/architecture/configuration/">Exonum configuration</a> for
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/configuration/">Exonum configuration</a> for
    *     consensus configuration information.
    */
   public Config getConsensusConfiguration() {
@@ -247,7 +252,7 @@ public final class Blockchain {
    * Note that this pool represents the state as of the current snapshot, and its state is volatile
    * even between block commits.
    *
-   * @see <a href="https://exonum.com/doc/version/0.12/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   public KeySetIndexProxy<HashCode> getTransactionPool() {
     return schema.getTransactionPool();

@@ -20,7 +20,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import lombok.Value;
 
 @Value
-public class ServiceInfo {
+public class ServiceInstanceInfo {
 
   /**
    * Returns the name of the service instance. It serves as the primary identifier of this service

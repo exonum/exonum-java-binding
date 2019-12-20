@@ -33,11 +33,11 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 @RequiresNativeLibrary
-class CoreSchemaProxyIntegrationTest {
+class CoreSchemaIntegrationTest {
 
   @Test
   void getHeightBeforeGenesisBlockTest() {
-    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getHeight));
+    assertSchema((schema) -> assertThrows(IllegalStateException.class, schema::getHeight));
   }
 
   @Test
@@ -49,10 +49,9 @@ class CoreSchemaProxyIntegrationTest {
   void getBlockTransactionsTest() {
     assertSchema((schema) -> {
       long height = 0L;
-      Exception e = assertThrows(RuntimeException.class,
+      Exception e = assertThrows(IllegalStateException.class,
           () -> schema.getBlockTransactions(height));
-      assertThat(e).hasMessageContaining("An attempt to get the actual `height` "
-          + "during creating the genesis block");
+      assertThat(e).hasMessageContaining("No genesis block created");
     });
   }
 
@@ -65,11 +64,6 @@ class CoreSchemaProxyIntegrationTest {
   @Test
   void getBlocksTest() {
     assertSchema((schema) -> assertTrue(schema.getBlocks().isEmpty()));
-  }
-
-  @Test
-  void getLastBlockBeforeGenesisBlockTest() {
-    assertSchema((schema) -> assertThrows(RuntimeException.class, schema::getLastBlock));
   }
 
   @Test
@@ -95,10 +89,10 @@ class CoreSchemaProxyIntegrationTest {
     });
   }
 
-  private static void assertSchema(Consumer<CoreSchemaProxy> assertion) {
+  private static void assertSchema(Consumer<CoreSchema> assertion) {
     try (TemporaryDb db = TemporaryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
       Snapshot view = db.createSnapshot(cleaner);
-      assertion.accept(CoreSchemaProxy.newInstance(view));
+      assertion.accept(CoreSchema.newInstance(view));
     } catch (CloseFailuresException e) {
       fail(e.getLocalizedMessage());
     }

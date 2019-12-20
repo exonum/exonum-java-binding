@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+use exonum_btc_anchoring::BtcAnchoringService;
 use exonum_supervisor::SimpleSupervisor;
 use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
 use java_bindings::{
     create_java_vm, create_service_runtime,
     exonum::{
-        blockchain::{Blockchain, BlockchainBuilder, BlockchainMut, InstanceCollection},
+        blockchain::{config::GenesisConfigBuilder, Blockchain, BlockchainBuilder, BlockchainMut},
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel},
+        runtime::rust::{DefaultInstance, RustRuntime, ServiceFactory},
     },
     Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
 };
@@ -63,20 +65,33 @@ fn create_blockchain(
     channel: &NodeChannel,
 ) -> Result<BlockchainMut, failure::Error> {
     let node_config = &config.run_config.node_config;
-    let service_factories = standard_exonum_service_factories();
     let database = create_database(config)?;
     let keypair = node_config.service_keypair();
     let api_sender = ApiSender::new(channel.api_requests.0.clone());
-    let api_endpoints = channel.endpoints.0.clone();
-
-    let java_runtime = create_java_runtime(&config);
 
     let blockchain = Blockchain::new(database, keypair, api_sender);
 
-    BlockchainBuilder::new(blockchain, node_config.consensus.clone())
-        .with_additional_runtime(java_runtime)
-        .with_rust_runtime(api_endpoints, service_factories.into_iter())
+    let supervisor_service = SimpleSupervisor::new();
+    let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus.clone())
+        .with_artifact(supervisor_service.artifact_id())
+        .with_instance(supervisor_service.default_instance())
+        .build();
+
+    let rust_runtime = create_rust_runtime(channel);
+    let java_runtime = create_java_runtime(&config);
+
+    BlockchainBuilder::new(blockchain, genesis_config)
+        .with_runtime(rust_runtime)
+        .with_runtime(java_runtime)
         .build()
+}
+
+fn create_rust_runtime(channel: &NodeChannel) -> RustRuntime {
+    let service_factories = standard_exonum_service_factories();
+    service_factories.into_iter().fold(
+        RustRuntime::new(channel.endpoints.0.clone()),
+        |runtime, factory| runtime.with_factory(factory),
+    )
 }
 
 fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
@@ -97,10 +112,10 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
     Ok(database)
 }
 
-fn standard_exonum_service_factories() -> Vec<InstanceCollection> {
-    // TODO(ECR-3714): add anchoring service
+fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
     vec![
-        InstanceCollection::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
-        InstanceCollection::from(SimpleSupervisor::new()),
+        Box::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
+        Box::new(BtcAnchoringService),
+        Box::new(SimpleSupervisor::new()),
     ]
 }

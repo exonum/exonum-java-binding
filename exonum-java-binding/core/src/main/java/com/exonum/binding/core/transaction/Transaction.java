@@ -21,8 +21,8 @@ import com.exonum.core.messages.Runtime.ExecutionError;
 /**
  * An Exonum transaction.
  *
- * @see <a href="https://exonum.com/doc/version/0.12/architecture/transactions">Exonum Transactions</a>
- * @see <a href="https://exonum.com/doc/version/0.12/architecture/services">Exonum Services</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/transactions">Exonum Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/services">Exonum Services</a>
  */
 @FunctionalInterface
 public interface Transaction {

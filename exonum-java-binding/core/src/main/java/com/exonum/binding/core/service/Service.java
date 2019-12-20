@@ -91,10 +91,15 @@ public interface Service {
    * });
    * }</pre>
    *
+   * <p>Please remember that Java services use a <em>separate</em> server from Rust services.
+   * The Java server TCP port is specified on node start, see
+   * <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#running-the-node">
+   * documentation</a> for details.
+   *
    * @param node a set-up Exonum node, providing an interface to access
    *             the current blockchain state and submit transactions
    * @param router a router responsible for handling requests to this service
-   * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#external-service-api">
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>
    */
   void createPublicApiHandlers(Node node, Router router);

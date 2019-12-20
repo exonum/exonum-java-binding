@@ -20,8 +20,6 @@ import static com.exonum.binding.core.storage.indices.StoragePreconditions.check
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkRange;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.list.UncheckedListProof;
-import com.exonum.binding.common.proofs.list.UncheckedListProofAdapter;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -30,6 +28,7 @@ import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.util.function.LongSupplier;
 
@@ -177,15 +176,13 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @param index the element index
    * @throws IndexOutOfBoundsException if the index is invalid
    * @throws IllegalStateException if this list is not valid
-   * @deprecated Proofs are temporarily disabled since 0.9.0-rc1, and will be re-enabled
-   *     in a later release
    */
-  @Deprecated
-  public UncheckedListProof getProof(long index) {
-    return nativeGetProof(getNativeHandle(), index);
+  public ListProof getProof(long index) {
+    byte[] proofMessage = nativeGetProof(getNativeHandle(), index);
+    return parseProof(proofMessage);
   }
 
-  private native UncheckedListProofAdapter nativeGetProof(long nativeHandle, long index);
+  private native byte[] nativeGetProof(long nativeHandle, long index);
 
   /**
    * Returns a proof of either existence or absence of some elements in the specified range
@@ -196,17 +193,23 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @param to the index after the last element
    * @throws IndexOutOfBoundsException if the range is not valid
    * @throws IllegalStateException if this list is not valid
-   * @deprecated Proofs are temporarily disabled since 0.9.0-rc1, and will be re-enabled
-   *     in a later release
    */
-  @Deprecated
-  public UncheckedListProof getRangeProof(long from, long to) {
+  public ListProof getRangeProof(long from, long to) {
     checkRange(from, to);
-    return nativeGetRangeProof(getNativeHandle(), from, to);
+    byte[] proofMessage = nativeGetRangeProof(getNativeHandle(), from, to);
+    return parseProof(proofMessage);
   }
 
-  private native UncheckedListProofAdapter nativeGetRangeProof(
-      long nativeHandle, long from, long to);
+  private native byte[] nativeGetRangeProof(long nativeHandle, long from, long to);
+
+  private static ListProof parseProof(byte[] proofMessage) {
+    try {
+      return ListProof.parseFrom(proofMessage);
+    } catch (InvalidProtocolBufferException e) {
+      // Must never happen with the correct native
+      throw new IllegalStateException("Non-decodable list proof", e);
+    }
+  }
 
   /**
    * Returns the index hash which represents the complete state of this list.
@@ -233,6 +236,12 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
 
   @Override
   native byte[] nativeGetLast(long nativeHandle);
+
+  @Override
+  native byte[] nativeRemoveLast(long nativeHandle);
+
+  @Override
+  native void nativeTruncate(long nativeHandle, long newSize);
 
   @Override
   native void nativeClear(long nativeHandle);

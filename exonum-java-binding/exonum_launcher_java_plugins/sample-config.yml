@@ -18,15 +18,15 @@ plugins:
 artifacts:
   cryptocurrency:
     runtime: java
-    name: "com.exonum.examples:cryptocurrency:0.9.0-SNAPSHOT"
+    name: "com.exonum.examples:cryptocurrency:0.10.0-SNAPSHOT"
     spec:
-      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.9.0-SNAPSHOT-artifact.jar"
+      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-SNAPSHOT-artifact.jar"
   time:
     runtime: rust
-    name: "exonum-time:0.12.0"
+    name: "exonum-time:0.13.0-rc.2"
   timestamping:
     runtime: rust
-    name: "exonum-timestamping:0.12.0"
+    name: "exonum-timestamping:0.13.0-rc.2"
 
 instances:
   cryptocurrency:

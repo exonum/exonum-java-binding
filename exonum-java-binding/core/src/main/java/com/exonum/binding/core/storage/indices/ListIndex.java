@@ -52,8 +52,8 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
    * <p>If the collection contains an invalid element, this list is not modified.
    *
    * @param elements elements to add to this list
-   * @throws NullPointerException if the collection is null or it contains null elements.
-   *                              In this case the collection is not modified.
+   * @throws NullPointerException if the source collection is null or it contains null elements.
+   *                              In this case this list is not modified.
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
@@ -88,6 +88,29 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
    * @throws IllegalStateException if this list is not valid
    */
   T getLast();
+
+  /**
+   * Removes the last element of the list and returns it.
+   *
+   * @return the last element of the list.
+   * @throws NoSuchElementException if the list is empty
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only
+   */
+  T removeLast();
+
+  /**
+   * Truncates the list, reducing its size to {@code newSize}.
+   *
+   * <p>If {@code newSize < size()}, keeps the first {@code newSize} elements, removing the rest.
+   * If {@code newSize >= size()}, has no effect.
+   *
+   * @param newSize the maximum number of elements to keep
+   * @throws IllegalArgumentException if the new size is negative
+   * @throws IllegalStateException if this list is not valid
+   * @throws UnsupportedOperationException if this list is read-only
+   */
+  void truncate(long newSize);
 
   /**
    * Clears the list.

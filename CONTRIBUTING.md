@@ -17,16 +17,24 @@ This guide shows how to build the whole project only.
 ### System Dependencies
 You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
-  * [JDK 1.8+](https://jdk.java.net/12/).
+  * [JDK 1.8+](https://jdk.java.net/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
   * [Rust 1.36.0](https://www.rust-lang.org/).
   To install a specific Rust version, use `rustup install 1.36.0` command.
-  * The [system dependencies](https://exonum.com/doc/version/0.12/get-started/install/) of Exonum. 
+  * The [system dependencies](https://exonum.com/doc/version/0.13-rc.2/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
 
-  __Important__: On Mac OS it is necessary to install RocksDB
+  __Important__: It is necessary to install RocksDB
   package and to set the environment variable `ROCKSDB_LIB_DIR`.
-  To install the package via Homebrew:
+  To install the package on Ubuntu:
+  
+  ```bash
+  sudo add-apt-repository ppa:exonum/rocksdb
+  sudo apt-get update && sudo apt-get install librocksdb6.2
+  export ROCKSDB_LIB_DIR=/usr/lib
+  ```
+  
+  To install the package via Homebrew on Mac:
   
   ```bash
   brew install rocksdb
@@ -54,7 +62,11 @@ $ ./run_all_tests.sh
 ---
 
 ⚠️ Some maven modules have not been migrated to dynamic services and
-have to be excluded when executing `mvn` directly:
+have to be excluded when executing `mvn` directly (from the project root):
+```sh
+mvn -pl '!exonum-java-binding/fakes' <commands>
+```
+or, when running `mvn` from the `exonum-java-binding` directory:
 ```sh
 mvn -pl '!fakes' <commands>
 ```
@@ -123,12 +135,12 @@ Run `mvn clean -DcleanRust`.
 The [Exonum Java Binding](exonum-java-binding) project is split into several modules. 
 Here are the main ones:
   * [`core`](exonum-java-binding/core) contains the APIs to define and implement an 
-  [Exonum service](https://exonum.com/doc/version/0.12/get-started/design-overview/#modularity-and-services).
+  [Exonum service](https://exonum.com/doc/version/0.13-rc.2/get-started/design-overview/#modularity-and-services).
   * [`core-native`](exonum-java-binding/core/rust) contains the glue code between Java and Rust.
   * [`app`](exonum-java-binding/core/rust/exonum-java) is an application that runs a node with Java 
   and Rust services.
   * [`common`](exonum-java-binding/common) provides common functionality to Exonum core
-  and light clients: [Exonum proofs](https://exonum.com/doc/version/0.12/get-started/design-overview/#proofs),
+  and light clients: [Exonum proofs](https://exonum.com/doc/version/0.13-rc.2/get-started/design-overview/#proofs),
   hashing and cryptographic operations, serialization support.
   * [`exonum-service-archetype`](exonum-java-binding/service-archetype) implements an archetype
   generating a template project of Exonum Java service. 

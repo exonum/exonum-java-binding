@@ -1,12 +1,13 @@
 [package]
 name = "exonum-java"
-version = "0.9.0-SNAPSHOT"
+version = "0.10.0-SNAPSHOT"
 authors = ["Exonum team <contact@exonum.com>"]
 
 [dependencies]
 env_logger = "0.7"
-exonum-supervisor = "0.12"
-exonum-time = "0.12"
+exonum-btc-anchoring = "0.13.0-rc.2"
+exonum-supervisor = "0.13.0-rc.2"
+exonum-time = "0.13.0-rc.2"
 failure = "0.1"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).
 # Although its primary goal is to detect _programming_ errors that shall not occur

@@ -21,8 +21,9 @@ import lombok.Value;
 
 @Value
 public class ServicesResponse {
+
   /**
    * List of started service instances.
    */
-  List<ServiceInfo> services;
+  List<ServiceInstanceState> services;
 }

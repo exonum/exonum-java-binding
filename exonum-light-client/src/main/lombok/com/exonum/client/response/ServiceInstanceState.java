@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.proofs.list;
+package com.exonum.client.response;
 
-/**
- * Represents a proof that some elements exist in a ProofList at certain positions.
- */
-public interface ListProofNode {
+import lombok.Value;
+
+@Value
+public class ServiceInstanceState {
 
   /**
-   * Applies the visitor to this proof node.
-   *
-   * <p>Most implementations simply call {@code visitor.visit(this);}
-   *
-   * @param visitor a visitor to apply to this node
+   * Service instance spec - its name and id.
    */
-  void accept(ListProofVisitor visitor);
+  ServiceInstanceInfo spec;
 }

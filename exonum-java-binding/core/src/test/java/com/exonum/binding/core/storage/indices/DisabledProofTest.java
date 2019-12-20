@@ -23,10 +23,13 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.Disabled;
 
 /**
- * Indicates that a test is a test of a proof method, temporarily disabled
- * till the new protobuf-based format is fully supported.
+ * Indicates that a test is an integration test of proof <em>verification</em>.
+ * Such tests are temporarily disabled till the proof verification is fully implemented.
  *
- * <p>See ECR-3666 and the epic https://jira.bf.local/browse/ECR-2545
+ * <p>When it is implemented — reconsider both the ITs of proof <em>creation</em> and
+ * <em>verification</em>.
+ *
+ * <p>See the epic https://jira.bf.local/browse/ECR-3784
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})

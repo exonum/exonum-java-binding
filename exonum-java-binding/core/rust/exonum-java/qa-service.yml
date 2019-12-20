@@ -18,12 +18,12 @@ plugins:
 artifacts:
   qa-service:
     runtime: java
-    name: "com.exonum.binding:exonum-java-binding-qa-service:0.9.0-SNAPSHOT"
+    name: "com.exonum.binding:exonum-java-binding-qa-service:0.10.0-SNAPSHOT"
     spec:
-      artifact_filename: "exonum-java-binding-qa-service-0.9.0-SNAPSHOT-artifact.jar"
+      artifact_filename: "exonum-java-binding-qa-service-0.10.0-SNAPSHOT-artifact.jar"
   time:
     runtime: rust
-    name: "exonum-time:0.12.0"
+    name: "exonum-time:0.13.0-rc.2"
 
 instances:
   qa-service:
@@ -31,7 +31,7 @@ instances:
     config:
       sources: "../../../qa-service/src/main/proto"
       config_message_source: "config.proto"
-      message_name: "InitialConfiguration"
+      message_name: "QaConfiguration"
       data:
         time_oracle_name: "time"
   time:
