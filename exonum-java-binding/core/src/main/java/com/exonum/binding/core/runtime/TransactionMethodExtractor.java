@@ -19,10 +19,12 @@ package com.exonum.binding.core.runtime;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toMap;
 
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionMethod;
 import com.google.common.annotations.VisibleForTesting;
-
+import com.google.protobuf.MessageLite;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -40,14 +42,14 @@ final class TransactionMethodExtractor {
    *
    * @see TransactionMethod
    */
-  static Map<Integer, MethodHandle> extractTransactionMethods(Class<?> serviceClass) {
+  static Map<Integer, TransactionMethodObject> extractTransactionMethods(Class<?> serviceClass) {
     Map<Integer, Method> transactionMethods = findTransactionMethods(serviceClass);
     Lookup lookup = MethodHandles.publicLookup()
         .in(serviceClass);
     return transactionMethods.entrySet().stream()
         .peek(tx -> validateTransactionMethod(tx.getValue(), serviceClass))
         .collect(toMap(Map.Entry::getKey,
-            (e) -> toMethodHandle(e.getValue(), lookup)));
+            (e) -> toTransactionMethodObject(e.getValue(), lookup)));
   }
 
   @VisibleForTesting
@@ -84,13 +86,14 @@ final class TransactionMethodExtractor {
    */
   private static void validateTransactionMethod(Method transaction, Class<?> serviceClass) {
     String errorMessage = String.format("Method %s in a service class %s annotated with"
-        + " @TransactionMethod should have precisely two parameters of the following types:"
-        + " 'byte[]' and 'com.exonum.binding.core.transaction.TransactionContext'",
+        + " @TransactionMethod should have precisely two parameters: transaction arguments of"
+        + " 'byte[]' type or a protobuf type and transaction context of"
+        + " 'com.exonum.binding.core.transaction.TransactionContext' type",
         transaction.getName(), serviceClass.getName());
     checkArgument(transaction.getParameterCount() == 2, errorMessage);
     Class<?> firstParameter = transaction.getParameterTypes()[0];
     Class<?> secondParameter = transaction.getParameterTypes()[1];
-    checkArgument(firstParameter == byte[].class,
+    checkArgument(firstParameter == byte[].class || isProtobufArgument(firstParameter),
         String.format(errorMessage
             + ". But first parameter type was: %s", firstParameter.getName()));
     checkArgument(TransactionContext.class.isAssignableFrom(secondParameter),
@@ -98,13 +101,27 @@ final class TransactionMethodExtractor {
             + ". But second parameter type was: %s", secondParameter.getName()));
   }
 
-  private static MethodHandle toMethodHandle(Method method, Lookup lookup) {
+  private static TransactionMethodObject toTransactionMethodObject(Method method, Lookup lookup) {
+    Serializer<?> argumentsSerializer = StandardSerializers.bytes();
+    Class parameterType = method.getParameterTypes()[0];
+    if (isProtobufArgument(parameterType)) {
+      argumentsSerializer = StandardSerializers.protobuf(parameterType);
+    }
+    MethodHandle methodHandle;
     try {
-      return lookup.unreflect(method);
+      methodHandle = lookup.unreflect(method);
     } catch (IllegalAccessException e) {
       throw new IllegalArgumentException(
           String.format("Couldn't access method %s", method.getName()), e);
     }
+    return new TransactionMethodObject(methodHandle, argumentsSerializer);
+  }
+
+  /**
+   * Returns true if given class is a protobuf type; false otherwise.
+   */
+  private static boolean isProtobufArgument(Class type) {
+    return MessageLite.class.isAssignableFrom(type);
   }
 
   private TransactionMethodExtractor() {}

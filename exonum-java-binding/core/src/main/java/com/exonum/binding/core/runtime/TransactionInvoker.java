@@ -29,7 +29,7 @@ import java.util.Map;
  */
 final class TransactionInvoker {
   private final Service service;
-  private final Map<Integer, MethodHandle> transactionMethods;
+  private final Map<Integer, TransactionMethodObject> transactionMethods;
 
   TransactionInvoker(Service service) {
     this.service = service;
@@ -54,9 +54,11 @@ final class TransactionInvoker {
       throws TransactionExecutionException {
     checkArgument(transactionMethods.containsKey(transactionId),
         "No method with transaction id (%s)", transactionId);
+    TransactionMethodObject transactionMethodObject = transactionMethods.get(transactionId);
+    Object argumentsObject = transactionMethodObject.serializeArguments(arguments);
+    MethodHandle methodHandle = transactionMethodObject.getMethodHandle();
     try {
-      MethodHandle methodHandle = transactionMethods.get(transactionId);
-      methodHandle.invoke(service, arguments, context);
+      methodHandle.invoke(service, argumentsObject, context);
     } catch (Throwable throwable) {
       if (throwable instanceof TransactionExecutionException) {
         throw (TransactionExecutionException) throwable;
