@@ -22,6 +22,9 @@ import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.core.messages.Blockchain.Config;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -53,4 +56,16 @@ public interface QaService extends Service, Configurable {
   Optional<ZonedDateTime> getTime();
 
   Map<PublicKey, ZonedDateTime> getValidatorsTimes();
+
+  void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
+      throws TransactionExecutionException;
+
+  void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments, TransactionContext context)
+      throws TransactionExecutionException;
+
+  void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
+      throws TransactionExecutionException;
+
+  void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context)
+      throws TransactionExecutionException;
 }

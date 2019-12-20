@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.qaservice;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
+/**
+ * All known QA service transactions.
+ */
+public enum QaTransaction {
+  // Well-behaved transactions.
+  CREATE_COUNTER(0),
+  INCREMENT_COUNTER(1),
 
-import com.exonum.binding.core.transaction.TransactionContext;
-import org.junit.jupiter.api.Test;
+  // Badly-behaved transactions, do some crazy things.
+  VALID_THROWING(12),
+  VALID_ERROR(13);
 
-class UnknownTxTest {
+  private final int id;
 
-  @Test
-  void execute() {
-    UnknownTx tx = new UnknownTx();
+  QaTransaction(int id) {
+    this.id = id;
+  }
 
-    assertThrows(AssertionError.class,
-        () -> tx.execute(mock(TransactionContext.class)));
+  /** Returns the unique id of this transaction. */
+  public int id() {
+    return id;
   }
 
 }

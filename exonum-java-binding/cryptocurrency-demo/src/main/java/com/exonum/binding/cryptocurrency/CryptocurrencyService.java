@@ -30,9 +30,9 @@ public interface CryptocurrencyService extends Service {
 
   List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
 
-  void createWalletTx(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
+  void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
       throws TransactionExecutionException;
 
-  void transferTx(TxMessageProtos.TransferTx arguments, TransactionContext context)
+  void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context)
       throws TransactionExecutionException;
 }

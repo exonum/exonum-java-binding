@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.qaservice;
 
-/**
- * All known QA service transactions.
- */
-public enum QaTransaction {
-  // Well-behaved transactions.
-  CREATE_COUNTER(0),
-  INCREMENT_COUNTER(1),
+import com.google.common.primitives.UnsignedBytes;
 
-  // Badly-behaved transactions, do some crazy things.
-  VALID_THROWING(12),
-  VALID_ERROR(13);
+enum TransactionError {
+  // Create counter errors
+  COUNTER_ALREADY_EXISTS(0),
+  // Increment counter errors
+  UNKNOWN_COUNTER(1);
 
-  private final int id;
+  final byte code;
 
-  QaTransaction(int id) {
-    this.id = id;
+  TransactionError(int code) {
+    this.code = UnsignedBytes.checkedCast(code);
   }
-
-  /** Returns the unique id of this transaction. */
-  public int id() {
-    return id;
-  }
-
 }

@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
+import static com.exonum.binding.qaservice.TransactionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
-import static com.exonum.binding.qaservice.transactions.TransactionError.COUNTER_ALREADY_EXISTS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
@@ -33,14 +32,10 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.qaservice.Integration;
-import com.exonum.binding.qaservice.QaArtifactInfo;
-import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -51,15 +46,6 @@ class CreateCounterTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       QaArtifactInfo.createQaServiceTestkit()
   );
-
-  @Test
-  void rejectsEmptyName() {
-    String name = "";
-
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> new CreateCounterTx(name));
-    assertThat(e.getMessage()).contains("Name must not be blank");
-  }
 
   @Test
   void executeNewCounter(TestKit testKit) {
@@ -93,12 +79,6 @@ class CreateCounterTxTest {
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(transactionMessage2.hash());
     ExecutionStatus expectedTransactionResult = serviceError(COUNTER_ALREADY_EXISTS.code);
     assertThat(txResult).hasValue(expectedTransactionResult);
-  }
-
-  @Test
-  void equals() {
-    EqualsVerifier.forClass(CreateCounterTx.class)
-        .verify();
   }
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
@@ -23,7 +23,7 @@ import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.binding.qaservice.TransactionMessages.createIncrementCounterTx;
-import static com.exonum.binding.qaservice.transactions.TransactionError.UNKNOWN_COUNTER;
+import static com.exonum.binding.qaservice.TransactionError.UNKNOWN_COUNTER;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +39,6 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -85,12 +84,5 @@ class IncrementCounterTxTest {
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(incrementCounterTx.hash());
     ExecutionStatus expectedTransactionResult = serviceError(UNKNOWN_COUNTER.code);
     assertThat(txResult).hasValue(expectedTransactionResult);
-  }
-
-  @Test
-  void equals() {
-    EqualsVerifier.forClass(IncrementCounterTx.class)
-        .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
-        .verify();
   }
 }

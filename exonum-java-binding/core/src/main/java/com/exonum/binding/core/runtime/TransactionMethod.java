@@ -23,12 +23,11 @@ import java.lang.invoke.MethodHandle;
  * Stores a method handle of a transaction and a protobuf serializer in case of a protobuf type
  * transaction arguments.
  */
-// TODO: rename to TransactionMethod after migration? Another name?
-class TransactionMethodObject {
+class TransactionMethod {
   private final MethodHandle methodHandle;
   private final Serializer<?> argumentsSerializer;
 
-  TransactionMethodObject(MethodHandle methodHandle, Serializer<?> argumentsSerializer) {
+  TransactionMethod(MethodHandle methodHandle, Serializer<?> argumentsSerializer) {
     this.methodHandle = methodHandle;
     this.argumentsSerializer = argumentsSerializer;
   }
