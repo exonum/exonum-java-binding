@@ -564,6 +564,7 @@
                 <exclude>**/WalletProtos*</exclude>
                 <exclude>**/ServiceRuntimeProtos*</exclude>
                 <exclude>**/DeployArguments*</exclude>
+                <exclude>**/TestKitProtos*</exclude>
                 <exclude>com/exonum/core/messages/*</exclude>
                 <exclude>com/exonum/binding/fakeservice/Transactions*</exclude>
                 <exclude>com/exonum/binding/qaservice/Config*</exclude>
