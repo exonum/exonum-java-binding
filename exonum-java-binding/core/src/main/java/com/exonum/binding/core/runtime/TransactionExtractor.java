@@ -21,8 +21,8 @@ import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionMethod;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.MessageLite;
 import java.lang.invoke.MethodHandle;
@@ -31,26 +31,25 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Finds and validates transaction methods in a service.
  */
-final class TransactionMethodExtractor {
+final class TransactionExtractor {
 
   /**
    * Returns a map of transaction ids to transaction methods found in a service class.
    *
-   * @see TransactionMethod
+   * @see Transaction
    */
-  static Map<Integer, TransactionMethodObject> extractTransactionMethods(Class<?> serviceClass) {
+  static Map<Integer, TransactionMethod> extractTransactionMethods(Class<?> serviceClass) {
     Map<Integer, Method> transactionMethods = findTransactionMethods(serviceClass);
     Lookup lookup = MethodHandles.publicLookup()
         .in(serviceClass);
     return transactionMethods.entrySet().stream()
         .peek(tx -> validateTransactionMethod(tx.getValue(), serviceClass))
         .collect(toMap(Map.Entry::getKey,
-            (e) -> toTransactionMethodObject(e.getValue(), lookup)));
+            (e) -> toTransactionMethod(e.getValue(), lookup)));
   }
 
   @VisibleForTesting
@@ -59,8 +58,8 @@ final class TransactionMethodExtractor {
     while (serviceClass != Object.class) {
       Method[] classMethods = serviceClass.getDeclaredMethods();
       for (Method method : classMethods) {
-        if (method.isAnnotationPresent(TransactionMethod.class)) {
-          TransactionMethod annotation = method.getAnnotation(TransactionMethod.class);
+        if (method.isAnnotationPresent(Transaction.class)) {
+          Transaction annotation = method.getAnnotation(Transaction.class);
           int transactionId = annotation.value();
           checkDuplicates(transactionMethods, transactionId, serviceClass, method);
           transactionMethods.put(transactionId, method);
@@ -87,23 +86,23 @@ final class TransactionMethodExtractor {
    */
   private static void validateTransactionMethod(Method transaction, Class<?> serviceClass) {
     String errorMessage = String.format("Method %s in a service class %s annotated with"
-        + " @TransactionMethod should have precisely two parameters: transaction arguments of"
+        + " @Transaction should have precisely two parameters: transaction arguments of"
         + " 'byte[]' type or a protobuf type and transaction context of"
-        + " 'com.exonum.binding.core.transaction.TransactionContext' type",
+        + " 'com.exonum.binding.core.transaction.TransactionContext' type.",
         transaction.getName(), serviceClass.getName());
     checkArgument(transaction.getParameterCount() == 2, errorMessage);
     Class<?> firstParameter = transaction.getParameterTypes()[0];
     Class<?> secondParameter = transaction.getParameterTypes()[1];
     checkArgument(firstParameter == byte[].class || isProtobufArgument(firstParameter),
         String.format(errorMessage
-            + ". But first parameter type was: %s", firstParameter.getName()));
+            + " But first parameter type was: %s", firstParameter.getName()));
     checkArgument(TransactionContext.class.isAssignableFrom(secondParameter),
         String.format(errorMessage
-            + ". But second parameter type was: %s", secondParameter.getName()));
+            + " But second parameter type was: %s", secondParameter.getName()));
   }
 
-  private static TransactionMethodObject toTransactionMethodObject(Method method, Lookup lookup) {
-    Serializer argumentsSerializer = null;
+  private static TransactionMethod toTransactionMethod(Method method, Lookup lookup) {
+    Serializer<?> argumentsSerializer = StandardSerializers.bytes();
     Class parameterType = method.getParameterTypes()[0];
     if (isProtobufArgument(parameterType)) {
       argumentsSerializer = StandardSerializers.protobuf(parameterType);
@@ -115,7 +114,7 @@ final class TransactionMethodExtractor {
       throw new IllegalArgumentException(
           String.format("Couldn't access method %s", method.getName()), e);
     }
-    return new TransactionMethodObject(methodHandle, argumentsSerializer);
+    return new TransactionMethod(methodHandle, argumentsSerializer);
   }
 
   /**
@@ -125,5 +124,5 @@ final class TransactionMethodExtractor {
     return MessageLite.class.isAssignableFrom(type);
   }
 
-  private TransactionMethodExtractor() {}
+  private TransactionExtractor() {}
 }

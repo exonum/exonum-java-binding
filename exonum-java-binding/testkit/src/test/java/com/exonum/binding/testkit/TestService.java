@@ -28,7 +28,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionMethod;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -73,7 +73,7 @@ final class TestService extends AbstractService {
     testMap.put(INITIAL_ENTRY_KEY, configurationValue);
   }
 
-  @TransactionMethod(TEST_TRANSACTION_ID)
+  @Transaction(TEST_TRANSACTION_ID)
   public void executeTestTransaction(byte[] arguments, TransactionContext context) {
     String value = getValue(arguments);
 

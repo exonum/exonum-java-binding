@@ -61,8 +61,7 @@
 
   <properties>
     <!-- Project configuration -->
-    <!-- TODO: Rollback to 0.9.0-rc1 when it is released -->
-    <ejb.version>0.10.0-SNAPSHOT</ejb.version>
+    <ejb.version>0.9.0-rc2</ejb.version>
     <java.compiler.source>8</java.compiler.source>
     <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -72,7 +71,7 @@
     <lombok.version>1.18.10</lombok.version>
     <!--Test dependencies-->
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
-    <mockito.version>3.2.0</mockito.version>
+    <mockito.version>3.2.4</mockito.version>
     <hamcrest.version>2.2</hamcrest.version>
     <equalsverifier.version>3.1.10</equalsverifier.version>
     <!--Plugins-->

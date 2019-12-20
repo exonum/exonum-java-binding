@@ -26,9 +26,9 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.TestProtoMessages;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
-import com.exonum.binding.core.transaction.TransactionMethod;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
 import java.util.List;
@@ -111,11 +111,11 @@ class TransactionInvokerTest {
 
   public static class ValidService extends BasicService {
 
-    @TransactionMethod(TRANSACTION_ID)
+    @Transaction(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
     public void transactionMethod(byte[] arguments, TransactionContext context) {}
 
-    @TransactionMethod(TRANSACTION_ID_2)
+    @Transaction(TRANSACTION_ID_2)
     @SuppressWarnings("WeakerAccess") // Should be accessible
     public void transactionMethod2(byte[] arguments, TransactionContext context) {}
   }
@@ -125,13 +125,13 @@ class TransactionInvokerTest {
     static final byte ERROR_CODE = 18;
     static final String ERROR_MESSAGE = "Service originated exception";
 
-    @TransactionMethod(TRANSACTION_ID)
+    @Transaction(TRANSACTION_ID)
     public void transactionMethod(byte[] arguments, TransactionContext context)
         throws TransactionExecutionException {
       throw new TransactionExecutionException(ERROR_CODE);
     }
 
-    @TransactionMethod(TRANSACTION_ID_2)
+    @Transaction(TRANSACTION_ID_2)
     public void transactionMethod2(byte[] arguments, TransactionContext context)
         throws TransactionExecutionException {
       throw new IllegalArgumentException(ERROR_MESSAGE);
@@ -140,7 +140,7 @@ class TransactionInvokerTest {
 
   public static class ProtobufArgumentsService extends BasicService {
 
-    @TransactionMethod(TRANSACTION_ID)
+    @Transaction(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
     public void transactionMethod(TestProtoMessages.Point arguments, TransactionContext context) {}
   }

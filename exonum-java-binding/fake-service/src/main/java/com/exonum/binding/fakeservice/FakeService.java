@@ -20,8 +20,8 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionMethod;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 
@@ -45,8 +45,8 @@ final class FakeService extends AbstractService {
     // No handlers
   }
 
-  @TransactionMethod(PUT_TX_ID)
-  public void putTransactionExecute(Transactions.PutTransactionArgs arguments, TransactionContext context) {
+  @Transaction(PUT_TX_ID)
+  public void executePutTransaction(Transactions.PutTransactionArgs arguments, TransactionContext context) {
     FakeSchema schema = new FakeSchema(context.getServiceName(), context.getFork());
     String key = arguments.getKey();
     String value = arguments.getValue();

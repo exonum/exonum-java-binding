@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.common.message;
+package com.exonum.binding.qaservice;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+/**
+ * All known QA service transactions.
+ */
+public enum QaTransaction {
+  // Well-behaved transactions.
+  CREATE_COUNTER(0),
+  INCREMENT_COUNTER(1),
 
-class ByteBufferAllocator {
+  // Badly-behaved transactions, do some crazy things.
+  VALID_THROWING(12),
+  VALID_ERROR(13);
 
-  /**
-   * Allocates a byte buffer of the given size, and sets its order to little-endian.
-   *
-   * @param size size of the buffer in bytes
-   *
-   * @return a new byte buffer of the given size
-   */
-  static ByteBuffer allocateBuffer(int size) {
-    return ByteBuffer.allocate(size)
-        .order(ByteOrder.LITTLE_ENDIAN);
+  private final int id;
+
+  QaTransaction(int id) {
+    this.id = id;
   }
 
-  private ByteBufferAllocator() {}
+  /** Returns the unique id of this transaction. */
+  public int id() {
+    return id;
+  }
+
 }

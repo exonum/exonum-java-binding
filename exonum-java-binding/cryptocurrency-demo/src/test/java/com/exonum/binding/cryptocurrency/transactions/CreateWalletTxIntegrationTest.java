@@ -22,7 +22,7 @@ import static com.exonum.binding.cryptocurrency.transactions.PredefinedServicePa
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
 import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
+import static com.exonum.binding.cryptocurrency.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.DEFAULT_INITIAL_BALANCE;
 import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
 import static org.assertj.core.api.Assertions.assertThat;

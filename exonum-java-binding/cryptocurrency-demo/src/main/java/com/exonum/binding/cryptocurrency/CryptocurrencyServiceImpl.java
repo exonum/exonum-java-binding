@@ -16,11 +16,11 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.WALLET_ALREADY_EXISTS;
+import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
+import static com.exonum.binding.cryptocurrency.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
@@ -38,7 +38,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
-import com.exonum.binding.core.transaction.TransactionMethod;
+import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
@@ -107,8 +107,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   @Override
-  @TransactionMethod(CREATE_WALLET_TX_ID)
-  public void createWalletTx(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
+  @Transaction(CREATE_WALLET_TX_ID)
+  public void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
       throws TransactionExecutionException {
     PublicKey ownerPublicKey = context.getAuthorPk();
 
@@ -116,12 +116,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
         new CryptocurrencySchema(context.getFork(), context.getServiceName());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-    /*
-    Review: May also use checkExecution(!wallets.containsKey(ownerPublicKey), WALLET_ALREADY_EXISTS.errorCode)
-     */
-    if (wallets.containsKey(ownerPublicKey)) {
-      throw new TransactionExecutionException(WALLET_ALREADY_EXISTS.errorCode);
-    }
+    checkExecution(!wallets.containsKey(ownerPublicKey), WALLET_ALREADY_EXISTS.errorCode);
 
     long initialBalance = arguments.getInitialBalance();
     checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
@@ -132,8 +127,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   @Override
-  @TransactionMethod(TRANSFER_TX_ID)
-  public void transferTx(TxMessageProtos.TransferTx arguments, TransactionContext context)
+  @Transaction(TRANSFER_TX_ID)
+  public void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context)
       throws TransactionExecutionException {
     PublicKey fromWallet = context.getAuthorPk();
 

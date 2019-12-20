@@ -18,7 +18,7 @@
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
     <nativeLibPath>${env.EXONUM_HOME}/lib/native</nativeLibPath>
     <hamcrest.version>2.1</hamcrest.version>
-    <mockito.version>3.2.0</mockito.version>
+    <mockito.version>3.2.4</mockito.version>
     <exonum.version>0.10.0-SNAPSHOT</exonum.version>
     <artifactFilename>${project.artifactId}-${project.version}-artifact</artifactFilename>
     <artifactName>${project.groupId}:${project.artifactId}:${project.version}</artifactName>

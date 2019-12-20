@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.cryptocurrency;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
+enum TransactionError {
+  WALLET_ALREADY_EXISTS(0),
+  UNKNOWN_RECEIVER(1),
+  UNKNOWN_SENDER(2),
+  INSUFFICIENT_FUNDS(3),
+  SAME_SENDER_AND_RECEIVER(4);
 
-import com.exonum.binding.core.transaction.TransactionContext;
-import org.junit.jupiter.api.Test;
+  public final byte errorCode;
 
-class UnknownTxTest {
-
-  @Test
-  void execute() {
-    UnknownTx tx = new UnknownTx();
-
-    assertThrows(AssertionError.class,
-        () -> tx.execute(mock(TransactionContext.class)));
+  TransactionError(int errorCode) {
+    this.errorCode = (byte) errorCode;
   }
-
 }
