@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.storage.indices.TestProtoMessages;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transaction.TransactionMethod;
@@ -73,6 +74,21 @@ class TransactionInvokerTest {
     assertThat(e.getCause().getClass()).isEqualTo(IllegalArgumentException.class);
   }
 
+  @Test
+  void invokeProtobufArgumentsService() throws Exception {
+    ProtobufArgumentsService service = spy(new ProtobufArgumentsService());
+    TransactionInvoker invoker = new TransactionInvoker(service);
+    TestProtoMessages.Point point = TestProtoMessages.Point.newBuilder()
+        .setX(1)
+        .setY(1)
+        .build();
+
+    invoker.invokeTransaction(ProtobufArgumentsService.TRANSACTION_ID, point.toByteArray(),
+        context);
+
+    verify(service).transactionMethod(point, context);
+  }
+
   static class BasicService implements Service {
 
     static final int TRANSACTION_ID = 1;
@@ -88,13 +104,11 @@ class TransactionInvokerTest {
 
     @TransactionMethod(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod(byte[] arguments, TransactionContext context) {
-    }
+    public void transactionMethod(byte[] arguments, TransactionContext context) {}
 
     @TransactionMethod(TRANSACTION_ID_2)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod2(byte[] arguments, TransactionContext context) {
-    }
+    public void transactionMethod2(byte[] arguments, TransactionContext context) {}
   }
 
   public static class ThrowingService extends BasicService {
@@ -113,5 +127,12 @@ class TransactionInvokerTest {
         throws TransactionExecutionException {
       throw new IllegalArgumentException(ERROR_MESSAGE);
     }
+  }
+
+  public static class ProtobufArgumentsService extends BasicService {
+
+    @TransactionMethod(TRANSACTION_ID)
+    @SuppressWarnings("WeakerAccess") // Should be accessible
+    public void transactionMethod(TestProtoMessages.Point arguments, TransactionContext context) {}
   }
 }

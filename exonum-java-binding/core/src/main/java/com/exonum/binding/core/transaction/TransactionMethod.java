@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.transaction;
 
-import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
 import java.lang.annotation.ElementType;
@@ -26,14 +25,16 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that a method is a transaction method. The annotated method should execute the
- * transaction, possibly modifying the blockchain state. The method should:
+ * transaction, possibly modifying the blockchain state.
+ *
+ * <p>The method should be {@code public} and have the following parameters
+ * (in this particular order):
  * <ul>
- *   <li>be public
- *   <li>have exactly two parameters - the
- *       {@linkplain TransactionMessage#getPayload() serialized transaction arguments} of type
- *       'byte[]' and a transaction execution context, which allows to access the information about
- *       this transaction and modify the blockchain state through the included database fork of
- *       type '{@link TransactionContext}' in this particular order
+ *   <li>transaction arguments either as 'byte[]' or as a protobuf message. Protobuf messages will
+ *       be deserialized using a {@code #parseFrom(byte[])} method
+ *   <li>transaction execution context, which allows to access the information about this
+ *       transaction and modify the blockchain state through the included database fork of type
+ *       '{@link TransactionContext}'
  * </ul>
  *
  * <p>The annotated method might throw {@linkplain TransactionExecutionException} if the
