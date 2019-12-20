@@ -28,12 +28,12 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.MapIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Blockchain.Config;
@@ -48,7 +48,7 @@ import java.nio.ByteOrder;
  * services and store general-purpose information, such as committed transactions.
  *
  * @see <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">
- *     Definition in Exonum</a>
+ * Definition in Exonum</a>
  */
 final class CoreSchema {
 
@@ -166,8 +166,9 @@ final class CoreSchema {
    * @throws IllegalStateException if the "genesis block" was not created
    */
   Config getConsensusConfiguration() {
-    EntryIndexProxy<Config> configEntry = EntryIndexProxy.newInstance(CoreIndex.CONSENSUS_CONFIG,
-        dbView, CONSENSUS_CONFIG_SERIALIZER);
+    ProofEntryIndexProxy<Config> configEntry = ProofEntryIndexProxy
+        .newInstance(CoreIndex.CONSENSUS_CONFIG,
+                     dbView, CONSENSUS_CONFIG_SERIALIZER);
     checkState(configEntry.isPresent(), "No consensus configuration: requesting the configuration "
         + "before the genesis block was created");
     return configEntry.get();

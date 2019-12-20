@@ -32,8 +32,8 @@ import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.transactions.IncrementCounterTx;
@@ -178,7 +178,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Optional<ZonedDateTime> getTime() {
     return node.withSnapshot(s -> {
       TimeSchema timeOracle = createDataSchema(s).timeSchema();
-      EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
+      ProofEntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
       return currentTime.toOptional();
     });
   }
