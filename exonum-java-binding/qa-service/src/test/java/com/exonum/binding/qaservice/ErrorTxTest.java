@@ -52,6 +52,9 @@ class ErrorTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       createQaServiceTestkit());
 
+  /*
+  Review: constructorRejectsInvalidErrorCode and InvalidDescription as tx tests.
+   */
   @Test
   void executeNoDescription(TestKit testKit) {
     byte errorCode = 1;

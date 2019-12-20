@@ -180,6 +180,9 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
    */
   private static RawTransaction newRawIncrementCounterTransaction(long requestSeed,
       HashCode counterId, int serviceId) {
+    /*
+    Review: Why not `build().toByteArray()` instead of a serializer?
+     */
     byte[] payload = INCREMENT_TX_PROTO_SERIALIZER.toBytes(TxMessageProtos.IncrementCounterTxBody
         .newBuilder()
         .setSeed(requestSeed)
@@ -193,6 +196,9 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
         .build();
   }
 
+  /*
+  Review: The documentation on what an unknown tx must be moved here.
+   */
   @Override
   public HashCode submitUnknownTx() {
     return submitTransaction(newRawUnknownTransaction(getId()));
@@ -288,6 +294,9 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
   @Transaction(CREATE_COUNTER_TX_ID)
   public void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
       throws TransactionExecutionException {
+    /*
+    Review: Checks from the constructor.
+     */
     String name = arguments.getName();
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
     MapIndex<HashCode, Long> counters = schema.counters();
@@ -332,6 +341,10 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
     schema.clearAll();
 
     // Throw an exception. Framework must revert the changes made above.
+    /*
+     Review: `this` is now the service, hence no longer appropriate. I think a hash of the message would
+     be better (it identifies the message) + arguments.seed()
+     */
     throw new IllegalStateException("#execute of this transaction always throws: " + this);
   }
 
@@ -339,6 +352,9 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
   @Transaction(VALID_ERROR_TX_ID)
   public void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
       throws TransactionExecutionException {
+    /*
+    Review: misses checks in ErrorTx constructor.
+     */
     byte errorCode = (byte) arguments.getErrorCode();
     String errorDescription = arguments.getErrorDescription();
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());

@@ -47,6 +47,9 @@ class CreateCounterTxTest {
       QaArtifactInfo.createQaServiceTestkit()
   );
 
+  /*
+  Review: rejectsEmptyName — as a transaction test.
+   */
   @Test
   void executeNewCounter(TestKit testKit) {
     String counterName = "counter";
