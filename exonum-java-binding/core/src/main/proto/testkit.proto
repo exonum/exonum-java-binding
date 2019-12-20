@@ -16,12 +16,15 @@ syntax = "proto3";
 
 package exonum.testkit;
 
-option java_package = "com.exonum.binding.testkit";
+option java_package = "com.exonum.binding.core.testkit.internal";
 option java_outer_classname = "TestKitProtos";
 
 import "runtime.proto";
 
+// DTO for TestKit initialization.
 message TestKitServiceInstances {
+    // Artifacts to deploy on blockchain instantiation.
     repeated exonum.runtime.ArtifactSpec artifact_specs = 1;
+    // Services to start on blockchain instantiation.
     repeated exonum.runtime.InstanceInitParams service_specs = 2;
 }
