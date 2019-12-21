@@ -26,8 +26,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
@@ -77,9 +75,6 @@ import org.apache.logging.log4j.Logger;
 public final class QaServiceImpl extends AbstractService implements QaService {
 
   private static final Logger logger = LogManager.getLogger(QaService.class);
-
-  private static final Serializer<TxMessageProtos.IncrementCounterTxBody> INCREMENT_TX_PROTO_SERIALIZER =
-      StandardSerializers.protobuf(TxMessageProtos.IncrementCounterTxBody.class);
 
   private static final int CREATE_COUNTER_TX_ID = 0;
   private static final int INCREMENT_COUNTER_TX_ID = 1;
@@ -177,11 +172,11 @@ public final class QaServiceImpl extends AbstractService implements QaService {
    */
   private static RawTransaction newRawIncrementCounterTransaction(long requestSeed,
       HashCode counterId, int serviceId) {
-    byte[] payload = INCREMENT_TX_PROTO_SERIALIZER.toBytes(TxMessageProtos.IncrementCounterTxBody
+    byte[] payload = TxMessageProtos.IncrementCounterTxBody
         .newBuilder()
         .setSeed(requestSeed)
         .setCounterId(ByteString.copyFrom(counterId.asBytes()))
-        .build());
+        .build().toByteArray();
 
     return RawTransaction.newBuilder()
         .serviceId(serviceId)
@@ -190,6 +185,17 @@ public final class QaServiceImpl extends AbstractService implements QaService {
         .build();
   }
 
+  /**
+   * Submit a transaction that has QA service identifier, but an unknown transaction id.
+   * Such transaction must be rejected when received by other nodes.
+   *
+   * <p>Only a single unknown transaction may be submitted to each node,
+   * as they have empty body (= the same binary representation),
+   * and once it is added to the local pool of a certain node,
+   * it will remain there. Other nodes must reject the message of this transaction
+   * once they receive it as a message from this node. If multiple unknown transaction messages
+   * need to be submitted, a seed might be added.
+   */
   @Override
   public HashCode submitUnknownTx() {
     return submitTransaction(newRawUnknownTransaction(getId()));
@@ -286,6 +292,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
       throws TransactionExecutionException {
     String name = arguments.getName();
+    checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
@@ -328,8 +335,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // Attempt to clear all service indices.
     schema.clearAll();
 
+    HashCode transactionHash = Hashing.defaultHashFunction().hashBytes(arguments.toByteArray());
     // Throw an exception. Framework must revert the changes made above.
-    throw new IllegalStateException("#execute of this transaction always throws: " + this);
+    throw new IllegalStateException("#execute of this transaction always throws, seed: " +
+        arguments.getSeed());
   }
 
   @Override
@@ -338,6 +347,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
       throws TransactionExecutionException {
     byte errorCode = (byte) arguments.getErrorCode();
     String errorDescription = arguments.getErrorDescription();
+    checkArgument(errorCode >= 0, "error code (%s) must be in range [0; 127]", errorCode);
+    checkArgument(nullOrNonEmpty(errorDescription));
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.
@@ -345,6 +356,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     // Throw an exception. Framework must revert the changes made above.
     throw new TransactionExecutionException(errorCode, errorDescription);
+  }
+
+  private static boolean nullOrNonEmpty(@Nullable String errorDescription) {
+    return errorDescription == null || !errorDescription.isEmpty();
   }
 
   private void checkConfiguration(QaConfiguration config) {

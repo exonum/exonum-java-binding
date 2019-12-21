@@ -174,6 +174,7 @@ public class ServiceRuntimeAdapter {
    * @throws TransactionExecutionException if the transaction execution failed
    * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
    *      PublicKey)
+   * @see com.exonum.binding.core.transaction.Transaction
    */
   void executeTransaction(int serviceId, String interfaceName, int txId, byte[] arguments,
       long forkNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)
