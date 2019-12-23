@@ -121,13 +121,13 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
     updateTimeOracle(fork, configuration);
 
     // Add a default counter to the blockchain.
-    createCounter(DEFAULT_COUNTER_NAME, fork);
+    createInitCounter(DEFAULT_COUNTER_NAME, fork);
 
     // Add an afterCommit counter that will be incremented after each block committed event.
-    createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
+    createInitCounter(AFTER_COMMIT_COUNTER_NAME, fork);
   }
 
-  private void createCounter(String name, Fork fork) {
+  private void createInitCounter(String name, Fork fork) {
     QaSchema schema = createDataSchema(fork);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
@@ -292,8 +292,8 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
 
   @Override
   @Transaction(CREATE_COUNTER_TX_ID)
-  public void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  public void createCounter(TxMessageProtos.CreateCounterTxBody arguments,
+      TransactionContext context) throws TransactionExecutionException {
     String name = arguments.getName();
     checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
@@ -313,8 +313,8 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
 
   @Override
   @Transaction(INCREMENT_COUNTER_TX_ID)
-  public void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  public void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
+      TransactionContext context) throws TransactionExecutionException {
     byte[] rawCounterId = arguments.getCounterId().toByteArray();
     HashCode counterId = HashCode.fromBytes(rawCounterId);
 
@@ -331,8 +331,7 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
 
   @Override
   @Transaction(VALID_THROWING_TX_ID)
-  public void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  public void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context) {
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.

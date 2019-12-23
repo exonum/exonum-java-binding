@@ -60,8 +60,8 @@ public interface QaService extends Service, Configurable {
   void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
       throws TransactionExecutionException;
 
-  void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException;
+  void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
+      TransactionContext context) throws TransactionExecutionException;
 
   void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
       throws TransactionExecutionException;
