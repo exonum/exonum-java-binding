@@ -351,20 +351,17 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
     Review: misses checks in ErrorTx constructor.
      */
     byte errorCode = (byte) arguments.getErrorCode();
-    String errorDescription = arguments.getErrorDescription();
     checkArgument(errorCode >= 0, "error code (%s) must be in range [0; 127]", errorCode);
-    checkArgument(nullOrNonEmpty(errorDescription));
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.
     schema.clearAll();
 
     // Throw an exception. Framework must revert the changes made above.
+    // TODO: Study how it is handled in core now and if an empty string would be more sensible
+    // Convert error description to null to enable 'no-description' tests
+    String errorDescription = Strings.emptyToNull(arguments.getErrorDescription());
     throw new TransactionExecutionException(errorCode, errorDescription);
-  }
-
-  private static boolean nullOrNonEmpty(@Nullable String errorDescription) {
-    return errorDescription == null || !errorDescription.isEmpty();
   }
 
   private void checkConfiguration(QaConfiguration config) {
