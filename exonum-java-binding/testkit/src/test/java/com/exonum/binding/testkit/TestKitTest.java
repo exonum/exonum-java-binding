@@ -199,17 +199,21 @@ class TestKitTest {
   }
 
   @Test
-  void createTestKitWithInvalidArtifactThrows(@TempDir Path directory) throws Exception {
-    String invalidArtifactFilename = "invalid-artifact.jar";
-    createInvalidArtifact(directory, invalidArtifactFilename);
-    Class<RuntimeException> exceptionType = RuntimeException.class;
+  void createTestKitWithInvalidArtifactThrows() throws Exception {
+    String artifactFilename = "invalid-artifact.jar";
+    createInvalidArtifact(artifactsDirectory, artifactFilename);
+
     TestKit.Builder testKitBuilder = TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, invalidArtifactFilename)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+        .withDeployedArtifact(ARTIFACT_ID, artifactFilename)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
         .withArtifactsDirectory(artifactsDirectory);
-    RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
-    assertThat(thrownException.getMessage()).contains("Unable to create blockchain instance");
+
+    Exception e = assertThrows(RuntimeException.class, testKitBuilder::build);
+
+    assertThat(e.getMessage()).contains("Unable to create blockchain instance");
   }
+
+  // todo: invalidartifact — causing deploy errors (as ^) and causing instantiation errors (todo)
 
   @Test
   void createTestKitWithCustomConfiguration() {
@@ -518,33 +522,17 @@ class TestKitTest {
   }
 
   @Test
-  void createBlockWithTransactionWithWrongServiceId(TestKit testKit) {
-    short wrongServiceId = SERVICE_ID + 1;
+  void createBlockWithTransactionWithUnknownServiceId(TestKit testKit) {
+    short unknownServiceId = SERVICE_ID + 100;
     TransactionMessage message = TransactionMessage.builder()
-        .serviceId(wrongServiceId)
+        .serviceId(unknownServiceId)
         .transactionId(TEST_TRANSACTION_ID)
         .payload("Test message".getBytes(BODY_CHARSET))
         .sign(KEY_PAIR);
-    IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
+    Exception e = assertThrows(Exception.class,
         () -> testKit.createBlockWithTransactions(message));
-    String expectedMessage = String.format("No service with id=%s in the Java runtime",
-        wrongServiceId);
-    assertThat(thrownException.getCause().getMessage()).contains(expectedMessage);
-  }
-
-  @Test
-  void createBlockWithTransactionWithWrongTransactionId(TestKit testKit) {
-    short wrongTransactionId = (short) (TEST_TRANSACTION_ID + 1);
-    TransactionMessage message = TransactionMessage.builder()
-        .serviceId(SERVICE_ID)
-        .transactionId(wrongTransactionId)
-        .payload("Test message".getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR);
-    IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
-        () -> testKit.createBlockWithTransactions(message));
-    assertThat(thrownException.getMessage())
-        .contains("failed to convert transaction", Integer.toString(SERVICE_ID),
-            message.toString());
+    assertThat(e)
+        .hasMessageContaining("Suitable runtime for the given service instance ID is not found");
   }
 
   @Test

@@ -71,7 +71,7 @@ class TransactionInvokerTest {
   }
 
   @Test
-  void invokeThrowingServiceException() {
+  void invokeThrowingRuntimeException() {
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingService());
     RuntimeException e = assertThrows(RuntimeException.class,
         () -> invoker.invokeTransaction(ThrowingService.TRANSACTION_ID_2, ARGUMENTS, context));

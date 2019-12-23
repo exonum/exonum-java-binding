@@ -27,8 +27,8 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -40,7 +40,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
-final class TestService extends AbstractService {
+public final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("Initial key", StandardCharsets.UTF_8);
@@ -74,7 +74,7 @@ final class TestService extends AbstractService {
   }
 
   @Transaction(TEST_TRANSACTION_ID)
-  public void executeTestTransaction(byte[] arguments, TransactionContext context) {
+  public void putEntry(byte[] arguments, TransactionContext context) {
     String value = getValue(arguments);
 
     TestSchema schema = new TestSchema(context.getFork(), context.getServiceId());

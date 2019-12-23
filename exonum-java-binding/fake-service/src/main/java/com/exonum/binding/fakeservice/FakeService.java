@@ -25,7 +25,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 
-final class FakeService extends AbstractService {
+public final class FakeService extends AbstractService {
 
   static final int PUT_TX_ID = 0;
 
@@ -45,8 +45,12 @@ final class FakeService extends AbstractService {
     // No handlers
   }
 
+  /**
+   * Puts an entry (a key-value pair) into the test map.
+   */
   @Transaction(PUT_TX_ID)
-  public void executePutTransaction(Transactions.PutTransactionArgs arguments, TransactionContext context) {
+  public void putEntry(Transactions.PutTransactionArgs arguments,
+      TransactionContext context) {
     FakeSchema schema = new FakeSchema(context.getServiceName(), context.getFork());
     String key = arguments.getKey();
     String value = arguments.getValue();

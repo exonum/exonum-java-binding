@@ -25,6 +25,7 @@ import static com.exonum.binding.qaservice.TransactionError.COUNTER_ALREADY_EXIS
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
@@ -34,10 +35,14 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @Integration
 class CreateCounterTxTest {
@@ -46,6 +51,24 @@ class CreateCounterTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       QaArtifactInfo.createQaServiceTestkit()
   );
+
+  @ParameterizedTest
+  @ValueSource(strings = {"", " ", "  ", "\n", "\t"})
+  void executeNewCounterRejectsEmptyName(String name, TestKit testKit) {
+    TransactionMessage tx = createCreateCounterTx(name, QA_SERVICE_ID);
+    testKit.createBlockWithTransactions(tx);
+
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(tx.hash());
+
+    assertThat(txResultOpt).isPresent();
+    ExecutionStatus executionStatus = txResultOpt.get();
+    assertTrue(executionStatus.hasError());
+    ExecutionError error = executionStatus.getError();
+    assertThat(error.getKind()).isEqualTo(ErrorKind.RUNTIME);
+    assertThat(error.getDescription()).contains("Name must not be blank");
+  }
 
   @Test
   void executeNewCounter(TestKit testKit) {

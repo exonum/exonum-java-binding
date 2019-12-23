@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency.transactions;
+package com.exonum.binding.cryptocurrency;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
 import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
+import static com.exonum.binding.cryptocurrency.TransactionUtils.newCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.TransactionUtils.newTransferTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.KeyPair;
@@ -37,9 +38,6 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
-import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
@@ -47,6 +45,8 @@ import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TransferTxIntegrationTest {
 
@@ -96,6 +96,26 @@ class TransferTxIntegrationTest {
         .containsExactly(messageHash);
     assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
         .containsExactly(messageHash);
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L})
+  @RequiresNativeLibrary
+  void executeTransfer_NonPositiveBalance(long transferSum, TestKit testKit) {
+    // Create and execute the transaction
+    long seed = 1L;
+    TransactionMessage transferTx = newTransferTransaction(
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    testKit.createBlockWithTransactions(transferTx);
+
+    // Check the Exception
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
+    String description = "Non-positive transfer amount: " + transferSum;
+    ExecutionStatus expectedTransactionResult =
+        serviceError(NON_POSITIVE_TRANSFER_AMOUNT.errorCode, description);
+    assertThat(txResultOpt).hasValue(expectedTransactionResult);
   }
 
   @Test

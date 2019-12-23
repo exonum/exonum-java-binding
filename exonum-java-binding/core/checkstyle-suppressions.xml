@@ -5,7 +5,8 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-    <!-- fixme: remove both below when https://github.com/checkstyle/checkstyle/issues/5088 is resolved -->
+    <!-- fixme: remove both below when https://github.com/checkstyle/checkstyle/issues/5088
+           is resolved (ECR-3159) -->
     <suppress files="Node.*\.java" checks="JavadocMethod"/>
     <suppress files="Transaction\.java" checks="JavadocMethod"/>
 

@@ -30,9 +30,20 @@ public interface CryptocurrencyService extends Service {
 
   List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
 
+  /**
+   * Creates a new named wallet with the given initial balance.
+   *
+   * @throws TransactionExecutionException if the wallet of the tx author already exists
+   */
   void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
       throws TransactionExecutionException;
 
+  /**
+   * Transfers tokens between two wallets.
+   *
+   * @throws TransactionExecutionException if the sender or receiver are unknown; the sender
+   *     has insufficient funds; or the sender attempts a transfer to itself
+   */
   void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context)
       throws TransactionExecutionException;
 }

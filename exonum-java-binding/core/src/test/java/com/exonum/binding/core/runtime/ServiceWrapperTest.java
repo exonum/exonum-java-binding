@@ -24,6 +24,7 @@ import static com.exonum.binding.core.runtime.ServiceWrapper.VERIFY_CONFIGURATIO
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -62,40 +63,40 @@ class ServiceWrapperTest {
   ConfigurableService service;
 
   @Mock
+  TransactionInvoker txInvoker;
+
+  @Mock
   Node node;
 
   ServiceWrapper serviceWrapper;
 
   @BeforeEach
   void setUp() {
-    serviceWrapper = new ServiceWrapper(service, instanceSpec, node);
+    serviceWrapper = new ServiceWrapper(service, instanceSpec, txInvoker, node);
   }
 
   @Test
   void executeTransactionDefaultInterface() throws TransactionExecutionException {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
-    // TODO: refactor
-//    Transaction executableTx = mock(Transaction.class);
-//
-//    TransactionContext context = mock(TransactionContext.class);
-//    serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0, context);
-//
-//    verify(executableTx).execute(context);
+
+    TransactionContext context = mock(TransactionContext.class);
+    serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0, context);
+
+    verify(txInvoker).invokeTransaction(txId, arguments, context);
   }
 
   @Test
-  void executeInvalidTransaction() {
+  void executeInvalidTransaction() throws TransactionExecutionException {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
-    // TODO: refactor
-//    doThrow(IllegalArgumentException.class)
-//        .when(txConverter)
-//        .toTransaction(txId, arguments);
-
     TransactionContext context = anyContext().build();
-    assertThrows(IllegalArgumentException.class,
+    doThrow(TransactionExecutionException.class)
+        .when(txInvoker)
+        .invokeTransaction(txId, arguments, context);
+
+    assertThrows(TransactionExecutionException.class,
         () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0,
             context));
   }
@@ -175,7 +176,7 @@ class ServiceWrapperTest {
   @Test
   void executeVerifyConfigurationUnconfigurableService() {
     Service service = mock(Service.class); // Does not implement Configurable
-    serviceWrapper = new ServiceWrapper(service, instanceSpec, node);
+    serviceWrapper = new ServiceWrapper(service, instanceSpec, txInvoker, node);
 
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     int txId = VERIFY_CONFIGURATION_TX_ID;
@@ -218,7 +219,7 @@ class ServiceWrapperTest {
   })
   void serviceApiPath(String serviceName, String expectedPathFragment) {
     ServiceInstanceSpec spec = ServiceInstanceSpec.newInstance(serviceName, 1, TEST_ARTIFACT_ID);
-    serviceWrapper = new ServiceWrapper(service, spec, node);
+    serviceWrapper = new ServiceWrapper(service, spec, txInvoker, node);
 
     assertThat(serviceWrapper.getPublicApiRelativePath()).isEqualTo(expectedPathFragment);
   }

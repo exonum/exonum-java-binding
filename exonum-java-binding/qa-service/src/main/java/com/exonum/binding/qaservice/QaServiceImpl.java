@@ -76,10 +76,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   private static final Logger logger = LogManager.getLogger(QaService.class);
 
-  private static final int CREATE_COUNTER_TX_ID = 0;
-  private static final int INCREMENT_COUNTER_TX_ID = 1;
-  private static final int VALID_THROWING_TX_ID = 12;
-  private static final int VALID_ERROR_TX_ID = 13;
+  static final int CREATE_COUNTER_TX_ID = 0;
+  static final int INCREMENT_COUNTER_TX_ID = 1;
+  static final int VALID_THROWING_TX_ID = 12;
+  static final int VALID_ERROR_TX_ID = 13;
 
   @VisibleForTesting
   static final short UNKNOWN_TX_ID = 9999;
@@ -118,13 +118,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     updateTimeOracle(fork, configuration);
 
     // Add a default counter to the blockchain.
-    createCounter(DEFAULT_COUNTER_NAME, fork);
+    createInitCounter(DEFAULT_COUNTER_NAME, fork);
 
     // Add an afterCommit counter that will be incremented after each block committed event.
-    createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
+    createInitCounter(AFTER_COMMIT_COUNTER_NAME, fork);
   }
 
-  private void createCounter(String name, Fork fork) {
+  private void createInitCounter(String name, Fork fork) {
     QaSchema schema = createDataSchema(fork);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
@@ -289,8 +289,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @Transaction(CREATE_COUNTER_TX_ID)
-  public void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  public void createCounter(TxMessageProtos.CreateCounterTxBody arguments,
+      TransactionContext context) throws TransactionExecutionException {
     String name = arguments.getName();
     checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
@@ -310,8 +310,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @Transaction(INCREMENT_COUNTER_TX_ID)
-  public void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  public void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
+      TransactionContext context) throws TransactionExecutionException {
     byte[] rawCounterId = arguments.getCounterId().toByteArray();
     HashCode counterId = HashCode.fromBytes(rawCounterId);
 
@@ -328,38 +328,32 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @Transaction(VALID_THROWING_TX_ID)
-  public void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  public void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context) {
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.
     schema.clearAll();
 
-    HashCode transactionHash = Hashing.defaultHashFunction().hashBytes(arguments.toByteArray());
-    // Throw an exception. Framework must revert the changes made above.
-    throw new IllegalStateException("#execute of this transaction always throws, seed: " +
-        arguments.getSeed());
+    throw new IllegalStateException(String
+        .format("#execute of this transaction always throws (seed=%d, txHash=%s)",
+            arguments.getSeed(), context.getTransactionMessageHash()));
   }
 
   @Override
   @Transaction(VALID_ERROR_TX_ID)
   public void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
       throws TransactionExecutionException {
-    byte errorCode = (byte) arguments.getErrorCode();
-    String errorDescription = arguments.getErrorDescription();
-    checkArgument(errorCode >= 0, "error code (%s) must be in range [0; 127]", errorCode);
-    checkArgument(nullOrNonEmpty(errorDescription));
+    int errorCode = arguments.getErrorCode();
+    checkArgument(0 <= errorCode && errorCode <= 127,
+        "error code (%s) must be in range [0; 127]", errorCode);
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.
     schema.clearAll();
 
     // Throw an exception. Framework must revert the changes made above.
-    throw new TransactionExecutionException(errorCode, errorDescription);
-  }
-
-  private static boolean nullOrNonEmpty(@Nullable String errorDescription) {
-    return errorDescription == null || !errorDescription.isEmpty();
+    String errorDescription = arguments.getErrorDescription();
+    throw new TransactionExecutionException((byte) errorCode, errorDescription);
   }
 
   private void checkConfiguration(QaConfiguration config) {

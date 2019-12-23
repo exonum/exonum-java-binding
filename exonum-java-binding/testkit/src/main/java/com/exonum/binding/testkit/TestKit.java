@@ -192,8 +192,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws IllegalArgumentException if transactions are malformed or don't belong to this
-   *     service
+   * @throws RuntimeException if any transaction does not belong to a started service
+   *     (i.e., has an unknown service id)
    */
   public Block createBlockWithTransactions(TransactionMessage... transactions) {
     return createBlockWithTransactions(asList(transactions));
@@ -204,6 +204,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
+   * @throws RuntimeException if any transaction does not belong to a started service
+   *     (i.e., has an unknown service id)
    */
   public Block createBlockWithTransactions(Iterable<TransactionMessage> transactions) {
     List<TransactionMessage> messageList = ImmutableList.copyOf(transactions);

@@ -17,11 +17,11 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
+import static com.exonum.binding.qaservice.QaServiceImpl.CREATE_COUNTER_TX_ID;
+import static com.exonum.binding.qaservice.QaServiceImpl.INCREMENT_COUNTER_TX_ID;
 import static com.exonum.binding.qaservice.QaServiceImpl.UNKNOWN_TX_ID;
-import static com.exonum.binding.qaservice.QaTransaction.CREATE_COUNTER;
-import static com.exonum.binding.qaservice.QaTransaction.INCREMENT_COUNTER;
-import static com.exonum.binding.qaservice.QaTransaction.VALID_ERROR;
-import static com.exonum.binding.qaservice.QaTransaction.VALID_THROWING;
+import static com.exonum.binding.qaservice.QaServiceImpl.VALID_ERROR_TX_ID;
+import static com.exonum.binding.qaservice.QaServiceImpl.VALID_THROWING_TX_ID;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
@@ -55,7 +55,7 @@ final class TransactionMessages {
       int qaServiceId, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(qaServiceId)
-        .transactionId(CREATE_COUNTER.id())
+        .transactionId(CREATE_COUNTER_TX_ID)
         .payload(CreateCounterTxBody.newBuilder()
             .setName(counterName)
             .build())
@@ -66,11 +66,11 @@ final class TransactionMessages {
    * Returns an error transaction message with the given arguments and signed with the test key
    * pair.
    */
-  static TransactionMessage createErrorTx(byte errorCode,
+  static TransactionMessage createErrorTx(int errorCode,
       @Nullable String errorDescription, int qaServiceId) {
     return testMessage()
         .serviceId(qaServiceId)
-        .transactionId(VALID_ERROR.id())
+        .transactionId(VALID_ERROR_TX_ID)
         .payload(ErrorTxBody.newBuilder()
             .setSeed(0)
             .setErrorCode(errorCode)
@@ -96,7 +96,7 @@ final class TransactionMessages {
       int qaServiceId, KeyPair keys) {
     return TransactionMessage.builder()
       .serviceId(qaServiceId)
-      .transactionId(INCREMENT_COUNTER.id())
+      .transactionId(INCREMENT_COUNTER_TX_ID)
       .payload(IncrementCounterTxBody.newBuilder()
           .setSeed(seed)
           .setCounterId(ByteString.copyFrom(counterId.asBytes()))
@@ -110,7 +110,7 @@ final class TransactionMessages {
   static TransactionMessage createThrowingTx(long seed, int qaServiceId) {
     return testMessage()
         .serviceId(qaServiceId)
-        .transactionId(VALID_THROWING.id())
+        .transactionId(VALID_THROWING_TX_ID)
         .payload(ThrowingTxBody.newBuilder()
             .setSeed(seed)
             .build())

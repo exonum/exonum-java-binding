@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency.transactions;
+package com.exonum.binding.cryptocurrency;
 
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.CREATE_WALLET_TX_ID;
 import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.TRANSFER_TX_ID;
@@ -22,12 +22,13 @@ import static com.exonum.binding.cryptocurrency.CryptocurrencyServiceImpl.TRANSF
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.protobuf.ByteString;
 
 /**
  * Helper class to create transaction messages from raw transactions.
  */
-public final class TransactionUtils {
+final class TransactionUtils {
 
   static final long DEFAULT_INITIAL_BALANCE = 100L;
 
