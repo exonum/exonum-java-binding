@@ -518,18 +518,17 @@ class TestKitTest {
   }
 
   @Test
-  void createBlockWithTransactionWithWrongServiceId(TestKit testKit) {
-    short wrongServiceId = SERVICE_ID + 1;
+  void createBlockWithTransactionWithUnknownServiceId(TestKit testKit) {
+    short unknownServiceId = SERVICE_ID + 100;
     TransactionMessage message = TransactionMessage.builder()
-        .serviceId(wrongServiceId)
+        .serviceId(unknownServiceId)
         .transactionId(TEST_TRANSACTION_ID)
         .payload("Test message".getBytes(BODY_CHARSET))
         .sign(KEY_PAIR);
-    IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
+    Exception e = assertThrows(Exception.class,
         () -> testKit.createBlockWithTransactions(message));
-    String expectedMessage = String.format("No service with id=%s in the Java runtime",
-        wrongServiceId);
-    assertThat(thrownException.getCause().getMessage()).contains(expectedMessage);
+    assertThat(e)
+        .hasMessageContaining("Suitable runtime for the given service instance ID is not found");
   }
 
   @Test
