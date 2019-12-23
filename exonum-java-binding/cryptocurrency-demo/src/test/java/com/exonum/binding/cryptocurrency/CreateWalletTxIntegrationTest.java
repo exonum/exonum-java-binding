@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency.transactions;
+package com.exonum.binding.cryptocurrency;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.TransactionError.WALLET_ALREADY_EXISTS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.DEFAULT_INITIAL_BALANCE;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.TransactionUtils.DEFAULT_INITIAL_BALANCE;
+import static com.exonum.binding.cryptocurrency.TransactionUtils.newCreateWalletTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.KeyPair;
@@ -33,9 +33,6 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
-import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
