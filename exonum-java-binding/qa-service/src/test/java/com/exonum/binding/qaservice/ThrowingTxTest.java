@@ -53,7 +53,8 @@ class ThrowingTxTest {
 
   @Test
   void executeThrows(TestKit testKit) {
-    TransactionMessage throwingTx = createThrowingTx(0L, QA_SERVICE_ID);
+    long seed = 0L;
+    TransactionMessage throwingTx = createThrowingTx(seed, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(throwingTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -77,7 +78,10 @@ class ThrowingTxTest {
     assertTrue(txResult.hasError());
     ExecutionError error = txResult.getError();
     assertThat(error.getKind()).isEqualTo(ErrorKind.RUNTIME);
-    assertThat(error.getDescription()).contains("#execute of this transaction always throws");
+    assertThat(error.getDescription())
+        .contains("#execute of this transaction always throws")
+        .contains(String.valueOf(throwingTx.hash()))
+        .contains(Long.toString(seed));
   }
 
   @Test

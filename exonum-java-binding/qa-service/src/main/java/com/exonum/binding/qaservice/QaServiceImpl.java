@@ -341,17 +341,9 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
     // Attempt to clear all service indices.
     schema.clearAll();
 
-    /*
-    Review: Incorrect tx hash.
-     */
-    HashCode transactionHash = Hashing.defaultHashFunction().hashBytes(arguments.toByteArray());
-    // Throw an exception. Framework must revert the changes made above.
-    /*
-     Review: `this` is now the service, hence no longer appropriate. I think a hash of the message would
-     be better (it identifies the message) + arguments.seed()
-     */
-    throw new IllegalStateException("#execute of this transaction always throws, seed: " +
-        arguments.getSeed());
+    throw new IllegalStateException(String
+        .format("#execute of this transaction always throws (seed=%d, txHash=%s)",
+            arguments.getSeed(), context.getTransactionMessageHash()));
   }
 
   @Override
