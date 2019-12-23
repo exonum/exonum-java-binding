@@ -74,7 +74,7 @@ public final class TestService extends AbstractService {
   }
 
   @Transaction(TEST_TRANSACTION_ID)
-  public void executeTestTransaction(byte[] arguments, TransactionContext context) {
+  public void putEntry(byte[] arguments, TransactionContext context) {
     String value = getValue(arguments);
 
     TestSchema schema = new TestSchema(context.getFork(), context.getServiceId());
