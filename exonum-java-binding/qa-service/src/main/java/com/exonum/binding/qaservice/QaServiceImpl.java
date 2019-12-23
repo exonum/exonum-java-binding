@@ -294,9 +294,6 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
   @Transaction(CREATE_COUNTER_TX_ID)
   public void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
       throws TransactionExecutionException {
-    /*
-    Review: Checks from the constructor.
-     */
     String name = arguments.getName();
     checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
