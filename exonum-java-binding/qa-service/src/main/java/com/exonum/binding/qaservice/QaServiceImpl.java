@@ -341,6 +341,9 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
     // Attempt to clear all service indices.
     schema.clearAll();
 
+    /*
+    Review: Incorrect tx hash.
+     */
     HashCode transactionHash = Hashing.defaultHashFunction().hashBytes(arguments.toByteArray());
     // Throw an exception. Framework must revert the changes made above.
     /*
