@@ -66,7 +66,7 @@ class CreateCounterTxTest {
     ExecutionStatus executionStatus = txResultOpt.get();
     assertTrue(executionStatus.hasError());
     ExecutionError error = executionStatus.getError();
-    assertThat(error.getKind()).isEqualTo(ErrorKind.PANIC);
+    assertThat(error.getKind()).isEqualTo(ErrorKind.RUNTIME);
     assertThat(error.getDescription()).contains("Name must not be blank");
   }
 
