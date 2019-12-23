@@ -17,6 +17,7 @@
 package com.exonum.binding.cryptocurrency;
 
 import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
 import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
@@ -130,12 +131,12 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   @Transaction(TRANSFER_TX_ID)
   public void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context)
       throws TransactionExecutionException {
-    PublicKey fromWallet = context.getAuthorPk();
-
-    PublicKey toWallet = toPublicKey(arguments.getToWallet());
     long sum = arguments.getSum();
-    checkArgument(0 < sum, "Non-positive transfer amount: %s", sum);
+    checkExecution(0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode,
+        "Non-positive transfer amount: " + sum);
 
+    PublicKey fromWallet = context.getAuthorPk();
+    PublicKey toWallet = toPublicKey(arguments.getToWallet());
     checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
 
     CryptocurrencySchema schema =
@@ -163,12 +164,17 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   // todo: consider extracting in a TransactionPreconditions or
-  //   TransactionExecutionException: ECR-2746.
+  //   TransactionExecutionException, with proper lazy formatting: ECR-2746.
   /** Checks a transaction execution precondition, throwing if it is false. */
   private static void checkExecution(boolean precondition, byte errorCode)
       throws TransactionExecutionException {
+    checkExecution(precondition, errorCode, null);
+  }
+
+  private static void checkExecution(boolean precondition, byte errorCode, @Nullable String message)
+      throws TransactionExecutionException {
     if (!precondition) {
-      throw new TransactionExecutionException(errorCode);
+      throw new TransactionExecutionException(errorCode, message);
     }
   }
 

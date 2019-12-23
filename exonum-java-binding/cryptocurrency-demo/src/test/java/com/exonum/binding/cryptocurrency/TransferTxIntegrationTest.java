@@ -23,6 +23,7 @@ import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERV
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
 import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
 import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVER;
 import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
@@ -44,6 +45,8 @@ import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TransferTxIntegrationTest {
 
@@ -57,10 +60,6 @@ class TransferTxIntegrationTest {
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
 
-  /*
-  Review: Keep as fromRawTransactionRejectsNonPositiveBalance -> executeTransferNegativeBalance
-as the condition moved from the constructor to execute
-   */
   @Test
   @RequiresNativeLibrary
   void executeTransfer(TestKit testKit) {
@@ -97,6 +96,26 @@ as the condition moved from the constructor to execute
         .containsExactly(messageHash);
     assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
         .containsExactly(messageHash);
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L})
+  @RequiresNativeLibrary
+  void executeTransfer_NonPositiveBalance(long transferSum, TestKit testKit) {
+    // Create and execute the transaction
+    long seed = 1L;
+    TransactionMessage transferTx = newTransferTransaction(
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    testKit.createBlockWithTransactions(transferTx);
+
+    // Check the Exception
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
+    String description = "Non-positive transfer amount: " + transferSum;
+    ExecutionStatus expectedTransactionResult =
+        serviceError(NON_POSITIVE_TRANSFER_AMOUNT.errorCode, description);
+    assertThat(txResultOpt).hasValue(expectedTransactionResult);
   }
 
   @Test
