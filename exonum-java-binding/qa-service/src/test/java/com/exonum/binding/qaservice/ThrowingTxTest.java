@@ -16,20 +16,26 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.qaservice.QaArtifactInfo.ARTIFACT_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
 import static com.exonum.binding.qaservice.TransactionMessages.createThrowingTx;
 import static com.exonum.binding.qaservice.TransactionUtils.createCounter;
+import static com.exonum.binding.qaservice.TransactionUtils.newContext;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
+import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.qaservice.transactions.TxMessageProtos.ThrowingTxBody;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ErrorKind;
@@ -90,25 +96,24 @@ class ThrowingTxTest {
       long value = 10L;
       createCounter(schema, name, value);
 
-      // TODO: refactor this test
-      // Create the transaction
-//      ThrowingTx tx = new ThrowingTx(0L);
-//
-//      // Execute the transaction
-//      TransactionContext context = newContext(view)
-//          .serviceName(QA_SERVICE_NAME)
-//          .serviceId(QA_SERVICE_ID)
-//          .build();
-//      IllegalStateException expected = assertThrows(IllegalStateException.class,
-//          () -> tx.execute(context));
-//
-//      // Check that execute cleared the maps
-//      assertThat(schema.counters().isEmpty()).isTrue();
-//      assertThat(schema.counterNames().isEmpty()).isTrue();
-//
-//      // Check the exception message
-//      String message = expected.getMessage();
-//      assertThat(message).contains("#execute of this transaction always throws");
+      QaServiceImpl qaService = new QaServiceImpl(
+          ServiceInstanceSpec.newInstance(QA_SERVICE_NAME, QA_SERVICE_ID, ARTIFACT_ID));
+
+      // Create the transaction arguments
+      ThrowingTxBody arguments = ThrowingTxBody.newBuilder()
+          .setSeed(17L)
+          .build();
+      TransactionContext context = newContext(view)
+          .serviceName(QA_SERVICE_NAME)
+          .serviceId(QA_SERVICE_ID)
+          .build();
+      // Invoke the transaction
+      assertThrows(IllegalStateException.class,
+          () -> qaService.throwing(arguments, context));
+
+      // Check that it has cleared the maps
+      assertThat(schema.counters().isEmpty()).isTrue();
+      assertThat(schema.counterNames().isEmpty()).isTrue();
     }
   }
 }
