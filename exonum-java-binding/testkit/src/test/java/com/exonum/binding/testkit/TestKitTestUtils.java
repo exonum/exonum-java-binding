@@ -63,11 +63,16 @@ final class TestKitTestUtils {
         TestSchema.class, TestService2.class);
   }
 
+  /**
+   * Creates an invalid service artifact that has no required metadata.
+   */
   static void createInvalidArtifact(Path directory, String filename) throws IOException {
     Path artifactLocation = directory.resolve(filename);
-    // Create an invalid artifact without a TestService class
-    createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
-        TestSchema.class);
+    // Create an invalid artifact with no required metadata (plugin-id) and no classes.
+    new ServiceArtifactBuilder()
+        .setPluginId("")
+        .setPluginVersion("1.0.0")
+        .writeTo(artifactLocation);
   }
 
   static void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {

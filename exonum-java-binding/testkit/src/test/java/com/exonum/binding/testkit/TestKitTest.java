@@ -199,16 +199,18 @@ class TestKitTest {
   }
 
   @Test
-  void createTestKitWithInvalidArtifactThrows(@TempDir Path directory) throws Exception {
-    String invalidArtifactFilename = "invalid-artifact.jar";
-    createInvalidArtifact(directory, invalidArtifactFilename);
-    Class<RuntimeException> exceptionType = RuntimeException.class;
+  void createTestKitWithInvalidArtifactThrows() throws Exception {
+    String artifactFilename = "invalid-artifact.jar";
+    createInvalidArtifact(artifactsDirectory, artifactFilename);
+
     TestKit.Builder testKitBuilder = TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, invalidArtifactFilename)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+        .withDeployedArtifact(ARTIFACT_ID, artifactFilename)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
         .withArtifactsDirectory(artifactsDirectory);
-    RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
-    assertThat(thrownException.getMessage()).contains("Unable to create blockchain instance");
+
+    Exception e = assertThrows(RuntimeException.class, testKitBuilder::build);
+
+    assertThat(e.getMessage()).contains("Unable to create blockchain instance");
   }
 
   @Test
