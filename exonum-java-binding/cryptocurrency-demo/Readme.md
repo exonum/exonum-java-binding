@@ -54,7 +54,7 @@ $ python3 -m exonum_launcher -i cryptocurrency-demo.yml
 
 ### 🛑
 
-*Frontend has not been updated to DS yet as of 0.9.0-rc1.
+*Frontend has not been updated to DS yet as of 0.9.0-rc2.
 Skip the subsequent instructions.*
 
 ---
