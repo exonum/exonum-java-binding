@@ -534,21 +534,6 @@ class TestKitTest {
   }
 
   @Test
-  void createBlockWithTransactionWithWrongTransactionId(TestKit testKit) {
-    short wrongTransactionId = (short) (TEST_TRANSACTION_ID + 1);
-    TransactionMessage message = TransactionMessage.builder()
-        .serviceId(SERVICE_ID)
-        .transactionId(wrongTransactionId)
-        .payload("Test message".getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR);
-    IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
-        () -> testKit.createBlockWithTransactions(message));
-    assertThat(thrownException.getMessage())
-        .contains("failed to convert transaction", Integer.toString(SERVICE_ID),
-            message.toString());
-  }
-
-  @Test
   void getValidatorEmulatedNode(TestKit testKit) {
     EmulatedNode node = testKit.getEmulatedNode();
     assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
