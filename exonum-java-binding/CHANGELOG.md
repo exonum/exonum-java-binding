@@ -22,7 +22,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   See `ProofMapIndexProxy#getProof` and `MapProof`;
   `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
   `ListProof`.
-  
+- Transaction methods now accept protobuf messages as transaction arguments
+  type. (#1304)
+
+### Changed
+- Transactions now implemented as service methods annotated with
+  `@Transaction(TX_ID)`, instead of objects of a class that implements
+  `Transaction` interface. (#1274, #1307)
+
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
 

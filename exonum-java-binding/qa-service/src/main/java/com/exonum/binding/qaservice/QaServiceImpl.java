@@ -26,8 +26,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
@@ -78,12 +76,9 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   private static final Logger logger = LogManager.getLogger(QaService.class);
 
-  private static final Serializer<TxMessageProtos.IncrementCounterTxBody> INCREMENT_TX_PROTO_SERIALIZER =
-      StandardSerializers.protobuf(TxMessageProtos.IncrementCounterTxBody.class);
-
   /*
 Review: Duplicates the values in QaTransaction — shall probably re-use (or one of them — deleted)?
- */
+*/
   private static final int CREATE_COUNTER_TX_ID = 0;
   private static final int INCREMENT_COUNTER_TX_ID = 1;
   private static final int VALID_THROWING_TX_ID = 12;
@@ -180,14 +175,11 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
    */
   private static RawTransaction newRawIncrementCounterTransaction(long requestSeed,
       HashCode counterId, int serviceId) {
-    /*
-    Review: Why not `build().toByteArray()` instead of a serializer?
-     */
-    byte[] payload = INCREMENT_TX_PROTO_SERIALIZER.toBytes(TxMessageProtos.IncrementCounterTxBody
+    byte[] payload = TxMessageProtos.IncrementCounterTxBody
         .newBuilder()
         .setSeed(requestSeed)
         .setCounterId(ByteString.copyFrom(counterId.asBytes()))
-        .build());
+        .build().toByteArray();
 
     return RawTransaction.newBuilder()
         .serviceId(serviceId)
@@ -196,8 +188,16 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
         .build();
   }
 
-  /*
-  Review: The documentation on what an unknown tx must be moved here.
+  /**
+   * Submit a transaction that has QA service identifier, but an unknown transaction id.
+   * Such transaction must be rejected when received by other nodes.
+   *
+   * <p>Only a single unknown transaction may be submitted to each node,
+   * as they have empty body (= the same binary representation),
+   * and once it is added to the local pool of a certain node,
+   * it will remain there. Other nodes must reject the message of this transaction
+   * once they receive it as a message from this node. If multiple unknown transaction messages
+   * need to be submitted, a seed might be added.
    */
   @Override
   public HashCode submitUnknownTx() {
@@ -298,6 +298,7 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
     Review: Checks from the constructor.
      */
     String name = arguments.getName();
+    checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
@@ -340,12 +341,14 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
     // Attempt to clear all service indices.
     schema.clearAll();
 
+    HashCode transactionHash = Hashing.defaultHashFunction().hashBytes(arguments.toByteArray());
     // Throw an exception. Framework must revert the changes made above.
     /*
      Review: `this` is now the service, hence no longer appropriate. I think a hash of the message would
      be better (it identifies the message) + arguments.seed()
      */
-    throw new IllegalStateException("#execute of this transaction always throws: " + this);
+    throw new IllegalStateException("#execute of this transaction always throws, seed: " +
+        arguments.getSeed());
   }
 
   @Override
@@ -357,6 +360,8 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
      */
     byte errorCode = (byte) arguments.getErrorCode();
     String errorDescription = arguments.getErrorDescription();
+    checkArgument(errorCode >= 0, "error code (%s) must be in range [0; 127]", errorCode);
+    checkArgument(nullOrNonEmpty(errorDescription));
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.
@@ -364,6 +369,10 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
 
     // Throw an exception. Framework must revert the changes made above.
     throw new TransactionExecutionException(errorCode, errorDescription);
+  }
+
+  private static boolean nullOrNonEmpty(@Nullable String errorDescription) {
+    return errorDescription == null || !errorDescription.isEmpty();
   }
 
   private void checkConfiguration(QaConfiguration config) {
