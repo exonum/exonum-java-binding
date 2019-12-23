@@ -12,13 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Module of the rust-protobuf generated files.
+syntax = "proto3";
 
-#![allow(bare_trait_objects)]
-#![allow(renamed_and_removed_lints)]
+package exonum.testkit;
 
-pub use self::service_runtime::*;
-pub use self::testkit::*;
-pub use exonum::proto::schema::*;
+option java_package = "com.exonum.binding.core.testkit.internal";
+option java_outer_classname = "TestKitProtos";
 
-include!(concat!(env!("OUT_DIR"), "/protobuf_mod.rs"));
+import "runtime.proto";
+
+// DTO for TestKit initialization.
+message TestKitServiceInstances {
+    // Artifacts to deploy on blockchain instantiation.
+    repeated exonum.runtime.ArtifactSpec artifact_specs = 1;
+    // Services to start on blockchain instantiation.
+    repeated exonum.runtime.InstanceInitParams service_specs = 2;
+}
