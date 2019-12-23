@@ -30,10 +30,6 @@ public interface CryptocurrencyService extends Service {
 
   List<HistoryEntity> getWalletHistory(PublicKey ownerKey);
 
-  /*
-  Review: I'd remove Tx suffix (just createWallet — a service operation).
-   */
-
   /**
    * Creates a new named wallet with the given initial balance.
    *
