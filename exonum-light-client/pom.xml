@@ -214,25 +214,6 @@
         </dependencies>
       </plugin>
 
-      <!-- Checks that the POMs match the code convention:
-           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
-
-           Use `mvn tidy:pom` to fix any style issues -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>tidy-maven-plugin</artifactId>
-        <version>1.1.0</version>
-        <executions>
-          <execution>
-            <id>check-pom-code-style</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
