@@ -86,8 +86,14 @@ public interface QaService extends Service, Configurable {
    * <p>This transaction will always throw an {@link TransactionExecutionException},
    * therefore, have "error" status in the blockchain.
    *
+   * <p>Parameters:
+   * - a seed to distinguish transaction with the same parameters;
+   * - an error code to include in the exception, must be in range [0; 127];
+   * - an optional description to include in the exception. May be empty.
+   *
    * @throws TransactionExecutionException always; includes the given
    *     error code and error message
+   * @throws IllegalArgumentException if the error code is not in range [0; 127]
    */
   void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
       throws TransactionExecutionException;

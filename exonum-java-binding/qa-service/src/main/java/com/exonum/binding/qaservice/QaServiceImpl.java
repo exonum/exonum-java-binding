@@ -346,21 +346,17 @@ Review: Duplicates the values in QaTransaction — shall probably re-use (or one
   @Transaction(VALID_ERROR_TX_ID)
   public void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
       throws TransactionExecutionException {
-    /*
-    Review: misses checks in ErrorTx constructor.
-     */
-    byte errorCode = (byte) arguments.getErrorCode();
-    checkArgument(errorCode >= 0, "error code (%s) must be in range [0; 127]", errorCode);
+    int errorCode = arguments.getErrorCode();
+    checkArgument(0 <= errorCode && errorCode <= 127,
+        "error code (%s) must be in range [0; 127]", errorCode);
     QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
 
     // Attempt to clear all service indices.
     schema.clearAll();
 
     // Throw an exception. Framework must revert the changes made above.
-    // TODO: Study how it is handled in core now and if an empty string would be more sensible
-    // Convert error description to null to enable 'no-description' tests
-    String errorDescription = Strings.emptyToNull(arguments.getErrorDescription());
-    throw new TransactionExecutionException(errorCode, errorDescription);
+    String errorDescription = arguments.getErrorDescription();
+    throw new TransactionExecutionException((byte) errorCode, errorDescription);
   }
 
   private void checkConfiguration(QaConfiguration config) {

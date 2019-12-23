@@ -66,7 +66,7 @@ final class TransactionMessages {
    * Returns an error transaction message with the given arguments and signed with the test key
    * pair.
    */
-  static TransactionMessage createErrorTx(byte errorCode,
+  static TransactionMessage createErrorTx(int errorCode,
       @Nullable String errorDescription, int qaServiceId) {
     return testMessage()
         .serviceId(qaServiceId)

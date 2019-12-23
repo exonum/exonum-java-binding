@@ -25,6 +25,7 @@ import static com.exonum.binding.qaservice.TransactionUtils.createCounter;
 import static com.exonum.binding.qaservice.TransactionUtils.newContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
@@ -39,11 +40,16 @@ import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @Integration
 class ErrorTxTest {
@@ -52,9 +58,23 @@ class ErrorTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       createQaServiceTestkit());
 
-  /*
-  Review: constructorRejectsInvalidErrorCode and InvalidDescription as tx tests.
-   */
+  @ParameterizedTest
+  @ValueSource(ints = {Integer.MIN_VALUE, -2, -1, 128, Integer.MAX_VALUE})
+  void executeThrowsIfInvalidErrorCode(int errorCode, TestKit testKit) {
+    TransactionMessage errorTx = createErrorTransaction(errorCode, null);
+    testKit.createBlockWithTransactions(errorTx);
+
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    ExecutionStatus txResult = blockchain.getTxResult(errorTx.hash()).get();
+    assertTrue(txResult.hasError());
+    ExecutionError error = txResult.getError();
+    assertThat(error.getKind())
+        .as("actual=%s", error)
+        .isEqualTo(ErrorKind.RUNTIME);
+    assertThat(error.getDescription()).contains(Integer.toString(errorCode));
+  }
+
   @Test
   void executeNoDescription(TestKit testKit) {
     byte errorCode = 1;
@@ -68,10 +88,13 @@ class ErrorTxTest {
     assertThat(txResult).hasValue(expectedTransactionResult);
   }
 
-  @Test
-  void executeWithDescription(TestKit testKit) {
-    byte errorCode = 1;
-    String errorDescription = "Test";
+  @ParameterizedTest
+  @CsvSource({
+      "0, ''",
+      "1, 'Non-empty description'",
+      "127, 'Max error code: 127'",
+  })
+  void executeWithDescription(byte errorCode, String errorDescription, TestKit testKit) {
     TransactionMessage errorTx = createErrorTransaction(errorCode, errorDescription);
     testKit.createBlockWithTransactions(errorTx);
 
@@ -114,7 +137,7 @@ class ErrorTxTest {
     }
   }
 
-  private static TransactionMessage createErrorTransaction(byte errorCode,
+  private static TransactionMessage createErrorTransaction(int errorCode,
       @Nullable String errorDescription) {
     return TransactionMessages.createErrorTx(errorCode, errorDescription, QA_SERVICE_ID);
   }
