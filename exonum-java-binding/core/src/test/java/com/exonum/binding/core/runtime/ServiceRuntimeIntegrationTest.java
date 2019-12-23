@@ -257,7 +257,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    serviceRuntime.commitService(instanceSpec);
+    serviceRuntime.updateInstanceState(instanceSpec, null);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
@@ -290,11 +290,11 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    serviceRuntime.commitService(instanceSpec);
+    serviceRuntime.updateInstanceState(instanceSpec, null);
 
     // Try to create another service with the same service instance specification
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.commitService(instanceSpec));
+        () -> serviceRuntime.updateInstanceState(instanceSpec, null));
 
     assertThat(e).hasMessageContaining("name");
     assertThat(e).hasMessageContaining(TEST_NAME);
@@ -352,7 +352,7 @@ class ServiceRuntimeIntegrationTest {
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
-      serviceRuntime.commitService(INSTANCE_SPEC);
+      serviceRuntime.updateInstanceState(INSTANCE_SPEC, null);
     }
 
     @Test
@@ -515,7 +515,7 @@ class ServiceRuntimeIntegrationTest {
 
       // Create the services
       for (ServiceInstanceSpec instanceSpec : SERVICES.keySet()) {
-        serviceRuntime.commitService(instanceSpec);
+        serviceRuntime.updateInstanceState(instanceSpec, null);
       }
     }
 

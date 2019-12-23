@@ -684,7 +684,7 @@ dependencies = [
 [[package]]
 name = "exonum"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "actix 0.7.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "actix-net 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -696,12 +696,12 @@ dependencies = [
  "ctrlc 3.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "erased-serde 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-keys 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-keys 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "exonum_sodiumoxide 0.0.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -717,6 +717,7 @@ dependencies = [
  "serde_derive 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.44 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_str 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_urlencoded 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "snow 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.1.22 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-codec 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -734,7 +735,7 @@ dependencies = [
 [[package]]
 name = "exonum-build"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "protoc-rust 2.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -746,10 +747,10 @@ dependencies = [
 [[package]]
 name = "exonum-cli"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
- "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-supervisor 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-supervisor 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "rpassword 4.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -762,13 +763,13 @@ dependencies = [
 [[package]]
 name = "exonum-crypto"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "bit-vec 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "byteorder 1.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "exonum_sodiumoxide 0.0.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -786,7 +787,7 @@ dependencies = [
 [[package]]
 name = "exonum-derive"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "darling 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "heck 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -801,8 +802,8 @@ name = "exonum-java"
 version = "0.10.0-SNAPSHOT"
 dependencies = [
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-supervisor 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-time 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum-supervisor 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-time 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "java_bindings 0.10.0-SNAPSHOT",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -815,9 +816,9 @@ dependencies = [
 [[package]]
 name = "exonum-keys"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
- "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "pwbox 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -830,15 +831,15 @@ dependencies = [
 [[package]]
 name = "exonum-merkledb"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "bincode 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "byteorder 1.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "enum-primitive-derive 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "leb128 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -858,15 +859,15 @@ dependencies = [
 [[package]]
 name = "exonum-proto"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "bit-vec 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "protobuf 2.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "protobuf-convert 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "protobuf-convert 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -874,15 +875,15 @@ dependencies = [
 [[package]]
 name = "exonum-supervisor"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "byteorder 1.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -896,16 +897,17 @@ dependencies = [
 [[package]]
 name = "exonum-testkit"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "actix 0.7.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "actix-web 0.7.19 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -921,15 +923,15 @@ dependencies = [
 [[package]]
 name = "exonum-time"
 version = "0.13.0-rc.2"
-source = "git+https://github.com/exonum/exonum?rev=7223ce6ebcf#7223ce6ebcf7f4c2d4a7e092c74253ed1c9d2ae4"
+source = "git+https://github.com/exonum/exonum?rev=af28b719e6#af28b719e6571a4fb027e8f7bb9cadd581947878"
 dependencies = [
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "protobuf 2.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1250,7 +1252,7 @@ dependencies = [
 name = "integration_tests"
 version = "0.10.0-SNAPSHOT"
 dependencies = [
- "exonum-testkit 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum-testkit 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "java_bindings 0.10.0-SNAPSHOT",
@@ -1291,14 +1293,14 @@ name = "java_bindings"
 version = "0.10.0-SNAPSHOT"
 dependencies = [
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-cli 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-testkit 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
- "exonum-time 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)",
+ "exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-cli 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-testkit 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
+ "exonum-time 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "jni 0.14.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1821,7 +1823,7 @@ dependencies = [
 
 [[package]]
 name = "protobuf-convert"
-version = "0.2.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "darling 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -3298,17 +3300,17 @@ dependencies = [
 "checksum erased-serde 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)" = "3beee4bc16478a1b26f2e80ad819a52d24745e292f521a63c16eea5f74b7eb60"
 "checksum error-chain 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3ab49e9dcb602294bc42f9a7dfc9bc6e936fca4418ea300dbfb84fe16de0b7d9"
 "checksum error-chain 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6930e04918388a9a2e41d518c25cf679ccafe26733fb4127dbf21993f2575d46"
-"checksum exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-cli 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-keys 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-supervisor 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-testkit 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
-"checksum exonum-time 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=7223ce6ebcf)" = "<none>"
+"checksum exonum 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-build 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-cli 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-crypto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-keys 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-merkledb 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-proto 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-supervisor 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-testkit 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
+"checksum exonum-time 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)" = "<none>"
 "checksum exonum_libsodium-sys 0.0.23 (registry+https://github.com/rust-lang/crates.io-index)" = "447f9c9a8f5bdb6cc8cce4372165a20d4bda0cced80a715cc89f074caf35d2d3"
 "checksum exonum_sodiumoxide 0.0.23 (registry+https://github.com/rust-lang/crates.io-index)" = "f9df5c4e3e262e04290c1cf4e9fecadab9084ed65526b19cb2ddd51c77241dbb"
 "checksum failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "f8273f13c977665c5db7eb2b99ae520952fe5ac831ae4cd09d80c4c7042b5ed9"
@@ -3405,7 +3407,7 @@ dependencies = [
 "checksum proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)" = "9c9e470a8dc4aeae2dee2f335e8f533e2d4b347e1434e5671afc49b054592f27"
 "checksum protobuf 2.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "40361836defdd5871ff7e84096c6f6444af7fc157f8ef1789f54f147687caa20"
 "checksum protobuf-codegen 2.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "12c6abd78435445fc86898ebbd0521a68438063d4a73e23527b7134e6bf58b4a"
-"checksum protobuf-convert 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "a67d7cb9db1cfb59e1155d65c4882528fdbf9a28b626e214945a80de8a7bbc7b"
+"checksum protobuf-convert 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2aff6864195b28dd52a2f044acd808c51e4a98e9c021bcc966bdb2889e299847"
 "checksum protoc 2.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3998c4bc0af8ccbd3cc68245ee9f72663c5ae2fb78bc48ff7719aef11562edea"
 "checksum protoc-rust 2.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "234c97039c32bb58a883d0deafa57db37e59428ce536f3bdfe1c46cffec04113"
 "checksum publicsuffix 1.5.4 (registry+https://github.com/rust-lang/crates.io-index)" = "3bbaa49075179162b49acac1c6aa45fb4dafb5f13cf6794276d77bc7fd95757b"

@@ -30,6 +30,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.InstanceState;
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
@@ -138,11 +139,13 @@ public class ServiceRuntimeAdapter {
    *
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
-   * @see ServiceRuntime#commitService(ServiceInstanceSpec)
+   * @see ServiceRuntime#updateInstanceState(ServiceInstanceSpec, InstanceState.Status)
    */
-  void commitService(byte[] instanceSpec) {
+  void updateServiceState(byte[] instanceSpec, int numericInstanceStatus) {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
-    serviceRuntime.commitService(javaInstanceSpec);
+    InstanceState.Status instanceStatus =
+        InstanceState.Status.forNumber(numericInstanceStatus);
+    serviceRuntime.updateInstanceState(javaInstanceSpec, instanceStatus);
   }
 
   private static ServiceInstanceSpec parseInstanceSpec(byte[] instanceSpec) {

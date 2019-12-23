@@ -43,7 +43,7 @@ static mut RUNTIME_ADAPTER_INITIALIZE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_DEPLOY_ARTIFACT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_START_ADDING_SERVICE: Option<JMethodID> = None;
-static mut RUNTIME_ADAPTER_COMMIT_SERVICE: Option<JMethodID> = None;
+static mut RUNTIME_ADAPTER_UPDATE_SERVICE_STATE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
 // TODO(ECR-4016): rename to RUNTIME_ADAPTER_AFTER_TRANSACTIONS
 static mut RUNTIME_ADAPTER_BEFORE_COMMIT: Option<JMethodID> = None;
@@ -110,11 +110,11 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "startAddingService",
         "(J[B[B)V",
     );
-    RUNTIME_ADAPTER_COMMIT_SERVICE = get_method_id(
+    RUNTIME_ADAPTER_UPDATE_SERVICE_STATE = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
-        "commitService",
-        "([B)V",
+        "updateServiceState",
+        "([BI)V",
     );
     RUNTIME_ADAPTER_EXECUTE_TX = get_method_id(
         &env,
@@ -158,7 +158,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && RUNTIME_ADAPTER_DEPLOY_ARTIFACT.is_some()
             && RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.is_some()
             && RUNTIME_ADAPTER_START_ADDING_SERVICE.is_some()
-            && RUNTIME_ADAPTER_COMMIT_SERVICE.is_some()
+            && RUNTIME_ADAPTER_UPDATE_SERVICE_STATE.is_some()
             && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
             && RUNTIME_ADAPTER_BEFORE_COMMIT.is_some()
             && RUNTIME_ADAPTER_AFTER_COMMIT.is_some()
@@ -216,9 +216,9 @@ pub mod runtime_adapter {
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.commitService()`.
-    pub fn commit_service_id() -> JMethodID<'static> {
+    pub fn update_service_state_id() -> JMethodID<'static> {
         check_cache_initialized();
-        unsafe { RUNTIME_ADAPTER_COMMIT_SERVICE.unwrap() }
+        unsafe { RUNTIME_ADAPTER_UPDATE_SERVICE_STATE.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.executeTransaction()`.

@@ -45,6 +45,7 @@ use {
     },
     JniError, JniErrorKind, JniResult, Node,
 };
+use exonum::runtime::InstanceStatus;
 
 /// Default validator ID. -1 is used as not-a-value in Java runtime.
 const DEFAULT_VALIDATOR_ID: i32 = -1;
@@ -246,7 +247,7 @@ impl Runtime for JavaRuntimeProxy {
         }))
     }
 
-    fn start_adding_service(
+    fn initiate_adding_service(
         &self,
         context: ExecutionContext<'_>,
         spec: &InstanceSpec,
@@ -274,10 +275,11 @@ impl Runtime for JavaRuntimeProxy {
         })
     }
 
-    fn commit_service(
+    fn update_service_status(
         &mut self,
         _snapshot: &dyn Snapshot,
         instance_spec: &InstanceSpec,
+        _status: InstanceStatus,
     ) -> Result<(), ExecutionError> {
         let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
         self.jni_call_default(|env| {
@@ -286,7 +288,7 @@ impl Runtime for JavaRuntimeProxy {
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::commit_service_id(),
+                runtime_adapter::update_service_state_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[JValue::from(instance_spec)],
             )
