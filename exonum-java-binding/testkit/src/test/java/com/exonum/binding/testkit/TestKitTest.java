@@ -213,6 +213,8 @@ class TestKitTest {
     assertThat(e.getMessage()).contains("Unable to create blockchain instance");
   }
 
+  // todo: invalidartifact — causing deploy errors (as ^) and causing instantiation errors (todo)
+
   @Test
   void createTestKitWithCustomConfiguration() {
     String configurationValue = "Custom value";
