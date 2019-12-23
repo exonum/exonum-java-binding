@@ -22,13 +22,11 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.MapIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.time.TimeSchema;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A schema of the QA service.
@@ -48,17 +46,12 @@ public final class QaSchema implements Schema {
     namespace = serviceName;
   }
 
-  @Override
-  public List<HashCode> getStateHashes() {
-    return Collections.singletonList(counters().getIndexHash());
-  }
-
   /**
    * Returns the index containing the name of the time oracle to use.
    */
-  public EntryIndexProxy<String> timeOracleName() {
+  public ProofEntryIndexProxy<String> timeOracleName() {
     String name = fullIndexName("time_oracle_name");
-    return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
+    return ProofEntryIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
   /**

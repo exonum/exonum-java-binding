@@ -43,6 +43,7 @@ import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -68,6 +69,7 @@ class ErrorTxTest {
   }
 
   @Test
+  @Disabled("ECR-4014")
   void executeNoDescription(TestKit testKit) {
     byte errorCode = 1;
     TransactionMessage errorTx = createErrorTransaction(errorCode, null);
@@ -81,6 +83,7 @@ class ErrorTxTest {
   }
 
   @Test
+  @Disabled("ECR-4014")
   void executeWithDescription(TestKit testKit) {
     byte errorCode = 1;
     String errorDescription = "Test";

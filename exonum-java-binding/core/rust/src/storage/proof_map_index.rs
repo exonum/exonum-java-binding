@@ -154,7 +154,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let map_id = env.convert_byte_array(map_id)?;
-        let address = IndexAddress::with_root(group_name).append_bytes(&map_id);
+        let address = IndexAddress::from_root(group_name).append_key(&map_id);
         let key_is_hashed = key_hashing == JNI_TRUE;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {

@@ -55,8 +55,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -280,6 +282,7 @@ class BlockchainIntegrationTest {
     }
 
     @Test
+    @Disabled("ECR-4014")
     void getTxResults() {
       testKitTest((blockchain) -> {
         ProofMapIndexProxy<HashCode, ExecutionStatus> txResults = blockchain.getTxResults();
@@ -291,6 +294,7 @@ class BlockchainIntegrationTest {
     }
 
     @Test
+    @Disabled("ECR-4014")
     void getTxResult() {
       testKitTest((blockchain) -> {
         Optional<ExecutionStatus> txResult =

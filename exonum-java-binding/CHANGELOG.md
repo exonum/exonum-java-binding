@@ -22,9 +22,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   See `ProofMapIndexProxy#getProof` and `MapProof`;
   `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
   `ListProof`.
-  
+- `ProofEntryIndexProxy` collection.
+
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
+- `Schema#getStateHashes` and `Service#getStateHashes` methods. Framework
+  automatically aggregates state hashes of the Merkelized collections.
 
 ## 0.9.0-rc2 - 2019-12-17
 

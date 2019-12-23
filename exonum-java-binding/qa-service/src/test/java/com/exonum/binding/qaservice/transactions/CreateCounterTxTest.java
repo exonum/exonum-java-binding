@@ -41,6 +41,7 @@ import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -78,6 +79,7 @@ class CreateCounterTxTest {
   }
 
   @Test
+  @Disabled("ECR-4014")
   void executeAlreadyExistingCounter(TestKit testKit) {
     String counterName = "counter";
     KeyPair key1 = ed25519().generateKeyPair();
