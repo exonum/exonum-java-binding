@@ -40,7 +40,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
-final class TestService extends AbstractService {
+public final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("Initial key", StandardCharsets.UTF_8);

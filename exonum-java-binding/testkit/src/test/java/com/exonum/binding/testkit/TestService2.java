@@ -25,7 +25,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 
-final class TestService2 extends AbstractService {
+public final class TestService2 extends AbstractService {
 
   private final int serviceInstanceId;
 

@@ -25,7 +25,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 
-final class FakeService extends AbstractService {
+public final class FakeService extends AbstractService {
 
   static final int PUT_TX_ID = 0;
 
