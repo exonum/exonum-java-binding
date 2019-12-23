@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.google.inject.Inject;
 import java.lang.invoke.MethodHandle;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ final class TransactionInvoker {
   private final Service service;
   private final Map<Integer, TransactionMethod> transactionMethods;
 
+  @Inject
   TransactionInvoker(Service service) {
     this.service = service;
     this.transactionMethods =

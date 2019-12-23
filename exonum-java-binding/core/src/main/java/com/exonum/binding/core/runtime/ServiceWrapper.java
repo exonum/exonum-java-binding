@@ -63,15 +63,24 @@ final class ServiceWrapper {
 
   private final Service service;
   private final ServiceInstanceSpec instanceSpec;
-  private final Node node;
   private final TransactionInvoker invoker;
+  private final Node node;
 
+  /**
+   * Creates a new ServiceWrapper.
+   *
+   * @param service a service instance
+   * @param instanceSpec an instance specification
+   * @param transactionInvoker an invoker for the given {@code service}
+   * @param node a node to inject into a service API controller
+   */
   @Inject
-  ServiceWrapper(Service service, ServiceInstanceSpec instanceSpec, Node node) {
+  ServiceWrapper(Service service, ServiceInstanceSpec instanceSpec,
+      TransactionInvoker transactionInvoker, Node node) {
     this.service = service;
     this.instanceSpec = instanceSpec;
+    this.invoker = transactionInvoker;
     this.node = node;
-    this.invoker = new TransactionInvoker(service);
   }
 
   /**
