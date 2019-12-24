@@ -53,6 +53,7 @@ class CreateCounterTxTest {
       QaArtifactInfo.createQaServiceTestkit()
   );
 
+  @Disabled("ECR-4014")
   @ParameterizedTest
   @ValueSource(strings = {"", " ", "  ", "\n", "\t"})
   void executeNewCounterRejectsEmptyName(String name, TestKit testKit) {

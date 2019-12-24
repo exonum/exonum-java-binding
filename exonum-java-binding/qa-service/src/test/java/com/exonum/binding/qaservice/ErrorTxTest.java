@@ -59,6 +59,7 @@ class ErrorTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       createQaServiceTestkit());
 
+  @Disabled("ECR-4014")
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -2, -1, 128, Integer.MAX_VALUE})
   void executeThrowsIfInvalidErrorCode(int errorCode, TestKit testKit) {

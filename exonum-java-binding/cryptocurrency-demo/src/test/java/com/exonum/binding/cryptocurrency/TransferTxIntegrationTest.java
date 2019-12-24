@@ -99,6 +99,7 @@ class TransferTxIntegrationTest {
         .containsExactly(messageHash);
   }
 
+  @Disabled("ECR-4014")
   @ParameterizedTest
   @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L})
   @RequiresNativeLibrary
