@@ -26,8 +26,6 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 
 /**
  * A schema of the cryptocurrency service.
@@ -42,11 +40,6 @@ public final class CryptocurrencySchema implements Schema {
   public CryptocurrencySchema(View view, String serviceName) {
     this.view = checkNotNull(view);
     this.namespace = serviceName + ".";
-  }
-
-  @Override
-  public List<HashCode> getStateHashes() {
-    return ImmutableList.of(wallets().getIndexHash());
   }
 
   /**

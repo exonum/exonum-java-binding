@@ -18,7 +18,7 @@ package com.exonum.binding.time;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
 
@@ -50,7 +50,7 @@ public interface TimeSchema {
    * the transactions with time updates from at least two thirds of validator nodes are processed.
    * After that the time will be always present.
    */
-  EntryIndexProxy<ZonedDateTime> getTime();
+  ProofEntryIndexProxy<ZonedDateTime> getTime();
 
   /**
    * Returns the table that stores time for every validator. Note that this is a

@@ -45,6 +45,7 @@ import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -76,6 +77,7 @@ class ErrorTxTest {
   }
 
   @Test
+  @Disabled("ECR-4014")
   void executeNoDescription(TestKit testKit) {
     byte errorCode = 1;
     TransactionMessage errorTx = createErrorTransaction(errorCode, null);
@@ -94,6 +96,7 @@ class ErrorTxTest {
       "1, 'Non-empty description'",
       "127, 'Max error code: 127'",
   })
+  @Disabled("ECR-4014")
   void executeWithDescription(byte errorCode, String errorDescription, TestKit testKit) {
     TransactionMessage errorTx = createErrorTransaction(errorCode, errorDescription);
     testKit.createBlockWithTransactions(errorTx);

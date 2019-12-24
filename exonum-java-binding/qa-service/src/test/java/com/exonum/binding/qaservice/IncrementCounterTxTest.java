@@ -36,6 +36,7 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -69,6 +70,7 @@ class IncrementCounterTxTest {
   }
 
   @Test
+  @Disabled("ECR-4014")
   void executeNoSuchCounter(TestKit testKit) {
     String counterName = "unknown-counter";
     HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);

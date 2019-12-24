@@ -49,7 +49,7 @@ import java.util.Optional;
  *
  * @see View
  */
-public final class EntryIndexProxy<T> extends AbstractIndexProxy {
+public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy {
 
   static {
     LibraryLoader.load();
@@ -71,7 +71,7 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the view proxy is invalid
    */
-  public static <E extends MessageLite> EntryIndexProxy<E> newInstance(
+  public static <E extends MessageLite> ProofEntryIndexProxy<E> newInstance(
       String name, View view, Class<E> elementType) {
     return newInstance(name, view, StandardSerializers.protobuf(elementType));
   }
@@ -89,27 +89,27 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
    * @throws IllegalStateException if the view proxy is invalid
    * @see StandardSerializers
    */
-  public static <E> EntryIndexProxy<E> newInstance(
+  public static <E> ProofEntryIndexProxy<E> newInstance(
       String name, View view, Serializer<E> serializer) {
     IndexAddress address = IndexAddress.valueOf(name);
     return view.findOpenIndex(address)
-        .map(EntryIndexProxy::<E>checkCachedInstance)
+        .map(ProofEntryIndexProxy::<E>checkCachedInstance)
         .orElseGet(() -> newEntryIndexProxy(address, view, serializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
-  private static <E> EntryIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
-    StoragePreconditions.checkIndexType(cachedIndex, EntryIndexProxy.class);
-    return (EntryIndexProxy<E>) cachedIndex;
+  private static <E> ProofEntryIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
+    StoragePreconditions.checkIndexType(cachedIndex, ProofEntryIndexProxy.class);
+    return (ProofEntryIndexProxy<E>) cachedIndex;
   }
 
-  private static <E> EntryIndexProxy<E> newEntryIndexProxy(IndexAddress address, View view,
-      Serializer<E> serializer) {
+  private static <E> ProofEntryIndexProxy<E> newEntryIndexProxy(IndexAddress address, View view,
+                                                                Serializer<E> serializer) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
     NativeHandle entryNativeHandle = createNativeEntry(address.getName(), view);
 
-    EntryIndexProxy<E> entry = new EntryIndexProxy<>(entryNativeHandle, address, view, s);
+    ProofEntryIndexProxy<E> entry = new ProofEntryIndexProxy<>(entryNativeHandle, address, view, s);
     view.registerIndex(entry);
     return entry;
   }
@@ -120,13 +120,13 @@ public final class EntryIndexProxy<T> extends AbstractIndexProxy {
     NativeHandle entryNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
 
     Cleaner cleaner = view.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, entryNativeHandle, EntryIndexProxy.class,
-        EntryIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, entryNativeHandle, ProofEntryIndexProxy.class,
+        ProofEntryIndexProxy::nativeFree);
     return entryNativeHandle;
   }
 
-  private EntryIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
-      CheckingSerializerDecorator<T> serializer) {
+  private ProofEntryIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
+                               CheckingSerializerDecorator<T> serializer) {
     super(nativeHandle, address, view);
     this.serializer = serializer;
   }

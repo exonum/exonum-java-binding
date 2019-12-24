@@ -38,6 +38,7 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -71,6 +72,7 @@ class CreateWalletTxIntegrationTest {
   }
 
   @Test
+  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeAlreadyExistingWalletTx(TestKit testKit) {
     // Create a new wallet

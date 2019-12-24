@@ -35,8 +35,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
-class EntryIndexProxyIntegrationTest
-    extends BaseIndexProxyTestable<EntryIndexProxy<String>> {
+class ProofEntryIndexProxyIntegrationTest
+    extends BaseIndexProxyTestable<ProofEntryIndexProxy<String>> {
 
   private static final String ENTRY_NAME = "test_entry";
 
@@ -123,27 +123,27 @@ class EntryIndexProxyIntegrationTest
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      Consumer<EntryIndexProxy<String>> entryTest) {
+      Consumer<ProofEntryIndexProxy<String>> entryTest) {
     runTestWithView(viewFactory, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
   private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, EntryIndexProxy<String>> entryTest) {
+      BiConsumer<View, ProofEntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         ENTRY_NAME,
-        EntryIndexProxy::newInstance,
+        ProofEntryIndexProxy::newInstance,
         entryTest
     );
   }
 
   @Override
-  EntryIndexProxy<String> create(String name, View view) {
-    return EntryIndexProxy.newInstance(name, view, StandardSerializers.string());
+  ProofEntryIndexProxy<String> create(String name, View view) {
+    return ProofEntryIndexProxy.newInstance(name, view, StandardSerializers.string());
   }
 
   @Override
-  EntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+  ProofEntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
     return null; // Entry index does not support groups
   }
 
@@ -153,12 +153,12 @@ class EntryIndexProxyIntegrationTest
   }
 
   @Override
-  Object getAnyElement(EntryIndexProxy<String> index) {
+  Object getAnyElement(ProofEntryIndexProxy<String> index) {
     return index.get();
   }
 
   @Override
-  void update(EntryIndexProxy<String> index) {
+  void update(ProofEntryIndexProxy<String> index) {
     index.set(V1);
   }
 }

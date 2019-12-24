@@ -41,6 +41,7 @@ import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -52,6 +53,7 @@ class ThrowingTxTest {
       QaArtifactInfo.createQaServiceTestkit());
 
   @Test
+  @Disabled("ECR-4014")
   void executeThrows(TestKit testKit) {
     long seed = 0L;
     TransactionMessage throwingTx = createThrowingTx(seed, QA_SERVICE_ID);

@@ -19,21 +19,18 @@ package com.exonum.binding.core.runtime;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
-import java.util.List;
 
 /**
  * The service wrapper represents an Exonum service as a whole and allows the service runtime
@@ -154,10 +151,6 @@ final class ServiceWrapper {
         throw new IllegalArgumentException(
             format("Unknown txId (%d) in Configurable interface", txId));
     }
-  }
-
-  List<HashCode> getStateHashes(Snapshot snapshot) {
-    return service.getStateHashes(snapshot);
   }
 
   void beforeCommit(Fork fork) {
