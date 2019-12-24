@@ -215,7 +215,7 @@ pub mod runtime_adapter {
         unsafe { RUNTIME_ADAPTER_START_ADDING_SERVICE.unwrap() }
     }
 
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.commitService()`.
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.updateServiceState()`.
     pub fn update_service_state_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { RUNTIME_ADAPTER_UPDATE_SERVICE_STATE.unwrap() }
