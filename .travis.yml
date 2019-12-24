@@ -37,6 +37,18 @@ env:
 
 matrix:
   include:
+    - name: "Linux JDK 8 CHECK_RUST=true"
+      os: linux
+      jdk: openjdk8
+      env: CHECK_RUST=true
+    - name: "Linux JDK 8 CHECK_RUST=false"
+      os: linux
+      jdk: openjdk8
+      env: CHECK_RUST=false
+    - name: "Linux JDK 13 CHECK_RUST=false"
+      os: linux
+      jdk: openjdk13
+      env: CHECK_RUST=false
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
       # Specify the image containing JDK 8
@@ -48,20 +60,6 @@ matrix:
         - ROCKSDB_STATIC=1
         - SNAPPY_LIB_DIR=/usr/local/lib
         - SNAPPY_STATIC=1
-  - exclude:
-      - name: "Linux JDK 8 CHECK_RUST=true"
-        os: linux
-        jdk: openjdk8
-        env: CHECK_RUST=true
-      - name: "Linux JDK 8 CHECK_RUST=false"
-        os: linux
-        jdk: openjdk8
-        env: CHECK_RUST=false
-      - name: "Linux JDK 13 CHECK_RUST=false"
-        os: linux
-        jdk: openjdk13
-        env: CHECK_RUST=false
-
 
 cache:
   directories:
