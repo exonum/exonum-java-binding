@@ -279,18 +279,19 @@ impl Runtime for JavaRuntimeProxy {
         &mut self,
         _snapshot: &dyn Snapshot,
         instance_spec: &InstanceSpec,
-        _status: InstanceStatus,
+        status: InstanceStatus,
     ) -> Result<(), ExecutionError> {
         let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
         self.jni_call_default(|env| {
             let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
+            let instance_status = status as i32;
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::update_service_state_id(),
                 JavaType::Primitive(Primitive::Void),
-                &[JValue::from(instance_spec)],
+                &[JValue::from(instance_spec), JValue::from(instance_status)],
             )
             .and_then(JValue::v)
         })
