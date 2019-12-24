@@ -183,7 +183,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * @throws RuntimeException if it failed to instantiate the service;
    *     or if the service initialization failed
    */
-  public void startAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
+  public void initiateAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
       byte[] configuration) {
     try {
       synchronized (lock) {
@@ -206,7 +206,7 @@ public final class ServiceRuntime implements AutoCloseable {
   /**
    * TODO(ECR-3919): fix the documentation of the method
    * Adds a service instance to the runtime after it has been successfully initialized
-   * in {@link #startAddingService(Fork, ServiceInstanceSpec, byte[])}. This operation
+   * in {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])}. This operation
    * completes the service instance registration, allowing subsequent operations on it:
    * transactions, API requests.
    *
@@ -216,7 +216,7 @@ public final class ServiceRuntime implements AutoCloseable {
    *     is not deployed
    */
   public void updateInstanceStatus(ServiceInstanceSpec instanceSpec,
-                                   InstanceState.Status instanceStatus) {
+      InstanceState.Status instanceStatus) {
     try {
       synchronized (lock) {
         // Create a previously added service

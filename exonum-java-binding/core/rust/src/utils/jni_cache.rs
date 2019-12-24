@@ -42,7 +42,7 @@ static mut TX_EXECUTION_GET_ERROR_CODE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_INITIALIZE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_DEPLOY_ARTIFACT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED: Option<JMethodID> = None;
-static mut RUNTIME_ADAPTER_START_ADDING_SERVICE: Option<JMethodID> = None;
+static mut RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_UPDATE_SERVICE_STATE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
 // TODO(ECR-4016): rename to RUNTIME_ADAPTER_AFTER_TRANSACTIONS
@@ -104,7 +104,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "isArtifactDeployed",
         "(Ljava/lang/String;)Z",
     );
-    RUNTIME_ADAPTER_START_ADDING_SERVICE = get_method_id(
+    RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
         "startAddingService",
@@ -157,7 +157,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && RUNTIME_ADAPTER_INITIALIZE.is_some()
             && RUNTIME_ADAPTER_DEPLOY_ARTIFACT.is_some()
             && RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.is_some()
-            && RUNTIME_ADAPTER_START_ADDING_SERVICE.is_some()
+            && RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE.is_some()
             && RUNTIME_ADAPTER_UPDATE_SERVICE_STATE.is_some()
             && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
             && RUNTIME_ADAPTER_BEFORE_COMMIT.is_some()
@@ -209,10 +209,10 @@ pub mod runtime_adapter {
         unsafe { RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.unwrap() }
     }
 
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.startAddingService()`.
-    pub fn start_adding_service_id() -> JMethodID<'static> {
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.initiateAddingService()`.
+    pub fn initiate_adding_service_id() -> JMethodID<'static> {
         check_cache_initialized();
-        unsafe { RUNTIME_ADAPTER_START_ADDING_SERVICE.unwrap() }
+        unsafe { RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.updateServiceState()`.

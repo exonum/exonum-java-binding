@@ -119,16 +119,16 @@ public class ServiceRuntimeAdapter {
    *     protobuf message
    * @param configuration the service initial configuration parameters as a serialized protobuf
    *     message
-   * @see ServiceRuntime#startAddingService(Fork, ServiceInstanceSpec, byte[])
+   * @see ServiceRuntime#initiateAddingService(Fork, ServiceInstanceSpec, byte[])
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    */
-  void startAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
+  void initiateAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
       ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
 
-      serviceRuntime.startAddingService(fork, javaInstanceSpec, configuration);
+      serviceRuntime.initiateAddingService(fork, javaInstanceSpec, configuration);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }

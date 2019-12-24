@@ -263,7 +263,7 @@ impl Runtime for JavaRuntimeProxy {
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::start_adding_service_id(),
+                runtime_adapter::initiate_adding_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(fork_handle),

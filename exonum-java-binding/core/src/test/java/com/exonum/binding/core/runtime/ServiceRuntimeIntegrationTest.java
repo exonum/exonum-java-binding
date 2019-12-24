@@ -172,7 +172,7 @@ class ServiceRuntimeIntegrationTest {
     // Create the service from the artifact
     Fork fork = mock(Fork.class);
     byte[] configuration = anyConfiguration();
-    serviceRuntime.startAddingService(fork, instanceSpec, configuration);
+    serviceRuntime.initiateAddingService(fork, instanceSpec, configuration);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
@@ -199,7 +199,7 @@ class ServiceRuntimeIntegrationTest {
     Fork fork = mock(Fork.class);
     byte[] configuration = anyConfiguration();
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.startAddingService(fork, instanceSpec, configuration));
+        () -> serviceRuntime.initiateAddingService(fork, instanceSpec, configuration));
 
     assertThat(e).hasMessageFindingMatch("Unknown.+artifact");
     assertThat(e).hasMessageContaining(String.valueOf(artifactId));
@@ -232,7 +232,7 @@ class ServiceRuntimeIntegrationTest {
 
     // Try to create and initialize the service
     assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.startAddingService(fork, instanceSpec, configuration));
+        () -> serviceRuntime.initiateAddingService(fork, instanceSpec, configuration));
 
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
   }

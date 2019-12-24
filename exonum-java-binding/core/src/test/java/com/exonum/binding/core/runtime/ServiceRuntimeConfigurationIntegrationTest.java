@@ -81,7 +81,7 @@ class ServiceRuntimeConfigurationIntegrationTest {
       String name = "s1";
       ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(name, 1, ARTIFACT_ID);
       Fork fork = database.createFork(cleaner);
-      runtime.startAddingService(fork, instanceSpec, new byte[0]);
+      runtime.initiateAddingService(fork, instanceSpec, new byte[0]);
       runtime.updateInstanceStatus(instanceSpec, null);
       assertThat(runtime.findService(name)).isNotEmpty();
     }

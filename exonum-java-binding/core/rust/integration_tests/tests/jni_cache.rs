@@ -41,7 +41,7 @@ fn concurrent_cache_read() {
             jni_cache::runtime_adapter::initialize_id();
             jni_cache::runtime_adapter::deploy_artifact_id();
             jni_cache::runtime_adapter::is_artifact_deployed_id();
-            jni_cache::runtime_adapter::start_adding_service_id();
+            jni_cache::runtime_adapter::initiate_adding_service_id();
             jni_cache::runtime_adapter::update_service_state_id();
             jni_cache::runtime_adapter::execute_tx_id();
             jni_cache::runtime_adapter::before_commit_id();
