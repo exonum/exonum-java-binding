@@ -135,19 +135,19 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
-   * Updates the state of the service instance.
+   * Updates the status of the service instance.
    *
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
    * @param numericInstanceStatus new status of the service instance as a numeric
    *     representation of the {@link InstanceState.Status} enum.
-   * @see ServiceRuntime#updateInstanceState(ServiceInstanceSpec, InstanceState.Status)
+   * @see ServiceRuntime#updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)
    */
-  void updateServiceState(byte[] instanceSpec, int numericInstanceStatus) {
+  void updateServiceStatus(byte[] instanceSpec, int numericInstanceStatus) {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
     InstanceState.Status instanceStatus =
         InstanceState.Status.forNumber(numericInstanceStatus);
-    serviceRuntime.updateInstanceState(javaInstanceSpec, instanceStatus);
+    serviceRuntime.updateInstanceStatus(javaInstanceSpec, instanceStatus);
   }
 
   private static ServiceInstanceSpec parseInstanceSpec(byte[] instanceSpec) {
