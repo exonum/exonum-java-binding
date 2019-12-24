@@ -34,6 +34,7 @@ use jni::{
 
 use std::fmt;
 
+use exonum::runtime::InstanceStatus;
 use {
     runtime::Error,
     storage::View,
@@ -45,7 +46,6 @@ use {
     },
     JniError, JniErrorKind, JniResult, Node,
 };
-use exonum::runtime::InstanceStatus;
 
 /// Default validator ID. -1 is used as not-a-value in Java runtime.
 const DEFAULT_VALIDATOR_ID: i32 = -1;
@@ -289,7 +289,7 @@ impl Runtime for JavaRuntimeProxy {
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::update_service_state_id(),
+                runtime_adapter::update_service_status_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[JValue::from(instance_spec), JValue::from(instance_status)],
             )
