@@ -106,16 +106,13 @@ class ServiceRuntimeAdapterTest {
         .thenReturn(fork);
 
     String serviceName = "s1";
-    String artifactName = "com.acme:foo";
-    String artifactVersion = "1.2.3";
-    String artifactId = artifactName + ":" + artifactVersion;
+    String javaArtifactName = "com.acme:foo:1.2.3";
     byte[] instanceSpec = InstanceSpec.newBuilder()
         .setId(serviceId)
         .setName(serviceName)
         .setArtifact(ArtifactId.newBuilder()
             .setRuntimeId(1)
-            .setName(artifactName)
-            .setVersion(artifactVersion)
+            .setName(javaArtifactName)
             .build())
         .build()
         .toByteArray();
@@ -126,7 +123,7 @@ class ServiceRuntimeAdapterTest {
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
-        ServiceArtifactId.newJavaId(artifactId));
+        ServiceArtifactId.newJavaId(javaArtifactName));
     verify(serviceRuntime).startAddingService(fork, expected, configuration);
   }
 
