@@ -19,11 +19,10 @@
 use std::{panic, sync::Arc};
 
 use exonum::{
-    blockchain::{config::InstanceInitParams, Block},
+    blockchain::{config::InstanceInitParams, Block, InstanceCollection},
     crypto::{PublicKey, SecretKey},
     exonum_merkledb::{self, BinaryValue},
     helpers::ValidatorId,
-    runtime::rust::ServiceFactory,
     runtime::ArtifactSpec,
 };
 use exonum_proto::ProtobufConvert;
@@ -96,14 +95,16 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
                 builder = builder.with_instance(instance);
             }
 
-            if let Some(params) =
+            if let Some(service) =
                 time_service_instance_from_java(&env, executor.clone(), time_service_spec)?
             {
-                let artifact_id = params.factory.artifact_id();
+                // We always have exactly one time service instance.
+                let instance = service.instances[0].clone();
+                let artifact_id = service.factory.artifact_id();
                 builder = builder
+                    .with_rust_service(service.factory)
                     .with_artifact(artifact_id)
-                    .with_instance(&params)
-                    .with_rust_service(params.factory);
+                    .with_instance(instance);
             }
 
             builder
@@ -256,7 +257,7 @@ fn time_service_instance_from_java(
     env: &JNIEnv,
     executor: Executor,
     time_service_spec: JObject,
-) -> JniResult<Option<TimeServiceInstanceParams>> {
+) -> JniResult<Option<InstanceCollection>> {
     if time_service_spec.is_null() {
         return Ok(None);
     }
@@ -268,13 +269,9 @@ fn time_service_instance_from_java(
 
     let provider = JavaTimeProvider::new(executor.clone(), time_provider);
     let factory = TimeServiceFactory::with_provider(Arc::new(provider) as Arc<dyn TimeProvider>);
-    let params = TimeServiceInstanceParams {
-        factory,
-        service_id,
-        service_name,
-    };
+    let instance = InstanceCollection::new(factory).with_instance(service_id, service_name, ());
 
-    Ok(Some(params))
+    Ok(Some(instance))
 }
 
 // Returns id and name value from corresponding instances of Java objects.
@@ -290,22 +287,4 @@ fn get_field_as_string(env: &JNIEnv, obj: JObject, field_name: &str) -> JniResul
         env,
         env.get_field(obj, field_name, "Ljava/lang/String;")?.l()?,
     )
-}
-
-/// DTO for time oracle service instantiation parameters.
-struct TimeServiceInstanceParams {
-    pub factory: TimeServiceFactory,
-    pub service_id: u32,
-    pub service_name: String,
-}
-
-impl<'a> Into<InstanceInitParams> for &'a TimeServiceInstanceParams {
-    fn into(self) -> InstanceInitParams {
-        InstanceInitParams::new(
-            self.service_id,
-            self.service_name.clone(),
-            self.factory.artifact_id(),
-            (),
-        )
-    }
 }

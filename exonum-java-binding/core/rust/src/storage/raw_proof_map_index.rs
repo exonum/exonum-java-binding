@@ -14,7 +14,9 @@
 
 use exonum::merkledb::{
     access::FromAccess,
-    indexes::proof_map::{Iter as ProofMapIndexIter, Keys, Values, PROOF_MAP_KEY_SIZE},
+    proof_map_index::{
+        ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, PROOF_MAP_KEY_SIZE,
+    },
     Fork, IndexAddress, ObjectHash, RawProofMapIndex, Snapshot,
 };
 use jni::{
@@ -420,7 +422,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<Keys<Key>>(iter_handle);
+        let iter = handle::cast_handle::<ProofMapIndexKeys<Key>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -436,7 +438,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<Keys<Key>>(&env, iter_handle);
+    handle::drop_handle::<ProofMapIndexKeys<Key>>(&env, iter_handle);
 }
 
 /// Return next value from the values-iterator. Returns null pointer when iteration is finished.
@@ -447,7 +449,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<Values<Value>>(iter_handle);
+        let iter = handle::cast_handle::<ProofMapIndexValues<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -463,7 +465,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<Values<Value>>(&env, iter_handle);
+    handle::drop_handle::<ProofMapIndexValues<Value>>(&env, iter_handle);
 }
 
 // Converts Java byte array to key.
