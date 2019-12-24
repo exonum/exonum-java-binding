@@ -54,20 +54,25 @@ final class TestKitTestUtils {
   static void createTestServiceArtifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);
     createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
-        TestTransaction.class, TestSchema.class, TestService.class);
+        TestSchema.class, TestService.class);
   }
 
   static void createTestService2Artifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME_2);
     createArtifact(artifactLocation, ARTIFACT_ID_2, ARTIFACT_VERSION_2, TestServiceModule2.class,
-        TestTransaction.class, TestSchema.class, TestService2.class);
+        TestSchema.class, TestService2.class);
   }
 
+  /**
+   * Creates an invalid service artifact that has no required metadata.
+   */
   static void createInvalidArtifact(Path directory, String filename) throws IOException {
     Path artifactLocation = directory.resolve(filename);
-    // Create an invalid artifact without a TestService class
-    createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
-        TestTransaction.class, TestSchema.class);
+    // Create an invalid artifact with no required metadata (plugin-id) and no classes.
+    new ServiceArtifactBuilder()
+        .setPluginId("")
+        .setPluginVersion("1.0.0")
+        .writeTo(artifactLocation);
   }
 
   static void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {

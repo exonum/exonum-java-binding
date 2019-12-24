@@ -16,11 +16,11 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;

@@ -14,31 +14,19 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.cryptocurrency;
 
-/**
- * All known QA service transactions.
- *
- * @implNote Keep in sync with {@link QaTransactionConverter#TRANSACTION_FACTORIES}.
- */
-public enum QaTransaction {
-  // Well-behaved transactions.
-  CREATE_COUNTER(0),
-  INCREMENT_COUNTER(1),
+enum TransactionError {
+  WALLET_ALREADY_EXISTS(0),
+  UNKNOWN_RECEIVER(1),
+  UNKNOWN_SENDER(2),
+  INSUFFICIENT_FUNDS(3),
+  SAME_SENDER_AND_RECEIVER(4),
+  NON_POSITIVE_TRANSFER_AMOUNT(5);
 
-  // Badly-behaved transactions, do some crazy things.
-  VALID_THROWING(12),
-  VALID_ERROR(13);
+  public final byte errorCode;
 
-  private final int id;
-
-  QaTransaction(int id) {
-    this.id = id;
+  TransactionError(int errorCode) {
+    this.errorCode = (byte) errorCode;
   }
-
-  /** Returns the unique id of this transaction. */
-  public int id() {
-    return id;
-  }
-
 }

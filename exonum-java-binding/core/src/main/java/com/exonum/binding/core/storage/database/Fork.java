@@ -30,10 +30,9 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  * <p>A fork represents the database state at the time it was created <em>plus</em> any changes
  * to the database made using this fork.
  *
- * <p>A fork allows to perform
- * a {@linkplain com.exonum.binding.core.transaction.Transaction transaction}: a number
- * of independent writes to the database, which then may be <em>atomically</em> applied
- * (i.e. committed) to the database and change the database state.
+ * <p>A fork allows to perform a transaction: a number of independent writes to the database,
+ * which then may be <em>atomically</em> applied (i.e. committed) to the database and change
+ * the database state.
  */
 public final class Fork extends View {
 

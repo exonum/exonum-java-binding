@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency.transactions;
+package com.exonum.binding.cryptocurrency;
 
 import static com.google.common.base.Preconditions.checkState;
 

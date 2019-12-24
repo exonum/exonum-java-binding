@@ -26,7 +26,6 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
@@ -173,7 +172,7 @@ public class ServiceRuntimeAdapter {
    * @throws TransactionExecutionException if the transaction execution failed
    * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
    *      PublicKey)
-   * @see com.exonum.binding.core.transaction.Transaction#execute(TransactionContext)
+   * @see com.exonum.binding.core.transaction.Transaction
    */
   void executeTransaction(int serviceId, String interfaceName, int txId, byte[] arguments,
       long forkNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)

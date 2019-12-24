@@ -17,10 +17,11 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.CREATE_COUNTER;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.INCREMENT_COUNTER;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_ERROR;
-import static com.exonum.binding.qaservice.transactions.QaTransaction.VALID_THROWING;
+import static com.exonum.binding.qaservice.QaServiceImpl.CREATE_COUNTER_TX_ID;
+import static com.exonum.binding.qaservice.QaServiceImpl.INCREMENT_COUNTER_TX_ID;
+import static com.exonum.binding.qaservice.QaServiceImpl.UNKNOWN_TX_ID;
+import static com.exonum.binding.qaservice.QaServiceImpl.VALID_ERROR_TX_ID;
+import static com.exonum.binding.qaservice.QaServiceImpl.VALID_THROWING_TX_ID;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
@@ -29,12 +30,11 @@ import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTx
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ThrowingTxBody;
-import com.exonum.binding.qaservice.transactions.UnknownTx;
 import com.google.common.base.Strings;
 import com.google.protobuf.ByteString;
 import javax.annotation.Nullable;
 
-public final class TransactionMessages {
+final class TransactionMessages {
 
   private static final KeyPair TEST_KEY_PAIR = ed25519().generateKeyPair();
 
@@ -42,7 +42,7 @@ public final class TransactionMessages {
    * Returns a CreateCounterTx transaction message with the given name and signed with the test key
    * pair.
    */
-  public static TransactionMessage createCreateCounterTx(String counterName,
+  static TransactionMessage createCreateCounterTx(String counterName,
       int qaServiceId) {
     return createCreateCounterTx(counterName, qaServiceId, TEST_KEY_PAIR);
   }
@@ -51,11 +51,11 @@ public final class TransactionMessages {
    * Returns a CreateCounterTx transaction message with the given name and signed with the given key
    * pair.
    */
-  public static TransactionMessage createCreateCounterTx(String counterName,
+  static TransactionMessage createCreateCounterTx(String counterName,
       int qaServiceId, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(qaServiceId)
-        .transactionId(CREATE_COUNTER.id())
+        .transactionId(CREATE_COUNTER_TX_ID)
         .payload(CreateCounterTxBody.newBuilder()
             .setName(counterName)
             .build())
@@ -66,11 +66,11 @@ public final class TransactionMessages {
    * Returns an error transaction message with the given arguments and signed with the test key
    * pair.
    */
-  public static TransactionMessage createErrorTx(byte errorCode,
+  static TransactionMessage createErrorTx(int errorCode,
       @Nullable String errorDescription, int qaServiceId) {
     return testMessage()
         .serviceId(qaServiceId)
-        .transactionId(VALID_ERROR.id())
+        .transactionId(VALID_ERROR_TX_ID)
         .payload(ErrorTxBody.newBuilder()
             .setSeed(0)
             .setErrorCode(errorCode)
@@ -83,7 +83,7 @@ public final class TransactionMessages {
    * Returns an increment counter transaction message with the given arguments and signed
    * with the test key pair.
    */
-  public static TransactionMessage createIncrementCounterTx(long seed,
+  static TransactionMessage createIncrementCounterTx(long seed,
       HashCode counterId, int qaServiceId) {
     return createIncrementCounterTx(seed, counterId, qaServiceId, TEST_KEY_PAIR);
   }
@@ -92,11 +92,11 @@ public final class TransactionMessages {
    * Returns an increment counter transaction message with the given arguments and signed
    * with the given key pair.
    */
-  public static TransactionMessage createIncrementCounterTx(long seed, HashCode counterId,
+  static TransactionMessage createIncrementCounterTx(long seed, HashCode counterId,
       int qaServiceId, KeyPair keys) {
     return TransactionMessage.builder()
       .serviceId(qaServiceId)
-      .transactionId(INCREMENT_COUNTER.id())
+      .transactionId(INCREMENT_COUNTER_TX_ID)
       .payload(IncrementCounterTxBody.newBuilder()
           .setSeed(seed)
           .setCounterId(ByteString.copyFrom(counterId.asBytes()))
@@ -107,10 +107,10 @@ public final class TransactionMessages {
   /**
    * Returns a ThrowingTx transaction message with the given seed and signed with the test key pair.
    */
-  public static TransactionMessage createThrowingTx(long seed, int qaServiceId) {
+  static TransactionMessage createThrowingTx(long seed, int qaServiceId) {
     return testMessage()
         .serviceId(qaServiceId)
-        .transactionId(VALID_THROWING.id())
+        .transactionId(VALID_THROWING_TX_ID)
         .payload(ThrowingTxBody.newBuilder()
             .setSeed(seed)
             .build())
@@ -120,10 +120,10 @@ public final class TransactionMessages {
   /**
    * Creates an 'unknown' to this service transaction.
    */
-  public static TransactionMessage createUnknownTx(int qaServiceId, KeyPair keys) {
+  static TransactionMessage createUnknownTx(int qaServiceId, KeyPair keys) {
     return TransactionMessage.builder()
         .serviceId(qaServiceId)
-        .transactionId(UnknownTx.ID)
+        .transactionId(UNKNOWN_TX_ID)
         .payload(new byte[0])
         .sign(keys);
   }

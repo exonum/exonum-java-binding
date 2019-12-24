@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Exonum Team
+ * Copyright 2019 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.cryptocurrency.transactions;
+package com.exonum.binding.cryptocurrency;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.INSUFFICIENT_FUNDS;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.SAME_SENDER_AND_RECEIVER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_RECEIVER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionError.UNKNOWN_SENDER;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newCreateWalletTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTransaction;
-import static com.exonum.binding.cryptocurrency.transactions.TransactionUtils.newTransferTxPayload;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
+import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
+import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
+import static com.exonum.binding.cryptocurrency.TransactionUtils.newCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.TransactionUtils.newTransferTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
@@ -39,15 +38,11 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.cryptocurrency.CryptocurrencySchema;
-import com.exonum.binding.cryptocurrency.PredefinedOwnerKeys;
-import com.exonum.binding.cryptocurrency.Wallet;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -65,37 +60,6 @@ class TransferTxIntegrationTest {
 
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
-
-  @Test
-  void from() {
-    long seed = 1;
-    long sum = 50L;
-    PublicKey recipientKey = TO_KEY_PAIR.getPublicKey();
-
-    byte[] arguments = newTransferTxPayload(seed, recipientKey, sum);
-
-    TransferTx tx = TransferTx.from(arguments);
-
-    assertThat(tx).isEqualTo(new TransferTx(seed, recipientKey, sum));
-  }
-
-  @ParameterizedTest
-  @ValueSource(longs = {
-      Long.MIN_VALUE,
-      -100,
-      -1,
-      0
-  })
-  void fromRawTransactionRejectsNonPositiveBalance(long transferAmount) {
-    long seed = 1;
-    byte[] arguments = newTransferTxPayload(seed, TO_KEY_PAIR.getPublicKey(), transferAmount);
-
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransferTx.from(arguments));
-
-    assertThat(e.getMessage()).contains("transfer amount")
-        .contains(Long.toString(transferAmount));
-  }
 
   @Test
   @RequiresNativeLibrary
@@ -133,6 +97,27 @@ class TransferTxIntegrationTest {
         .containsExactly(messageHash);
     assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
         .containsExactly(messageHash);
+  }
+
+  @Disabled("ECR-4014")
+  @ParameterizedTest
+  @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L})
+  @RequiresNativeLibrary
+  void executeTransfer_NonPositiveBalance(long transferSum, TestKit testKit) {
+    // Create and execute the transaction
+    long seed = 1L;
+    TransactionMessage transferTx = newTransferTransaction(
+        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    testKit.createBlockWithTransactions(transferTx);
+
+    // Check the Exception
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
+    String description = "Non-positive transfer amount: " + transferSum;
+    ExecutionStatus expectedTransactionResult =
+        serviceError(NON_POSITIVE_TRANSFER_AMOUNT.errorCode, description);
+    assertThat(txResultOpt).hasValue(expectedTransactionResult);
   }
 
   @Test
@@ -223,13 +208,5 @@ class TransferTxIntegrationTest {
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
     ExecutionStatus expectedTransactionResult = serviceError(INSUFFICIENT_FUNDS.errorCode);
     assertThat(txResult).hasValue(expectedTransactionResult);
-  }
-
-  @Test
-  void verifyEquals() {
-    EqualsVerifier
-        .forClass(TransferTx.class)
-        .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
-        .verify();
   }
 }
