@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod db;
+mod entry;
 mod fork;
 mod key_set_index;
 mod list_index;
