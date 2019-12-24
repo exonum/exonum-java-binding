@@ -16,32 +16,46 @@
 
 package com.exonum.binding.core.transaction;
 
+import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * An Exonum transaction.
+ * Indicates that a method is a transaction method. The annotated method should execute the
+ * transaction, possibly modifying the blockchain state.
+ *
+ * <p>The method should be {@code public} and have the following parameters
+ * (in this particular order):
+ * <ul>
+ *   <li>transaction arguments either as 'byte[]' or as a protobuf message. Protobuf messages will
+ *       be deserialized using a {@code #parseFrom(byte[])} method
+ *   <li>transaction execution context, which allows to access the information about this
+ *       transaction and modify the blockchain state through the included database fork of type
+ *       '{@link TransactionContext}'
+ * </ul>
+ *
+ * <p>The annotated method might throw {@linkplain TransactionExecutionException} if the
+ * transaction cannot be executed normally and has to be rolled back. The transaction will be
+ * committed as failed (error kind {@linkplain ErrorKind#SERVICE SERVICE}), the
+ * {@linkplain ExecutionError#getCode() error code} with the optional description will be saved
+ * into the storage. The client can request the error code to know the reason of the failure.
+ *
+ * <p>The annotated method might also throw {@linkplain RuntimeException} if an unexpected error
+ * occurs. A correct transaction implementation must not throw such exceptions. The transaction
+ * will be committed as failed (status "panic").
  *
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/transactions">Exonum Transactions</a>
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/services">Exonum Services</a>
  */
-@FunctionalInterface
-public interface Transaction {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Transaction {
 
   /**
-   * Execute the transaction, possibly modifying the blockchain state.
-   *
-   * @param context a transaction execution context, which allows to access the information about
-   *        this transaction and modify the blockchain state through the included database fork
-   * @throws TransactionExecutionException if the transaction cannot be executed normally
-   *     and has to be rolled back. The transaction will be committed as failed (error kind
-   *     {@linkplain com.exonum.core.messages.Runtime.ErrorKind#SERVICE SERVICE}),
-   *     the {@linkplain ExecutionError#getCode() error code} with the optional description
-   *     will be saved into the storage. The client can request the error code to know the reason
-   *     of the failure
-   * @throws RuntimeException if an unexpected error occurs. A correct transaction implementation
-   *     must not throw such exceptions. The transaction will be committed as failed
-   *     (status "panic")
+   * Returns the transaction type identifier which is unique within the service.
    */
-  void execute(TransactionContext context) throws TransactionExecutionException;
-
+  int value();
 }

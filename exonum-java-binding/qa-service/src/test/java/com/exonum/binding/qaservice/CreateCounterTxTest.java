@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.qaservice.transactions;
+package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
+import static com.exonum.binding.qaservice.TransactionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
-import static com.exonum.binding.qaservice.transactions.TransactionError.COUNTER_ALREADY_EXISTS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
@@ -33,17 +33,17 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.qaservice.Integration;
-import com.exonum.binding.qaservice.QaArtifactInfo;
-import com.exonum.binding.qaservice.QaSchema;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @Integration
 class CreateCounterTxTest {
@@ -53,13 +53,23 @@ class CreateCounterTxTest {
       QaArtifactInfo.createQaServiceTestkit()
   );
 
-  @Test
-  void rejectsEmptyName() {
-    String name = "";
+  @Disabled("ECR-4014")
+  @ParameterizedTest
+  @ValueSource(strings = {"", " ", "  ", "\n", "\t"})
+  void executeNewCounterRejectsEmptyName(String name, TestKit testKit) {
+    TransactionMessage tx = createCreateCounterTx(name, QA_SERVICE_ID);
+    testKit.createBlockWithTransactions(tx);
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> new CreateCounterTx(name));
-    assertThat(e.getMessage()).contains("Name must not be blank");
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(tx.hash());
+
+    assertThat(txResultOpt).isPresent();
+    ExecutionStatus executionStatus = txResultOpt.get();
+    assertTrue(executionStatus.hasError());
+    ExecutionError error = executionStatus.getError();
+    assertThat(error.getKind()).isEqualTo(ErrorKind.RUNTIME);
+    assertThat(error.getDescription()).contains("Name must not be blank");
   }
 
   @Test
@@ -95,12 +105,6 @@ class CreateCounterTxTest {
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(transactionMessage2.hash());
     ExecutionStatus expectedTransactionResult = serviceError(COUNTER_ALREADY_EXISTS.code);
     assertThat(txResult).hasValue(expectedTransactionResult);
-  }
-
-  @Test
-  void equals() {
-    EqualsVerifier.forClass(CreateCounterTx.class)
-        .verify();
   }
 
 }

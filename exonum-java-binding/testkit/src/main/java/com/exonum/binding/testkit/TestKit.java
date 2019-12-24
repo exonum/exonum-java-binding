@@ -192,8 +192,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws IllegalArgumentException if transactions are malformed or don't belong to this
-   *     service
+   * @throws RuntimeException if any transaction does not belong to a started service
+   *     (i.e., has an unknown service id)
    */
   public Block createBlockWithTransactions(TransactionMessage... transactions) {
     return createBlockWithTransactions(asList(transactions));
@@ -204,12 +204,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws IllegalArgumentException if transactions are malformed or don't belong to this
-   *     service
+   * @throws RuntimeException if any transaction does not belong to a started service
+   *     (i.e., has an unknown service id)
    */
   public Block createBlockWithTransactions(Iterable<TransactionMessage> transactions) {
     List<TransactionMessage> messageList = ImmutableList.copyOf(transactions);
-    checkTransactions(messageList);
     byte[][] transactionMessagesArr = messageList.stream()
         .map(TransactionMessage::toBytes)
         .toArray(byte[][]::new);
@@ -224,36 +223,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @return created block
    */
   public Block createBlock() {
-    List<TransactionMessage> inPoolTransactions = getTransactionPool();
-    checkTransactions(inPoolTransactions);
     byte[] block = nativeCreateBlock(nativeHandle.get());
     return BLOCK_SERIALIZER.fromBytes(block);
-  }
-
-  private void checkTransactions(List<TransactionMessage> transactionMessages) {
-    for (TransactionMessage transactionMessage: transactionMessages) {
-      checkTransaction(transactionMessage);
-    }
-  }
-
-  private void checkTransaction(TransactionMessage transactionMessage) {
-    Integer serviceId = transactionMessage.getServiceId();
-    // As transactions of time service might be submitted in TestKit that has this service
-    // activated, those transactions should be considered valid, as time service is not
-    // contained in Java runtime
-    if (serviceId.equals(timeServiceId)) {
-      return;
-    }
-    try {
-      serviceRuntime.verifyTransaction(serviceId,
-          transactionMessage.getTransactionId(), transactionMessage.getPayload().toByteArray());
-    } catch (Exception conversionException) {
-      String message = String.format("Service with id=%s failed to convert transaction (%s)."
-          + " Make sure that the submitted transaction is correctly serialized, and the service's"
-          + " TransactionConverter implementation is correct and handles this transaction as"
-          + " expected.", serviceId, transactionMessage);
-      throw new IllegalArgumentException(message, conversionException);
-    }
   }
 
   /**
