@@ -16,6 +16,8 @@
 
 package com.exonum.binding.core.transaction;
 
+import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.service.Service;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
 import java.lang.annotation.ElementType;
@@ -27,15 +29,20 @@ import java.lang.annotation.Target;
  * Indicates that a method is a transaction method. The annotated method should execute the
  * transaction, possibly modifying the blockchain state.
  *
- * <p>The method should be {@code public} and have the following parameters
- * (in this particular order):
- * <ul>
- *   <li>transaction arguments either as 'byte[]' or as a protobuf message. Protobuf messages will
- *       be deserialized using a {@code #parseFrom(byte[])} method
- *   <li>transaction execution context, which allows to access the information about this
- *       transaction and modify the blockchain state through the included database fork of type
- *       '{@link TransactionContext}'
- * </ul>
+ * <p>The method should be a {@code public} {@link Service} method.
+ *
+ * <h3>Parameters
+ *
+ * <p>The annotated method shall have the following parameters (in this particular order):
+ * <ol>
+ *   <li>transaction arguments either as {@code byte[]} or as a protobuf message.
+ *       Protobuf messages are deserialized using a {@code #parseFrom(byte[])} method
+ *   <li>transaction execution context as {@link TransactionContext}. It allows to access
+ *       the information about this transaction and modify the blockchain state
+ *       through the included database fork.
+ * </ol>
+ *
+ * <h3>Exceptions
  *
  * <p>The annotated method might throw {@linkplain TransactionExecutionException} if the
  * transaction cannot be executed normally and has to be rolled back. The transaction will be
@@ -43,9 +50,12 @@ import java.lang.annotation.Target;
  * {@linkplain ExecutionError#getCode() error code} with the optional description will be saved
  * into the storage. The client can request the error code to know the reason of the failure.
  *
- * <p>The annotated method might also throw {@linkplain RuntimeException} if an unexpected error
- * occurs. A correct transaction implementation must not throw such exceptions. The transaction
- * will be committed as failed (status "panic").
+ * <p>The annotated method might also throw any other exception if an unexpected error
+ * todo: @slowli: Do you agree with the part 'if the clients do not need to distinguish between different error types.'
+ *   or prefer the previous recommendation?
+ * occurs, or if the clients do not need to distinguish between different error types.
+ * The transaction will be committed as failed (error kind
+ * {@linkplain ErrorKind#UNEXPECTED UNEXPECTED}).
  *
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/transactions">Exonum Transactions</a>
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/services">Exonum Services</a>
@@ -55,7 +65,11 @@ import java.lang.annotation.Target;
 public @interface Transaction {
 
   /**
-   * Returns the transaction type identifier which is unique within the service.
+   * The transaction type identifier. Must be unique within the service.
+   * <!-- TODO: update to 'Exonum interface' or sth when they are supported: ECR-3783 -->
+   *
+   * <p>The transaction id is specified in the
+   * {@linkplain TransactionMessage#getTransactionId() transaction messages}.
    */
   int value();
 }
