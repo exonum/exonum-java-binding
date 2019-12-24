@@ -14,9 +14,7 @@
 
 use exonum_merkledb::{
     access::{FromAccess, RawAccess},
-    proof_map_index::{
-        Hashed, ProofMapIndexIter, ProofMapIndexKeys, ProofMapIndexValues, PROOF_MAP_KEY_SIZE,
-    },
+    indexes::proof_map::{Hashed, Iter as ProofMapIndexIter, Keys, Values, PROOF_MAP_KEY_SIZE},
     Fork, IndexAddress, ObjectHash, ProofMapIndex, RawProofMapIndex, Snapshot,
 };
 use exonum_proto::ProtobufConvert;
@@ -63,8 +61,8 @@ enum Iter<'a> {
 }
 
 enum KeysIter<'a> {
-    Raw(ProofMapIndexKeys<'a, RawKey>),
-    Hashed(ProofMapIndexKeys<'a, Key>),
+    Raw(Keys<'a, RawKey>),
+    Hashed(Keys<'a, Key>),
 }
 
 // For easy conversion to RawKey.
@@ -622,7 +620,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<ProofMapIndexValues<Value>>(iter_handle);
+        let iter = handle::cast_handle::<Values<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -638,7 +636,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<ProofMapIndexValues<Value>>(&env, iter_handle);
+    handle::drop_handle::<Values<Value>>(&env, iter_handle);
 }
 
 // Converts array of Java bytes arrays to the vector of keys.

@@ -17,11 +17,11 @@
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
-    exonum_merkledb::Snapshot,
-    messages::BinaryValue,
+    exonum_merkledb::{BinaryValue, Snapshot},
     runtime::{
         ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, ExecutionFail, InstanceId,
-        InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
+        InstanceSpec, InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt,
+        WellKnownRuntime,
     },
 };
 use futures::{Future, IntoFuture};
@@ -45,7 +45,6 @@ use {
     },
     JniError, JniErrorKind, JniResult, Node,
 };
-use exonum::runtime::InstanceStatus;
 
 /// Default validator ID. -1 is used as not-a-value in Java runtime.
 const DEFAULT_VALIDATOR_ID: i32 = -1;

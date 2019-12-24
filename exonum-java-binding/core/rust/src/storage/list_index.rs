@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use exonum_merkledb::{
-    access::FromAccess, list_index::ListIndexIter, Fork, IndexAddress, ListIndex, Snapshot,
+    access::FromAccess, indexes::list::Iter, Fork, IndexAddress, ListIndex, Snapshot,
 };
 use jni::{
     objects::{JClass, JObject, JString},
@@ -312,7 +312,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<ListIndexIter<Value>>(iter_handle);
+        let iter = handle::cast_handle::<Iter<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -328,5 +328,5 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<ListIndexIter<Value>>(&env, iter_handle);
+    handle::drop_handle::<Iter<Value>>(&env, iter_handle);
 }
