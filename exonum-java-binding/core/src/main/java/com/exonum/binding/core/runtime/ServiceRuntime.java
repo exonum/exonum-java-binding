@@ -22,7 +22,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
@@ -357,26 +356,6 @@ public final class ServiceRuntime implements AutoCloseable {
               service.getName(), event, e);
         }
       }
-    }
-  }
-
-  /**
-   * Verifies that an Exonum raw transaction can be correctly converted to an executable
-   * transaction of given service.
-   *
-   * @param serviceId the id of the service
-   * @param txId the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}
-   *     within the service
-   * @param arguments the {@linkplain TransactionMessage#getPayload() serialized transaction
-   *     arguments}
-   * @throws IllegalArgumentException if there is no service with such id in this runtime, or if
-   *     the transaction is not known to the service, or the arguments are not valid: e.g., cannot
-   *     be deserialized, or do not meet the preconditions
-   */
-  public void verifyTransaction(int serviceId, int txId, byte[] arguments) {
-    synchronized (lock) {
-      ServiceWrapper service = getServiceById(serviceId);
-      service.convertTransaction(txId, arguments);
     }
   }
 

@@ -18,8 +18,6 @@ package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.exonum.binding.cryptocurrency.transactions.CryptocurrencyTransactionConverter;
 import com.google.inject.Singleton;
 import org.pf4j.Extension;
 
@@ -30,6 +28,5 @@ public final class CryptocurrencyServiceModule extends AbstractServiceModule {
   protected void configure() {
     bind(Service.class).to(CryptocurrencyServiceImpl.class);
     bind(CryptocurrencyService.class).to(CryptocurrencyServiceImpl.class).in(Singleton.class);
-    bind(TransactionConverter.class).to(CryptocurrencyTransactionConverter.class);
   }
 }

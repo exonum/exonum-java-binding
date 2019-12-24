@@ -18,7 +18,6 @@ package ${package};
 
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.google.inject.Singleton;
 import org.pf4j.Extension;
 
@@ -31,6 +30,5 @@ public final class ServiceModule extends AbstractServiceModule {
   @Override
   protected void configure() {
     bind(Service.class).to(MyService.class).in(Singleton.class);
-    bind(TransactionConverter.class).to(MyTransactionConverter.class);
   }
 }

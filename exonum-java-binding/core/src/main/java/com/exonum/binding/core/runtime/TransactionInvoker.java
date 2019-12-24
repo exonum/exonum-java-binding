@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.google.inject.Inject;
 import java.lang.invoke.MethodHandle;
 import java.util.Map;
 
@@ -29,12 +30,13 @@ import java.util.Map;
  */
 final class TransactionInvoker {
   private final Service service;
-  private final Map<Integer, TransactionMethodObject> transactionMethods;
+  private final Map<Integer, TransactionMethod> transactionMethods;
 
+  @Inject
   TransactionInvoker(Service service) {
     this.service = service;
     this.transactionMethods =
-        TransactionMethodExtractor.extractTransactionMethods(service.getClass());
+        TransactionExtractor.extractTransactionMethods(service.getClass());
   }
 
   /**
@@ -54,9 +56,9 @@ final class TransactionInvoker {
       throws TransactionExecutionException {
     checkArgument(transactionMethods.containsKey(transactionId),
         "No method with transaction id (%s)", transactionId);
-    TransactionMethodObject transactionMethodObject = transactionMethods.get(transactionId);
-    Object argumentsObject = transactionMethodObject.serializeArguments(arguments);
-    MethodHandle methodHandle = transactionMethodObject.getMethodHandle();
+    TransactionMethod transactionMethod = transactionMethods.get(transactionId);
+    Object argumentsObject = transactionMethod.serializeArguments(arguments);
+    MethodHandle methodHandle = transactionMethod.getMethodHandle();
     try {
       methodHandle.invoke(service, argumentsObject, context);
     } catch (Throwable throwable) {

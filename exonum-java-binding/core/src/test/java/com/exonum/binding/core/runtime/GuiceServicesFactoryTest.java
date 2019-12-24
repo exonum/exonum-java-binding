@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -75,8 +74,7 @@ class GuiceServicesFactoryTest {
         () -> factory.createService(serviceDefinition, instanceSpec, node));
 
     // Check the message indicates missing bindings
-    assertThat(e).hasMessageContaining(Service.class.getSimpleName())
-        .hasMessageContaining(TransactionConverter.class.getSimpleName());
+    assertThat(e).hasMessageContaining(Service.class.getSimpleName());
   }
 }
 

@@ -1,10 +1,16 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE suppressions PUBLIC
-    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
-    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
     <suppress files="AnyTransaction" checks="MemberName|ParameterName"/>
     <suppress files="QaService" checks="JavadocParagraph"/>
+    <!--  todo: Caused by:
+            "Unable to get class information for @throws tag 'TransactionExecutionException'. [JavadocMethod]"
+            Remove when we update to newer Checkstyle (such issues are closed in Checkstyle issue
+            tracker: ECR-3159
+   -->
+    <suppress files="QaService" checks="JavadocMethod"/>
 </suppressions>

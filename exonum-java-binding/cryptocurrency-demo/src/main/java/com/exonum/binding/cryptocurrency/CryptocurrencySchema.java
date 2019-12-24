@@ -25,6 +25,7 @@ import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 
 /**
  * A schema of the cryptocurrency service.
@@ -53,8 +54,8 @@ public final class CryptocurrencySchema implements Schema {
 
   /**
    * Returns transactions history of the wallet. It contains hashes of
-   * {@link com.exonum.binding.cryptocurrency.transactions.TransferTx} transaction messages
-   * that changed the balance of the given wallet.
+   * {@link TxMessageProtos.TransferTx} transaction messages that changed the balance of the given
+   * wallet.
    *
    * @param walletId wallet address
    */

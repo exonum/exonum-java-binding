@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.fakeservice;
+package com.exonum.binding.qaservice;
 
-import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
+import com.google.common.primitives.UnsignedBytes;
 
-class PutTransaction implements Transaction {
+enum TransactionError {
+  // Create counter errors
+  COUNTER_ALREADY_EXISTS(0),
+  // Increment counter errors
+  UNKNOWN_COUNTER(1);
 
-  static final int ID = 0;
+  final byte code;
 
-  private final String key;
-  private final String value;
-
-  PutTransaction(String key, String value) {
-    this.key = key;
-    this.value = value;
-  }
-
-  @Override
-  public void execute(TransactionContext context) {
-    FakeSchema schema = new FakeSchema(context.getServiceName(), context.getFork());
-    schema.testMap()
-        .put(key, value);
+  TransactionError(int code) {
+    this.code = UnsignedBytes.checkedCast(code);
   }
 }
