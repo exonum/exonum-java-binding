@@ -16,12 +16,14 @@
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, ExecutionFail)]
 #[execution_fail(kind = "runtime")]
 pub enum Error {
-    /// Unable to parse artifact identifier or specified artifact has non-empty spec.
-    IncorrectArtifactId = 0,
-    /// Checked java exception is occurred
+    /// Illegal argument exception, as a result of malformed method arguments.
+    IllegalArgument = 0,
+    /// Java exception in runtime implementation. Is a result of a bug in the
+    /// framework code.
     JavaException = 1,
-    /// Any JNI error is occurred (except Java exception)
-    OtherJniError = 2,
-    /// Not supported operation
+    /// Any JNI error (except for Java exception). Is a result of bug in the
+    /// JNI glue code or some low-level JVM-related issue.
+    JniError = 2,
+    /// Not supported operation.
     NotSupportedOperation = 3,
 }
