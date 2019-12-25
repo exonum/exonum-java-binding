@@ -34,6 +34,7 @@ use jni::{
 
 use std::fmt;
 
+use exonum::runtime::InstanceStatus;
 use {
     runtime::Error,
     storage::View,
@@ -246,7 +247,7 @@ impl Runtime for JavaRuntimeProxy {
         }))
     }
 
-    fn start_adding_service(
+    fn initiate_adding_service(
         &self,
         context: ExecutionContext<'_>,
         spec: &InstanceSpec,
@@ -262,7 +263,7 @@ impl Runtime for JavaRuntimeProxy {
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::start_adding_service_id(),
+                runtime_adapter::initiate_adding_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(fork_handle),
@@ -274,21 +275,23 @@ impl Runtime for JavaRuntimeProxy {
         })
     }
 
-    fn commit_service(
+    fn update_service_status(
         &mut self,
         _snapshot: &dyn Snapshot,
         instance_spec: &InstanceSpec,
+        status: InstanceStatus,
     ) -> Result<(), ExecutionError> {
         let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
         self.jni_call_default(|env| {
             let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
+            let instance_status = status as i32;
 
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
-                runtime_adapter::commit_service_id(),
+                runtime_adapter::update_service_status_id(),
                 JavaType::Primitive(Primitive::Void),
-                &[JValue::from(instance_spec)],
+                &[JValue::from(instance_spec), JValue::from(instance_status)],
             )
             .and_then(JValue::v)
         })

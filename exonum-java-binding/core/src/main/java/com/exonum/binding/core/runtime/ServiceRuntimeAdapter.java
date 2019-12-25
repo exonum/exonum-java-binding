@@ -29,6 +29,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.InstanceState;
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
@@ -117,31 +118,35 @@ public class ServiceRuntimeAdapter {
    *     protobuf message
    * @param configuration the service initial configuration parameters as a serialized protobuf
    *     message
-   * @see ServiceRuntime#startAddingService(Fork, ServiceInstanceSpec, byte[])
+   * @see ServiceRuntime#initiateAddingService(Fork, ServiceInstanceSpec, byte[])
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    */
-  void startAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
+  void initiateAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
       ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
 
-      serviceRuntime.startAddingService(fork, javaInstanceSpec, configuration);
+      serviceRuntime.initiateAddingService(fork, javaInstanceSpec, configuration);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
   }
 
   /**
-   * Adds a service instance to the runtime after it has been successfully initialized.
+   * Updates the status of the service instance.
    *
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
-   * @see ServiceRuntime#commitService(ServiceInstanceSpec)
+   * @param numericInstanceStatus new status of the service instance as a numeric
+   *     representation of the {@link InstanceState.Status} enum.
+   * @see ServiceRuntime#updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)
    */
-  void commitService(byte[] instanceSpec) {
+  void updateServiceStatus(byte[] instanceSpec, int numericInstanceStatus) {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
-    serviceRuntime.commitService(javaInstanceSpec);
+    InstanceState.Status instanceStatus =
+        InstanceState.Status.forNumber(numericInstanceStatus);
+    serviceRuntime.updateInstanceStatus(javaInstanceSpec, instanceStatus);
   }
 
   private static ServiceInstanceSpec parseInstanceSpec(byte[] instanceSpec) {
