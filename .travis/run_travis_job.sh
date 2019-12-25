@@ -44,7 +44,7 @@ else
 -Djunit.jupiter.execution.parallel.enabled=true \
 -Djunit.jupiter.execution.parallel.mode.default=concurrent"
     fi
-     echo "${MAVEN_CONFIG}" > .mvn/maven.config
+    echo "${MAVEN_CONFIG}" > .mvn/maven.config
 
     # Run all tests
     ./run_all_tests.sh
