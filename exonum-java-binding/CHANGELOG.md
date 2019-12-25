@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Any exceptions thrown from the `Transaction` methods
   but `TransactionExecutionException` are saved with the error kind
   "unexpected".
+- Renamed `Service#beforeCommit` into `Service#afterTransactions`.
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.

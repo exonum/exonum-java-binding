@@ -45,8 +45,7 @@ static mut RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_UPDATE_SERVICE_STATUS: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
-// TODO(ECR-4016): rename to RUNTIME_ADAPTER_AFTER_TRANSACTIONS
-static mut RUNTIME_ADAPTER_BEFORE_COMMIT: Option<JMethodID> = None;
+static mut RUNTIME_ADAPTER_AFTER_TRANSACTIONS: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_SHUTDOWN: Option<JMethodID> = None;
 
@@ -122,8 +121,12 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "executeTransaction",
         "(ILjava/lang/String;I[BJI[B[B)V",
     );
-    RUNTIME_ADAPTER_BEFORE_COMMIT =
-        get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "beforeCommit", "(IJ)V");
+    RUNTIME_ADAPTER_AFTER_TRANSACTIONS = get_method_id(
+        &env,
+        SERVICE_RUNTIME_ADAPTER_CLASS,
+        "afterTransactions",
+        "(IJ)V",
+    );
     RUNTIME_ADAPTER_AFTER_COMMIT =
         get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "afterCommit", "(JIJ)V");
     RUNTIME_ADAPTER_SHUTDOWN =
@@ -160,7 +163,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE.is_some()
             && RUNTIME_ADAPTER_UPDATE_SERVICE_STATUS.is_some()
             && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
-            && RUNTIME_ADAPTER_BEFORE_COMMIT.is_some()
+            && RUNTIME_ADAPTER_AFTER_TRANSACTIONS.is_some()
             && RUNTIME_ADAPTER_AFTER_COMMIT.is_some()
             && RUNTIME_ADAPTER_SHUTDOWN.is_some()
             && JAVA_LANG_ERROR.is_some()
@@ -227,10 +230,10 @@ pub mod runtime_adapter {
         unsafe { RUNTIME_ADAPTER_EXECUTE_TX.unwrap() }
     }
 
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.beforeCommit()`.
-    pub fn before_commit_id() -> JMethodID<'static> {
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.afterTransactions()`.
+    pub fn after_transactions_id() -> JMethodID<'static> {
         check_cache_initialized();
-        unsafe { RUNTIME_ADAPTER_BEFORE_COMMIT.unwrap() }
+        unsafe { RUNTIME_ADAPTER_AFTER_TRANSACTIONS.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.afterCommit()`.
