@@ -398,30 +398,30 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
-    void beforeCommitSingleService() throws CloseFailuresException {
+    void afterTransactionsSingleService() throws CloseFailuresException {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
         Fork fork = database.createFork(cleaner);
 
-        serviceRuntime.beforeCommit(TEST_ID, fork);
+        serviceRuntime.afterTransactions(TEST_ID, fork);
 
-        verify(serviceWrapper).beforeCommit(fork);
+        verify(serviceWrapper).afterTransactions(fork);
       }
     }
 
     @Test
-    void beforeCommitThrowingServiceExceptionPropagated() throws CloseFailuresException {
+    void afterTransactionsThrowingServiceExceptionPropagated() throws CloseFailuresException {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
         Fork fork = database.createFork(cleaner);
         RuntimeException serviceException = new RuntimeException("Service exception");
-        doThrow(serviceException).when(serviceWrapper).beforeCommit(fork);
+        doThrow(serviceException).when(serviceWrapper).afterTransactions(fork);
 
         RuntimeException actual = assertThrows(serviceException.getClass(),
-            () -> serviceRuntime.beforeCommit(TEST_ID, fork));
+            () -> serviceRuntime.afterTransactions(TEST_ID, fork));
         assertThat(actual).isSameAs(serviceException);
 
-        verify(serviceWrapper).beforeCommit(fork);
+        verify(serviceWrapper).afterTransactions(fork);
       }
     }
 

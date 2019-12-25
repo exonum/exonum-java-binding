@@ -92,7 +92,7 @@ public interface Service {
    * <p>Any exceptions in this method will revert any changes made to the database by it,
    * but will not affect the processing of this block.
    */
-  default void beforeCommit(Fork fork) {}
+  default void afterTransactions(Fork fork) {}
 
   /**
    * Handles read-only block commit event. This handler is an optional callback method which is

@@ -128,16 +128,16 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
-  void beforeCommit() throws CloseFailuresException {
+  void afterTransactions() throws CloseFailuresException {
     int serviceId = 1;
     long forkHandle = 0x110b;
     Fork fork = mock(Fork.class);
     when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
-    serviceRuntimeAdapter.beforeCommit(serviceId, forkHandle);
+    serviceRuntimeAdapter.afterTransactions(serviceId, forkHandle);
 
-    verify(serviceRuntime).beforeCommit(serviceId, fork);
+    verify(serviceRuntime).afterTransactions(serviceId, fork);
   }
 
   @Test

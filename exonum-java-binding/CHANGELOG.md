@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Transactions now implemented as service methods annotated with
   `@Transaction(TX_ID)`, instead of objects of a class that implements
   `Transaction` interface. (#1274, #1307)
+- Renamed `Service#beforeCommit` into `Service#afterTransactions`.
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.

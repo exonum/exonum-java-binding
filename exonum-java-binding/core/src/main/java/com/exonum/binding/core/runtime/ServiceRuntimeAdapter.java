@@ -191,17 +191,17 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
-   * Performs the before commit operation for services in this runtime.
+   * Performs the after transactions operation for services in this runtime.
    *
    * @param forkHandle a handle to the native fork object, which must support checkpoints
    *                   and rollbacks
    * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#beforeCommit(int, Fork)
+   * @see ServiceRuntime#afterTransactions(int, Fork)
    */
-  void beforeCommit(int serviceId, long forkHandle) throws CloseFailuresException {
-    try (Cleaner cleaner = new Cleaner("beforeCommit")) {
+  void afterTransactions(int serviceId, long forkHandle) throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner("afterTransactions")) {
       Fork fork = viewFactory.createFork(forkHandle, cleaner);
-      serviceRuntime.beforeCommit(serviceId, fork);
+      serviceRuntime.afterTransactions(serviceId, fork);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }

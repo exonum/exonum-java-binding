@@ -307,19 +307,19 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
-   * Performs the before commit operation on the specified service in this runtime.
+   * Performs the after transactions operation on the specified service in this runtime.
    *
    * @param serviceId the id of the service on which to perform the operation
    * @param fork a fork allowing the runtime and the service to modify the database state.
    */
-  public void beforeCommit(int serviceId, Fork fork) {
+  public void afterTransactions(int serviceId, Fork fork) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       try {
-        service.beforeCommit(fork);
+        service.afterTransactions(fork);
       } catch (Exception e) {
-        logger.error("Service {} threw exception in beforeCommit. Any changes will be rolled-back",
-            service.getName(), e);
+        logger.error("Service {} threw exception in afterTransactions."
+                + " Any changes will be rolled-back", service.getName(), e);
         throw e;
       }
     }

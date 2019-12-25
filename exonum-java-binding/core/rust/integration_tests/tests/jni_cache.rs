@@ -44,7 +44,7 @@ fn concurrent_cache_read() {
             jni_cache::runtime_adapter::start_adding_service_id();
             jni_cache::runtime_adapter::commit_service_id();
             jni_cache::runtime_adapter::execute_tx_id();
-            jni_cache::runtime_adapter::before_commit_id();
+            jni_cache::runtime_adapter::after_transactions_id();
             jni_cache::runtime_adapter::after_commit_id();
             jni_cache::runtime_adapter::shutdown_id();
             jni_cache::class::get_name_id();
