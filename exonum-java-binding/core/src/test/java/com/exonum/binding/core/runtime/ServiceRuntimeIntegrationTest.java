@@ -40,6 +40,7 @@ import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.core.messages.Runtime.InstanceState;
 import com.google.common.collect.ImmutableMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -172,7 +173,7 @@ class ServiceRuntimeIntegrationTest {
     // Create the service from the artifact
     Fork fork = mock(Fork.class);
     byte[] configuration = anyConfiguration();
-    serviceRuntime.startAddingService(fork, instanceSpec, configuration);
+    serviceRuntime.initiateAddingService(fork, instanceSpec, configuration);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
@@ -199,7 +200,7 @@ class ServiceRuntimeIntegrationTest {
     Fork fork = mock(Fork.class);
     byte[] configuration = anyConfiguration();
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.startAddingService(fork, instanceSpec, configuration));
+        () -> serviceRuntime.initiateAddingService(fork, instanceSpec, configuration));
 
     assertThat(e).hasMessageFindingMatch("Unknown.+artifact");
     assertThat(e).hasMessageContaining(String.valueOf(artifactId));
@@ -232,7 +233,7 @@ class ServiceRuntimeIntegrationTest {
 
     // Try to create and initialize the service
     assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.startAddingService(fork, instanceSpec, configuration));
+        () -> serviceRuntime.initiateAddingService(fork, instanceSpec, configuration));
 
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
   }
@@ -257,7 +258,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    serviceRuntime.commitService(instanceSpec);
+    serviceRuntime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
@@ -290,11 +291,11 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    serviceRuntime.commitService(instanceSpec);
+    serviceRuntime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE);
 
     // Try to create another service with the same service instance specification
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.commitService(instanceSpec));
+        () -> serviceRuntime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE));
 
     assertThat(e).hasMessageContaining("name");
     assertThat(e).hasMessageContaining(TEST_NAME);
@@ -352,7 +353,7 @@ class ServiceRuntimeIntegrationTest {
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
-      serviceRuntime.commitService(INSTANCE_SPEC);
+      serviceRuntime.updateInstanceStatus(INSTANCE_SPEC, InstanceState.Status.NONE);
     }
 
     @Test
@@ -492,7 +493,7 @@ class ServiceRuntimeIntegrationTest {
 
       // Create the services
       for (ServiceInstanceSpec instanceSpec : SERVICES.keySet()) {
-        serviceRuntime.commitService(instanceSpec);
+        serviceRuntime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE);
       }
     }
 

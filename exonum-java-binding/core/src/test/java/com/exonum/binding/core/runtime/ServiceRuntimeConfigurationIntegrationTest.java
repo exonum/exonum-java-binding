@@ -26,6 +26,7 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
+import com.exonum.core.messages.Runtime.InstanceState;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
@@ -81,8 +82,8 @@ class ServiceRuntimeConfigurationIntegrationTest {
       String name = "s1";
       ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(name, 1, ARTIFACT_ID);
       Fork fork = database.createFork(cleaner);
-      runtime.startAddingService(fork, instanceSpec, new byte[0]);
-      runtime.commitService(instanceSpec);
+      runtime.initiateAddingService(fork, instanceSpec, new byte[0]);
+      runtime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE);
       assertThat(runtime.findService(name)).isNotEmpty();
     }
 

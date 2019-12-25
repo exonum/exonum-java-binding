@@ -119,12 +119,12 @@ class ServiceRuntimeAdapterTest {
     byte[] configuration = bytes(1, 2);
 
     // Initialize the service
-    serviceRuntimeAdapter.startAddingService(forkHandle, instanceSpec, configuration);
+    serviceRuntimeAdapter.initiateAddingService(forkHandle, instanceSpec, configuration);
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
         ServiceArtifactId.newJavaId(javaArtifactName));
-    verify(serviceRuntime).startAddingService(fork, expected, configuration);
+    verify(serviceRuntime).initiateAddingService(fork, expected, configuration);
   }
 
   @Test

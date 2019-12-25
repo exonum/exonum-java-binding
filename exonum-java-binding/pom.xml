@@ -547,6 +547,8 @@
                 <exclude>**/DeployArguments*</exclude>
                 <exclude>**/TestKitProtos*</exclude>
                 <exclude>com/exonum/core/messages/*</exclude>
+                <!-- TODO(ECR-4059): remove when proto sources are fixed -->
+                <exclude>exonum/OrderedMap*</exclude>
                 <exclude>com/exonum/binding/fakeservice/Transactions*</exclude>
                 <exclude>com/exonum/binding/qaservice/Config*</exclude>
                 <exclude>com/exonum/binding/qaservice/transactions/TxMessageProtos*</exclude>
