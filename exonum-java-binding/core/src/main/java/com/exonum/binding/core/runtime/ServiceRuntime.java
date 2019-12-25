@@ -29,6 +29,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.InstanceState;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -169,7 +170,8 @@ public final class ServiceRuntime implements AutoCloseable {
   /**
    * Starts registration of a new service instance with the given specification.
    * It involves the initial configuration of the service instance with the given parameters.
-   * The instance is not registered until {@link #commitService(ServiceInstanceSpec)}
+   * The instance is not registered until
+   * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)}
    * is invoked.
    *
    * @param fork a database view to apply configuration
@@ -181,7 +183,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * @throws RuntimeException if it failed to instantiate the service;
    *     or if the service initialization failed
    */
-  public void startAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
+  public void initiateAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
       byte[] configuration) {
     try {
       synchronized (lock) {
@@ -202,16 +204,19 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
+   * TODO(ECR-3919): fix the documentation of the method
    * Adds a service instance to the runtime after it has been successfully initialized
-   * in {@link #startAddingService(Fork, ServiceInstanceSpec, byte[])}. This operation
+   * in {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])}. This operation
    * completes the service instance registration, allowing subsequent operations on it:
    * transactions, API requests.
    *
    * @param instanceSpec a service instance specification; must reference a deployed artifact
+   * @param instanceStatus a new status of the service instance
    * @throws IllegalArgumentException if the service is already started; or its artifact
    *     is not deployed
    */
-  public void commitService(ServiceInstanceSpec instanceSpec) {
+  public void updateInstanceStatus(ServiceInstanceSpec instanceSpec,
+      InstanceState.Status instanceStatus) {
     try {
       synchronized (lock) {
         // Create a previously added service
