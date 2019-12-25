@@ -18,7 +18,6 @@ package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
 
 public class TestServiceModule extends AbstractServiceModule {
 
@@ -26,8 +25,5 @@ public class TestServiceModule extends AbstractServiceModule {
   protected void configure() {
     bind(Service.class)
         .to(TestService.class);
-
-    bind(TransactionConverter.class)
-        .toInstance((txId, payload) -> (context) -> System.out.println("Transaction#execute"));
   }
 }

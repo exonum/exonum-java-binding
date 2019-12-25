@@ -22,8 +22,8 @@ package com.exonum.client.response;
  */
 public enum ConsensusStatus {
   /**
-   * Shows that consensus is active
-   * i.e. it is enabled and the node has enough connected peers.
+   * Shows that consensus is active,
+   * i.e., it is enabled and the node has enough connected peers.
    */
   ACTIVE,
   /**

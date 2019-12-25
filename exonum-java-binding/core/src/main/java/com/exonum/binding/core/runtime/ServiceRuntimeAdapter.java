@@ -20,14 +20,12 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
@@ -163,17 +161,21 @@ public class ServiceRuntimeAdapter {
    * Executes the service transaction.
    *
    * @param serviceId the service numeric identifier
+   * @param interfaceName the name of the interface in which the transaction is defined
    * @param txId the transaction type identifier within the service
    * @param arguments the transaction arguments
    * @param forkNativeHandle a handle to a native fork object
+   * @param callerServiceId the id of the service which invoked the transaction (in case of
+   *      inner transactions); or 0 when the caller is an external message
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    * @throws TransactionExecutionException if the transaction execution failed
-   * @see ServiceRuntime#executeTransaction(int, int, byte[], Fork, HashCode, PublicKey)
-   * @see com.exonum.binding.core.transaction.Transaction#execute(TransactionContext)
+   * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
+   *      PublicKey)
+   * @see com.exonum.binding.core.transaction.Transaction
    */
-  void executeTransaction(int serviceId, int txId, byte[] arguments,
-      long forkNativeHandle, byte[] txMessageHash, byte[] authorPublicKey)
+  void executeTransaction(int serviceId, String interfaceName, int txId, byte[] arguments,
+      long forkNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)
       throws TransactionExecutionException, CloseFailuresException {
 
     try (Cleaner cleaner = new Cleaner("executeTransaction")) {
@@ -181,30 +183,10 @@ public class ServiceRuntimeAdapter {
       HashCode hash = HashCode.fromBytes(txMessageHash);
       PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
 
-      serviceRuntime.executeTransaction(serviceId, txId, arguments, fork, hash, authorPk);
+      serviceRuntime.executeTransaction(serviceId, interfaceName, txId, arguments, fork,
+          callerServiceId, hash, authorPk);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
-    }
-  }
-
-  /**
-   * Returns the state hashes of this runtime. The state hashes are serialized in protobuf,
-   * see {@link ServiceRuntimeStateHashes} for message specification.
-   *
-   * @param snapshotHandle a handle to the native snapshot object
-   * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#getStateHashes(Snapshot)
-   * @see ServiceRuntimeStateHashes
-   */
-  byte[] getStateHashes(long snapshotHandle) throws CloseFailuresException {
-    try (Cleaner cleaner = new Cleaner("getStateHashes")) {
-      Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
-      ServiceRuntimeStateHashes stateHashes = serviceRuntime.getStateHashes(snapshot);
-      return stateHashes.toByteArray();
-    } catch (CloseFailuresException e) {
-      handleCloseFailure(e);
-      // unreachable, ^ throws
-      return null;
     }
   }
 

@@ -30,10 +30,9 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  * <p>A fork represents the database state at the time it was created <em>plus</em> any changes
  * to the database made using this fork.
  *
- * <p>A fork allows to perform
- * a {@linkplain com.exonum.binding.core.transaction.Transaction transaction}: a number
- * of independent writes to the database, which then may be <em>atomically</em> applied
- * (i.e. committed) to the database and change the database state.
+ * <p>A fork allows to perform a transaction: a number of independent writes to the database,
+ * which then may be <em>atomically</em> applied (i.e. committed) to the database and change
+ * the database state.
  */
 public final class Fork extends View {
 
@@ -117,7 +116,7 @@ public final class Fork extends View {
    * <p>Subsequent operations with the fork are prohibited.
    *
    * @return a handle to the patch obtained from this fork
-   * @see <a href="https://exonum.com/doc/version/0.12/architecture/merkledb/#patches">
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/merkledb/#patches">
    *   MerkleDB Patches</a>
    */
   NativeHandle intoPatch() {

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.exonum.binding</groupId>
   <artifactId>exonum-java-binding-parent</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Exonum Java Binding Parent</name>
@@ -111,13 +111,13 @@
     <checkstyle.configLocation>${project.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.2</guice.version>
-    <log4j.version>2.12.1</log4j.version>
+    <log4j.version>2.13.0</log4j.version>
     <hamcrest.version>2.2</hamcrest.version>
     <junit.version>4.12</junit.version>
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
     <powermock.version>2.0.4</powermock.version>
     <protobuf.version>3.11.0</protobuf.version>
-    <mockito.version>3.1.0</mockito.version>
+    <mockito.version>3.2.4</mockito.version>
     <guava.version>28.1-jre</guava.version>
     <vertx.version>3.8.4</vertx.version>
     <equalsverifier.version>3.1.10</equalsverifier.version>
@@ -130,7 +130,7 @@
     <jacoco.it.args></jacoco.it.args>
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <excludeTags>slow-test</excludeTags>
-    <pf4j.version>3.1.0</pf4j.version>
+    <pf4j.version>3.2.0</pf4j.version>
     <!-- Default build mode is `debug`, can also be `release`. Usually controlled
          by the packaging script (package_app.sh), but can also be set from the CLI -->
     <build.mode>debug</build.mode>
@@ -439,7 +439,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.2.1</version>
           <executions>
             <execution>
               <id>attach-sources</id>
@@ -514,25 +514,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!-- Checks that the POMs match the code convention:
-           https://maven.apache.org/developers/conventions/code.html#POM_Code_Convention
-
-           Use `mvn tidy:pom` to fix any style issues -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>tidy-maven-plugin</artifactId>
-        <version>1.1.0</version>
-        <executions>
-          <execution>
-            <id>check-pom-code-style</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
@@ -564,6 +545,7 @@
                 <exclude>**/WalletProtos*</exclude>
                 <exclude>**/ServiceRuntimeProtos*</exclude>
                 <exclude>**/DeployArguments*</exclude>
+                <exclude>**/TestKitProtos*</exclude>
                 <exclude>com/exonum/core/messages/*</exclude>
                 <exclude>com/exonum/binding/fakeservice/Transactions*</exclude>
                 <exclude>com/exonum/binding/qaservice/Config*</exclude>

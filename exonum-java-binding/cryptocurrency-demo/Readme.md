@@ -24,8 +24,11 @@ Be sure you installed necessary packages:
 - [git](https://git-scm.com/downloads)
 - [Node.js with npm](https://nodejs.org/en/download/)
 - [Exonum Java][ejb-installation] application.
+- [Exonum Launcher][exonum-launcher] python application.
+- [Exonum Launcher Plugins](../exonum_launcher_java_plugins/README.md).
 
-[ejb-installation]: https://exonum.com/doc/version/0.12/get-started/java-binding/#installation
+[ejb-installation]: https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#installation
+[exonum-launcher]: https://github.com/exonum/exonum-launcher
 
 #### Build and Run
 
@@ -37,10 +40,24 @@ $ cd exonum-java-binding/cryptocurrency-demo
 $ mvn -P with-installed-app install 
 ```
 
-Run the service:
+Start the node:
 ```sh
-$ ./start-cryptocurrency-demo.sh
+$ ./start-node.sh
 ```
+
+Start the service:
+```sh
+$ python3 -m exonum_launcher -i cryptocurrency-demo.yml
+```
+
+---
+
+### 🛑
+
+*Frontend has not been updated to DS yet as of 0.9.0-rc1.
+Skip the subsequent instructions.*
+
+---
 
 Install frontend dependencies:
 
@@ -71,7 +88,7 @@ $ npm start -- --port=6040 --api-root=http://127.0.0.1:7000 --explorer-root=http
 Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 
 ## See Also
-- [Reference Documentation](https://exonum.com/doc/version/0.12/get-started/java-binding).
+- [Reference Documentation](https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding).
 - [Instructions][app-tutorial] explaining how to configure and run any Java service.
 
 [app-tutorial]: https://github.com/exonum/exonum-java-binding/blob/master/exonum-java-binding/core/rust/exonum-java/TUTORIAL.md

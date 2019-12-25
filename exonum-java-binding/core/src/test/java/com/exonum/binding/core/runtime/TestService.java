@@ -16,21 +16,11 @@
 
 package com.exonum.binding.core.runtime;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.storage.database.Snapshot;
 import io.vertx.ext.web.Router;
-import java.util.Collections;
-import java.util.List;
 
 class TestService implements Service {
-
-  @Override
-  public List<HashCode> getStateHashes(Snapshot snapshot) {
-    return Collections.emptyList();
-  }
-
   @Override
   public void createPublicApiHandlers(Node node, Router router) {
     // no-op

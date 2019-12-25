@@ -25,14 +25,14 @@ use jni::{
     sys::{jint, JNI_VERSION_1_8},
     JNIEnv, JavaVM,
 };
-use parking_lot::{Once, ONCE_INIT};
+use parking_lot::Once;
 use std::{os::raw::c_void, panic::catch_unwind};
 
 /// Invalid JNI version constant, signifying JNI_OnLoad failure.
 const INVALID_JNI_VERSION: jint = 0;
 const SERVICE_RUNTIME_ADAPTER_CLASS: &str = "com/exonum/binding/core/runtime/ServiceRuntimeAdapter";
 
-static INIT: Once = ONCE_INIT;
+static INIT: Once = Once::new();
 
 static mut OBJECT_GET_CLASS: Option<JMethodID> = None;
 static mut CLASS_GET_NAME: Option<JMethodID> = None;
@@ -45,7 +45,7 @@ static mut RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_START_ADDING_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_COMMIT_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
-static mut RUNTIME_ADAPTER_STATE_HASHES: Option<JMethodID> = None;
+// TODO(ECR-4016): rename to RUNTIME_ADAPTER_AFTER_TRANSACTIONS
 static mut RUNTIME_ADAPTER_BEFORE_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_SHUTDOWN: Option<JMethodID> = None;
@@ -120,13 +120,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
         "executeTransaction",
-        "(II[BJ[B[B)V",
-    );
-    RUNTIME_ADAPTER_STATE_HASHES = get_method_id(
-        &env,
-        SERVICE_RUNTIME_ADAPTER_CLASS,
-        "getStateHashes",
-        "(J)[B",
+        "(ILjava/lang/String;I[BJI[B[B)V",
     );
     RUNTIME_ADAPTER_BEFORE_COMMIT =
         get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "beforeCommit", "(IJ)V");
@@ -166,7 +160,6 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && RUNTIME_ADAPTER_START_ADDING_SERVICE.is_some()
             && RUNTIME_ADAPTER_COMMIT_SERVICE.is_some()
             && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
-            && RUNTIME_ADAPTER_STATE_HASHES.is_some()
             && RUNTIME_ADAPTER_BEFORE_COMMIT.is_some()
             && RUNTIME_ADAPTER_AFTER_COMMIT.is_some()
             && RUNTIME_ADAPTER_SHUTDOWN.is_some()
@@ -232,12 +225,6 @@ pub mod runtime_adapter {
     pub fn execute_tx_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { RUNTIME_ADAPTER_EXECUTE_TX.unwrap() }
-    }
-
-    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.getStateHashes()`.
-    pub fn state_hashes_id() -> JMethodID<'static> {
-        check_cache_initialized();
-        unsafe { RUNTIME_ADAPTER_STATE_HASHES.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.beforeCommit()`.

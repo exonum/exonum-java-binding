@@ -15,12 +15,14 @@ functions for _hashing_, _cryptography_, _serialization_, etc.
 ## Capabilities
 By using the client you are able to perform the following operations:
 - Submit transactions to the node
-- Receive transaction information 
-- Receive blockchain blocks information 
-- Receive node system information 
-- Receive node status information  
-_*Please refer to [the documentation][exonum-client] for details._  
-Also, see [examples](#examples). 
+- Receive transaction information
+- Receive blockchain blocks information
+- Receive node system information
+- Receive node status information
+- Receive list of started service instances
+
+_Please see the [examples](#examples) below and the [Javadocs][exonum-client]
+for details._
 
 ## Compatibility
 The following table shows versions compatibility:  
@@ -82,11 +84,17 @@ The following example shows how to create the transaction message.
 In addition please read about [transaction message structure][exonum-tx-message-builder].
 ```java
     TransactionMessage txMessage = TransactionMessage.builder()
-        .serviceId((short) 1)
-        .transactionId((short) 2)
+        .serviceId(serviceId)
+        .transactionId(2)
         .payload(data)
-        .sign(keys, CryptoFunctions.ed25519());
+        .sign(keys);
 ```
+* `serviceId` can be obtained, if needed, by the service name:
+  ```
+  int serviceId = exonumClient.findServiceInfo(serviceName)
+      .map(ServiceInfo::getId)
+      .orElseThrow(() -> new IllegalStateException("No service with the given name found: " + serviceName);
+  ```
 * `data` is a bytes array which contains transactional information/parameters
 in a service-defined format.
 It can be any object which should be serialized to bytes in advance.
@@ -94,9 +102,8 @@ We recommend to use [Google Protobuf][protobuf] for serialization,
 but it is always an option of your choice.
 Also, _common_ package provides [`StandardSerializers`][standard-serializers]
 utility class which can be helpful for serialization.  
-* `keys` is a key pair of private and public keys which is used for message signature.  
-* `ed25519` is the cryptographic function for signing.
- 
+* `keys` is a key pair of private and public keys which is used for message signature.
+
 ### Sending Transaction
 To send the transaction just call a `submitTransaction`.  
 Make notice that it works in a blocking way i.e. your thread will be 
@@ -121,7 +128,13 @@ if available, transaction location and result:
 Optional<TransactionResponse> response = exonumClient.getTransaction(txHash);
 ```
 * `txHash` is a hash of the transaction to search.
-  
+
+### Retrieving service info
+To retrieve the list of all started service instances:
+```java
+List<ServiceInfo> response = exonumClient.getServiceInfoList();
+```
+
 ## How to Build
 To build the client locally, clone the repository, and
 run next commands from the project's root 

@@ -17,36 +17,39 @@
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
-    exonum_merkledb::{self, Snapshot},
+    exonum_merkledb::Snapshot,
     messages::BinaryValue,
     runtime::{
-        ArtifactId, CallInfo, ErrorKind, ExecutionContext, ExecutionError, InstanceId,
-        InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, StateHashAggregator,
+        ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, ExecutionFail, InstanceId,
+        InstanceSpec, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
     },
 };
-use exonum_proto::ProtobufConvert;
 use futures::{Future, IntoFuture};
 use jni::{
     objects::{GlobalRef, JObject, JValue},
     signature::{JavaType, Primitive},
+    sys::jint,
     Executor, JNIEnv,
 };
-use runtime::Error;
+
 use std::fmt;
-use storage::View;
-use to_handle;
-use utils::{
-    describe_java_exception, get_and_clear_java_exception, get_exception_message,
-    jni_cache::{classes_refs, runtime_adapter, tx_execution_exception},
-    panic_on_exception, unwrap_jni,
+
+use {
+    runtime::Error,
+    storage::View,
+    to_handle,
+    utils::{
+        describe_java_exception, get_and_clear_java_exception, get_exception_message,
+        jni_cache::{classes_refs, runtime_adapter, tx_execution_exception},
+        panic_on_exception, unwrap_jni,
+    },
+    JniError, JniErrorKind, JniResult, Node,
 };
-use JniError;
-use JniErrorKind;
-use JniResult;
-use {proto, Node};
 
 /// Default validator ID. -1 is used as not-a-value in Java runtime.
 const DEFAULT_VALIDATOR_ID: i32 = -1;
+/// Java Runtime ID.
+pub const JAVA_RUNTIME_ID: u32 = RuntimeIdentifier::Java as u32;
 
 /// A proxy for `ServiceRuntimeAdapter`s.
 #[derive(Clone)]
@@ -57,9 +60,6 @@ pub struct JavaRuntimeProxy {
 }
 
 impl JavaRuntimeProxy {
-    /// Runtime Identifier
-    pub const RUNTIME_ID: RuntimeIdentifier = RuntimeIdentifier::Java;
-
     /// Creates new `JavaRuntimeProxy` for given `ServiceRuntimeAdapter` object
     pub fn new(executor: Executor, adapter: GlobalRef) -> Self {
         JavaRuntimeProxy {
@@ -70,7 +70,7 @@ impl JavaRuntimeProxy {
     }
 
     fn parse_artifact(&self, artifact: &ArtifactId) -> Result<JavaArtifactId, ExecutionError> {
-        if artifact.runtime_id != Self::RUNTIME_ID as u32 {
+        if artifact.runtime_id != JAVA_RUNTIME_ID {
             Err(Error::IncorrectArtifactId.into())
         } else {
             Ok(JavaArtifactId(artifact.name.to_string()))
@@ -113,7 +113,7 @@ impl JavaRuntimeProxy {
 
                 ExceptionHandlers::DEFAULT(env, exception)
             }
-            _ => (Error::OtherJniError, err).into(),
+            _ => Error::OtherJniError.with_description(err.to_string()),
         }
     }
 
@@ -171,11 +171,8 @@ impl JavaRuntimeProxy {
                     assert!(result.is_some());
                     Ok(result.unwrap())
                 }
-                Err(err) => Err((
-                    Error::OtherJniError,
-                    format!("Unexpected JNI error: {:?}", err),
-                )
-                    .into()),
+                Err(err) => Err(Error::OtherJniError
+                    .with_description(format!("Unexpected JNI error: {:?}", err))),
             },
             Some(error) => Err(error),
         }
@@ -303,10 +300,17 @@ impl Runtime for JavaRuntimeProxy {
         call_info: &CallInfo,
         arguments: &[u8],
     ) -> Result<(), ExecutionError> {
-        let tx = match context.caller.as_transaction() {
-            Some((hash, pub_key)) => (hash.to_bytes(), pub_key.to_bytes()),
-            None => {
-                // TODO (ECR-3702): caller is Service (not Transaction) is not supported yet
+        // todo: Replace this abomination (8-parameter method, arguments that make sense only
+        //   in some cases) with a single protobuf message or other alternative [ECR-3872]
+        let tx_info: (InstanceId, Hash, PublicKey) = match context.caller {
+            Caller::Transaction {
+                hash: message_hash,
+                author: author_pk,
+            } => (0, message_hash, author_pk),
+            Caller::Service {
+                instance_id: caller_id,
+            } => (caller_id, Hash::default(), PublicKey::default()),
+            Caller::Blockchain => {
                 return Err(Error::NotSupportedOperation.into());
             }
         };
@@ -318,11 +322,15 @@ impl Runtime for JavaRuntimeProxy {
             )],
             |env| {
                 let service_id = call_info.instance_id as i32;
+                let interface_name = JObject::from(env.new_string(context.interface_name)?);
                 let tx_id = call_info.method_id as i32;
                 let args = JObject::from(env.byte_array_from_slice(arguments)?);
                 let view_handle = to_handle(View::from_ref_fork(context.fork));
-                let hash = JObject::from(env.byte_array_from_slice(&tx.0)?);
-                let pub_key = JObject::from(env.byte_array_from_slice(&tx.1)?);
+                let caller_id = tx_info.0;
+                let message_hash = tx_info.1.to_bytes();
+                let message_hash = JObject::from(env.byte_array_from_slice(&message_hash)?);
+                let author_pk = tx_info.2.to_bytes();
+                let author_pk = JObject::from(env.byte_array_from_slice(&author_pk)?);
 
                 env.call_method_unchecked(
                     self.runtime_adapter.as_obj(),
@@ -330,11 +338,13 @@ impl Runtime for JavaRuntimeProxy {
                     JavaType::Primitive(Primitive::Void),
                     &[
                         JValue::from(service_id),
+                        JValue::from(interface_name),
                         JValue::from(tx_id),
                         JValue::from(args),
                         JValue::from(view_handle),
-                        JValue::from(hash),
-                        JValue::from(pub_key),
+                        JValue::from(caller_id as jint),
+                        JValue::from(message_hash),
+                        JValue::from(author_pk),
                     ],
                 )
                 .and_then(JValue::v)
@@ -342,30 +352,16 @@ impl Runtime for JavaRuntimeProxy {
         )
     }
 
-    fn state_hashes(&self, snapshot: &dyn Snapshot) -> StateHashAggregator {
-        let bytes = unwrap_jni(self.exec.with_attached(|env| {
-            let view_handle = to_handle(View::from_ref_snapshot(snapshot));
-            let java_runtime_hashes = panic_on_exception(
-                env,
-                env.call_method_unchecked(
-                    self.runtime_adapter.as_obj(),
-                    runtime_adapter::state_hashes_id(),
-                    JavaType::Array(Box::new(JavaType::Primitive(Primitive::Byte))),
-                    &[JValue::from(view_handle)],
-                ),
-            );
-            let byte_array = java_runtime_hashes.l()?.into_inner();
-            let data = env.convert_byte_array(byte_array)?;
-
-            Ok(data)
-        }));
-
-        ServiceRuntimeStateHashes::from_bytes(bytes.into())
-            .unwrap()
-            .into()
+    fn before_transactions(
+        &self,
+        _context: ExecutionContext,
+        _instance_id: InstanceId,
+    ) -> Result<(), ExecutionError> {
+        // TODO(ECR-4016): implement
+        Ok(())
     }
 
-    fn before_commit(
+    fn after_transactions(
         &self,
         context: ExecutionContext,
         instance_id: InstanceId,
@@ -437,10 +433,8 @@ impl fmt::Debug for JavaRuntimeProxy {
     }
 }
 
-impl From<JavaRuntimeProxy> for (u32, Box<dyn Runtime>) {
-    fn from(r: JavaRuntimeProxy) -> Self {
-        (JavaRuntimeProxy::RUNTIME_ID as u32, Box::new(r))
-    }
+impl WellKnownRuntime for JavaRuntimeProxy {
+    const ID: u32 = JAVA_RUNTIME_ID;
 }
 
 /// Artifact identification properties within `JavaRuntimeProxy`
@@ -453,60 +447,6 @@ impl fmt::Display for JavaArtifactId {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, ProtobufConvert, PartialEq)]
-#[protobuf_convert(source = "proto::ServiceStateHashes")]
-struct ServiceStateHashes {
-    instance_id: u32,
-    state_hashes: Vec<Vec<u8>>,
-}
-
-impl From<&ServiceStateHashes> for (InstanceId, Vec<Hash>) {
-    fn from(value: &ServiceStateHashes) -> Self {
-        let hashes: Vec<Hash> = value
-            .state_hashes
-            .iter()
-            .map(|bytes| to_hash(bytes))
-            .collect();
-        (value.instance_id, hashes)
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, ProtobufConvert, BinaryValue, PartialEq)]
-#[protobuf_convert(source = "proto::ServiceRuntimeStateHashes")]
-struct ServiceRuntimeStateHashes {
-    runtime_state_hashes: Vec<Vec<u8>>,
-    service_state_hashes: Vec<ServiceStateHashes>,
-}
-
-impl ServiceRuntimeStateHashes {
-    fn runtime(&self) -> Vec<Hash> {
-        self.runtime_state_hashes
-            .iter()
-            .map(|bytes| to_hash(bytes))
-            .collect()
-    }
-
-    fn instances(&self) -> Vec<(InstanceId, Vec<Hash>)> {
-        self.service_state_hashes
-            .iter()
-            .map(|service| service.into())
-            .collect()
-    }
-}
-
-impl From<ServiceRuntimeStateHashes> for StateHashAggregator {
-    fn from(value: ServiceRuntimeStateHashes) -> Self {
-        StateHashAggregator {
-            runtime: value.runtime(),
-            instances: value.instances(),
-        }
-    }
-}
-
-fn to_hash(bytes: &[u8]) -> Hash {
-    Hash::from_bytes(bytes.into()).unwrap()
-}
-
 type ExceptionHandler = Fn(&JNIEnv, JObject) -> ExecutionError;
 struct ExceptionHandlers;
 
@@ -514,14 +454,14 @@ impl ExceptionHandlers {
     const DEFAULT: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let message = describe_java_exception(env, exception);
-        (Error::JavaException, message).into()
+        Error::JavaException.with_description(message)
     };
 
     const TX_EXECUTION: &'static ExceptionHandler = &|env, exception| {
         assert!(!exception.is_null(), "No exception thrown.");
         let code = unwrap_jni(Self::get_tx_error_code(env, exception)) as u8;
         let msg = unwrap_jni(get_exception_message(env, exception)).unwrap_or_default();
-        ExecutionError::new(ErrorKind::service(code), msg)
+        ExecutionError::service(code, msg)
     };
 
     fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {

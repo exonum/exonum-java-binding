@@ -28,7 +28,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 /**
  * Helper class with utilities aiding in testing some transactions.
  */
-public final class TransactionUtils {
+final class TransactionUtils {
 
   private static final HashCode DEFAULT_HASH = HashCode.fromString("a0b0c0d0");
   private static final PublicKey DEFAULT_AUTHOR_KEY = PublicKey.fromHexString("abcd");
@@ -36,7 +36,7 @@ public final class TransactionUtils {
   /**
    * Returns new context with default values for a given view.
    */
-  public static TransactionContext.Builder newContext(Fork view) {
+  static TransactionContext.Builder newContext(Fork view) {
     return TransactionContext.builder()
         .fork(view)
         .txMessageHash(DEFAULT_HASH)
@@ -44,7 +44,7 @@ public final class TransactionUtils {
   }
 
   /** Creates a counter in the storage with the given name and initial value. */
-  public static void createCounter(QaSchema schema, String name, Long initialValue) {
+  static void createCounter(QaSchema schema, String name, Long initialValue) {
     HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> counterNames = schema.counterNames();

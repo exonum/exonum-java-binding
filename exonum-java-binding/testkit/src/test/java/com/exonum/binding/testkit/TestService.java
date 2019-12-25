@@ -16,8 +16,6 @@
 
 package com.exonum.binding.testkit;
 
-import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
-
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
@@ -29,16 +27,26 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
-final class TestService extends AbstractService {
+public final class TestService extends AbstractService {
 
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("Initial key", StandardCharsets.UTF_8);
   static final String THROWING_VALUE = "Incorrect value";
+  static final short TEST_TRANSACTION_ID = 94;
+  static final Charset BODY_CHARSET = StandardCharsets.UTF_8;
 
   private Node node;
 
@@ -65,6 +73,37 @@ final class TestService extends AbstractService {
     testMap.put(INITIAL_ENTRY_KEY, configurationValue);
   }
 
+  @Transaction(TEST_TRANSACTION_ID)
+  public void putEntry(byte[] arguments, TransactionContext context) {
+    String value = getValue(arguments);
+
+    TestSchema schema = new TestSchema(context.getFork(), context.getServiceId());
+    ProofMapIndexProxy<HashCode, String> map = schema.testMap();
+    map.put(getKey(value), value);
+  }
+
+  private static String getValue(byte[] payload) {
+    try {
+      CharsetDecoder utf8Decoder = createUtf8Decoder();
+      ByteBuffer body = ByteBuffer.wrap(payload);
+      CharBuffer result = utf8Decoder.decode(body);
+      return result.toString();
+    } catch (CharacterCodingException e) {
+      throw new IllegalArgumentException("Cannot decode the message body", e);
+    }
+  }
+
+  private static CharsetDecoder createUtf8Decoder() {
+    return BODY_CHARSET.newDecoder()
+        .onMalformedInput(CodingErrorAction.REPORT)
+        .onUnmappableCharacter(CodingErrorAction.REPLACE);
+  }
+
+  private HashCode getKey(String value) {
+    return Hashing.defaultHashFunction()
+        .hashString(value, BODY_CHARSET);
+  }
+
   @Override
   public void afterCommit(BlockCommittedEvent event) {
     long height = event.getHeight();
@@ -76,7 +115,7 @@ final class TestService extends AbstractService {
     String payload = "Test message on height " + height;
     return RawTransaction.newBuilder()
         .serviceId(serviceId)
-        .transactionId(TestTransaction.ID)
+        .transactionId(TEST_TRANSACTION_ID)
         .payload(payload.getBytes(BODY_CHARSET))
         .build();
   }

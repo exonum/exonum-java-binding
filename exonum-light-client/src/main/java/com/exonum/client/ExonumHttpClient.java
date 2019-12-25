@@ -22,6 +22,7 @@ import static com.exonum.client.ExonumIterables.indexOf;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
 import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
+import static com.exonum.client.ExonumUrls.SERVICES;
 import static com.exonum.client.ExonumUrls.STATS;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
 import static com.exonum.client.ExonumUrls.USER_AGENT;
@@ -46,6 +47,7 @@ import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.SystemStatistics;
 import com.exonum.client.response.TransactionResponse;
 import com.google.common.collect.ImmutableList;
@@ -277,6 +279,20 @@ class ExonumHttpClient implements ExonumClient {
     return response.getBlocks()
         .stream()
         .findFirst();
+  }
+
+  @Override
+  public Optional<ServiceInstanceInfo> findServiceInfo(String serviceName) {
+    return getServiceInfoList().stream()
+        .filter(s -> s.getName().equals(serviceName))
+        .findFirst();
+  }
+
+  @Override
+  public List<ServiceInstanceInfo> getServiceInfoList() {
+    Request request = get(url(SERVICES));
+
+    return blockingExecuteAndParse(request, ExplorerApiHelper::parseServicesResponse);
   }
 
   private BlocksResponse doGetBlocks(int count, BlockFilteringOption blockFilter, Long heightMax,

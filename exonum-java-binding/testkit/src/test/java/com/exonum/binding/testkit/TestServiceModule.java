@@ -18,7 +18,6 @@ package com.exonum.binding.testkit;
 
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.google.inject.Singleton;
 
 public final class TestServiceModule extends AbstractServiceModule {
@@ -26,6 +25,5 @@ public final class TestServiceModule extends AbstractServiceModule {
   @Override
   protected void configure() {
     bind(Service.class).to(TestService.class).in(Singleton.class);
-    bind(TransactionConverter.class).toInstance(TestTransaction::from);
   }
 }

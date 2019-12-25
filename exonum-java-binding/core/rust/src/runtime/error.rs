@@ -13,8 +13,8 @@
 // limitations under the License.
 
 /// List of possible Java runtime errors.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, IntoExecutionError)]
-#[execution_error(kind = "runtime")]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, ExecutionFail)]
+#[execution_fail(kind = "runtime")]
 pub enum Error {
     /// Unable to parse artifact identifier or specified artifact has non-empty spec.
     IncorrectArtifactId = 0,

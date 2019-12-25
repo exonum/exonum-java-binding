@@ -21,8 +21,6 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import java.util.Collections;
-import java.util.List;
 
 final class TestSchema implements Schema {
 
@@ -38,11 +36,5 @@ final class TestSchema implements Schema {
   ProofMapIndexProxy<HashCode, String> testMap() {
     return ProofMapIndexProxy.newInstance(testMapName, view, StandardSerializers.hash(),
         StandardSerializers.string());
-  }
-
-  @Override
-  public List<HashCode> getStateHashes() {
-    HashCode rootHash = testMap().getIndexHash();
-    return Collections.singletonList(rootHash);
   }
 }

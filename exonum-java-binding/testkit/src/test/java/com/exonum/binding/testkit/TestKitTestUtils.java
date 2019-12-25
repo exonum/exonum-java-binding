@@ -25,6 +25,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.core.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.InstanceState;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -53,29 +54,34 @@ final class TestKitTestUtils {
   static void createTestServiceArtifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);
     createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
-        TestTransaction.class, TestSchema.class, TestService.class);
+        TestSchema.class, TestService.class);
   }
 
   static void createTestService2Artifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME_2);
     createArtifact(artifactLocation, ARTIFACT_ID_2, ARTIFACT_VERSION_2, TestServiceModule2.class,
-        TestTransaction.class, TestSchema.class, TestService2.class);
+        TestSchema.class, TestService2.class);
   }
 
+  /**
+   * Creates an invalid service artifact that has no required metadata.
+   */
   static void createInvalidArtifact(Path directory, String filename) throws IOException {
     Path artifactLocation = directory.resolve(filename);
-    // Create an invalid artifact without a TestService class
-    createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
-        TestTransaction.class, TestSchema.class);
+    // Create an invalid artifact with no required metadata (plugin-id) and no classes.
+    new ServiceArtifactBuilder()
+        .setPluginId("")
+        .setPluginVersion("1.0.0")
+        .writeTo(artifactLocation);
   }
 
   static void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {
     View view = testKit.getSnapshot();
-    MapIndex<String, InstanceSpec> serviceInstances =
+    MapIndex<String, InstanceState> serviceInstances =
         new DispatcherSchema(view).serviceInstances();
     assertThat(serviceInstances.containsKey(serviceName)).isTrue();
 
-    InstanceSpec serviceSpec = serviceInstances.get(serviceName);
+    InstanceSpec serviceSpec = serviceInstances.get(serviceName).getSpec();
     int actualServiceId = serviceSpec.getId();
     assertThat(actualServiceId).isEqualTo(serviceId);
   }

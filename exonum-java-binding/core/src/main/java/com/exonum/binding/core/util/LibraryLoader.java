@@ -33,9 +33,9 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>This class is thread-safe.
  *
- * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#installation">
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#installation">
  *   Exonum Java installation instructions</a>
- * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#testing">
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#testing">
  *   Build configuration to enable integration testing of Java services</a>
  */
 public final class LibraryLoader {
@@ -50,7 +50,7 @@ public final class LibraryLoader {
    * <a href="https://wiki.bf.local/display/EJB/Java+Binding+Release+Checklist+Template">
    * each release</a>.
    */
-  private static final String JAVA_BINDING_VERSION = "0.9.0-SNAPSHOT";
+  private static final String JAVA_BINDING_VERSION = "0.10.0-SNAPSHOT";
 
   private static final Logger logger = LogManager.getLogger(LibraryLoader.class);
 
@@ -123,7 +123,7 @@ public final class LibraryLoader {
               + "containing %s library, where 'EXONUM_HOME' denotes the Exonum Java app "
               + "installation directory.%n"
               + "The code launching tests must usually set this property explicitly, see "
-              + "https://exonum.com/doc/version/0.12/get-started/java-binding/#testing",
+              + "https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#testing",
           JAVA_LIBRARY_PATH_PROPERTY, BINDING_LIB_NAME);
     } else {
       String dynamicLibVar = dynamicLibrariesEnvVar();
@@ -160,7 +160,7 @@ public final class LibraryLoader {
               + "  Native library version: %s%n"
               + "Check that the version of 'exonum-java-binding-core' matches the version of "
               + "the installed 'Exonum Java' application.%n"
-              + "See https://exonum.com/doc/version/0.12/get-started/java-binding/#installation",
+              + "See https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#installation",
           BINDING_LIB_NAME, expectedLibVersion, nativeLibVersion);
       logger.fatal(message);
       throw new LinkageError(message);

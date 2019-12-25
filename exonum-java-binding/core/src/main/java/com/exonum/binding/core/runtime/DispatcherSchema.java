@@ -20,8 +20,8 @@ import static com.exonum.binding.common.serialization.StandardSerializers.protob
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
 
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.MapIndexProxy;
-import com.exonum.core.messages.Runtime.InstanceSpec;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.core.messages.Runtime.InstanceState;
 
 /**
  * Exonum service instances database schema.
@@ -36,8 +36,8 @@ public class DispatcherSchema {
   /**
    * Returns a map of service instance specifications of started services indexed by their names.
    */
-  public MapIndexProxy<String, InstanceSpec> serviceInstances() {
-    return MapIndexProxy.newInstance("core.dispatcher.service_instances", view,
-        string(), protobuf(InstanceSpec.class));
+  public ProofMapIndexProxy<String, InstanceState> serviceInstances() {
+    return ProofMapIndexProxy.newInstance("dispatcher_instances", view,
+        string(), protobuf(InstanceState.class));
   }
 }

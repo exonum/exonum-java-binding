@@ -24,11 +24,12 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.RuntimeId;
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.InstanceState;
 import java.time.ZonedDateTime;
 
 class TimeSchemaProxy implements TimeSchema {
@@ -51,11 +52,13 @@ class TimeSchemaProxy implements TimeSchema {
   }
 
   private void checkIfEnabled() {
-    MapIndex<String, InstanceSpec> serviceInstances = new DispatcherSchema(view).serviceInstances();
+    MapIndex<String, InstanceState> serviceInstances =
+        new DispatcherSchema(view).serviceInstances();
     checkArgument(serviceInstances.containsKey(name), "No time service instance "
         + "with the given name (%s) started.", name);
 
-    InstanceSpec serviceSpec = serviceInstances.get(name);
+    // TODO(ECR-3953): check instance status
+    InstanceSpec serviceSpec = serviceInstances.get(name).getSpec();
     ArtifactId artifactId = serviceSpec.getArtifact();
     checkArgument(isTimeOracleInstance(artifactId), "Service with the given name (%s) is not "
         + "an Exonum time oracle, but %s.", name, artifactId);
@@ -67,8 +70,9 @@ class TimeSchemaProxy implements TimeSchema {
   }
 
   @Override
-  public EntryIndexProxy<ZonedDateTime> getTime() {
-    return EntryIndexProxy.newInstance(indexName(TimeIndex.TIME), view, ZONED_DATE_TIME_SERIALIZER);
+  public ProofEntryIndexProxy<ZonedDateTime> getTime() {
+    return ProofEntryIndexProxy.newInstance(
+        indexName(TimeIndex.TIME), view, ZONED_DATE_TIME_SERIALIZER);
   }
 
   @Override

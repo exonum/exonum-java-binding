@@ -18,7 +18,6 @@ package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
-import com.exonum.binding.core.service.TransactionConverter;
 import com.google.auto.value.AutoValue;
 
 /**
@@ -26,9 +25,6 @@ import com.google.auto.value.AutoValue;
  * as it only includes the serialized transaction parameters and transaction identifiers.
  * Author’s public key is <em>not</em> included but is accessible from
  * the {@linkplain TransactionContext#getAuthorPk() execution context}.
- *
- * <p>A raw transaction is converted to an {@linkplain Transaction executable transaction}
- * by the framework using an implementation of {@link TransactionConverter}.
  */
 // todo: [ECR-3438] Reconsider (split into CallInfo and the payload)? It is currently used
 //  in Node#submitTransaction. Will it make #submitTransaction easier or harder to use?

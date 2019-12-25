@@ -18,7 +18,7 @@ package com.exonum.binding.time;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
 
@@ -26,7 +26,7 @@ import java.time.ZonedDateTime;
  * Exonum time service database schema. It provides read-only access to the state
  * of a time oracle service instance.
  *
- * @see <a href="https://exonum.com/doc/version/0.12/advanced/time/">Time oracle documentation</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/time/">Time oracle documentation</a>
  */
 public interface TimeSchema {
 
@@ -50,7 +50,7 @@ public interface TimeSchema {
    * the transactions with time updates from at least two thirds of validator nodes are processed.
    * After that the time will be always present.
    */
-  EntryIndexProxy<ZonedDateTime> getTime();
+  ProofEntryIndexProxy<ZonedDateTime> getTime();
 
   /**
    * Returns the table that stores time for every validator. Note that this is a

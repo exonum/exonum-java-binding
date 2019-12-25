@@ -16,13 +16,11 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.PROOF_MAP_KEY_SIZE;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.map.UncheckedMapProof;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -31,7 +29,7 @@ import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.View;
 import com.google.common.collect.Lists;
-import java.nio.ByteBuffer;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -52,14 +50,16 @@ import java.util.function.LongSupplier;
  * <h3><a name="key-hashing">Key hashing in proof maps</a></h3>
  *
  * <p>By default, when creating the proof map using methods
- * {@link #newInstance(String, View, Serializer, Serializer)} and
- * {@link #newInGroupUnsafe(String, byte[], View, Serializer, Serializer)}, the user keys are
- * converted into internal keys through hashing. This allows to use keys of arbitrary size and
- * ensures the balance of the internal tree. It is also possible to create a proof map that will
- * not hash keys with methods {@link #newInstanceNoKeyHashing(String, View, Serializer, Serializer)}
- * and {@link #newInGroupUnsafeNoKeyHashing(String, byte[], View, Serializer, Serializer)}. In this
- * mode, the map will use the user keys as internal tree keys. Such mode of operation is
- * appropriate iff all of the following conditions hold:
+ * {@link #newInstance(String, View, Serializer, Serializer) #newInstance} and
+ * {@link #newInGroupUnsafe(String, byte[], View, Serializer, Serializer) #newInGroupUnsafe},
+ * the user keys are converted into internal keys through hashing. This allows to use keys of
+ * an arbitrary size and ensures the balance of the internal tree.
+ * It is also possible to create a proof map that will not hash keys with methods
+ * {@link #newInstanceNoKeyHashing(String, View, Serializer, Serializer) #newInstanceNoKeyHashing}
+ * and {@link #newInGroupUnsafeNoKeyHashing(String, byte[], View, Serializer, Serializer)
+ * #newInGroupUnsafeNoKeyHashing}. In this mode the map will use the user keys as internal
+ * tree keys. Such mode of operation is appropriate iff <em>all</em> of the following conditions
+ * hold:
  *
  * <ul>
  *   <li>All keys are 32-byte long</li>
@@ -67,6 +67,8 @@ import java.util.function.LongSupplier;
  *   <li>The keys come from a trusted source that cannot influence their distribution and affect
  *       the tree balance.</li>
  * </ul>
+ *
+ * <hr>
  *
  * <p>The "destructive" methods of the map, i.e., the one that change the map contents,
  * are specified to throw {@link UnsupportedOperationException} if
@@ -316,7 +318,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
    *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>)
    */
-  public UncheckedMapProof getProof(K key, K... otherKeys) {
+  public MapProof getProof(K key, K... otherKeys) {
     if (otherKeys.length == 0) {
       return getSingleKeyProof(key);
     } else {
@@ -335,7 +337,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>) or
    *     keys collection is empty
    */
-  public UncheckedMapProof getProof(Collection<? extends K> keys) {
+  public MapProof getProof(Collection<? extends K> keys) {
     checkArgument(!keys.isEmpty(), "Keys collection should not be empty");
     if (keys.size() == 1) {
       K key = keys.iterator()
@@ -346,27 +348,36 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     }
   }
 
-  private UncheckedMapProof getSingleKeyProof(K key) {
+  private MapProof getSingleKeyProof(K key) {
     byte[] dbKey = keySerializer.toBytes(key);
-    return nativeGetProof(getNativeHandle(), dbKey);
+    byte[] proofMessage = nativeGetProof(getNativeHandle(), dbKey);
+    return decodeProofMessage(proofMessage);
   }
 
-  private native UncheckedMapProof nativeGetProof(long nativeHandle, byte[] key);
+  private native byte[] nativeGetProof(long nativeHandle, byte[] key);
 
-  private UncheckedMapProof getMultiKeyProof(Collection<? extends K> keys) {
-    return nativeGetMultiProof(getNativeHandle(), mergeKeysIntoByteArray(keys));
+  private MapProof getMultiKeyProof(Collection<? extends K> keys) {
+    byte[][] dbKeys = keysToArray(keys);
+    byte[] proofMessage = nativeGetMultiProof(getNativeHandle(), dbKeys);
+    return decodeProofMessage(proofMessage);
   }
 
-  private byte[] mergeKeysIntoByteArray(Collection<? extends K> keys) {
-    int arraySize = keys.size() * PROOF_MAP_KEY_SIZE;
-    ByteBuffer flattenedKeys = ByteBuffer.allocate(arraySize);
-    keys.stream()
+  private byte[][] keysToArray(Collection<? extends K> keys) {
+    return keys.stream()
         .map(keySerializer::toBytes)
-        .forEach(flattenedKeys::put);
-    return flattenedKeys.array();
+        .toArray(byte[][]::new);
   }
 
-  private native UncheckedMapProof nativeGetMultiProof(long nativeHandle, byte[] keys);
+  private native byte[] nativeGetMultiProof(long nativeHandle, byte[][] keys);
+
+  private static MapProof decodeProofMessage(byte[] proofMessage) {
+    try {
+      return MapProof.parseFrom(proofMessage);
+    } catch (InvalidProtocolBufferException e) {
+      // Must never happen with correct native code
+      throw new IllegalStateException("Non-decodable proof message", e);
+    }
+  }
 
   /**
    * Returns the index hash which represents the complete state of this map.

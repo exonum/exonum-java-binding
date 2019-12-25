@@ -19,17 +19,12 @@ package com.exonum.binding.core.runtime;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceRuntimeStateHashes;
-import com.exonum.binding.core.runtime.ServiceRuntimeProtos.ServiceStateHashes;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transport.Server;
@@ -37,11 +32,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.google.protobuf.ByteString;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedMap;
@@ -74,8 +67,8 @@ public final class ServiceRuntime implements AutoCloseable {
   private final Path artifactsDir;
   /**
    * The active services indexed by their name. It is stored in a sorted map that offers
-   * the same iteration order on all nodes with the same services, which is required
-   * for correct operation of beforeCommit and {@link #getStateHashes(Snapshot)}.
+   * the same iteration order on all nodes with the same services, which is useful
+   * for logging purposes.
    */
   private final SortedMap<String, ServiceWrapper> services = new TreeMap<>();
   /**
@@ -276,16 +269,22 @@ public final class ServiceRuntime implements AutoCloseable {
 
   /**
    * Executes a transaction belonging to the given service.
+   *
    * @param serviceId the numeric identifier of the service instance to which the transaction
    *     belongs
+   * @param interfaceName a fully-qualified name of the interface in which the transaction
+   *     is defined, or empty string if it is defined in the service directly (implicit interface)
    * @param txId the transaction type identifier
    * @param arguments the serialized transaction arguments
    * @param fork a native fork object
+   * @param callerServiceId the id of the caller service if transaction is invoked by other
+   *     service. Currently only applicable to invocations of Configure interface methods
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    */
-  public void executeTransaction(int serviceId, int txId, byte[] arguments,
-                                 Fork fork, HashCode txMessageHash, PublicKey authorPublicKey)
+  public void executeTransaction(int serviceId, String interfaceName, int txId,
+      byte[] arguments, Fork fork, int callerServiceId, HashCode txMessageHash,
+      PublicKey authorPublicKey)
       throws TransactionExecutionException {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
@@ -298,44 +297,13 @@ public final class ServiceRuntime implements AutoCloseable {
           .serviceId(serviceId)
           .build();
       try {
-        service.executeTransaction(txId, arguments, context);
+        service.executeTransaction(interfaceName, txId, arguments, callerServiceId, context);
       } catch (Exception e) {
         logger.info("Transaction execution failed (service={}, txId={}, txMessageHash={})",
             service.getName(), txId, context.getTransactionMessageHash(), e);
         throw e;
       }
     }
-  }
-
-  /**
-   * Returns the state hashes of this runtime and the services registered in it as a protobuf
-   * message.
-   *
-   * @param snapshot the snapshot of the current database state
-   */
-  public ServiceRuntimeStateHashes getStateHashes(Snapshot snapshot) {
-    synchronized (lock) {
-      // Collect the service state hashes
-      List<ServiceStateHashes> serviceStateHashes = services.values().stream()
-          .map(service -> getServiceStateHashes(service, snapshot))
-          .collect(toList());
-
-      return ServiceRuntimeStateHashes.newBuilder()
-              // The runtime itself does not have any state hashes at the moment.
-              .addAllServiceStateHashes(serviceStateHashes)
-              .build();
-    }
-  }
-
-  private ServiceStateHashes getServiceStateHashes(ServiceWrapper service, Snapshot snapshot) {
-    List<HashCode> stateHashes = service.getStateHashes(snapshot);
-    List<ByteString> stateHashesAsBytes = stateHashes.stream()
-        .map(hash -> ByteString.copyFrom(hash.asBytes()))
-        .collect(toList());
-    return ServiceStateHashes.newBuilder()
-        .setInstanceId(service.getId())
-        .addAllStateHashes(stateHashesAsBytes)
-        .build();
   }
 
   /**
@@ -383,26 +351,6 @@ public final class ServiceRuntime implements AutoCloseable {
               service.getName(), event, e);
         }
       }
-    }
-  }
-
-  /**
-   * Verifies that an Exonum raw transaction can be correctly converted to an executable
-   * transaction of given service.
-   *
-   * @param serviceId the id of the service
-   * @param txId the {@linkplain TransactionMessage#getTransactionId() transaction type identifier}
-   *     within the service
-   * @param arguments the {@linkplain TransactionMessage#getPayload() serialized transaction
-   *     arguments}
-   * @throws IllegalArgumentException if there is no service with such id in this runtime, or if
-   *     the transaction is not known to the service, or the arguments are not valid: e.g., cannot
-   *     be deserialized, or do not meet the preconditions
-   */
-  public void verifyTransaction(int serviceId, int txId, byte[] arguments) {
-    synchronized (lock) {
-      ServiceWrapper service = getServiceById(serviceId);
-      service.convertTransaction(txId, arguments);
     }
   }
 

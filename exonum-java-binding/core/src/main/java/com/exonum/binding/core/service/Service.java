@@ -16,13 +16,8 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
-import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import io.vertx.ext.web.Router;
-import java.util.List;
 
 /**
  * An Exonum service.
@@ -49,30 +44,11 @@ public interface Service {
    * @throws IllegalArgumentException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
    *     its initialization fails
+   * @see Configurable
    */
   default void initialize(Fork fork, Configuration configuration) {
     // No configuration
   }
-
-  /**
-   * Returns a list of hashes representing the state of this service, as of the given snapshot
-   * of the blockchain state. Usually, it includes the hashes of all Merkelized collections
-   * defined by this service.
-   *
-   * <p>The core uses this list to verify that the service on each node in the network has the same
-   * database state. To do so efficiently, it aggregates state hashes of all services
-   * into a single Merkelized meta-map. The hash of this meta-map is considered the hash
-   * of the entire blockchain state and is recorded as such in blocks and Precommit messages.
-   *
-   * <p>Please note that if this service does not provide any state hashes,
-   * the framework will not be able to verify that its transactions cause the same results
-   * on different nodes.
-   *
-   * @param snapshot a snapshot of the blockchain state. Not valid after this method returns
-   * @see ProofListIndexProxy#getIndexHash()
-   * @see ProofMapIndexProxy#getIndexHash()
-   */
-  List<HashCode> getStateHashes(Snapshot snapshot);
 
   /**
    * Creates handlers that make up the public HTTP API of this service.
@@ -90,10 +66,15 @@ public interface Service {
    * });
    * }</pre>
    *
+   * <p>Please remember that Java services use a <em>separate</em> server from Rust services.
+   * The Java server TCP port is specified on node start, see
+   * <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#running-the-node">
+   * documentation</a> for details.
+   *
    * @param node a set-up Exonum node, providing an interface to access
    *             the current blockchain state and submit transactions
    * @param router a router responsible for handling requests to this service
-   * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#external-service-api">
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>
    */
   void createPublicApiHandlers(Node node, Router router);

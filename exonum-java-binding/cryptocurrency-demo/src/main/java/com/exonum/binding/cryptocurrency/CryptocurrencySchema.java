@@ -25,8 +25,7 @@ import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
+import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 
 /**
  * A schema of the cryptocurrency service.
@@ -43,11 +42,6 @@ public final class CryptocurrencySchema implements Schema {
     this.namespace = serviceName + ".";
   }
 
-  @Override
-  public List<HashCode> getStateHashes() {
-    return ImmutableList.of(wallets().getIndexHash());
-  }
-
   /**
    * Returns a proof map of wallets. Note that this is a
    * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
@@ -60,8 +54,8 @@ public final class CryptocurrencySchema implements Schema {
 
   /**
    * Returns transactions history of the wallet. It contains hashes of
-   * {@link com.exonum.binding.cryptocurrency.transactions.TransferTx} transaction messages
-   * that changed the balance of the given wallet.
+   * {@link TxMessageProtos.TransferTx} transaction messages that changed the balance of the given
+   * wallet.
    *
    * @param walletId wallet address
    */

@@ -37,15 +37,18 @@ import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.service.BlockCommittedEvent;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.testkit.internal.TestKitProtos.TestKitServiceInstances;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.binding.core.util.LibraryLoader;
+import com.exonum.core.messages.Runtime;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -81,12 +84,12 @@ import javax.annotation.Nullable;
  * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized — service instances are
- * {@linkplain Service#configure(Fork) initialized} and genesis block is committed.
+ * {@linkplain Service#initialize(Fork, Configuration) initialized} and genesis block is committed.
  * Then the {@linkplain Service#createPublicApiHandlers(Node, Router) public API handlers} are
  * created.
  *
- * @see <a href="https://exonum.com/doc/version/0.12/get-started/test-service/">TestKit documentation</a>
- * @see <a href="https://exonum.com/doc/version/0.12/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/test-service/">TestKit documentation</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
@@ -126,7 +129,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     this.port = port;
   }
 
-  private static TestKit newInstance(TestKitServiceInstances[] serviceInstances,
+  private static TestKit newInstance(TestKitServiceInstances serviceInstances,
                                      EmulatedNodeType nodeType, short validatorCount,
                                      @Nullable TimeServiceSpec timeServiceSpec,
                                      Path artifactsDirectory) {
@@ -135,8 +138,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     ServiceRuntimeAdapter serviceRuntimeAdapter =
         frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
-    long nativeHandle = nativeCreateTestKit(serviceInstances, isAuditorNode, validatorCount,
-        timeServiceSpec, serviceRuntimeAdapter);
+    long nativeHandle = nativeCreateTestKit(serviceInstances.toByteArray(), isAuditorNode,
+            validatorCount, timeServiceSpec, serviceRuntimeAdapter);
 
     try {
       // Get the actual port: it must have been set as testkit initialized the runtimes.
@@ -189,8 +192,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws IllegalArgumentException if transactions are malformed or don't belong to this
-   *     service
+   * @throws RuntimeException if any transaction does not belong to a started service
+   *     (i.e., has an unknown service id)
    */
   public Block createBlockWithTransactions(TransactionMessage... transactions) {
     return createBlockWithTransactions(asList(transactions));
@@ -201,12 +204,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws IllegalArgumentException if transactions are malformed or don't belong to this
-   *     service
+   * @throws RuntimeException if any transaction does not belong to a started service
+   *     (i.e., has an unknown service id)
    */
   public Block createBlockWithTransactions(Iterable<TransactionMessage> transactions) {
     List<TransactionMessage> messageList = ImmutableList.copyOf(transactions);
-    checkTransactions(messageList);
     byte[][] transactionMessagesArr = messageList.stream()
         .map(TransactionMessage::toBytes)
         .toArray(byte[][]::new);
@@ -221,36 +223,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @return created block
    */
   public Block createBlock() {
-    List<TransactionMessage> inPoolTransactions = getTransactionPool();
-    checkTransactions(inPoolTransactions);
     byte[] block = nativeCreateBlock(nativeHandle.get());
     return BLOCK_SERIALIZER.fromBytes(block);
-  }
-
-  private void checkTransactions(List<TransactionMessage> transactionMessages) {
-    for (TransactionMessage transactionMessage: transactionMessages) {
-      checkTransaction(transactionMessage);
-    }
-  }
-
-  private void checkTransaction(TransactionMessage transactionMessage) {
-    Integer serviceId = transactionMessage.getServiceId();
-    // As transactions of time service might be submitted in TestKit that has this service
-    // activated, those transactions should be considered valid, as time service is not
-    // contained in Java runtime
-    if (serviceId.equals(timeServiceId)) {
-      return;
-    }
-    try {
-      serviceRuntime.verifyTransaction(serviceId,
-          transactionMessage.getTransactionId(), transactionMessage.getPayload().toByteArray());
-    } catch (Exception conversionException) {
-      String message = String.format("Service with id=%s failed to convert transaction (%s)."
-          + " Make sure that the submitted transaction is correctly serialized, and the service's"
-          + " TransactionConverter implementation is correct and handles this transaction as"
-          + " expected.", serviceId, transactionMessage);
-      throw new IllegalArgumentException(message, conversionException);
-    }
   }
 
   /**
@@ -366,7 +340,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
   }
 
-  private static native long nativeCreateTestKit(TestKitServiceInstances[] services,
+  private static native long nativeCreateTestKit(byte[] services,
                                                  boolean auditor, short withValidatorCount,
                                                  TimeServiceSpec timeProviderSpec,
                                                  ServiceRuntimeAdapter serviceRuntimeAdapter);
@@ -396,7 +370,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     private EmulatedNodeType nodeType = EmulatedNodeType.VALIDATOR;
     private short validatorCount = 1;
-    private Multimap<ServiceArtifactId, ServiceSpec> services = ArrayListMultimap.create();
+    private Multimap<ServiceArtifactId, Runtime.InstanceInitParams> services =
+            ArrayListMultimap.create();
     private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
     private Path artifactsDirectory;
     private TimeServiceSpec timeServiceSpec;
@@ -492,9 +467,18 @@ public final class TestKit extends AbstractCloseableNativeProxy {
                                int serviceId, MessageLite configuration) {
       checkServiceId(serviceId, serviceName);
       checkServiceArtifactIsDeployed(serviceArtifactId);
-      ServiceSpec serviceSpec = new ServiceSpec(serviceName, serviceId,
-          configuration.toByteArray());
-      services.put(serviceArtifactId, serviceSpec);
+
+      // Collect specifications of service instances in their protobuf representation.
+      Runtime.InstanceSpec instanceSpec = Runtime.InstanceSpec.newBuilder()
+              .setId(serviceId)
+              .setName(serviceName)
+              .setArtifact(artifactIdToProto(serviceArtifactId))
+              .build();
+      Runtime.InstanceInitParams params = Runtime.InstanceInitParams.newBuilder()
+              .setInstanceSpec(instanceSpec)
+              .setConstructor(configuration.toByteString())
+              .build();
+      services.put(serviceArtifactId, params);
       return this;
     }
 
@@ -557,20 +541,46 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkCorrectServiceNumber(services.size());
       checkCorrectValidatorNumber();
       checkArtifactsDirectory();
-      TestKitServiceInstances[] testKitServiceInstances = mergeServiceSpecs();
+      TestKitServiceInstances testKitServiceInstances = prepareServicesConfiguration();
       return newInstance(testKitServiceInstances, nodeType, validatorCount,
           timeServiceSpec, artifactsDirectory);
     }
 
     /**
-     * Turn collection of service instances into a list of
-     * {@linkplain TestKitServiceInstances} objects for native to work with.
+     * Turn collections of artifacts and service instances into a
+     * {@linkplain TestKitServiceInstances} object for native to work with.
      */
-    private TestKitServiceInstances[] mergeServiceSpecs() {
+    private TestKitServiceInstances prepareServicesConfiguration() {
       checkDeployedArtifactsAreUsed();
-      return serviceArtifactFilenames.entrySet().stream()
-          .map(this::aggregateServiceSpecs)
-          .toArray(TestKitServiceInstances[]::new);
+      TestKitServiceInstances.Builder builder = TestKitServiceInstances.newBuilder();
+
+      // Add specifications of artifacts to deploy.
+      for (Map.Entry<ServiceArtifactId, String> entry: serviceArtifactFilenames.entrySet()) {
+        ServiceArtifactId artifactId = entry.getKey();
+        Runtime.ArtifactSpec artifactSpec = Runtime.ArtifactSpec.newBuilder()
+                .setArtifact(artifactIdToProto(artifactId))
+                .setPayload(DeployArguments.newBuilder()
+                        .setArtifactFilename(entry.getValue())
+                        .build()
+                        .toByteString())
+                .build();
+
+        builder.addArtifactSpecs(artifactSpec);
+      }
+
+      // Add specifications of service instances to start.
+      for (Runtime.InstanceInitParams instanceInitParams: services.values()) {
+        builder.addServiceSpecs(instanceInitParams);
+      }
+
+      return builder.build();
+    }
+
+    private Runtime.ArtifactId artifactIdToProto(ServiceArtifactId artifactId) {
+      return Runtime.ArtifactId.newBuilder()
+              .setRuntimeId(artifactId.getRuntimeId())
+              .setName(artifactId.getName())
+              .build();
     }
 
     private void checkDeployedArtifactsAreUsed() {
@@ -581,21 +591,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkArgument(unusedArtifacts.isEmpty(),
           "Following service artifacts were deployed, but not used for service instantiation: %s",
           unusedArtifacts);
-    }
-
-    /**
-     * Aggregates service instances specifications of a given service artifact id as a
-     * {@linkplain TestKitServiceInstances} object.
-     */
-    private TestKitServiceInstances aggregateServiceSpecs(
-        Map.Entry<ServiceArtifactId, String> serviceArtifact) {
-      ServiceArtifactId serviceArtifactId = serviceArtifact.getKey();
-      ServiceSpec[] serviceSpecs = services.get(serviceArtifactId).toArray(new ServiceSpec[0]);
-      DeployArguments deployArgs = DeployArguments.newBuilder()
-          .setArtifactFilename(serviceArtifact.getValue())
-          .build();
-      return new TestKitServiceInstances(
-          serviceArtifactId.toString(), deployArgs.toByteArray(), serviceSpecs);
     }
 
     private void checkCorrectValidatorNumber() {

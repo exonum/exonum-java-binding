@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{
+use exonum::merkledb::{
     access::FromAccess, proof_list_index::ProofListIndexIter, Fork, IndexAddress, ObjectHash,
     ProofListIndex, Snapshot,
 };
 use jni::{
     objects::{JClass, JObject, JString},
-    sys::{jboolean, jbyteArray, jint, jlong, jobject},
+    sys::{jboolean, jbyteArray, jint, jlong},
     JNIEnv,
 };
 
@@ -71,7 +71,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     let res = panic::catch_unwind(|| {
         let group_name = utils::convert_to_string(&env, group_name)?;
         let list_id = env.convert_byte_array(list_id)?;
-        let address = IndexAddress::with_root(group_name).append_bytes(&list_id);
+        let address = IndexAddress::from_root(group_name).append_key(&list_id);
         let view_ref = handle::cast_handle::<View>(view_handle).get();
         Ok(handle::to_handle(match view_ref {
             ViewRef::Snapshot(snapshot) => {
@@ -132,6 +132,46 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+/// Removes the last element from a list and returns it, or null pointer if it is empty.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeRemoveLast(
+    env: JNIEnv,
+    _: JObject,
+    list_handle: Handle,
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let val = match *handle::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(_) => panic!("Unable to modify snapshot."),
+            IndexType::ForkIndex(ref mut list) => list.pop(),
+        };
+        match val {
+            Some(val) => env.byte_array_from_slice(&val),
+            None => Ok(ptr::null_mut()),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
+}
+
+/// Shortens the list, keeping the first len elements and dropping the rest.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeTruncate(
+    env: JNIEnv,
+    _: JObject,
+    list_handle: Handle,
+    len: jlong,
+) {
+    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(list_handle) {
+        IndexType::SnapshotIndex(_) => {
+            panic!("Unable to modify snapshot.");
+        }
+        IndexType::ForkIndex(ref mut list) => {
+            list.truncate(len as u64);
+            Ok(())
+        }
+    });
+    utils::unwrap_exc_or_default(&env, res)
 }
 
 /// Returns `true` if the list is empty.
@@ -203,32 +243,43 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Returns Java representation of the proof that an element exists at the specified index.
+/// Returns the proof that an element exists at the specified index. The proof is serialized in
+/// the protobuf format.
 #[no_mangle]
-// fixme: ECR-3614
-#[allow(unused_variables)]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetProof(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
     index: jlong,
-) -> jobject {
-    ptr::null_mut()
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
+            IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
+        };
+        utils::proto_to_java_bytes(&env, proof)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
-/// Returns Java representation of the proof that some elements exists in the specified range.
+/// Returns the proof that some elements exists in the specified range. The proof is serialized in
+/// the protobuf format.
 #[no_mangle]
-// fixme: ECR-3614
-#[allow(unused_variables)]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListIndexProxy_nativeGetRangeProof(
     env: JNIEnv,
     _: JObject,
     list_handle: Handle,
     from: jlong,
     to: jlong,
-) -> jobject {
-    // fixme: ECR-3614
-    ptr::null_mut()
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let proof = match *handle::cast_handle::<IndexType>(list_handle) {
+            IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64..to as u64),
+            IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64..to as u64),
+        };
+        utils::proto_to_java_bytes(&env, proof)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Returns pointer to the iterator over list.

@@ -30,20 +30,55 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ExplorerApiHelperTest {
+
+  private static TransactionMessage TRANSACTION_MESSAGE = createTransactionMessage();
+  private static long BLOCK_HEIGHT = 1L;
+  private static long INDEX_IN_BLOCK = 0L;
+
+  private static String TEMPLATE_TRANSACTION_MESSAGE_JSON = "{\n"
+      + "    'type': 'committed',\n"
+      + "    'content': '" + toHex(TRANSACTION_MESSAGE) + "',\n"
+      + "    'location': {\n"
+      + "        'block_height': " + BLOCK_HEIGHT + ",\n"
+      + "        'position_in_block': " + INDEX_IN_BLOCK + "\n"
+      + "    },\n"
+      + "    'location_proof': {\n"
+      + "        'entries': [\n"
+      + "            [\n"
+      + "                0,\n"
+      + "                'd27f4ae6692fc00caf4e51ca7c072bab35487bb0d56272e08b6069ebadb52100'\n"
+      + "            ]\n"
+      + "        ],\n"
+      + "        'length': 1,\n"
+      + "        'proof': []\n"
+      + "    },\n"
+      + "    %s,\n"
+      + "    'time': '2019-12-02T21:51:36.439431Z'"
+      + "}";
 
   @Test
   void parseSubmitTxResponse() {
@@ -56,130 +91,29 @@ class ExplorerApiHelperTest {
 
   @Test
   void parseGetTxResponseInPool() {
-    TransactionMessage expectedMessage = createTransactionMessage();
     String json = "{\n"
         + "    'type': 'in-pool',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'to': {\n"
-        + "                'data': []\n"
-        + "            },\n"
-        + "            'amount': 10,\n"
-        + "            'seed': 9587307158524814255\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    }\n"
+        + "    'content': '" + toHex(TRANSACTION_MESSAGE) + "'\n"
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.IN_POOL));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
+    assertThat(transactionResponse.getMessage(), is(TRANSACTION_MESSAGE));
     assertThrows(IllegalStateException.class, transactionResponse::getExecutionResult);
     assertThrows(IllegalStateException.class, transactionResponse::getLocation);
   }
 
-  @Test
-  void parseGetTxResponseCommitted() {
-    TransactionMessage expectedMessage = createTransactionMessage();
-    String json = "{\n"
-        + "    'type': 'committed',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'to': {\n"
-        + "                'data': []\n"
-        + "            },\n"
-        + "            'amount': 10,\n"
-        + "            'seed': 2084648087298472854\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    },\n"
-        + "    'location': {\n"
-        + "        'block_height': 11,\n"
-        + "        'position_in_block': 0\n"
-        + "    },\n"
-        + "    'location_proof': {\n"
-        + "        'val': '2f23541b10b258dfc80693ed1bf6'\n"
-        + "    },\n"
-        + "    'status': {\n"
-        + "        'type': 'success'\n"
-        + "    }\n"
-        + "}";
+  @ParameterizedTest
+  @MethodSource("testData")
+  void parseGetTxResponseCommitted(ExecutionStatus executionStatus, String statusJson) {
+    String json = String.format(TEMPLATE_TRANSACTION_MESSAGE_JSON, statusJson);
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(), is(TransactionResult.successful()));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(11L, 0L)));
-  }
-
-  @Test
-  void parseGetTxResponseCommittedWithError() {
-    TransactionMessage expectedMessage = createTransactionMessage();
-    int errorCode = 2;
-    String errorDescription = "Receiver doesn't exist";
-    String json = "{\n"
-        + "    'type': 'committed',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'amount': 1,\n"
-        + "            'seed': 5019726028924803177\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    },\n"
-        + "    'location': {\n"
-        + "        'block_height': 1,\n"
-        + "        'position_in_block': 0\n"
-        + "    },\n"
-        + "    'location_proof': {\n"
-        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
-        + "    },\n"
-        + "    'status': {\n"
-        + "        'type': 'error',\n"
-        + "        'code': " + errorCode + ",\n"
-        + "        'description': \"" + errorDescription + "\""
-        + "    }\n"
-        + "}";
-    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
-
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.error(errorCode, errorDescription)));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
-  }
-
-  @Test
-  void parseGetTxResponseCommittedWithPanic() {
-    TransactionMessage expectedMessage = createTransactionMessage();
-    String errorDescription = "panic happens";
-    String json = "{\n"
-        + "    'type': 'committed',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'amount': 1,\n"
-        + "            'seed': 5019726028924803177\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    },\n"
-        + "    'location': {\n"
-        + "        'block_height': 1,\n"
-        + "        'position_in_block': 0\n"
-        + "    },\n"
-        + "    'location_proof': {\n"
-        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
-        + "    },\n"
-        + "    'status': {\n"
-        + "        'type': 'panic',\n"
-        + "        'description': '" + errorDescription + "'"
-        + "    }\n"
-        + "}";
-    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
-
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.unexpectedError(errorDescription)));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+    assertThat(transactionResponse.getMessage(), is(TRANSACTION_MESSAGE));
+    assertThat(transactionResponse.getExecutionResult(), is(executionStatus));
+    assertThat(transactionResponse.getLocation(),
+        is(TransactionLocation.valueOf(BLOCK_HEIGHT, INDEX_IN_BLOCK)));
   }
 
   @Test
@@ -240,4 +174,69 @@ class ExplorerApiHelperTest {
     assertThat(response.getBlocksRangeEnd(), is(288L));
   }
 
+  @Test
+  void parseServicesResponse() {
+    String serviceName1 = "service-name-1";
+    String serviceName2 = "service-name-2";
+    int serviceId1 = 1;
+    int serviceId2 = 2;
+    ServiceInstanceInfo serviceInstanceInfo1 = new ServiceInstanceInfo(serviceName1, serviceId1);
+    ServiceInstanceInfo serviceInstanceInfo2 = new ServiceInstanceInfo(serviceName2, serviceId2);
+    List<ServiceInstanceInfo> expected = Arrays.asList(serviceInstanceInfo1, serviceInstanceInfo2);
+    String json = "{\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + serviceName1 + "\",\n"
+        + "            \"id\": " + serviceId1 + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        },\n"
+        + "        {\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + serviceName2 + "\",\n"
+        + "            \"id\": " + serviceId2 + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
+        + "    ]\n"
+        + "}";
+
+    List<ServiceInstanceInfo> actual = ExplorerApiHelper.parseServicesResponse(json);
+    assertThat(actual, contains(expected.toArray()));
+  }
+
+  private static Stream<Arguments> testData() {
+    String successStatus = "'status': {\n"
+        + "    'type': 'success'\n"
+        + "}\n";
+
+    int errorCode = 1;
+    String errorDescription = "Some error";
+    String errorStatusTemplate = "'status': {\n"
+        + "    'type': '%s',\n"
+        + "    'code': " + errorCode + ",\n"
+        + "    'description': \"" + errorDescription + "\""
+        + "}\n";
+
+    String serviceErrorStatus = String.format(errorStatusTemplate, "service_error");
+    String dispatcherErrorStatus = String.format(errorStatusTemplate, "dispatcher_error");
+    String runtimeErrorStatus = String.format(errorStatusTemplate, "runtime_error");
+
+    String panicStatus = "'status': {\n"
+        + "    'type': 'panic',\n"
+        + "    'description': \"" + errorDescription + "\""
+        + "}\n";
+
+    return Stream.of(
+        arguments(ExecutionStatuses.success(), successStatus),
+        arguments(ExecutionStatuses.serviceError(errorCode, errorDescription), serviceErrorStatus),
+        arguments(ExplorerApiHelper.buildExecutionStatus(ErrorKind.DISPATCHER, errorCode,
+            errorDescription),
+            dispatcherErrorStatus),
+        arguments(ExplorerApiHelper.buildExecutionStatus(ErrorKind.RUNTIME, errorCode,
+            errorDescription),
+            runtimeErrorStatus),
+        arguments(ExplorerApiHelper.buildPanicExecutionStatus(errorDescription), panicStatus)
+    );
+  }
 }

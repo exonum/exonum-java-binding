@@ -18,6 +18,7 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkNoNulls;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.core.proxy.NativeHandle;
@@ -92,6 +93,23 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
   }
 
   @Override
+  public T removeLast() {
+    notifyModified();
+    byte[] e = nativeRemoveLast(getNativeHandle());
+    if (e == null) {
+      throw new NoSuchElementException("List is empty");
+    }
+    return serializer.fromBytes(e);
+  }
+
+  @Override
+  public void truncate(long newSize) {
+    checkArgument(newSize >= 0, "New size must be non-negative: %s", newSize);
+    notifyModified();
+    nativeTruncate(getNativeHandle(), newSize);
+  }
+
+  @Override
   public final void clear() {
     notifyModified();
     nativeClear(getNativeHandle());
@@ -132,6 +150,10 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
   abstract byte[] nativeGet(long nativeHandle, long index);
 
   abstract byte[] nativeGetLast(long nativeHandle);
+
+  abstract byte[] nativeRemoveLast(long nativeHandle);
+
+  abstract void nativeTruncate(long nativeHandle, long newSize);
 
   abstract void nativeClear(long nativeHandle);
 

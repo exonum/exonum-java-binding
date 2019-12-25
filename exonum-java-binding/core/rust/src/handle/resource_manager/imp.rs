@@ -87,6 +87,7 @@ pub fn known_handles() -> usize {
 mod tests {
     use super::*;
     use std::i64;
+    use utils::assert_panics;
 
     enum T {}
     const INVALID_HANDLE: Handle = i64::MAX;
@@ -128,10 +129,11 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Trying to add the same handle for the second time")]
     fn add_duplicated_handle() {
         add_handle::<T>(DUPLICATED_HANDLE);
-        add_handle::<T>(DUPLICATED_HANDLE);
+        assert_panics("Trying to add the same handle for the second time", || {
+            add_handle::<T>(DUPLICATED_HANDLE)
+        });
     }
 
     #[test]
@@ -159,10 +161,11 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Wrong type id for")]
     fn check_wrong_type_handle() {
         add_handle::<T>(WRONG_TYPE_HANDLE);
         enum OtherT {}
-        check_handle::<OtherT>(WRONG_TYPE_HANDLE);
+        assert_panics("Wrong type id for", || {
+            check_handle::<OtherT>(WRONG_TYPE_HANDLE)
+        });
     }
 }

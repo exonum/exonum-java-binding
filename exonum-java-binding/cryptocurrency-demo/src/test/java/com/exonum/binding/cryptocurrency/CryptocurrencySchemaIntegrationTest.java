@@ -16,20 +16,18 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_FILENAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.ARTIFACT_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_ID;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.SERVICE_NAME;
-import static com.exonum.binding.cryptocurrency.transactions.PredefinedServiceParameters.artifactsDirectory;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -45,17 +43,6 @@ class CryptocurrencySchemaIntegrationTest {
 
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
-
-  @Test
-  void getStateHashes(TestKit testKit) {
-    Snapshot view = testKit.getSnapshot();
-    CryptocurrencySchema schema = new CryptocurrencySchema(view, SERVICE_NAME);
-
-    HashCode walletsMerkleRoot = schema.wallets().getIndexHash();
-    ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
-
-    assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);
-  }
 
   @Test
   void walletHistoryNoRecords(TestKit testKit) {
