@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.TransactionInvokerTest.BasicService.TRANSACTION_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
@@ -28,6 +29,7 @@ import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import io.vertx.ext.web.Router;
+import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
@@ -41,7 +43,7 @@ class TransactionInvokerTest {
   void invokeValidServiceTransaction() throws Exception {
     ValidService service = spy(new ValidService());
     TransactionInvoker invoker = new TransactionInvoker(service);
-    invoker.invokeTransaction(ValidService.TRANSACTION_ID, ARGUMENTS, context);
+    invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context);
     invoker.invokeTransaction(ValidService.TRANSACTION_ID_2, ARGUMENTS, context);
 
     verify(service).transactionMethod(ARGUMENTS, context);
@@ -60,18 +62,29 @@ class TransactionInvokerTest {
 
   @Test
   void invokeThrowingTransactionExecutionException() {
-    TransactionInvoker invoker = new TransactionInvoker(new ThrowingService());
-    TransactionExecutionException e = assertThrows(TransactionExecutionException.class,
-        () -> invoker.invokeTransaction(ThrowingService.TRANSACTION_ID, ARGUMENTS, context));
-    assertThat(e.getErrorCode()).isEqualTo(ThrowingService.ERROR_CODE);
+    TransactionExecutionException e = new TransactionExecutionException((byte) 0);
+    TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
+    TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
+        () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
+    assertThat(actual).isSameAs(e);
   }
 
   @Test
   void invokeThrowingRuntimeException() {
-    TransactionInvoker invoker = new TransactionInvoker(new ThrowingService());
-    RuntimeException e = assertThrows(RuntimeException.class,
-        () -> invoker.invokeTransaction(ThrowingService.TRANSACTION_ID_2, ARGUMENTS, context));
-    assertThat(e.getCause().getClass()).isEqualTo(IllegalArgumentException.class);
+    RuntimeException e = new IllegalArgumentException("Unexpected runtime exception");
+    TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
+    Exception actual = assertThrows(UnexpectedTransactionExecutionException.class,
+        () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
+    assertThat(actual.getCause()).isSameAs(e);
+  }
+
+  @Test
+  void invokeThrowingException() {
+    IOException e = new IOException("Unexpected checked exception");
+    TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
+    Exception actual = assertThrows(UnexpectedTransactionExecutionException.class,
+        () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
+    assertThat(actual.getCause()).isSameAs(e);
   }
 
   @Test
@@ -83,8 +96,7 @@ class TransactionInvokerTest {
         .setY(1)
         .build();
 
-    invoker.invokeTransaction(ProtobufArgumentsService.TRANSACTION_ID, point.toByteArray(),
-        context);
+    invoker.invokeTransaction(TRANSACTION_ID, point.toByteArray(), context);
 
     verify(service).transactionMethod(point, context);
   }
@@ -111,21 +123,16 @@ class TransactionInvokerTest {
     public void transactionMethod2(byte[] arguments, TransactionContext context) {}
   }
 
-  public static class ThrowingService extends BasicService {
+  public static class ThrowingAnyException extends BasicService {
+    private final Exception exception;
 
-    static final byte ERROR_CODE = 18;
-    static final String ERROR_MESSAGE = "Service originated exception";
-
-    @Transaction(TRANSACTION_ID)
-    public void transactionMethod(byte[] arguments, TransactionContext context)
-        throws TransactionExecutionException {
-      throw new TransactionExecutionException(ERROR_CODE);
+    public ThrowingAnyException(Exception e) {
+      this.exception = e;
     }
 
-    @Transaction(TRANSACTION_ID_2)
-    public void transactionMethod2(byte[] arguments, TransactionContext context)
-        throws TransactionExecutionException {
-      throw new IllegalArgumentException(ERROR_MESSAGE);
+    @Transaction(TRANSACTION_ID)
+    public void transactionMethod(byte[] arguments, TransactionContext context) throws Exception {
+      throw exception;
     }
   }
 
