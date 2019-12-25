@@ -33,17 +33,18 @@ then
 else
     cd "${TRAVIS_BUILD_DIR}"
 
-    # Set CI Maven arguments. They enable parallel builds, and parallel tests (Linux only).
-    # TODO: Remove this when macos builds use newer JDK that does not hang up when
+    # Set CI Maven arguments. They set batch mode (less verbose Maven output);
+    # and enable parallel builds, and parallel tests (Linux only).
+    # TODO: Enable on macos when it uses newer JDK that does not hang up when
     #   parallel tests are enabled.
-    PARALLEL_TESTS_ENABLED="true"
-    if [[ ${TRAVIS_OS_NAME} == "osx" ]]; then
-      PARALLEL_TESTS_ENABLED="false"
+    MAVEN_CONFIG="--batch-mode"
+    if [[ ${TRAVIS_OS_NAME} == "linux" ]]; then
+      MAVEN_CONFIG="${MAVEN_CONFIG} \
+--threads 1C \
+-Djunit.jupiter.execution.parallel.enabled=true \
+-Djunit.jupiter.execution.parallel.mode.default=concurrent"
     fi
-    echo "--threads 1C -Djunit.jupiter.execution.parallel.enabled=${PARALLEL_TESTS_ENABLED} \
-          -Djunit.jupiter.execution.parallel.mode.default=concurrent \
-          --batch-mode" > \
-      .mvn/maven.config
+     echo "${MAVEN_CONFIG}" > .mvn/maven.config
 
     # Run all tests
     ./run_all_tests.sh
