@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Transactions are now implemented as service methods annotated with
   `@Transaction(TX_ID)`, instead of classes implementing
   `Transaction` _interface_. (#1274, #1307)
+- Any exceptions thrown from the `Transaction` methods
+  but `TransactionExecutionException` are saved with the error kind
+  "unexpected".
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
