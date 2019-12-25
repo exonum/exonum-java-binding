@@ -153,8 +153,8 @@ final class ServiceWrapper {
     }
   }
 
-  void beforeCommit(Fork fork) {
-    service.beforeCommit(fork);
+  void afterTransactions(Fork fork) {
+    service.afterTransactions(fork);
   }
 
   void afterCommit(BlockCommittedEvent event) {

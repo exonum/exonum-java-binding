@@ -376,7 +376,7 @@ impl Runtime for JavaRuntimeProxy {
                 env,
                 env.call_method_unchecked(
                     self.runtime_adapter.as_obj(),
-                    runtime_adapter::before_commit_id(),
+                    runtime_adapter::after_transactions_id(),
                     JavaType::Primitive(Primitive::Void),
                     &[JValue::from(instance_id as i32), JValue::from(view_handle)],
                 ),
