@@ -73,7 +73,7 @@ class CoreSchemaIntegrationTest {
 
   @Test
   void getTxResultsTest() {
-    assertSchema((schema) -> assertTrue(schema.getTxResults().isEmpty()));
+    assertSchema((schema) -> assertTrue(schema.getCallErrors(0).isEmpty()));
   }
 
   @Test

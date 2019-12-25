@@ -36,8 +36,9 @@ import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.core.messages.Blockchain.CallInBlock;
 import com.exonum.core.messages.Blockchain.Config;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -56,8 +57,10 @@ final class CoreSchema {
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final Serializer<TransactionLocation> TRANSACTION_LOCATION_SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
-  private static final Serializer<ExecutionStatus> EXECUTION_STATUS_SERIALIZER =
-      protobuf(ExecutionStatus.class);
+  private static final Serializer<ExecutionError> EXECUTION_ERROR_SERIALIZER =
+      protobuf(ExecutionError.class);
+  private static final Serializer<CallInBlock> CALL_IN_BLOCK_SERIALIZER =
+      protobuf(CallInBlock.class);
   private static final Serializer<TransactionMessage> TRANSACTION_MESSAGE_SERIALIZER =
       StandardSerializers.transactionMessage();
   private static final Serializer<Config> CONSENSUS_CONFIG_SERIALIZER =
@@ -102,13 +105,7 @@ final class CoreSchema {
    * @throws IllegalArgumentException if the height is negative or there is no block at given height
    */
   ProofListIndexProxy<HashCode> getBlockTransactions(long blockHeight) {
-    checkArgument(blockHeight >= 0, "Height shouldn't be negative, but was %s", blockHeight);
-    long blockchainHeight = getHeight();
-    checkArgument(
-        blockchainHeight >= blockHeight,
-        "Height should be less or equal compared to blockchain height %s, but was %s",
-        blockchainHeight,
-        blockHeight);
+    checkBlockHeight(blockHeight);
     byte[] id = toCoreStorageKey(blockHeight);
     return ProofListIndexProxy.newInGroupUnsafe(
         CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
@@ -131,12 +128,14 @@ final class CoreSchema {
   }
 
   /**
-   * Returns a map with a key-value pair of a transaction hash and execution result. Note that this
-   * is a <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
+   * Returns execution errors that occurred in the given block indexed by calls in that block.
+   * @param blockHeight the height of the block
    */
-  ProofMapIndexProxy<HashCode, ExecutionStatus> getTxResults() {
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(CoreIndex.TRANSACTIONS_RESULTS, dbView,
-        StandardSerializers.hash(), EXECUTION_STATUS_SERIALIZER);
+  ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
+    checkBlockHeight(blockHeight);
+    byte[] idInGroup = toCoreStorageKey(blockHeight);
+    return ProofMapIndexProxy.newInGroupUnsafe(CoreIndex.CALL_ERRORS, idInGroup, dbView,
+        CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_SERIALIZER);
   }
 
   /**
@@ -174,6 +173,20 @@ final class CoreSchema {
     return configEntry.get();
   }
 
+  /**
+   * Checks that a given block height corresponds to an existing block in the blockchain
+   * (i.e., {@code 0 <= blockHeight <= blockchainHeight}).
+   */
+  private void checkBlockHeight(long blockHeight) {
+    checkArgument(blockHeight >= 0, "Height shouldn't be negative, but was %s", blockHeight);
+    long blockchainHeight = getHeight();
+    checkArgument(
+        blockchainHeight >= blockHeight,
+        "Height should be less than or equal to the blockchain height %s, but was %s",
+        blockchainHeight,
+        blockHeight);
+  }
+
   private byte[] toCoreStorageKey(long value) {
     return ByteBuffer.allocate(Long.BYTES)
         .order(ByteOrder.BIG_ENDIAN)
@@ -191,7 +204,7 @@ final class CoreSchema {
     private static final String ALL_BLOCK_HASHES = PREFIX + "block_hashes_by_height";
     private static final String TRANSACTIONS = PREFIX + "transactions";
     private static final String BLOCKS = PREFIX + "blocks";
-    private static final String TRANSACTIONS_RESULTS = PREFIX + "transaction_results";
+    private static final String CALL_ERRORS = PREFIX + "call_errors";
     private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
     private static final String TRANSACTIONS_POOL = PREFIX + "transactions_pool";
     private static final String CONSENSUS_CONFIG = PREFIX + "consensus_config";
