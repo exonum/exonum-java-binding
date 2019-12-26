@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.core.runtime.TransactionInvokerTest.BasicService.TRANSACTION_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
@@ -35,6 +34,9 @@ import org.mockito.Mock;
 
 class TransactionInvokerTest {
 
+  static final int TRANSACTION_ID = 1;
+  static final int TRANSACTION_ID_2 = 2;
+
   private static final byte[] ARGUMENTS = new byte[0];
   @Mock
   private TransactionContext context;
@@ -44,7 +46,7 @@ class TransactionInvokerTest {
     ValidService service = spy(new ValidService());
     TransactionInvoker invoker = new TransactionInvoker(service);
     invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context);
-    invoker.invokeTransaction(ValidService.TRANSACTION_ID_2, ARGUMENTS, context);
+    invoker.invokeTransaction(TRANSACTION_ID_2, ARGUMENTS, context);
 
     verify(service).transactionMethod(ARGUMENTS, context);
     verify(service).transactionMethod2(ARGUMENTS, context);
@@ -102,9 +104,6 @@ class TransactionInvokerTest {
   }
 
   static class BasicService implements Service {
-
-    static final int TRANSACTION_ID = 1;
-    static final int TRANSACTION_ID_2 = 2;
 
     @Override
     public void createPublicApiHandlers(Node node, Router router) {
