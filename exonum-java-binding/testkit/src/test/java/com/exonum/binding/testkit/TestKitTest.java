@@ -494,6 +494,7 @@ class TestKitTest {
     assertThat(block.getNumTransactions()).isEqualTo(2);
     assertThat(block.getHeight()).isEqualTo(1);
 
+    // Check the transactions are indeed executed by the core
     testKit.withSnapshot((view) -> checkCommittedBlockWithMessages(
         view, block, message, message2));
   }

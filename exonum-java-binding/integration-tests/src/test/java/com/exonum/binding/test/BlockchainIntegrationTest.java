@@ -16,7 +16,6 @@
 
 package com.exonum.binding.test;
 
-import static com.exonum.binding.common.blockchain.ExecutionStatuses.success;
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.fakeservice.FakeService.PUT_TX_ID;
 import static com.exonum.binding.fakeservice.FakeService.RAISE_ERROR_TX_ID;
@@ -29,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
@@ -311,7 +311,7 @@ class BlockchainIntegrationTest {
       testKitTest((blockchain) -> {
         Optional<ExecutionStatus> txResult =
             blockchain.getTxResult(expectedBlockTransaction.hash());
-        assertThat(txResult).hasValue(success());
+        assertThat(txResult).hasValue(ExecutionStatuses.SUCCESS);
       });
     }
 
@@ -476,7 +476,7 @@ class BlockchainIntegrationTest {
             .getCallErrors(block.getHeight());
         Map<CallInBlock, ExecutionError> callErrorsAsMap = toMap(callErrors);
 
-        int txPosition = 0; // single tx in block
+        int txPosition = 0; // A single tx in block must be at 0 position
         CallInBlock callId = CallInBlock.newBuilder()
             .setTransaction(txPosition)
             .build();

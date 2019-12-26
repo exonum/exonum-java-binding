@@ -26,6 +26,7 @@ import static com.exonum.binding.qaservice.TransactionMessages.createIncrementCo
 import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -79,6 +80,7 @@ class IncrementCounterTxTest {
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
     ExecutionStatus txResult = blockchain.getTxResult(incrementCounterTx.hash()).get();
+    assertTrue(txResult.hasError());
     ExecutionError error = txResult.getError();
     assertThat(error.getKind()).isEqualTo(SERVICE);
     assertThat(error.getCode()).isEqualTo(UNKNOWN_COUNTER.code);

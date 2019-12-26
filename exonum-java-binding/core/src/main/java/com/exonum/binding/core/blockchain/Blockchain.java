@@ -151,11 +151,13 @@ public final class Blockchain {
   }
 
   /**
-   * Returns execution errors that occurred in the given block indexed by calls in that block.
+   * Returns execution errors that occurred in the block at the given height. Execution errors
+   * are preserved for transactions and before/after transaction handlers.
    *
    * <p>The {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of this index is recorded
-   * in the block header as <!-- todo: link (ECR-4021) --> {@code Block#getErrorHash()}. That allows
-   * constructing proofs <!-- todo: link 'proofs' (where do we document construction procedure?) -->
+   * in the block header as <!-- todo: link (ECR-4021) --> {@code Block#getErrorHash()}. That
+   * enables constructing proofs
+   * <!-- todo: link 'proofs' (where do we document construction procedure?) -->
    * that a transaction with a certain message hash was executed at a certain
    * <em>{@linkplain TransactionLocation location}</em> with a particular result.
    *
@@ -174,16 +176,17 @@ public final class Blockchain {
    *         is unknown or was not yet executed
    */
   public Optional<ExecutionStatus> getTxResult(HashCode messageHash) {
-    // Find its location
+    // Find tx location
     Optional<TransactionLocation> txLocationOpt = getTxLocation(messageHash);
     if (txLocationOpt.isPresent()) {
+      // Find the error, if any
       TransactionLocation txLocation = txLocationOpt.get();
       long height = txLocation.getHeight();
       ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = getCallErrors(height);
       CallInBlock txCall = CallInBlock.newBuilder()
           .setTransaction(txLocation.getIndexInBlock())
           .build();
-      ExecutionStatus txStatus = ExecutionStatuses.success();
+      ExecutionStatus txStatus = ExecutionStatuses.SUCCESS;
       if (callErrors.containsKey(txCall)) {
         ExecutionError txError = callErrors.get(txCall);
         txStatus = ExecutionStatus.newBuilder()
