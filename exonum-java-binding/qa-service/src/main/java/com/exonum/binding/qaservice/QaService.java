@@ -106,6 +106,5 @@ public interface QaService extends Service, Configurable {
    *
    * @throws IllegalStateException always
    */
-  void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException;
+  void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context);
 }

@@ -54,7 +54,7 @@ class ThrowingTxTest {
 
   @Test
   @Disabled("ECR-4014")
-  void executeThrows(TestKit testKit) {
+  void throwingTxMustHaveUnexpectedErrorCode(TestKit testKit) {
     long seed = 0L;
     TransactionMessage throwingTx = createThrowingTx(seed, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(throwingTx);
@@ -79,7 +79,7 @@ class ThrowingTxTest {
     ExecutionStatus txResult = blockchain.getTxResult(throwingTx.hash()).get();
     assertTrue(txResult.hasError());
     ExecutionError error = txResult.getError();
-    assertThat(error.getKind()).isEqualTo(ErrorKind.RUNTIME);
+    assertThat(error.getKind()).isEqualTo(ErrorKind.UNEXPECTED);
     assertThat(error.getDescription())
         .contains("#execute of this transaction always throws")
         .contains(String.valueOf(throwingTx.hash()))

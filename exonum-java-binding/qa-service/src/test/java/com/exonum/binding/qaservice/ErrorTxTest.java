@@ -73,7 +73,7 @@ class ErrorTxTest {
     ExecutionError error = txResult.getError();
     assertThat(error.getKind())
         .as("actual=%s", error)
-        .isEqualTo(ErrorKind.RUNTIME);
+        .isEqualTo(ErrorKind.UNEXPECTED);
     assertThat(error.getDescription()).contains(Integer.toString(errorCode));
   }
 

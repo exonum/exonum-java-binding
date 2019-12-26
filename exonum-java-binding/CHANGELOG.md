@@ -23,19 +23,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
   `ListProof`.
 - `ProofEntryIndexProxy` collection.
-- Transaction methods now accept protobuf messages as transaction arguments
-  type. (#1304)
 
 ### Changed
-- Transactions now implemented as service methods annotated with
-  `@Transaction(TX_ID)`, instead of objects of a class that implements
-  `Transaction` interface. (#1274, #1307)
+- Transactions are now implemented as service methods annotated with
+  `@Transaction(TX_ID)`, instead of classes implementing
+  `Transaction` _interface_. (#1274, #1307)
+- Any exceptions thrown from the `Transaction` methods
+  but `TransactionExecutionException` are saved with the error kind
+  "unexpected".
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
 - `Schema#getStateHashes` and `Service#getStateHashes` methods. Framework
   automatically aggregates state hashes of the Merkelized collections.
+- `TransactionConverter` — it is no longer needed with transactions
+as `Service` methods annotated with `@Transaction`. Such methods may accept
+arbitrary protobuf messages as their argument. (#1304, #1307)
 
 ## 0.9.0-rc2 - 2019-12-17
 

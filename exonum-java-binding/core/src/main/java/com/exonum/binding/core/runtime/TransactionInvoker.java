@@ -23,6 +23,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.inject.Inject;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.WrongMethodTypeException;
 import java.util.Map;
 
 /**
@@ -50,7 +51,8 @@ final class TransactionInvoker {
    *     corresponding service
    * @throws TransactionExecutionException if {@link TransactionExecutionException} was thrown by
    *     the transaction method, it is propagated
-   * @throws RuntimeException any other error is wrapped into a {@link RuntimeException}
+   * @throws UnexpectedTransactionExecutionException if any other exception is thrown by
+   *     the transaction method, it is wrapped as cause
    */
   void invokeTransaction(int transactionId, byte[] arguments, TransactionContext context)
       throws TransactionExecutionException {
@@ -61,12 +63,16 @@ final class TransactionInvoker {
     MethodHandle methodHandle = transactionMethod.getMethodHandle();
     try {
       methodHandle.invoke(service, argumentsObject, context);
-    } catch (Throwable throwable) {
-      if (throwable instanceof TransactionExecutionException) {
-        throw (TransactionExecutionException) throwable;
-      } else {
-        throw new RuntimeException(throwable);
-      }
+    } catch (WrongMethodTypeException | ClassCastException invocationException) {
+      // Invocation-specific exceptions are thrown as is — they are not thrown
+      // from the _transaction method_, but from framework code (see mh#invoke spec).
+      throw invocationException;
+    } catch (TransactionExecutionException serviceException) {
+      // 'Service-defined' transaction exceptions
+      throw serviceException;
+    } catch (Throwable unexpectedServiceException) {
+      // Any other _transaction_ exceptions
+      throw new UnexpectedTransactionExecutionException(unexpectedServiceException);
     }
   }
 }

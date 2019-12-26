@@ -175,9 +175,11 @@ public class ServiceRuntimeAdapter {
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    * @throws TransactionExecutionException if the transaction execution failed
+   * @throws UnexpectedTransactionExecutionException if the transaction execution failed
+   *     with an unexpected exception with no error code
+   * @throws IllegalArgumentException if any argument is not valid
    * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
    *      PublicKey)
-   * @see com.exonum.binding.core.transaction.Transaction
    */
   void executeTransaction(int serviceId, String interfaceName, int txId, byte[] arguments,
       long forkNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)
