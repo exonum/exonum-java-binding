@@ -16,7 +16,7 @@
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, ExecutionFail)]
 #[execution_fail(kind = "runtime")]
 pub enum Error {
-    /// Illegal argument exception, as a result of malformed method arguments.
+    /// Illegal argument exception. E.g., as a result of malformed method arguments.
     IllegalArgument = 0,
     /// Java exception in runtime implementation. Is a result of a bug in the
     /// framework code.
