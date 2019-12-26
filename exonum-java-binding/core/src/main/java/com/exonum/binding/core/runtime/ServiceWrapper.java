@@ -154,7 +154,22 @@ final class ServiceWrapper {
   }
 
   void afterTransactions(Fork fork) {
-    service.afterTransactions(fork);
+    try {
+      service.afterTransactions(fork);
+    } catch (TransactionExecutionException e) {
+      // Re-throw as is to keep the error code
+      // todo: consider _always_ wrapping in UserCodeException to avoid conditional code
+      //  both in all exception handlers **and** in native code? Would it be simpler?
+      //  It seems that an even simpler approach is to _not_ distinguish service-originated
+      //  'unexpected' errors and 'runtime' errors — then we don't need to wrap any exceptions
+      //  (if we also forbid checked in @Transaction methods), but in this case we will
+      //  go **against** the spec (see ErrorKind) and lose the benefit of error kind telling
+      //  the error source ('unexpected' — only in service code,
+      //  'runtime' — only somewhere in the runtime).
+      throw e;
+    } catch (Exception e) {
+      throw new UnexpectedTransactionExecutionException(e);
+    }
   }
 
   void afterCommit(BlockCommittedEvent event) {

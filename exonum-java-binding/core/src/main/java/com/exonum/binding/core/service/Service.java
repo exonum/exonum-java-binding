@@ -90,7 +90,15 @@ public interface Service {
    * implementations of this method must not perform any blocking or long-running operations.
    *
    * <p>Any exceptions in this method will revert any changes made to the database by it,
-   * but will not affect the processing of this block.
+   * but will not affect the processing of this block. Exceptions are saved
+   * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   * the registry of call errors} with appropriate error kinds.
+   *
+   * @throws com.exonum.binding.core.transaction.TransactionExecutionException if an error
+   *     occurs that shall have an error code; it is saved as a call error of kind "service"
+   *     in
+   * @throws RuntimeException if an error occurs that doesn't need an error code; it is saved
+   *     as a call error of kind "unexpected"
    */
   default void afterTransactions(Fork fork) {}
 
