@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
 import static com.exonum.binding.qaservice.QaArtifactInfo.ARTIFACT_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
@@ -41,7 +42,6 @@ import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -53,7 +53,6 @@ class ThrowingTxTest {
       QaArtifactInfo.createQaServiceTestkit());
 
   @Test
-  @Disabled("ECR-4014")
   void throwingTxMustHaveUnexpectedErrorCode(TestKit testKit) {
     long seed = 0L;
     TransactionMessage throwingTx = createThrowingTx(seed, QA_SERVICE_ID);
@@ -61,29 +60,16 @@ class ThrowingTxTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    /*
-     todo: In tests it might be useful not only to be able to easily create expected
-      results (which is relatively easy with a combination of factory methods and a builder),
-      but also to access the description and match it against a condition (e.g., contains, or
-      containsIgnoringCase), which is not perfect:
-
-        ExecutionStatus txResult = blockchain.getTxResult(throwingTx.hash())
-            .orElseThrow(() -> new AssertionError("No result"));
-
-        assertTrue(txResult.hasError());
-        String description = txResult
-            .getError() // ! might throw without check above
-            .getDescription();
-        assertThat(description).containsIgnoringCase("foo");
-     */
     ExecutionStatus txResult = blockchain.getTxResult(throwingTx.hash()).get();
     assertTrue(txResult.hasError());
     ExecutionError error = txResult.getError();
+    // Verify only the properties EJB is responsible for
     assertThat(error.getKind()).isEqualTo(ErrorKind.UNEXPECTED);
     assertThat(error.getDescription())
         .contains("#execute of this transaction always throws")
         .contains(String.valueOf(throwingTx.hash()))
         .contains(Long.toString(seed));
+    assertThat(error.getRuntimeId()).isEqualTo(JAVA.getId());
   }
 
   @Test

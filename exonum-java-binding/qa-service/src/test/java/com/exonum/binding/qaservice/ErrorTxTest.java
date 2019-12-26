@@ -16,7 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
+import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
 import static com.exonum.binding.qaservice.QaArtifactInfo.ARTIFACT_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
@@ -44,8 +44,6 @@ import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import javax.annotation.Nullable;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -59,7 +57,6 @@ class ErrorTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       createQaServiceTestkit());
 
-  @Disabled("ECR-4014")
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -2, -1, 128, Integer.MAX_VALUE})
   void executeThrowsIfInvalidErrorCode(int errorCode, TestKit testKit) {
@@ -77,36 +74,29 @@ class ErrorTxTest {
     assertThat(error.getDescription()).contains(Integer.toString(errorCode));
   }
 
-  @Test
-  @Disabled("ECR-4014")
-  void executeNoDescription(TestKit testKit) {
-    byte errorCode = 1;
-    TransactionMessage errorTx = createErrorTransaction(errorCode, null);
-    testKit.createBlockWithTransactions(errorTx);
-
-    Snapshot view = testKit.getSnapshot();
-    Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(errorTx.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(errorCode);
-    assertThat(txResult).hasValue(expectedTransactionResult);
-  }
-
   @ParameterizedTest
   @CsvSource({
       "0, ''",
       "1, 'Non-empty description'",
       "127, 'Max error code: 127'",
   })
-  @Disabled("ECR-4014")
-  void executeWithDescription(byte errorCode, String errorDescription, TestKit testKit) {
+  void executeErrorTx(byte errorCode, String errorDescription, TestKit testKit) {
     TransactionMessage errorTx = createErrorTransaction(errorCode, errorDescription);
     testKit.createBlockWithTransactions(errorTx);
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(errorTx.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(errorCode, errorDescription);
-    assertThat(txResult).hasValue(expectedTransactionResult);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(errorTx.hash());
+    assertThat(txResultOpt).hasValueSatisfying(status -> {
+      assertTrue(status.hasError());
+
+      ExecutionError error = status.getError();
+      // Verify only the properties EJB is responsible for
+      assertThat(error.getKind()).isEqualTo(ErrorKind.SERVICE);
+      assertThat(error.getCode()).isEqualTo(errorCode);
+      assertThat(error.getDescription()).isEqualTo(errorDescription);
+      assertThat(error.getRuntimeId()).isEqualTo(JAVA.getId());
+    });
   }
 
   @Test
@@ -142,7 +132,7 @@ class ErrorTxTest {
   }
 
   private static TransactionMessage createErrorTransaction(int errorCode,
-      @Nullable String errorDescription) {
+      String errorDescription) {
     return TransactionMessages.createErrorTx(errorCode, errorDescription, QA_SERVICE_ID);
   }
 }

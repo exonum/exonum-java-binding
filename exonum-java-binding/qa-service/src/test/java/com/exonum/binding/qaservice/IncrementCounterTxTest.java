@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
@@ -24,6 +23,7 @@ import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
 import static com.exonum.binding.qaservice.TransactionError.UNKNOWN_COUNTER;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.binding.qaservice.TransactionMessages.createIncrementCounterTx;
+import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,9 +34,8 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
-import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -70,7 +69,6 @@ class IncrementCounterTxTest {
   }
 
   @Test
-  @Disabled("ECR-4014")
   void executeNoSuchCounter(TestKit testKit) {
     String counterName = "unknown-counter";
     HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);
@@ -80,8 +78,9 @@ class IncrementCounterTxTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(incrementCounterTx.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(UNKNOWN_COUNTER.code);
-    assertThat(txResult).hasValue(expectedTransactionResult);
+    ExecutionStatus txResult = blockchain.getTxResult(incrementCounterTx.hash()).get();
+    ExecutionError error = txResult.getError();
+    assertThat(error.getKind()).isEqualTo(SERVICE);
+    assertThat(error.getCode()).isEqualTo(UNKNOWN_COUNTER.code);
   }
 }
