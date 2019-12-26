@@ -515,6 +515,10 @@ impl ExceptionHandlers {
 
     const TX_UNEXPECTED: &'static ExceptionHandler = &|env, exception| {
         let cause = unwrap_jni(get_exception_cause(env, exception));
+        debug_assert!(
+            !cause.is_null(),
+            "UnexpectedTransactionExecutionException#getCause returned null"
+        );
         let message = unwrap_jni(get_exception_message(env, cause)).unwrap_or_default();
         ExecutionError::new(ErrorKind::Unexpected, message)
     };

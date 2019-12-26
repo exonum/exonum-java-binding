@@ -180,6 +180,9 @@ pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) 
 /// Returns a cause of the passed exception by using `Throwable#getCause` method.
 ///
 /// Panics if `exception` is null.
+///
+/// Does not check for the returned `JObject` being `null`, the caller is
+/// responsible for that.
 pub fn get_exception_cause<'a>(env: &JNIEnv<'a>, exception: JObject<'a>) -> JniResult<JObject<'a>> {
     assert!(!exception.is_null(), "No exception thrown.");
     env.call_method_unchecked(
