@@ -24,6 +24,7 @@ import static com.exonum.binding.core.runtime.ServiceWrapper.VERIFY_CONFIGURATIO
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -207,6 +208,28 @@ class ServiceWrapperTest {
 
     assertThat(e.getMessage()).containsIgnoringCase("Unknown interface")
         .contains(interfaceName);
+  }
+
+  @Test
+  void afterTransactionsPropagatesExecutionException() {
+    TransactionExecutionException e = new TransactionExecutionException((byte) 0);
+    doThrow(e).when(service).afterTransactions(any(Fork.class));
+
+    Fork fork = mock(Fork.class);
+    TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
+        () -> serviceWrapper.afterTransactions(fork));
+    assertThat(actual).isSameAs(e);
+  }
+
+  @Test
+  void afterTransactionsKeepsRuntimeExceptionAsCause() {
+    Exception e = new RuntimeException("Boom");
+    doThrow(e).when(service).afterTransactions(any(Fork.class));
+
+    Fork fork = mock(Fork.class);
+    Exception actual = assertThrows(UnexpectedTransactionExecutionException.class,
+        () -> serviceWrapper.afterTransactions(fork));
+    assertThat(actual.getCause()).isSameAs(e);
   }
 
   @ParameterizedTest

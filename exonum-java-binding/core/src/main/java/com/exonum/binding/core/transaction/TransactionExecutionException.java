@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
  * @see Blockchain#getCallErrors(long)
  * @see ExecutionStatus
  */
-public class TransactionExecutionException extends Exception {
+public class TransactionExecutionException extends RuntimeException /* todo: fix all usages */ {
 
   // TODO: Consider using enums and taking their ordinal as the error code: ECR-2006?
   private final byte errorCode;

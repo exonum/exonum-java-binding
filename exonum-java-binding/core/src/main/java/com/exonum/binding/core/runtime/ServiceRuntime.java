@@ -324,6 +324,12 @@ public final class ServiceRuntime implements AutoCloseable {
    *
    * @param serviceId the id of the service on which to perform the operation
    * @param fork a fork allowing the runtime and the service to modify the database state.
+   * @throws TransactionExecutionException if such exception occurred in the transaction;
+   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedTransactionExecutionException if any other exception occurred in
+   *     the transaction; it is included as cause. The cause must be translated
+   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @throws IllegalArgumentException if any argument is not valid (e.g., unknown service)
    */
   public void afterTransactions(int serviceId, Fork fork) {
     synchronized (lock) {
