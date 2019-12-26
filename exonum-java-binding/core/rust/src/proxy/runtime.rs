@@ -531,7 +531,7 @@ impl ExceptionHandlers {
 
 /// Returns the error code of the `TransactionExecutionException`.
 fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {
-    assert!(!exception.is_null(), "No exception thrown.");
+    assert!(!exception.is_null(), "Exception is null");
     let err_code = env.call_method_unchecked(
         exception,
         tx_execution_exception::get_error_code_id(),

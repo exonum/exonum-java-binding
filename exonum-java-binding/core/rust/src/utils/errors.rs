@@ -184,7 +184,7 @@ pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) 
 /// Does not check for the returned `JObject` being `null`, the caller is
 /// responsible for that.
 pub fn get_exception_cause<'a>(env: &JNIEnv<'a>, exception: JObject<'a>) -> JniResult<JObject<'a>> {
-    assert!(!exception.is_null(), "No exception thrown.");
+    assert!(!exception.is_null(), "Exception is null");
     env.call_method_unchecked(
         exception,
         get_cause_id(),
