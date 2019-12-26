@@ -334,7 +334,7 @@ pub mod classes_refs {
         unsafe { JAVA_LANG_RUNTIME_EXCEPTION.clone().unwrap() }
     }
 
-    /// Returns cached `JClass` for `java/lang/RuntimeException` as a `GlobalRef`.
+    /// Returns cached `JClass` for `java/lang/IllegalArgumentException` as a `GlobalRef`.
     pub fn java_lang_illegal_argument_exception() -> GlobalRef {
         check_cache_initialized();
         unsafe { JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION.clone().unwrap() }
