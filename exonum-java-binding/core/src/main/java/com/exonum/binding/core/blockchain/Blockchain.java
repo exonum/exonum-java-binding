@@ -176,27 +176,24 @@ public final class Blockchain {
    *         is unknown or was not yet executed
    */
   public Optional<ExecutionStatus> getTxResult(HashCode messageHash) {
-    // Find tx location
-    Optional<TransactionLocation> txLocationOpt = getTxLocation(messageHash);
-    if (txLocationOpt.isPresent()) {
-      // Find the error, if any
-      TransactionLocation txLocation = txLocationOpt.get();
-      long height = txLocation.getHeight();
-      ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = getCallErrors(height);
-      CallInBlock txCall = CallInBlock.newBuilder()
-          .setTransaction(txLocation.getIndexInBlock())
+    return getTxLocation(messageHash)
+        .map(this::getExecutionStatus);
+  }
+
+  private ExecutionStatus getExecutionStatus(TransactionLocation txLocation) {
+    long height = txLocation.getHeight();
+    ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = getCallErrors(height);
+    CallInBlock txCall = CallInBlock.newBuilder()
+        .setTransaction(txLocation.getIndexInBlock())
+        .build();
+    if (callErrors.containsKey(txCall)) {
+      ExecutionError txError = callErrors.get(txCall);
+      return ExecutionStatus.newBuilder()
+          .setError(txError)
           .build();
-      ExecutionStatus txStatus = ExecutionStatuses.SUCCESS;
-      if (callErrors.containsKey(txCall)) {
-        ExecutionError txError = callErrors.get(txCall);
-        txStatus = ExecutionStatus.newBuilder()
-            .setError(txError)
-            .build();
-      }
-      return Optional.of(txStatus);
-    } else {
-      return Optional.empty();
     }
+    // No error: tx completed successfully
+    return ExecutionStatuses.SUCCESS;
   }
 
   /**
