@@ -27,5 +27,6 @@
  *   }
  * </pre>
  *
+ * <p>See more examples in the project <a href="https://github.com/exonum/exonum-java-binding/blob/master/exonum-light-client/README.md#examples">readme</a>.
  */
 package com.exonum.client;

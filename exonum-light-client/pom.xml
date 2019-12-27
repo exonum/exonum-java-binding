@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.5.0-SNAPSHOT</version>
+  <version>0.6.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Light Client</name>
@@ -73,7 +73,7 @@
     <junit.jupiter.version>5.5.2</junit.jupiter.version>
     <mockito.version>3.2.4</mockito.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <equalsverifier.version>3.1.10</equalsverifier.version>
+    <equalsverifier.version>3.1.11</equalsverifier.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
