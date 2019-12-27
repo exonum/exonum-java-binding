@@ -100,8 +100,8 @@ public abstract class Block {
   public abstract Optional<HashCode> getErrorHash();
 
   /**
-   * Contains additional block headers ordered by the key.
-   * The value is stored as hex string.
+   * Contains additional block headers stored as a key value pairs and ordered by the key.
+   * The key is a block header; and the value is a header bytes value encoded in hex string.
    */
   public abstract Map<String, String> getAdditionalHeaders();
 
