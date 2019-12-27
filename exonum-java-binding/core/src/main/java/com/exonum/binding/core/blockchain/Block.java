@@ -88,7 +88,7 @@ public abstract class Block {
   /**
    * Hash of the blockchain state after applying transactions in the block.
    *
-   * @see Schema#getStateHashes()
+   * @see Schema
    */
   public abstract HashCode getStateHash();
 

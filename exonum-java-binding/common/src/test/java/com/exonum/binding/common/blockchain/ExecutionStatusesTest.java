@@ -16,56 +16,16 @@
 
 package com.exonum.binding.common.blockchain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import com.exonum.core.messages.Runtime.ErrorKind;
-import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class ExecutionStatusesTest {
 
   @Test
   void success() {
-    ExecutionStatus s = ExecutionStatuses.success();
+    ExecutionStatus s = ExecutionStatuses.SUCCESS;
     assertTrue(s.hasOk());
-  }
-
-  @ParameterizedTest
-  @MethodSource("errors")
-  void serviceError(int code, String description) {
-    ExecutionStatus s = ExecutionStatuses.serviceError(code, description);
-
-    assertTrue(s.hasError());
-    ExecutionError error = s.getError();
-    assertThat(error.getKind()).isEqualTo(ErrorKind.SERVICE);
-    assertThat(error.getCode()).isEqualTo(code);
-    assertThat(error.getDescription()).isEqualTo(description);
-  }
-
-  private static List<Arguments> errors() {
-    return ImmutableList.of(
-        arguments(0, "Min error code"),
-        arguments(1, ""),
-        arguments(Integer.MAX_VALUE, "Max error code")
-    );
-  }
-
-  @ParameterizedTest
-  @ValueSource(ints = {-1, -2, Integer.MIN_VALUE})
-  void serviceErrorRejectsNegative(int code) {
-    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> ExecutionStatuses.serviceError(code, ""));
-
-    assertThat(e).hasMessageContaining(String.valueOf(code));
   }
 }

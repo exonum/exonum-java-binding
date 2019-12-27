@@ -32,14 +32,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   but `TransactionExecutionException` are saved with the error kind
   "unexpected".
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
+- `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`. 
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
 - `Schema#getStateHashes` and `Service#getStateHashes` methods. Framework
   automatically aggregates state hashes of the Merkelized collections.
 - `TransactionConverter` — it is no longer needed with transactions
-as `Service` methods annotated with `@Transaction`. Such methods may accept
-arbitrary protobuf messages as their argument. (#1304, #1307)
+  as `Service` methods annotated with `@Transaction`. Such methods may accept
+  arbitrary protobuf messages as their argument. (#1304, #1307)
+- `ExecutionStatuses` factory methods (`serviceError`) as they are no longer
+  useful to create _expected_ transaction execution statuses in tests —
+  an `ExecutionError` now has a lot of other properties.  
+  `ExecutionStatuses.success` is replaced with `ExecutionStatuses.SUCCESS` constant.
 
 ## 0.9.0-rc2 - 2019-12-17
 
