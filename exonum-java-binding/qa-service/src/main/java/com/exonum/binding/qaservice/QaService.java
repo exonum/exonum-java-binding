@@ -66,8 +66,7 @@ public interface QaService extends Service, Configurable {
    * @throws TransactionExecutionException if the counter already exists
    * @throws IllegalArgumentException if the counter name is empty
    */
-  void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException;
+  void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context);
 
   /**
    * Increments an existing counter.
@@ -78,7 +77,7 @@ public interface QaService extends Service, Configurable {
    * @throws TransactionExecutionException if a counter with the given id does not exist
    */
   void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
-      TransactionContext context) throws TransactionExecutionException;
+      TransactionContext context);
 
   /**
    * Clears all collections of this service and throws an exception with the given arguments.
@@ -95,8 +94,7 @@ public interface QaService extends Service, Configurable {
    *     error code and error message
    * @throws IllegalArgumentException if the error code is not in range [0; 127]
    */
-  void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException;
+  void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context);
 
   /**
    * Clears all collections of this service and throws a runtime exception.

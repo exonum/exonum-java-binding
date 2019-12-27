@@ -183,7 +183,7 @@ public class ServiceRuntimeAdapter {
    */
   void executeTransaction(int serviceId, String interfaceName, int txId, byte[] arguments,
       long forkNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)
-      throws TransactionExecutionException, CloseFailuresException {
+      throws CloseFailuresException {
 
     try (Cleaner cleaner = new Cleaner("executeTransaction")) {
       Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
@@ -202,6 +202,9 @@ public class ServiceRuntimeAdapter {
    *
    * @param forkHandle a handle to the native fork object, which must support checkpoints
    *                   and rollbacks
+   * @throws TransactionExecutionException if the transaction execution failed
+   * @throws UnexpectedTransactionExecutionException if the transaction execution failed
+   *     with an unexpected exception with no error code
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#afterTransactions(int, Fork)
    */

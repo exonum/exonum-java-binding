@@ -51,8 +51,8 @@ import java.lang.annotation.Target;
  * into the storage. The client can request the error code to know the reason of the failure.
  *
  * <p>The annotated method might also throw any other exception if an unexpected error
- * todo: @slowli: Do you agree with the part 'if the clients do not need to distinguish between
- *   different error types' or prefer the previous recommendation?
+ * <!-- todo: @slowli: Do you agree with the part 'if the clients do not need to distinguish between
+ *   different error types' or prefer the previous recommendation? -->
  * occurs, or if the clients do not need to distinguish between different error types.
  * The transaction will be committed as failed (error kind
  * {@linkplain ErrorKind#UNEXPECTED UNEXPECTED}).

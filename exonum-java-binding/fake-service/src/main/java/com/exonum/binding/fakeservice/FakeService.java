@@ -64,8 +64,7 @@ public final class FakeService extends AbstractService {
    * Throws an exception with the given error code and description.
    */
   @Transaction(RAISE_ERROR_TX_ID)
-  public void raiseError(Transactions.RaiseErrorArgs arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  public void raiseError(Transactions.RaiseErrorArgs arguments, TransactionContext context) {
     throw new TransactionExecutionException((byte) arguments.getCode());
   }
 }

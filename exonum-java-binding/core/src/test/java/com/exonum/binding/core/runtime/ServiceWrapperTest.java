@@ -77,7 +77,7 @@ class ServiceWrapperTest {
   }
 
   @Test
-  void executeTransactionDefaultInterface() throws TransactionExecutionException {
+  void executeTransactionDefaultInterface() {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
@@ -88,7 +88,7 @@ class ServiceWrapperTest {
   }
 
   @Test
-  void executeInvalidTransaction() throws TransactionExecutionException {
+  void executeInvalidTransaction() {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
@@ -103,7 +103,7 @@ class ServiceWrapperTest {
   }
 
   @Test
-  void executeVerifyConfiguration() throws TransactionExecutionException {
+  void executeVerifyConfiguration() {
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
@@ -121,7 +121,7 @@ class ServiceWrapperTest {
   }
 
   @Test
-  void executeApplyConfiguration() throws TransactionExecutionException {
+  void executeApplyConfiguration() {
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     int txId = APPLY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);

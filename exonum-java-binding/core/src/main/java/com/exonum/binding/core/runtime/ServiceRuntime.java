@@ -297,8 +297,7 @@ public final class ServiceRuntime implements AutoCloseable {
    */
   public void executeTransaction(int serviceId, String interfaceName, int txId,
       byte[] arguments, Fork fork, int callerServiceId, HashCode txMessageHash,
-      PublicKey authorPublicKey)
-      throws TransactionExecutionException {
+      PublicKey authorPublicKey) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       String serviceName = service.getName();
