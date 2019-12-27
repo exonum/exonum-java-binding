@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.service;
 
+import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
@@ -35,6 +36,7 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
  *
  * @see ProofListIndexProxy#getIndexHash()
  * @see ProofMapIndexProxy#getIndexHash()
+ * @see ProofEntryIndexProxy#getIndexHash()
  */
 
 public interface Schema {
