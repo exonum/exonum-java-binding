@@ -17,11 +17,15 @@
 package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.ExecutionException;
+import com.exonum.binding.core.transaction.TransactionContext;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.WrongMethodTypeException;
 
 /**
- * Stores a method handle of a transaction and a protobuf serializer in case of a protobuf type
- * transaction arguments.
+ * A proxy of a transaction method. This class implements argument resolution,
+ * conversion, and invocation of a transaction method.
  */
 class TransactionMethod {
   private final MethodHandle methodHandle;
@@ -32,11 +36,24 @@ class TransactionMethod {
     this.argumentsSerializer = argumentsSerializer;
   }
 
-  MethodHandle getMethodHandle() {
-    return methodHandle;
+  void invoke(Service targetService, byte[] arguments, TransactionContext context) {
+    Object argumentsObject = serializeArguments(arguments);
+    try {
+      methodHandle.invoke(targetService, argumentsObject, context);
+    } catch (WrongMethodTypeException | ClassCastException invocationException) {
+      // Invocation-specific exceptions are thrown as is — they are not thrown
+      // from the _transaction method_, but from framework code (see mh#invoke spec).
+      throw invocationException;
+    } catch (ExecutionException serviceException) {
+      // 'Service-defined' transaction exceptions
+      throw serviceException;
+    } catch (Throwable unexpectedServiceException) {
+      // Any other _transaction_ exceptions
+      throw new UnexpectedExecutionException(unexpectedServiceException);
+    }
   }
 
-  Object serializeArguments(byte[] arguments) {
+  private Object serializeArguments(byte[] arguments) {
     return argumentsSerializer.fromBytes(arguments);
   }
 }
