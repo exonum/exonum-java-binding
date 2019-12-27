@@ -42,9 +42,11 @@ public interface Service {
    *
    * @param fork a database fork to apply changes to. Not valid after this method returns
    * @param configuration the service configuration parameters
-   * @throws IllegalArgumentException if the configuration parameters are not valid (e.g.,
+   * @throws ExecutionException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
-   *     its initialization fails
+   *     its initialization fails. It will save the error into
+   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   *     the registry of call errors}
    * @see Configurable
    */
   default void initialize(Fork fork, Configuration configuration) {

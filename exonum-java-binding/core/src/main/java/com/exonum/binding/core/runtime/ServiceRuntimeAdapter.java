@@ -118,8 +118,11 @@ public class ServiceRuntimeAdapter {
    *     protobuf message
    * @param configuration the service initial configuration parameters as a serialized protobuf
    *     message
-   * @see ServiceRuntime#initiateAddingService(Fork, ServiceInstanceSpec, byte[])
    * @throws CloseFailuresException if there was a failure in destroying some native peers
+   * @throws ExecutionException if the service initialization failed
+   * @throws UnexpectedExecutionException if the service initialization failed
+   *     with an unexpected exception
+   * @see ServiceRuntime#initiateAddingService(Fork, ServiceInstanceSpec, byte[])
    */
   void initiateAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
       throws CloseFailuresException {
@@ -176,7 +179,7 @@ public class ServiceRuntimeAdapter {
    * @param authorPublicKey the public key of the transaction author
    * @throws ExecutionException if the transaction execution failed
    * @throws UnexpectedExecutionException if the transaction execution failed
-   *     with an unexpected exception with no error code
+   *     with an unexpected exception
    * @throws IllegalArgumentException if any argument is not valid
    * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
    *      PublicKey)
@@ -204,7 +207,7 @@ public class ServiceRuntimeAdapter {
    *                   and rollbacks
    * @throws ExecutionException if the transaction execution failed
    * @throws UnexpectedExecutionException if the transaction execution failed
-   *     with an unexpected exception with no error code
+   *     with an unexpected exception
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#afterTransactions(int, Fork)
    */

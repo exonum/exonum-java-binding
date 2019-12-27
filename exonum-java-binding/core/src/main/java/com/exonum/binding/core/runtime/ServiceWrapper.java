@@ -103,7 +103,7 @@ final class ServiceWrapper {
   }
 
   void initialize(Fork view, Configuration configuration) {
-    service.initialize(view, configuration);
+    callServiceMethod(() -> service.initialize(view, configuration));
   }
 
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
@@ -152,6 +152,13 @@ final class ServiceWrapper {
     }
   }
 
+  /**
+   * Calls a service method — a method that is specified to throw {@link ExecutionException}.
+   *
+   * <p>Exceptions are handled as follows:
+   * - {@link ExecutionException} is propagated as-is
+   * - Any other exception is wrapped into {@link UnexpectedExecutionException}
+   */
   private static void callServiceMethod(Runnable serviceMethod) {
     try {
       serviceMethod.run();
