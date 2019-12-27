@@ -37,9 +37,9 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
@@ -162,7 +162,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   // todo: consider extracting in a TransactionPreconditions or
-  //   TransactionExecutionException, with proper lazy formatting: ECR-2746.
+  //   ExecutionException, with proper lazy formatting: ECR-2746.
   /** Checks a transaction execution precondition, throwing if it is false. */
   private static void checkExecution(boolean precondition, byte errorCode) {
     checkExecution(precondition, errorCode, null);
@@ -171,7 +171,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   private static void checkExecution(boolean precondition, byte errorCode,
       @Nullable String message) {
     if (!precondition) {
-      throw new TransactionExecutionException(errorCode, message);
+      throw new ExecutionException(errorCode, message);
     }
   }
 

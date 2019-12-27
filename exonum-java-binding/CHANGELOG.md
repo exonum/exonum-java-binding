@@ -30,8 +30,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `Transaction` _interface_. (#1274, #1307)
 - Any exceptions thrown from the `Transaction` methods
   but `TransactionExecutionException` are saved with the error kind
-  "unexpected".
-- Made `TransactionExecutionException` an unchecked (runtime) exception.
+  "unexpected" into `Blockchain#getCallErrors`.
+- Redefined `TransactionExecutionException`:
+  - Renamed into `ExecutionException`
+  - Made `TransactionExecutionException` an unchecked (runtime) exception
+  - Specified it as _the_ exception to communicate execution errors
+  of `Service` methods: `@Transaction`s; `Service#afterTransactions`,
+  `#initialize`. 
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
 - Allowed throwing execution exceptions from `Service#afterTransaction`
   (ex. `beforeCommit`).

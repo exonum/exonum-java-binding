@@ -18,28 +18,43 @@ package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import javax.annotation.Nullable;
 
 /**
- * An exception occurred during transaction execution. The transaction exception includes
- * an integer error code, that may be either service-specific or transaction-specific;
- * and an optional description — an exception message. Both the error code and the description
- * are saved in the database, but only the value of the error code affects the blockchain state.
+ * An error occurred during the execution of a Service method. The execution exception includes
+ * an integer error code, that may be either service-specific or operation-specific;
+ * and an optional description — an exception message. Different error codes allow the clients
+ * of the operation to distinguish between different error conditions.
+ *
+ * <p>Exonum translates this exception into an {@link ExecutionError} type
+ * with error kind equal to {@linkplain ErrorKind#SERVICE}. The execution error copies
+ * the error code and the description from this exception. Exonum saves it into the database in
+ * {@linkplain Blockchain#getCallErrors(long) the registry of call errors}.
+ * Note that only the value of the error code affects the blockchain state.
  *
  * <p>The other attributes of a Java exception — a stack trace, a cause, suppressed exceptions —
- * are not saved in the database and are used for logging only.
+ * are not saved in the database. They are used for logging only.
  *
- * <p>An external client will get the error code and description when requests a transaction
- * status of a failed transaction. See
- * <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/node-management/#transaction">the API endpoint documentation</a>
- * for more information.
+ * <h3>Requesting Execution Errors</h3>
+ *
+ * <p>An execution error, including the error code and description, can be requested:
+ * <ul>
+ *   <li>by any Exonum Service, using {@link Blockchain#getCallErrors(long)}</li>
+ *   <li>by an authorized Light Client, using the Exonum endpoints. For example, when
+ *   the clients requests the transaction information, it will get the execution error,
+ *   if it occurred. See
+ *   <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/node-management/#transaction">the API endpoint documentation</a>
+ *   for more information.</li>
+ * </ul>
  *
  * @see Blockchain#getTxResult(HashCode)
  * @see Blockchain#getCallErrors(long)
  * @see ExecutionStatus
  */
-public class TransactionExecutionException extends RuntimeException /* todo: fix all usages */ {
+public class ExecutionException extends RuntimeException {
 
   // TODO: Consider using enums and taking their ordinal as the error code: ECR-2006?
   private final byte errorCode;
@@ -49,7 +64,7 @@ public class TransactionExecutionException extends RuntimeException /* todo: fix
    *
    * @param errorCode the transaction error code
    */
-  public TransactionExecutionException(byte errorCode) {
+  public ExecutionException(byte errorCode) {
     this(errorCode, null);
   }
 
@@ -60,7 +75,7 @@ public class TransactionExecutionException extends RuntimeException /* todo: fix
    * @param description the error description. The detail description is saved for
    *     later retrieval by the {@link #getMessage()} method.
    */
-  public TransactionExecutionException(byte errorCode, @Nullable String description) {
+  public ExecutionException(byte errorCode, @Nullable String description) {
     this(errorCode, description, null);
   }
 
@@ -76,14 +91,17 @@ public class TransactionExecutionException extends RuntimeException /* todo: fix
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
    *     A <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown.
    */
-  public TransactionExecutionException(byte errorCode,
+  public ExecutionException(byte errorCode,
       @Nullable String description,
       @Nullable Throwable cause) {
     super(description, cause);
     this.errorCode = errorCode;
   }
 
-  /** Returns the transaction error code. */
+  /**
+   * Returns the transaction error code.
+   * @see ExecutionError#getCode()
+   */
   @SuppressWarnings("unused")  // Native API
   public final byte getErrorCode() {
     return errorCode;

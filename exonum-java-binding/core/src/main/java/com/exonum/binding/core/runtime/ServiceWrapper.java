@@ -25,8 +25,8 @@ import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
@@ -154,7 +154,7 @@ final class ServiceWrapper {
   void afterTransactions(Fork fork) {
     try {
       service.afterTransactions(fork);
-    } catch (TransactionExecutionException e) {
+    } catch (ExecutionException e) {
       // Re-throw as is to keep the error code
       // todo: consider _always_ wrapping in UserCodeException to avoid conditional code
       //  both in all exception handlers **and** in native code? Would it be simpler?
@@ -166,7 +166,7 @@ final class ServiceWrapper {
       //  'runtime' — only somewhere in the runtime).
       throw e;
     } catch (Exception e) {
-      throw new UnexpectedTransactionExecutionException(e);
+      throw new UnexpectedExecutionException(e);
     }
   }
 

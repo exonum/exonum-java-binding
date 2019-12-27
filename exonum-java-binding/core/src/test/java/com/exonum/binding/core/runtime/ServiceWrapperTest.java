@@ -38,8 +38,8 @@ import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,11 +93,11 @@ class ServiceWrapperTest {
     byte[] arguments = bytes(1, 2, 3);
 
     TransactionContext context = anyContext().build();
-    doThrow(TransactionExecutionException.class)
+    doThrow(ExecutionException.class)
         .when(txInvoker)
         .invokeTransaction(txId, arguments, context);
 
-    assertThrows(TransactionExecutionException.class,
+    assertThrows(ExecutionException.class,
         () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0,
             context));
   }
@@ -212,11 +212,11 @@ class ServiceWrapperTest {
 
   @Test
   void afterTransactionsPropagatesExecutionException() {
-    TransactionExecutionException e = new TransactionExecutionException((byte) 0);
+    ExecutionException e = new ExecutionException((byte) 0);
     doThrow(e).when(service).afterTransactions(any(Fork.class));
 
     Fork fork = mock(Fork.class);
-    TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
+    ExecutionException actual = assertThrows(ExecutionException.class,
         () -> serviceWrapper.afterTransactions(fork));
     assertThat(actual).isSameAs(e);
   }
@@ -227,7 +227,7 @@ class ServiceWrapperTest {
     doThrow(e).when(service).afterTransactions(any(Fork.class));
 
     Fork fork = mock(Fork.class);
-    Exception actual = assertThrows(UnexpectedTransactionExecutionException.class,
+    Exception actual = assertThrows(UnexpectedExecutionException.class,
         () -> serviceWrapper.afterTransactions(fork));
     assertThat(actual.getCause()).isSameAs(e);
   }
