@@ -217,7 +217,13 @@ public interface ExonumClient {
     private String prefix = "";
 
     /**
-     * Sets Exonum host url.
+     * Sets the Exonum host url.
+     *
+     * @param exonumHost Exonum <em>public API address</em>
+     * @see <a href="https://exonum.com/doc/version/latest/architecture/configuration/#api">
+     *   API Configuration</a>
+     * @see <a href="https://exonum.com/doc/version/latest/get-started/java-binding/#node-configuration">
+     *   Exonum Node Configuraion</a>
      */
     public Builder setExonumHost(URL exonumHost) {
       this.exonumHost = checkNotNull(exonumHost);
@@ -225,8 +231,11 @@ public interface ExonumClient {
     }
 
     /**
-     * Sets Exonum host url.
+     * Sets the Exonum host url.
+     *
+     * @param exonumHost Exonum <em>public API address</em>
      * @throws IllegalArgumentException if the url is malformed
+     * @see #setExonumHost(URL)
      */
     public Builder setExonumHost(String exonumHost) {
       String host = checkNotNull(exonumHost);
