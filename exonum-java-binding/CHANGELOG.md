@@ -36,17 +36,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - Made `TransactionExecutionException` an unchecked (runtime) exception
   - Specified it as _the_ exception to communicate execution errors
   of `Service` methods: `@Transaction`s; `Service#afterTransactions`,
-  `#initialize`; `Configurable` methods. 
+  `#initialize`; `Configurable` methods.
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
-- Allowed throwing execution exceptions from `Service#afterTransaction`
+- Allowed throwing execution exceptions from `Service#afterTransactions`
   (ex. `beforeCommit`).
-  <!-- TODO: just list here all the other exc. sources as they get implemented -->
   Any exceptions thrown in these methods are saved in the blockchain
   in `Blockchain#getCallErrors` and can be retrieved by any services or
   light clients.
 - `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`.
-- The `Configurable` specification to require `ExecutionException` instead
-  of `IllegalArgumentException`.
+- The specification of `Configurable` operations and `Service#initialize` 
+  to require throwing `ExecutionException` instead of
+  `IllegalArgumentException`.
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.

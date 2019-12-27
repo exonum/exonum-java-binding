@@ -254,6 +254,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     checkState(node != null, "Service has not been fully initialized yet");
   }
 
+  /**
+   * Verifies the QA service configuration.
+   * @throws ExecutionException if time oracle name is empty
+   */
   @Override
   public void verifyConfiguration(Fork fork, Configuration configuration) {
     QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);

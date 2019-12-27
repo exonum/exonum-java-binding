@@ -77,6 +77,38 @@ class ServiceWrapperTest {
   }
 
   @Test
+  void initialize() {
+    Fork fork = mock(Fork.class);
+    Configuration config = new ServiceConfiguration(new byte[0]);
+    serviceWrapper.initialize(fork, config);
+    verify(service).initialize(fork, config);
+  }
+
+  @Test
+  void initializePropagatesExecutionException() {
+    ExecutionException e = new ExecutionException((byte) 1);
+    Fork fork = mock(Fork.class);
+    Configuration config = new ServiceConfiguration(new byte[0]);
+    doThrow(e).when(service).initialize(fork, config);
+
+    ExecutionException actual = assertThrows(ExecutionException.class,
+        () -> serviceWrapper.initialize(fork, config));
+    assertThat(actual).isSameAs(e);
+  }
+
+  @Test
+  void initializeWrapsRuntimeExceptions() {
+    RuntimeException e = new RuntimeException("unexpected");
+    Fork fork = mock(Fork.class);
+    Configuration config = new ServiceConfiguration(new byte[0]);
+    doThrow(e).when(service).initialize(fork, config);
+
+    Exception actual = assertThrows(UnexpectedExecutionException.class,
+        () -> serviceWrapper.initialize(fork, config));
+    assertThat(actual).hasCause(e);
+  }
+
+  @Test
   void executeTransactionDefaultInterface() {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);

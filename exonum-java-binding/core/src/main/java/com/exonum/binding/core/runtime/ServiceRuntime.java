@@ -180,8 +180,12 @@ public final class ServiceRuntime implements AutoCloseable {
    *     message
    * @throws IllegalArgumentException if the service is already started; or its artifact
    *     is not deployed
-   * @throws RuntimeException if it failed to instantiate the service;
-   *     or if the service initialization failed
+   * @throws ExecutionException if such exception occurred in the service constructor;
+   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedExecutionException if any other exception occurred in
+   *     the  the service constructor; it is included as cause. The cause must be translated
+   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @throws RuntimeException if the runtime failed to instantiate the service for other reason
    */
   public void initiateAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
       byte[] configuration) {
