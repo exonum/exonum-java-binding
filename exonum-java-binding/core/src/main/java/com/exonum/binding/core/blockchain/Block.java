@@ -24,6 +24,7 @@ import com.exonum.binding.core.service.Schema;
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
+import com.google.protobuf.ByteString;
 import java.util.Map;
 import java.util.Optional;
 
@@ -103,7 +104,7 @@ public abstract class Block {
    * Contains additional block headers stored as a key value pairs and ordered by the key.
    * The key is a block header; and the value is a header bytes value encoded in hex string.
    */
-  public abstract Map<String, String> getAdditionalHeaders();
+  public abstract Map<String, ByteString> getAdditionalHeaders();
 
   @Override
   public int hashCode() {
@@ -186,7 +187,7 @@ public abstract class Block {
     /**
      * Sets additional block headers.
      */
-    public abstract Builder additionalHeaders(Map<String, String> additionalHeaders);
+    public abstract Builder additionalHeaders(Map<String, ByteString> additionalHeaders);
 
     abstract Block autoBuild();
 

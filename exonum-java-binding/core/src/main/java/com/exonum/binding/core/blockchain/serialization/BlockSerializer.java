@@ -27,7 +27,6 @@ import com.exonum.core.messages.Blockchain;
 import com.exonum.core.messages.Blockchain.AdditionalHeaders;
 import com.exonum.core.messages.Types;
 import com.exonum.core.messages.Types.Hash;
-import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
 import exonum.KeyValueSequenceOuterClass.KeyValue;
 import exonum.KeyValueSequenceOuterClass.KeyValueSequence;
@@ -41,8 +40,6 @@ public enum BlockSerializer implements Serializer<Block> {
 
   private static final Serializer<Blockchain.Block> PROTO_SERIALIZER =
       protobuf(Blockchain.Block.class);
-  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16()
-      .lowerCase();
 
   @Override
   public byte[] toBytes(Block value) {
@@ -108,17 +105,17 @@ public enum BlockSerializer implements Serializer<Block> {
   }
 
   //TODO: define the order
-  private static Map<String, String> toHeadersMap(AdditionalHeaders headers) {
+  private static Map<String, ByteString> toHeadersMap(AdditionalHeaders headers) {
     return headers.getHeaders().getEntryList()
         .stream()
         .collect(toImmutableSortedMap(
             Comparator.naturalOrder(),
             KeyValue::getKey,
-            e -> HEX_ENCODING.encode(e.getValue().toByteArray()))
+            KeyValue::getValue)
         );
   }
 
-  private static AdditionalHeaders toHeadersProto(Map<String, String> headers) {
+  private static AdditionalHeaders toHeadersProto(Map<String, ByteString> headers) {
     return AdditionalHeaders.newBuilder()
         .setHeaders(
             KeyValueSequence.newBuilder()
@@ -127,7 +124,7 @@ public enum BlockSerializer implements Serializer<Block> {
                         .stream()
                         .map(e -> KeyValue.newBuilder()
                             .setKey(e.getKey())
-                            .setValue(ByteString.copyFrom(HEX_ENCODING.decode(e.getValue())))
+                            .setValue(e.getValue())
                             .build())
                         .collect(Collectors.toList())
                 )

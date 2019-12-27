@@ -24,6 +24,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blocks;
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.protobuf.ByteString;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -63,7 +64,7 @@ class BlockSerializerTest {
         .previousBlockHash(HashCode.fromString("bc"))
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
-        .additionalHeaders(ImmutableSortedMap.of("one", "abcd01"))
+        .additionalHeaders(ImmutableSortedMap.of("one", ByteString.copyFromUtf8("abcd01")))
         .errorHash(Optional.of(HashCode.fromString("ef")))
         .build();
 
