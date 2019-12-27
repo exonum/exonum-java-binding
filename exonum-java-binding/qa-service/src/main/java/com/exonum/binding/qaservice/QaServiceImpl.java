@@ -36,10 +36,10 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.binding.time.TimeSchema;
@@ -281,7 +281,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     HashCode counterId = Hashing.defaultHashFunction()
         .hashString(counterName, UTF_8);
     if (counters.containsKey(counterId)) {
-      throw new TransactionExecutionException(COUNTER_ALREADY_EXISTS.code,
+      throw new ExecutionException(COUNTER_ALREADY_EXISTS.code,
           String.format("Counter %s already exists", counterName));
     }
     assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
@@ -302,7 +302,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     // Increment the counter if there is such.
     if (!counters.containsKey(counterId)) {
-      throw new TransactionExecutionException(UNKNOWN_COUNTER.code);
+      throw new ExecutionException(UNKNOWN_COUNTER.code);
     }
     long newValue = counters.get(counterId) + 1;
     counters.put(counterId, newValue);
@@ -334,7 +334,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     // Throw an exception. Framework must revert the changes made above.
     String errorDescription = arguments.getErrorDescription();
-    throw new TransactionExecutionException((byte) errorCode, errorDescription);
+    throw new ExecutionException((byte) errorCode, errorDescription);
   }
 
   private void checkConfiguration(QaConfiguration config) {

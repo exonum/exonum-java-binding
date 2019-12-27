@@ -17,6 +17,7 @@
 package com.exonum.binding.core.service;
 
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.ExecutionException;
 import io.vertx.ext.web.Router;
 
 /**
@@ -94,11 +95,9 @@ public interface Service {
    * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
    * the registry of call errors} with appropriate error kinds.
    *
-   * @throws com.exonum.binding.core.transaction.TransactionExecutionException if an error
-   *     occurs that shall have an error code; it is saved as a call error of kind "service"
-   *     in
-   * @throws RuntimeException if an error occurs that doesn't need an error code; it is saved
-   *     as a call error of kind "unexpected"
+   * @throws ExecutionException if an error occurs during the method execution;
+   *     it is saved as a call error of kind "service". Any other exceptions
+   *     are considered unexpected. They are saved with kind "unexpected".
    */
   default void afterTransactions(Fork fork) {}
 

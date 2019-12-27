@@ -27,7 +27,7 @@ import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.core.messages.Blockchain.CallInBlock;
@@ -92,7 +92,7 @@ class ServiceRuntimeIntegrationTest {
 
     @Override
     public void afterTransactions(Fork fork) {
-      throw new TransactionExecutionException(AFTER_TX_ERROR_CODE);
+      throw new ExecutionException(AFTER_TX_ERROR_CODE);
     }
   }
 

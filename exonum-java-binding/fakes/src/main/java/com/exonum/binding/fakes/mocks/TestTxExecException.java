@@ -16,13 +16,13 @@
 
 package com.exonum.binding.fakes.mocks;
 
-import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.binding.core.transaction.ExecutionException;
 import javax.annotation.Nullable;
 
 /**
- * Used in tests that cover the cases of using subclass of {@link #TransactionExecutionException}.
+ * Used in tests that cover the cases of using subclass of {@link #ExecutionException}.
  */
-class TestTxExecException extends TransactionExecutionException {
+class TestTxExecException extends ExecutionException {
 
   /**
    * The constructor that gets called from native code.

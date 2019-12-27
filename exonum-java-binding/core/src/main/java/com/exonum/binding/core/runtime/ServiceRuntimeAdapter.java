@@ -26,7 +26,7 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
 import com.exonum.core.messages.Runtime.InstanceState;
@@ -174,8 +174,8 @@ public class ServiceRuntimeAdapter {
    *      inner transactions); or 0 when the caller is an external message
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
-   * @throws TransactionExecutionException if the transaction execution failed
-   * @throws UnexpectedTransactionExecutionException if the transaction execution failed
+   * @throws ExecutionException if the transaction execution failed
+   * @throws UnexpectedExecutionException if the transaction execution failed
    *     with an unexpected exception with no error code
    * @throws IllegalArgumentException if any argument is not valid
    * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
@@ -202,8 +202,8 @@ public class ServiceRuntimeAdapter {
    *
    * @param forkHandle a handle to the native fork object, which must support checkpoints
    *                   and rollbacks
-   * @throws TransactionExecutionException if the transaction execution failed
-   * @throws UnexpectedTransactionExecutionException if the transaction execution failed
+   * @throws ExecutionException if the transaction execution failed
+   * @throws UnexpectedExecutionException if the transaction execution failed
    *     with an unexpected exception with no error code
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#afterTransactions(int, Fork)

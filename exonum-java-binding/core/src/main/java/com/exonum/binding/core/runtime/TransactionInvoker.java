@@ -19,8 +19,8 @@ package com.exonum.binding.core.runtime;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.inject.Inject;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.WrongMethodTypeException;
@@ -49,9 +49,9 @@ final class TransactionInvoker {
    *
    * @throws IllegalArgumentException if there is no transaction method with given id in a
    *     corresponding service
-   * @throws TransactionExecutionException if {@link TransactionExecutionException} was thrown by
+   * @throws ExecutionException if {@link ExecutionException} was thrown by
    *     the transaction method, it is propagated
-   * @throws UnexpectedTransactionExecutionException if any other exception is thrown by
+   * @throws UnexpectedExecutionException if any other exception is thrown by
    *     the transaction method, it is wrapped as cause
    */
   void invokeTransaction(int transactionId, byte[] arguments, TransactionContext context) {
@@ -66,12 +66,12 @@ final class TransactionInvoker {
       // Invocation-specific exceptions are thrown as is — they are not thrown
       // from the _transaction method_, but from framework code (see mh#invoke spec).
       throw invocationException;
-    } catch (TransactionExecutionException serviceException) {
+    } catch (ExecutionException serviceException) {
       // 'Service-defined' transaction exceptions
       throw serviceException;
     } catch (Throwable unexpectedServiceException) {
       // Any other _transaction_ exceptions
-      throw new UnexpectedTransactionExecutionException(unexpectedServiceException);
+      throw new UnexpectedExecutionException(unexpectedServiceException);
     }
   }
 }
