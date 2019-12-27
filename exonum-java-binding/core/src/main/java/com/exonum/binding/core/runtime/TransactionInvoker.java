@@ -22,8 +22,6 @@ import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.WrongMethodTypeException;
 import java.util.Map;
 
 /**
@@ -58,20 +56,6 @@ final class TransactionInvoker {
     checkArgument(transactionMethods.containsKey(transactionId),
         "No method with transaction id (%s)", transactionId);
     TransactionMethod transactionMethod = transactionMethods.get(transactionId);
-    Object argumentsObject = transactionMethod.serializeArguments(arguments);
-    MethodHandle methodHandle = transactionMethod.getMethodHandle();
-    try {
-      methodHandle.invoke(service, argumentsObject, context);
-    } catch (WrongMethodTypeException | ClassCastException invocationException) {
-      // Invocation-specific exceptions are thrown as is — they are not thrown
-      // from the _transaction method_, but from framework code (see mh#invoke spec).
-      throw invocationException;
-    } catch (ExecutionException serviceException) {
-      // 'Service-defined' transaction exceptions
-      throw serviceException;
-    } catch (Throwable unexpectedServiceException) {
-      // Any other _transaction_ exceptions
-      throw new UnexpectedExecutionException(unexpectedServiceException);
-    }
+    transactionMethod.invoke(service, arguments, context);
   }
 }
