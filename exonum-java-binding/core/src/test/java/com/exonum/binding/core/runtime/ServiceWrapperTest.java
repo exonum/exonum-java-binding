@@ -121,6 +121,48 @@ class ServiceWrapperTest {
   }
 
   @Test
+  void executeVerifyConfigurationPropagatesExecutionException() {
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    int txId = VERIFY_CONFIGURATION_TX_ID;
+    byte[] arguments = bytes(1, 2, 3);
+
+    Fork fork = mock(Fork.class);
+    TransactionContext context = anyContext()
+        .fork(fork)
+        .build();
+
+    ExecutionException e = new ExecutionException((byte) 0);
+    Configuration config = new ServiceConfiguration(arguments);
+    doThrow(e).when(service).verifyConfiguration(fork, config);
+
+    ExecutionException actual = assertThrows(ExecutionException.class,
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
+            SUPERVISOR_SERVICE_ID, context));
+    assertThat(actual).isSameAs(e);
+  }
+
+  @Test
+  void executeVerifyConfigurationWrapsRuntimeExceptions() {
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    int txId = VERIFY_CONFIGURATION_TX_ID;
+    byte[] arguments = bytes(1, 2, 3);
+
+    Fork fork = mock(Fork.class);
+    TransactionContext context = anyContext()
+        .fork(fork)
+        .build();
+
+    RuntimeException e = new RuntimeException("unexpected");
+    Configuration config = new ServiceConfiguration(arguments);
+    doThrow(e).when(service).verifyConfiguration(fork, config);
+
+    Exception actual = assertThrows(UnexpectedExecutionException.class,
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
+            SUPERVISOR_SERVICE_ID, context));
+    assertThat(actual).hasCause(e);
+  }
+
+  @Test
   void executeApplyConfiguration() {
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     int txId = APPLY_CONFIGURATION_TX_ID;
@@ -229,7 +271,7 @@ class ServiceWrapperTest {
     Fork fork = mock(Fork.class);
     Exception actual = assertThrows(UnexpectedExecutionException.class,
         () -> serviceWrapper.afterTransactions(fork));
-    assertThat(actual.getCause()).isSameAs(e);
+    assertThat(actual).hasCause(e);
   }
 
   @ParameterizedTest

@@ -16,10 +16,12 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.qaservice.TransactionError.COUNTER_ALREADY_EXISTS;
-import static com.exonum.binding.qaservice.TransactionError.UNKNOWN_COUNTER;
+import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
+import static com.exonum.binding.qaservice.QaExecutionError.EMPTY_TIME_ORACLE_NAME;
+import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -282,7 +284,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
         .hashString(counterName, UTF_8);
     if (counters.containsKey(counterId)) {
       throw new ExecutionException(COUNTER_ALREADY_EXISTS.code,
-          String.format("Counter %s already exists", counterName));
+          format("Counter %s already exists", counterName));
     }
     assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
 
@@ -316,9 +318,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // Attempt to clear all service indices.
     schema.clearAll();
 
-    throw new IllegalStateException(String
-        .format("#execute of this transaction always throws (seed=%d, txHash=%s)",
-            arguments.getSeed(), context.getTransactionMessageHash()));
+    throw new IllegalStateException(format("#execute of this transaction always throws "
+            + "(seed=%d, txHash=%s)", arguments.getSeed(), context.getTransactionMessageHash()));
   }
 
   @Override
@@ -343,8 +344,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // We do *not* check if the time oracle is active to (a) allow running this service with
     // reduced read functionality without time oracle; (b) testing time schema when it is not
     // active.
-    checkArgument(!Strings.isNullOrEmpty(timeOracleName), "Empty time oracle name: %s",
-        timeOracleName);
+    if (Strings.isNullOrEmpty(timeOracleName)) {
+      throw new ExecutionException(EMPTY_TIME_ORACLE_NAME.code,
+          format("Empty time oracle name: %s", timeOracleName));
+    }
   }
 
   private void updateTimeOracle(Fork fork, Configuration configuration) {
