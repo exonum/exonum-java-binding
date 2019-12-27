@@ -19,6 +19,7 @@ package com.exonum.binding.core.blockchain;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.common.blockchain.CallInBlocks;
 import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.hash.HashCode;
@@ -167,6 +168,7 @@ public final class Blockchain {
    * @param blockHeight the height of the block
    * @throws IllegalArgumentException if the height is invalid: negative or exceeding
    *     the {@linkplain #getHeight() blockchain height}
+   * @see CallInBlocks
    */
   public ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
     return schema.getCallErrors(blockHeight);
@@ -186,9 +188,7 @@ public final class Blockchain {
       TransactionLocation txLocation = txLocationOpt.get();
       long height = txLocation.getHeight();
       ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = getCallErrors(height);
-      CallInBlock txCall = CallInBlock.newBuilder()
-          .setTransaction(txLocation.getIndexInBlock())
-          .build();
+      CallInBlock txCall = CallInBlocks.transaction(txLocation.getIndexInBlock());
       ExecutionStatus txStatus = ExecutionStatuses.SUCCESS;
       if (callErrors.containsKey(txCall)) {
         ExecutionError txError = callErrors.get(txCall);

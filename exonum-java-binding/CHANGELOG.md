@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   in `Blockchain#getCallErrors` and can be retrieved by any services or
   light clients.
 - `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`.
+  - Use `CallInBlocks` to concisely create `CallInBlock`s.
 - The specification of `Configurable` operations and `Service#initialize` 
   to require throwing `ExecutionException` instead of
   `IllegalArgumentException`.
