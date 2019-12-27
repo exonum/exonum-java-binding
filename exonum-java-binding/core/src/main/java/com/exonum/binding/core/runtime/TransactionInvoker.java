@@ -54,8 +54,7 @@ final class TransactionInvoker {
    * @throws UnexpectedTransactionExecutionException if any other exception is thrown by
    *     the transaction method, it is wrapped as cause
    */
-  void invokeTransaction(int transactionId, byte[] arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  void invokeTransaction(int transactionId, byte[] arguments, TransactionContext context) {
     checkArgument(transactionMethods.containsKey(transactionId),
         "No method with transaction id (%s)", transactionId);
     TransactionMethod transactionMethod = transactionMethods.get(transactionId);

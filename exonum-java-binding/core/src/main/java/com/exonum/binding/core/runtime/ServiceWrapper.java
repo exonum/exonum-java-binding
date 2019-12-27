@@ -106,8 +106,7 @@ final class ServiceWrapper {
   }
 
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
-      TransactionContext context)
-      throws TransactionExecutionException {
+      TransactionContext context) {
     switch (interfaceName) {
       case DEFAULT_INTERFACE_NAME: {
         executeIntrinsicTransaction(txId, arguments, context);
@@ -122,8 +121,7 @@ final class ServiceWrapper {
     }
   }
 
-  private void executeIntrinsicTransaction(int txId, byte[] arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  private void executeIntrinsicTransaction(int txId, byte[] arguments, TransactionContext context) {
     invoker.invokeTransaction(txId, arguments, context);
   }
 
