@@ -20,7 +20,7 @@ import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
-import static com.exonum.binding.qaservice.TransactionError.UNKNOWN_COUNTER;
+import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.binding.qaservice.TransactionMessages.createIncrementCounterTx;
 import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;

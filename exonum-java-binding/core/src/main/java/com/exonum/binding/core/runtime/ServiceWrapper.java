@@ -17,6 +17,7 @@
 package com.exonum.binding.core.runtime;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Throwables.throwIfInstanceOf;
 import static java.lang.String.format;
 
 import com.exonum.binding.core.service.BlockCommittedEvent;
@@ -140,14 +141,25 @@ final class ServiceWrapper {
     Configuration config = new ServiceConfiguration(arguments);
     switch (txId) {
       case VERIFY_CONFIGURATION_TX_ID:
-        configurable.verifyConfiguration(fork, config);
+        callServiceMethod(() -> configurable.verifyConfiguration(fork, config));
         break;
       case APPLY_CONFIGURATION_TX_ID:
-        configurable.applyConfiguration(fork, config);
+        callServiceMethod(() -> configurable.applyConfiguration(fork, config));
         break;
       default:
         throw new IllegalArgumentException(
             format("Unknown txId (%d) in Configurable interface", txId));
+    }
+  }
+
+  private static void callServiceMethod(Runnable serviceMethod) {
+    try {
+      serviceMethod.run();
+    } catch (Exception e) {
+      // Propagate ExecutionExceptions as-is
+      throwIfInstanceOf(e, ExecutionException.class);
+      // Wrap any other exception type
+      throw new UnexpectedExecutionException(e);
     }
   }
 

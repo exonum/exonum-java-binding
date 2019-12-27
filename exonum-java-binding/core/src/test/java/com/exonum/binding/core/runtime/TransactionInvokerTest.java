@@ -42,7 +42,7 @@ class TransactionInvokerTest {
   private TransactionContext context;
 
   @Test
-  void invokeValidServiceTransaction() throws Exception {
+  void invokeValidServiceTransaction() {
     ValidService service = spy(new ValidService());
     TransactionInvoker invoker = new TransactionInvoker(service);
     invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context);
@@ -77,7 +77,7 @@ class TransactionInvokerTest {
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
     Exception actual = assertThrows(UnexpectedExecutionException.class,
         () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
-    assertThat(actual.getCause()).isSameAs(e);
+    assertThat(actual).hasCause(e);
   }
 
   @Test
@@ -86,11 +86,11 @@ class TransactionInvokerTest {
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
     Exception actual = assertThrows(UnexpectedExecutionException.class,
         () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
-    assertThat(actual.getCause()).isSameAs(e);
+    assertThat(actual).hasCause(e);
   }
 
   @Test
-  void invokeProtobufArgumentsService() throws Exception {
+  void invokeProtobufArgumentsService() {
     ProtobufArgumentsService service = spy(new ProtobufArgumentsService());
     TransactionInvoker invoker = new TransactionInvoker(service);
     TestProtoMessages.Point point = TestProtoMessages.Point.newBuilder()
