@@ -24,6 +24,8 @@ import com.exonum.binding.core.service.Schema;
 import com.google.auto.value.AutoValue;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Exonum block header data structure.
@@ -89,6 +91,19 @@ public abstract class Block {
    * @see Schema#getStateHashes()
    */
   public abstract HashCode getStateHash();
+
+  /**
+   * Root hash of exceptions occurred in the block. Empty if no errors.
+   *
+   * @see Blockchain#getCallErrors()
+   */
+  public abstract Optional<HashCode> getErrorHash();
+
+  /**
+   * Contains additional block headers ordered by the key.
+   * The value is stored as hex string.
+   */
+  public abstract Map<String, String> getAdditionalHeaders();
 
   @Override
   public int hashCode() {
@@ -160,6 +175,18 @@ public abstract class Block {
      * @see Schema#getStateHashes()
      */
     public abstract Builder stateHash(HashCode blockchainStateHash);
+
+    /**
+     * Sets error hash.
+     *
+     * @see Blockchain#getCallErrors()
+     */
+    public abstract Builder errorHash(Optional<HashCode> errorHash);
+
+    /**
+     * Sets additional block headers.
+     */
+    public abstract Builder additionalHeaders(Map<String, String> additionalHeaders);
 
     abstract Block autoBuild();
 

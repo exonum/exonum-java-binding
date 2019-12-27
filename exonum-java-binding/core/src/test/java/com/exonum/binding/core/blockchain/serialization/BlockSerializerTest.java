@@ -23,6 +23,9 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blocks;
+import com.google.common.collect.ImmutableSortedMap;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -49,6 +52,8 @@ class BlockSerializerTest {
         .previousBlockHash(HashCode.fromString("bc"))
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
+        .additionalHeaders(Collections.emptyMap())
+        .errorHash(Optional.empty())
         .build();
     Block block2 = Block.builder()
         .proposerId(Integer.MAX_VALUE)
@@ -58,6 +63,8 @@ class BlockSerializerTest {
         .previousBlockHash(HashCode.fromString("bc"))
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
+        .additionalHeaders(ImmutableSortedMap.of("one", "abcd01"))
+        .errorHash(Optional.of(HashCode.fromString("ef")))
         .build();
 
     return Stream.of(block1, block2)

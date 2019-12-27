@@ -17,21 +17,32 @@
 package com.exonum.binding.core.blockchain.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+import static com.google.common.collect.ImmutableSortedMap.toImmutableSortedMap;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.core.messages.Blockchain;
+import com.exonum.core.messages.Blockchain.AdditionalHeaders;
 import com.exonum.core.messages.Types;
 import com.exonum.core.messages.Types.Hash;
+import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
+import exonum.KeyValueSequenceOuterClass.KeyValue;
+import exonum.KeyValueSequenceOuterClass.KeyValueSequence;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
 
   private static final Serializer<Blockchain.Block> PROTO_SERIALIZER =
       protobuf(Blockchain.Block.class);
+  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16()
+      .lowerCase();
 
   @Override
   public byte[] toBytes(Block value) {
@@ -42,6 +53,8 @@ public enum BlockSerializer implements Serializer<Block> {
         .setPrevHash(toHashProto(value.getPreviousBlockHash()))
         .setTxHash(toHashProto(value.getTxRootHash()))
         .setStateHash(toHashProto(value.getStateHash()))
+        .setErrorHash(toHashProtoOptional(value.getErrorHash()))
+        .setAdditionalHeaders(toHeadersProto(value.getAdditionalHeaders()))
         .build();
     return block.toByteArray();
   }
@@ -58,6 +71,8 @@ public enum BlockSerializer implements Serializer<Block> {
         .previousBlockHash(toHashCode(copiedBlocks.getPrevHash()))
         .txRootHash(toHashCode(copiedBlocks.getTxHash()))
         .stateHash(toHashCode(copiedBlocks.getStateHash()))
+        .errorHash(toOptionalHashCode(copiedBlocks.getErrorHash()))
+        .additionalHeaders(toHeadersMap(copiedBlocks.getAdditionalHeaders()))
         .build();
   }
 
@@ -71,5 +86,53 @@ public enum BlockSerializer implements Serializer<Block> {
   private static HashCode toHashCode(Hash hash) {
     ByteString bytes = hash.getData();
     return HashCode.fromBytes(bytes.toByteArray());
+  }
+
+  private static Optional<HashCode> toOptionalHashCode(Hash hash) {
+    return Optional.of(hash)
+        .map(Hash::getData)
+        .filter(h -> !h.isEmpty())
+        .map(ByteString::toByteArray)
+        .map(HashCode::fromBytes);
+  }
+
+  private static Types.Hash toHashProtoOptional(Optional<HashCode> hash) {
+    ByteString bytes = hash
+        .map(HashCode::asBytes)
+        .map(ByteString::copyFrom)
+        .orElse(ByteString.EMPTY);
+
+    return Types.Hash.newBuilder()
+        .setData(bytes)
+        .build();
+  }
+
+  //TODO: define the order
+  private static Map<String, String> toHeadersMap(AdditionalHeaders headers) {
+    return headers.getHeaders().getEntryList()
+        .stream()
+        .collect(toImmutableSortedMap(
+            Comparator.naturalOrder(),
+            KeyValue::getKey,
+            e -> HEX_ENCODING.encode(e.getValue().toByteArray()))
+        );
+  }
+
+  private static AdditionalHeaders toHeadersProto(Map<String, String> headers) {
+    return AdditionalHeaders.newBuilder()
+        .setHeaders(
+            KeyValueSequence.newBuilder()
+                .addAllEntry(
+                    headers.entrySet()
+                        .stream()
+                        .map(e -> KeyValue.newBuilder()
+                            .setKey(e.getKey())
+                            .setValue(ByteString.copyFrom(HEX_ENCODING.decode(e.getValue())))
+                            .build())
+                        .collect(Collectors.toList())
+                )
+                .build()
+        )
+        .build();
   }
 }
