@@ -34,7 +34,7 @@ import com.google.auto.value.AutoValue;
 public abstract class ServiceArtifactId {
 
   private static final String DELIMITER = ":";
-  private static final int NUM_FIELDS = 2;
+  private static final int NUM_FIELDS = 3;
 
   /**
    * Returns the runtime id in which the service shall be deployed.
@@ -42,14 +42,19 @@ public abstract class ServiceArtifactId {
   public abstract int getRuntimeId();
 
   /**
-   * Returns the full artifact name of this service (e.g., "com.acme:land-registry:1.2.0").
+   * Returns the artifact name of this service (e.g., "com.acme/land-registry").
    */
   public abstract String getName();
 
   /**
+   * Returns the artifact version of this service (e.g., "1.2.0").
+   */
+  public abstract String getVersion();
+
+  /**
    * Parses a service id in format "runtimeId:serviceName" as {@link #toString()} produces.
    *
-   * @param serviceArtifactId a string in format "runtimeId:serviceName". Whitespace
+   * @param serviceArtifactId a string in format "runtimeId:serviceName:version". Whitespace
    *     characters, including preceding and trailing, are not allowed
    * @return a ServiceArtifactId with the given coordinates
    * @throws IllegalArgumentException if the format is not correct
@@ -58,7 +63,8 @@ public abstract class ServiceArtifactId {
     String[] coordinates = serviceArtifactId.split(DELIMITER, NUM_FIELDS);
     int runtimeId = parseInt(coordinates[0]);
     String name = coordinates[1];
-    return valueOf(runtimeId, name);
+    String version = coordinates[2];
+    return valueOf(runtimeId, name, version);
   }
 
   /**
@@ -66,8 +72,8 @@ public abstract class ServiceArtifactId {
    *
    * @param name the name of the service; must not be blank
    */
-  public static ServiceArtifactId newJavaId(String name) {
-    return valueOf(JAVA.getId(), name);
+  public static ServiceArtifactId newJavaId(String name, String version) {
+    return valueOf(JAVA.getId(), name, version);
   }
 
   /**
@@ -76,9 +82,10 @@ public abstract class ServiceArtifactId {
    * @param runtimeId the runtime id in which the service shall be deployed
    * @param name the name of the service; must not be blank
    */
-  public static ServiceArtifactId valueOf(int runtimeId, String name) {
+  public static ServiceArtifactId valueOf(int runtimeId, String name, String version) {
     checkArgument(isNotBlank(name), "name is blank: '%s'", name);
-    return new AutoValue_ServiceArtifactId(runtimeId, name);
+    checkArgument(isNotBlank(version), "version is blank: '%s'", version);
+    return new AutoValue_ServiceArtifactId(runtimeId, name, version);
   }
 
   /**
@@ -86,6 +93,6 @@ public abstract class ServiceArtifactId {
    */
   @Override
   public final String toString() {
-    return getRuntimeId() + DELIMITER + getName();
+    return getRuntimeId() + DELIMITER + getName() + DELIMITER + getVersion();
   }
 }
