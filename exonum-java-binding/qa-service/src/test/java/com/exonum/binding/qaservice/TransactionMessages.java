@@ -30,9 +30,7 @@ import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTx
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.IncrementCounterTxBody;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ThrowingTxBody;
-import com.google.common.base.Strings;
 import com.google.protobuf.ByteString;
-import javax.annotation.Nullable;
 
 final class TransactionMessages {
 
@@ -66,15 +64,14 @@ final class TransactionMessages {
    * Returns an error transaction message with the given arguments and signed with the test key
    * pair.
    */
-  static TransactionMessage createErrorTx(int errorCode,
-      @Nullable String errorDescription, int qaServiceId) {
+  static TransactionMessage createErrorTx(int errorCode, String errorDescription, int qaServiceId) {
     return testMessage()
         .serviceId(qaServiceId)
         .transactionId(VALID_ERROR_TX_ID)
         .payload(ErrorTxBody.newBuilder()
             .setSeed(0)
             .setErrorCode(errorCode)
-            .setErrorDescription(Strings.nullToEmpty(errorDescription))
+            .setErrorDescription(errorDescription)
             .build())
         .build();
   }
