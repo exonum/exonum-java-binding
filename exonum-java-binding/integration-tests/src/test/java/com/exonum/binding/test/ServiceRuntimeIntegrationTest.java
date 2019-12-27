@@ -19,6 +19,7 @@ package com.exonum.binding.test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.common.blockchain.CallInBlocks;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.service.AbstractServiceModule;
@@ -73,9 +74,7 @@ class ServiceRuntimeIntegrationTest {
       Snapshot snapshot = testKit.getSnapshot();
       Blockchain blockchain = Blockchain.newInstance(snapshot);
       ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = blockchain.getCallErrors(1L);
-      CallInBlock afterTxId = CallInBlock.newBuilder()
-          .setAfterTransactions(serviceId)
-          .build();
+      CallInBlock afterTxId = CallInBlocks.afterTransactions(serviceId);
       assertTrue(callErrors.containsKey(afterTxId));
       ExecutionError executionError = callErrors.get(afterTxId);
       assertThat(executionError.getKind()).isEqualTo(ErrorKind.SERVICE);
