@@ -162,7 +162,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   // todo: consider extracting in a TransactionPreconditions or
-  //   TransactionExecutionException, with proper lazy formatting: ECR-2746.
+  //   ExecutionException, with proper lazy formatting: ECR-2746.
   /** Checks a transaction execution precondition, throwing if it is false. */
   private static void checkExecution(boolean precondition, byte errorCode) {
     checkExecution(precondition, errorCode, null);

@@ -33,8 +33,7 @@ use java_bindings::{
 use std::sync::Arc;
 use test::{black_box, Bencher};
 
-const TX_EXEC_EXCEPTION_CLASS: &str =
-    "com/exonum/binding/core/transaction/TransactionExecutionException";
+const EXECUTION_EXCEPTION_CLASS: &str = "com/exonum/binding/core/transaction/ExecutionException";
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_fakes();
@@ -53,7 +52,7 @@ fn get_class_name_not_cached_impl(env: &JNIEnv, obj: JObject) -> JniResult<Strin
 }
 
 fn create_exception<'a>(env: &'a JNIEnv) -> JObject<'a> {
-    env.new_object(TX_EXEC_EXCEPTION_CLASS, "(B)V", &[JValue::from(0 as i8)])
+    env.new_object(EXECUTION_EXCEPTION_CLASS, "(B)V", &[JValue::from(0 as i8)])
         .unwrap()
 }
 
@@ -83,7 +82,7 @@ pub fn is_instance_of_not_cached(b: &mut Bencher) {
             let exception = create_exception(env);
             b.iter(|| {
                 black_box(assert!(env
-                    .is_instance_of(exception, TX_EXEC_EXCEPTION_CLASS)
+                    .is_instance_of(exception, EXECUTION_EXCEPTION_CLASS)
                     .unwrap()))
             });
             Ok(())

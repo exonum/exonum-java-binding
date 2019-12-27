@@ -29,7 +29,7 @@ class ExecutionExceptionTest {
     ExecutionException e = new ExecutionException(errorCode);
 
     assertThat(e.toString(),
-        containsString("TransactionExecutionException: errorCode=2"));
+        containsString("ExecutionException: errorCode=2"));
   }
 
   @Test
@@ -39,6 +39,6 @@ class ExecutionExceptionTest {
     ExecutionException e = new ExecutionException(errorCode, description);
 
     assertThat(e.toString(),
-        containsString("TransactionExecutionException: Foo, errorCode=2"));
+        containsString("ExecutionException: Foo, errorCode=2"));
   }
 }
