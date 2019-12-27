@@ -15,7 +15,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.5.0 — 2019-12-23
+
+The new release of the light client brings support for dynamic services.
+
+### Versions Support
+- Exonum version, 0.13
+- Exonum Java Binding version, 0.9
+
 ### Added
+- Java 13 support.
 - `ExonumClient#findServiceInfo(String)` to retrieve a service id by its
   name and `ExonumClient#getServiceInfoList` to retrieve the list of all
   started services - their names and ids. (#1247)
@@ -96,4 +105,3 @@ This release brings:
 
 [system-api-public]: https://exonum.com/doc/version/0.12/advanced/node-management/#public-endpoints
 [explorer-api]: https://exonum.com/doc/version/0.12/advanced/node-management/#explorer-api-endpoints
-
