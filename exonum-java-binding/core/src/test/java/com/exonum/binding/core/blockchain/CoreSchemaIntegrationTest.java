@@ -72,11 +72,6 @@ class CoreSchemaIntegrationTest {
   }
 
   @Test
-  void getTxResultsTest() {
-    assertSchema((schema) -> assertTrue(schema.getTxResults().isEmpty()));
-  }
-
-  @Test
   void getTxLocationsTest() {
     assertSchema((schema) -> assertTrue(schema.getTxLocations().isEmpty()));
   }

@@ -16,7 +16,6 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
@@ -25,6 +24,7 @@ import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.arti
 import static com.exonum.binding.cryptocurrency.TransactionError.WALLET_ALREADY_EXISTS;
 import static com.exonum.binding.cryptocurrency.TransactionUtils.DEFAULT_INITIAL_BALANCE;
 import static com.exonum.binding.cryptocurrency.TransactionUtils.newCreateWalletTransaction;
+import static com.exonum.binding.cryptocurrency.TransferTxIntegrationTest.checkServiceError;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.KeyPair;
@@ -38,7 +38,6 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -72,7 +71,6 @@ class CreateWalletTxIntegrationTest {
   }
 
   @Test
-  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeAlreadyExistingWalletTx(TestKit testKit) {
     // Create a new wallet
@@ -90,7 +88,6 @@ class CreateWalletTxIntegrationTest {
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
     Optional<ExecutionStatus> txResult = blockchain.getTxResult(transactionMessage2.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(WALLET_ALREADY_EXISTS.errorCode);
-    assertThat(txResult).hasValue(expectedTransactionResult);
+    checkServiceError(txResult, WALLET_ALREADY_EXISTS);
   }
 }

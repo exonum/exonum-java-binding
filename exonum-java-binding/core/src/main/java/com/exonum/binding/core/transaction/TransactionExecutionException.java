@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
  * for more information.
  *
  * @see Blockchain#getTxResult(HashCode)
- * @see Blockchain#getTxResults()
+ * @see Blockchain#getCallErrors(long)
  * @see ExecutionStatus
  */
 public class TransactionExecutionException extends Exception {

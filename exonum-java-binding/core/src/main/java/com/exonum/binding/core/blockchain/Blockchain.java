@@ -19,6 +19,7 @@ package com.exonum.binding.core.blockchain;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
@@ -28,7 +29,9 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.core.messages.Blockchain.CallInBlock;
 import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
@@ -99,6 +102,12 @@ public final class Blockchain {
   /**
    * Returns a proof list of transaction hashes committed in the block at the given height.
    *
+   * <p>The {@linkplain ProofListIndexProxy#getIndexHash() index hash} of this index is recorded
+   * in the block header as {@link Block#getTxRootHash()}. That allows constructing proofs
+   * <!-- todo: link 'proofs' (where do we document construction procedure?) -->
+   * that a transaction with a certain message hash was executed at a certain
+   * <em>{@linkplain TransactionLocation location}</em>: (block_height, tx_index_in_block) pair.
+   *
    * @param height block height starting from 0
    * @throws IllegalArgumentException if the height is invalid: negative or exceeding
    *     the {@linkplain #getHeight() blockchain height}
@@ -112,6 +121,7 @@ public final class Blockchain {
    *
    * @param blockId id of the block
    * @throws IllegalArgumentException if there is no block with given id
+   * @see #getBlockTransactions(long)
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(HashCode blockId) {
     Optional<Block> block = findBlock(blockId);
@@ -125,6 +135,7 @@ public final class Blockchain {
    *
    * @param block block of which list of transaction hashes should be returned
    * @throws IllegalArgumentException if there is no such block in the blockchain
+   * @see #getBlockTransactions(long)
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(Block block) {
     checkArgument(containsBlock(block), "No such block (%s) in the database", block);
@@ -140,23 +151,49 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a map with a key-value pair of a transaction hash and execution result. Note that this
-   * is a <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
+   * Returns execution errors that occurred in the block at the given height. Execution errors
+   * are preserved for transactions and before/after transaction handlers.
+   *
+   * <p>The {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of this index is recorded
+   * in the block header as <!-- todo: link (ECR-4021) --> {@code Block#getErrorHash()}. That
+   * enables constructing proofs
+   * <!-- todo: link 'proofs' (where do we document construction procedure?) -->
+   * that a transaction with a certain message hash was executed at a certain
+   * <em>{@linkplain TransactionLocation location}</em> with a particular result.
+   *
+   * @param blockHeight the height of the block
+   * @throws IllegalArgumentException if the height is invalid: negative or exceeding
+   *     the {@linkplain #getHeight() blockchain height}
    */
-  public ProofMapIndexProxy<HashCode, ExecutionStatus> getTxResults() {
-    return schema.getTxResults();
+  public ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
+    return schema.getCallErrors(blockHeight);
   }
 
   /**
-   * Returns a transaction execution result for given message hash.
+   * Returns a transaction execution result for the given message hash.
    *
    * @return a transaction execution result, or {@code Optional.empty()} if this transaction
    *         is unknown or was not yet executed
    */
   public Optional<ExecutionStatus> getTxResult(HashCode messageHash) {
-    MapIndex<HashCode, ExecutionStatus> txResults = getTxResults();
-    ExecutionStatus transactionResult = txResults.get(messageHash);
-    return Optional.ofNullable(transactionResult);
+    return getTxLocation(messageHash)
+        .map(this::getExecutionStatus);
+  }
+
+  private ExecutionStatus getExecutionStatus(TransactionLocation txLocation) {
+    long height = txLocation.getHeight();
+    ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = getCallErrors(height);
+    CallInBlock txCall = CallInBlock.newBuilder()
+        .setTransaction(txLocation.getIndexInBlock())
+        .build();
+    if (callErrors.containsKey(txCall)) {
+      ExecutionError txError = callErrors.get(txCall);
+      return ExecutionStatus.newBuilder()
+          .setError(txError)
+          .build();
+    }
+    // No error: tx completed successfully
+    return ExecutionStatuses.SUCCESS;
   }
 
   /**

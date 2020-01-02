@@ -16,7 +16,6 @@
 
 package com.exonum.binding.testkit;
 
-import static com.exonum.binding.common.blockchain.ExecutionStatuses.success;
 import static com.exonum.binding.testkit.TestKit.MAX_SERVICE_INSTANCE_ID;
 import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_FILENAME;
 import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_FILENAME_2;
@@ -52,13 +51,13 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.binding.time.TimeSchema;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Blockchain.ValidatorKeys;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -71,7 +70,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
@@ -457,7 +455,6 @@ class TestKitTest {
   }
 
   @Test
-  @Disabled("ECR-4014")
   void createBlockWithSingleTransaction(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     Block block = testKit.createBlockWithTransactions(message);
@@ -467,35 +464,38 @@ class TestKitTest {
     Blockchain blockchain = Blockchain.newInstance(view);
     assertThat(blockchain.getHeight()).isEqualTo(1);
     assertThat(block).isEqualTo(blockchain.getBlock(1));
-    Map<HashCode, ExecutionStatus> transactionResults = toMap(blockchain.getTxResults());
-    assertThat(transactionResults).hasSize(1);
-    ExecutionStatus transactionResult = transactionResults.get(message.hash());
-    assertThat(transactionResult).isEqualTo(success());
+
+    ProofListIndexProxy<HashCode> blockTransactions = blockchain.getBlockTransactions(block);
+    assertThat(blockTransactions).containsExactly(message.hash());
   }
 
   @Test
-  @Disabled("ECR-4014")
   void createBlockWithTransactions(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
 
     Block block = testKit.createBlockWithTransactions(ImmutableList.of(message, message2));
+    // Check the returned block
     assertThat(block.getNumTransactions()).isEqualTo(2);
+    assertThat(block.getHeight()).isEqualTo(1);
 
-    testKit.withSnapshot((view) -> checkTransactionsCommittedSuccessfully(
+    // Check the transactions are indeed executed by the core
+    testKit.withSnapshot((view) -> checkCommittedBlockWithMessages(
         view, block, message, message2));
   }
 
   @Test
-  @Disabled("ECR-4014")
   void createBlockWithTransactionsVarargs(TestKit testKit) {
     TransactionMessage message = constructTestTransactionMessage("Test message");
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
 
     Block block = testKit.createBlockWithTransactions(message, message2);
+    // Check the returned block
     assertThat(block.getNumTransactions()).isEqualTo(2);
+    assertThat(block.getHeight()).isEqualTo(1);
 
-    testKit.withSnapshot((view) -> checkTransactionsCommittedSuccessfully(
+    // Check the transactions are indeed executed by the core
+    testKit.withSnapshot((view) -> checkCommittedBlockWithMessages(
         view, block, message, message2));
   }
 
@@ -511,18 +511,23 @@ class TestKitTest {
         .sign(keyPair);
   }
 
-  private void checkTransactionsCommittedSuccessfully(
-      View view, Block block, TransactionMessage message, TransactionMessage message2) {
+  private void checkCommittedBlockWithMessages(View view, Block lastBlock,
+      TransactionMessage... messages) {
+    // Check the info in blockchain matches the block
     Blockchain blockchain = Blockchain.newInstance(view);
-    assertThat(blockchain.getHeight()).isEqualTo(1);
-    assertThat(block).isEqualTo(blockchain.getBlock(1));
-    Map<HashCode, ExecutionStatus> transactionResults = toMap(blockchain.getTxResults());
-    assertThat(transactionResults).hasSize(2);
+    long blockHeight = lastBlock.getHeight();
+    assertThat(blockchain.getHeight()).isEqualTo(blockHeight);
+    assertThat(blockchain.getBlock(blockHeight)).isEqualTo(lastBlock);
 
-    ExecutionStatus transactionResult = transactionResults.get(message.hash());
-    assertThat(transactionResult).isEqualTo(success());
-    ExecutionStatus transactionResult2 = transactionResults.get(message2.hash());
-    assertThat(transactionResult2).isEqualTo(success());
+    // Check the messages are committed
+    ProofListIndexProxy<HashCode> blockTransactions = blockchain.getBlockTransactions(blockHeight);
+    assertThat(blockTransactions).hasSize(messages.length);
+    for (TransactionMessage message : messages) {
+      HashCode hash = message.hash();
+      assertThat(blockTransactions)
+          .as("No hash for %s", message)
+          .contains(hash);
+    }
   }
 
   @Test
