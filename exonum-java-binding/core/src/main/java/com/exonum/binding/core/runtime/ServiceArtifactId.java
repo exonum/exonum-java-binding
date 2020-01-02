@@ -61,6 +61,9 @@ public abstract class ServiceArtifactId {
    */
   public static ServiceArtifactId parseFrom(String serviceArtifactId) {
     String[] coordinates = serviceArtifactId.split(DELIMITER, NUM_FIELDS);
+    checkArgument(coordinates.length == 3,
+        "Invalid artifact id (%s), must have 'runtimeId:groupId/artifactId:version' format",
+        serviceArtifactId);
     int runtimeId = parseInt(coordinates[0]);
     String name = coordinates[1];
     String version = coordinates[2];

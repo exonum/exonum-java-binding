@@ -28,19 +28,21 @@ final class JavaArtifactNames {
   private static final int KEEP_EMPTY = -1;
 
   /**
-   * Checks that a Java artifact name is in format "groupId:artifactId:version".
+   * Checks that a Java artifact name is in format "groupId/artifactId:version".
    *
    * @param name a Java artifact name
+   * @return an array with two elements: artifact name and artifact version
    * @throws IllegalArgumentException if the name format is not correct
    */
-  static void checkArtifactName(String name) {
+  static String[] checkPluginArtifact(String name) {
     String[] coordinates = name.split(DELIMITER, KEEP_EMPTY);
-    checkArgument(coordinates.length == 3,
-        "Invalid artifact name (%s), must have 'groupId:artifactId:version' format",
+    checkArgument(coordinates.length == 2,
+        "Invalid artifact name (%s), must have 'groupId/artifactId:version' format",
         name);
     for (String c : coordinates) {
       checkNoForbiddenChars(c);
     }
+    return coordinates;
   }
 
   private static void checkNoForbiddenChars(String s) {

@@ -45,7 +45,7 @@ class ServiceRuntimeConfigurationIntegrationTest {
 
   private static final String ARTIFACT_VERSION = "1.0.0";
   private static final ServiceArtifactId ARTIFACT_ID =
-      ServiceArtifactId.newJavaId("com.exonum.binding:test-service:" + ARTIFACT_VERSION);
+      ServiceArtifactId.newJavaId("com.exonum.binding/test-service", ARTIFACT_VERSION);
   private static final String ARTIFACT_FILENAME = "test-service.jar";
 
   @BeforeEach

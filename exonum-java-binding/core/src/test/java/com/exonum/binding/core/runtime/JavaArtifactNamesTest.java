@@ -26,14 +26,14 @@ class JavaArtifactNamesTest {
 
   @Test
   void checkValidName() {
-    String name = "com.acme:foo:1.0";
-    JavaArtifactNames.checkArtifactName(name);
+    String name = "com.acme/foo:1.0";
+    JavaArtifactNames.checkPluginArtifact(name);
   }
 
   @ParameterizedTest
   @ValueSource(strings = {
       "",
-      "too-few:components",
+      "too-few:components:1.0",
       "com.acme:foo-service:0.1.0:extra-component",
       " : : ",
       "com acme:foo:1.0",
@@ -42,8 +42,8 @@ class JavaArtifactNamesTest {
       "com.acme:foo-service: 1.0",
       "com.acme:foo-service:1.0 ",
   })
-  void checkInvalidName(String serviceId) {
+  void checkInvalidName(String pluginId) {
     assertThrows(IllegalArgumentException.class,
-        () -> JavaArtifactNames.checkArtifactName(serviceId));
+        () -> JavaArtifactNames.checkPluginArtifact(pluginId));
   }
 }

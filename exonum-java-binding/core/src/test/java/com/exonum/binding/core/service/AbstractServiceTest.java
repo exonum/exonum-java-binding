@@ -30,7 +30,7 @@ class AbstractServiceTest {
   private static final String NAME = "test";
   private static final int ID = 1;
   private static final ServiceInstanceSpec INSTANCE_SPEC = ServiceInstanceSpec.newInstance(NAME, ID,
-      ServiceArtifactId.newJavaId("g:a:1"));
+      ServiceArtifactId.newJavaId("g/a", "1"));
 
   @Test
   void getName() {

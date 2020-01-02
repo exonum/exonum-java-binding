@@ -75,7 +75,8 @@ public class ServiceRuntimeAdapter {
   /**
    * Deploys the Java service artifact.
    *
-   * @param name the Java service artifact name in format "groupId:artifactId:version"
+   * @param name the Java service artifact name in format "groupId/artifactId"
+   * @param version the Java service artifact version
    * @param deploySpec the deploy specification as a serialized
    *     {@link com.exonum.binding.core.runtime.DeployArguments}
    *     protobuf message
@@ -83,20 +84,22 @@ public class ServiceRuntimeAdapter {
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
    * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
    */
-  void deployArtifact(String name, byte[] deploySpec) throws ServiceLoadingException {
+  void deployArtifact(String name, String version, byte[] deploySpec)
+      throws ServiceLoadingException {
     DeployArguments deployArguments = parseDeployArgs(name, deploySpec);
     String artifactFilename = deployArguments.getArtifactFilename();
 
-    serviceRuntime.deployArtifact(ServiceArtifactId.newJavaId(name), artifactFilename);
+    serviceRuntime.deployArtifact(ServiceArtifactId.newJavaId(name, version), artifactFilename);
   }
 
   /**
    * Returns true if the artifact with the given name is deployed in this runtime;
    * false — otherwise.
-   * @param name the service artifact name in format "groupId:artifactId:version"
+   * @param name the service artifact name in format "groupId/artifactId:version"
+   * @param version the Java service artifact version
    */
-  boolean isArtifactDeployed(String name) {
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId(name);
+  boolean isArtifactDeployed(String name, String version) {
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId(name, version);
     return serviceRuntime.isArtifactDeployed(artifactId);
   }
 
@@ -154,7 +157,7 @@ public class ServiceRuntimeAdapter {
       InstanceSpec spec = InstanceSpec.parseFrom(instanceSpec);
       ArtifactId artifact = spec.getArtifact();
       ServiceArtifactId artifactId = ServiceArtifactId.valueOf(artifact.getRuntimeId(),
-          artifact.getName());
+          artifact.getName(), artifact.getVersion());
       return ServiceInstanceSpec.newInstance(spec.getName(), spec.getId(), artifactId);
     } catch (InvalidProtocolBufferException e) {
       logger.error(e);

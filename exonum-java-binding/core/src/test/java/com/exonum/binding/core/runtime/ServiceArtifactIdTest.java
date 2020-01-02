@@ -26,9 +26,9 @@ class ServiceArtifactIdTest {
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "0:land-registry",
-      "1:com.acme:foo-service:1.1.1-beta1",
-      "100500:::",
+      "0:land-registry:v1",
+      "1:com.acme/foo-service:1.1.1-beta1",
+      "100500:foo:bar:",
   })
   void parseFromRoundtrip(String serviceId) {
     ServiceArtifactId parsedId = ServiceArtifactId.parseFrom(serviceId);
@@ -41,16 +41,19 @@ class ServiceArtifactIdTest {
   void valueOf() {
     int runtimeId = 1;
     String name = "test-service";
-    ServiceArtifactId id = ServiceArtifactId.valueOf(runtimeId, name);
+    String version = "0.1";
+    ServiceArtifactId id = ServiceArtifactId.valueOf(runtimeId, name, version);
 
     assertThat(id.getRuntimeId()).isEqualTo(runtimeId);
     assertThat(id.getName()).isEqualTo(name);
+    assertThat(id.getVersion()).isEqualTo(version);
   }
 
   @Test
   void newJavaId() {
     String name = "test-service";
-    ServiceArtifactId id = ServiceArtifactId.newJavaId(name);
+    String version = "test-version";
+    ServiceArtifactId id = ServiceArtifactId.newJavaId(name, version);
 
     assertThat(id.getRuntimeId()).isEqualTo(RuntimeId.JAVA.getId());
     assertThat(id.getName()).isEqualTo(name);
@@ -58,8 +61,8 @@ class ServiceArtifactIdTest {
 
   @Test
   void toStringTest() {
-    ServiceArtifactId id = ServiceArtifactId.valueOf(0, "full-name");
+    ServiceArtifactId id = ServiceArtifactId.valueOf(0, "full-name", "0.1");
 
-    assertThat(id.toString()).isEqualTo("0:full-name");
+    assertThat(id.toString()).isEqualTo("0:full-name:0.1");
   }
 }
