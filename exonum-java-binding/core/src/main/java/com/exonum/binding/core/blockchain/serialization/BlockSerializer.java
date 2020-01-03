@@ -17,7 +17,9 @@
 package com.exonum.binding.core.blockchain.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
-import static com.google.common.collect.ImmutableSortedMap.toImmutableSortedMap;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -27,13 +29,13 @@ import com.exonum.core.messages.Blockchain;
 import com.exonum.core.messages.Blockchain.AdditionalHeaders;
 import com.exonum.core.messages.Types;
 import com.exonum.core.messages.Types.Hash;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import exonum.KeyValueSequenceOuterClass.KeyValue;
 import exonum.KeyValueSequenceOuterClass.KeyValueSequence;
-import java.util.Comparator;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
@@ -104,18 +106,25 @@ public enum BlockSerializer implements Serializer<Block> {
         .build();
   }
 
-  //TODO: define the order
-  private static Map<String, ByteString> toHeadersMap(AdditionalHeaders headers) {
+  @VisibleForTesting
+  static ImmutableMap<String, ByteString> toHeadersMap(AdditionalHeaders headers) {
     return headers.getHeaders().getEntryList()
         .stream()
-        .collect(toImmutableSortedMap(
-            Comparator.naturalOrder(),
-            KeyValue::getKey,
-            KeyValue::getValue)
+        .collect(collectingAndThen(
+            toMap(
+                KeyValue::getKey,
+                KeyValue::getValue,
+                (o, n) -> {
+                  throw new IllegalStateException(String.format(
+                      "Should never happen. Duplicate key found in headers %s", headers));
+                },
+                LinkedHashMap::new),
+            ImmutableMap::copyOf)
         );
   }
 
-  private static AdditionalHeaders toHeadersProto(Map<String, ByteString> headers) {
+  @VisibleForTesting
+  static AdditionalHeaders toHeadersProto(ImmutableMap<String, ByteString> headers) {
     return AdditionalHeaders.newBuilder()
         .setHeaders(
             KeyValueSequence.newBuilder()
@@ -126,10 +135,11 @@ public enum BlockSerializer implements Serializer<Block> {
                             .setKey(e.getKey())
                             .setValue(e.getValue())
                             .build())
-                        .collect(Collectors.toList())
+                        .collect(toList())
                 )
                 .build()
         )
         .build();
   }
+
 }

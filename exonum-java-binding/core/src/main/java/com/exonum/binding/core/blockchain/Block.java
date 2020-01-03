@@ -22,10 +22,10 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.exonum.binding.core.service.Schema;
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.protobuf.ByteString;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -104,7 +104,7 @@ public abstract class Block {
    * Contains additional block headers stored as a key value pairs and ordered by the key.
    * The key is a block header; and the value is a header bytes value encoded in hex string.
    */
-  public abstract Map<String, ByteString> getAdditionalHeaders();
+  public abstract ImmutableMap<String, ByteString> getAdditionalHeaders();
 
   @Override
   public int hashCode() {
@@ -169,6 +169,7 @@ public abstract class Block {
     public abstract Builder txRootHash(HashCode txRootHash);
 
     // TODO: Expand on that when it has meaningful applications: ECR-2756
+
     /**
      * Sets the blockchain state hash at the moment this block was committed. The blockchain
      * state hash reflects the state of each service in the database.
@@ -187,7 +188,7 @@ public abstract class Block {
     /**
      * Sets additional block headers.
      */
-    public abstract Builder additionalHeaders(Map<String, ByteString> additionalHeaders);
+    public abstract Builder additionalHeaders(ImmutableMap<String, ByteString> additionalHeaders);
 
     abstract Block autoBuild();
 

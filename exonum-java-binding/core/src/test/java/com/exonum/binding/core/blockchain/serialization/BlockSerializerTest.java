@@ -16,18 +16,24 @@
 
 package com.exonum.binding.core.blockchain.serialization;
 
+import static com.exonum.binding.core.blockchain.serialization.BlockSerializer.toHeadersMap;
+import static com.exonum.binding.core.blockchain.serialization.BlockSerializer.toHeadersProto;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blocks;
-import com.google.common.collect.ImmutableSortedMap;
+import com.exonum.core.messages.Blockchain.AdditionalHeaders;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
-import java.util.Collections;
+import exonum.KeyValueSequenceOuterClass.KeyValue;
+import exonum.KeyValueSequenceOuterClass.KeyValueSequence;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -53,7 +59,7 @@ class BlockSerializerTest {
         .previousBlockHash(HashCode.fromString("bc"))
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
-        .additionalHeaders(Collections.emptyMap())
+        .additionalHeaders(ImmutableMap.of())
         .errorHash(Optional.empty())
         .build();
     Block block2 = Block.builder()
@@ -64,11 +70,36 @@ class BlockSerializerTest {
         .previousBlockHash(HashCode.fromString("bc"))
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
-        .additionalHeaders(ImmutableSortedMap.of("one", ByteString.copyFromUtf8("abcd01")))
+        .additionalHeaders(ImmutableMap.of("one", ByteString.copyFromUtf8("abcd01")))
         .errorHash(Optional.of(HashCode.fromString("ef")))
         .build();
 
     return Stream.of(block1, block2)
         .map(Blocks::withProperHash);
   }
+
+  @Test
+  void headersMapStrictOrderRoundTripTest() {
+    KeyValue first = KeyValue.newBuilder()
+        .setKey("foo")
+        .setValue(ByteString.EMPTY)
+        .build();
+    KeyValue second = KeyValue.newBuilder()
+        .setKey("bar")
+        .setValue(ByteString.EMPTY)
+        .build();
+    AdditionalHeaders expected = AdditionalHeaders.newBuilder()
+        .setHeaders(KeyValueSequence.newBuilder()
+            .addEntry(first)
+            .addEntry(second)
+            .build())
+        .build();
+
+    AdditionalHeaders actual = toHeadersProto(toHeadersMap(expected));
+
+    assertThat(actual, is(expected));
+    assertThat(actual.getHeaders().getEntry(0), is(first));
+    assertThat(actual.getHeaders().getEntry(1), is(second));
+  }
+
 }
