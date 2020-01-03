@@ -43,6 +43,14 @@ final class JavaArtifactNames {
     }
   }
 
+  /**
+   * Returns plugin artifact id for the given service artifact.
+   */
+  static String getPluginArtifactId(ServiceArtifactId artifactId) {
+    return artifactId.getName() + DELIMITER + artifactId.getVersion();
+  }
+
+
   private static void checkNoForbiddenChars(String s) {
     Matcher matcher = FORBIDDEN_CHARS_PATTERN.matcher(s);
 

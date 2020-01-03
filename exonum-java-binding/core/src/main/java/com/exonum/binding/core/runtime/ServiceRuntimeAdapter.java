@@ -26,7 +26,7 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.transaction.ExecutionException;
+import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
 import com.exonum.core.messages.Runtime.InstanceState;
@@ -75,7 +75,7 @@ public class ServiceRuntimeAdapter {
   /**
    * Deploys the Java service artifact.
    *
-   * @param name the Java service artifact name in format "groupId:artifactId:version"
+   * @param artifactId bytes representation of the service artifact
    * @param deploySpec the deploy specification as a serialized
    *     {@link com.exonum.binding.core.runtime.DeployArguments}
    *     protobuf message
@@ -83,21 +83,25 @@ public class ServiceRuntimeAdapter {
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
    * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
    */
-  void deployArtifact(String name, byte[] deploySpec) throws ServiceLoadingException {
-    DeployArguments deployArguments = parseDeployArgs(name, deploySpec);
+  void deployArtifact(byte[] artifactId, byte[] deploySpec) throws ServiceLoadingException {
+    ArtifactId artifact = parseArtifact(artifactId);
+    DeployArguments deployArguments = parseDeployArgs(artifact.getName(), deploySpec);
     String artifactFilename = deployArguments.getArtifactFilename();
 
-    serviceRuntime.deployArtifact(ServiceArtifactId.newJavaId(name), artifactFilename);
+    serviceRuntime.deployArtifact(
+        ServiceArtifactId.newJavaId(artifact.getName(), artifact.getVersion()), artifactFilename);
   }
 
   /**
    * Returns true if the artifact with the given name is deployed in this runtime;
    * false — otherwise.
-   * @param name the service artifact name in format "groupId:artifactId:version"
+   * @param artifactId bytes representation of the service artifact
    */
-  boolean isArtifactDeployed(String name) {
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId(name);
-    return serviceRuntime.isArtifactDeployed(artifactId);
+  boolean isArtifactDeployed(byte[] artifactId) {
+    ArtifactId artifact = parseArtifact(artifactId);
+    ServiceArtifactId serviceArtifact = ServiceArtifactId.newJavaId(
+        artifact.getName(), artifact.getVersion());
+    return serviceRuntime.isArtifactDeployed(serviceArtifact);
   }
 
   private static DeployArguments parseDeployArgs(String name, byte[] deploySpec) {
@@ -105,6 +109,16 @@ public class ServiceRuntimeAdapter {
       return DeployArguments.parseFrom(deploySpec);
     } catch (InvalidProtocolBufferException e) {
       String message = "Invalid deploy specification for " + name;
+      logger.error(message, e);
+      throw new IllegalArgumentException(message, e);
+    }
+  }
+
+  private static ArtifactId parseArtifact(byte[] artifactId) {
+    try {
+      return ArtifactId.parseFrom(artifactId);
+    } catch (InvalidProtocolBufferException e) {
+      String message = "Invalid artifact";
       logger.error(message, e);
       throw new IllegalArgumentException(message, e);
     }
@@ -118,11 +132,8 @@ public class ServiceRuntimeAdapter {
    *     protobuf message
    * @param configuration the service initial configuration parameters as a serialized protobuf
    *     message
-   * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @throws ExecutionException if the service initialization failed
-   * @throws UnexpectedExecutionException if the service initialization failed
-   *     with an unexpected exception
    * @see ServiceRuntime#initiateAddingService(Fork, ServiceInstanceSpec, byte[])
+   * @throws CloseFailuresException if there was a failure in destroying some native peers
    */
   void initiateAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
       throws CloseFailuresException {
@@ -157,7 +168,7 @@ public class ServiceRuntimeAdapter {
       InstanceSpec spec = InstanceSpec.parseFrom(instanceSpec);
       ArtifactId artifact = spec.getArtifact();
       ServiceArtifactId artifactId = ServiceArtifactId.valueOf(artifact.getRuntimeId(),
-          artifact.getName());
+          artifact.getName(), artifact.getVersion());
       return ServiceInstanceSpec.newInstance(spec.getName(), spec.getId(), artifactId);
     } catch (InvalidProtocolBufferException e) {
       logger.error(e);
@@ -177,16 +188,16 @@ public class ServiceRuntimeAdapter {
    *      inner transactions); or 0 when the caller is an external message
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
-   * @throws ExecutionException if the transaction execution failed
-   * @throws UnexpectedExecutionException if the transaction execution failed
-   *     with an unexpected exception
+   * @throws TransactionExecutionException if the transaction execution failed
+   * @throws UnexpectedTransactionExecutionException if the transaction execution failed
+   *     with an unexpected exception with no error code
    * @throws IllegalArgumentException if any argument is not valid
    * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
    *      PublicKey)
    */
   void executeTransaction(int serviceId, String interfaceName, int txId, byte[] arguments,
       long forkNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)
-      throws CloseFailuresException {
+      throws TransactionExecutionException, CloseFailuresException {
 
     try (Cleaner cleaner = new Cleaner("executeTransaction")) {
       Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
@@ -205,9 +216,6 @@ public class ServiceRuntimeAdapter {
    *
    * @param forkHandle a handle to the native fork object, which must support checkpoints
    *                   and rollbacks
-   * @throws ExecutionException if the transaction execution failed
-   * @throws UnexpectedExecutionException if the transaction execution failed
-   *     with an unexpected exception
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#afterTransactions(int, Fork)
    */
