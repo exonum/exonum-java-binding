@@ -48,7 +48,8 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
   private static final Comparator<ServiceArtifactId> SERVICE_ID_COMPARATOR =
       // No need to compare id — it is always Java
-      Comparator.comparing(ServiceArtifactId::getName);
+      Comparator.comparing(ServiceArtifactId::getName)
+          .thenComparing(ServiceArtifactId::getVersion);
 
   private final PluginManager pluginManager;
   private final ClassLoadingScopeChecker classLoadingChecker;
@@ -192,7 +193,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
   public void unloadService(ServiceArtifactId artifactId) {
     checkArgument(loadedServices.containsKey(artifactId), "No such artifactId: %s", artifactId);
 
-    String pluginId = getPluginId(artifactId);
+    String pluginId = JavaArtifactNames.getPluginArtifactId(artifactId);
     try {
       boolean stopped = pluginManager.unloadPlugin(pluginId);
       // The docs don't say why it may fail to stop the plugin.
@@ -212,7 +213,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
     // Unload the plugins
     List<Exception> errors = new ArrayList<>();
     for (ServiceArtifactId artifactId : loadedServices.keySet()) {
-      String pluginId = getPluginId(artifactId);
+      String pluginId = JavaArtifactNames.getPluginArtifactId(artifactId);
       try {
         unloadPlugin(pluginId);
       } catch (Exception e) {
@@ -230,10 +231,6 @@ final class Pf4jServiceLoader implements ServiceLoader {
       errors.forEach(e::addSuppressed);
       throw e;
     }
-  }
-
-  private String getPluginId(ServiceArtifactId artifactId) {
-    return artifactId.getName() + ":" + artifactId.getVersion();
   }
 
   @Override
