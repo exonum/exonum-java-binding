@@ -75,8 +75,7 @@ public class ServiceRuntimeAdapter {
   /**
    * Deploys the Java service artifact.
    *
-   * @param name the Java service artifact name in format "groupId/artifactId"
-   * @param version the Java service artifact version
+   * @param artifactId bytes representation of the service artifact
    * @param deploySpec the deploy specification as a serialized
    *     {@link com.exonum.binding.core.runtime.DeployArguments}
    *     protobuf message
@@ -84,23 +83,25 @@ public class ServiceRuntimeAdapter {
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
    * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
    */
-  void deployArtifact(String name, String version, byte[] deploySpec)
-      throws ServiceLoadingException {
-    DeployArguments deployArguments = parseDeployArgs(name, deploySpec);
+  void deployArtifact(byte[] artifactId, byte[] deploySpec) throws ServiceLoadingException {
+    ArtifactId artifact = parseArtifact(artifactId);
+    DeployArguments deployArguments = parseDeployArgs(artifact.getName(), deploySpec);
     String artifactFilename = deployArguments.getArtifactFilename();
 
-    serviceRuntime.deployArtifact(ServiceArtifactId.newJavaId(name, version), artifactFilename);
+    serviceRuntime.deployArtifact(
+        ServiceArtifactId.newJavaId(artifact.getName(), artifact.getVersion()), artifactFilename);
   }
 
   /**
    * Returns true if the artifact with the given name is deployed in this runtime;
    * false — otherwise.
-   * @param name the service artifact name in format "groupId/artifactId:version"
-   * @param version the Java service artifact version
+   * @param artifactId bytes representation of the service artifact
    */
-  boolean isArtifactDeployed(String name, String version) {
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId(name, version);
-    return serviceRuntime.isArtifactDeployed(artifactId);
+  boolean isArtifactDeployed(byte[] artifactId) {
+    ArtifactId artifact = parseArtifact(artifactId);
+    ServiceArtifactId serviceArtifact = ServiceArtifactId.newJavaId(
+        artifact.getName(), artifact.getVersion());
+    return serviceRuntime.isArtifactDeployed(serviceArtifact);
   }
 
   private static DeployArguments parseDeployArgs(String name, byte[] deploySpec) {
@@ -108,6 +109,16 @@ public class ServiceRuntimeAdapter {
       return DeployArguments.parseFrom(deploySpec);
     } catch (InvalidProtocolBufferException e) {
       String message = "Invalid deploy specification for " + name;
+      logger.error(message, e);
+      throw new IllegalArgumentException(message, e);
+    }
+  }
+
+  private static ArtifactId parseArtifact(byte[] artifactId) {
+    try {
+      return ArtifactId.parseFrom(artifactId);
+    } catch (InvalidProtocolBufferException e) {
+      String message = "Invalid artifact";
       logger.error(message, e);
       throw new IllegalArgumentException(message, e);
     }

@@ -70,7 +70,13 @@ class ServiceRuntimeAdapterTest {
 
     String name = "com.acme/foo";
     String version = "1.2.3";
-    serviceRuntimeAdapter.deployArtifact(name, version, deploySpec);
+    ArtifactId artifact = ArtifactId.newBuilder()
+        .setName(name)
+        .setVersion(version)
+        .build();
+    byte[] artifactBytes = artifact.toByteArray();
+
+    serviceRuntimeAdapter.deployArtifact(artifactBytes, deploySpec);
 
     ServiceArtifactId expectedId = ServiceArtifactId.newJavaId(name, version);
     verify(serviceRuntime).deployArtifact(expectedId, artifactFilename);
@@ -80,21 +86,31 @@ class ServiceRuntimeAdapterTest {
   void isArtifactDeployed() {
     String name = "com.acme/foo";
     String version = "1.2.3";
+    ArtifactId artifact = ArtifactId.newBuilder()
+        .setName(name)
+        .setVersion(version)
+        .build();
+    byte[] artifactBytes = artifact.toByteArray();
 
     when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.newJavaId(name, version)))
         .thenReturn(true);
 
-    assertTrue(serviceRuntimeAdapter.isArtifactDeployed(name, version));
+    assertTrue(serviceRuntimeAdapter.isArtifactDeployed(artifactBytes));
   }
 
   @Test
   void deployArtifactWrongSpec() {
     String name = "com.acme/foo";
     String version = "1.2.3";
+    ArtifactId artifact = ArtifactId.newBuilder()
+        .setName(name)
+        .setVersion(version)
+        .build();
+    byte[] artifactBytes = artifact.toByteArray();
     byte[] deploySpec = bytes("Some rubbish");
 
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntimeAdapter.deployArtifact(name, version, deploySpec));
+        () -> serviceRuntimeAdapter.deployArtifact(artifactBytes, deploySpec));
 
     assertThat(e).hasMessageContaining(name);
   }
