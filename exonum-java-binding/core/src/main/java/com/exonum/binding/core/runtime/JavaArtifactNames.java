@@ -50,7 +50,6 @@ final class JavaArtifactNames {
     return artifactId.getName() + DELIMITER + artifactId.getVersion();
   }
 
-
   private static void checkNoForbiddenChars(String s) {
     Matcher matcher = FORBIDDEN_CHARS_PATTERN.matcher(s);
 
