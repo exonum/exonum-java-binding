@@ -24,7 +24,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.core.blockchain.Block.Builder;
-import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.ImmutableMap;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
@@ -74,6 +74,6 @@ class BlockTest {
         .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
         .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
         .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8))
-        .additionalHeaders(ImmutableSortedMap.of());
+        .additionalHeaders(ImmutableMap.of());
   }
 }
