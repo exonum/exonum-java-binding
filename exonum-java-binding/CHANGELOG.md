@@ -32,7 +32,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   but `TransactionExecutionException` are saved with the error kind
   "unexpected".
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
-- `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`. 
+- `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`.
+- Extracted artifact version to the separate field from the artifact name.
+  Artifact name format is `groupId/artifactId` now. (#4041) 
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
