@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.core.transaction.Preconditions.check;
 import static com.exonum.binding.qaservice.TransactionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.TransactionError.UNKNOWN_COUNTER;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -280,10 +281,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     HashCode counterId = Hashing.defaultHashFunction()
         .hashString(counterName, UTF_8);
-    if (counters.containsKey(counterId)) {
-      throw new ExecutionException(COUNTER_ALREADY_EXISTS.code,
-          String.format("Counter %s already exists", counterName));
-    }
+    check(!counters.containsKey(counterId),
+        COUNTER_ALREADY_EXISTS.code, "Counter %s already exists", counterName);
     assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
 
     counters.put(counterId, 0L);
@@ -301,9 +300,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
 
     // Increment the counter if there is such.
-    if (!counters.containsKey(counterId)) {
-      throw new ExecutionException(UNKNOWN_COUNTER.code);
-    }
+    check(counters.containsKey(counterId), UNKNOWN_COUNTER.code);
+
     long newValue = counters.get(counterId) + 1;
     counters.put(counterId, newValue);
   }
