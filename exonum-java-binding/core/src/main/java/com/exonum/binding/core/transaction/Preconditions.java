@@ -24,6 +24,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Utility methods that helps verifying conditions conducted in expression
  * while transaction execution.
  * If the condition is not met, the {@code Preconditions} method throws {@link ExecutionException}.
+ *
  * <p>Consider the following example:
  * <pre>{@code
  *   void checkEnoughMoney(long balance, long amount) {
@@ -33,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *     }
  *   }
  * }</pre>
+ *
  * <p>which can be replaced using Preconditions:
  * <pre>{@code
  *   check(amount <= balance, (byte)3,
@@ -75,10 +77,10 @@ public final class Preconditions {
    * @param expression a boolean expression
    * @param errorCode execution error code
    * @param errorMessageTemplate execution error description template to use if the check fails.
-   *    The template could have placeholders {@code %s} which will be replaces by arguments
-   *    resolved by position
+   *        The template could have placeholders {@code %s} which will be replaces by arguments
+   *        resolved by position
    * @param errorMessageArgs arguments to be used in the template. Each argument will be converted
-   *    to string using {@link String#valueOf(Object)}
+   *        to string using {@link String#valueOf(Object)}
    * @throws ExecutionException if {@code expression} is false
    */
   public static void check(boolean expression, byte errorCode,

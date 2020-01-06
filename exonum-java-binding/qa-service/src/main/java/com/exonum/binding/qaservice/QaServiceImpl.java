@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.core.transaction.Preconditions.check;
 import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.QaExecutionError.EMPTY_TIME_ORACLE_NAME;
 import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
@@ -286,10 +287,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     HashCode counterId = Hashing.defaultHashFunction()
         .hashString(counterName, UTF_8);
-    if (counters.containsKey(counterId)) {
-      throw new ExecutionException(COUNTER_ALREADY_EXISTS.code,
-          format("Counter %s already exists", counterName));
-    }
+    check(!counters.containsKey(counterId),
+        COUNTER_ALREADY_EXISTS.code, "Counter %s already exists", counterName);
     assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
 
     counters.put(counterId, 0L);
@@ -307,9 +306,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
 
     // Increment the counter if there is such.
-    if (!counters.containsKey(counterId)) {
-      throw new ExecutionException(UNKNOWN_COUNTER.code);
-    }
+    check(counters.containsKey(counterId), UNKNOWN_COUNTER.code);
+
     long newValue = counters.get(counterId) + 1;
     counters.put(counterId, newValue);
   }
@@ -348,10 +346,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // We do *not* check if the time oracle is active to (a) allow running this service with
     // reduced read functionality without time oracle; (b) testing time schema when it is not
     // active.
-    if (Strings.isNullOrEmpty(timeOracleName)) {
-      throw new ExecutionException(EMPTY_TIME_ORACLE_NAME.code,
-          format("Empty time oracle name: %s", timeOracleName));
-    }
+    check(!Strings.isNullOrEmpty(timeOracleName), EMPTY_TIME_ORACLE_NAME.code,
+        "Empty time oracle name: %s", timeOracleName);
   }
 
   private void updateTimeOracle(Fork fork, Configuration configuration) {

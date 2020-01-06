@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.core.transaction.Preconditions.check;
 import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
 import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
@@ -37,7 +38,6 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
@@ -116,7 +116,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
         new CryptocurrencySchema(context.getFork(), context.getServiceName());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-    checkExecution(!wallets.containsKey(ownerPublicKey), WALLET_ALREADY_EXISTS.errorCode);
+    check(!wallets.containsKey(ownerPublicKey), WALLET_ALREADY_EXISTS.errorCode);
 
     long initialBalance = arguments.getInitialBalance();
     checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
@@ -130,22 +130,22 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   @Transaction(TRANSFER_TX_ID)
   public void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context) {
     long sum = arguments.getSum();
-    checkExecution(0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode,
+    check(0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode,
         "Non-positive transfer amount: " + sum);
 
     PublicKey fromWallet = context.getAuthorPk();
     PublicKey toWallet = toPublicKey(arguments.getToWallet());
-    checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
+    check(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
 
     CryptocurrencySchema schema =
         new CryptocurrencySchema(context.getFork(), context.getServiceName());
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
-    checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
-    checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
+    check(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
+    check(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
 
     Wallet from = wallets.get(fromWallet);
     Wallet to = wallets.get(toWallet);
-    checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
+    check(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
 
     // Update the balances
     wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
@@ -159,20 +159,6 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   private static PublicKey toPublicKey(ByteString s) {
     return PublicKey.fromBytes(s.toByteArray());
-  }
-
-  // todo: consider extracting in a TransactionPreconditions or
-  //   ExecutionException, with proper lazy formatting: ECR-2746.
-  /** Checks a transaction execution precondition, throwing if it is false. */
-  private static void checkExecution(boolean precondition, byte errorCode) {
-    checkExecution(precondition, errorCode, null);
-  }
-
-  private static void checkExecution(boolean precondition, byte errorCode,
-      @Nullable String message) {
-    if (!precondition) {
-      throw new ExecutionException(errorCode, message);
-    }
   }
 
   private HistoryEntity createTransferHistoryEntry(TransactionMessage txMessage) {

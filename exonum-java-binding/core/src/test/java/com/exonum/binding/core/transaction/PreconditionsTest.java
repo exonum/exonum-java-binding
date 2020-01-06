@@ -45,7 +45,7 @@ class PreconditionsTest {
         () -> check(false, TEST_ERROR_CODE, description));
 
     assertThat(e.getErrorCode()).isEqualTo(TEST_ERROR_CODE);
-    assertThat(e.getMessage()).isEqualTo(description);
+    assertThat(e).hasMessage(description);
   }
 
   @Test
@@ -53,18 +53,17 @@ class PreconditionsTest {
     ExecutionException e = assertThrows(ExecutionException.class,
         () -> check(false, TEST_ERROR_CODE, null));
 
-    assertThat(e.getMessage()).isEqualTo("null");
+    assertThat(e).hasMessage("null");
   }
 
   @Test
   void errorDescriptionFormat() {
-    int p1 = 10, p2 = 20;
+    int p1 = 10;
+    int p2 = 20;
 
     ExecutionException e = assertThrows(ExecutionException.class,
-        () -> check(p1 == p2, TEST_ERROR_CODE,
-            "%s != %s", p1, p2));
+        () -> check(p1 == p2, TEST_ERROR_CODE, "%s != %s", p1, p2));
 
-    assertThat(e.getMessage()).isEqualTo("10 != 20");
+    assertThat(e).hasMessage("10 != 20");
   }
-
 }
