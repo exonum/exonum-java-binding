@@ -119,6 +119,24 @@
         </configuration>
       </plugin>
 
+      <!-- Generates a classpath file to be used by native integration tests.
+           Bound to the default phase (generate-sources). -->
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <outputFile>${project.build.directory}/ejb-app-classpath.txt</outputFile>
+          <includeScope>runtime</includeScope>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-classpath-file</id>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>

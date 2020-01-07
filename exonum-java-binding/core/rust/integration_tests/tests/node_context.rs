@@ -27,7 +27,7 @@ use futures::{
     sync::mpsc::{self, Receiver},
     Stream,
 };
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
+use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
     exonum::{
         blockchain::Blockchain,
@@ -41,7 +41,7 @@ use java_bindings::{
 };
 
 lazy_static! {
-    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_classes();
     pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 

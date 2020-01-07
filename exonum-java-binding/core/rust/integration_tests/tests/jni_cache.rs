@@ -15,7 +15,7 @@
 extern crate integration_tests;
 extern crate java_bindings;
 
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
+use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::utils::jni_cache;
 
 use std::{
@@ -30,7 +30,7 @@ fn concurrent_cache_read() {
     let mut threads = Vec::new();
 
     // Create a VM, initializing the JNI cache
-    let _jvm = create_vm_for_tests_with_fake_classes();
+    let _jvm = create_vm_for_tests_with_classes();
 
     let barrier = Arc::new(Barrier::new(THREAD_NUM));
 

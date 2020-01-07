@@ -20,7 +20,7 @@ extern crate java_bindings;
 extern crate lazy_static;
 extern crate test;
 
-use integration_tests::vm::create_vm_for_benchmarks_with_fakes;
+use integration_tests::vm::create_vm_for_benchmarks_with_classes;
 use java_bindings::{
     jni::{
         objects::{JObject, JValue},
