@@ -30,9 +30,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `Transaction` _interface_. (#1274, #1307)
 - Any exceptions thrown from the `Transaction` methods
   but `TransactionExecutionException` are saved with the error kind
-  "unexpected".
+  "unexpected" into `Blockchain#getCallErrors`.
+- Redefined `TransactionExecutionException`:
+  - Renamed into `ExecutionException`
+  - Made `TransactionExecutionException` an unchecked (runtime) exception
+  - Specified it as _the_ exception to communicate execution errors
+  of `Service` methods: `@Transaction`s; `Service#afterTransactions`,
+  `#initialize`; `Configurable` methods.
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
+- Allowed throwing execution exceptions from `Service#afterTransactions`
+  (ex. `beforeCommit`).
+  Any exceptions thrown in these methods are saved in the blockchain
+  in `Blockchain#getCallErrors` and can be retrieved by any services or
+  light clients.
 - `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`.
+  - Use `CallInBlocks` to concisely create `CallInBlock`s.
+- The specification of `Configurable` operations and `Service#initialize` 
+  to require throwing `ExecutionException` instead of
+  `IllegalArgumentException`.
 - Extracted artifact version to the separate field from the artifact name.
   Artifact name format is `groupId/artifactId` now. (#4041) 
 

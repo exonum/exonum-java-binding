@@ -20,7 +20,7 @@ import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
-import static com.exonum.binding.qaservice.TransactionError.COUNTER_ALREADY_EXISTS;
+import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;
 import static java.nio.charset.StandardCharsets.UTF_8;

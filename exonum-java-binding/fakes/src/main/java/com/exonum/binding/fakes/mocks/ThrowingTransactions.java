@@ -20,9 +20,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import java.lang.reflect.Constructor;
 import javax.annotation.Nullable;
 import org.mockito.invocation.InvocationOnMock;
@@ -71,10 +71,10 @@ public final class ThrowingTransactions {
   }
 
   /**
-   * Creates a transaction mock that will throw {@link TransactionExecutionException} in its
+   * Creates a transaction mock that will throw {@link ExecutionException} in its
    * execute method.
    *
-   * @param isSubclass whether method should produce a subclass of TransactionExecutionException
+   * @param isSubclass whether method should produce a subclass of ExecutionException
    * @param errorCode an error code that will be included in the exception
    * @param description a description; may be {@code null}
    * @return a transaction mock throwing in execute
@@ -85,11 +85,11 @@ public final class ThrowingTransactions {
           @Nullable String description) {
     Transaction tx = mock(Transaction.class);
     try {
-      TransactionExecutionException e = isSubclass
+      ExecutionException e = isSubclass
               ? new TestTxExecException(errorCode, description)
-              : new TransactionExecutionException(errorCode, description);
+              : new ExecutionException(errorCode, description);
       doThrow(e).when(tx).execute(any(TransactionContext.class));
-    } catch (TransactionExecutionException e2) {
+    } catch (ExecutionException e2) {
       throw new AssertionError("Supposedly unreachable", e2);
     }
     return tx;

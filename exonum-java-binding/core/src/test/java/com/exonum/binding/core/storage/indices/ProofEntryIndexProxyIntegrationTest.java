@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,6 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.View;
@@ -39,6 +43,7 @@ class ProofEntryIndexProxyIntegrationTest
     extends BaseIndexProxyTestable<ProofEntryIndexProxy<String>> {
 
   private static final String ENTRY_NAME = "test_entry";
+  public static final Serializer<String> SERIALIZER = StandardSerializers.string();
 
   @Test
   void setValue() {
@@ -77,6 +82,31 @@ class ProofEntryIndexProxyIntegrationTest
   void getFailsIfNotPresent() {
     runTestWithView(database::createSnapshot,
         (e) -> assertThrows(NoSuchElementException.class, e::get));
+  }
+
+  @Test
+  void getIndexHashEmptyEntry() {
+    runTestWithView(database::createSnapshot, e -> {
+      HashCode indexHash = e.getIndexHash();
+      // Expected hash of an empty Entry: all zeroes
+      HashCode expectedHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
+      assertThat(indexHash, equalTo(expectedHash));
+    });
+  }
+
+  @Test
+  void getIndexHashNonEmptyEntry() {
+    runTestWithView(database::createFork, e -> {
+      String value = V1;
+      e.set(value);
+
+      HashCode indexHash = e.getIndexHash();
+      // Expected hash of a set Entry: SHA-256(value)
+      byte[] valueAsBytes = SERIALIZER.toBytes(value);
+      HashCode expectedHash = Hashing.sha256()
+          .hashBytes(valueAsBytes);
+      assertThat(indexHash, equalTo(expectedHash));
+    });
   }
 
   @Test
@@ -139,7 +169,7 @@ class ProofEntryIndexProxyIntegrationTest
 
   @Override
   ProofEntryIndexProxy<String> create(String name, View view) {
-    return ProofEntryIndexProxy.newInstance(name, view, StandardSerializers.string());
+    return ProofEntryIndexProxy.newInstance(name, view, SERIALIZER);
   }
 
   @Override

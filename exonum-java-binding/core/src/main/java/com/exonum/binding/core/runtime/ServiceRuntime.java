@@ -25,8 +25,8 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.InstanceState;
@@ -180,8 +180,12 @@ public final class ServiceRuntime implements AutoCloseable {
    *     message
    * @throws IllegalArgumentException if the service is already started; or its artifact
    *     is not deployed
-   * @throws RuntimeException if it failed to instantiate the service;
-   *     or if the service initialization failed
+   * @throws ExecutionException if such exception occurred in the service constructor;
+   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedExecutionException if any other exception occurred in
+   *     the  the service constructor; it is included as cause. The cause must be translated
+   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @throws RuntimeException if the runtime failed to instantiate the service for other reason
    */
   public void initiateAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
       byte[] configuration) {
@@ -287,9 +291,9 @@ public final class ServiceRuntime implements AutoCloseable {
    *     service. Currently only applicable to invocations of Configure interface methods
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
-   * @throws TransactionExecutionException if such exception occurred in the transaction;
+   * @throws ExecutionException if such exception occurred in the transaction;
    *     must be translated into an error of kind {@link ErrorKind#SERVICE}
-   * @throws UnexpectedTransactionExecutionException if any other exception occurred in
+   * @throws UnexpectedExecutionException if any other exception occurred in
    *     the transaction; it is included as cause. The cause must be translated
    *     into an error of kind {@link ErrorKind#UNEXPECTED}
    * @throws IllegalArgumentException if any argument is not valid (e.g., unknown service)
@@ -297,8 +301,7 @@ public final class ServiceRuntime implements AutoCloseable {
    */
   public void executeTransaction(int serviceId, String interfaceName, int txId,
       byte[] arguments, Fork fork, int callerServiceId, HashCode txMessageHash,
-      PublicKey authorPublicKey)
-      throws TransactionExecutionException {
+      PublicKey authorPublicKey) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       String serviceName = service.getName();
@@ -324,6 +327,12 @@ public final class ServiceRuntime implements AutoCloseable {
    *
    * @param serviceId the id of the service on which to perform the operation
    * @param fork a fork allowing the runtime and the service to modify the database state.
+   * @throws ExecutionException if such exception occurred in the transaction;
+   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedExecutionException if any other exception occurred in
+   *     the transaction; it is included as cause. The cause must be translated
+   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @throws IllegalArgumentException if any argument is not valid (e.g., unknown service)
    */
   public void afterTransactions(int serviceId, Fork fork) {
     synchronized (lock) {

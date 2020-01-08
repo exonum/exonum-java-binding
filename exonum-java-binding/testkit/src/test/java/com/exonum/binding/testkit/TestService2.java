@@ -18,9 +18,7 @@ package com.exonum.binding.testkit;
 
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
-import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -39,9 +37,6 @@ public final class TestService2 extends AbstractService {
   protected TestSchema createDataSchema(View view) {
     return new TestSchema(view, serviceInstanceId);
   }
-
-  @Override
-  public void initialize(Fork fork, Configuration configuration) {}
 
   @Override
   public void createPublicApiHandlers(Node node, Router router) {

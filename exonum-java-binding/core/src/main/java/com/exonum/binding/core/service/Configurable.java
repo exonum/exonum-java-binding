@@ -49,7 +49,8 @@ public interface Configurable {
    *
    * @param fork a view representing the current database state
    * @param configuration a proposed configuration
-   * @throws IllegalArgumentException if the proposed configuration is not valid
+   * @throws com.exonum.binding.core.transaction.ExecutionException if the proposed configuration
+   *     is not valid to prevent the configuration application
    */
   void verifyConfiguration(Fork fork, Configuration configuration);
 
