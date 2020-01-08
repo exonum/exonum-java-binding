@@ -28,10 +28,10 @@ lazy_static! {
 
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const ILLEGAL_ARGUMENT_EXCEPTION_CLASS: &str = "java/lang/IllegalArgumentException";
-const TRANSACTION_EXECUTION_EXCEPTION_CLASS: &str =
-    "com/exonum/binding/core/transaction/TransactionExecutionException";
-const UNEXPECTED_TRANSACTION_EXECUTION_EXCEPTION_CLASS: &str =
-    "com/exonum/binding/core/runtime/UnexpectedTransactionExecutionException";
+const EXECUTION_EXCEPTION_CLASS: &str =
+    "com/exonum/binding/core/transaction/ExecutionException";
+const UNEXPECTED_EXECUTION_EXCEPTION_CLASS: &str =
+    "com/exonum/binding/core/runtime/UnexpectedExecutionException";
 const STRING_CLASS: &str = "java/lang/String";
 const EXPECTED_DESCRIPTION: &str = "EXPECTED_DESCRIPTION";
 const EXPECTED_CODE: u8 = FakeServiceError::Error as u8;
@@ -58,7 +58,7 @@ fn jni_call_default_any_java_exception() {
         .with_description_containing(EXPECTED_DESCRIPTION);
     assert_jni_call_default_errors(&EXECUTOR, expected, |env| {
         env.throw_new(ARITHMETIC_EXCEPTION_CLASS, EXPECTED_DESCRIPTION)?;
-        wait_for_thrown_exception(env)?;
+        trigger_jni_error(env)?;
         Ok(())
     });
 }
@@ -69,7 +69,7 @@ fn jni_call_default_illegal_argument_exception() {
         .with_description_containing(EXPECTED_DESCRIPTION);
     assert_jni_call_default_errors(&EXECUTOR, expected, |env| {
         env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, EXPECTED_DESCRIPTION)?;
-        wait_for_thrown_exception(env)?;
+        trigger_jni_error(env)?;
         Ok(())
     });
 }
@@ -91,7 +91,7 @@ fn jni_call_transaction_any_java_exception() {
         .with_description_containing(EXPECTED_DESCRIPTION);
     assert_jni_call_transaction_errors(&EXECUTOR, expected, |env| {
         env.throw_new(ARITHMETIC_EXCEPTION_CLASS, EXPECTED_DESCRIPTION)?;
-        wait_for_thrown_exception(env)?;
+        trigger_jni_error(env)?;
         Ok(())
     });
 }
@@ -102,19 +102,19 @@ fn jni_call_transaction_illegal_argument_exception() {
         .with_description_containing(EXPECTED_DESCRIPTION);
     assert_jni_call_transaction_errors(&EXECUTOR, expected, |env| {
         env.throw_new(ILLEGAL_ARGUMENT_EXCEPTION_CLASS, EXPECTED_DESCRIPTION)?;
-        wait_for_thrown_exception(env)?;
+        trigger_jni_error(env)?;
         Ok(())
     });
 }
 
 #[test]
-fn jni_call_transaction_transaction_execution_exception() {
+fn jni_call_transaction_execution_exception() {
     let expected = ErrorMatch::from_fail(&FakeServiceError::Error)
         .with_description_containing(EXPECTED_DESCRIPTION);
     let err = jni_call_transaction(&EXECUTOR, |env| {
-        let exception = create_transaction_execution_exception(env)?;
+        let exception = create_execution_exception(env)?;
         env.throw(JThrowable::from(exception))?;
-        wait_for_thrown_exception(env)?;
+        trigger_jni_error(env)?;
         Ok(())
     })
     .unwrap_err();
@@ -122,16 +122,16 @@ fn jni_call_transaction_transaction_execution_exception() {
 }
 
 #[test]
-fn jni_call_transaction_unexpected_transaction_execution_exception() {
+fn jni_call_transaction_unexpected_execution_exception() {
     let err = jni_call_transaction(&EXECUTOR, |env| {
         let cause = create_any_java_exception(env)?;
         let exception = env.new_object(
-            UNEXPECTED_TRANSACTION_EXECUTION_EXCEPTION_CLASS,
+            UNEXPECTED_EXECUTION_EXCEPTION_CLASS,
             "(Ljava/lang/Throwable;)V",
             &[cause.into()],
         )?;
         env.throw(JThrowable::from(exception))?;
-        wait_for_thrown_exception(env)?;
+        trigger_jni_error(env)?;
         Ok(())
     })
     .unwrap_err();
@@ -139,11 +139,11 @@ fn jni_call_transaction_unexpected_transaction_execution_exception() {
     assert_eq!(err.description(), EXPECTED_DESCRIPTION);
 }
 
-fn create_transaction_execution_exception<'a>(env: &'a JNIEnv) -> JniResult<JObject<'a>> {
+fn create_execution_exception<'a>(env: &'a JNIEnv) -> JniResult<JObject<'a>> {
     let code = EXPECTED_CODE;
     let description: JObject = env.new_string(EXPECTED_DESCRIPTION)?.into();
     env.new_object(
-        TRANSACTION_EXECUTION_EXCEPTION_CLASS,
+        EXECUTION_EXCEPTION_CLASS,
         "(BLjava/lang/String;)V",
         &[code.into(), description.into()],
     )
@@ -188,7 +188,9 @@ where
     assert_eq!(err, expected_error);
 }
 
-/// Performs some trivial action using JNI to wait for Java exception being thrown.
-fn wait_for_thrown_exception<'a>(env: &'a JNIEnv) -> JniResult<JObject<'a>> {
+/// Performs an exception-unsafe JNI operation to trigger a JNI error caused by
+/// an already thrown Java exception.
+fn trigger_jni_error<'a>(env: &'a JNIEnv) -> JniResult<JObject<'a>> {
+    assert!(env.exception_check()?);
     env.new_object(STRING_CLASS, "()V", &[])
 }

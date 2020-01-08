@@ -80,7 +80,7 @@ fn create_vm(debug: bool, with_classes: bool) -> JavaVM {
 
     let vm = JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e));
 
-    // Initialize JNI cache for testing with fakes
+    // Initialize JNI cache
     if with_classes {
         let env = vm.attach_current_thread().unwrap();
         jni_cache::init_cache(&env);

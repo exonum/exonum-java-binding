@@ -50,7 +50,7 @@ fn concurrent_cache_read() {
             jni_cache::class::get_name_id();
             jni_cache::object::get_class_id();
             jni_cache::classes_refs::java_lang_error();
-            jni_cache::classes_refs::transaction_execution_exception();
+            jni_cache::classes_refs::execution_exception();
         });
         threads.push(jh);
     }

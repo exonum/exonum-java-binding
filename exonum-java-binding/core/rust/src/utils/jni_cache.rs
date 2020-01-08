@@ -91,7 +91,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "getCause",
         "()Ljava/lang/Throwable;",
     );
-    EXECUTION_GET_ERROR_CODE = get_method_id(
+    EXECUTION_EXCEPTION_GET_ERROR_CODE = get_method_id(
         &env,
         "com/exonum/binding/core/transaction/ExecutionException",
         "getErrorCode",
@@ -308,7 +308,7 @@ pub mod throwable {
 }
 
 /// Refers to the cached methods of the `com.exonum.binding.core.transaction.ExecutionException` class.
-pub mod tx_execution_exception {
+pub mod execution_exception {
     use super::*;
 
     /// Returns cached `JMethodID` for `ExecutionException.getErrorCode()`.
@@ -341,7 +341,7 @@ pub mod classes_refs {
     }
 
     /// Returns cached `JClass` for `ExecutionException` as a `GlobalRef`.
-    pub fn transaction_execution_exception() -> GlobalRef {
+    pub fn execution_exception() -> GlobalRef {
         check_cache_initialized();
         unsafe { EXECUTION_EXCEPTION.clone().unwrap() }
     }

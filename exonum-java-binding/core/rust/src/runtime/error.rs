@@ -22,7 +22,7 @@ use jni::{
 use utils::{
     describe_java_exception, get_and_clear_java_exception, get_exception_cause,
     get_exception_message,
-    jni_cache::{classes_refs, tx_execution_exception},
+    jni_cache::{classes_refs, execution_exception},
     unwrap_jni,
 };
 use {JniError, JniErrorKind, JniResult};
@@ -63,7 +63,7 @@ mod exception_handlers {
         let cause = unwrap_jni(get_exception_cause(env, exception));
         debug_assert!(
             !cause.is_null(),
-            "UnexpectedTransactionExecutionException#getCause returned null"
+            "UnexpectedExecutionException#getCause returned null"
         );
         let message = unwrap_jni(get_exception_message(env, cause)).unwrap_or_default();
         ExecutionError::new(ErrorKind::Unexpected, message)
@@ -125,11 +125,11 @@ where
         executor,
         &[
             (
-                &classes_refs::transaction_execution_exception(),
+                &classes_refs::execution_exception(),
                 exception_handlers::TX_EXECUTION,
             ),
             (
-                &classes_refs::unexpected_transaction_execution_exception(),
+                &classes_refs::unexpected_execution_exception(),
                 exception_handlers::TX_UNEXPECTED,
             ),
             (
@@ -222,12 +222,12 @@ where
     }
 }
 
-/// Returns the error code of the `TransactionExecutionException`.
+/// Returns the error code of the `ExecutionException`.
 fn get_tx_error_code(env: &JNIEnv, exception: JObject) -> JniResult<i8> {
     assert!(!exception.is_null(), "Exception is null");
     let err_code = env.call_method_unchecked(
         exception,
-        tx_execution_exception::get_error_code_id(),
+        execution_exception::get_error_code_id(),
         JavaType::Primitive(Primitive::Byte),
         &[],
     )?;
