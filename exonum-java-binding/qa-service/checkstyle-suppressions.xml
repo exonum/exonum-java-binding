@@ -8,7 +8,7 @@
     <suppress files="AnyTransaction" checks="MemberName|ParameterName"/>
     <suppress files="QaService" checks="JavadocParagraph"/>
     <!--  todo: Caused by:
-            "Unable to get class information for @throws tag 'TransactionExecutionException'. [JavadocMethod]"
+            "Unable to get class information for @throws tag 'ExecutionException'. [JavadocMethod]"
             Remove when we update to newer Checkstyle (such issues are closed in Checkstyle issue
             tracker: ECR-3159
    -->

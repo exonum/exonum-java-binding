@@ -20,6 +20,7 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
@@ -27,7 +28,8 @@ import io.vertx.ext.web.Router;
 
 public final class FakeService extends AbstractService {
 
-  static final int PUT_TX_ID = 0;
+  public static final int PUT_TX_ID = 0;
+  public static final int RAISE_ERROR_TX_ID = 1;
 
   @Inject
   FakeService(ServiceInstanceSpec instanceSpec) {
@@ -56,5 +58,13 @@ public final class FakeService extends AbstractService {
     String value = arguments.getValue();
     schema.testMap()
         .put(key, value);
+  }
+
+  /**
+   * Throws an exception with the given error code and description.
+   */
+  @Transaction(RAISE_ERROR_TX_ID)
+  public void raiseError(Transactions.RaiseErrorArgs arguments, TransactionContext context) {
+    throw new ExecutionException((byte) arguments.getCode());
   }
 }

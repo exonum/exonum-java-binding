@@ -16,11 +16,12 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
-import static com.exonum.binding.qaservice.TransactionError.COUNTER_ALREADY_EXISTS;
-import static com.exonum.binding.qaservice.TransactionError.UNKNOWN_COUNTER;
+import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
+import static com.exonum.binding.qaservice.QaExecutionError.EMPTY_TIME_ORACLE_NAME;
+import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -37,10 +38,10 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.binding.time.TimeSchema;
@@ -107,22 +108,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     updateTimeOracle(fork, configuration);
 
     // Add a default counter to the blockchain.
-    createInitCounter(DEFAULT_COUNTER_NAME, fork);
+    createCounter(DEFAULT_COUNTER_NAME, fork);
 
     // Add an afterCommit counter that will be incremented after each block committed event.
-    createInitCounter(AFTER_COMMIT_COUNTER_NAME, fork);
-  }
-
-  private void createInitCounter(String name, Fork fork) {
-    QaSchema schema = createDataSchema(fork);
-    MapIndex<HashCode, Long> counters = schema.counters();
-    MapIndex<HashCode, String> names = schema.counterNames();
-
-    HashCode counterId = defaultHashFunction().hashString(name, UTF_8);
-    checkState(!counters.containsKey(counterId), "Counter %s already exists", name);
-
-    counters.put(counterId, 0L);
-    names.put(counterId, name);
+    createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
   }
 
   @Override
@@ -265,6 +254,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     checkState(node != null, "Service has not been fully initialized yet");
   }
 
+  /**
+   * Verifies the QA service configuration.
+   * @throws ExecutionException if time oracle name is empty
+   */
   @Override
   public void verifyConfiguration(Fork fork, Configuration configuration) {
     QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
@@ -279,37 +272,43 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   @Transaction(CREATE_COUNTER_TX_ID)
   public void createCounter(TxMessageProtos.CreateCounterTxBody arguments,
-      TransactionContext context) throws TransactionExecutionException {
+      TransactionContext context) {
     String name = arguments.getName();
     checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
-    QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
+
+    createCounter(name, context.getFork());
+  }
+
+  private void createCounter(String counterName, Fork fork) {
+    QaSchema schema = createDataSchema(fork);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
 
     HashCode counterId = Hashing.defaultHashFunction()
-        .hashString(name, UTF_8);
+        .hashString(counterName, UTF_8);
     if (counters.containsKey(counterId)) {
-      throw new TransactionExecutionException(COUNTER_ALREADY_EXISTS.code);
+      throw new ExecutionException(COUNTER_ALREADY_EXISTS.code,
+          format("Counter %s already exists", counterName));
     }
-    assert !names.containsKey(counterId) : "counterNames must not contain the id of " + name;
+    assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
 
     counters.put(counterId, 0L);
-    names.put(counterId, name);
+    names.put(counterId, counterName);
   }
 
   @Override
   @Transaction(INCREMENT_COUNTER_TX_ID)
   public void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
-      TransactionContext context) throws TransactionExecutionException {
+      TransactionContext context) {
     byte[] rawCounterId = arguments.getCounterId().toByteArray();
     HashCode counterId = HashCode.fromBytes(rawCounterId);
 
-    QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
+    QaSchema schema = createDataSchema(context.getFork());
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
 
     // Increment the counter if there is such.
     if (!counters.containsKey(counterId)) {
-      throw new TransactionExecutionException(UNKNOWN_COUNTER.code);
+      throw new ExecutionException(UNKNOWN_COUNTER.code);
     }
     long newValue = counters.get(counterId) + 1;
     counters.put(counterId, newValue);
@@ -318,31 +317,29 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   @Transaction(VALID_THROWING_TX_ID)
   public void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context) {
-    QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
+    QaSchema schema = createDataSchema(context.getFork());
 
     // Attempt to clear all service indices.
     schema.clearAll();
 
-    throw new IllegalStateException(String
-        .format("#execute of this transaction always throws (seed=%d, txHash=%s)",
-            arguments.getSeed(), context.getTransactionMessageHash()));
+    throw new IllegalStateException(format("#execute of this transaction always throws "
+            + "(seed=%d, txHash=%s)", arguments.getSeed(), context.getTransactionMessageHash()));
   }
 
   @Override
   @Transaction(VALID_ERROR_TX_ID)
-  public void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  public void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context) {
     int errorCode = arguments.getErrorCode();
     checkArgument(0 <= errorCode && errorCode <= 127,
         "error code (%s) must be in range [0; 127]", errorCode);
-    QaSchema schema = new QaSchema(context.getFork(), context.getServiceName());
+    QaSchema schema = createDataSchema(context.getFork());
 
     // Attempt to clear all service indices.
     schema.clearAll();
 
     // Throw an exception. Framework must revert the changes made above.
     String errorDescription = arguments.getErrorDescription();
-    throw new TransactionExecutionException((byte) errorCode, errorDescription);
+    throw new ExecutionException((byte) errorCode, errorDescription);
   }
 
   private void checkConfiguration(QaConfiguration config) {
@@ -351,8 +348,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // We do *not* check if the time oracle is active to (a) allow running this service with
     // reduced read functionality without time oracle; (b) testing time schema when it is not
     // active.
-    checkArgument(!Strings.isNullOrEmpty(timeOracleName), "Empty time oracle name: %s",
-        timeOracleName);
+    if (Strings.isNullOrEmpty(timeOracleName)) {
+      throw new ExecutionException(EMPTY_TIME_ORACLE_NAME.code,
+          format("Empty time oracle name: %s", timeOracleName));
+    }
   }
 
   private void updateTimeOracle(Fork fork, Configuration configuration) {

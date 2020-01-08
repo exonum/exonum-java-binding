@@ -17,6 +17,7 @@
 package com.exonum.binding.core.service;
 
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.ExecutionException;
 import io.vertx.ext.web.Router;
 
 /**
@@ -41,9 +42,11 @@ public interface Service {
    *
    * @param fork a database fork to apply changes to. Not valid after this method returns
    * @param configuration the service configuration parameters
-   * @throws IllegalArgumentException if the configuration parameters are not valid (e.g.,
+   * @throws ExecutionException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
-   *     its initialization fails
+   *     its initialization fails. It will save the error into
+   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   *     the registry of call errors}
    * @see Configurable
    */
   default void initialize(Fork fork, Configuration configuration) {
@@ -90,7 +93,13 @@ public interface Service {
    * implementations of this method must not perform any blocking or long-running operations.
    *
    * <p>Any exceptions in this method will revert any changes made to the database by it,
-   * but will not affect the processing of this block.
+   * but will not affect the processing of this block. Exceptions are saved
+   * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   * the registry of call errors} with appropriate error kinds.
+   *
+   * @throws ExecutionException if an error occurs during the method execution;
+   *     it is saved as a call error of kind "service". Any other exceptions
+   *     are considered unexpected. They are saved with kind "unexpected".
    */
   default void afterTransactions(Fork fork) {}
 

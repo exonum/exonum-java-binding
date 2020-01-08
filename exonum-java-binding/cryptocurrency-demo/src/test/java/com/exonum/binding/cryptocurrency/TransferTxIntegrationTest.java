@@ -16,7 +16,6 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
@@ -29,7 +28,9 @@ import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVE
 import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.TransactionUtils.newCreateWalletTransaction;
 import static com.exonum.binding.cryptocurrency.TransactionUtils.newTransferTransaction;
+import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
@@ -41,9 +42,9 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -99,7 +100,6 @@ class TransferTxIntegrationTest {
         .containsExactly(messageHash);
   }
 
-  @Disabled("ECR-4014")
   @ParameterizedTest
   @ValueSource(longs = {Long.MIN_VALUE, -1L, 0L})
   @RequiresNativeLibrary
@@ -114,14 +114,17 @@ class TransferTxIntegrationTest {
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
     Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
-    String description = "Non-positive transfer amount: " + transferSum;
-    ExecutionStatus expectedTransactionResult =
-        serviceError(NON_POSITIVE_TRANSFER_AMOUNT.errorCode, description);
-    assertThat(txResultOpt).hasValue(expectedTransactionResult);
+    assertThat(txResultOpt).hasValueSatisfying(status -> {
+      assertTrue(status.hasError());
+      ExecutionError error = status.getError();
+      assertThat(error.getKind()).isEqualTo(SERVICE);
+      assertThat(error.getCode()).isEqualTo(NON_POSITIVE_TRANSFER_AMOUNT.errorCode);
+      assertThat(error.getDescription()).containsIgnoringCase("Non-positive transfer amount")
+          .contains(String.valueOf(transferSum));
+    });
   }
 
   @Test
-  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeTransfer_NoSuchFromWallet(TestKit testKit) {
     // Create a receiver’s wallet with the given initial balance
@@ -138,13 +141,11 @@ class TransferTxIntegrationTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(UNKNOWN_SENDER.errorCode);
-    assertThat(txResult).hasValue(expectedTransactionResult);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
+    checkServiceError(txResultOpt, UNKNOWN_SENDER);
   }
 
   @Test
-  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeTransfer_NoSuchToWallet(TestKit testKit) {
     // Create a receiver’s wallet with the given initial balance
@@ -161,13 +162,11 @@ class TransferTxIntegrationTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(UNKNOWN_RECEIVER.errorCode);
-    assertThat(txResult).hasValue(expectedTransactionResult);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
+    checkServiceError(txResultOpt, UNKNOWN_RECEIVER);
   }
 
   @Test
-  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeTransfer_RejectsSameSenderAndReceiver(TestKit testKit) {
     long seed = 1L;
@@ -178,13 +177,11 @@ class TransferTxIntegrationTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(SAME_SENDER_AND_RECEIVER.errorCode);
-    assertThat(txResult).hasValue(expectedTransactionResult);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
+    checkServiceError(txResultOpt, SAME_SENDER_AND_RECEIVER);
   }
 
   @Test
-  @Disabled("ECR-4014")
   @RequiresNativeLibrary
   void executeTransfer_InsufficientFunds(TestKit testKit) {
     // Create source and target wallets with the same initial balance
@@ -205,8 +202,18 @@ class TransferTxIntegrationTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transferTx.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(INSUFFICIENT_FUNDS.errorCode);
-    assertThat(txResult).hasValue(expectedTransactionResult);
+    Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
+    checkServiceError(txResultOpt, INSUFFICIENT_FUNDS);
+  }
+
+  static void checkServiceError(
+      @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<ExecutionStatus> txResultOpt,
+      TransactionError expectedError) {
+    assertThat(txResultOpt).hasValueSatisfying(status -> {
+      assertTrue(status.hasError());
+      ExecutionError error = status.getError();
+      assertThat(error.getKind()).isEqualTo(SERVICE);
+      assertThat(error.getCode()).isEqualTo(expectedError.errorCode);
+    });
   }
 }

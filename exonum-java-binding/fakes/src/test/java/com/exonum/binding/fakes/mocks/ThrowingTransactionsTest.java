@@ -20,9 +20,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import java.io.IOException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -73,7 +73,7 @@ class ThrowingTransactionsTest {
     Transaction tx = ThrowingTransactions.createThrowingExecutionException(false,
         errorCode, description);
 
-    TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
+    ExecutionException actual = assertThrows(ExecutionException.class,
         () -> tx.execute(context));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));
@@ -86,7 +86,7 @@ class ThrowingTransactionsTest {
     Transaction tx = ThrowingTransactions.createThrowingExecutionException(true,
         errorCode, description);
 
-    TransactionExecutionException actual = assertThrows(TestTxExecException.class,
+    ExecutionException actual = assertThrows(TestTxExecException.class,
         () -> tx.execute(context));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));

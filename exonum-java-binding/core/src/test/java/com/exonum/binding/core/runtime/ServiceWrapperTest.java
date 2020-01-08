@@ -24,6 +24,7 @@ import static com.exonum.binding.core.runtime.ServiceWrapper.VERIFY_CONFIGURATIO
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,8 +38,8 @@ import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,7 +77,39 @@ class ServiceWrapperTest {
   }
 
   @Test
-  void executeTransactionDefaultInterface() throws TransactionExecutionException {
+  void initialize() {
+    Fork fork = mock(Fork.class);
+    Configuration config = new ServiceConfiguration(new byte[0]);
+    serviceWrapper.initialize(fork, config);
+    verify(service).initialize(fork, config);
+  }
+
+  @Test
+  void initializePropagatesExecutionException() {
+    ExecutionException e = new ExecutionException((byte) 1);
+    Fork fork = mock(Fork.class);
+    Configuration config = new ServiceConfiguration(new byte[0]);
+    doThrow(e).when(service).initialize(fork, config);
+
+    ExecutionException actual = assertThrows(ExecutionException.class,
+        () -> serviceWrapper.initialize(fork, config));
+    assertThat(actual).isSameAs(e);
+  }
+
+  @Test
+  void initializeWrapsRuntimeExceptions() {
+    RuntimeException e = new RuntimeException("unexpected");
+    Fork fork = mock(Fork.class);
+    Configuration config = new ServiceConfiguration(new byte[0]);
+    doThrow(e).when(service).initialize(fork, config);
+
+    Exception actual = assertThrows(UnexpectedExecutionException.class,
+        () -> serviceWrapper.initialize(fork, config));
+    assertThat(actual).hasCause(e);
+  }
+
+  @Test
+  void executeTransactionDefaultInterface() {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
@@ -87,22 +120,22 @@ class ServiceWrapperTest {
   }
 
   @Test
-  void executeInvalidTransaction() throws TransactionExecutionException {
+  void executeInvalidTransaction() {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
     TransactionContext context = anyContext().build();
-    doThrow(TransactionExecutionException.class)
+    doThrow(ExecutionException.class)
         .when(txInvoker)
         .invokeTransaction(txId, arguments, context);
 
-    assertThrows(TransactionExecutionException.class,
+    assertThrows(ExecutionException.class,
         () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0,
             context));
   }
 
   @Test
-  void executeVerifyConfiguration() throws TransactionExecutionException {
+  void executeVerifyConfiguration() {
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
@@ -120,7 +153,49 @@ class ServiceWrapperTest {
   }
 
   @Test
-  void executeApplyConfiguration() throws TransactionExecutionException {
+  void executeVerifyConfigurationPropagatesExecutionException() {
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    int txId = VERIFY_CONFIGURATION_TX_ID;
+    byte[] arguments = bytes(1, 2, 3);
+
+    Fork fork = mock(Fork.class);
+    TransactionContext context = anyContext()
+        .fork(fork)
+        .build();
+
+    ExecutionException e = new ExecutionException((byte) 0);
+    Configuration config = new ServiceConfiguration(arguments);
+    doThrow(e).when(service).verifyConfiguration(fork, config);
+
+    ExecutionException actual = assertThrows(ExecutionException.class,
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
+            SUPERVISOR_SERVICE_ID, context));
+    assertThat(actual).isSameAs(e);
+  }
+
+  @Test
+  void executeVerifyConfigurationWrapsRuntimeExceptions() {
+    String interfaceName = CONFIGURE_INTERFACE_NAME;
+    int txId = VERIFY_CONFIGURATION_TX_ID;
+    byte[] arguments = bytes(1, 2, 3);
+
+    Fork fork = mock(Fork.class);
+    TransactionContext context = anyContext()
+        .fork(fork)
+        .build();
+
+    RuntimeException e = new RuntimeException("unexpected");
+    Configuration config = new ServiceConfiguration(arguments);
+    doThrow(e).when(service).verifyConfiguration(fork, config);
+
+    Exception actual = assertThrows(UnexpectedExecutionException.class,
+        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
+            SUPERVISOR_SERVICE_ID, context));
+    assertThat(actual).hasCause(e);
+  }
+
+  @Test
+  void executeApplyConfiguration() {
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     int txId = APPLY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
@@ -207,6 +282,28 @@ class ServiceWrapperTest {
 
     assertThat(e.getMessage()).containsIgnoringCase("Unknown interface")
         .contains(interfaceName);
+  }
+
+  @Test
+  void afterTransactionsPropagatesExecutionException() {
+    ExecutionException e = new ExecutionException((byte) 0);
+    doThrow(e).when(service).afterTransactions(any(Fork.class));
+
+    Fork fork = mock(Fork.class);
+    ExecutionException actual = assertThrows(ExecutionException.class,
+        () -> serviceWrapper.afterTransactions(fork));
+    assertThat(actual).isSameAs(e);
+  }
+
+  @Test
+  void afterTransactionsKeepsRuntimeExceptionAsCause() {
+    Exception e = new RuntimeException("Boom");
+    doThrow(e).when(service).afterTransactions(any(Fork.class));
+
+    Fork fork = mock(Fork.class);
+    Exception actual = assertThrows(UnexpectedExecutionException.class,
+        () -> serviceWrapper.afterTransactions(fork));
+    assertThat(actual).hasCause(e);
   }
 
   @ParameterizedTest

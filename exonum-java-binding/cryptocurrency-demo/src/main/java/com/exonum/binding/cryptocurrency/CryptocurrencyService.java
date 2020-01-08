@@ -18,8 +18,8 @@ package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import java.util.List;
 import java.util.Optional;
@@ -33,17 +33,15 @@ public interface CryptocurrencyService extends Service {
   /**
    * Creates a new named wallet with the given initial balance.
    *
-   * @throws TransactionExecutionException if the wallet of the tx author already exists
+   * @throws ExecutionException if the wallet of the tx author already exists
    */
-  void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context)
-      throws TransactionExecutionException;
+  void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context);
 
   /**
    * Transfers tokens between two wallets.
    *
-   * @throws TransactionExecutionException if the sender or receiver are unknown; the sender
+   * @throws ExecutionException if the sender or receiver are unknown; the sender
    *     has insufficient funds; or the sender attempts a transfer to itself
    */
-  void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context)
-      throws TransactionExecutionException;
+  void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context);
 }

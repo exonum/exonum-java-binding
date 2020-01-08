@@ -16,13 +16,13 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.blockchain.ExecutionStatuses.serviceError;
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
 import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
-import static com.exonum.binding.qaservice.TransactionError.COUNTER_ALREADY_EXISTS;
+import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
+import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +53,8 @@ class CreateCounterTxTest {
       QaArtifactInfo.createQaServiceTestkit()
   );
 
-  @Disabled("ECR-4014")
+
+  @Disabled("ECR-4054")
   @ParameterizedTest
   @ValueSource(strings = {"", " ", "  ", "\n", "\t"})
   void executeNewCounterRejectsEmptyName(String name, TestKit testKit) {
@@ -89,7 +90,6 @@ class CreateCounterTxTest {
   }
 
   @Test
-  @Disabled("ECR-4014")
   void executeAlreadyExistingCounter(TestKit testKit) {
     String counterName = "counter";
     KeyPair key1 = ed25519().generateKeyPair();
@@ -102,9 +102,10 @@ class CreateCounterTxTest {
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    Optional<ExecutionStatus> txResult = blockchain.getTxResult(transactionMessage2.hash());
-    ExecutionStatus expectedTransactionResult = serviceError(COUNTER_ALREADY_EXISTS.code);
-    assertThat(txResult).hasValue(expectedTransactionResult);
+    ExecutionStatus txResult = blockchain.getTxResult(transactionMessage2.hash()).get();
+    ExecutionError error = txResult.getError();
+    assertThat(error.getKind()).isEqualTo(SERVICE);
+    assertThat(error.getCode()).isEqualTo(COUNTER_ALREADY_EXISTS.code);
   }
 
 }

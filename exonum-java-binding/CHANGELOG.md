@@ -30,16 +30,36 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `Transaction` _interface_. (#1274, #1307)
 - Any exceptions thrown from the `Transaction` methods
   but `TransactionExecutionException` are saved with the error kind
-  "unexpected".
+  "unexpected" into `Blockchain#getCallErrors`.
+- Redefined `TransactionExecutionException`:
+  - Renamed into `ExecutionException`
+  - Made `TransactionExecutionException` an unchecked (runtime) exception
+  - Specified it as _the_ exception to communicate execution errors
+  of `Service` methods: `@Transaction`s; `Service#afterTransactions`,
+  `#initialize`; `Configurable` methods.
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
+- Allowed throwing execution exceptions from `Service#afterTransactions`
+  (ex. `beforeCommit`).
+  Any exceptions thrown in these methods are saved in the blockchain
+  in `Blockchain#getCallErrors` and can be retrieved by any services or
+  light clients.
+- `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`.
+  - Use `CallInBlocks` to concisely create `CallInBlock`s.
+- The specification of `Configurable` operations and `Service#initialize` 
+  to require throwing `ExecutionException` instead of
+  `IllegalArgumentException`.
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
 - `Schema#getStateHashes` and `Service#getStateHashes` methods. Framework
   automatically aggregates state hashes of the Merkelized collections.
 - `TransactionConverter` — it is no longer needed with transactions
-as `Service` methods annotated with `@Transaction`. Such methods may accept
-arbitrary protobuf messages as their argument. (#1304, #1307)
+  as `Service` methods annotated with `@Transaction`. Such methods may accept
+  arbitrary protobuf messages as their argument. (#1304, #1307)
+- `ExecutionStatuses` factory methods (`serviceError`) as they are no longer
+  useful to create _expected_ transaction execution statuses in tests —
+  an `ExecutionError` now has a lot of other properties.  
+  `ExecutionStatuses.success` is replaced with `ExecutionStatuses.SUCCESS` constant.
 
 ## 0.9.0-rc2 - 2019-12-17
 

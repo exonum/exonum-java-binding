@@ -21,24 +21,24 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-class TransactionExecutionExceptionTest {
+class ExecutionExceptionTest {
 
   @Test
   void toStringNoDescription() {
     byte errorCode = 2;
-    TransactionExecutionException e = new TransactionExecutionException(errorCode);
+    ExecutionException e = new ExecutionException(errorCode);
 
     assertThat(e.toString(),
-        containsString("TransactionExecutionException: errorCode=2"));
+        containsString("ExecutionException: errorCode=2"));
   }
 
   @Test
   void toStringWithDescription() {
     byte errorCode = 2;
     String description = "Foo";
-    TransactionExecutionException e = new TransactionExecutionException(errorCode, description);
+    ExecutionException e = new ExecutionException(errorCode, description);
 
     assertThat(e.toString(),
-        containsString("TransactionExecutionException: Foo, errorCode=2"));
+        containsString("ExecutionException: Foo, errorCode=2"));
   }
 }

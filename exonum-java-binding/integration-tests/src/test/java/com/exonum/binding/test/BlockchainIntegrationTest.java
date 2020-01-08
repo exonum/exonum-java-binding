@@ -16,8 +16,9 @@
 
 package com.exonum.binding.test;
 
-import static com.exonum.binding.common.blockchain.ExecutionStatuses.success;
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.fakeservice.FakeService.PUT_TX_ID;
+import static com.exonum.binding.fakeservice.FakeService.RAISE_ERROR_TX_ID;
 import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_DIR;
 import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_FILENAME;
 import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_ID;
@@ -25,7 +26,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.common.blockchain.CallInBlocks;
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
@@ -42,23 +46,26 @@ import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
+import com.exonum.binding.fakeservice.Transactions.RaiseErrorArgs;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.core.messages.Blockchain.CallInBlock;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Blockchain.ValidatorKeys;
+import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.protobuf.MessageLite;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -137,8 +144,8 @@ class BlockchainIntegrationTest {
     private TransactionMessage expectedBlockTransaction;
 
     @BeforeEach
-    void commitBlock() {
-      TransactionMessage transactionMessage = createTestTransactionMessage();
+    void commitBlockWithSingleTx() {
+      TransactionMessage transactionMessage = createPutTransactionMessage();
       expectedBlockTransaction = transactionMessage;
       block = testKit.createBlockWithTransactions(transactionMessage);
     }
@@ -159,7 +166,7 @@ class BlockchainIntegrationTest {
     @Test
     void getBlockHashes() {
       testKitTest((blockchain) -> {
-        Block genesisBlock = blockchain.getBlock(0);
+        Block genesisBlock = blockchain.getBlock(GENESIS_BLOCK_HEIGHT);
         List<HashCode> expectedHashes = ImmutableList.of(
             genesisBlock.getBlockHash(),
             block.getBlockHash()
@@ -207,7 +214,7 @@ class BlockchainIntegrationTest {
             () -> blockchain.getBlockTransactions(invalidBlockHeight));
         String expectedMessage =
             String.format(
-                "Height should be less or equal compared to blockchain height %s, but was %s",
+                "Height should be less than or equal to the blockchain height %s, but was %s",
                 block.getHeight(), invalidBlockHeight);
         assertThat(e).hasMessageContaining(expectedMessage);
       });
@@ -282,24 +289,30 @@ class BlockchainIntegrationTest {
     }
 
     @Test
-    @Disabled("ECR-4014")
-    void getTxResults() {
+    void getCallErrorsNoErrors() {
       testKitTest((blockchain) -> {
-        ProofMapIndexProxy<HashCode, ExecutionStatus> txResults = blockchain.getTxResults();
-        Map<HashCode, ExecutionStatus> txResultsMap = toMap(txResults);
-        ImmutableMap<HashCode, ExecutionStatus> expected =
-            ImmutableMap.of(expectedBlockTransaction.hash(), success());
-        assertThat(txResultsMap).isEqualTo(expected);
+        long height = block.getHeight();
+        ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors =
+            blockchain.getCallErrors(height);
+        Map<CallInBlock, ExecutionError> callErrorsMap = toMap(callErrors);
+        assertThat(callErrorsMap).isEmpty();
       });
     }
 
     @Test
-    @Disabled("ECR-4014")
-    void getTxResult() {
+    void getCallErrorsInvalidHeight() {
+      testKitTest((blockchain) -> {
+        long invalidHeight = block.getHeight() + 1;
+        assertThrows(IllegalArgumentException.class, () -> blockchain.getCallErrors(invalidHeight));
+      });
+    }
+
+    @Test
+    void getTxResultSuccess() {
       testKitTest((blockchain) -> {
         Optional<ExecutionStatus> txResult =
             blockchain.getTxResult(expectedBlockTransaction.hash());
-        assertThat(txResult).hasValue(success());
+        assertThat(txResult).hasValue(ExecutionStatuses.SUCCESS);
       });
     }
 
@@ -441,6 +454,59 @@ class BlockchainIntegrationTest {
     }
   }
 
+  @Nested
+  class WithErrorTx {
+
+    final int errorCode = 17;
+    TransactionMessage transactionMessage;
+    Block block;
+
+    @BeforeEach
+    void commitBlockWithErrorTx() {
+      RaiseErrorArgs args = RaiseErrorArgs.newBuilder()
+          .setCode(errorCode)
+          .build();
+      transactionMessage = createTestTransactionMessage(RAISE_ERROR_TX_ID, args);
+      block = testKit.createBlockWithTransactions(transactionMessage);
+    }
+
+    @Test
+    void getCallErrorsWithError() {
+      testKitTest(blockchain -> {
+        ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = blockchain
+            .getCallErrors(block.getHeight());
+        Map<CallInBlock, ExecutionError> callErrorsAsMap = toMap(callErrors);
+
+        int txPosition = 0; // A single tx in block must be at 0 position
+        CallInBlock callId = CallInBlocks.transaction(txPosition);
+        assertThat(callErrorsAsMap).containsOnlyKeys(callId);
+        ExecutionError executionError = callErrorsAsMap.get(callId);
+        checkExecutionError(executionError);
+      });
+    }
+
+    @Test
+    void getTxResultWithError() {
+      testKitTest(blockchain -> {
+        HashCode txHash = transactionMessage.hash();
+        Optional<ExecutionStatus> txResult = blockchain.getTxResult(txHash);
+
+        assertThat(txResult).isPresent();
+        ExecutionStatus executionStatus = txResult.get();
+        assertTrue(executionStatus.hasError());
+        checkExecutionError(executionStatus.getError());
+      });
+    }
+
+    private void checkExecutionError(ExecutionError executionError) {
+      // It's a Blockchain test, therefore it's enough to check that the error
+      // has some of its attributes correct — the rest may be checked in QaService tests
+      // or other ITs.
+      assertThat(executionError.getKind()).isEqualTo(ErrorKind.SERVICE);
+      assertThat(executionError.getCode()).isEqualTo(errorCode);
+    }
+  }
+
   private void testKitTest(Consumer<Blockchain> test) {
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
@@ -456,18 +522,23 @@ class BlockchainIntegrationTest {
     return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 
-  private static TransactionMessage createTestTransactionMessage() {
-    return createTestTransactionMessage("k1", "v1");
+  private static TransactionMessage createPutTransactionMessage() {
+    return createPutTransactionMessage("k1", "v1");
   }
 
-  private static TransactionMessage createTestTransactionMessage(String key, String value) {
+  private static TransactionMessage createPutTransactionMessage(String key, String value) {
+    PutTransactionArgs args = PutTransactionArgs.newBuilder()
+        .setKey(key)
+        .setValue(value)
+        .build();
+    return createTestTransactionMessage(PUT_TX_ID, args);
+  }
+
+  private static TransactionMessage createTestTransactionMessage(int txId, MessageLite payload) {
     return TransactionMessage.builder()
         .serviceId(SERVICE_ID)
-        .transactionId(0)
-        .payload(PutTransactionArgs.newBuilder()
-            .setKey(key)
-            .setValue(value)
-            .build())
+        .transactionId(txId)
+        .payload(payload)
         .sign(KEY_PAIR);
   }
 
