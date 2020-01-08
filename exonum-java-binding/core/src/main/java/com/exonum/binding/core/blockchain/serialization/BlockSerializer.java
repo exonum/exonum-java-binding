@@ -25,14 +25,14 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.core.messages.Blockchain;
 import com.exonum.core.messages.Blockchain.AdditionalHeaders;
+import com.exonum.core.messages.KeyValueSequenceOuterClass.KeyValue;
+import com.exonum.core.messages.KeyValueSequenceOuterClass.KeyValueSequence;
+import com.exonum.core.messages.KeyValueSequenceOuterClass.KeyValueSequence.Builder;
 import com.exonum.core.messages.Types;
 import com.exonum.core.messages.Types.Hash;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
-import exonum.KeyValueSequenceOuterClass.KeyValue;
-import exonum.KeyValueSequenceOuterClass.KeyValueSequence;
-import exonum.KeyValueSequenceOuterClass.KeyValueSequence.Builder;
 
 public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
