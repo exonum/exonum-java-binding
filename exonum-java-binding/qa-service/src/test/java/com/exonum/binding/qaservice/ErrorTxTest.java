@@ -35,8 +35,8 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
@@ -125,7 +125,7 @@ class ErrorTxTest {
           .serviceId(QA_SERVICE_ID)
           .build();
       // Invoke the transaction
-      assertThrows(TransactionExecutionException.class, () -> qaService.error(arguments, context));
+      assertThrows(ExecutionException.class, () -> qaService.error(arguments, context));
 
       // Check that it has cleared the maps
       assertThat(schema.counters().isEmpty()).isTrue();

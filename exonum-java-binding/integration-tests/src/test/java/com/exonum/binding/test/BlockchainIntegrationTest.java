@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.exonum.binding.common.blockchain.CallInBlocks;
 import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.crypto.CryptoFunction;
@@ -477,9 +478,7 @@ class BlockchainIntegrationTest {
         Map<CallInBlock, ExecutionError> callErrorsAsMap = toMap(callErrors);
 
         int txPosition = 0; // A single tx in block must be at 0 position
-        CallInBlock callId = CallInBlock.newBuilder()
-            .setTransaction(txPosition)
-            .build();
+        CallInBlock callId = CallInBlocks.transaction(txPosition);
         assertThat(callErrorsAsMap).containsOnlyKeys(callId);
         ExecutionError executionError = callErrorsAsMap.get(callId);
         checkExecutionError(executionError);

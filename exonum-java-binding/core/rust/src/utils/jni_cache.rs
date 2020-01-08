@@ -38,7 +38,7 @@ static mut OBJECT_GET_CLASS: Option<JMethodID> = None;
 static mut CLASS_GET_NAME: Option<JMethodID> = None;
 static mut THROWABLE_GET_MESSAGE: Option<JMethodID> = None;
 static mut THROWABLE_GET_CAUSE: Option<JMethodID> = None;
-static mut TX_EXECUTION_GET_ERROR_CODE: Option<JMethodID> = None;
+static mut EXECUTION_EXCEPTION_GET_ERROR_CODE: Option<JMethodID> = None;
 
 static mut RUNTIME_ADAPTER_INITIALIZE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_DEPLOY_ARTIFACT: Option<JMethodID> = None;
@@ -53,8 +53,8 @@ static mut RUNTIME_ADAPTER_SHUTDOWN: Option<JMethodID> = None;
 static mut JAVA_LANG_ERROR: Option<GlobalRef> = None;
 static mut JAVA_LANG_RUNTIME_EXCEPTION: Option<GlobalRef> = None;
 static mut JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION: Option<GlobalRef> = None;
-static mut TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
-static mut UNEXPECTED_TRANSACTION_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
+static mut EXECUTION_EXCEPTION: Option<GlobalRef> = None;
+static mut UNEXPECTED_EXECUTION_EXCEPTION: Option<GlobalRef> = None;
 
 /// This function is executed on loading native library by JVM.
 /// It initializes the cache of method and class references.
@@ -91,9 +91,9 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "getCause",
         "()Ljava/lang/Throwable;",
     );
-    TX_EXECUTION_GET_ERROR_CODE = get_method_id(
+    EXECUTION_GET_ERROR_CODE = get_method_id(
         &env,
-        "com/exonum/binding/core/transaction/TransactionExecutionException",
+        "com/exonum/binding/core/transaction/ExecutionException",
         "getErrorCode",
         "()B",
     );
@@ -152,18 +152,18 @@ unsafe fn cache_methods(env: &JNIEnv) {
                 .into(),
         )
         .ok();
-    TRANSACTION_EXECUTION_EXCEPTION = env
+    EXECUTION_EXCEPTION = env
         .new_global_ref(
-            env.find_class("com/exonum/binding/core/transaction/TransactionExecutionException")
+            env.find_class("com/exonum/binding/core/transaction/ExecutionException")
                 .unwrap()
                 .into(),
         )
         .ok();
 
-    UNEXPECTED_TRANSACTION_EXECUTION_EXCEPTION = env
+    UNEXPECTED_EXECUTION_EXCEPTION = env
         .new_global_ref(
             env.find_class(
-                "com/exonum/binding/core/runtime/UnexpectedTransactionExecutionException",
+                "com/exonum/binding/core/runtime/UnexpectedExecutionException",
             )
             .unwrap()
             .into(),
@@ -174,7 +174,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         OBJECT_GET_CLASS.is_some()
             && JAVA_LANG_ERROR.is_some()
             && THROWABLE_GET_MESSAGE.is_some()
-            && TX_EXECUTION_GET_ERROR_CODE.is_some()
+            && EXECUTION_EXCEPTION_GET_ERROR_CODE.is_some()
             && RUNTIME_ADAPTER_INITIALIZE.is_some()
             && RUNTIME_ADAPTER_DEPLOY_ARTIFACT.is_some()
             && RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.is_some()
@@ -187,8 +187,8 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && JAVA_LANG_ERROR.is_some()
             && JAVA_LANG_RUNTIME_EXCEPTION.is_some()
             && JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION.is_some()
-            && TRANSACTION_EXECUTION_EXCEPTION.is_some()
-            && UNEXPECTED_TRANSACTION_EXECUTION_EXCEPTION.is_some(),
+            && EXECUTION_EXCEPTION.is_some()
+            && UNEXPECTED_EXECUTION_EXCEPTION.is_some(),
         "Error caching Java entities"
     );
 
@@ -307,14 +307,14 @@ pub mod throwable {
     }
 }
 
-/// Refers to the cached methods of the `com.exonum.binding.core.transaction.TransactionExecutionException` class.
+/// Refers to the cached methods of the `com.exonum.binding.core.transaction.ExecutionException` class.
 pub mod tx_execution_exception {
     use super::*;
 
-    /// Returns cached `JMethodID` for `TransactionExecutionException.getErrorCode()`.
+    /// Returns cached `JMethodID` for `ExecutionException.getErrorCode()`.
     pub fn get_error_code_id() -> JMethodID<'static> {
         check_cache_initialized();
-        unsafe { TX_EXECUTION_GET_ERROR_CODE.unwrap() }
+        unsafe { EXECUTION_EXCEPTION_GET_ERROR_CODE.unwrap() }
     }
 }
 
@@ -340,15 +340,15 @@ pub mod classes_refs {
         unsafe { JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION.clone().unwrap() }
     }
 
-    /// Returns cached `JClass` for `TransactionExecutionException` as a `GlobalRef`.
+    /// Returns cached `JClass` for `ExecutionException` as a `GlobalRef`.
     pub fn transaction_execution_exception() -> GlobalRef {
         check_cache_initialized();
-        unsafe { TRANSACTION_EXECUTION_EXCEPTION.clone().unwrap() }
+        unsafe { EXECUTION_EXCEPTION.clone().unwrap() }
     }
 
-    /// Returns cached `JClass` for `UnexpectedTransactionExecutionException` as a `GlobalRef`.
-    pub fn unexpected_transaction_execution_exception() -> GlobalRef {
+    /// Returns cached `JClass` for `UnexpectedExecutionException` as a `GlobalRef`.
+    pub fn unexpected_execution_exception() -> GlobalRef {
         check_cache_initialized();
-        unsafe { UNEXPECTED_TRANSACTION_EXECUTION_EXCEPTION.clone().unwrap() }
+        unsafe { UNEXPECTED_EXECUTION_EXCEPTION.clone().unwrap() }
     }
 }

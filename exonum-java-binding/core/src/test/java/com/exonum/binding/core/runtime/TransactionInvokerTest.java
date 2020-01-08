@@ -24,9 +24,9 @@ import static org.mockito.Mockito.verify;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.indices.TestProtoMessages;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import io.vertx.ext.web.Router;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ class TransactionInvokerTest {
   private TransactionContext context;
 
   @Test
-  void invokeValidServiceTransaction() throws Exception {
+  void invokeValidServiceTransaction() {
     ValidService service = spy(new ValidService());
     TransactionInvoker invoker = new TransactionInvoker(service);
     invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context);
@@ -63,10 +63,10 @@ class TransactionInvokerTest {
   }
 
   @Test
-  void invokeThrowingTransactionExecutionException() {
-    TransactionExecutionException e = new TransactionExecutionException((byte) 0);
+  void invokeThrowingExecutionException() {
+    ExecutionException e = new ExecutionException((byte) 0);
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
-    TransactionExecutionException actual = assertThrows(TransactionExecutionException.class,
+    ExecutionException actual = assertThrows(ExecutionException.class,
         () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
     assertThat(actual).isSameAs(e);
   }
@@ -75,22 +75,22 @@ class TransactionInvokerTest {
   void invokeThrowingRuntimeException() {
     RuntimeException e = new IllegalArgumentException("Unexpected runtime exception");
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
-    Exception actual = assertThrows(UnexpectedTransactionExecutionException.class,
+    Exception actual = assertThrows(UnexpectedExecutionException.class,
         () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
-    assertThat(actual.getCause()).isSameAs(e);
+    assertThat(actual).hasCause(e);
   }
 
   @Test
   void invokeThrowingException() {
     IOException e = new IOException("Unexpected checked exception");
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
-    Exception actual = assertThrows(UnexpectedTransactionExecutionException.class,
+    Exception actual = assertThrows(UnexpectedExecutionException.class,
         () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
-    assertThat(actual.getCause()).isSameAs(e);
+    assertThat(actual).hasCause(e);
   }
 
   @Test
-  void invokeProtobufArgumentsService() throws Exception {
+  void invokeProtobufArgumentsService() {
     ProtobufArgumentsService service = spy(new ProtobufArgumentsService());
     TransactionInvoker invoker = new TransactionInvoker(service);
     TestProtoMessages.Point point = TestProtoMessages.Point.newBuilder()
