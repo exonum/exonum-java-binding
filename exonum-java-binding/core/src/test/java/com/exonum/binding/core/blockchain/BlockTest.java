@@ -74,6 +74,7 @@ class BlockTest {
         .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
         .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
         .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8))
-        .additionalHeaders(ImmutableMap.of());
+        .additionalHeaders(ImmutableMap.of())
+        .errorHash(HashCode.fromString("ab"));
   }
 }
