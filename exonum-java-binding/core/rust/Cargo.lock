@@ -1252,6 +1252,7 @@ dependencies = [
 name = "integration_tests"
 version = "0.10.0-SNAPSHOT"
 dependencies = [
+ "exonum-derive 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "exonum-testkit 0.13.0-rc.2 (git+https://github.com/exonum/exonum?rev=af28b719e6)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",

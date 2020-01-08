@@ -41,7 +41,9 @@ public class UnexpectedTransactionExecutionException extends RuntimeException {
 
   private static Throwable checkValidCause(Throwable cause) {
     checkNotNull(cause, "null cause is not allowed");
-    checkArgument(!(cause instanceof TransactionExecutionException));
+    // FIXME: revert this change
+    //checkArgument(!(cause instanceof TransactionExecutionException));
+    checkArgument(!(cause instanceof TransactionExecutionException), cause.getClass().toString());
     return cause;
   }
 }
