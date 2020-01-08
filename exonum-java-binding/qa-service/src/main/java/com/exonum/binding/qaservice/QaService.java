@@ -21,9 +21,9 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.core.messages.Blockchain.Config;
 import java.time.ZonedDateTime;
@@ -63,11 +63,10 @@ public interface QaService extends Service, Configurable {
    * <p>Parameters:
    *  - name counter name, must not be blank
    *
-   * @throws TransactionExecutionException if the counter already exists
+   * @throws ExecutionException if the counter already exists
    * @throws IllegalArgumentException if the counter name is empty
    */
-  void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException;
+  void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context);
 
   /**
    * Increments an existing counter.
@@ -75,15 +74,15 @@ public interface QaService extends Service, Configurable {
    * <p>Parameters:
    *  - seed transaction seed
    *  - counterId counter id, a hash of the counter name
-   * @throws TransactionExecutionException if a counter with the given id does not exist
+   * @throws ExecutionException if a counter with the given id does not exist
    */
   void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
-      TransactionContext context) throws TransactionExecutionException;
+      TransactionContext context);
 
   /**
    * Clears all collections of this service and throws an exception with the given arguments.
    *
-   * <p>This transaction will always throw an {@link TransactionExecutionException},
+   * <p>This transaction will always throw an {@link ExecutionException},
    * therefore, have "error" status in the blockchain.
    *
    * <p>Parameters:
@@ -91,12 +90,11 @@ public interface QaService extends Service, Configurable {
    * - an error code to include in the exception, must be in range [0; 127];
    * - an optional description to include in the exception. May be empty.
    *
-   * @throws TransactionExecutionException always; includes the given
+   * @throws ExecutionException always; includes the given
    *     error code and error message
    * @throws IllegalArgumentException if the error code is not in range [0; 127]
    */
-  void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context)
-      throws TransactionExecutionException;
+  void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context);
 
   /**
    * Clears all collections of this service and throws a runtime exception.

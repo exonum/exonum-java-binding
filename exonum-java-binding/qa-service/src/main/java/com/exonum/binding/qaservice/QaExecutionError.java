@@ -18,15 +18,17 @@ package com.exonum.binding.qaservice;
 
 import com.google.common.primitives.UnsignedBytes;
 
-enum TransactionError {
+enum QaExecutionError {
   // Create counter errors
   COUNTER_ALREADY_EXISTS(0),
   // Increment counter errors
-  UNKNOWN_COUNTER(1);
+  UNKNOWN_COUNTER(1),
+  // Empty time oracle name supplied in the configuration
+  EMPTY_TIME_ORACLE_NAME(2);
 
   final byte code;
 
-  TransactionError(int code) {
+  QaExecutionError(int code) {
     this.code = UnsignedBytes.checkedCast(code);
   }
 }

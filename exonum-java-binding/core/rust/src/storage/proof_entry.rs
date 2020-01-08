@@ -104,7 +104,7 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexPr
 
 /// Returns the hash of the value or default hash if value is absent.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexProxy_nativeGetHash(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexProxy_nativeGetIndexHash(
     env: JNIEnv,
     _: JObject,
     entry_handle: Handle,

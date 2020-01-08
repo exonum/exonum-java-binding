@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -170,8 +171,18 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy {
     return serializer.fromBytes(value);
   }
 
-  // TODO(dt): add getHash when you clarify why on Earth it returns a default (= zero) hash when
-  // value is not present.
+  /**
+   * Returns the index hash which represents the complete state of this entry.
+   * Any modifications to this entry affect the index hash.
+   *
+   * <p>The entry index hash is computed as SHA-256 of the entry binary representation, or
+   * a hash of zeroes if the entry is not set.
+   *
+   * @throws IllegalStateException if this list is not valid
+   */
+  public HashCode getIndexHash() {
+    return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
+  }
 
   /**
    * Removes a value from this entry.
@@ -217,8 +228,7 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy {
 
   private native byte[] nativeGet(long nativeHandle);
 
-  @SuppressWarnings("unused")
-  private native byte[] nativeGetHash(long nativeHandle);
+  private native byte[] nativeGetIndexHash(long nativeHandle);
 
   private native void nativeRemove(long nativeHandle);
 

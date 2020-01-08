@@ -17,6 +17,7 @@
 package com.exonum.binding.core.runtime;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Throwables.throwIfInstanceOf;
 import static java.lang.String.format;
 
 import com.exonum.binding.core.service.BlockCommittedEvent;
@@ -25,8 +26,8 @@ import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.binding.core.transaction.TransactionExecutionException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
@@ -102,12 +103,11 @@ final class ServiceWrapper {
   }
 
   void initialize(Fork view, Configuration configuration) {
-    service.initialize(view, configuration);
+    callServiceMethod(() -> service.initialize(view, configuration));
   }
 
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
-      TransactionContext context)
-      throws TransactionExecutionException {
+      TransactionContext context) {
     switch (interfaceName) {
       case DEFAULT_INTERFACE_NAME: {
         executeIntrinsicTransaction(txId, arguments, context);
@@ -122,8 +122,7 @@ final class ServiceWrapper {
     }
   }
 
-  private void executeIntrinsicTransaction(int txId, byte[] arguments, TransactionContext context)
-      throws TransactionExecutionException {
+  private void executeIntrinsicTransaction(int txId, byte[] arguments, TransactionContext context) {
     invoker.invokeTransaction(txId, arguments, context);
   }
 
@@ -142,10 +141,10 @@ final class ServiceWrapper {
     Configuration config = new ServiceConfiguration(arguments);
     switch (txId) {
       case VERIFY_CONFIGURATION_TX_ID:
-        configurable.verifyConfiguration(fork, config);
+        callServiceMethod(() -> configurable.verifyConfiguration(fork, config));
         break;
       case APPLY_CONFIGURATION_TX_ID:
-        configurable.applyConfiguration(fork, config);
+        callServiceMethod(() -> configurable.applyConfiguration(fork, config));
         break;
       default:
         throw new IllegalArgumentException(
@@ -153,8 +152,41 @@ final class ServiceWrapper {
     }
   }
 
+  /**
+   * Calls a service method — a method that is specified to throw {@link ExecutionException}.
+   *
+   * <p>Exceptions are handled as follows:
+   * - {@link ExecutionException} is propagated as-is
+   * - Any other exception is wrapped into {@link UnexpectedExecutionException}
+   */
+  private static void callServiceMethod(Runnable serviceMethod) {
+    try {
+      serviceMethod.run();
+    } catch (Exception e) {
+      // Propagate ExecutionExceptions as-is
+      throwIfInstanceOf(e, ExecutionException.class);
+      // Wrap any other exception type
+      throw new UnexpectedExecutionException(e);
+    }
+  }
+
   void afterTransactions(Fork fork) {
-    service.afterTransactions(fork);
+    try {
+      service.afterTransactions(fork);
+    } catch (ExecutionException e) {
+      // Re-throw as is to keep the error code
+      // todo: consider _always_ wrapping in UserCodeException to avoid conditional code
+      //  both in all exception handlers **and** in native code? Would it be simpler?
+      //  It seems that an even simpler approach is to _not_ distinguish service-originated
+      //  'unexpected' errors and 'runtime' errors — then we don't need to wrap any exceptions
+      //  (if we also forbid checked in @Transaction methods), but in this case we will
+      //  go **against** the spec (see ErrorKind) and lose the benefit of error kind telling
+      //  the error source ('unexpected' — only in service code,
+      //  'runtime' — only somewhere in the runtime).
+      throw e;
+    } catch (Exception e) {
+      throw new UnexpectedExecutionException(e);
+    }
   }
 
   void afterCommit(BlockCommittedEvent event) {
