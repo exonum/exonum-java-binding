@@ -12,7 +12,10 @@ use java_bindings::{
         runtime::ExecutionError,
         runtime::{ErrorKind, ErrorMatch},
     },
-    jni::{JNIEnv, JavaVM, objects::{JObject, JThrowable}},
+    jni::{
+        objects::{JObject, JThrowable},
+        JNIEnv, JavaVM,
+    },
     jni_call_default, jni_call_transaction, Error, Executor, JniResult,
 };
 
@@ -72,7 +75,7 @@ fn jni_call_default_illegal_argument_exception() {
 }
 
 #[test]
-fn test_jni_call_transaction_jni_error() {
+fn jni_call_transaction_jni_error() {
     let expected = ErrorMatch::from_fail(&Error::JniError)
         .with_description_containing("Invalid constructor return type (must be void)");
     assert_jni_call_transaction_errors(&EXECUTOR, expected, |env| {
@@ -83,7 +86,7 @@ fn test_jni_call_transaction_jni_error() {
 }
 
 #[test]
-fn test_jni_call_transaction_any_java_exception() {
+fn jni_call_transaction_any_java_exception() {
     let expected = ErrorMatch::from_fail(&Error::JavaException)
         .with_description_containing(EXPECTED_DESCRIPTION);
     assert_jni_call_transaction_errors(&EXECUTOR, expected, |env| {
@@ -94,7 +97,7 @@ fn test_jni_call_transaction_any_java_exception() {
 }
 
 #[test]
-fn test_jni_call_transaction_illegal_argument_exception() {
+fn jni_call_transaction_illegal_argument_exception() {
     let expected = ErrorMatch::from_fail(&Error::IllegalArgument)
         .with_description_containing(EXPECTED_DESCRIPTION);
     assert_jni_call_transaction_errors(&EXECUTOR, expected, |env| {
@@ -105,7 +108,7 @@ fn test_jni_call_transaction_illegal_argument_exception() {
 }
 
 #[test]
-fn test_jni_call_transaction_transaction_execution_exception() {
+fn jni_call_transaction_transaction_execution_exception() {
     let expected = ErrorMatch::from_fail(&FakeServiceError::Error)
         .with_description_containing(EXPECTED_DESCRIPTION);
     let err = jni_call_transaction(&EXECUTOR, |env| {
@@ -113,14 +116,15 @@ fn test_jni_call_transaction_transaction_execution_exception() {
         env.throw(JThrowable::from(exception))?;
         wait_for_thrown_exception(env)?;
         Ok(())
-    }).unwrap_err();
+    })
+    .unwrap_err();
     assert_eq!(err, expected);
 }
 
 #[test]
-fn test_jni_call_transaction_unexpected_transaction_execution_exception() {
+fn jni_call_transaction_unexpected_transaction_execution_exception() {
     let err = jni_call_transaction(&EXECUTOR, |env| {
-        let cause = create_transaction_execution_exception(env)?;
+        let cause = create_any_java_exception(env)?;
         let exception = env.new_object(
             UNEXPECTED_TRANSACTION_EXECUTION_EXCEPTION_CLASS,
             "(Ljava/lang/Throwable;)V",
@@ -131,9 +135,8 @@ fn test_jni_call_transaction_unexpected_transaction_execution_exception() {
         Ok(())
     })
     .unwrap_err();
-    // FIXME: this test isn't working
-    assert_eq!(err.description(), "");
     assert_eq!(err.kind(), ErrorKind::Unexpected);
+    assert_eq!(err.description(), EXPECTED_DESCRIPTION);
 }
 
 fn create_transaction_execution_exception<'a>(env: &'a JNIEnv) -> JniResult<JObject<'a>> {
@@ -143,6 +146,15 @@ fn create_transaction_execution_exception<'a>(env: &'a JNIEnv) -> JniResult<JObj
         TRANSACTION_EXECUTION_EXCEPTION_CLASS,
         "(BLjava/lang/String;)V",
         &[code.into(), description.into()],
+    )
+}
+
+fn create_any_java_exception<'a>(env: &'a JNIEnv) -> JniResult<JObject<'a>> {
+    let description = JObject::from(env.new_string(EXPECTED_DESCRIPTION)?);
+    env.new_object(
+        ARITHMETIC_EXCEPTION_CLASS,
+        "(Ljava/lang/String;)V",
+        &[description.into()],
     )
 }
 

@@ -349,6 +349,6 @@ pub mod classes_refs {
     /// Returns cached `JClass` for `UnexpectedTransactionExecutionException` as a `GlobalRef`.
     pub fn unexpected_transaction_execution_exception() -> GlobalRef {
         check_cache_initialized();
-        unsafe { TRANSACTION_EXECUTION_EXCEPTION.clone().unwrap() }
+        unsafe { UNEXPECTED_TRANSACTION_EXECUTION_EXCEPTION.clone().unwrap() }
     }
 }
