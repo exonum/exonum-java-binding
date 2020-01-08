@@ -23,7 +23,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 /**
  * A view of a {@link ProofMapIndexProxy}, i.e., a subset of its entries coupled
  * with a <em>proof</em>, which jointly allow restoring the
- * {@linkplain ProofListIndexProxy#getIndexHash() index hash} of the map.
+ * {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of the map.
  * Apart from proving the existing entries in the map, MapProof can assert absence of certain keys
  * in the underlying index.
  * <!--
