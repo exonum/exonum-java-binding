@@ -64,10 +64,7 @@ pub fn is_instance_of_cached(b: &mut Bencher) {
 
             b.iter(|| {
                 black_box(assert!(env
-                    .is_instance_of(
-                        exception,
-                        &jni_cache::classes_refs::execution_exception(),
-                    )
+                    .is_instance_of(exception, &jni_cache::classes_refs::execution_exception(),)
                     .unwrap()))
             });
             Ok(())

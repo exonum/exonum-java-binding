@@ -28,8 +28,7 @@ lazy_static! {
 
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const ILLEGAL_ARGUMENT_EXCEPTION_CLASS: &str = "java/lang/IllegalArgumentException";
-const EXECUTION_EXCEPTION_CLASS: &str =
-    "com/exonum/binding/core/transaction/ExecutionException";
+const EXECUTION_EXCEPTION_CLASS: &str = "com/exonum/binding/core/transaction/ExecutionException";
 const UNEXPECTED_EXECUTION_EXCEPTION_CLASS: &str =
     "com/exonum/binding/core/runtime/UnexpectedExecutionException";
 const STRING_CLASS: &str = "java/lang/String";

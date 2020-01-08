@@ -162,11 +162,9 @@ unsafe fn cache_methods(env: &JNIEnv) {
 
     UNEXPECTED_EXECUTION_EXCEPTION = env
         .new_global_ref(
-            env.find_class(
-                "com/exonum/binding/core/runtime/UnexpectedExecutionException",
-            )
-            .unwrap()
-            .into(),
+            env.find_class("com/exonum/binding/core/runtime/UnexpectedExecutionException")
+                .unwrap()
+                .into(),
         )
         .ok();
 
