@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import exonum.KeyValueSequenceOuterClass.KeyValue;
 import exonum.KeyValueSequenceOuterClass.KeyValueSequence;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,7 +59,7 @@ class BlockSerializerTest {
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
         .additionalHeaders(ImmutableMap.of())
-        .errorHash(Optional.empty())
+        .errorHash(HashCode.fromString("ef"))
         .build();
     Block block2 = Block.builder()
         .proposerId(Integer.MAX_VALUE)
@@ -71,7 +70,7 @@ class BlockSerializerTest {
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
         .additionalHeaders(ImmutableMap.of("one", ByteString.copyFromUtf8("abcd01")))
-        .errorHash(Optional.of(HashCode.fromString("ef")))
+        .errorHash(HashCode.fromString("ef"))
         .build();
 
     return Stream.of(block1, block2)
@@ -98,8 +97,6 @@ class BlockSerializerTest {
     AdditionalHeaders actual = toHeadersProto(toHeadersMap(expected));
 
     assertThat(actual, is(expected));
-    assertThat(actual.getHeaders().getEntry(0), is(first));
-    assertThat(actual.getHeaders().getEntry(1), is(second));
   }
 
 }

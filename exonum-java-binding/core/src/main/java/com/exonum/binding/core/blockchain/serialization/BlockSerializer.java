@@ -17,9 +17,7 @@
 package com.exonum.binding.core.blockchain.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -34,8 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import exonum.KeyValueSequenceOuterClass.KeyValue;
 import exonum.KeyValueSequenceOuterClass.KeyValueSequence;
-import java.util.LinkedHashMap;
-import java.util.Optional;
+import exonum.KeyValueSequenceOuterClass.KeyValueSequence.Builder;
 
 public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
@@ -52,7 +49,7 @@ public enum BlockSerializer implements Serializer<Block> {
         .setPrevHash(toHashProto(value.getPreviousBlockHash()))
         .setTxHash(toHashProto(value.getTxRootHash()))
         .setStateHash(toHashProto(value.getStateHash()))
-        .setErrorHash(toHashProtoOptional(value.getErrorHash()))
+        .setErrorHash(toHashProto(value.getErrorHash()))
         .setAdditionalHeaders(toHeadersProto(value.getAdditionalHeaders()))
         .build();
     return block.toByteArray();
@@ -70,7 +67,7 @@ public enum BlockSerializer implements Serializer<Block> {
         .previousBlockHash(toHashCode(copiedBlocks.getPrevHash()))
         .txRootHash(toHashCode(copiedBlocks.getTxHash()))
         .stateHash(toHashCode(copiedBlocks.getStateHash()))
-        .errorHash(toOptionalHashCode(copiedBlocks.getErrorHash()))
+        .errorHash(toHashCode(copiedBlocks.getErrorHash()))
         .additionalHeaders(toHeadersMap(copiedBlocks.getAdditionalHeaders()))
         .build();
   }
@@ -87,58 +84,28 @@ public enum BlockSerializer implements Serializer<Block> {
     return HashCode.fromBytes(bytes.toByteArray());
   }
 
-  private static Optional<HashCode> toOptionalHashCode(Hash hash) {
-    return Optional.of(hash)
-        .map(Hash::getData)
-        .filter(h -> !h.isEmpty())
-        .map(ByteString::toByteArray)
-        .map(HashCode::fromBytes);
-  }
-
-  private static Types.Hash toHashProtoOptional(Optional<HashCode> hash) {
-    ByteString bytes = hash
-        .map(HashCode::asBytes)
-        .map(ByteString::copyFrom)
-        .orElse(ByteString.EMPTY);
-
-    return Types.Hash.newBuilder()
-        .setData(bytes)
-        .build();
-  }
-
   @VisibleForTesting
   static ImmutableMap<String, ByteString> toHeadersMap(AdditionalHeaders headers) {
     return headers.getHeaders().getEntryList()
         .stream()
-        .collect(collectingAndThen(
-            toMap(
-                KeyValue::getKey,
-                KeyValue::getValue,
-                (o, n) -> {
-                  throw new IllegalStateException(String.format(
-                      "Should never happen. Duplicate key found in headers %s", headers));
-                },
-                LinkedHashMap::new),
-            ImmutableMap::copyOf)
-        );
+        .collect(toImmutableMap(KeyValue::getKey, KeyValue::getValue));
   }
 
   @VisibleForTesting
   static AdditionalHeaders toHeadersProto(ImmutableMap<String, ByteString> headers) {
+    Builder additionalHeadersBuilder = KeyValueSequence.newBuilder();
+
+    headers.forEach((k, v) -> additionalHeadersBuilder.addEntry(toProtoEntry(k, v)));
+
     return AdditionalHeaders.newBuilder()
-        .setHeaders(
-            KeyValueSequence.newBuilder()
-                .addAllEntry(
-                    headers.entrySet()
-                        .stream()
-                        .map(e -> KeyValue.newBuilder()
-                            .setKey(e.getKey())
-                            .setValue(e.getValue())
-                            .build())
-                        .collect(toList())
-                )
-                .build()
-        )
+        .setHeaders(additionalHeadersBuilder.build())
+        .build();
+  }
+
+  private static KeyValue toProtoEntry(String key, ByteString value) {
+    return KeyValue.newBuilder()
+        .setKey(key)
+        .setValue(value)
         .build();
   }
 

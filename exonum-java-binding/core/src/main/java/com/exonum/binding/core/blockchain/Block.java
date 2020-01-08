@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.protobuf.ByteString;
-import java.util.Optional;
 
 /**
  * Exonum block header data structure.
@@ -94,11 +93,11 @@ public abstract class Block {
   public abstract HashCode getStateHash();
 
   /**
-   * Root hash of exceptions occurred in the block. Empty if no errors.
+   * Root hash of exceptions occurred in the block.
    *
    * @see Blockchain#getCallErrors()
    */
-  public abstract Optional<HashCode> getErrorHash();
+  public abstract HashCode getErrorHash();
 
   /**
    * Contains additional block headers of the block.
@@ -182,10 +181,11 @@ public abstract class Block {
      *
      * @see Blockchain#getCallErrors()
      */
-    public abstract Builder errorHash(Optional<HashCode> errorHash);
+    public abstract Builder errorHash(HashCode errorHash);
 
     /**
-     * Sets additional block headers.
+     * Sets additional block headers. Headers should have exactly the same order
+     * as its native equivalent. Changing headers order will lead to the block hash violation.
      */
     public abstract Builder additionalHeaders(ImmutableMap<String, ByteString> additionalHeaders);
 
