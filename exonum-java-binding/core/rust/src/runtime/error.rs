@@ -43,23 +43,23 @@ pub enum Error {
     NotSupportedOperation = 3,
 }
 
-type ExceptionHandler = Fn(&JNIEnv, JObject) -> ExecutionError;
+type ExceptionHandler = dyn Fn(&JNIEnv, JObject) -> ExecutionError;
 
 mod exception_handlers {
     use super::*;
 
-    pub const DEFAULT: &'static ExceptionHandler = &|env, exception| {
+    pub const DEFAULT: &ExceptionHandler = &|env, exception| {
         let message = describe_java_exception(env, exception);
         Error::JavaException.with_description(message)
     };
 
-    pub const TX_EXECUTION: &'static ExceptionHandler = &|env, exception| {
+    pub const TX_EXECUTION: &ExceptionHandler = &|env, exception| {
         let code = unwrap_jni(get_tx_error_code(env, exception)) as u8;
         let message = unwrap_jni(get_exception_message(env, exception)).unwrap_or_default();
         ExecutionError::service(code, message)
     };
 
-    pub const TX_UNEXPECTED: &'static ExceptionHandler = &|env, exception| {
+    pub const TX_UNEXPECTED: &ExceptionHandler = &|env, exception| {
         let cause = unwrap_jni(get_exception_cause(env, exception));
         debug_assert!(
             !cause.is_null(),
@@ -69,7 +69,7 @@ mod exception_handlers {
         ExecutionError::new(ErrorKind::Unexpected, message)
     };
 
-    pub const ILLEGAL_ARGUMENT: &'static ExceptionHandler = &|env, exception| {
+    pub const ILLEGAL_ARGUMENT: &ExceptionHandler = &|env, exception| {
         let message = unwrap_jni(get_exception_message(env, exception)).unwrap_or_default();
         Error::IllegalArgument.with_description(message)
     };

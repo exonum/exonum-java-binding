@@ -96,7 +96,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
             }
 
             if let Some(service) =
-                time_service_instance_from_java(&env, executor.clone(), time_service_spec)?
+                time_service_instance_from_java(&env, executor, time_service_spec)?
             {
                 // We always have exactly one time service instance.
                 let instance = service.instances[0].clone();
@@ -267,7 +267,7 @@ fn time_service_instance_from_java(
         .get_field(time_service_spec, "timeProvider", TIME_PROVIDER_FIELD_TYPE)?
         .l()?;
 
-    let provider = JavaTimeProvider::new(executor.clone(), time_provider);
+    let provider = JavaTimeProvider::new(executor, time_provider);
     let factory = TimeServiceFactory::with_provider(Arc::new(provider) as Arc<dyn TimeProvider>);
     let instance = InstanceCollection::new(factory).with_instance(service_id, service_name, ());
 
