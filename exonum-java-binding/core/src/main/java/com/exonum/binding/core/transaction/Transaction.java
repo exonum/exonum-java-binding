@@ -17,6 +17,7 @@
 package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.service.Service;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
@@ -44,18 +45,20 @@ import java.lang.annotation.Target;
  *
  * <h3>Exceptions</h3>
  *
- * <p>The annotated method might throw {@linkplain TransactionExecutionException} if the
+ * <p>The annotated method might throw {@linkplain ExecutionException} if the
  * transaction cannot be executed normally and has to be rolled back. The transaction will be
- * committed as failed (error kind {@linkplain ErrorKind#SERVICE SERVICE}), the
- * {@linkplain ExecutionError#getCode() error code} with the optional description will be saved
- * into the storage. The client can request the error code to know the reason of the failure.
+ * committed as failed (error kind {@linkplain ErrorKind#SERVICE SERVICE}).
+ * The {@linkplain ExecutionError#getCode() error code} with the optional description will be saved
+ * in the storage.
  *
- * <p>The annotated method might also throw any other exception if an unexpected error
- * todo: @slowli: Do you agree with the part 'if the clients do not need to distinguish between
- *   different error types' or prefer the previous recommendation?
- * occurs, or if the clients do not need to distinguish between different error types.
+ * <p>If the annotated method throws any other exception, it is considered an unexpected error.
  * The transaction will be committed as failed (error kind
  * {@linkplain ErrorKind#UNEXPECTED UNEXPECTED}).
+ *
+ * <p>Exonum rolls back any changes made by a transaction that threw an exception.
+ * It also saves any error into
+ * {@linkplain Blockchain#getCallErrors(long) the registry of call errors}.
+ * The transaction clients can request the error information to know the reason of the failure.
  *
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/transactions">Exonum Transactions</a>
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/services">Exonum Services</a>

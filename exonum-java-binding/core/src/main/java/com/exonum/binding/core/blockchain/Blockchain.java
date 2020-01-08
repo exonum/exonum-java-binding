@@ -19,6 +19,7 @@ package com.exonum.binding.core.blockchain;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.common.blockchain.CallInBlocks;
 import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.hash.HashCode;
@@ -158,12 +159,16 @@ public final class Blockchain {
    * in the block header as <!-- todo: link (ECR-4021) --> {@code Block#getErrorHash()}. That
    * enables constructing proofs
    * <!-- todo: link 'proofs' (where do we document construction procedure?) -->
-   * that a transaction with a certain message hash was executed at a certain
-   * <em>{@linkplain TransactionLocation location}</em> with a particular result.
+   * that a certain operation was executed with a particular result. For example,
+   * a proof that a transaction with a certain message hash at
+   * a certain {@linkplain TransactionLocation location} had a certain result must include
+   * a BlockProof, a proof from this collection, and a proof from
+   * {@link #getBlockTransactions(long)}.
    *
    * @param blockHeight the height of the block
    * @throws IllegalArgumentException if the height is invalid: negative or exceeding
    *     the {@linkplain #getHeight() blockchain height}
+   * @see CallInBlocks
    */
   public ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
     return schema.getCallErrors(blockHeight);
@@ -183,9 +188,7 @@ public final class Blockchain {
   private ExecutionStatus getExecutionStatus(TransactionLocation txLocation) {
     long height = txLocation.getHeight();
     ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = getCallErrors(height);
-    CallInBlock txCall = CallInBlock.newBuilder()
-        .setTransaction(txLocation.getIndexInBlock())
-        .build();
+    CallInBlock txCall = CallInBlocks.transaction(txLocation.getIndexInBlock());
     if (callErrors.containsKey(txCall)) {
       ExecutionError txError = callErrors.get(txCall);
       return ExecutionStatus.newBuilder()

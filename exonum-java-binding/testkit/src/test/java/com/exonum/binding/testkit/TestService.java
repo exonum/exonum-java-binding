@@ -26,6 +26,7 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -45,6 +46,7 @@ public final class TestService extends AbstractService {
   static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
       .hashString("Initial key", StandardCharsets.UTF_8);
   static final String THROWING_VALUE = "Incorrect value";
+  static final byte ANY_ERROR_CODE = 127;
   static final short TEST_TRANSACTION_ID = 94;
   static final Charset BODY_CHARSET = StandardCharsets.UTF_8;
 
@@ -65,7 +67,7 @@ public final class TestService extends AbstractService {
     TestConfiguration initialConfiguration = configuration.getAsMessage(TestConfiguration.class);
     String configurationValue = initialConfiguration.getValue();
     if (configurationValue.equals(THROWING_VALUE)) {
-      throw new IllegalArgumentException("Service configuration had an invalid value: "
+      throw new ExecutionException(ANY_ERROR_CODE, "Service configuration had an invalid value: "
           + configurationValue);
     }
     TestSchema schema = createDataSchema(fork);

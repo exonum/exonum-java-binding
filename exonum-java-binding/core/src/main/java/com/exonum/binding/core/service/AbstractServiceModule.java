@@ -21,7 +21,7 @@ import com.google.inject.AbstractModule;
 /**
  * A base class for {@link ServiceModule} implementations provided for convenience.
  *
- * <p>The implementation must be specified as an extension:
+ * <p>The implementation must be specified as an {@linkplain org.pf4j.Extension extension}:
  * <pre>
  *   &#64;Extension
  *   class MyServiceModule extends AbstractServiceModule {
