@@ -106,16 +106,21 @@ fn tests_classpath_option() -> String {
 }
 
 pub fn tests_classpath() -> String {
-    let classpath_txt_path =
-        java_binding_parent_root_dir().join("app/target/ejb-app-classpath.txt");
+    let core_classpath = java_binding_parent_root_dir()
+        .join("core/target/classes")
+        .to_str()
+        .expect(CONVERSION_FAILED_MESSAGE)
+        .to_owned();
 
-    let mut classpath = String::new();
-    File::open(classpath_txt_path)
+    let mut dependencies_classpath = String::new();
+    let dependencies_txt_path =
+        java_binding_parent_root_dir().join("core/target/ejb-core-classpath.txt");
+    File::open(dependencies_txt_path)
         .expect("Can't open classpath.txt")
-        .read_to_string(&mut classpath)
+        .read_to_string(&mut dependencies_classpath)
         .expect("Failed to read classpath.txt");
 
-    classpath
+    format!("{}:{}", dependencies_classpath, core_classpath)
 }
 
 /// Returns a Log4j system property pointing to the configuration file. The file is in
