@@ -17,8 +17,7 @@
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
-    exonum_merkledb::Snapshot,
-    messages::BinaryValue,
+    exonum_merkledb::{BinaryValue, Snapshot},
     runtime::{
         ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, ExecutionFail, InstanceId,
         InstanceSpec, InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt,
@@ -66,17 +65,6 @@ impl JavaRuntimeProxy {
         }
     }
 
-    fn parse_artifact(&self, artifact: &ArtifactId) -> Result<JavaArtifactId, ExecutionError> {
-        if artifact.runtime_id != JAVA_RUNTIME_ID {
-            Err(Error::IllegalArgument.with_description(format!(
-                "Invalid runtime ID ({}), {} expected",
-                artifact.runtime_id, JAVA_RUNTIME_ID
-            )))
-        } else {
-            Ok(JavaArtifactId(artifact.name.to_string()))
-        }
-    }
-
     /// If the current node is a validator, returns its ID, otherwise returns `-1`.
     fn validator_id(snapshot: &dyn Snapshot, pub_key: &PublicKey) -> i32 {
         snapshot
@@ -106,16 +94,13 @@ impl Runtime for JavaRuntimeProxy {
 
     fn deploy_artifact(
         &mut self,
-        artifact: ArtifactId,
+        artifact_id: ArtifactId,
         deploy_spec: Vec<u8>,
     ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
-        let id = match self.parse_artifact(&artifact) {
-            Ok(id) => id.to_string(),
-            Err(err) => return Box::new(Err(err).into_future()),
-        };
+        let serialized_artifact_id: Vec<u8> = artifact_id.to_bytes();
 
         let result = jni_call_default(&self.exec, |env| {
-            let artifact_id = JObject::from(env.new_string(id)?);
+            let artifact_id = JObject::from(env.byte_array_from_slice(&serialized_artifact_id)?);
             let spec = JObject::from(env.byte_array_from_slice(&deploy_spec)?);
 
             env.call_method_unchecked(
@@ -130,16 +115,11 @@ impl Runtime for JavaRuntimeProxy {
         Box::new(result.map(|_| ()).into_future())
     }
 
-    fn is_artifact_deployed(&self, id: &ArtifactId) -> bool {
-        let artifact = match self.parse_artifact(id) {
-            Ok(id) => id.to_string(),
-            Err(_) => {
-                return false;
-            }
-        };
+    fn is_artifact_deployed(&self, artifact_id: &ArtifactId) -> bool {
+        let serialized_artifact_id: Vec<u8> = artifact_id.to_bytes();
 
         unwrap_jni(self.exec.with_attached(|env| {
-            let artifact_id = JObject::from(env.new_string(artifact)?);
+            let artifact_id = JObject::from(env.byte_array_from_slice(&serialized_artifact_id)?);
 
             panic_on_exception(
                 env,
@@ -187,21 +167,24 @@ impl Runtime for JavaRuntimeProxy {
         _snapshot: &dyn Snapshot,
         instance_spec: &InstanceSpec,
         status: InstanceStatus,
-    ) -> Result<(), ExecutionError> {
+    ) {
         let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
-        jni_call_default(&self.exec, |env| {
+        unwrap_jni(self.exec.with_attached(|env| {
             let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
             let instance_status = status as i32;
 
-            env.call_method_unchecked(
-                self.runtime_adapter.as_obj(),
-                runtime_adapter::update_service_status_id(),
-                JavaType::Primitive(Primitive::Void),
-                &[JValue::from(instance_spec), JValue::from(instance_status)],
-            )
-            .and_then(JValue::v)
-        })
+            panic_on_exception(
+                env,
+                env.call_method_unchecked(
+                    self.runtime_adapter.as_obj(),
+                    runtime_adapter::update_service_status_id(),
+                    JavaType::Primitive(Primitive::Void),
+                    &[JValue::from(instance_spec), JValue::from(instance_status)],
+                ),
+            );
+            Ok(())
+        }));
     }
 
     fn execute(
