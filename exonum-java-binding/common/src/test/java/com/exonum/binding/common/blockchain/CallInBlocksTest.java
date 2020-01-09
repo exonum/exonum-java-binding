@@ -26,16 +26,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 class CallInBlocksTest {
 
   @ParameterizedTest
-  @ValueSource(longs = {0, 1, Integer.MAX_VALUE - 1})
-  void transaction(long txPosition) {
+  @ValueSource(ints = {0, 1, Integer.MAX_VALUE - 1})
+  void transaction(int txPosition) {
     CallInBlock transaction = CallInBlocks.transaction(txPosition);
     assertThat(transaction.getTransaction()).isEqualTo(txPosition);
   }
 
   @ParameterizedTest
-  @ValueSource(longs = {/* Negative: */ Integer.MIN_VALUE, -2, -1,
+  @ValueSource(ints = {/* Negative: */ Integer.MIN_VALUE, -2, -1,
       /* Too big: */ Integer.MAX_VALUE})
-  void transactionInvalidPositions(long txPosition) {
+  void transactionInvalidPositions(int txPosition) {
     assertThrows(IndexOutOfBoundsException.class, () -> CallInBlocks.transaction(txPosition));
   }
 }

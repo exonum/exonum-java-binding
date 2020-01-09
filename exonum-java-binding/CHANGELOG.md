@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The specification of `Configurable` operations and `Service#initialize` 
   to require throwing `ExecutionException` instead of
   `IllegalArgumentException`.
+- Transaction index in block type changed from `long` to `int`. (#1348)
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.

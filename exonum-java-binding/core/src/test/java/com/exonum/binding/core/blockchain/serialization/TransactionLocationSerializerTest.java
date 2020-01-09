@@ -42,7 +42,7 @@ class TransactionLocationSerializerTest {
   private static Stream<TransactionLocation> testSource() {
     return Stream.of(
         TransactionLocation.valueOf(1, 1),
-        TransactionLocation.valueOf(Long.MAX_VALUE, Long.MAX_VALUE));
+        TransactionLocation.valueOf(Long.MAX_VALUE, Integer.MAX_VALUE));
   }
 
 }

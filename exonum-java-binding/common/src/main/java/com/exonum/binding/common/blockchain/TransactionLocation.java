@@ -27,7 +27,7 @@ import com.google.gson.annotations.SerializedName;
 @AutoValue
 public abstract class TransactionLocation {
 
-  public static TransactionLocation valueOf(long height, long indexInBlock) {
+  public static TransactionLocation valueOf(long height, int indexInBlock) {
     return new AutoValue_TransactionLocation(height, indexInBlock);
   }
 
@@ -42,7 +42,7 @@ public abstract class TransactionLocation {
    * order of these indices.
    */
   @SerializedName("position_in_block")
-  public abstract long getIndexInBlock();
+  public abstract int getIndexInBlock();
 
   /**
    * Provides a Gson type adapter for this class.
