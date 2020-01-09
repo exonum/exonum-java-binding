@@ -319,13 +319,3 @@ impl fmt::Debug for JavaRuntimeProxy {
 impl WellKnownRuntime for JavaRuntimeProxy {
     const ID: u32 = JAVA_RUNTIME_ID;
 }
-
-/// Artifact identification properties within `JavaRuntimeProxy`
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct JavaArtifactId(String);
-
-impl fmt::Display for JavaArtifactId {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
