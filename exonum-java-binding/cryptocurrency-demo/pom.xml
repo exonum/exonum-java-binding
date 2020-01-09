@@ -19,7 +19,8 @@
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
     <artifactFilename>${project.artifactId}-${project.version}-artifact</artifactFilename>
-    <artifactName>${project.groupId}:${project.artifactId}:${project.version}</artifactName>
+    <artifactName>${project.groupId}/${project.artifactId}</artifactName>
+    <artifactVersion>${project.version}</artifactVersion>
   </properties>
 
   <dependencyManagement>
@@ -194,7 +195,7 @@
           <archive>
             <manifestEntries>
               <Plugin-Id>${artifactName}</Plugin-Id>
-              <Plugin-Version>${project.version}</Plugin-Version>
+              <Plugin-Version>${artifactVersion}</Plugin-Version>
               <Plugin-Provider>${project.groupId}</Plugin-Provider>
             </manifestEntries>
           </archive>
@@ -224,6 +225,7 @@
           <systemPropertyVariables>
             <it.artifactFilename>${artifactFilename}.jar</it.artifactFilename>
             <it.artifactId>${artifactName}</it.artifactId>
+            <it.artifactVersion>${artifactVersion}</it.artifactVersion>
             <it.artifactsDirectory>${project.build.directory}</it.artifactsDirectory>
           </systemPropertyVariables>
         </configuration>
