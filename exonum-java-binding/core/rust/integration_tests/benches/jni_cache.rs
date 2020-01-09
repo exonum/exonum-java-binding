@@ -20,7 +20,7 @@ extern crate java_bindings;
 extern crate lazy_static;
 extern crate test;
 
-use integration_tests::vm::create_vm_for_benchmarks_with_fakes;
+use integration_tests::vm::create_vm_for_benchmarks_with_classes;
 use java_bindings::{
     jni::{
         objects::{JObject, JValue},
@@ -64,10 +64,7 @@ pub fn is_instance_of_cached(b: &mut Bencher) {
 
             b.iter(|| {
                 black_box(assert!(env
-                    .is_instance_of(
-                        exception,
-                        &jni_cache::classes_refs::transaction_execution_exception(),
-                    )
+                    .is_instance_of(exception, &jni_cache::classes_refs::execution_exception(),)
                     .unwrap()))
             });
             Ok(())
