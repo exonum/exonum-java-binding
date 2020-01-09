@@ -34,7 +34,7 @@ final class TestKitTestUtils {
   static final String ARTIFACT_FILENAME = "test-service.jar";
   private static final String ARTIFACT_VERSION = "1.0.0";
   static final ServiceArtifactId ARTIFACT_ID =
-      ServiceArtifactId.newJavaId("com.exonum.binding:test-service:" + ARTIFACT_VERSION);
+      ServiceArtifactId.newJavaId("com.exonum.binding/test-service", ARTIFACT_VERSION);
   static final String SERVICE_NAME = "test-service";
   static final int SERVICE_ID = 46;
   static final String CONFIGURATION_VALUE = "Initial value";
@@ -45,7 +45,7 @@ final class TestKitTestUtils {
   static final String ARTIFACT_FILENAME_2 = "test-service-2.jar";
   private static final String ARTIFACT_VERSION_2 = "2.8.0";
   static final ServiceArtifactId ARTIFACT_ID_2 =
-      ServiceArtifactId.newJavaId("com.exonum.binding:test-service-2:" + ARTIFACT_VERSION_2);
+      ServiceArtifactId.newJavaId("com.exonum.binding/test-service-2", ARTIFACT_VERSION_2);
   static final String SERVICE_NAME_2 = "test-service2";
   static final int SERVICE_ID_2 = 48;
 

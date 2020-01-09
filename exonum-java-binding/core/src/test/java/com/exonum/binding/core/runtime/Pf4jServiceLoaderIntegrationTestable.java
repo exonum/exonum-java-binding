@@ -56,8 +56,8 @@ import org.pf4j.PluginManager;
 
 abstract class Pf4jServiceLoaderIntegrationTestable {
 
-  private static final String PLUGIN_ID = "com.acme:foo-service:1.0.1";
-  private static final String PLUGIN_ID_2 = "org.acme:bar-service:3.2.1";
+  private static final String PLUGIN_ID = "com.acme/foo-service:1.0.1";
+  private static final String PLUGIN_ID_2 = "org.acme/bar-service:3.2.1";
   private static final Map<String, Class<?>> TEST_DEPENDENCY_REFERENCE_CLASSES = ImmutableMap.of(
       "exonum-java-binding", Service.class,
       "vertx", Vertx.class,
@@ -95,7 +95,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
 
     // Check the definition
     ServiceArtifactId serviceId = serviceDefinition.getId();
-    ServiceArtifactId expectedId = ServiceArtifactId.newJavaId(pluginId);
+    ServiceArtifactId expectedId = getServiceArtifact(pluginId);
     assertThat(serviceId).isEqualTo(expectedId);
     Supplier<ServiceModule> moduleSupplier = serviceDefinition.getModuleSupplier();
     ServiceModule module = moduleSupplier.get();
@@ -123,7 +123,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     assertThat(e).hasMessageContaining("Failed to load the service from");
 
     // Check the definition is inaccessible
-    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId(PLUGIN_ID);
+    ServiceArtifactId serviceId = getServiceArtifact(PLUGIN_ID);
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
   }
 
@@ -153,7 +153,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     assertThat(e).hasMessageContaining("Failed to start the plugin");
 
     // Check the definition is inaccessible
-    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId(pluginId);
+    ServiceArtifactId serviceId = getServiceArtifact(pluginId);
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
 
     // Check it is unloaded if failed to start
@@ -253,14 +253,14 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
 
   @Test
   void unloadServiceNonLoaded() {
-    ServiceArtifactId unknownPluginId = ServiceArtifactId.newJavaId(PLUGIN_ID);
+    ServiceArtifactId unknownPluginId = getServiceArtifact(PLUGIN_ID);
     assertThrows(IllegalArgumentException.class,
         () -> serviceLoader.unloadService(unknownPluginId));
   }
 
   @Test
   void findServiceNonLoaded() {
-    ServiceArtifactId unknownPluginId = ServiceArtifactId.newJavaId(PLUGIN_ID);
+    ServiceArtifactId unknownPluginId = getServiceArtifact(PLUGIN_ID);
     Optional<?> serviceDefinition = serviceLoader.findService(unknownPluginId);
     assertThat(serviceDefinition).isEmpty();
   }
@@ -304,11 +304,16 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   private void verifyUnloaded(String pluginId) {
     verify(pluginManager).unloadPlugin(pluginId);
 
-    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId(pluginId);
+    ServiceArtifactId serviceId = getServiceArtifact(pluginId);
     assertThat(serviceLoader.findService(serviceId)).isEmpty();
   }
 
   private static void assertNamesEqual(Class<?> actual, Class<?> expected) {
     assertThat(actual.getName()).isEqualTo(expected.getName());
+  }
+
+  private ServiceArtifactId getServiceArtifact(String pluginId) {
+    String[] result = JavaArtifactNames.checkPluginArtifact(pluginId);
+    return ServiceArtifactId.newJavaId(result[0], result[1]);
   }
 }
