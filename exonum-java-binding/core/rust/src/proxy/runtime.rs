@@ -19,9 +19,8 @@ use exonum::{
     crypto::{Hash, PublicKey},
     exonum_merkledb::{BinaryValue, Snapshot},
     runtime::{
-        ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, InstanceId,
-        InstanceSpec, InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt,
-        WellKnownRuntime,
+        ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, InstanceId, InstanceSpec,
+        InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
     },
 };
 use futures::{Future, IntoFuture};

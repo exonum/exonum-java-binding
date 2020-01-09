@@ -27,7 +27,8 @@ use java_bindings::{
         node::{ApiSender, Node, NodeChannel, NodeConfig as CoreNodeConfig},
         runtime::rust::{RustRuntime, ServiceFactory},
     },
-    Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
+    Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
+    JavaRuntimeProxy,
 };
 
 use java_bindings::exonum::runtime::rust::RustRuntimeBuilder;
@@ -48,12 +49,13 @@ fn create_node(config: Config) -> Result<Node, failure::Error> {
     let channel = NodeChannel::new(events_pool_capacity);
     let blockchain = create_blockchain(&config, &channel)?;
 
+    let config_manager = DefaultConfigManager::new(config.run_config.node_config_path);
+
     Ok(Node::with_blockchain(
         blockchain,
         channel,
         node_config.into(),
-        // TODO: use DefaultConfigManager once it is available
-        None,
+        Some(Box::new(config_manager)),
     ))
 }
 
