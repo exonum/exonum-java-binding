@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.service;
 
+import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -27,8 +28,8 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
  * the core automatically tracks every Merkelized collection used by the user
  * services. It aggregates state hashes of these collections into a single
  * Merkelized meta-map. The hash of this meta-map is considered the hash of the
- * entire blockchain state and is recorded as such in blocks and Precommit
- * messages.
+ * entire blockchain state and is recorded as such in {@linkplain Block#getStateHash() blocks}
+ * and Precommit messages.
  *
  * <p>Please note that if the service does not use any Merkelized collections,
  * the framework will not be able to verify that its transactions cause the same

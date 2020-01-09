@@ -24,6 +24,9 @@ import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.blockchain.proofs.BlockProof;
+import com.exonum.binding.core.blockchain.proofs.IndexProof;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
@@ -32,6 +35,7 @@ import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Blockchain.CallInBlock;
 import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Proofs;
 import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
@@ -43,14 +47,23 @@ import java.util.Optional;
  * blockchain::Schema</a> features in the Core API: blocks, transaction messages, execution
  * results.
  *
+ * <h3>Proofs</h3>
+ * - Types
+ *   - What each proves
+ *   - How to create
+ *
+ * <hr/>
+ *
  * <p>All method arguments are non-null by default.
  */
 public final class Blockchain {
 
+  private final View view;
   private final CoreSchema schema;
 
   @VisibleForTesting
-  Blockchain(CoreSchema schema) {
+  Blockchain(View view, CoreSchema schema) {
+    this.view = view;
     this.schema = schema;
   }
 
@@ -59,7 +72,33 @@ public final class Blockchain {
    */
   public static Blockchain newInstance(View view) {
     CoreSchema coreSchema = CoreSchema.newInstance(view);
-    return new Blockchain(coreSchema);
+    return new Blockchain(view, coreSchema);
+  }
+
+  /**
+   * Creates a proof for the block at the given height.
+   * @param blockHeight a height of the block for which to create a proof
+   * @throws IndexOutOfBoundsException if the height is not valid
+   */
+  public BlockProof createBlockProof(long blockHeight) {
+    checkHeight(blockHeight);
+    Proofs.BlockProof blockProof = BlockchainProofs.createBlockProof(view, blockHeight);
+    return BlockProof.newInstance(blockProof);
+  }
+
+  /**
+   * Creates a proof for a single index in the database.
+   * @param fullIndexName the full index name for which to create a proof
+   * @throws IllegalStateException if the view is not a snapshot, because a state of a service index
+   *     can be proved only for the latest committed block, not for any intermediate state during
+   *     transaction processing
+   */
+  public IndexProof createIndexProof(String fullIndexName) {
+    checkState(!view.canModify(), "Cannot create an index proof for a mutable view (%s).",
+        view);
+    Proofs.IndexProof indexProof = BlockchainProofs
+        .createIndexProof((Snapshot) view, fullIndexName);
+    return IndexProof.newInstance(indexProof);
   }
 
   /**
@@ -243,6 +282,7 @@ public final class Blockchain {
     return blocks.get(blockHash);
   }
 
+  /** Checks if the blockchain height is valid. */
   private void checkHeight(long height) {
     long blockchainHeight = getHeight();
     if (height < 0 || height > blockchainHeight) {

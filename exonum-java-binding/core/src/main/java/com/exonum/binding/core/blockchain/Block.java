@@ -19,6 +19,7 @@ package com.exonum.binding.core.blockchain;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.exonum.binding.core.service.Schema;
 import com.google.auto.value.AutoValue;
@@ -122,6 +123,28 @@ public abstract class Block {
     return new AutoValue_Block.GsonTypeAdapter(gson);
   }
 
+//  todo: Shall we add it? It will have to serialize the message to compute the hash.
+//    Or we can get rid of hash? Also, parseFrom(byte[])?
+
+  /**
+   * Creates a block from the block message.
+   * @param blockMessage a block
+   */
+  public static Block fromMessage(com.exonum.core.messages.Blockchain.Block blockMessage) {
+    // fixme: If we *do* keep it — then fix the redundant serialization
+    return parseFrom(blockMessage.toByteArray());
+  }
+
+  /**
+   * Creates a block from the serialized block message.
+   * @param serializedBlock a serialized block message
+   * @throws IllegalArgumentException if the block bytes are not a serialized
+   *     {@link com.exonum.core.messages.Blockchain.Block}
+   */
+  public static Block parseFrom(byte[] serializedBlock) {
+    return BlockSerializer.INSTANCE.fromBytes(serializedBlock);
+  }
+
   /**
    * Creates a new block builder.
    */
@@ -172,7 +195,7 @@ public abstract class Block {
      * Sets the blockchain state hash at the moment this block was committed. The blockchain
      * state hash reflects the state of each service in the database.
      *
-     * @see Schema#getStateHashes()
+     * @see Schema
      */
     public abstract Builder stateHash(HashCode blockchainStateHash);
 
