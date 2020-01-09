@@ -19,7 +19,7 @@ use exonum::{
     crypto::{Hash, PublicKey},
     exonum_merkledb::{BinaryValue, Snapshot},
     runtime::{
-        ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, ExecutionFail, InstanceId,
+        ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, InstanceId,
         InstanceSpec, InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt,
         WellKnownRuntime,
     },
