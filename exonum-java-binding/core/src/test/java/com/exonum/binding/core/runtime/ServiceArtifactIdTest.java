@@ -17,6 +17,7 @@
 package com.exonum.binding.core.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,7 +29,7 @@ class ServiceArtifactIdTest {
   @ValueSource(strings = {
       "0:land-registry:v1",
       "1:com.acme/foo-service:1.1.1-beta1",
-      "100500:foo:bar:",
+      "100500:foo:bar",
   })
   void parseFromRoundtrip(String serviceId) {
     ServiceArtifactId parsedId = ServiceArtifactId.parseFrom(serviceId);
@@ -64,5 +65,22 @@ class ServiceArtifactIdTest {
     ServiceArtifactId id = ServiceArtifactId.valueOf(0, "full-name", "0.1");
 
     assertThat(id.toString()).isEqualTo("0:full-name:0.1");
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "",
+      "too-few:components:1.0",
+      "com.acme:foo-service:0.1.0:extra-component",
+      " : : ",
+      "com acme:foo:1.0",
+      "com.acme:foo service:1.0",
+      "com.acme:foo-service:1 0",
+      "com.acme:foo-service: 1.0",
+      "com.acme:foo-service:1.0 ",
+  })
+  void checkInvalidName(String artifactId) {
+    assertThrows(IllegalArgumentException.class,
+        () -> ServiceArtifactId.parseFrom(artifactId));
   }
 }

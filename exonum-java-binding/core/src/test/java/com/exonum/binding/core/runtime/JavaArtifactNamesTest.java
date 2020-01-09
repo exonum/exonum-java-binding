@@ -16,34 +16,22 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.JavaArtifactNames.checkNoForbiddenChars;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class JavaArtifactNamesTest {
 
   @Test
   void checkValidName() {
     String name = "com.acme/foo:1.0";
-    JavaArtifactNames.checkPluginArtifact(name);
+    checkNoForbiddenChars(name);
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {
-      "",
-      "too-few:components:1.0",
-      "com.acme:foo-service:0.1.0:extra-component",
-      " : : ",
-      "com acme:foo:1.0",
-      "com.acme:foo service:1.0",
-      "com.acme:foo-service:1 0",
-      "com.acme:foo-service: 1.0",
-      "com.acme:foo-service:1.0 ",
-  })
-  void checkInvalidName(String pluginId) {
-    assertThrows(IllegalArgumentException.class,
-        () -> JavaArtifactNames.checkPluginArtifact(pluginId));
+  @Test
+  void checkInvalidName() {
+    String name = "com.acme foo:1.0";
+    assertThrows(IllegalArgumentException.class, () -> checkNoForbiddenChars(name));
   }
 }

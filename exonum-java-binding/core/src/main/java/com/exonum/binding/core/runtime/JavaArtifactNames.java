@@ -16,43 +16,17 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 final class JavaArtifactNames {
-
-  private static final String DELIMITER = ":";
-  private static final Pattern FORBIDDEN_CHARS_PATTERN = Pattern.compile("[\\s:]");
-  private static final int KEEP_EMPTY = -1;
+  private static final Pattern FORBIDDEN_CHARS_PATTERN = Pattern.compile("[\\s]");
 
   /**
-   * Checks that a Java artifact name is in format "groupId/artifactId:version".
-   *
-   * @param name a Java artifact name
-   * @return an array with two elements: artifact name and artifact version
-   * @throws IllegalArgumentException if the name format is not correct
+   * Validates artifact id for forbidden characters.
+   * @throws IllegalArgumentException if any forbidden characters found
    */
-  static String[] checkPluginArtifact(String name) {
-    String[] coordinates = name.split(DELIMITER, KEEP_EMPTY);
-    checkArgument(coordinates.length == 2,
-        "Invalid artifact name (%s), must have 'groupId/artifactId:version' format",
-        name);
-    for (String c : coordinates) {
-      checkNoForbiddenChars(c);
-    }
-    return coordinates;
-  }
-
-  /**
-   * Returns plugin artifact id for the given service artifact.
-   */
-  static String getPluginArtifactId(ServiceArtifactId artifactId) {
-    return artifactId.getName() + DELIMITER + artifactId.getVersion();
-  }
-
-  private static void checkNoForbiddenChars(String s) {
+  static void checkNoForbiddenChars(String s) {
     Matcher matcher = FORBIDDEN_CHARS_PATTERN.matcher(s);
 
     if (matcher.find()) {

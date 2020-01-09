@@ -34,7 +34,7 @@ import com.google.auto.value.AutoValue;
 public abstract class ServiceArtifactId {
 
   private static final String DELIMITER = ":";
-  private static final int NUM_FIELDS = 3;
+  private static final int KEEP_EMPTY = -1;
 
   /**
    * Returns the runtime id in which the service shall be deployed.
@@ -52,7 +52,7 @@ public abstract class ServiceArtifactId {
   public abstract String getVersion();
 
   /**
-   * Parses a service id in format "runtimeId:serviceName" as {@link #toString()} produces.
+   * Parses a service id in format "runtimeId:serviceName:version" as {@link #toString()} produces.
    *
    * @param serviceArtifactId a string in format "runtimeId:serviceName:version". Whitespace
    *     characters, including preceding and trailing, are not allowed
@@ -60,7 +60,8 @@ public abstract class ServiceArtifactId {
    * @throws IllegalArgumentException if the format is not correct
    */
   public static ServiceArtifactId parseFrom(String serviceArtifactId) {
-    String[] coordinates = serviceArtifactId.split(DELIMITER, NUM_FIELDS);
+    JavaArtifactNames.checkNoForbiddenChars(serviceArtifactId);
+    String[] coordinates = serviceArtifactId.split(DELIMITER, KEEP_EMPTY);
     checkArgument(coordinates.length == 3,
         "Invalid artifact id (%s), must have 'runtimeId:groupId/artifactId:version' format",
         serviceArtifactId);
@@ -92,7 +93,7 @@ public abstract class ServiceArtifactId {
   }
 
   /**
-   * Returns an artifact id in the following format: "runtimeId:serviceName".
+   * Returns an artifact id in the following format: "runtimeId:serviceName:version".
    */
   @Override
   public final String toString() {
