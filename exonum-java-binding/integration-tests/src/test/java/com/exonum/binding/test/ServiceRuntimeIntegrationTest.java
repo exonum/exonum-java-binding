@@ -46,7 +46,7 @@ class ServiceRuntimeIntegrationTest {
 
   private static final byte AFTER_TX_ERROR_CODE = 17;
 
-  @Disabled("ECR-4054")
+  @Disabled("ECR-4093")
   @Test
   void afterTransactionsExecutionException(@TempDir Path artifactDir) throws IOException {
     String artifactFilename = "service.jar";

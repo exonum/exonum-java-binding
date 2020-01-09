@@ -26,7 +26,8 @@ pub use self::conversion::{
 };
 pub use self::errors::{
     any_to_string, check_error_on_exception, describe_java_exception, get_and_clear_java_exception,
-    panic_on_exception, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni, unwrap_jni_verbose,
+    get_exception_cause, panic_on_exception, unwrap_exc_or, unwrap_exc_or_default, unwrap_jni,
+    unwrap_jni_verbose,
 };
 pub use self::jni::{get_class_name, get_exception_message};
 

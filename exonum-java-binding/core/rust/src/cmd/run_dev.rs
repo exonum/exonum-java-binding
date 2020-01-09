@@ -81,8 +81,8 @@ impl RunDev {
         generate_template.execute()?;
 
         let generate_config = GenerateConfig {
-            common_config: common_config_path.clone(),
-            output_dir: config_directory.clone(),
+            common_config: common_config_path,
+            output_dir: config_directory,
             peer_address,
             listen_address: None,
             no_password: true,

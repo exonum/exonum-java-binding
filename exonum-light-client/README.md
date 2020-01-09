@@ -91,10 +91,11 @@ In addition please read about [transaction message structure][exonum-tx-message-
         .sign(keys);
 ```
 * `serviceId` can be obtained, if needed, by the service name:
-  ```
+  ```java
   int serviceId = exonumClient.findServiceInfo(serviceName)
       .map(ServiceInfo::getId)
-      .orElseThrow(() -> new IllegalStateException("No service with the given name found: " + serviceName);
+      .orElseThrow(() -> new IllegalStateException("No service" 
+          + " with the given name found: " + serviceName);
   ```
 * `data` is a bytes array which contains transactional information/parameters
 in a service-defined format.

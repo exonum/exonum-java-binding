@@ -15,17 +15,18 @@
  */
 
 use exonum::exonum_merkledb::Error as DatabaseError;
-use jni::objects::JObject;
-use jni::JNIEnv;
+use jni::{objects::JObject, signature::JavaType, JNIEnv};
 
-use std::any::Any;
-use std::cell::Cell;
-use std::error::Error;
-use std::result;
-use std::thread;
+use std::{any::Any, cell::Cell, error::Error, result, thread};
 
-use utils::{get_class_name, get_exception_message, jni_cache::classes_refs};
+use jni::objects::JValue;
+use utils::{
+    get_class_name, get_exception_message,
+    jni_cache::{classes_refs, throwable::get_cause_id},
+};
 use {JniError, JniErrorKind, JniResult};
+
+const JAVA_LANG_THROWABLE: &str = "java/lang/Throwable";
 
 /// Unwraps the result, returning its content.
 ///
@@ -176,6 +177,23 @@ pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) 
     unwrap_exc_or(env, res, T::default())
 }
 
+/// Returns a cause of the passed exception by using `Throwable#getCause` method.
+///
+/// Panics if `exception` is null.
+///
+/// Does not check for the returned `JObject` being `null`, the caller is
+/// responsible for that.
+pub fn get_exception_cause<'a>(env: &JNIEnv<'a>, exception: JObject<'a>) -> JniResult<JObject<'a>> {
+    assert!(!exception.is_null(), "Exception is null");
+    env.call_method_unchecked(
+        exception,
+        get_cause_id(),
+        JavaType::Object(JAVA_LANG_THROWABLE.into()),
+        &[],
+    )
+    .and_then(JValue::l)
+}
+
 /// Calls a corresponding `JNIEnv` method, so exception will be thrown when execution returns to
 /// the Java side.
 fn throw(env: &JNIEnv, error_message: &str) {
@@ -192,7 +210,7 @@ fn throw(env: &JNIEnv, error_message: &str) {
 /// Tries to get meaningful description from panic-error.
 pub fn any_to_string(any: &Box<dyn Any + Send>) -> String {
     if let Some(s) = any.downcast_ref::<&str>() {
-        s.to_string()
+        (*s).to_string()
     } else if let Some(s) = any.downcast_ref::<String>() {
         s.clone()
     } else if let Some(error) = any.downcast_ref::<Box<dyn Error + Send>>() {
@@ -227,7 +245,7 @@ mod tests {
 
     #[test]
     fn box_error_any() {
-        let error: Box<Error + Send> = Box::new("e".parse::<i32>().unwrap_err());
+        let error: Box<dyn Error + Send> = Box::new("e".parse::<i32>().unwrap_err());
         let description = error.description().to_owned();
         let error = panic_error(error);
         assert_eq!(description, any_to_string(&error));
@@ -246,7 +264,7 @@ mod tests {
         assert_eq!("Unknown error occurred", any_to_string(&error));
     }
 
-    fn panic_error<T: Send + 'static>(val: T) -> Box<Any + Send> {
+    fn panic_error<T: Send + 'static>(val: T) -> Box<dyn Any + Send> {
         panic::catch_unwind(panic::AssertUnwindSafe(|| panic!(val))).unwrap_err()
     }
 }

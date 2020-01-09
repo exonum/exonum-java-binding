@@ -27,7 +27,7 @@ use futures::{
     sync::mpsc::{self, Receiver},
     Stream,
 };
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
+use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
     exonum::{
         blockchain::Blockchain,
@@ -41,7 +41,7 @@ use java_bindings::{
 };
 
 lazy_static! {
-    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_classes();
     pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
@@ -78,7 +78,7 @@ fn submit_transaction_to_missing_service() {
     let service_id = 1;
     let raw_transaction = create_raw_transaction(service_id);
 
-    let res = node.submit(raw_transaction.clone());
+    let res = node.submit(raw_transaction);
     assert!(res.is_err());
 }
 
@@ -97,7 +97,7 @@ fn create_node(keypair: (PublicKey, SecretKey)) -> (Node, Receiver<ExternalMessa
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
     let storage = TemporaryDB::new();
-    let blockchain = Blockchain::new(storage, keypair, app_tx.clone());
+    let blockchain = Blockchain::new(storage, keypair, app_tx);
     let node = Node::new(blockchain);
 
     (node, app_rx)
