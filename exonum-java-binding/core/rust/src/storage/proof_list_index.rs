@@ -13,8 +13,8 @@
 // limitations under the License.
 
 use exonum::merkledb::{
-    access::FromAccess, proof_list_index::ProofListIndexIter, Fork, IndexAddress, ObjectHash,
-    ProofListIndex, Snapshot,
+    access::FromAccess, indexes::proof_list::Iter, Fork, IndexAddress, ObjectHash, ProofListIndex,
+    Snapshot,
 };
 use jni::{
     objects::{JClass, JObject, JString},
@@ -389,7 +389,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<ProofListIndexIter<Value>>(iter_handle);
+        let iter = handle::cast_handle::<Iter<Value>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -405,5 +405,5 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<ProofListIndexIter<Value>>(&env, iter_handle);
+    handle::drop_handle::<Iter<Value>>(&env, iter_handle);
 }

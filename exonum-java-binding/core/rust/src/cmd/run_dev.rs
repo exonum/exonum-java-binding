@@ -16,11 +16,12 @@
 
 use exonum_cli::command::{
     finalize::Finalize,
-    generate_config::{GenerateConfig, PUB_CONFIG_FILE_NAME, SEC_CONFIG_FILE_NAME},
+    generate_config::{GenerateConfig, PRIVATE_CONFIG_FILE_NAME, PUBLIC_CONFIG_FILE_NAME},
     generate_template::GenerateTemplate,
     run::Run as StandardRun,
     ExonumCommand,
 };
+use exonum_supervisor::mode::Mode;
 use failure;
 use structopt::StructOpt;
 
@@ -71,12 +72,13 @@ impl RunDev {
         let public_allow_origin = "http://127.0.0.1:8080, http://localhost:8080".into();
         let private_allow_origin = "http://127.0.0.1:8081, http://localhost:8081".into();
         let common_config_path = concat_path(config_directory.clone(), "template.toml");
-        let public_config_path = concat_path(config_directory.clone(), PUB_CONFIG_FILE_NAME);
-        let secret_config_path = concat_path(config_directory.clone(), SEC_CONFIG_FILE_NAME);
+        let public_config_path = concat_path(config_directory.clone(), PUBLIC_CONFIG_FILE_NAME);
+        let private_config_path = concat_path(config_directory.clone(), PRIVATE_CONFIG_FILE_NAME);
 
         let generate_template = GenerateTemplate {
             common_config: common_config_path.clone(),
             validators_count,
+            supervisor_mode: Mode::Simple,
         };
         generate_template.execute()?;
 
@@ -92,7 +94,7 @@ impl RunDev {
         generate_config.execute()?;
 
         let finalize = Finalize {
-            secret_config_path,
+            private_config_path,
             output_config_path: node_config_path.clone(),
             public_configs: vec![public_config_path],
             public_api_address: Some(public_api_address),
