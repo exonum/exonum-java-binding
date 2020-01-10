@@ -39,14 +39,17 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.SignedMessage;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.proofs.BlockProof;
+import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.fakeservice.FakeSchema;
 import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
 import com.exonum.binding.fakeservice.Transactions.RaiseErrorArgs;
 import com.exonum.binding.testkit.EmulatedNode;
@@ -54,8 +57,12 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.core.messages.Blockchain.CallInBlock;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Blockchain.ValidatorKeys;
+import com.exonum.core.messages.Consensus;
+import com.exonum.core.messages.Consensus.ExonumMessage;
+import com.exonum.core.messages.Consensus.ExonumMessage.KindCase;
 import com.exonum.core.messages.Consensus.Precommit;
-import com.exonum.core.messages.Consensus.SignedMessage;
+import com.exonum.core.messages.MapProofOuterClass.MapProof;
+import com.exonum.core.messages.MapProofOuterClass.OptionalEntry;
 import com.exonum.core.messages.Proofs;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
@@ -64,6 +71,8 @@ import com.exonum.core.messages.Types;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Empty;
 import com.google.protobuf.MessageLite;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +80,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingConsumer;
@@ -109,6 +119,7 @@ class BlockchainIntegrationTest {
   @Nested
   class WithGenesisBlock {
 
+    @Disabled("ECR-4025")
     @Test
     void createBlockProof() {
       testKitTest(blockchain -> {
@@ -121,13 +132,6 @@ class BlockchainIntegrationTest {
         // A genesis block proof is a special case: it does not have precommit messages,
         // for it is created based on the network configuration only, with no messages.
         assertThat(proof.getPrecommitsList()).isEmpty();
-      });
-    }
-
-    @Test
-    void createIndexProof() {
-      testKitTest(blockchain -> {
-        // todo:
       });
     }
 
@@ -179,6 +183,7 @@ class BlockchainIntegrationTest {
       block = testKit.createBlockWithTransactions(transactionMessage);
     }
 
+    @Disabled("ECR-4025")
     @Test
     void createBlockProof() {
       testKitTest(blockchain -> {
@@ -187,18 +192,70 @@ class BlockchainIntegrationTest {
 
         // Check the block proof message
         Proofs.BlockProof proof = blockProof.getAsMessage();
-        // Verify the block
+        // 1 Verify the block
         Block blockInProof = Block.fromMessage(proof.getBlock());
         assertThat(blockInProof).isEqualTo(block);
-        // Verify the precommits
+        // 2 Verify the proof: the precommit messages
         assertThat(proof.getPrecommitsList()).hasSize(VALIDATOR_COUNT);
-        // todo: consider using our (currently, package-private) SignedMessage wrapper.
-        SignedMessage rawPrecommit = proof.getPrecommits(0).getRaw();
-        // todo: author can be verified only via getConsensusConfiguration — which we test separately
-        PublicKey authorPk = pkFromProto(rawPrecommit.getAuthor());
-        Precommit precommit = Precommit.parseFrom(rawPrecommit.getPayload());
+        // Check the precommit message from the single validator
+        Consensus.SignedMessage rawPrecommitMessage = proof.getPrecommits(0).getRaw();
+        SignedMessage rawPrecommit = SignedMessage.fromProto(rawPrecommitMessage);
+        ExonumMessage payload = rawPrecommit.getPayload();
+        assertThat(payload.getKindCase()).isEqualTo(KindCase.PRECOMMIT);
+        Precommit precommit = payload.getPrecommit();
         HashCode blockHash = hashFromProto(precommit.getBlockHash());
+        // Check the block hash in precommit matches the actual block hash
         assertThat(blockHash).isEqualTo(block.getBlockHash());
+      });
+    }
+
+    @Disabled("ECR-4025")
+    @Test
+    void createIndexProof() {
+      testKitTest(blockchain -> {
+        String testMapName = SERVICE_NAME + ".test-map";
+        IndexProof indexProof = blockchain.createIndexProof(testMapName);
+
+        // Check the index proof message
+        Proofs.IndexProof proof = indexProof.getAsMessage();
+        // 1 Verify the block proof
+        Proofs.BlockProof blockProof = proof.getBlockProof();
+        Block blockInProof = Block.fromMessage(blockProof.getBlock());
+        assertThat(blockInProof).isEqualTo(block);
+        // Verify the precommits
+        assertThat(blockProof.getPrecommitsList()).hasSize(VALIDATOR_COUNT);
+
+        // 2 Verify the aggregating index proof
+        MapProof aggregatingIndexProof = proof.getIndexProof();
+        // It must have a single entry: (testMapName, indexHash(testMap))
+        Snapshot snapshot = testKit.getSnapshot();
+        FakeSchema serviceSchema = new FakeSchema(SERVICE_NAME, snapshot);
+        HashCode testMapHash = serviceSchema.testMap().getIndexHash();
+        OptionalEntry expectedEntry = OptionalEntry.newBuilder()
+            .setKey(ByteString.copyFromUtf8(testMapName))
+            .setValue(ByteString.copyFrom(testMapHash.asBytes()))
+            .build();
+        assertThat(aggregatingIndexProof.getEntriesList()).containsExactly(expectedEntry);
+      });
+    }
+
+    @Disabled("ECR-4025")
+    @Test
+    void createIndexProofForUnknownIndex() {
+      testKitTest(blockchain -> {
+        String testIndexName = "unknown-index";
+        IndexProof indexProof = blockchain.createIndexProof(testIndexName);
+
+        // Check the index proof message
+        Proofs.IndexProof proof = indexProof.getAsMessage();
+        // Verify the aggregating index proof
+        MapProof aggregatingIndexProof = proof.getIndexProof();
+        // It must have a single entry: (testIndexName, no index hash)
+        OptionalEntry expectedEntry = OptionalEntry.newBuilder()
+            .setKey(ByteString.copyFromUtf8(testIndexName))
+            .setNoValue(Empty.getDefaultInstance())
+            .build();
+        assertThat(aggregatingIndexProof.getEntriesList()).containsExactly(expectedEntry);
       });
     }
 

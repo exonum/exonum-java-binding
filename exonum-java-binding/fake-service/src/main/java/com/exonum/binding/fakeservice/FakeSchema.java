@@ -20,20 +20,20 @@ import static com.exonum.binding.common.serialization.StandardSerializers.string
 
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.MapIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
-class FakeSchema implements Schema {
+public final class FakeSchema implements Schema {
 
   private final String namespace;
   private final View view;
 
-  FakeSchema(String serviceName, View view) {
+  public FakeSchema(String serviceName, View view) {
     this.namespace = serviceName;
     this.view = view;
   }
 
-  MapIndexProxy<String, String> testMap() {
+  public ProofMapIndexProxy<String, String> testMap() {
     String fullName = namespace + ".test-map";
-    return MapIndexProxy.newInstance(fullName, view, string(), string());
+    return ProofMapIndexProxy.newInstance(fullName, view, string(), string());
   }
 }

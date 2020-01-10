@@ -77,8 +77,15 @@ public final class Blockchain {
 
   /**
    * Creates a proof for the block at the given height.
+   *
+   * <p>It allows creating genesis block proofs, but they make little sense, as a genesis
+   * block is supposed to be a "root of trust", hence, well-known to the clients verifying
+   * any subsequent proofs coming from the blockchain.
+   *
+   * <p>If you need to create a proof for a service index, use {@link #createIndexProof(String)}.
    * @param blockHeight a height of the block for which to create a proof
    * @throws IndexOutOfBoundsException if the height is not valid
+   * @see #createIndexProof(String)
    */
   public BlockProof createBlockProof(long blockHeight) {
     checkHeight(blockHeight);
@@ -92,6 +99,10 @@ public final class Blockchain {
    * @throws IllegalStateException if the view is not a snapshot, because a state of a service index
    *     can be proved only for the latest committed block, not for any intermediate state during
    *     transaction processing
+   */
+  /*
+  Todo: Shall we allow creating proofs for invalid (e.g., impossible) index names or throw
+   an exception?
    */
   public IndexProof createIndexProof(String fullIndexName) {
     checkState(!view.canModify(), "Cannot create an index proof for a mutable view (%s).",
