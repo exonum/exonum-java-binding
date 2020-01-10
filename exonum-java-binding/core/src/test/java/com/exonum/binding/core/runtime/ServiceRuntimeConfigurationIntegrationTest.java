@@ -52,7 +52,7 @@ class ServiceRuntimeConfigurationIntegrationTest {
   void createValidArtifact(@TempDir Path tmpArtifactDir) throws IOException {
     Path artifactLocation = tmpArtifactDir.resolve(ARTIFACT_FILENAME);
     new ServiceArtifactBuilder()
-        .setPluginId(ARTIFACT_ID.getName())
+        .setPluginId(ARTIFACT_ID.toString())
         .setPluginVersion(ARTIFACT_VERSION)
         .addClasses(TestService.class)
         .addExtensionClass(TestServiceModule.class)

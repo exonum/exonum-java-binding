@@ -580,6 +580,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       return Runtime.ArtifactId.newBuilder()
               .setRuntimeId(artifactId.getRuntimeId())
               .setName(artifactId.getName())
+          .setVersion(artifactId.getVersion())
               .build();
     }
 
