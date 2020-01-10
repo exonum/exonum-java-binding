@@ -172,8 +172,7 @@ public class ServiceRuntimeAdapter {
     try {
       InstanceSpec spec = InstanceSpec.parseFrom(instanceSpec);
       ArtifactId artifact = spec.getArtifact();
-      ServiceArtifactId artifactId = ServiceArtifactId.valueOf(artifact.getRuntimeId(),
-          artifact.getName(), artifact.getVersion());
+      ServiceArtifactId artifactId = ServiceArtifactId.fromProto(artifact);
       return ServiceInstanceSpec.newInstance(spec.getName(), spec.getId(), artifactId);
     } catch (InvalidProtocolBufferException e) {
       logger.error(e);

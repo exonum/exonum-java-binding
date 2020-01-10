@@ -19,6 +19,7 @@ package com.exonum.binding.core.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.core.messages.Runtime.ArtifactId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -61,6 +62,17 @@ class ServiceArtifactIdTest {
   }
 
   @Test
+  void fromProto() {
+    ArtifactId artifactId = createArtifactIdMessage();
+
+    ServiceArtifactId serviceArtifactId = ServiceArtifactId.fromProto(artifactId);
+
+    assertThat(serviceArtifactId.getRuntimeId()).isEqualTo(artifactId.getRuntimeId());
+    assertThat(serviceArtifactId.getName()).isEqualTo(artifactId.getName());
+    assertThat(serviceArtifactId.getVersion()).isEqualTo(artifactId.getVersion());
+  }
+
+  @Test
   void toStringTest() {
     ServiceArtifactId id = ServiceArtifactId.valueOf(0, "full-name", "0.1");
 
@@ -84,4 +96,13 @@ class ServiceArtifactIdTest {
     assertThrows(IllegalArgumentException.class,
         () -> ServiceArtifactId.parseFrom(artifactId));
   }
+
+  private ArtifactId createArtifactIdMessage() {
+    return ArtifactId.newBuilder()
+        .setRuntimeId(1)
+        .setName("com.acme/foo")
+        .setVersion("1.2.3")
+        .build();
+  }
+
 }

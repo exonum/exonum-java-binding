@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Integer.parseInt;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
+import com.exonum.core.messages.Runtime.ArtifactId;
 import com.google.auto.value.AutoValue;
 
 /**
@@ -91,6 +92,13 @@ public abstract class ServiceArtifactId {
     checkArgument(isNotBlank(name), "name is blank: '%s'", name);
     checkArgument(isNotBlank(version), "version is blank: '%s'", version);
     return new AutoValue_ServiceArtifactId(runtimeId, name, version);
+  }
+
+  /**
+   * Creates a new service artifact from the given artifact id message.
+   */
+  public static ServiceArtifactId fromProto(ArtifactId artifactId) {
+    return valueOf(artifactId.getRuntimeId(), artifactId.getName(), artifactId.getVersion());
   }
 
   /**

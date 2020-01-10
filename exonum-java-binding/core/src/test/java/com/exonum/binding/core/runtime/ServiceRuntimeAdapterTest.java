@@ -69,25 +69,21 @@ class ServiceRuntimeAdapterTest {
         .build();
     byte[] deploySpec = deployArguments.toByteArray();
 
-    String name = "com.acme/foo";
-    String version = "1.2.3";
-    ArtifactId artifact = createArtifactIdMessage(name, version);
+    ArtifactId artifact = createArtifactIdMessage();
     byte[] artifactBytes = artifact.toByteArray();
 
     serviceRuntimeAdapter.deployArtifact(artifactBytes, deploySpec);
 
-    ServiceArtifactId expectedId = ServiceArtifactId.newJavaId(name, version);
+    ServiceArtifactId expectedId = ServiceArtifactId.fromProto(artifact);
     verify(serviceRuntime).deployArtifact(expectedId, artifactFilename);
   }
 
   @Test
   void isArtifactDeployed() {
-    String name = "com.acme/foo";
-    String version = "1.2.3";
-    ArtifactId artifact = createArtifactIdMessage(name, version);
+    ArtifactId artifact = createArtifactIdMessage();
     byte[] artifactBytes = artifact.toByteArray();
 
-    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.newJavaId(name, version)))
+    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.fromProto(artifact)))
         .thenReturn(true);
 
     assertTrue(serviceRuntimeAdapter.isArtifactDeployed(artifactBytes));
@@ -95,16 +91,15 @@ class ServiceRuntimeAdapterTest {
 
   @Test
   void deployArtifactWrongSpec() {
-    String name = "com.acme/foo";
-    String version = "1.2.3";
-    ArtifactId artifact = createArtifactIdMessage(name, version);
+    ArtifactId artifact = createArtifactIdMessage();
     byte[] artifactBytes = artifact.toByteArray();
     byte[] deploySpec = bytes("Some rubbish");
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> serviceRuntimeAdapter.deployArtifact(artifactBytes, deploySpec));
 
-    assertThat(e).hasMessageContaining(name);
+    assertThat(e).hasMessageContaining(artifact.getName());
+    assertThat(e).hasMessageContaining(artifact.getVersion());
   }
 
   @Test
@@ -117,16 +112,11 @@ class ServiceRuntimeAdapterTest {
         .thenReturn(fork);
 
     String serviceName = "s1";
-    String javaArtifactName = "com.acme/foo";
-    String version = "1.2.3";
+    ArtifactId artifact = createArtifactIdMessage();
     byte[] instanceSpec = InstanceSpec.newBuilder()
         .setId(serviceId)
         .setName(serviceName)
-        .setArtifact(ArtifactId.newBuilder()
-            .setRuntimeId(1)
-            .setName(javaArtifactName)
-            .setVersion(version)
-            .build())
+        .setArtifact(artifact)
         .build()
         .toByteArray();
     byte[] configuration = bytes(1, 2);
@@ -136,7 +126,7 @@ class ServiceRuntimeAdapterTest {
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
-        ServiceArtifactId.newJavaId(javaArtifactName, version));
+        ServiceArtifactId.fromProto(artifact));
     verify(serviceRuntime).initiateAddingService(fork, expected, configuration);
   }
 
@@ -186,11 +176,11 @@ class ServiceRuntimeAdapterTest {
     assertThat(event.getValidatorId()).isEmpty();
   }
 
-  private ArtifactId createArtifactIdMessage(String name, String version) {
+  private ArtifactId createArtifactIdMessage() {
     return ArtifactId.newBuilder()
         .setRuntimeId(JAVA_RUNTIME)
-        .setName(name)
-        .setVersion(version)
+        .setName("com.acme/foo")
+        .setVersion("1.2.3")
         .build();
   }
 }
