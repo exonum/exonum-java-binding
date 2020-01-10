@@ -21,14 +21,14 @@
  * a {@linkplain com.exonum.binding.core.storage.database.View database view} is inherently
  * associated with an index.
  *
- * <h2 id="families">Index families</a></h2>
+ * <h2 id="families">Index families</h2>
  *
  * <p>An index family is a named group of indexes of the same type. Each index in the group
  * is identified by an <em>identifier</em>, an arbitrary byte string. An index in the group works
  * the same as an individual index. Indexes in a family are isolated from each other.
  * It is not possible to iterate through all elements that are stored inside an index group.
  *
- * <h3 id="families-use-cases">Use cases</a></h3>
+ * <h3 id="families-use-cases">Use cases</h3>
  *
  * <p>Index families provide a way to separate elements by a certain criterion. Applications include
  * indexing, where you create a separate collection group to index another collection of elements
@@ -36,7 +36,7 @@
  * where you keep an identifier into a collection in group Bar in a structure stored
  * in collection Foo.
  *
- * <h3 id="families-limitations">Limitations</a></h3>
+ * <h3 id="families-limitations">Limitations</h3>
  *
  * <p>Currently Exonum prepends an index identifier within a group to internal,
  * implementation-specific, keys of that index to keep their elements separate from each other.

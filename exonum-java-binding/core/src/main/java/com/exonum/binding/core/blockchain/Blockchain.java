@@ -185,13 +185,13 @@ public final class Blockchain {
    *     can be proved only for the latest committed block, not for any intermediate state during
    *     transaction processing
    */
-  /*
-   todo: Shall we allow creating proofs for invalid (e.g., impossible) index names or throw
-    an exception?
-
-   todo: If index proofs for "uninitialized" indexes are forbidden, document that.
-   */
   public IndexProof createIndexProof(String fullIndexName) {
+    /*
+     todo: Shall we allow creating proofs for invalid (e.g., impossible) index names or throw
+      an exception?
+
+     todo: If index proofs for "uninitialized" indexes are forbidden, document that.
+    */
     checkState(!view.canModify(), "Cannot create an index proof for a mutable view (%s).",
         view);
     Proofs.IndexProof indexProof = BlockchainProofs
