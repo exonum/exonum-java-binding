@@ -21,6 +21,7 @@ import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.core.messages.Proofs.BlockProof;
 import com.exonum.core.messages.Proofs.IndexProof;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * Provides constructors of block and index proofs.
@@ -40,7 +41,12 @@ final class BlockchainProofs {
       /* todo: here snapshot is not strictly required — but shall we allow Forks (see the ticket) */
       View view,
       long height) {
-    return null;
+    byte[] blockProof = nativeCreateBlockProof(view.getViewNativeHandle(), height);
+    try {
+      return BlockProof.parseFrom(blockProof);
+    } catch (InvalidProtocolBufferException e) {
+      throw new AssertionError("Invalid block proof from native", e);
+    }
   }
 
   /**
@@ -49,8 +55,17 @@ final class BlockchainProofs {
    * @param fullIndexName the full name of a proof index for which to create a proof
    */
   static IndexProof createIndexProof(Snapshot snapshot, String fullIndexName) {
-    return null;
+    byte[] indexProof = nativeCreateIndexProof(snapshot.getViewNativeHandle(), fullIndexName);
+    try {
+      return IndexProof.parseFrom(indexProof);
+    } catch (InvalidProtocolBufferException e) {
+      throw new AssertionError("Invalid index proof from native", e);
+    }
   }
+
+  static native byte[] nativeCreateBlockProof(long viewNativeHandle, long blockHeight);
+
+  static native byte[] nativeCreateIndexProof(long snapshotNativeHandle, String fullIndexName);
 
   private BlockchainProofs() {}
 }
