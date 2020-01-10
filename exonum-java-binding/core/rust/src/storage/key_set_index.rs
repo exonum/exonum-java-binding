@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use exonum_merkledb::{
-    access::FromAccess, key_set_index::KeySetIndexIter, Fork, IndexAddress, KeySetIndex, Snapshot,
+    access::FromAccess, indexes::key_set::Iter, Fork, IndexAddress, KeySetIndex, Snapshot,
 };
 use jni::{
     objects::{JClass, JObject, JString},
@@ -217,7 +217,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<KeySetIndexIter<Key>>(iter_handle);
+        let iter = handle::cast_handle::<Iter<Key>>(iter_handle);
         match iter.next() {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -233,5 +233,5 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<KeySetIndexIter<Key>>(&env, iter_handle);
+    handle::drop_handle::<Iter<Key>>(&env, iter_handle);
 }
