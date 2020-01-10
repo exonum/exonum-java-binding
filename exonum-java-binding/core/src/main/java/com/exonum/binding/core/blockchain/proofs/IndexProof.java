@@ -28,8 +28,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * aggregating the index hashes of proof indexes for an index with a certain full name.
  *
  * <p>If an index does not exist in the database, then the MapProof will prove its absence.
- * <!-- todo: Link the one-stop page on proofs -->
  *
+ * @see <a href="../Blockchain.html#service-data-proof">Service Data Proofs</a>
  * @see com.exonum.binding.core.service.Schema
  */
 @AutoValue

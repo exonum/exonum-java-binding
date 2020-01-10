@@ -26,8 +26,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
  *
  * <p>A block proof can be used independently or as a part of {@linkplain IndexProof index proof};
  * or transaction proof.
- * <!-- todo: Link the one-stop page on proofs -->
  *
+ * @see <a href="../Blockchain.html#block-proof">Block Proof Creation</a>
  * @see com.exonum.binding.core.blockchain.Block
  */
 @AutoValue
