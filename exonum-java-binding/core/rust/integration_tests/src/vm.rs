@@ -120,7 +120,7 @@ pub fn tests_classpath() -> String {
         .read_to_string(&mut dependencies_classpath)
         .expect("Failed to read classpath.txt");
 
-    format!("{}:{}", dependencies_classpath, core_classpath)
+    format!("{}:{}", core_classpath, dependencies_classpath)
 }
 
 /// Returns a Log4j system property pointing to the configuration file. The file is in
