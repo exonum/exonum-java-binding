@@ -18,9 +18,14 @@
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
-    <artifactFilename>${project.artifactId}-${project.version}-artifact</artifactFilename>
-    <artifactName>${project.groupId}/${project.artifactId}</artifactName>
-    <artifactVersion>${project.version}</artifactVersion>
+    <!-- Service Artifact properties -->
+    <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
+    <exonum.artifactName>${project.groupId}/${project.artifactId}</exonum.artifactName>
+    <exonum.artifactVersion>${project.version}</exonum.artifactVersion>
+    <exonum.artifactId>${exonum.javaRuntimeId}:${exonum.artifactName}:${exonum.artifactVersion}
+    </exonum.artifactId>
+    <exonum.artifactFileName>${project.artifactId}-${project.version}-artifact
+    </exonum.artifactFileName>
   </properties>
 
   <dependencyManagement>
@@ -187,15 +192,15 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${artifactFilename}</finalName>
+          <finalName>${exonum.artifactFileName}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <!-- Do not use the produced artifact jar file as a main jar
                i.e. do not install it in the local repo -->
           <attach>false</attach>
           <archive>
             <manifestEntries>
-              <Plugin-Id>${artifactName}</Plugin-Id>
-              <Plugin-Version>${artifactVersion}</Plugin-Version>
+              <Plugin-Id>${exonum.artifactId}</Plugin-Id>
+              <Plugin-Version>${exonum.artifactVersion}</Plugin-Version>
               <Plugin-Provider>${project.groupId}</Plugin-Provider>
             </manifestEntries>
           </archive>
@@ -223,9 +228,8 @@
             ${java.vm.assertionFlag}
           </argLine>
           <systemPropertyVariables>
-            <it.artifactFilename>${artifactFilename}.jar</it.artifactFilename>
-            <it.artifactId>${artifactName}</it.artifactId>
-            <it.artifactVersion>${artifactVersion}</it.artifactVersion>
+            <it.artifactFilename>${exonum.artifactFileName}.jar</it.artifactFilename>
+            <it.exonumArtifactId>${exonum.artifactId}</it.exonumArtifactId>
             <it.artifactsDirectory>${project.build.directory}</it.artifactsDirectory>
           </systemPropertyVariables>
         </configuration>

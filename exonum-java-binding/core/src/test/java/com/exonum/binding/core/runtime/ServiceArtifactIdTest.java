@@ -70,14 +70,15 @@ class ServiceArtifactIdTest {
   @ParameterizedTest
   @ValueSource(strings = {
       "",
-      "too-few:components:1.0",
-      "com.acme:foo-service:0.1.0:extra-component",
+      "1:too-few:components:1.0",
+      "1:com.acme:foo-service:0.1.0:extra-component",
       " : : ",
-      "com acme:foo:1.0",
-      "com.acme:foo service:1.0",
-      "com.acme:foo-service:1 0",
-      "com.acme:foo-service: 1.0",
-      "com.acme:foo-service:1.0 ",
+      "1:com acme:foo:1.0",
+      "1 :com.acme:foo:1.0",
+      "1:com.acme:foo service:1.0",
+      "1:com.acme:foo-service:1 0",
+      "1:com.acme:foo-service: 1.0",
+      "1:com.acme:foo-service:1.0 ",
   })
   void checkInvalidName(String artifactId) {
     assertThrows(IllegalArgumentException.class,

@@ -50,7 +50,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `IllegalArgumentException`.
 - Transaction index in block type changed from `long` to `int`. (#1348)
 - Extracted artifact version to the separate field from the artifact name.
-  Artifact name format is `groupId/artifactId` now. (#1349) 
+  Artifact name format is `groupId/artifactId` now.
+  PluginId format is `runtimeId:artifactName:artifactVersion` now. (#1349) 
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.

@@ -173,9 +173,29 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     // Try to load the service
     Exception e = assertThrows(ServiceLoadingException.class,
         () -> serviceLoader.loadService(artifactLocation));
-    assertThat(e).hasMessageContaining("Failed to load plugin");
+    assertThat(e).hasMessageContaining("Invalid plugin id");
     assertThat(e).hasMessageContaining(invalidPluginId);
     assertThat(e.getCause()).hasMessageContaining("Invalid artifact id");
+
+    // Check it is unloaded if failed to start
+    verify(pluginManager).unloadPlugin(invalidPluginId);
+  }
+
+  @Test
+  void cannotLoadPluginIdForNonJavaRuntime() throws IOException {
+    int nonJavaRuntimeId = 55;
+    String invalidPluginId = nonJavaRuntimeId + ":com.acme/foo-service:1.0";
+    anArtifact()
+        .setPluginId(invalidPluginId)
+        .writeTo(artifactLocation);
+
+    // Try to load the service
+    Exception e = assertThrows(ServiceLoadingException.class,
+        () -> serviceLoader.loadService(artifactLocation));
+    assertThat(e).hasMessageContaining("Invalid plugin id");
+    assertThat(e).hasMessageContaining(invalidPluginId);
+    assertThat(e).hasRootCauseMessage("Required Java (%s) runtime id, but actually was %s",
+        RuntimeId.JAVA.getId(), nonJavaRuntimeId);
 
     // Check it is unloaded if failed to start
     verify(pluginManager).unloadPlugin(invalidPluginId);

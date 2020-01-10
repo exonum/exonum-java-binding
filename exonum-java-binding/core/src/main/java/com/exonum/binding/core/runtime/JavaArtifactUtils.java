@@ -19,22 +19,22 @@ package com.exonum.binding.core.runtime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-final class JavaArtifactNames {
+final class JavaArtifactUtils {
   private static final Pattern FORBIDDEN_CHARS_PATTERN = Pattern.compile("[\\s]");
 
   /**
-   * Validates artifact id for forbidden characters.
+   * Validates the string representation of the artifact id for forbidden characters.
    * @throws IllegalArgumentException if any forbidden characters found
    */
-  static void checkNoForbiddenChars(String s) {
-    Matcher matcher = FORBIDDEN_CHARS_PATTERN.matcher(s);
-
+  static void checkNoForbiddenChars(String artifactId) {
+    Matcher matcher = FORBIDDEN_CHARS_PATTERN.matcher(artifactId);
     if (matcher.find()) {
       throw new IllegalArgumentException(String.format("'%s' must not have any forbidden "
-          + "characters, but there is '%s' at index %d", s, matcher.group(), matcher.start()));
+              + "characters, but there is '%s' at index %d",
+          artifactId, matcher.group(), matcher.start()));
     }
   }
 
-  private JavaArtifactNames() {
+  private JavaArtifactUtils() {
   }
 }

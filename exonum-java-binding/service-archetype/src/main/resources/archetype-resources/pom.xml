@@ -20,9 +20,14 @@
     <hamcrest.version>2.1</hamcrest.version>
     <mockito.version>3.2.4</mockito.version>
     <exonum.version>0.10.0-SNAPSHOT</exonum.version>
-    <artifactFilename>${project.artifactId}-${project.version}-artifact</artifactFilename>
-    <artifactName>${project.groupId}/${project.artifactId}</artifactName>
-    <artifactVersion>${project.version}</artifactVersion>
+    <!-- Service Artifact properties -->
+    <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
+    <exonum.artifactName>${project.groupId}/${project.artifactId}</exonum.artifactName>
+    <exonum.artifactVersion>${project.version}</exonum.artifactVersion>
+    <exonum.artifactId>${exonum.javaRuntimeId}:${exonum.artifactName}:${exonum.artifactVersion}
+    </exonum.artifactId>
+    <exonum.artifactFileName>${project.artifactId}-${project.version}-artifact
+    </exonum.artifactFileName>
   </properties>
 
   <dependencyManagement>
@@ -142,9 +147,8 @@
           </includes>
           <argLine>-Djava.library.path=${nativeLibPath}</argLine>
           <systemPropertyVariables>
-            <it.artifactFilename>${artifactFilename}.jar</it.artifactFilename>
-            <it.artifactId>${artifactName}</it.artifactId>
-            <it.artifactVersion>${artifactVersion}</it.artifactVersion>
+            <it.artifactFilename>${artifactFileName}.jar</it.artifactFilename>
+            <it.exonumArtifactId>${artifactId}</it.exonumArtifactId>
             <it.artifactsDirectory>${project.build.directory}</it.artifactsDirectory>
           </systemPropertyVariables>
         </configuration>
@@ -176,14 +180,14 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${project.artifactId}-${project.version}-artifact</finalName>
+          <finalName>${artifactFileName}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <!-- Do not use the produced artifact jar file as a main jar
                i.e. do not install it in the local repo -->
           <attach>false</attach>
           <archive>
             <manifestEntries>
-              <Plugin-Id>${artifactName}</Plugin-Id>
+              <Plugin-Id>${artifactId}</Plugin-Id>
               <Plugin-Version>${artifactVersion}</Plugin-Version>
               <Plugin-Provider>${project.groupId}</Plugin-Provider>
             </manifestEntries>

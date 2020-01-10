@@ -16,21 +16,21 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.core.runtime.JavaArtifactNames.checkNoForbiddenChars;
+import static com.exonum.binding.core.runtime.JavaArtifactUtils.checkNoForbiddenChars;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-class JavaArtifactNamesTest {
+class JavaArtifactUtilsTest {
 
   @Test
-  void checkValidName() {
+  void checkArtifactWithNoForbiddenCharacters() {
     String name = "com.acme/foo:1.0";
     checkNoForbiddenChars(name);
   }
 
   @Test
-  void checkInvalidName() {
+  void checkArtifactWithForbiddenCharacters() {
     String name = "com.acme foo:1.0";
     assertThrows(IllegalArgumentException.class, () -> checkNoForbiddenChars(name));
   }

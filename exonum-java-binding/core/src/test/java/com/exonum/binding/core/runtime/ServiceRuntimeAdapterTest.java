@@ -46,6 +46,7 @@ class ServiceRuntimeAdapterTest {
   private static final long SNAPSHOT_HANDLE = 0x0A;
   private static final long HEIGHT = 1;
   private static final int VALIDATOR_ID = 1;
+  private static final int JAVA_RUNTIME = 1;
 
   @Mock
   private ServiceRuntime serviceRuntime;
@@ -70,10 +71,7 @@ class ServiceRuntimeAdapterTest {
 
     String name = "com.acme/foo";
     String version = "1.2.3";
-    ArtifactId artifact = ArtifactId.newBuilder()
-        .setName(name)
-        .setVersion(version)
-        .build();
+    ArtifactId artifact = createArtifactIdMessage(name, version);
     byte[] artifactBytes = artifact.toByteArray();
 
     serviceRuntimeAdapter.deployArtifact(artifactBytes, deploySpec);
@@ -86,10 +84,7 @@ class ServiceRuntimeAdapterTest {
   void isArtifactDeployed() {
     String name = "com.acme/foo";
     String version = "1.2.3";
-    ArtifactId artifact = ArtifactId.newBuilder()
-        .setName(name)
-        .setVersion(version)
-        .build();
+    ArtifactId artifact = createArtifactIdMessage(name, version);
     byte[] artifactBytes = artifact.toByteArray();
 
     when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.newJavaId(name, version)))
@@ -102,10 +97,7 @@ class ServiceRuntimeAdapterTest {
   void deployArtifactWrongSpec() {
     String name = "com.acme/foo";
     String version = "1.2.3";
-    ArtifactId artifact = ArtifactId.newBuilder()
-        .setName(name)
-        .setVersion(version)
-        .build();
+    ArtifactId artifact = createArtifactIdMessage(name, version);
     byte[] artifactBytes = artifact.toByteArray();
     byte[] deploySpec = bytes("Some rubbish");
 
@@ -192,5 +184,13 @@ class ServiceRuntimeAdapterTest {
 
     assertThat(event.getHeight()).isEqualTo(HEIGHT);
     assertThat(event.getValidatorId()).isEmpty();
+  }
+
+  private ArtifactId createArtifactIdMessage(String name, String version) {
+    return ArtifactId.newBuilder()
+        .setRuntimeId(JAVA_RUNTIME)
+        .setName(name)
+        .setVersion(version)
+        .build();
   }
 }

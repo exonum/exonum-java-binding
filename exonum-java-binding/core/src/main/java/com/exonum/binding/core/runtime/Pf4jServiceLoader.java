@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -119,7 +120,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
   /** Loads the service definition from the already loaded plugin with the given id. */
   private LoadedServiceDefinition loadDefinition(String pluginId) throws ServiceLoadingException {
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom(pluginId);
+    ServiceArtifactId artifactId = extractServiceId(pluginId);
     Supplier<ServiceModule> serviceModuleSupplier = findServiceModuleSupplier(pluginId);
     LoadedServiceDefinition serviceDefinition =
         LoadedServiceDefinition.newInstance(artifactId, serviceModuleSupplier);
@@ -127,6 +128,21 @@ final class Pf4jServiceLoader implements ServiceLoader {
     assert !loadedServices.containsKey(artifactId);
     loadedServices.put(artifactId, serviceDefinition);
     return serviceDefinition;
+  }
+
+  private static ServiceArtifactId extractServiceId(String pluginId)
+      throws ServiceLoadingException {
+    try {
+      ServiceArtifactId serviceArtifactId = ServiceArtifactId.parseFrom(pluginId);
+      checkArgument(serviceArtifactId.getRuntimeId() == JAVA.getId(),
+          "Required Java (%s) runtime id, but actually was %s",
+          JAVA.getId(), serviceArtifactId.getRuntimeId());
+      return serviceArtifactId;
+    } catch (IllegalArgumentException e) {
+      String message = String.format(
+          "Invalid plugin id (%s) is specified in service artifact metadata", pluginId);
+      throw new ServiceLoadingException(message, e);
+    }
   }
 
   private Supplier<ServiceModule> findServiceModuleSupplier(String pluginId)

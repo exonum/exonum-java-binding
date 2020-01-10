@@ -25,8 +25,7 @@ import com.google.auto.value.AutoValue;
 
 /**
  * A service artifact identifier. It consists of the runtime id in which the service shall be
- * deployed and the service artifact name. The name of Java artifacts usually contains the three
- * coordinates identifying any Java artifact: groupId, artifactId and version.
+ * deployed and the service artifact name and the service artifact version.
  *
  * <p>The extensions of this class must be immutable and hence thread-safe.
  */
@@ -42,7 +41,9 @@ public abstract class ServiceArtifactId {
   public abstract int getRuntimeId();
 
   /**
-   * Returns the artifact name of this service (e.g., "com.acme/land-registry").
+   * Returns the artifact name of this service.
+   * The name of Java artifacts usually (but not necessary) contains the two coordinates:
+   * groupId and artifactId separated by "/" (e.g., "com.acme/land-registry").
    */
   public abstract String getName();
 
@@ -60,10 +61,10 @@ public abstract class ServiceArtifactId {
    * @throws IllegalArgumentException if the format is not correct
    */
   public static ServiceArtifactId parseFrom(String serviceArtifactId) {
-    JavaArtifactNames.checkNoForbiddenChars(serviceArtifactId);
+    JavaArtifactUtils.checkNoForbiddenChars(serviceArtifactId);
     String[] coordinates = serviceArtifactId.split(DELIMITER, KEEP_EMPTY);
     checkArgument(coordinates.length == 3,
-        "Invalid artifact id (%s), must have 'runtimeId:groupId/artifactId:version' format",
+        "Invalid artifact id (%s), must have 'runtimeId:artifactName:version' format",
         serviceArtifactId);
     int runtimeId = parseInt(coordinates[0]);
     String name = coordinates[1];

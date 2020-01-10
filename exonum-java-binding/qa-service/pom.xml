@@ -18,11 +18,14 @@
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
-    <!-- Artifact name, used to identify the artifact during deploy -->
-    <artifactName>${project.groupId}/${project.artifactId}</artifactName>
-    <artifactVersion>${project.version}</artifactVersion>
-    <!-- Artifact JAR name (w/o extension) -->
-    <artifactFileName>${project.artifactId}-${project.version}-artifact</artifactFileName>
+    <!-- Service Artifact properties -->
+    <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
+    <exonum.artifactName>${project.groupId}/${project.artifactId}</exonum.artifactName>
+    <exonum.artifactVersion>${project.version}</exonum.artifactVersion>
+    <exonum.artifactId>${exonum.javaRuntimeId}:${exonum.artifactName}:${exonum.artifactVersion}
+    </exonum.artifactId>
+    <exonum.artifactFileName>${project.artifactId}-${project.version}-artifact
+    </exonum.artifactFileName>
   </properties>
 
   <dependencyManagement>
@@ -207,9 +210,8 @@
           <groups>integration</groups>
           <systemPropertyVariables>
             <it.artifactsDir>${project.build.directory}</it.artifactsDir>
-            <it.artifactFilename>${artifactFileName}.jar</it.artifactFilename>
-            <it.artifactName>${artifactName}</it.artifactName>
-            <it.artifactVersion>${artifactVersion}</it.artifactVersion>
+            <it.artifactFilename>${exonum.artifactFileName}.jar</it.artifactFilename>
+            <it.exonumArtifactId>${exonum.artifactId}</it.exonumArtifactId>
           </systemPropertyVariables>
           <argLine>
             ${jacoco.it.args}
@@ -244,15 +246,15 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${artifactFileName}</finalName>
+          <finalName>${exonum.artifactFileName}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <!-- Do not use the produced artifact jar file as a main jar
                i.e. do not install it in the local repo -->
           <attach>false</attach>
           <archive>
             <manifestEntries>
-              <Plugin-Id>${artifactName}</Plugin-Id>
-              <Plugin-Version>${artifactVersion}</Plugin-Version>
+              <Plugin-Id>${exonum.artifactId}</Plugin-Id>
+              <Plugin-Version>${exonum.artifactVersion}</Plugin-Version>
               <Plugin-Provider>${project.groupId}</Plugin-Provider>
             </manifestEntries>
           </archive>

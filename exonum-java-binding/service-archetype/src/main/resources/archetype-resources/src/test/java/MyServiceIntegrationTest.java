@@ -32,7 +32,7 @@ class MyServiceIntegrationTest {
 
   public static final String ARTIFACT_FILENAME = getRequiredProperty("it.artifactFilename");
   public static final ServiceArtifactId ARTIFACT_ID =
-      ServiceArtifactId.newJavaId(getRequiredProperty("it.artifactId"));
+      ServiceArtifactId.parseFrom(getRequiredProperty("it.exonumArtifactId"));
   public static Path artifactsDirectory = Paths.get(getRequiredProperty("it.artifactsDirectory"));
   public static final String SERVICE_NAME = "my-service";
   public static final int SERVICE_ID = 42;

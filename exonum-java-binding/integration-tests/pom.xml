@@ -24,6 +24,14 @@
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
+    <!-- Service Artifact properties -->
+    <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
+    <exonum.artifactName>fake-service</exonum.artifactName>
+    <exonum.artifactVersion>${project.version}</exonum.artifactVersion>
+    <exonum.artifactId>${exonum.javaRuntimeId}:${exonum.artifactName}:${exonum.artifactVersion}
+    </exonum.artifactId>
+    <exonum.artifactFileName>${exonum.artifactName}-artifact</exonum.artifactFileName>
+
   </properties>
 
   <dependencies>
@@ -110,8 +118,8 @@
           </argLine>
           <systemPropertyVariables>
             <it.artifactsDir>${project.parent.basedir}/fake-service/target</it.artifactsDir>
-            <it.artifactFilename>fake-service-artifact.jar</it.artifactFilename>
-            <it.artifactName>${project.groupId}:fake-service:${project.version}</it.artifactName>
+            <it.artifactFilename>${exonum.artifactFileName}.jar</it.artifactFilename>
+            <it.exonumArtifactId>${exonum.artifactId}</it.exonumArtifactId>
           </systemPropertyVariables>
         </configuration>
         <executions>

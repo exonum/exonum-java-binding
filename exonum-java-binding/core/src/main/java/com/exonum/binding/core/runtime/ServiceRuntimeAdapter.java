@@ -75,7 +75,7 @@ public class ServiceRuntimeAdapter {
   /**
    * Deploys the Java service artifact.
    *
-   * @param artifactId bytes representation of the service artifact
+   * @param artifactId bytes representation of the Java service artifact id as a serialized message
    * @param deploySpec the deploy specification as a serialized
    *     {@link com.exonum.binding.core.runtime.DeployArguments}
    *     protobuf message
@@ -85,11 +85,13 @@ public class ServiceRuntimeAdapter {
    */
   void deployArtifact(byte[] artifactId, byte[] deploySpec) throws ServiceLoadingException {
     ArtifactId artifact = parseArtifact(artifactId);
-    DeployArguments deployArguments = parseDeployArgs(artifact.getName(), deploySpec);
+    ServiceArtifactId javaArtifactId = ServiceArtifactId
+        .newJavaId(artifact.getName(), artifact.getVersion());
+
+    DeployArguments deployArguments = parseDeployArgs(javaArtifactId, deploySpec);
     String artifactFilename = deployArguments.getArtifactFilename();
 
-    serviceRuntime.deployArtifact(
-        ServiceArtifactId.newJavaId(artifact.getName(), artifact.getVersion()), artifactFilename);
+    serviceRuntime.deployArtifact(javaArtifactId, artifactFilename);
   }
 
   /**
@@ -104,11 +106,11 @@ public class ServiceRuntimeAdapter {
     return serviceRuntime.isArtifactDeployed(serviceArtifact);
   }
 
-  private static DeployArguments parseDeployArgs(String name, byte[] deploySpec) {
+  private static DeployArguments parseDeployArgs(ServiceArtifactId artifact, byte[] deploySpec) {
     try {
       return DeployArguments.parseFrom(deploySpec);
     } catch (InvalidProtocolBufferException e) {
-      String message = "Invalid deploy specification for " + name;
+      String message = "Invalid deploy specification for artifact " + artifact;
       logger.error(message, e);
       throw new IllegalArgumentException(message, e);
     }
