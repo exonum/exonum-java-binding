@@ -51,8 +51,8 @@ class ServiceRuntimeIntegrationTest {
   void afterTransactionsExecutionException(@TempDir Path artifactDir) throws IOException {
     String artifactFilename = "service.jar";
     // Create a service artifact
-    String pluginId = "com.acme:s1:1.0.0";
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId(pluginId);
+    String pluginId = "1:com.acme/s1:1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom(pluginId);
     new ServiceArtifactBuilder()
         .setPluginId(pluginId)
         .setPluginVersion("1.0.0")

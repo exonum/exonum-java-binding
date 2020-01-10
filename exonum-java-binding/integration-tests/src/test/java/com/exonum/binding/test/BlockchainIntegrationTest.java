@@ -331,7 +331,7 @@ class BlockchainIntegrationTest {
         MapIndex<HashCode, TransactionLocation> txLocations = blockchain.getTxLocations();
         Map<HashCode, TransactionLocation> txLocationsMap = toMap(txLocations);
         TransactionLocation expectedTransactionLocation =
-            TransactionLocation.valueOf(block.getHeight(), 0L);
+            TransactionLocation.valueOf(block.getHeight(), 0);
         assertThat(txLocationsMap)
             .isEqualTo(ImmutableMap.of(expectedBlockTransaction.hash(),
                 expectedTransactionLocation));
@@ -344,7 +344,7 @@ class BlockchainIntegrationTest {
         Optional<TransactionLocation> txLocation =
             blockchain.getTxLocation(expectedBlockTransaction.hash());
         TransactionLocation expectedTransactionLocation =
-            TransactionLocation.valueOf(block.getHeight(), 0L);
+            TransactionLocation.valueOf(block.getHeight(), 0);
         assertThat(txLocation).hasValue(expectedTransactionLocation);
       });
     }
@@ -559,6 +559,8 @@ class BlockchainIntegrationTest {
         .blockHash(hashFunction.hashLong(blockHeight))
         .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
         .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
-        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8));
+        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8))
+        .errorHash(HashCode.fromString("ab"))
+        .additionalHeaders(ImmutableMap.of());
   }
 }

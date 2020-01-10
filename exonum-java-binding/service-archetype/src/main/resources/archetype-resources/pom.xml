@@ -180,7 +180,7 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${artifactFileName}</finalName>
+          <finalName>${exonum.artifactFileName}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <!-- Do not use the produced artifact jar file as a main jar
                i.e. do not install it in the local repo -->

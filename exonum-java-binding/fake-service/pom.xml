@@ -15,6 +15,13 @@
 
   <properties>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
+    <!-- Service Artifact properties -->
+    <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
+    <exonum.artifactName>${project.artifactId}</exonum.artifactName>
+    <exonum.artifactVersion>${project.version}</exonum.artifactVersion>
+    <exonum.artifactId>${exonum.javaRuntimeId}:${exonum.artifactName}:${exonum.artifactVersion}
+    </exonum.artifactId>
+    <exonum.artifactFileName>${exonum.artifactName}-artifact</exonum.artifactFileName>
   </properties>
 
   <dependencyManagement>
@@ -100,7 +107,7 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${project.artifactId}-artifact</finalName>
+          <finalName>${exonum.artifactFileName}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <attach>false</attach>
           <!-- Do not use the produced artifact jar file as a main jar
@@ -108,8 +115,8 @@
           <attach>false</attach>
           <archive>
             <manifestEntries>
-              <Plugin-Id>${project.groupId}:${project.artifactId}:${project.version}</Plugin-Id>
-              <Plugin-Version>${project.version}</Plugin-Version>
+              <Plugin-Id>${exonum.artifactId}</Plugin-Id>
+              <Plugin-Version>${exonum.artifactVersion}</Plugin-Version>
               <Plugin-Provider>${project.groupId}</Plugin-Provider>
             </manifestEntries>
           </archive>
