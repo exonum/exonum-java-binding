@@ -26,11 +26,13 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blocks;
+import com.exonum.core.messages.Blockchain;
 import com.exonum.core.messages.Blockchain.AdditionalHeaders;
 import com.exonum.core.messages.KeyValueSequenceOuterClass.KeyValue;
 import com.exonum.core.messages.KeyValueSequenceOuterClass.KeyValueSequence;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,6 +47,16 @@ class BlockSerializerTest {
   void roundTrip(Block expected) {
     byte[] bytes = BLOCK_SERIALIZER.toBytes(expected);
     Block actual = BLOCK_SERIALIZER.fromBytes(bytes);
+
+    assertThat(actual, equalTo(expected));
+  }
+
+  @ParameterizedTest
+  @MethodSource("testSource")
+  void roundTripFromMessage(Block expected) throws InvalidProtocolBufferException {
+    byte[] asBytes = BLOCK_SERIALIZER.toBytes(expected);
+    Blockchain.Block asMessage = Blockchain.Block.parseFrom(asBytes);
+    Block actual = Block.fromMessage(asMessage);
 
     assertThat(actual, equalTo(expected));
   }

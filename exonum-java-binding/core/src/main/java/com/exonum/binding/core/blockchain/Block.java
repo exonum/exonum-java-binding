@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.blockchain;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -123,16 +124,15 @@ public abstract class Block {
     return new AutoValue_Block.GsonTypeAdapter(gson);
   }
 
-//  todo: Shall we add it? It will have to serialize the message to compute the hash.
-//    Or we can get rid of hash? Also, parseFrom(byte[])?
-
   /**
    * Creates a block from the block message.
    * @param blockMessage a block
    */
   public static Block fromMessage(com.exonum.core.messages.Blockchain.Block blockMessage) {
-    // fixme: If we *do* keep it — then fix the redundant serialization
-    return parseFrom(blockMessage.toByteArray());
+    // Such implementation prevents a redundant deserialization of Block message
+    // (in BlockSerializer#fromBytes).
+    HashCode blockHash = sha256().hashBytes(blockMessage.toByteArray());
+    return BlockSerializer.newBlockInternal(blockMessage, blockHash);
   }
 
   /**
