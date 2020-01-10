@@ -139,7 +139,7 @@ import java.util.Optional;
  * <hr/>
  *
  * <p>All method arguments are non-null by default.
- * <!-- TODO: Link a page on proofs from exonum.com when one arrives. -->
+ * <!-- TODO: Link a page on proofs from exonum.com when one arrives: ECR-4106 -->
  */
 public final class Blockchain {
 
