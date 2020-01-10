@@ -293,7 +293,7 @@ public final class Blockchain {
    * are preserved for transactions and before/after transaction handlers.
    *
    * <p>The {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of this index is recorded
-   * in the block header as <!-- todo: link (ECR-4021) --> {@code Block#getErrorHash()}. That
+   * in the block header as {@link Block#getErrorHash()}. That
    * enables constructing <a href="Blockchain.html#call-result-proof">proofs</a>
    * that a certain operation was executed with a particular result. For example,
    * a proof that a transaction with a certain message hash at
