@@ -90,7 +90,7 @@ final class TestKitTestUtils {
                                      String serviceArtifactVersion, Class serviceModule,
                                      Class<?>... artifactClasses) throws IOException {
     new ServiceArtifactBuilder()
-        .setPluginId(serviceArtifactId.getName())
+        .setPluginId(serviceArtifactId.toString())
         .setPluginVersion(serviceArtifactVersion)
         .addClasses(artifactClasses)
         .addExtensionClass(serviceModule)
