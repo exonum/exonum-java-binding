@@ -38,7 +38,7 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
  * @see ProofListIndexProxy#getIndexHash()
  * @see ProofMapIndexProxy#getIndexHash()
  * @see ProofEntryIndexProxy#getIndexHash()
+ * @see com.exonum.binding.core.blockchain.Blockchain
  */
-
 public interface Schema {
 }

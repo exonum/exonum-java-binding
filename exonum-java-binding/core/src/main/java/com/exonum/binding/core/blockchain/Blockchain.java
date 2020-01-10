@@ -186,8 +186,10 @@ public final class Blockchain {
    *     transaction processing
    */
   /*
-  Todo: Shall we allow creating proofs for invalid (e.g., impossible) index names or throw
-   an exception?
+   todo: Shall we allow creating proofs for invalid (e.g., impossible) index names or throw
+    an exception?
+
+   todo: If index proofs for "uninitialized" indexes are forbidden, document that.
    */
   public IndexProof createIndexProof(String fullIndexName) {
     checkState(!view.canModify(), "Cannot create an index proof for a mutable view (%s).",

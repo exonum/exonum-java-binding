@@ -674,12 +674,14 @@ class BlockchainIntegrationTest {
   }
 
   private static PublicKey pkFromProto(Types.PublicKey key) {
-    // fixme: [ECR-3734] highly error-prone and verbose key#getData.toByteArray susceptible
+    // todo: [ECR-3734] highly error-prone and verbose key#getData.toByteArray susceptible
     //  to incorrect key#toByteArray.
     return PublicKey.fromBytes(key.getData().toByteArray());
   }
 
   private static HashCode hashFromProto(Types.Hash hash) {
+    // todo: [ECR-3734] highly error-prone and verbose hash#getData.toByteArray susceptible
+    //  to incorrect hash#toByteArray.
     return HashCode.fromBytes(hash.getData().toByteArray());
   }
 }
