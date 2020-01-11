@@ -85,8 +85,7 @@ public class ServiceRuntimeAdapter {
    */
   void deployArtifact(byte[] artifactId, byte[] deploySpec) throws ServiceLoadingException {
     ArtifactId artifact = parseArtifact(artifactId);
-    ServiceArtifactId javaArtifactId = ServiceArtifactId
-        .newJavaId(artifact.getName(), artifact.getVersion());
+    ServiceArtifactId javaArtifactId = ServiceArtifactId.fromProto(artifact);
 
     DeployArguments deployArguments = parseDeployArgs(javaArtifactId, deploySpec);
     String artifactFilename = deployArguments.getArtifactFilename();

@@ -25,6 +25,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ServiceArtifactIdTest {
+  private static final ArtifactId ARTIFACT_ID =
+      ArtifactId.newBuilder()
+          .setRuntimeId(1)
+          .setName("com.acme/foo")
+          .setVersion("1.2.3")
+          .build();
 
   @ParameterizedTest
   @ValueSource(strings = {
@@ -63,7 +69,7 @@ class ServiceArtifactIdTest {
 
   @Test
   void fromProto() {
-    ArtifactId artifactId = createArtifactIdMessage();
+    ArtifactId artifactId = ARTIFACT_ID;
 
     ServiceArtifactId serviceArtifactId = ServiceArtifactId.fromProto(artifactId);
 
@@ -82,27 +88,28 @@ class ServiceArtifactIdTest {
   @ParameterizedTest
   @ValueSource(strings = {
       "",
-      "1:too-few:components:1.0",
-      "1:com.acme:foo-service:0.1.0:extra-component",
+      /* Too few components */
+      "too-few-components",
+      "1:too-few-components",
+      /* Extra component */
+      "1:foo-service:0.1.0:extra-component",
+      /* All blanks */
       " : : ",
-      "1:com acme:foo:1.0",
-      "1 :com.acme:foo:1.0",
-      "1:com.acme:foo service:1.0",
-      "1:com.acme:foo-service:1 0",
-      "1:com.acme:foo-service: 1.0",
-      "1:com.acme:foo-service:1.0 ",
+      /* Non-integral runtime id */
+      "a:com.acme/foo:1.0",
+      /* Spaces in runtime id */
+      "1 :com.acme/foo:1.0",
+      /* Spaces in name */
+      "1:com.acme foo:1.0",
+      "1:com.acme/fo o:1.0",
+      /* Spaces in version */
+      "1:com.acme:foo: 1.0",
+      "1:com.acme/foo:1.0 ",
+      "1:com.acme:foo:1 0",
   })
   void checkInvalidName(String artifactId) {
     assertThrows(IllegalArgumentException.class,
         () -> ServiceArtifactId.parseFrom(artifactId));
-  }
-
-  private ArtifactId createArtifactIdMessage() {
-    return ArtifactId.newBuilder()
-        .setRuntimeId(1)
-        .setName("com.acme/foo")
-        .setVersion("1.2.3")
-        .build();
   }
 
 }

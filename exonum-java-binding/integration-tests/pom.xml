@@ -31,7 +31,6 @@
     <exonum.artifactId>${exonum.javaRuntimeId}:${exonum.artifactName}:${exonum.artifactVersion}
     </exonum.artifactId>
     <exonum.artifactFileName>${exonum.artifactName}-artifact</exonum.artifactFileName>
-
   </properties>
 
   <dependencies>

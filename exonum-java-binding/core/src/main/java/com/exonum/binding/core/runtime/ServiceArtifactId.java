@@ -26,7 +26,7 @@ import com.google.auto.value.AutoValue;
 
 /**
  * A service artifact identifier. It consists of the runtime id in which the service shall be
- * deployed and the service artifact name and the service artifact version.
+ * deployed, the service artifact name and its version.
  *
  * <p>The extensions of this class must be immutable and hence thread-safe.
  */

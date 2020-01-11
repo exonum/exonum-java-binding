@@ -46,7 +46,13 @@ class ServiceRuntimeAdapterTest {
   private static final long SNAPSHOT_HANDLE = 0x0A;
   private static final long HEIGHT = 1;
   private static final int VALIDATOR_ID = 1;
-  private static final int JAVA_RUNTIME = 1;
+  private static final ArtifactId ARTIFACT_ID =
+      ArtifactId.newBuilder()
+          .setRuntimeId(1)
+          .setName("com.acme/foo")
+          .setVersion("1.2.3")
+          .build();
+
 
   @Mock
   private ServiceRuntime serviceRuntime;
@@ -69,7 +75,7 @@ class ServiceRuntimeAdapterTest {
         .build();
     byte[] deploySpec = deployArguments.toByteArray();
 
-    ArtifactId artifact = createArtifactIdMessage();
+    ArtifactId artifact = ARTIFACT_ID;
     byte[] artifactBytes = artifact.toByteArray();
 
     serviceRuntimeAdapter.deployArtifact(artifactBytes, deploySpec);
@@ -80,7 +86,7 @@ class ServiceRuntimeAdapterTest {
 
   @Test
   void isArtifactDeployed() {
-    ArtifactId artifact = createArtifactIdMessage();
+    ArtifactId artifact = ARTIFACT_ID;
     byte[] artifactBytes = artifact.toByteArray();
 
     when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.fromProto(artifact)))
@@ -91,7 +97,7 @@ class ServiceRuntimeAdapterTest {
 
   @Test
   void deployArtifactWrongSpec() {
-    ArtifactId artifact = createArtifactIdMessage();
+    ArtifactId artifact = ARTIFACT_ID;
     byte[] artifactBytes = artifact.toByteArray();
     byte[] deploySpec = bytes("Some rubbish");
 
@@ -112,7 +118,7 @@ class ServiceRuntimeAdapterTest {
         .thenReturn(fork);
 
     String serviceName = "s1";
-    ArtifactId artifact = createArtifactIdMessage();
+    ArtifactId artifact = ARTIFACT_ID;
     byte[] instanceSpec = InstanceSpec.newBuilder()
         .setId(serviceId)
         .setName(serviceName)
@@ -176,11 +182,4 @@ class ServiceRuntimeAdapterTest {
     assertThat(event.getValidatorId()).isEmpty();
   }
 
-  private ArtifactId createArtifactIdMessage() {
-    return ArtifactId.newBuilder()
-        .setRuntimeId(JAVA_RUNTIME)
-        .setName("com.acme/foo")
-        .setVersion("1.2.3")
-        .build();
-  }
 }
