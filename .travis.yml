@@ -57,7 +57,6 @@ matrix:
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
       osx_image: xcode11.3
-      jdk: openjdk8
       env:
         - CHECK_RUST=false
         - ROCKSDB_LIB_DIR=/usr/local/lib
@@ -84,6 +83,7 @@ before_install:
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then jdk_switcher use openjdk8; fi
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
