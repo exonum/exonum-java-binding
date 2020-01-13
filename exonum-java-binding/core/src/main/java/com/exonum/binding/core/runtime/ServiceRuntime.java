@@ -257,21 +257,16 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   private void stopService(ServiceInstanceSpec instanceSpec) {
-    try {
-      String name = instanceSpec.getName();
-      Optional<ServiceWrapper> activeService = findService(name);
-      if (activeService.isPresent()) {
-        ServiceWrapper service = activeService.get();
-        unRegisterService(service);
-        runtimeTransport.disconnectServiceApi(service);
-        logger.info("Stopped a service: {}", instanceSpec);
-      } else {
-        logger.warn("There is no active service with the given name {}. "
-            + "Possibly restoring services state after reboot?", name);
-      }
-    } catch (Exception e) {
-      logger.error("Failed to stop a service {} instance", instanceSpec, e);
-      throw e;
+    String name = instanceSpec.getName();
+    Optional<ServiceWrapper> activeService = findService(name);
+    if (activeService.isPresent()) {
+      ServiceWrapper service = activeService.get();
+      unRegisterService(service);
+      runtimeTransport.disconnectServiceApi(service);
+      logger.info("Stopped a service: {}", instanceSpec);
+    } else {
+      logger.warn("There is no active service with the given name {}. "
+          + "Possibly restoring services state after reboot?", name);
     }
   }
 
