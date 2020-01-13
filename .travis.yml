@@ -27,6 +27,9 @@ addons:
       - protobuf-compiler
       - libprotobuf-dev
   homebrew:
+    taps: homebrew/cask-versions
+    casks:
+      - java8
     packages:
       - libsodium
       - rocksdb
@@ -83,7 +86,6 @@ before_install:
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then jdk_switcher use openjdk8; fi
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
