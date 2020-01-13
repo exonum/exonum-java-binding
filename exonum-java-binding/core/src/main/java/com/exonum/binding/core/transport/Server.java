@@ -57,6 +57,8 @@ public interface Server {
    */
   void mountSubRouter(String mountPoint, Router subRouter);
 
+  void removeSubRouter(String mountPoint);
+
   /**
    * Requests the server to start listening on the given TCP port.
    *

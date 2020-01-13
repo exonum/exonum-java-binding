@@ -30,6 +30,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.core.messages.Runtime.InstanceState.Status;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -131,7 +132,7 @@ public final class ServiceRuntime implements AutoCloseable {
       synchronized (lock) {
         // Check the artifacts dir exists
         checkState(Files.isDirectory(artifactsDir), "Artifacts dir (%s) does not exist or is not "
-                + "a directory: check the runtime configuration", artifactsDir);
+            + "a directory: check the runtime configuration", artifactsDir);
         Path artifactLocation = artifactsDir.resolve(filename);
 
         // Load the service artifact
@@ -192,7 +193,7 @@ public final class ServiceRuntime implements AutoCloseable {
     try {
       synchronized (lock) {
         // Create a new service
-        ServiceWrapper service = createService(instanceSpec);
+        ServiceWrapper service = createServiceInstance(instanceSpec);
 
         // Initialize it
         service.initialize(fork, new ServiceConfiguration(configuration));
@@ -221,16 +222,28 @@ public final class ServiceRuntime implements AutoCloseable {
    */
   public void updateInstanceStatus(ServiceInstanceSpec instanceSpec,
       InstanceState.Status instanceStatus) {
-    try {
-      synchronized (lock) {
-        // Create a previously added service
-        ServiceWrapper service = createService(instanceSpec);
-        // Register it in the runtime
-        registerService(service);
-        // Connect its API
-        connectServiceApi(service);
+    synchronized (lock) {
+      if (instanceStatus.equals(Status.ACTIVE)) {
+        activateService(instanceSpec);
+      } else if (instanceStatus.equals(Status.STOPPED)) {
+        stopService(instanceSpec);
+      } else {
+        String msg = String.format("Unexpected status %s received for the service %s",
+            instanceStatus.name(), instanceSpec.getName());
+        logger.error(msg);
+        throw new IllegalArgumentException(msg);
       }
+    }
+  }
 
+  private void activateService(ServiceInstanceSpec instanceSpec) {
+    try {
+      // Create a previously added service
+      ServiceWrapper service = createServiceInstance(instanceSpec);
+      // Register it in the runtime
+      registerService(service);
+      // Connect its API
+      connectServiceApi(service);
       logger.info("Added a service: {}", instanceSpec);
     } catch (Exception e) {
       logger.error("Failed to add a service {} instance", instanceSpec, e);
@@ -238,7 +251,26 @@ public final class ServiceRuntime implements AutoCloseable {
     }
   }
 
-  private ServiceWrapper createService(ServiceInstanceSpec instanceSpec) {
+  private void stopService(ServiceInstanceSpec instanceSpec) {
+    try {
+      String name = instanceSpec.getName();
+      Optional<ServiceWrapper> activeService = findService(name);
+      if (activeService.isPresent()) {
+        ServiceWrapper service = activeService.get();
+        unRegisterService(service);
+        runtimeTransport.disconnectServiceApi(service);
+        logger.info("Stopped a service: {}", instanceSpec);
+      } else {
+        logger.warn("There is no active service with the given name {}. "
+            + "Possibly restoring services state after reboot?", name);
+      }
+    } catch (Exception e) {
+      logger.error("Failed to stop a service {} instance", instanceSpec, e);
+      throw e;
+    }
+  }
+
+  private ServiceWrapper createServiceInstance(ServiceInstanceSpec instanceSpec) {
     // Check no such service in the runtime
     String name = instanceSpec.getName();
     checkArgument(!findService(name).isPresent(),
@@ -259,6 +291,14 @@ public final class ServiceRuntime implements AutoCloseable {
 
     int id = service.getId();
     servicesById.put(id, service);
+  }
+
+  private void unRegisterService(ServiceWrapper service) {
+    String name = service.getName();
+    services.remove(name);
+
+    int id = service.getId();
+    servicesById.remove(id);
   }
 
   /**
@@ -341,7 +381,7 @@ public final class ServiceRuntime implements AutoCloseable {
         service.afterTransactions(fork);
       } catch (Exception e) {
         logger.error("Service {} threw exception in afterTransactions."
-                + " Any changes will be rolled-back", service.getName(), e);
+            + " Any changes will be rolled-back", service.getName(), e);
         throw e;
       }
     }
@@ -352,7 +392,7 @@ public final class ServiceRuntime implements AutoCloseable {
    */
   public void afterCommit(BlockCommittedEvent event) {
     synchronized (lock) {
-      for (ServiceWrapper service: services.values()) {
+      for (ServiceWrapper service : services.values()) {
         try {
           // todo: [ECR-3436] BCE carries a Snapshot which is based on a cleaner, which gets
           //   re-used by all services. If the total number of native proxies they create is large,

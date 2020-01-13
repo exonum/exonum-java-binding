@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
@@ -36,10 +37,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 // Execute the tests sequentially, as each of them creates a Vertx instance with its
 // own thread pool, which drives the delays up.
@@ -178,6 +182,59 @@ class VertxServerIntegrationTest {
         wcVertx.close();
       }
     }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"/foo", "/foo/", "/foo/bar", "/foo/:bar", "/foo/:bar/"})
+  void removeRoute(String path) throws Exception {
+    try {
+      server.start(ANY_PORT).get();
+
+      server.mountSubRouter(path, server.createRouter());
+      Assertions.assertThat(server.getMountedRoutes())
+          .anyMatch(route -> routPathEquals(route, path));
+
+      server.removeSubRouter(path);
+
+      Assertions.assertThat(server.getMountedRoutes())
+          .noneMatch(route -> routPathEquals(route, path));
+    } finally {
+      blockingStop();
+    }
+  }
+
+  @Test
+  void removeRoutesWithSamePrefix() throws Exception {
+    try {
+      server.start(ANY_PORT).get();
+
+      String routePath1 = "/foo";
+      Router router1 = server.createRouter();
+      router1.get("/bar").handler(h -> {
+      });
+      server.mountSubRouter(routePath1, router1);
+
+      String routePath2 = "/foo/bar";
+      server.mountSubRouter(routePath2, server.createRouter());
+
+      server.removeSubRouter(routePath1);
+
+      Assertions.assertThat(server.getMountedRoutes())
+          .noneMatch(route -> routPathEquals(route, routePath1));
+      Assertions.assertThat(server.getMountedRoutes())
+          .anyMatch(route -> routPathEquals(route, routePath2));
+
+      server.removeSubRouter(routePath2);
+
+      Assertions.assertThat(server.getMountedRoutes())
+          .noneMatch(route -> routPathEquals(route, routePath2));
+    } finally {
+      blockingStop();
+    }
+  }
+
+  private static boolean routPathEquals(Route route, String path) {
+    return route.getPath().equals(path);
   }
 
   /**
