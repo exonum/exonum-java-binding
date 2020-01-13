@@ -259,7 +259,7 @@ class ServiceRuntimeIntegrationTest {
     when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
         .thenReturn(serviceWrapper);
 
-    // Create the service from the artifact
+    // Activate the service from the artifact
     serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
 
     // Check it was instantiated as expected
@@ -292,10 +292,10 @@ class ServiceRuntimeIntegrationTest {
     when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
         .thenReturn(serviceWrapper);
 
-    // Create the service from the artifact
+    // Activate the service
     serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
 
-    // Try to create another service with the same service instance specification
+    // Try to activate another service with the same service instance specification
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE));
 
@@ -315,7 +315,6 @@ class ServiceRuntimeIntegrationTest {
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
 
-    // Create the service from the artifact
     serviceRuntime.updateInstanceStatus(instanceSpec, Status.STOPPED);
 
     verify(transport, never()).disconnectServiceApi(any(ServiceWrapper.class));

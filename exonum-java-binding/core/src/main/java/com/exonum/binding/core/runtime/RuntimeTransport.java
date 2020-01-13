@@ -82,7 +82,7 @@ public final class RuntimeTransport implements AutoCloseable {
   void disconnectServiceApi(ServiceWrapper service) {
     String serviceApiPath = createServiceApiPath(service);
     server.removeSubRouter(serviceApiPath);
-    logger.info("Removed the service API endpoint at {}", serviceApiPath);
+    logger.info("Removed the service API endpoints at {}", serviceApiPath);
   }
 
   private static String createServiceApiPath(ServiceWrapper service) {

@@ -220,8 +220,8 @@ public final class ServiceRuntime implements AutoCloseable {
    *
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param instanceStatus a new status of the service instance
-   * @throws IllegalArgumentException if the service is already started; or its artifact
-   *     is not deployed
+   * @throws IllegalArgumentException if activating already active service; or its artifact
+   *     is not deployed; or unrecognized service status received
    */
   public void updateInstanceStatus(ServiceInstanceSpec instanceSpec,
       InstanceState.Status instanceStatus) {
@@ -250,29 +250,24 @@ public final class ServiceRuntime implements AutoCloseable {
       registerService(service);
       // Connect its API
       connectServiceApi(service);
-      logger.info("Added a service: {}", instanceSpec);
+      logger.info("Activated a service: {}", instanceSpec);
     } catch (Exception e) {
-      logger.error("Failed to add a service {} instance", instanceSpec, e);
+      logger.error("Failed to activate a service {} instance", instanceSpec, e);
       throw e;
     }
   }
 
   private void stopService(ServiceInstanceSpec instanceSpec) {
-    try {
-      String name = instanceSpec.getName();
-      Optional<ServiceWrapper> activeService = findService(name);
-      if (activeService.isPresent()) {
-        ServiceWrapper service = activeService.get();
-        unRegisterService(service);
-        runtimeTransport.disconnectServiceApi(service);
-        logger.info("Stopped a service: {}", instanceSpec);
-      } else {
-        logger.warn("There is no active service with the given name {}. "
-            + "Possibly restoring services state after reboot?", name);
-      }
-    } catch (Exception e) {
-      logger.error("Failed to stop a service {} instance", instanceSpec, e);
-      throw e;
+    String name = instanceSpec.getName();
+    Optional<ServiceWrapper> activeService = findService(name);
+    if (activeService.isPresent()) {
+      ServiceWrapper service = activeService.get();
+      unRegisterService(service);
+      runtimeTransport.disconnectServiceApi(service);
+      logger.info("Stopped a service: {}", instanceSpec);
+    } else {
+      logger.warn("There is no active service with the given name {}. "
+          + "Possibly restoring services state after reboot?", name);
     }
   }
 
