@@ -73,6 +73,17 @@ class RuntimeTransportTest {
   }
 
   @Test
+  void disconnectServiceApi() {
+    String serviceApiPath = "test-service";
+    ServiceWrapper service = mock(ServiceWrapper.class);
+    when(service.getPublicApiRelativePath()).thenReturn(serviceApiPath);
+
+    transport.disconnectServiceApi(service);
+
+    verify(server).removeSubRouter(API_ROOT_PATH + "/" + serviceApiPath);
+  }
+
+  @Test
   void close() throws InterruptedException {
     when(server.stop()).thenReturn(CompletableFuture.completedFuture(null));
 

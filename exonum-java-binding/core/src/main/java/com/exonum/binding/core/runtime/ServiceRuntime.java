@@ -173,7 +173,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * It involves the initial configuration of the service instance with the given parameters.
    * The instance is not registered until
    * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)}
-   * is invoked.
+   * is invoked with the {@code Status=Active}.
    *
    * @param fork a database view to apply configuration
    * @param instanceSpec a service instance specification; must reference a deployed artifact
@@ -209,11 +209,14 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
-   * TODO(ECR-3919): fix the documentation of the method
-   * Adds a service instance to the runtime after it has been successfully initialized
-   * in {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])}. This operation
-   * completes the service instance registration, allowing subsequent operations on it:
+   * Modifies the state of the given service instance at the runtime either by activation it or
+   * stopping. The service instance should be successfully initialized
+   * by {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])} in advance.
+   * Activation leads to the service instance registration, allowing subsequent operations on it:
    * transactions, API requests.
+   * Stopping leads to the service disabling i.e. stopped service does not execute transactions,
+   * process events, provide APIs, etc. And it becomes unavailable to other services,
+   * but still exists.
    *
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param instanceStatus a new status of the service instance
@@ -227,6 +230,9 @@ public final class ServiceRuntime implements AutoCloseable {
         activateService(instanceSpec);
       } else if (instanceStatus.equals(Status.STOPPED)) {
         stopService(instanceSpec);
+      } else if (instanceStatus.equals(Status.NONE)) {
+        logger.warn("None status for the service instance {}, ignore. "
+            + "Possibly restoring services state after reboot?", instanceSpec.getName());
       } else {
         String msg = String.format("Unexpected status %s received for the service %s",
             instanceStatus.name(), instanceSpec.getName());

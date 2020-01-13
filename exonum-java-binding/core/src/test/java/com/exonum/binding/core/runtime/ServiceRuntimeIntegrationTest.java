@@ -24,8 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +42,7 @@ import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.core.messages.Runtime.InstanceState.Status;
 import com.google.common.collect.ImmutableMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -239,7 +241,7 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void commitService() {
+  void activateService() {
     Node node = mock(Node.class);
     serviceRuntime.initialize(node);
 
@@ -258,7 +260,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    serviceRuntime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE);
+    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
@@ -272,7 +274,7 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void commitServiceDuplicate() {
+  void activateServiceDuplicate() {
     Node node = mock(Node.class);
     serviceRuntime.initialize(node);
 
@@ -291,17 +293,63 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    serviceRuntime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE);
+    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
 
     // Try to create another service with the same service instance specification
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE));
+        () -> serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE));
 
     assertThat(e).hasMessageContaining("name");
     assertThat(e).hasMessageContaining(TEST_NAME);
 
     // Check the service was instantiated only once
     verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
+  }
+
+  @Test
+  void stopNonActiveService() {
+    Node node = mock(Node.class);
+    serviceRuntime.initialize(node);
+
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+
+    // Create the service from the artifact
+    serviceRuntime.updateInstanceStatus(instanceSpec, Status.STOPPED);
+
+    verify(transport, never()).disconnectServiceApi(any(ServiceWrapper.class));
+  }
+
+  @Test
+  void stopService() {
+    Node node = mock(Node.class);
+    serviceRuntime.initialize(node);
+
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+    when(serviceLoader.findService(artifactId))
+        .thenReturn(Optional.of(serviceDefinition));
+
+    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
+    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
+        .thenReturn(serviceWrapper);
+
+    // Activate the service
+    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+
+    // Stop the service
+    serviceRuntime.updateInstanceStatus(instanceSpec, Status.STOPPED);
+
+    // Verify service stopped
+    verify(transport).disconnectServiceApi(any(ServiceWrapper.class));
+    Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
+    assertThat(serviceOpt).isEmpty();
   }
 
   @Test
@@ -354,7 +402,7 @@ class ServiceRuntimeIntegrationTest {
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
-      serviceRuntime.updateInstanceStatus(INSTANCE_SPEC, InstanceState.Status.NONE);
+      serviceRuntime.updateInstanceStatus(INSTANCE_SPEC, Status.ACTIVE);
     }
 
     @Test
@@ -383,7 +431,7 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
-    void executeTransactionUnknownService() throws Exception {
+    void  executeTransactionUnknownService() throws Exception {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
         int serviceId = TEST_ID + 1;
@@ -495,7 +543,7 @@ class ServiceRuntimeIntegrationTest {
 
       // Create the services
       for (ServiceInstanceSpec instanceSpec : SERVICES.keySet()) {
-        serviceRuntime.updateInstanceStatus(instanceSpec, InstanceState.Status.NONE);
+        serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
       }
     }
 
@@ -516,7 +564,7 @@ class ServiceRuntimeIntegrationTest {
       // Verify that each service got the notifications, i.e., the first service
       // throwing an exception has not disrupted the notification process
       InOrder inOrder = Mockito.inOrder(services.toArray(new Object[0]));
-      for (ServiceWrapper service: services) {
+      for (ServiceWrapper service : services) {
         inOrder.verify(service).afterCommit(event);
       }
     }

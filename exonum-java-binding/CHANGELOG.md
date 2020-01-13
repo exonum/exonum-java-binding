@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
   `ListProof`.
 - `ProofEntryIndexProxy` collection.
+- Service instances can be stopped now. (#1358)
 
 ### Changed
 - Transactions are now implemented as service methods annotated with
