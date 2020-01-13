@@ -33,9 +33,8 @@ public final class CallInBlocks {
    * @throws IndexOutOfBoundsException if position is negative or greater than
    *     {@value Integer#MAX_VALUE}
    */
-  public static CallInBlock transaction(/* todo: change to int once ECR-4083 is integrated */
-      long txPosition) {
-    checkElementIndex(Math.toIntExact(txPosition), Integer.MAX_VALUE, "txPosition");
+  public static CallInBlock transaction(int txPosition) {
+    checkElementIndex(txPosition, Integer.MAX_VALUE, "txPosition");
     return CallInBlock.newBuilder()
         .setTransaction(txPosition)
         .build();

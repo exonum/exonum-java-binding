@@ -17,7 +17,8 @@ plugins:
 artifacts:
   cryptocurrency:
     runtime: java
-    name: "com.exonum.binding:exonum-java-binding-cryptocurrency-demo:0.10.0-SNAPSHOT"
+    name: "com.exonum.binding/exonum-java-binding-cryptocurrency-demo"
+    version: "0.10.0-SNAPSHOT"
     spec:
       artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-SNAPSHOT-artifact.jar"
 

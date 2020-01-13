@@ -18,12 +18,14 @@ plugins:
 artifacts:
   qa-service:
     runtime: java
-    name: "com.exonum.binding:exonum-java-binding-qa-service:0.10.0-SNAPSHOT"
+    name: "com.exonum.binding/exonum-java-binding-qa-service"
+    version: "0.10.0-SNAPSHOT"
     spec:
       artifact_filename: "exonum-java-binding-qa-service-0.10.0-SNAPSHOT-artifact.jar"
   time:
     runtime: rust
-    name: "exonum-time:0.13.0-rc.2"
+    name: "exonum-time"
+    version: "0.13.0-rc.2"
 
 instances:
   qa-service:

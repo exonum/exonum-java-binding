@@ -103,13 +103,13 @@ unsafe fn cache_methods(env: &JNIEnv) {
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
         "deployArtifact",
-        "(Ljava/lang/String;[B)V",
+        "([B[B)V",
     );
     RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
         "isArtifactDeployed",
-        "(Ljava/lang/String;)Z",
+        "([B)Z",
     );
     RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE = get_method_id(
         &env,

@@ -33,8 +33,8 @@ import java.nio.file.Paths;
 public final class QaArtifactInfo {
 
   public static final Path ARTIFACT_DIR = Paths.get(getRequiredProperty("it.artifactsDir"));
-  private static final String ARTIFACT_NAME = getRequiredProperty("it.artifactName");
-  public static final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.newJavaId(ARTIFACT_NAME);
+  public static final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom(
+      getRequiredProperty("it.exonumArtifactId"));
   public static final String ARTIFACT_FILENAME = getRequiredProperty("it.artifactFilename");
   public static final String TIME_SERVICE_NAME = "time";
   public static final int TIME_SERVICE_ID = 100;

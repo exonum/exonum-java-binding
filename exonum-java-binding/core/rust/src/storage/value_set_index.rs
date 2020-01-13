@@ -14,7 +14,7 @@
 
 use exonum_merkledb::{
     access::FromAccess,
-    value_set_index::{ValueSetIndexHashes, ValueSetIndexIter},
+    indexes::value_set::{Hashes, Iter as IndexIter},
     Fork, IndexAddress, Snapshot, ValueSetIndex,
 };
 use jni::{
@@ -39,7 +39,7 @@ enum IndexType {
     ForkIndex(Index<&'static Fork>),
 }
 
-type Iter<'a> = PairIter<ValueSetIndexIter<'a, Value>>;
+type Iter<'a> = PairIter<IndexIter<'a, Value>>;
 
 const JAVA_ENTRY_FQN: &str =
     "com/exonum/binding/core/storage/indices/ValueSetIndexProxy$EntryInternal";
@@ -341,7 +341,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<ValueSetIndexHashes>(iter_handle);
+        let iter = handle::cast_handle::<Hashes>(iter_handle);
         match iter.next() {
             Some(val) => utils::convert_hash(&env, &val),
             None => Ok(ptr::null_mut()),
@@ -357,5 +357,5 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<ValueSetIndexHashes>(&env, iter_handle);
+    handle::drop_handle::<Hashes>(&env, iter_handle);
 }
