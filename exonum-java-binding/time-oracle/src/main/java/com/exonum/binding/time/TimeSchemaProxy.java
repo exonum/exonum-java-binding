@@ -35,7 +35,7 @@ import java.time.ZonedDateTime;
 class TimeSchemaProxy implements TimeSchema {
 
   private static final int RUST_RUNTIME_ID = RuntimeId.RUST.getId();
-  private static final String EXONUM_TIME_ARTIFACT_NAME_PREFIX = "exonum-time:";
+  private static final String EXONUM_TIME_ARTIFACT_NAME = "exonum-time";
 
   private static final Serializer<PublicKey> PUBLIC_KEY_SERIALIZER =
       StandardSerializers.publicKey();
@@ -66,7 +66,7 @@ class TimeSchemaProxy implements TimeSchema {
 
   private static boolean isTimeOracleInstance(ArtifactId artifactId) {
     return artifactId.getRuntimeId() == RUST_RUNTIME_ID
-        && artifactId.getName().startsWith(EXONUM_TIME_ARTIFACT_NAME_PREFIX);
+        && artifactId.getName().equals(EXONUM_TIME_ARTIFACT_NAME);
   }
 
   @Override

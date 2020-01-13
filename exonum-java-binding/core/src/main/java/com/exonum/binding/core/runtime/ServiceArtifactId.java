@@ -21,12 +21,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Integer.parseInt;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
+import com.exonum.core.messages.Runtime.ArtifactId;
 import com.google.auto.value.AutoValue;
 
 /**
  * A service artifact identifier. It consists of the runtime id in which the service shall be
- * deployed and the service artifact name. The name of Java artifacts usually contains the three
- * coordinates identifying any Java artifact: groupId, artifactId and version.
+ * deployed, the service artifact name and its version.
  *
  * <p>The extensions of this class must be immutable and hence thread-safe.
  */
@@ -34,7 +34,7 @@ import com.google.auto.value.AutoValue;
 public abstract class ServiceArtifactId {
 
   private static final String DELIMITER = ":";
-  private static final int NUM_FIELDS = 2;
+  private static final int KEEP_EMPTY = -1;
 
   /**
    * Returns the runtime id in which the service shall be deployed.
@@ -42,23 +42,35 @@ public abstract class ServiceArtifactId {
   public abstract int getRuntimeId();
 
   /**
-   * Returns the full artifact name of this service (e.g., "com.acme:land-registry:1.2.0").
+   * Returns the artifact name of this service.
+   * The name of Java artifacts usually (but not necessary) contains the two coordinates:
+   * groupId and artifactId separated by "/" (e.g., "com.acme/land-registry").
    */
   public abstract String getName();
 
   /**
-   * Parses a service id in format "runtimeId:serviceName" as {@link #toString()} produces.
+   * Returns the artifact version of this service (e.g., "1.2.0").
+   */
+  public abstract String getVersion();
+
+  /**
+   * Parses a service id in format "runtimeId:serviceName:version" as {@link #toString()} produces.
    *
-   * @param serviceArtifactId a string in format "runtimeId:serviceName". Whitespace
+   * @param serviceArtifactId a string in format "runtimeId:serviceName:version". Whitespace
    *     characters, including preceding and trailing, are not allowed
    * @return a ServiceArtifactId with the given coordinates
    * @throws IllegalArgumentException if the format is not correct
    */
   public static ServiceArtifactId parseFrom(String serviceArtifactId) {
-    String[] coordinates = serviceArtifactId.split(DELIMITER, NUM_FIELDS);
+    JavaArtifactUtils.checkNoForbiddenChars(serviceArtifactId);
+    String[] coordinates = serviceArtifactId.split(DELIMITER, KEEP_EMPTY);
+    checkArgument(coordinates.length == 3,
+        "Invalid artifact id (%s), must have 'runtimeId:artifactName:version' format",
+        serviceArtifactId);
     int runtimeId = parseInt(coordinates[0]);
     String name = coordinates[1];
-    return valueOf(runtimeId, name);
+    String version = coordinates[2];
+    return valueOf(runtimeId, name, version);
   }
 
   /**
@@ -66,8 +78,8 @@ public abstract class ServiceArtifactId {
    *
    * @param name the name of the service; must not be blank
    */
-  public static ServiceArtifactId newJavaId(String name) {
-    return valueOf(JAVA.getId(), name);
+  public static ServiceArtifactId newJavaId(String name, String version) {
+    return valueOf(JAVA.getId(), name, version);
   }
 
   /**
@@ -76,16 +88,24 @@ public abstract class ServiceArtifactId {
    * @param runtimeId the runtime id in which the service shall be deployed
    * @param name the name of the service; must not be blank
    */
-  public static ServiceArtifactId valueOf(int runtimeId, String name) {
+  public static ServiceArtifactId valueOf(int runtimeId, String name, String version) {
     checkArgument(isNotBlank(name), "name is blank: '%s'", name);
-    return new AutoValue_ServiceArtifactId(runtimeId, name);
+    checkArgument(isNotBlank(version), "version is blank: '%s'", version);
+    return new AutoValue_ServiceArtifactId(runtimeId, name, version);
   }
 
   /**
-   * Returns an artifact id in the following format: "runtimeId:serviceName".
+   * Creates a new service artifact from the given artifact id message.
+   */
+  public static ServiceArtifactId fromProto(ArtifactId artifactId) {
+    return valueOf(artifactId.getRuntimeId(), artifactId.getName(), artifactId.getVersion());
+  }
+
+  /**
+   * Returns an artifact id in the following format: "runtimeId:serviceName:version".
    */
   @Override
   public final String toString() {
-    return getRuntimeId() + DELIMITER + getName();
+    return getRuntimeId() + DELIMITER + getName() + DELIMITER + getVersion();
   }
 }

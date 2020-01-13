@@ -26,8 +26,8 @@ import java.nio.file.Paths;
 final class TestArtifactInfo {
 
   static final Path ARTIFACT_DIR = Paths.get(getRequiredProperty("it.artifactsDir"));
-  private static final String ARTIFACT_NAME = getRequiredProperty("it.artifactName");
-  static final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.newJavaId(ARTIFACT_NAME);
+  static final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom(
+      getRequiredProperty("it.exonumArtifactId"));
   static final String ARTIFACT_FILENAME = getRequiredProperty("it.artifactFilename");
 
   private static String getRequiredProperty(String key) {

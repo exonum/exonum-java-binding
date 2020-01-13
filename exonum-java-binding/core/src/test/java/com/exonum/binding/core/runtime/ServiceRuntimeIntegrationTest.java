@@ -95,7 +95,7 @@ class ServiceRuntimeIntegrationTest {
   void deployCorrectArtifact() throws Exception {
     serviceRuntime.initialize(mock(Node.class));
 
-    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     String artifactFilename = "foo-service.jar";
     Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -115,7 +115,7 @@ class ServiceRuntimeIntegrationTest {
   void deployArtifactWrongId() throws Exception {
     serviceRuntime.initialize(mock(Node.class));
 
-    ServiceArtifactId actualId = ServiceArtifactId.newJavaId("com.acme:actual:1.0.0");
+    ServiceArtifactId actualId = ServiceArtifactId.newJavaId("com.acme/actual", "1.0.0");
     String artifactFilename = "foo-service.jar";
     Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -123,7 +123,7 @@ class ServiceRuntimeIntegrationTest {
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenReturn(serviceDefinition);
 
-    ServiceArtifactId expectedId = ServiceArtifactId.newJavaId("com.acme:expected:1.0.0");
+    ServiceArtifactId expectedId = ServiceArtifactId.newJavaId("com.acme/expected", "1.0.0");
 
     Exception actual = assertThrows(ServiceLoadingException.class,
         () -> serviceRuntime.deployArtifact(expectedId, artifactFilename));
@@ -138,7 +138,7 @@ class ServiceRuntimeIntegrationTest {
   void deployArtifactFailed() throws Exception {
     serviceRuntime.initialize(mock(Node.class));
 
-    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId("com.acme:actual:1.0.0");
+    ServiceArtifactId serviceId = ServiceArtifactId.newJavaId("com.acme/actual", "1.0.0");
     String artifactFilename = "foo-service.jar";
     Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     ServiceLoadingException exception = new ServiceLoadingException("Boom");
@@ -158,7 +158,7 @@ class ServiceRuntimeIntegrationTest {
     Node node = mock(Node.class);
     serviceRuntime.initialize(node);
 
-    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme:foo-service:1.0.0");
+    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme/foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
@@ -191,7 +191,7 @@ class ServiceRuntimeIntegrationTest {
     Node node = mock(Node.class);
     serviceRuntime.initialize(node);
 
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
 
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
@@ -213,7 +213,7 @@ class ServiceRuntimeIntegrationTest {
     Node node = mock(Node.class);
     serviceRuntime.initialize(node);
 
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
@@ -243,7 +243,7 @@ class ServiceRuntimeIntegrationTest {
     Node node = mock(Node.class);
     serviceRuntime.initialize(node);
 
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
@@ -276,7 +276,7 @@ class ServiceRuntimeIntegrationTest {
     Node node = mock(Node.class);
     serviceRuntime.initialize(node);
 
-    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
         .newInstance(artifactId, TestServiceModule::new);
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
@@ -327,7 +327,8 @@ class ServiceRuntimeIntegrationTest {
 
   @Nested
   class WithSingleService {
-    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", "1.0.0");
     final ServiceInstanceSpec INSTANCE_SPEC = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, ARTIFACT_ID);
 
@@ -454,7 +455,8 @@ class ServiceRuntimeIntegrationTest {
 
   @Nested
   class WithMultipleServices {
-    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.newJavaId("com.acme:foo-service:1.0.0");
+    final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", "1.0.0");
     final Map<ServiceInstanceSpec, ServiceWrapper> SERVICES = ImmutableMap.of(
         ServiceInstanceSpec.newInstance("a", 1, ARTIFACT_ID), mock(ServiceWrapper.class, "a"),
         ServiceInstanceSpec.newInstance("b", 2, ARTIFACT_ID), mock(ServiceWrapper.class, "b"),
