@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use exonum_supervisor::Supervisor;
+use exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor};
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
     create_java_vm, create_service_runtime,
@@ -70,7 +70,13 @@ fn create_blockchain(
 
     let blockchain = Blockchain::new(database, keypair, api_sender);
 
-    let supervisor_service = supervisor_service();
+    let supervisor_mode = &config
+        .run_config
+        .node_config
+        .public_config
+        .general
+        .supervisor_mode;
+    let supervisor_service = supervisor_service(supervisor_mode);
     let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus)
         .with_artifact(Supervisor.artifact_id())
         .with_instance(supervisor_service)
@@ -110,6 +116,9 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
     Ok(database)
 }
 
-fn supervisor_service() -> InstanceInitParams {
-    Supervisor::simple()
+fn supervisor_service(mode: &SupervisorMode) -> InstanceInitParams {
+    match *mode {
+        SupervisorMode::Simple => Supervisor::simple(),
+        SupervisorMode::Decentralized => Supervisor::decentralized(),
+    }
 }
