@@ -53,13 +53,13 @@ final class TestKitTestUtils {
 
   static void createTestServiceArtifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);
-    createArtifact(artifactLocation, ARTIFACT_ID, ARTIFACT_VERSION, TestServiceModule.class,
+    createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class,
         TestSchema.class, TestService.class);
   }
 
   static void createTestService2Artifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME_2);
-    createArtifact(artifactLocation, ARTIFACT_ID_2, ARTIFACT_VERSION_2, TestServiceModule2.class,
+    createArtifact(artifactLocation, ARTIFACT_ID_2, TestServiceModule2.class,
         TestSchema.class, TestService2.class);
   }
 
@@ -87,11 +87,10 @@ final class TestKitTestUtils {
   }
 
   private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,
-                                     String serviceArtifactVersion, Class serviceModule,
-                                     Class<?>... artifactClasses) throws IOException {
+      Class serviceModule, Class<?>... artifactClasses) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId(serviceArtifactId.toString())
-        .setPluginVersion(serviceArtifactVersion)
+        .setPluginVersion(serviceArtifactId.getVersion())
         .addClasses(artifactClasses)
         .addExtensionClass(serviceModule)
         .writeTo(artifactLocation);

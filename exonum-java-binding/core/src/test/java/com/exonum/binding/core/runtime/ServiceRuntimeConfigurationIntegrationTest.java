@@ -53,7 +53,7 @@ class ServiceRuntimeConfigurationIntegrationTest {
     Path artifactLocation = tmpArtifactDir.resolve(ARTIFACT_FILENAME);
     new ServiceArtifactBuilder()
         .setPluginId(ARTIFACT_ID.toString())
-        .setPluginVersion(ARTIFACT_VERSION)
+        .setPluginVersion(ARTIFACT_ID.getVersion())
         .addClasses(TestService.class)
         .addExtensionClass(TestServiceModule.class)
         .writeTo(artifactLocation);

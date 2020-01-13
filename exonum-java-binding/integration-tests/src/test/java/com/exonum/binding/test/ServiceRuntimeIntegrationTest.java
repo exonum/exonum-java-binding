@@ -55,7 +55,7 @@ class ServiceRuntimeIntegrationTest {
     ServiceArtifactId artifactId = ServiceArtifactId.parseFrom(pluginId);
     new ServiceArtifactBuilder()
         .setPluginId(pluginId)
-        .setPluginVersion("1.0.0")
+        .setPluginVersion(artifactId.getVersion())
         .addClass(ThrowingInAfterTxService.class)
         .addExtensionClass(ThrowingInAfterTxModule.class)
         .writeTo(artifactDir.resolve(artifactFilename));
