@@ -53,7 +53,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ServiceWrapperTest {
 
   private static final ServiceArtifactId TEST_ARTIFACT_ID =
-      ServiceArtifactId.newJavaId("com.acme:foo:1.2.3");
+      ServiceArtifactId.newJavaId("com.acme/foo", "1.2.3");
   private static final String TEST_SERVICE_NAME = "test-service";
   private static final int TEST_SERVICE_ID = 1;
 

@@ -17,18 +17,26 @@
 package com.exonum.binding.core.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.core.messages.Runtime.ArtifactId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class ServiceArtifactIdTest {
+  private static final ArtifactId ARTIFACT_ID =
+      ArtifactId.newBuilder()
+          .setRuntimeId(1)
+          .setName("com.acme/foo")
+          .setVersion("1.2.3")
+          .build();
 
   @ParameterizedTest
   @ValueSource(strings = {
-      "0:land-registry",
-      "1:com.acme:foo-service:1.1.1-beta1",
-      "100500:::",
+      "0:land-registry:v1",
+      "1:com.acme/foo-service:1.1.1-beta1",
+      "100500:foo:bar",
   })
   void parseFromRoundtrip(String serviceId) {
     ServiceArtifactId parsedId = ServiceArtifactId.parseFrom(serviceId);
@@ -41,25 +49,67 @@ class ServiceArtifactIdTest {
   void valueOf() {
     int runtimeId = 1;
     String name = "test-service";
-    ServiceArtifactId id = ServiceArtifactId.valueOf(runtimeId, name);
+    String version = "0.1";
+    ServiceArtifactId id = ServiceArtifactId.valueOf(runtimeId, name, version);
 
     assertThat(id.getRuntimeId()).isEqualTo(runtimeId);
     assertThat(id.getName()).isEqualTo(name);
+    assertThat(id.getVersion()).isEqualTo(version);
   }
 
   @Test
   void newJavaId() {
     String name = "test-service";
-    ServiceArtifactId id = ServiceArtifactId.newJavaId(name);
+    String version = "test-version";
+    ServiceArtifactId id = ServiceArtifactId.newJavaId(name, version);
 
     assertThat(id.getRuntimeId()).isEqualTo(RuntimeId.JAVA.getId());
     assertThat(id.getName()).isEqualTo(name);
   }
 
   @Test
-  void toStringTest() {
-    ServiceArtifactId id = ServiceArtifactId.valueOf(0, "full-name");
+  void fromProto() {
+    ArtifactId artifactId = ARTIFACT_ID;
 
-    assertThat(id.toString()).isEqualTo("0:full-name");
+    ServiceArtifactId serviceArtifactId = ServiceArtifactId.fromProto(artifactId);
+
+    assertThat(serviceArtifactId.getRuntimeId()).isEqualTo(artifactId.getRuntimeId());
+    assertThat(serviceArtifactId.getName()).isEqualTo(artifactId.getName());
+    assertThat(serviceArtifactId.getVersion()).isEqualTo(artifactId.getVersion());
   }
+
+  @Test
+  void toStringTest() {
+    ServiceArtifactId id = ServiceArtifactId.valueOf(0, "full-name", "0.1");
+
+    assertThat(id.toString()).isEqualTo("0:full-name:0.1");
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "",
+      /* Too few components */
+      "too-few-components",
+      "1:too-few-components",
+      /* Extra component */
+      "1:foo-service:0.1.0:extra-component",
+      /* All blanks */
+      " : : ",
+      /* Non-integral runtime id */
+      "a:com.acme/foo:1.0",
+      /* Spaces in runtime id */
+      "1 :com.acme/foo:1.0",
+      /* Spaces in name */
+      "1:com.acme foo:1.0",
+      "1:com.acme/fo o:1.0",
+      /* Spaces in version */
+      "1:com.acme:foo: 1.0",
+      "1:com.acme/foo:1.0 ",
+      "1:com.acme:foo:1 0",
+  })
+  void checkInvalidName(String artifactId) {
+    assertThrows(IllegalArgumentException.class,
+        () -> ServiceArtifactId.parseFrom(artifactId));
+  }
+
 }

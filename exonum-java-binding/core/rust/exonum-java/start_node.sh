@@ -93,6 +93,7 @@ export RUST_LOG="${RUST_LOG-warn,exonum=info,exonum-java=info,java_bindings=info
 header "GENERATE COMMON CONFIG"
 cargo +${RUST_COMPILER_VERSION} run -- generate-template \
     --validators-count=1 \
+    --supervisor-mode simple \
     ${COMMON_CONFIG_PATH}
 
 header "GENERATE CONFIG"
