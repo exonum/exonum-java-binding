@@ -77,6 +77,7 @@ before_cache:
 before_install:
   # Skip the build if only md files were updated.
   - source .travis/skip-ci.sh
+  # Install JDK 8 on Mac
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then wget "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09/OpenJDK8U-jdk_x64_mac_hotspot_8u232b09.tar.gz"
