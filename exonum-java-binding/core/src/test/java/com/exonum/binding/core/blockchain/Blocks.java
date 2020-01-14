@@ -40,6 +40,8 @@ public final class Blocks {
         .previousBlockHash(block.getPreviousBlockHash())
         .txRootHash(block.getTxRootHash())
         .stateHash(block.getStateHash())
+        .errorHash(block.getErrorHash())
+        .additionalHeaders(block.getAdditionalHeaders())
         .build();
   }
 

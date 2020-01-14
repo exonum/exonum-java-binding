@@ -37,7 +37,7 @@ class FakeServiceModuleTest {
       @Override
       protected void configure() {
         bind(ServiceInstanceSpec.class).toInstance(ServiceInstanceSpec.newInstance("test", 1,
-            ServiceArtifactId.newJavaId("a:b:1")));
+            ServiceArtifactId.newJavaId("a/b", "1")));
       }
     }, new FakeServiceModule());
 

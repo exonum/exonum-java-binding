@@ -22,6 +22,7 @@ exonum-cli = "0.13.0-rc.2"
 exonum-crypto = "0.13.0-rc.2"
 exonum-derive = "0.13.0-rc.2"
 exonum-proto = "0.13.0-rc.2"
+exonum-supervisor = "0.13.0-rc.2"
 exonum-testkit = "0.13.0-rc.2"
 exonum-time = "0.13.0-rc.2"
 failure = "0.1"
@@ -51,13 +52,13 @@ rpath = true
 
 # FIXME: using git dependency until Exonum 1.0 is released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-build = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-derive = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-cli = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-proto = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-crypto = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
-exonum-merkledb = { git = "https://github.com/exonum/exonum", rev = "af28b719e6" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-build = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-derive = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-cli = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-proto = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-crypto = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-merkledb = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
