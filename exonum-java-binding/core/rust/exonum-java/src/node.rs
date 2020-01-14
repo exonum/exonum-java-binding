@@ -70,13 +70,7 @@ fn create_blockchain(
 
     let blockchain = Blockchain::new(database, keypair, api_sender);
 
-    let supervisor_mode = &config
-        .run_config
-        .node_config
-        .public_config
-        .general
-        .supervisor_mode;
-    let supervisor_service = supervisor_service(supervisor_mode);
+    let supervisor_service = supervisor_service(&config);
     let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus)
         .with_artifact(Supervisor.artifact_id())
         .with_instance(supervisor_service)
@@ -116,7 +110,13 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
     Ok(database)
 }
 
-fn supervisor_service(mode: &SupervisorMode) -> InstanceInitParams {
+fn supervisor_service(config: &Config) -> InstanceInitParams {
+    let mode = &config
+        .run_config
+        .node_config
+        .public_config
+        .general
+        .supervisor_mode;
     match *mode {
         SupervisorMode::Simple => Supervisor::simple(),
         SupervisorMode::Decentralized => Supervisor::decentralized(),
