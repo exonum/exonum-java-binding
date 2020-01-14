@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use exonum_explorer_service::ExplorerFactory;
 use exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor};
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
@@ -25,13 +26,12 @@ use java_bindings::{
         },
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel, NodeConfig as CoreNodeConfig},
-        runtime::rust::{RustRuntime, ServiceFactory},
+        runtime::rust::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory},
     },
     Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
     JavaRuntimeProxy,
 };
 
-use java_bindings::exonum::runtime::rust::RustRuntimeBuilder;
 use std::sync::Arc;
 
 pub fn run_node(command: Command) -> Result<(), failure::Error> {
@@ -74,6 +74,8 @@ fn create_blockchain(
     let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus)
         .with_artifact(Supervisor.artifact_id())
         .with_instance(supervisor_service)
+        .with_artifact(ExplorerFactory.artifact_id())
+        .with_instance(ExplorerFactory.default_instance())
         .build();
 
     let rust_runtime = create_rust_runtime(channel);
@@ -89,6 +91,7 @@ fn create_rust_runtime(channel: &NodeChannel) -> RustRuntime {
     RustRuntimeBuilder::new()
         .with_factory(TimeServiceFactory::default())
         .with_factory(Supervisor)
+        .with_factory(ExplorerFactory)
         .build(channel.endpoints.0.clone())
 }
 
