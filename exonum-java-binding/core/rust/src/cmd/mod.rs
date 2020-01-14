@@ -30,6 +30,7 @@ mod run_dev;
 
 pub use self::run::*;
 pub use self::run_dev::*;
+pub use exonum_cli::DefaultConfigManager;
 
 /// Exonum Java Bindings Application.
 ///

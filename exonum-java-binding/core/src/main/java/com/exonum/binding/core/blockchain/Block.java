@@ -22,8 +22,10 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.exonum.binding.core.service.Schema;
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
+import com.google.protobuf.ByteString;
 
 /**
  * Exonum block header data structure.
@@ -89,6 +91,19 @@ public abstract class Block {
    * @see Schema
    */
   public abstract HashCode getStateHash();
+
+  /**
+   * Root hash of exceptions occurred in the block.
+   *
+   * @see Blockchain#getCallErrors()
+   */
+  public abstract HashCode getErrorHash();
+
+  /**
+   * Contains additional block headers of the block.
+   * The key is a block header; and the value is a header bytes value.
+   */
+  public abstract ImmutableMap<String, ByteString> getAdditionalHeaders();
 
   @Override
   public int hashCode() {
@@ -160,6 +175,19 @@ public abstract class Block {
      * @see Schema#getStateHashes()
      */
     public abstract Builder stateHash(HashCode blockchainStateHash);
+
+    /**
+     * Sets error hash.
+     *
+     * @see Blockchain#getCallErrors()
+     */
+    public abstract Builder errorHash(HashCode errorHash);
+
+    /**
+     * Sets additional block headers. Headers should have exactly the same order
+     * as its native equivalent. Changing headers order will lead to the block hash violation.
+     */
+    public abstract Builder additionalHeaders(ImmutableMap<String, ByteString> additionalHeaders);
 
     abstract Block autoBuild();
 

@@ -17,14 +17,21 @@
 package com.exonum.binding.core.blockchain.serialization;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.core.messages.Blockchain;
+import com.exonum.core.messages.Blockchain.AdditionalHeaders;
+import com.exonum.core.messages.KeyValueSequenceOuterClass.KeyValue;
+import com.exonum.core.messages.KeyValueSequenceOuterClass.KeyValueSequence;
+import com.exonum.core.messages.KeyValueSequenceOuterClass.KeyValueSequence.Builder;
 import com.exonum.core.messages.Types;
 import com.exonum.core.messages.Types.Hash;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 
 public enum BlockSerializer implements Serializer<Block> {
@@ -42,6 +49,8 @@ public enum BlockSerializer implements Serializer<Block> {
         .setPrevHash(toHashProto(value.getPreviousBlockHash()))
         .setTxHash(toHashProto(value.getTxRootHash()))
         .setStateHash(toHashProto(value.getStateHash()))
+        .setErrorHash(toHashProto(value.getErrorHash()))
+        .setAdditionalHeaders(toHeadersProto(value.getAdditionalHeaders()))
         .build();
     return block.toByteArray();
   }
@@ -58,6 +67,8 @@ public enum BlockSerializer implements Serializer<Block> {
         .previousBlockHash(toHashCode(copiedBlocks.getPrevHash()))
         .txRootHash(toHashCode(copiedBlocks.getTxHash()))
         .stateHash(toHashCode(copiedBlocks.getStateHash()))
+        .errorHash(toHashCode(copiedBlocks.getErrorHash()))
+        .additionalHeaders(toHeadersMap(copiedBlocks.getAdditionalHeaders()))
         .build();
   }
 
@@ -72,4 +83,30 @@ public enum BlockSerializer implements Serializer<Block> {
     ByteString bytes = hash.getData();
     return HashCode.fromBytes(bytes.toByteArray());
   }
+
+  @VisibleForTesting
+  static ImmutableMap<String, ByteString> toHeadersMap(AdditionalHeaders headers) {
+    return headers.getHeaders().getEntryList()
+        .stream()
+        .collect(toImmutableMap(KeyValue::getKey, KeyValue::getValue));
+  }
+
+  @VisibleForTesting
+  static AdditionalHeaders toHeadersProto(ImmutableMap<String, ByteString> headers) {
+    Builder additionalHeadersBuilder = KeyValueSequence.newBuilder();
+
+    headers.forEach((k, v) -> additionalHeadersBuilder.addEntry(toProtoEntry(k, v)));
+
+    return AdditionalHeaders.newBuilder()
+        .setHeaders(additionalHeadersBuilder.build())
+        .build();
+  }
+
+  private static KeyValue toProtoEntry(String key, ByteString value) {
+    return KeyValue.newBuilder()
+        .setKey(key)
+        .setValue(value)
+        .build();
+  }
+
 }
