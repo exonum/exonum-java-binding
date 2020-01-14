@@ -78,7 +78,8 @@ before_install:
   # Skip the build if only md files were updated.
   - source .travis/skip-ci.sh
   # Install JDK 8 on Mac. We use latest osx_image for faster Homebrew packages
-  # installation, but it does not support JDK 8.
+  # installation, but it has JDK 13 by default. We can't use Homebrew for installing
+  # a cask, because it will force Homebrew update, which takes a long time.
   - |
     if [[ "$TRAVIS_OS_NAME" == "osx" ]]
     then wget "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09/OpenJDK8U-jdk_x64_mac_hotspot_8u232b09.tar.gz"
