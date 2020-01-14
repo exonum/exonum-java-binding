@@ -258,6 +258,7 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   private void stopService(ServiceInstanceSpec instanceSpec) {
+    // TODO: ECR-2334 add restriction for creation new snapshots
     String name = instanceSpec.getName();
     Optional<ServiceWrapper> activeService = findService(name);
     if (activeService.isPresent()) {
