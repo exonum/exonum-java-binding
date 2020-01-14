@@ -27,9 +27,6 @@ addons:
       - protobuf-compiler
       - libprotobuf-dev
   homebrew:
-    taps: homebrew/cask-versions
-    casks:
-      - java8
     packages:
       - libsodium
       - rocksdb
@@ -80,6 +77,14 @@ before_cache:
 before_install:
   # Skip the build if only md files were updated.
   - source .travis/skip-ci.sh
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then wget "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09/OpenJDK8U-jdk_x64_mac_hotspot_8u232b09.tar.gz"
+    tar -xf OpenJDK8U-jdk_x64_mac_hotspot_8u232b09.tar.gz
+    export PATH=$PWD/jdk8u232-b09/Contents/Home/bin:$PATH
+    export JAVA_HOME=$PWD/jdk8u232-b09/Contents/Home/jre
+    java -version
+    fi
   - export PATH="$PATH":"$HOME/.cargo/bin"
   # Install rustup if it's not already installed (i.e., not in CI cache).
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
