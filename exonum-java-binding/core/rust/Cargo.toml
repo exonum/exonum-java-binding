@@ -58,6 +58,7 @@ exonum-time = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
 exonum-build = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
 exonum-derive = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
 exonum-cli = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
+exonum-explorer-service = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
 exonum-proto = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
 exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
 exonum-crypto = { git = "https://github.com/exonum/exonum", rev = "b81d64ef" }
