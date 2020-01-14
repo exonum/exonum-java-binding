@@ -46,7 +46,6 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
     def serialize_config(self, _loader: ProtobufLoader, instance: Instance, config: Any) -> bytes:
         return self.serialize_config_impl(config, instance.name)
 
-    @staticmethod
     def serialize_config_impl(self, config: Any, instance_name: str) -> bytes:
         protoc = Protoc()
 
