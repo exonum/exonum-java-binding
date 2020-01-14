@@ -24,6 +24,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -81,8 +82,7 @@ public final class ServiceRuntime implements AutoCloseable {
   private final Map<Integer, ServiceWrapper> servicesById = new HashMap<>();
   private final Object lock = new Object();
 
-  // todo: [ECR-2334] Ensure the Node is properly destroyed when the runtime is stopped
-  private Node node;
+  private NodeProxy node;
 
   /**
    * Creates a new Java service runtime.
@@ -106,7 +106,7 @@ public final class ServiceRuntime implements AutoCloseable {
   /**
    * Initializes the runtime with the given node. Starts the transport for Java services.
    */
-  public void initialize(Node node) {
+  public void initialize(NodeProxy node) {
     synchronized (lock) {
       checkState(this.node == null, "Invalid attempt to replace already set node (%s) with %s",
           this.node, node);
@@ -257,18 +257,25 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   private void stopService(ServiceInstanceSpec instanceSpec) {
-    // TODO: ECR-2334 add restriction for creation new snapshots
     String name = instanceSpec.getName();
     Optional<ServiceWrapper> activeService = findService(name);
     if (activeService.isPresent()) {
       ServiceWrapper service = activeService.get();
-      unRegisterService(service);
+      forbidAccessToBlockchain(service);
       runtimeTransport.disconnectServiceApi(service);
+      unRegisterService(service);
       logger.info("Stopped a service: {}", instanceSpec);
     } else {
       logger.warn("There is no active service with the given name {}. "
           + "Possibly restoring services state after reboot?", name);
     }
+  }
+
+  private void forbidAccessToBlockchain(ServiceWrapper service) {
+    Node serviceNode = service.getNode();
+    checkState(serviceNode instanceof RestrictingNodeDecorator,
+        "Should never happen. Unexpected node instance type %s", serviceNode.getClass().getName());
+    ((RestrictingNodeDecorator) serviceNode).restrictAccess();
   }
 
   private ServiceWrapper createServiceInstance(ServiceInstanceSpec instanceSpec) {
@@ -283,7 +290,8 @@ public final class ServiceRuntime implements AutoCloseable {
         .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
     // Instantiate the service
-    return servicesFactory.createService(serviceDefinition, instanceSpec, node);
+    return servicesFactory.createService(serviceDefinition, instanceSpec,
+        new RestrictingNodeDecorator(node));
   }
 
   private void registerService(ServiceWrapper service) {
@@ -438,6 +446,10 @@ public final class ServiceRuntime implements AutoCloseable {
         // Finally, when no service classes remain in use, unload the service artifacts
         unloadArtifacts();
 
+        // Free-up native resources
+        if (node != null) {
+          node.close();
+        }
         logger.info("The runtime shutdown complete");
       } catch (Exception e) {
         logger.error("Shutdown failure", e);
@@ -497,6 +509,4 @@ public final class ServiceRuntime implements AutoCloseable {
   Optional<ServiceWrapper> findService(String name) {
     return Optional.ofNullable(services.get(name));
   }
-
-  // TODO: unloadArtifact and stopService, once they can be used/ECR-2275
 }

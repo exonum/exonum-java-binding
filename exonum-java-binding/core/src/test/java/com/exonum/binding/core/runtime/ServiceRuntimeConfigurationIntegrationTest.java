@@ -19,9 +19,10 @@ package com.exonum.binding.core.runtime;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.service.NodeFake;
+import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -72,7 +73,7 @@ class ServiceRuntimeConfigurationIntegrationTest {
     try (TemporaryDb database = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       // Initialize it
-      runtime.initialize(new NodeFake(database));
+      runtime.initialize(mock(NodeProxy.class));
 
       // Deploy the service to the runtime
       runtime.deployArtifact(ARTIFACT_ID, ARTIFACT_FILENAME);

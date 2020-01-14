@@ -209,4 +209,9 @@ final class ServiceWrapper {
     return UrlEscapers.urlPathSegmentEscaper()
         .escape(getName());
   }
+
+  Node getNode() {
+    return node;
+  }
+
 }
