@@ -15,6 +15,7 @@
  */
 
 extern crate env_logger;
+extern crate exonum_explorer_service;
 extern crate exonum_supervisor;
 extern crate exonum_time;
 extern crate java_bindings;
