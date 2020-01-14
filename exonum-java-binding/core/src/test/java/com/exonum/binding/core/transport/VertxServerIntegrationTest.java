@@ -192,12 +192,12 @@ class VertxServerIntegrationTest {
 
       server.mountSubRouter(path, server.createRouter());
       Assertions.assertThat(server.getMountedRoutes())
-          .anyMatch(route -> routPathEquals(route, path));
+          .anyMatch(route -> routePathEquals(route, path));
 
       server.removeSubRouter(path);
 
       Assertions.assertThat(server.getMountedRoutes())
-          .noneMatch(route -> routPathEquals(route, path));
+          .noneMatch(route -> routePathEquals(route, path));
     } finally {
       blockingStop();
     }
@@ -220,20 +220,20 @@ class VertxServerIntegrationTest {
       server.removeSubRouter(routePath1);
 
       Assertions.assertThat(server.getMountedRoutes())
-          .noneMatch(route -> routPathEquals(route, routePath1));
+          .noneMatch(route -> routePathEquals(route, routePath1));
       Assertions.assertThat(server.getMountedRoutes())
-          .anyMatch(route -> routPathEquals(route, routePath2));
+          .anyMatch(route -> routePathEquals(route, routePath2));
 
       server.removeSubRouter(routePath2);
 
       Assertions.assertThat(server.getMountedRoutes())
-          .noneMatch(route -> routPathEquals(route, routePath2));
+          .noneMatch(route -> routePathEquals(route, routePath2));
     } finally {
       blockingStop();
     }
   }
 
-  private static boolean routPathEquals(Route route, String path) {
+  private static boolean routePathEquals(Route route, String path) {
     return route.getPath().equals(path);
   }
 
