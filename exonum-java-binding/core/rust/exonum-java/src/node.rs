@@ -15,7 +15,7 @@
  */
 
 use exonum_explorer_service::ExplorerFactory;
-use exonum_supervisor::Supervisor;
+use exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor};
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
     create_java_vm, create_service_runtime,
@@ -70,7 +70,7 @@ fn create_blockchain(
 
     let blockchain = Blockchain::new(database, keypair, api_sender);
 
-    let supervisor_service = supervisor_service();
+    let supervisor_service = supervisor_service(&config);
     let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus)
         .with_artifact(Supervisor.artifact_id())
         .with_instance(supervisor_service)
@@ -113,6 +113,15 @@ fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error>
     Ok(database)
 }
 
-fn supervisor_service() -> InstanceInitParams {
-    Supervisor::simple()
+fn supervisor_service(config: &Config) -> InstanceInitParams {
+    let mode = &config
+        .run_config
+        .node_config
+        .public_config
+        .general
+        .supervisor_mode;
+    match *mode {
+        SupervisorMode::Simple => Supervisor::simple(),
+        SupervisorMode::Decentralized => Supervisor::decentralized(),
+    }
 }
