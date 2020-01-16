@@ -41,20 +41,14 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
   private static final Logger logger = LogManager.getLogger(NodeProxy.class);
 
   /**
-   * Creates a proxy of a node. Native code owns the node,
-   * and, therefore, shall destroy the object.
+   * Creates a proxy of a Node.
    *
-   * @param nativeHandle an implementation-specific reference to a native node
+   * @param nativeHandle an implementation-specific reference to a native Node object
    */
   public NodeProxy(long nativeHandle) {
     super(nativeHandle, false);
   }
 
-  /**
-   * {@inheritDoc}
-   *
-   * @throws IllegalStateException if the node proxy is closed
-   */
   @Override
   public HashCode submitTransaction(RawTransaction rawTransaction) {
     byte[] payload = rawTransaction.getPayload();
@@ -77,11 +71,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
   private static native byte[] nativeSubmit(long nodeHandle, byte[] payload, int serviceId,
       int transactionId);
 
-  /**
-   * {@inheritDoc}
-   *
-   * @throws IllegalStateException if the node proxy is closed
-   */
   @Override
   public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
     try (Cleaner cleaner = new Cleaner("NodeProxy#withSnapshot")) {
@@ -97,11 +86,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
 
   private native long nativeCreateSnapshot(long nativeHandle);
 
-  /**
-   * {@inheritDoc}
-   *
-   * @throws IllegalStateException if the node proxy is closed
-   */
   @Override
   public PublicKey getPublicKey() {
     byte[] publicKey = nativeGetPublicKey(getNativeHandle());

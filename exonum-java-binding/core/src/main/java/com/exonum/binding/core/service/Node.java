@@ -26,6 +26,11 @@ import java.util.function.Function;
 /**
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
+ *
+ * <p>Once the node is <em>closed</em>, it can no longer be used. Methods of a closed Node
+ * will throw an {@link IllegalStateException} if invoked.
+ *
+ * <p>All method arguments are non-null by default.
  */
 public interface Node extends AutoCloseable {
 
@@ -47,7 +52,6 @@ public interface Node extends AutoCloseable {
    * @return hash of the transaction message created by the framework
    * @throws TransactionSubmissionException if the transaction belongs to an unknown service,
    *     or cannot be submitted
-   * @throws NullPointerException if the transaction is null
    * @see Blockchain#getTxMessages()
    */
   HashCode submitTransaction(RawTransaction rawTransaction);
@@ -70,8 +74,7 @@ public interface Node extends AutoCloseable {
   PublicKey getPublicKey();
 
   /**
-   * Closes an access to the node. This method is used for services lifecycle management
-   * and shouldn't be called by users directly (and used in {@code try}-with-resources blocks).
+   * Closes this node. A closed node must no longer be used.
    */
   @Override
   void close();
