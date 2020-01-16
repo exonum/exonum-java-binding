@@ -15,10 +15,10 @@ use {
 
 /// Returns IndexProof (serialized to protobuf) for specified index.
 ///
-/// Throws exception and returns null if
+/// Throws exception and returns null if passed `snapshot_handle` is Fork handle.
+/// Returns null if
 /// - index is not initialized (index have not been used before calling the method)
 /// - index is not Merkelized
-/// - passed `snapshot_handle` is Fork handle
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_blockchain_Blockchain_nativeCreateIndexProof(
     env: JNIEnv,
@@ -31,8 +31,12 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_Blockchain_native
         let db = handle::cast_handle::<View>(snapshot_handle);
         match db.get() {
             ViewRef::Snapshot(snapshot) => {
-                let proof = snapshot.proof_for_index(&name).unwrap();
-                proto_to_java_bytes(&env, proof)
+                let proof = snapshot.proof_for_index(&name);
+                if let Some(proof) = proof {
+                    proto_to_java_bytes(&env, proof)
+                } else {
+                    Ok(ptr::null_mut() as jbyteArray)
+                }
             }
             ViewRef::Fork(_) => panic!("nativeCreateIndexProof called with Fork"),
         }
