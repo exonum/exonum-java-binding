@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
   `ListProof`.
 - `ProofEntryIndexProxy` collection.
+- `supervisor-mode` CLI parameter added for `generate-template` command. It
+  allows to configure the mode of the Supervisor service. Possible values are
+  "simple" and "decentralized". (#1361)
 - Service instances can be stopped now. (#1358)
 
 ### Changed
