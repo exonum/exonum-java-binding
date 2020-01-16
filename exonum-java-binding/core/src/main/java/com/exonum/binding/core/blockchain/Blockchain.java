@@ -26,6 +26,8 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.proofs.BlockProof;
 import com.exonum.binding.core.blockchain.proofs.IndexProof;
+import com.exonum.binding.core.service.Configuration;
+import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
@@ -184,14 +186,14 @@ public final class Blockchain {
    * @throws IllegalStateException if the view is not a snapshot, because a state of a service index
    *     can be proved only for the latest committed block, not for any intermediate state during
    *     transaction processing
+   * @throws RuntimeException if the index with the given name does not exist; or is not Merkelized.
+   *     An index does not exist until it is <em>initialized</em> — created for the first time
+   *     with a {@link com.exonum.binding.core.storage.database.Fork}. Depending on the service
+   *     logic, an index may remain uninitialized indefinitely. Therefore, if proofs for an
+   *     empty index need to be created, it must be initialized early in the service lifecycle
+   *     (e.g., in {@link com.exonum.binding.core.service.Service#initialize(Fork, Configuration)}.
    */
   public IndexProof createIndexProof(String fullIndexName) {
-    /*
-     todo: Shall we allow creating proofs for invalid (e.g., impossible) index names or throw
-      an exception?
-
-     todo: If index proofs for "uninitialized" indexes are forbidden, document that.
-    */
     checkState(!view.canModify(), "Cannot create an index proof for a mutable view (%s).",
         view);
     Proofs.IndexProof indexProof = BlockchainProofs

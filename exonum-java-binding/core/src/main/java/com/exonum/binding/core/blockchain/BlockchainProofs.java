@@ -55,6 +55,9 @@ final class BlockchainProofs {
    * @param fullIndexName the full name of a proof index for which to create a proof
    */
   static IndexProof createIndexProof(Snapshot snapshot, String fullIndexName) {
+    // IndexProof for non-existent index is not supported because it doesn't make sense
+    // to combine a proof from an uninitialized index (that is not aggregated) with
+    // a proof of absence in the aggregating collection.
     byte[] indexProof = nativeCreateIndexProof(snapshot.getViewNativeHandle(), fullIndexName);
     try {
       return IndexProof.parseFrom(indexProof);

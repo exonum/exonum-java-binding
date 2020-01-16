@@ -72,7 +72,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Empty;
 import com.google.protobuf.MessageLite;
 import java.util.List;
 import java.util.Map;
@@ -244,18 +243,12 @@ class BlockchainIntegrationTest {
     void createIndexProofForUnknownIndex() {
       testKitTest(blockchain -> {
         String testIndexName = "unknown-index";
-        IndexProof indexProof = blockchain.createIndexProof(testIndexName);
 
-        // Check the index proof message
-        Proofs.IndexProof proof = indexProof.getAsMessage();
-        // Verify the aggregating index proof
-        MapProof aggregatingIndexProof = proof.getIndexProof();
-        // It must have a single entry: (testIndexName, no index hash)
-        OptionalEntry expectedEntry = OptionalEntry.newBuilder()
-            .setKey(ByteString.copyFromUtf8(testIndexName))
-            .setNoValue(Empty.getDefaultInstance())
-            .build();
-        assertThat(aggregatingIndexProof.getEntriesList()).containsExactly(expectedEntry);
+        Exception e = assertThrows(RuntimeException.class,
+            () -> blockchain.createIndexProof(testIndexName));
+
+        // todo: Extend the verifications ECR-4025
+        assertThat(e.getMessage()).contains(testIndexName);
       });
     }
 
