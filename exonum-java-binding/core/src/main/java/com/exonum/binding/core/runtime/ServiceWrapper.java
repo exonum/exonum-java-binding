@@ -210,8 +210,10 @@ final class ServiceWrapper {
         .escape(getName());
   }
 
-  Node getNode() {
-    return node;
+  /**
+   * Closes an access to the node within the service.
+   */
+  void requestToStop() {
+    node.close();
   }
-
 }

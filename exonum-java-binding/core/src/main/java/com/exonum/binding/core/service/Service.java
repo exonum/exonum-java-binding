@@ -75,7 +75,8 @@ public interface Service {
    * documentation</a> for details.
    *
    * @param node a set-up Exonum node, providing an interface to access
-   *             the current blockchain state and submit transactions
+   *             the current blockchain state and submit transactions. Note that a node gets
+   *             closed automatically by the runtime when the service stops
    * @param router a router responsible for handling requests to this service
    * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>

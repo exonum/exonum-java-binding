@@ -26,16 +26,16 @@ import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
 
 /**
- * Node decorator which can restrict access to the node by calling {@link #restrictAccess()} method.
+ * Node decorator which can restrict an access to the node by calling {@link #close()} method.
  */
-class RestrictingNodeDecorator implements Node {
+class MultiplexingNodeDecorator implements Node {
 
   private final Node node;
-  private boolean accessAllowed;
+  private boolean closed;
 
-  RestrictingNodeDecorator(Node node) {
+  MultiplexingNodeDecorator(Node node) {
     this.node = node;
-    this.accessAllowed = true;
+    this.closed = false;
   }
 
   @Override
@@ -56,16 +56,16 @@ class RestrictingNodeDecorator implements Node {
   }
 
   /**
-   * Restricts access to the node. After calling this method subsequent calling
+   * Closes an access to the node. After calling this method subsequent calling
    * {@link #submitTransaction(RawTransaction)} or {@link #withSnapshot(Function)} methods
    * will cause {@link IllegalStateException}.
    */
-  void restrictAccess() {
-    this.accessAllowed = false;
+  @Override
+  public void close() {
+    this.closed = true;
   }
 
   private void checkAccess() {
-    checkState(accessAllowed, "Node access is not allowed");
+    checkState(!closed, "Node access is closed");
   }
-
 }

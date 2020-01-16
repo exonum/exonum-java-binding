@@ -24,7 +24,6 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -82,7 +81,7 @@ public final class ServiceRuntime implements AutoCloseable {
   private final Map<Integer, ServiceWrapper> servicesById = new HashMap<>();
   private final Object lock = new Object();
 
-  private NodeProxy node;
+  private Node node;
 
   /**
    * Creates a new Java service runtime.
@@ -106,7 +105,7 @@ public final class ServiceRuntime implements AutoCloseable {
   /**
    * Initializes the runtime with the given node. Starts the transport for Java services.
    */
-  public void initialize(NodeProxy node) {
+  public void initialize(Node node) {
     synchronized (lock) {
       checkState(this.node == null, "Invalid attempt to replace already set node (%s) with %s",
           this.node, node);
@@ -261,7 +260,7 @@ public final class ServiceRuntime implements AutoCloseable {
     Optional<ServiceWrapper> activeService = findService(name);
     if (activeService.isPresent()) {
       ServiceWrapper service = activeService.get();
-      forbidAccessToBlockchain(service);
+      service.requestToStop();
       runtimeTransport.disconnectServiceApi(service);
       unRegisterService(service);
       logger.info("Stopped a service: {}", instanceSpec);
@@ -269,13 +268,6 @@ public final class ServiceRuntime implements AutoCloseable {
       logger.warn("There is no active service with the given name {}. "
           + "Possibly restoring services state after reboot?", name);
     }
-  }
-
-  private void forbidAccessToBlockchain(ServiceWrapper service) {
-    Node serviceNode = service.getNode();
-    checkState(serviceNode instanceof RestrictingNodeDecorator,
-        "Should never happen. Unexpected node instance type %s", serviceNode.getClass().getName());
-    ((RestrictingNodeDecorator) serviceNode).restrictAccess();
   }
 
   private ServiceWrapper createServiceInstance(ServiceInstanceSpec instanceSpec) {
@@ -291,7 +283,7 @@ public final class ServiceRuntime implements AutoCloseable {
 
     // Instantiate the service
     return servicesFactory.createService(serviceDefinition, instanceSpec,
-        new RestrictingNodeDecorator(node));
+        new MultiplexingNodeDecorator(node));
   }
 
   private void registerService(ServiceWrapper service) {

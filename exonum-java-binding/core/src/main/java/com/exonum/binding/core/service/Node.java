@@ -27,7 +27,7 @@ import java.util.function.Function;
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
  */
-public interface Node {
+public interface Node extends AutoCloseable {
 
   /**
    * Creates a transaction from the given parameters, signs it with
@@ -68,4 +68,11 @@ public interface Node {
    * <p>This key is stored under "service_public_key" key in the node configuration file.
    */
   PublicKey getPublicKey();
+
+  /**
+   * Closes an access to the node. This method is used for services lifecycle management
+   * and shouldn't be called by users directly (and used in {@code try}-with-resources blocks).
+   */
+  @Override
+  void close();
 }

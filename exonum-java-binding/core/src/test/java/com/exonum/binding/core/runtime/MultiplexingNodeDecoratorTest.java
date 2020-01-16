@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,7 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class RestrictingNodeDecoratorTest {
+class MultiplexingNodeDecoratorTest {
   private static final RawTransaction TX = RawTransaction.newBuilder()
       .serviceId(1)
       .transactionId(1)
@@ -43,7 +44,7 @@ class RestrictingNodeDecoratorTest {
   @Mock
   private Node node;
   @InjectMocks
-  private RestrictingNodeDecorator decorator;
+  private MultiplexingNodeDecorator decorator;
 
   @Test
   void submitTransaction() {
@@ -54,7 +55,7 @@ class RestrictingNodeDecoratorTest {
 
   @Test
   void restrictSubmitTransaction() {
-    decorator.restrictAccess();
+    decorator.close();
 
     assertThrows(IllegalStateException.class, () -> decorator.submitTransaction(TX));
   }
@@ -68,18 +69,19 @@ class RestrictingNodeDecoratorTest {
 
   @Test
   void restrictWithSnapshot() {
-    decorator.restrictAccess();
+    decorator.close();
 
     assertThrows(IllegalStateException.class, () -> decorator.withSnapshot(SNAPSHOT_FUNCTION));
   }
 
   @Test
   void getPublicKey() {
-    when(node.getPublicKey()).thenReturn(PublicKey.fromHexString("ab"));
+    PublicKey key = PublicKey.fromHexString("ab");
+    when(node.getPublicKey()).thenReturn(key);
 
-    decorator.getPublicKey();
+    PublicKey actualKey = decorator.getPublicKey();
 
-    verify(node).getPublicKey();
+    assertThat(actualKey).isEqualTo(key);
   }
 
 }

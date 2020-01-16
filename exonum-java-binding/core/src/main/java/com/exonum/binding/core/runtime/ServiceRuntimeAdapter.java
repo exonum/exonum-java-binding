@@ -22,6 +22,7 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
+import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.NodeProxy;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -64,10 +65,10 @@ public class ServiceRuntimeAdapter {
    * Initializes the runtime.
    *
    * @param nodeNativeHandle the native handle to the Node object
-   * @see ServiceRuntime#initialize(NodeProxy)
+   * @see ServiceRuntime#initialize(Node)
    */
   void initialize(long nodeNativeHandle) {
-    NodeProxy node = new NodeProxy(nodeNativeHandle);
+    Node node = new NodeProxy(nodeNativeHandle);
     serviceRuntime.initialize(node);
   }
 
