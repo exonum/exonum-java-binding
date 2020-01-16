@@ -73,7 +73,8 @@ final class BlockchainProofs {
 
   static native byte[] nativeCreateBlockProof(long viewNativeHandle, long blockHeight);
 
-  @Nullable static native byte[] nativeCreateIndexProof(long snapshotNativeHandle, String fullIndexName);
+  @Nullable static native byte[] nativeCreateIndexProof(long snapshotNativeHandle,
+      String fullIndexName);
 
   private BlockchainProofs() {}
 }
