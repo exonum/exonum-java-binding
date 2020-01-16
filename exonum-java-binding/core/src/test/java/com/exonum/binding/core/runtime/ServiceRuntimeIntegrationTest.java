@@ -54,6 +54,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -349,6 +351,19 @@ class ServiceRuntimeIntegrationTest {
     verify(transport).disconnectServiceApi(any(ServiceWrapper.class));
     Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
     assertThat(serviceOpt).isEmpty();
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = Status.class, names = {"NONE", "UNRECOGNIZED"})
+  void updateServiceStatusBadStatus(Status badStatus) {
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.updateInstanceStatus(instanceSpec, badStatus));
+    assertThat(exception).hasMessageContaining(badStatus.name());
+    assertThat(exception).hasMessageContaining(instanceSpec.getName());
   }
 
   @Test

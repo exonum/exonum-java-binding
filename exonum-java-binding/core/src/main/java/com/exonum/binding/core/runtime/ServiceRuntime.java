@@ -215,8 +215,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * Activation leads to the service instance registration, allowing subsequent operations on it:
    * transactions, API requests.
    * Stopping leads to the service disabling i.e. stopped service does not execute transactions,
-   * process events, provide APIs, etc. And it becomes unavailable to other services,
-   * but still exists.
+   * process events, provide APIs, etc. But the service data still exists.
    *
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param instanceStatus a new status of the service instance
@@ -230,9 +229,6 @@ public final class ServiceRuntime implements AutoCloseable {
         activateService(instanceSpec);
       } else if (instanceStatus.equals(Status.STOPPED)) {
         stopService(instanceSpec);
-      } else if (instanceStatus.equals(Status.NONE)) {
-        logger.warn("None status for the service instance {}, ignore. "
-            + "Possibly restoring services state after reboot?", instanceSpec.getName());
       } else {
         String msg = String.format("Unexpected status %s received for the service %s",
             instanceStatus.name(), instanceSpec.getName());
