@@ -22,6 +22,8 @@ import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.core.messages.Proofs.BlockProof;
 import com.exonum.core.messages.Proofs.IndexProof;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Provides constructors of block and index proofs.
@@ -54,21 +56,24 @@ final class BlockchainProofs {
    * @param snapshot a database snapshot
    * @param fullIndexName the full name of a proof index for which to create a proof
    */
-  static IndexProof createIndexProof(Snapshot snapshot, String fullIndexName) {
+  static Optional<IndexProof> createIndexProof(Snapshot snapshot, String fullIndexName) {
     // IndexProof for non-existent index is not supported because it doesn't make sense
-    // to combine a proof from an uninitialized index (that is not aggregated) with
+    // to combine a proof from an uninitialized index (which is not aggregated) with
     // a proof of absence in the aggregating collection.
-    byte[] indexProof = nativeCreateIndexProof(snapshot.getViewNativeHandle(), fullIndexName);
-    try {
-      return IndexProof.parseFrom(indexProof);
-    } catch (InvalidProtocolBufferException e) {
-      throw new AssertionError("Invalid index proof from native", e);
-    }
+    return Optional
+        .ofNullable(nativeCreateIndexProof(snapshot.getViewNativeHandle(), fullIndexName))
+        .map(proof -> {
+          try {
+            return IndexProof.parseFrom(proof);
+          } catch (InvalidProtocolBufferException e) {
+            throw new AssertionError("Invalid index proof from native", e);
+          }
+        });
   }
 
   static native byte[] nativeCreateBlockProof(long viewNativeHandle, long blockHeight);
 
-  static native byte[] nativeCreateIndexProof(long snapshotNativeHandle, String fullIndexName);
+  @Nullable static native byte[] nativeCreateIndexProof(long snapshotNativeHandle, String fullIndexName);
 
   private BlockchainProofs() {}
 }

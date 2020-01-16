@@ -244,10 +244,9 @@ class BlockchainIntegrationTest {
       testKitTest(blockchain -> {
         String testIndexName = "unknown-index";
 
-        Exception e = assertThrows(RuntimeException.class,
+        Exception e = assertThrows(IllegalArgumentException.class,
             () -> blockchain.createIndexProof(testIndexName));
 
-        // todo: Extend the verifications ECR-4025
         assertThat(e.getMessage()).contains(testIndexName);
       });
     }

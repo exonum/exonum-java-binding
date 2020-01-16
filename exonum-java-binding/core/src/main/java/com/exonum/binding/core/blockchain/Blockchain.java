@@ -181,24 +181,29 @@ public final class Blockchain {
   }
 
   /**
-   * Creates a proof for a single index in the database.
+   * Creates a proof for a single index in the database. It is usually a part
+   * of a <a href="#service-data-proof">Service Data Proof</a>.
+   *
    * @param fullIndexName the full index name for which to create a proof
    * @throws IllegalStateException if the view is not a snapshot, because a state of a service index
    *     can be proved only for the latest committed block, not for any intermediate state during
    *     transaction processing
-   * @throws RuntimeException if the index with the given name does not exist; or is not Merkelized.
-   *     An index does not exist until it is <em>initialized</em> — created for the first time
+   * @throws IllegalArgumentException if the index with the given name does not exist;
+   *     or is not Merkelized. An index does not exist until it is <em>initialized</em> —
+   *     created for the first time
    *     with a {@link com.exonum.binding.core.storage.database.Fork}. Depending on the service
    *     logic, an index may remain uninitialized indefinitely. Therefore, if proofs for an
    *     empty index need to be created, it must be initialized early in the service lifecycle
    *     (e.g., in {@link com.exonum.binding.core.service.Service#initialize(Fork, Configuration)}.
+   *     <!-- TODO: Simplify once initialization happens automatically: ECR-4121 -->
    */
   public IndexProof createIndexProof(String fullIndexName) {
     checkState(!view.canModify(), "Cannot create an index proof for a mutable view (%s).",
         view);
-    Proofs.IndexProof indexProof = BlockchainProofs
-        .createIndexProof((Snapshot) view, fullIndexName);
-    return IndexProof.newInstance(indexProof);
+    return BlockchainProofs.createIndexProof((Snapshot) view, fullIndexName)
+        .map(IndexProof::newInstance)
+        .orElseThrow(() -> new IllegalArgumentException(
+            String.format("Index %s does not exist or is not Merkelized", fullIndexName)));
   }
 
   /**
