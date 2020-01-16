@@ -31,6 +31,9 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
  * entire blockchain state and is recorded as such in {@linkplain Block#getStateHash() blocks}
  * and Precommit messages.
  *
+ * <p>Exonum starts aggregating a service collection state hash once it is <em>initialized</em>:
+ * created for the first time with a {@link com.exonum.binding.core.storage.database.Fork}.
+ *
  * <p>Please note that if the service does not use any Merkelized collections,
  * the framework will not be able to verify that its transactions cause the same
  * results on different nodes.
