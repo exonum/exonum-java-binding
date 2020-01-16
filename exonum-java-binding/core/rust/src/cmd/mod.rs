@@ -35,6 +35,8 @@ pub use exonum_cli::DefaultConfigManager;
 /// Exonum Java Bindings Application.
 ///
 /// Configures and runs Exonum node with Java runtime enabled.
+///
+/// See https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#node-configuration
 #[derive(StructOpt, Debug)]
 #[structopt(author, about)]
 #[allow(clippy::large_enum_variant)]
