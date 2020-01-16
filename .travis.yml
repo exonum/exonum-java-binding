@@ -56,6 +56,7 @@ matrix:
       env: CHECK_RUST=false
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
+      # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
       osx_image: xcode11.3
       env:
         - CHECK_RUST=false
