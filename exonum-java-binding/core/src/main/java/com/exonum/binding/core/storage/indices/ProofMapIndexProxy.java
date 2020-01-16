@@ -85,7 +85,8 @@ import java.util.function.LongSupplier;
  * @param <V> the type of values in this map
  * @see View
  */
-public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
+public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V>,
+    HashableIndex {
 
   private final Serializer<K> keySerializer;
   private final CheckingSerializerDecorator<V> valueSerializer;
@@ -381,12 +382,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     }
   }
 
-  /**
-   * Returns the index hash which represents the complete state of this map.
-   * Any modifications to the stored entries affect the index hash.
-   *
-   * @throws IllegalStateException if this map is not valid
-   */
+  @Override
   public HashCode getIndexHash() {
     return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
