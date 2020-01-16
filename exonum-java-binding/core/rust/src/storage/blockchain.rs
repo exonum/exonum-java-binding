@@ -20,7 +20,7 @@ use {
 /// - index is not initialized (index have not been used before calling the method)
 /// - index is not Merkelized
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_blockchain_Blockchain_nativeCreateIndexProof(
+pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainProofs_nativeCreateIndexProof(
     env: JNIEnv,
     _: JObject,
     snapshot_handle: jlong,
@@ -50,7 +50,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_Blockchain_native
 /// - there is no such block
 /// - passed `snapshot_handle` is Fork handle
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_blockchain_Blockchain_nativeCreateBlockProof(
+pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainProofs_nativeCreateBlockProof(
     env: JNIEnv,
     _: JObject,
     snapshot_handle: jlong,
