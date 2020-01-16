@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -48,7 +49,8 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
   private static final Comparator<ServiceArtifactId> SERVICE_ID_COMPARATOR =
       // No need to compare id — it is always Java
-      Comparator.comparing(ServiceArtifactId::getName);
+      Comparator.comparing(ServiceArtifactId::getName)
+          .thenComparing(ServiceArtifactId::getVersion);
 
   private final PluginManager pluginManager;
   private final ClassLoadingScopeChecker classLoadingChecker;
@@ -131,8 +133,11 @@ final class Pf4jServiceLoader implements ServiceLoader {
   private static ServiceArtifactId extractServiceId(String pluginId)
       throws ServiceLoadingException {
     try {
-      JavaArtifactNames.checkArtifactName(pluginId);
-      return ServiceArtifactId.newJavaId(pluginId);
+      ServiceArtifactId serviceArtifactId = ServiceArtifactId.parseFrom(pluginId);
+      checkArgument(serviceArtifactId.getRuntimeId() == JAVA.getId(),
+          "Required Java (%s) runtime id, but actually was %s",
+          JAVA.getId(), serviceArtifactId.getRuntimeId());
+      return serviceArtifactId;
     } catch (IllegalArgumentException e) {
       String message = String.format(
           "Invalid plugin id (%s) is specified in service artifact metadata", pluginId);
@@ -189,8 +194,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
   @Override
   public void unloadService(ServiceArtifactId artifactId) {
     checkArgument(loadedServices.containsKey(artifactId), "No such artifactId: %s", artifactId);
-
-    String pluginId = artifactId.getName();
+    String pluginId = artifactId.toString();
     try {
       boolean stopped = pluginManager.unloadPlugin(pluginId);
       // The docs don't say why it may fail to stop the plugin.
@@ -210,7 +214,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
     // Unload the plugins
     List<Exception> errors = new ArrayList<>();
     for (ServiceArtifactId artifactId : loadedServices.keySet()) {
-      String pluginId = artifactId.getName();
+      String pluginId = artifactId.toString();
       try {
         unloadPlugin(pluginId);
       } catch (Exception e) {

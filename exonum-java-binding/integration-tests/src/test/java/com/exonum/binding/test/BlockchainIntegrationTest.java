@@ -662,7 +662,9 @@ class BlockchainIntegrationTest {
         .blockHash(hashFunction.hashLong(blockHeight))
         .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
         .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
-        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8));
+        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8))
+        .errorHash(HashCode.fromString("ab"))
+        .additionalHeaders(ImmutableMap.of());
   }
 
   private static PublicKey pkFromProto(Types.PublicKey key) {

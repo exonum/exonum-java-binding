@@ -11,8 +11,6 @@ branches:
     # … and release branches, e.g. jlc/v0.2.0-release
     - /^.+-release$/
     - dynamic-services
-    # TODO: temp branch
-    - new-protos-base
 
 addons:
   apt:

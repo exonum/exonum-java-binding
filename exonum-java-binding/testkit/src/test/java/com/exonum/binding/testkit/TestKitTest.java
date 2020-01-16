@@ -209,7 +209,7 @@ class TestKitTest {
 
     Exception e = assertThrows(RuntimeException.class, testKitBuilder::build);
 
-    assertThat(e.getMessage()).contains("Unable to create blockchain instance");
+    assertThat(e.getMessage()).contains("Cannot deploy an artifact");
   }
 
   // todo: invalidartifact — causing deploy errors (as ^) and causing instantiation errors (todo)
