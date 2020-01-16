@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod blockchain;
 mod db;
 mod entry;
 mod fork;
@@ -27,6 +28,7 @@ mod raw_proof_map_index;
 mod temporarydb;
 mod value_set_index;
 
+pub use self::blockchain::*;
 pub use self::db::Java_com_exonum_binding_core_storage_database_Views_nativeFree;
 pub(crate) use self::db::View;
 pub use self::key_set_index::*;
