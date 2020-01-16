@@ -26,7 +26,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.exonum.binding.common.blockchain.CallInBlocks;
@@ -79,7 +78,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingConsumer;
@@ -118,7 +116,6 @@ class BlockchainIntegrationTest {
   @Nested
   class WithGenesisBlock {
 
-    @Disabled("ECR-4025")
     @Test
     void createBlockProof() {
       testKitTest(blockchain -> {
@@ -182,7 +179,6 @@ class BlockchainIntegrationTest {
       block = testKit.createBlockWithTransactions(transactionMessage);
     }
 
-    @Disabled("ECR-4025")
     @Test
     void createBlockProof() {
       testKitTest(blockchain -> {
@@ -208,7 +204,6 @@ class BlockchainIntegrationTest {
       });
     }
 
-    @Disabled("ECR-4025")
     @Test
     void createIndexProof() {
       testKitTest(blockchain -> {
@@ -238,7 +233,6 @@ class BlockchainIntegrationTest {
       });
     }
 
-    @Disabled("ECR-4025")
     @Test
     void createIndexProofForUnknownIndex() {
       testKitTest(blockchain -> {
