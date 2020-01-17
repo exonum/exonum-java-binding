@@ -22,7 +22,7 @@ import com.exonum.binding.core.blockchain.Block;
  * A schema of the collections (a.k.a. indices) of a service.
  *
  * <p>To verify the integrity of the database state on each node in the network,
- * the core automatically tracks every Merkelized collection used by the user
+ * Exonum automatically tracks every Merkelized collection used by the user
  * services. It aggregates state hashes of these collections into a single
  * Merkelized meta-map. The hash of this meta-map is considered the hash of the
  * entire blockchain state and is recorded as such in {@linkplain Block#getStateHash() blocks}
