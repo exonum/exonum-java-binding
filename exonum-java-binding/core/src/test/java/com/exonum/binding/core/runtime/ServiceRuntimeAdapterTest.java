@@ -33,6 +33,8 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
+import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.core.messages.Runtime.InstanceState.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -182,4 +184,26 @@ class ServiceRuntimeAdapterTest {
     assertThat(event.getValidatorId()).isEmpty();
   }
 
+  @Test
+  void updateServiceStatus() {
+    int serviceId = 1;
+    String serviceName = "s1";
+    ArtifactId artifact = ARTIFACT_ID;
+    Status status = Status.ACTIVE;
+    InstanceSpec instanceSpec = InstanceSpec.newBuilder()
+        .setId(serviceId)
+        .setName(serviceName)
+        .setArtifact(artifact)
+        .build();
+    InstanceState instanceState = InstanceState.newBuilder()
+        .setStatus(status)
+        .build();
+
+    serviceRuntimeAdapter
+        .updateServiceStatus(instanceSpec.toByteArray(), instanceState.toByteArray());
+
+    ServiceInstanceSpec expectedSpec = ServiceInstanceSpec
+        .newInstance(serviceName, serviceId, ServiceArtifactId.fromProto(artifact));
+    verify(serviceRuntime).updateInstanceStatus(expectedSpec, status);
+  }
 }

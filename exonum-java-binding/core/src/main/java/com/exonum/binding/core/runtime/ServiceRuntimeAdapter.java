@@ -156,14 +156,13 @@ public class ServiceRuntimeAdapter {
    *
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
-   * @param numericInstanceStatus new status of the service instance as a numeric
-   *     representation of the {@link InstanceState.Status} enum.
+   * @param instanceState new state of the service instance as a serialized
+   *     representation of the {@link InstanceState} protobuf message
    * @see ServiceRuntime#updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)
    */
-  void updateServiceStatus(byte[] instanceSpec, int numericInstanceStatus) {
+  void updateServiceStatus(byte[] instanceSpec, byte[] instanceState) {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
-    InstanceState.Status instanceStatus =
-        InstanceState.Status.forNumber(numericInstanceStatus);
+    InstanceState.Status instanceStatus = parseInstanceStatus(instanceState);
     serviceRuntime.updateInstanceStatus(javaInstanceSpec, instanceStatus);
   }
 
@@ -173,6 +172,16 @@ public class ServiceRuntimeAdapter {
       ArtifactId artifact = spec.getArtifact();
       ServiceArtifactId artifactId = ServiceArtifactId.fromProto(artifact);
       return ServiceInstanceSpec.newInstance(spec.getName(), spec.getId(), artifactId);
+    } catch (InvalidProtocolBufferException e) {
+      logger.error(e);
+      throw new IllegalArgumentException(e);
+    }
+  }
+
+  private static InstanceState.Status parseInstanceStatus(byte[] instanceState) {
+    try {
+      InstanceState state = InstanceState.parseFrom(instanceState);
+      return state.getStatus();
     } catch (InvalidProtocolBufferException e) {
       logger.error(e);
       throw new IllegalArgumentException(e);
