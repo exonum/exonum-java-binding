@@ -58,6 +58,13 @@ public interface Server {
   void mountSubRouter(String mountPoint, Router subRouter);
 
   /**
+   * Removes the sub router from the root router of this server registered by the given path.
+   * In case missing path nothing would happen.
+   * @param mountPoint a mount point i.e. a mounted router path
+   */
+  void removeSubRouter(String mountPoint);
+
+  /**
    * Requests the server to start listening on the given TCP port.
    *
    * @param port a port to listen on
