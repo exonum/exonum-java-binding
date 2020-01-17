@@ -40,19 +40,17 @@ class MultiplexingNodeDecorator implements Node {
 
   @Override
   public HashCode submitTransaction(RawTransaction rawTransaction) {
-    checkAccess();
-    return node.submitTransaction(rawTransaction);
+    return node().submitTransaction(rawTransaction);
   }
 
   @Override
   public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
-    checkAccess();
-    return node.withSnapshot(snapshotFunction);
+    return node().withSnapshot(snapshotFunction);
   }
 
   @Override
   public PublicKey getPublicKey() {
-    return node.getPublicKey();
+    return node().getPublicKey();
   }
 
   /**
@@ -63,6 +61,11 @@ class MultiplexingNodeDecorator implements Node {
   @Override
   public void close() {
     this.closed = true;
+  }
+
+  private Node node() {
+    checkAccess();
+    return node;
   }
 
   private void checkAccess() {

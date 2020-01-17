@@ -84,4 +84,11 @@ class MultiplexingNodeDecoratorTest {
     assertThat(actualKey).isEqualTo(key);
   }
 
+  @Test
+  void restrictGetPublicKey() {
+    decorator.close();
+
+    assertThrows(IllegalStateException.class, () -> decorator.getPublicKey());
+  }
+
 }
