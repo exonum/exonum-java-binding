@@ -225,15 +225,18 @@ public final class ServiceRuntime implements AutoCloseable {
   public void updateInstanceStatus(ServiceInstanceSpec instanceSpec,
       InstanceState.Status instanceStatus) {
     synchronized (lock) {
-      if (instanceStatus.equals(Status.ACTIVE)) {
-        activateService(instanceSpec);
-      } else if (instanceStatus.equals(Status.STOPPED)) {
-        stopService(instanceSpec);
-      } else {
-        String msg = String.format("Unexpected status %s received for the service %s",
-            instanceStatus.name(), instanceSpec.getName());
-        logger.error(msg);
-        throw new IllegalArgumentException(msg);
+      switch (instanceStatus) {
+        case ACTIVE:
+          activateService(instanceSpec);
+          break;
+        case STOPPED:
+          stopService(instanceSpec);
+          break;
+        default:
+          String msg = String.format("Unexpected status %s received for the service %s",
+              instanceStatus.name(), instanceSpec.getName());
+          logger.error(msg);
+          throw new IllegalArgumentException(msg);
       }
     }
   }
