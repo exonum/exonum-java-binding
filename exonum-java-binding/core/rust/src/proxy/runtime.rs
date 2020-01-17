@@ -168,10 +168,12 @@ impl Runtime for JavaRuntimeProxy {
         status: InstanceStatus,
     ) {
         let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
+        let serialized_instance_status: Vec<u8> = status.to_bytes();
         unwrap_jni(self.exec.with_attached(|env| {
             let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
-            let instance_status = status as i32;
+            let instance_status =
+                JObject::from(env.byte_array_from_slice(&serialized_instance_status)?);
 
             panic_on_exception(
                 env,

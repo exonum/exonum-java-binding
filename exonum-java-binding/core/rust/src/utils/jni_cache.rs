@@ -121,7 +121,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
         "updateServiceStatus",
-        "([BI)V",
+        "([B[B)V",
     );
     RUNTIME_ADAPTER_EXECUTE_TX = get_method_id(
         &env,
