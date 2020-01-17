@@ -38,7 +38,7 @@ public interface HashableIndex extends StorageIndex {
 
   /**
    * Returns the index hash which represents the complete state of this index.
-   * Any modifications to the stored entries must affect the index hash.
+   * Any modifications to the stored entries affect the index hash.
    *
    * <p>How index hash is computed depends on the index data structure implementation.
    */
