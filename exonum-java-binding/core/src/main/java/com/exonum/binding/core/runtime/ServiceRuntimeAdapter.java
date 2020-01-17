@@ -29,7 +29,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
-import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.core.messages.Runtime.InstanceStatus;
 import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.OptionalInt;
@@ -156,14 +156,14 @@ public class ServiceRuntimeAdapter {
    *
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
-   * @param instanceState new state of the service instance as a serialized
-   *     representation of the {@link InstanceState} protobuf message
-   * @see ServiceRuntime#updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)
+   * @param instanceStatus new status of the service instance as a serialized
+   *     representation of the {@link InstanceStatus} protobuf message
+   * @see ServiceRuntime#updateInstanceStatus(ServiceInstanceSpec, InstanceStatus)
    */
-  void updateServiceStatus(byte[] instanceSpec, byte[] instanceState) {
+  void updateServiceStatus(byte[] instanceSpec, byte[] instanceStatus) {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
-    InstanceState.Status instanceStatus = parseInstanceStatus(instanceState);
-    serviceRuntime.updateInstanceStatus(javaInstanceSpec, instanceStatus);
+    InstanceStatus status = parseInstanceStatus(instanceStatus);
+    serviceRuntime.updateInstanceStatus(javaInstanceSpec, status);
   }
 
   private static ServiceInstanceSpec parseInstanceSpec(byte[] instanceSpec) {
@@ -178,10 +178,9 @@ public class ServiceRuntimeAdapter {
     }
   }
 
-  private static InstanceState.Status parseInstanceStatus(byte[] instanceState) {
+  private static InstanceStatus parseInstanceStatus(byte[] instanceStatus) {
     try {
-      InstanceState state = InstanceState.parseFrom(instanceState);
-      return state.getStatus();
+      return InstanceStatus.parseFrom(instanceStatus);
     } catch (InvalidProtocolBufferException e) {
       logger.error(e);
       throw new IllegalArgumentException(e);

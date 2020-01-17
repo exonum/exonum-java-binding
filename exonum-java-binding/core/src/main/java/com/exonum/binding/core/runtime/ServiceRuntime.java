@@ -29,7 +29,8 @@ import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.core.messages.Runtime.ErrorKind;
-import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.core.messages.Runtime.InstanceStatus;
+import com.exonum.core.messages.Runtime.InstanceStatus.Simple;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -171,7 +172,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * Starts registration of a new service instance with the given specification.
    * It involves the initial configuration of the service instance with the given parameters.
    * The instance is not registered until
-   * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)}
+   * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceStatus)}
    * is invoked with the {@code Status=Active}.
    *
    * @param fork a database view to apply configuration
@@ -222,9 +223,10 @@ public final class ServiceRuntime implements AutoCloseable {
    *     is not deployed; or unrecognized service status received
    */
   public void updateInstanceStatus(ServiceInstanceSpec instanceSpec,
-      InstanceState.Status instanceStatus) {
+      InstanceStatus instanceStatus) {
     synchronized (lock) {
-      switch (instanceStatus) {
+      Simple status = instanceStatus.getSimple();
+      switch (status) {
         case ACTIVE:
           activateService(instanceSpec);
           break;
@@ -233,7 +235,7 @@ public final class ServiceRuntime implements AutoCloseable {
           break;
         default:
           String msg = String.format("Unexpected status %s received for the service %s",
-              instanceStatus.name(), instanceSpec.getName());
+              status, instanceSpec.getName());
           logger.error(msg);
           throw new IllegalArgumentException(msg);
       }
