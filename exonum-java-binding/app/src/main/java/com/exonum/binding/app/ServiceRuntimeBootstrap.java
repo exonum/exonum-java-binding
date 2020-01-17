@@ -16,12 +16,19 @@
 
 package com.exonum.binding.app;
 
+import static com.google.common.base.StandardSystemProperty.JAVA_VM_NAME;
+import static com.google.common.base.StandardSystemProperty.JAVA_VM_VERSION;
+import static com.google.common.base.StandardSystemProperty.OS_ARCH;
+import static com.google.common.base.StandardSystemProperty.OS_NAME;
+import static com.google.common.base.StandardSystemProperty.OS_VERSION;
+
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.runtime.FrameworkModule;
 import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.binding.time.TimeSchema;
+import com.google.common.base.StandardSystemProperty;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.inject.Guice;
@@ -133,21 +140,21 @@ public final class ServiceRuntimeBootstrap {
 
   private static void logVmInfo() {
     // Log VM info, e.g., OpenJDK 64-Bit Server VM (build 12.0.1+12)
-    String name = getSysProperty("java.vm.name");
-    String version = getSysProperty("java.vm.version");
+    String name = getSysProperty(JAVA_VM_NAME);
+    String version = getSysProperty(JAVA_VM_VERSION);
     logger.info("    VM: {} (build {})", name, version);
   }
 
   private static void logOsInfo() {
     // Log OS info, e.g. Linux 4.15.0-50-generic amd64
-    String name = getSysProperty("os.name");
-    String version = getSysProperty("os.version");
-    String arch = getSysProperty("os.arch");
+    String name = getSysProperty(OS_NAME);
+    String version = getSysProperty(OS_VERSION);
+    String arch = getSysProperty(OS_ARCH);
     logger.info("    OS: {} {} {}", name, version, arch);
   }
 
-  private static String getSysProperty(String key) {
-    return System.getProperty(key);
+  private static String getSysProperty(StandardSystemProperty property) {
+    return property.value();
   }
 
   private ServiceRuntimeBootstrap() {}
