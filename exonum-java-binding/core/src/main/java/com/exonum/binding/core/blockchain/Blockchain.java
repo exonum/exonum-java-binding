@@ -24,6 +24,11 @@ import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.core.blockchain.proofs.BlockProof;
+import com.exonum.binding.core.blockchain.proofs.IndexProof;
+import com.exonum.binding.core.service.Configuration;
+import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
@@ -32,6 +37,7 @@ import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Blockchain.CallInBlock;
 import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.core.messages.Proofs;
 import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
@@ -43,14 +49,108 @@ import java.util.Optional;
  * blockchain::Schema</a> features in the Core API: blocks, transaction messages, execution
  * results.
  *
+ * <!-- This section is suppossed to be the main Javadoc on proofs, documenting how
+ *      to create various blockchain proofs from their components.
+ *
+ *      Link here with <a href="<relative path>/Blockchain.html#proofs">Blockchain Proofs</a>.
+ *      See also: https://stackoverflow.com/a/27522316/ -->
+ * <h2 id="proofs">Proofs</h2>
+ *
+ * <p>Blockchain allows creating cryptographic proofs that some data is indeed stored
+ * in the database. Exonum supports the following types of proofs:
+ * <ul>
+ *   <li>Block Proof</li>
+ *   <li>Transaction Execution Proof</li>
+ *   <li>Call Result Proof</li>
+ *   <li>Service Data Proof</li>
+ * </ul>
+ *
+ * <h3 id="block-proof">Block Proof</h3>
+ *
+ * <p>A block proof proves correctness of a blockchain block. It can be created with
+ * {@link #createBlockProof(long)} for any committed block. See also {@link BlockProof}.
+ *
+ * <h3 id="tx-execution-proof">Transaction Execution Proof</h3>
+ *
+ * <p>A transaction execution proof proves that a transaction with a given message hash was
+ * executed in a block at a certain height at a certain
+ * <em>{@linkplain TransactionLocation location}</em>. It consists of a block proof,
+ * and a list proof from {@link #getBlockTransactions(long)}. It may be extended to
+ * a <em>call result</em> proof — read the next section.
+ *
+ * <h3 id="call-result-proof">Call Result Proof</h3>
+ *
+ * <p>A call result proof proves that a given service call completed with a particular
+ * result in a block at a certain height. It consists of a block proof and a map proof
+ * from {@link #getCallErrors(long)}. In case of <em>transaction</em> calls, it also
+ * includes a list proof from {@link #getBlockTransactions(long)}.
+ *
+ * <h3 id="service-data-proof">Service Data Proof</h3>
+ *
+ * <p>A service data proof proves that some service index contains certain data as of the last
+ * committed block. It includes:
+ * <ul>
+ *   <li>An index proof: a block proof + a proof from the aggregating collection.</li>
+ *   <li>A proof from the service index.</li>
+ * </ul>
+ *
+ * <p>An index proof is created with {@link #createIndexProof(String)}.
+ *
+ * <h4>Example</h4>
+ *
+ * <p>Consider a simple timestamping service that keeps timestamps for event ids, and supports
+ * proofs of their authenticity.
+ *
+ * <p>First, create a message definition for a proof:
+ *
+ * <pre>
+ *   message TimestampProof {
+ *     MapProof timestamp = 1;
+ *     IndexProof indexProof = 2;
+ *   }
+ * </pre>
+ *
+ * <p>Then create the two components: timestamp proof from a service index and index proof
+ * for that index from the blockchain:
+ *
+ * <pre>
+ *   TimestampProof createTimestampProof(Snapshot s,
+ *                                       String eventId) {
+ *     // 1. Create a timestamp proof
+ *     // The literal is for illustrative purposes —
+ *     // usually the service name is prepended elsewhere
+ *     var fullIndexName = "timestamping.timestamp";
+ *     var timestamps = ProofMapIndexProxy.newInstance(fullIndexName, s,
+ *         string(), timestamp());
+ *     var tsProof = timestamps.getProof(eventId);
+ *
+ *     // 2. Create an index proof
+ *     var blockchain = Blockchain.newInstance(s);
+ *     var indexProof = blockchain.createIndexProof(fullIndexName);
+ *
+ *     // 3. Create a complete service data proof
+ *     return TimestampProof.newBuilder()
+ *       .setTimestamp(tsProof.getAsMessage())
+ *       .setIndexProof(indexProof.getAsMessage())
+ *       .build();
+ *   }
+ * </pre>
+ *
+ * <p>Finally, serialize the proof and send it to the client.
+ *
+ * <hr/>
+ *
  * <p>All method arguments are non-null by default.
+ * <!-- TODO: Link a page on proofs from exonum.com when one arrives: ECR-4106 -->
  */
 public final class Blockchain {
 
+  private final View view;
   private final CoreSchema schema;
 
   @VisibleForTesting
-  Blockchain(CoreSchema schema) {
+  Blockchain(View view, CoreSchema schema) {
+    this.view = view;
     this.schema = schema;
   }
 
@@ -59,7 +159,51 @@ public final class Blockchain {
    */
   public static Blockchain newInstance(View view) {
     CoreSchema coreSchema = CoreSchema.newInstance(view);
-    return new Blockchain(coreSchema);
+    return new Blockchain(view, coreSchema);
+  }
+
+  /**
+   * Creates a proof for the block at the given height.
+   *
+   * <p>It allows creating genesis block proofs, but they make little sense, as a genesis
+   * block is supposed to be a "root of trust", hence, well-known to the clients verifying
+   * any subsequent proofs coming from the blockchain.
+   *
+   * <p>If you need to create a proof for a service index, use {@link #createIndexProof(String)}.
+   * @param blockHeight a height of the block for which to create a proof
+   * @throws IndexOutOfBoundsException if the height is not valid
+   * @see #createIndexProof(String)
+   */
+  public BlockProof createBlockProof(long blockHeight) {
+    checkHeight(blockHeight);
+    Proofs.BlockProof blockProof = BlockchainProofs.createBlockProof(view, blockHeight);
+    return BlockProof.newInstance(blockProof);
+  }
+
+  /**
+   * Creates a proof for a single index in the database. It is usually a part
+   * of a <a href="#service-data-proof">Service Data Proof</a>.
+   *
+   * @param fullIndexName the full index name for which to create a proof
+   * @throws IllegalStateException if the view is not a snapshot, because a state of a service index
+   *     can be proved only for the latest committed block, not for any intermediate state during
+   *     transaction processing
+   * @throws IllegalArgumentException if the index with the given name does not exist;
+   *     or is not Merkelized. An index does not exist until it is <em>initialized</em> —
+   *     created for the first time
+   *     with a {@link com.exonum.binding.core.storage.database.Fork}. Depending on the service
+   *     logic, an index may remain uninitialized indefinitely. Therefore, if proofs for an
+   *     empty index need to be created, it must be initialized early in the service lifecycle
+   *     (e.g., in {@link com.exonum.binding.core.service.Service#initialize(Fork, Configuration)}.
+   *     <!-- TODO: Simplify once initialization happens automatically: ECR-4121 -->
+   */
+  public IndexProof createIndexProof(String fullIndexName) {
+    checkState(!view.canModify(), "Cannot create an index proof for a mutable view (%s).",
+        view);
+    return BlockchainProofs.createIndexProof((Snapshot) view, fullIndexName)
+        .map(IndexProof::newInstance)
+        .orElseThrow(() -> new IllegalArgumentException(
+            String.format("Index %s does not exist or is not Merkelized", fullIndexName)));
   }
 
   /**
@@ -104,9 +248,9 @@ public final class Blockchain {
    * Returns a proof list of transaction hashes committed in the block at the given height.
    *
    * <p>The {@linkplain ProofListIndexProxy#getIndexHash() index hash} of this index is recorded
-   * in the block header as {@link Block#getTxRootHash()}. That allows constructing proofs
-   * <!-- todo: link 'proofs' (where do we document construction procedure?) -->
-   * that a transaction with a certain message hash was executed at a certain
+   * in the block header as {@link Block#getTxRootHash()}. That allows constructing
+   * <a href="Blockchain.html#tx-execution-proof">proofs</a> that a transaction
+   * with a certain message hash was executed at a certain
    * <em>{@linkplain TransactionLocation location}</em>: (block_height, tx_index_in_block) pair.
    *
    * @param height block height starting from 0
@@ -156,9 +300,8 @@ public final class Blockchain {
    * are preserved for transactions and before/after transaction handlers.
    *
    * <p>The {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of this index is recorded
-   * in the block header as <!-- todo: link (ECR-4021) --> {@code Block#getErrorHash()}. That
-   * enables constructing proofs
-   * <!-- todo: link 'proofs' (where do we document construction procedure?) -->
+   * in the block header as {@link Block#getErrorHash()}. That
+   * enables constructing <a href="Blockchain.html#call-result-proof">proofs</a>
    * that a certain operation was executed with a particular result. For example,
    * a proof that a transaction with a certain message hash at
    * a certain {@linkplain TransactionLocation location} had a certain result must include
@@ -243,6 +386,7 @@ public final class Blockchain {
     return blocks.get(blockHash);
   }
 
+  /** Checks if the blockchain height is valid. */
   private void checkHeight(long height) {
     long blockchainHeight = getHeight();
     if (height < 0 || height > blockchainHeight) {

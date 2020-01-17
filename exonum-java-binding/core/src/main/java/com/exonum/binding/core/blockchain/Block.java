@@ -16,9 +16,11 @@
 
 package com.exonum.binding.core.blockchain;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.exonum.binding.core.service.Schema;
 import com.google.auto.value.AutoValue;
@@ -95,7 +97,7 @@ public abstract class Block {
   /**
    * Root hash of exceptions occurred in the block.
    *
-   * @see Blockchain#getCallErrors()
+   * @see Blockchain#getCallErrors(long)
    */
   public abstract HashCode getErrorHash();
 
@@ -120,6 +122,27 @@ public abstract class Block {
    */
   public static TypeAdapter<Block> typeAdapter(Gson gson) {
     return new AutoValue_Block.GsonTypeAdapter(gson);
+  }
+
+  /**
+   * Creates a block from the block message.
+   * @param blockMessage a block
+   */
+  public static Block fromMessage(com.exonum.core.messages.Blockchain.Block blockMessage) {
+    // Such implementation prevents a redundant deserialization of Block message
+    // (in BlockSerializer#fromBytes).
+    HashCode blockHash = sha256().hashBytes(blockMessage.toByteArray());
+    return BlockSerializer.newBlockInternal(blockMessage, blockHash);
+  }
+
+  /**
+   * Creates a block from the serialized block message.
+   * @param serializedBlock a serialized block message
+   * @throws IllegalArgumentException if the block bytes are not a serialized
+   *     {@link com.exonum.core.messages.Blockchain.Block}
+   */
+  public static Block parseFrom(byte[] serializedBlock) {
+    return BlockSerializer.INSTANCE.fromBytes(serializedBlock);
   }
 
   /**
@@ -172,7 +195,7 @@ public abstract class Block {
      * Sets the blockchain state hash at the moment this block was committed. The blockchain
      * state hash reflects the state of each service in the database.
      *
-     * @see Schema#getStateHashes()
+     * @see Schema
      */
     public abstract Builder stateHash(HashCode blockchainStateHash);
 
