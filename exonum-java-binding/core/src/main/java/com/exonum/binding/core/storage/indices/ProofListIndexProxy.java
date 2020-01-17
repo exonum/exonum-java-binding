@@ -54,7 +54,7 @@ import java.util.function.LongSupplier;
  * @see View
  */
 public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
-    implements ListIndex<E> {
+    implements ListIndex<E>, HashableIndex {
 
   static {
     LibraryLoader.load();
@@ -212,12 +212,7 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
     }
   }
 
-  /**
-   * Returns the index hash which represents the complete state of this list.
-   * Any modifications to the stored entries affect the index hash.
-   *
-   * @throws IllegalStateException if this list is not valid
-   */
+  @Override
   public HashCode getIndexHash() {
     return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }

@@ -17,9 +17,6 @@
 package com.exonum.binding.core.service;
 
 import com.exonum.binding.core.blockchain.Block;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
-import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
-import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
 /**
  * A schema of the collections (a.k.a. indices) of a service.
@@ -38,9 +35,7 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
  * the framework will not be able to verify that its transactions cause the same
  * results on different nodes.
  *
- * @see ProofListIndexProxy#getIndexHash()
- * @see ProofMapIndexProxy#getIndexHash()
- * @see ProofEntryIndexProxy#getIndexHash()
+ * @see com.exonum.binding.core.storage.indices.HashableIndex
  * @see com.exonum.binding.core.blockchain.Blockchain
  */
 public interface Schema {

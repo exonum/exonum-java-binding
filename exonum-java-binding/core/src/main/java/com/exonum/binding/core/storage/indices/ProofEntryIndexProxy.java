@@ -50,7 +50,7 @@ import java.util.Optional;
  *
  * @see View
  */
-public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy {
+public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements HashableIndex {
 
   static {
     LibraryLoader.load();
@@ -178,8 +178,9 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy {
    * <p>The entry index hash is computed as SHA-256 of the entry binary representation, or
    * a hash of zeroes if the entry is not set.
    *
-   * @throws IllegalStateException if this list is not valid
+   * @throws IllegalStateException if the proxy is invalid
    */
+  @Override
   public HashCode getIndexHash() {
     return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
