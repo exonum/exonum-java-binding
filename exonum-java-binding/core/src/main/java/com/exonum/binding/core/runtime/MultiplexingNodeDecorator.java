@@ -64,11 +64,7 @@ class MultiplexingNodeDecorator implements Node {
   }
 
   private Node node() {
-    checkAccess();
-    return node;
-  }
-
-  private void checkAccess() {
     checkState(!closed, "Node access is closed");
+    return node;
   }
 }
