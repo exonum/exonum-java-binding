@@ -48,7 +48,7 @@ public final class FakeService extends AbstractService {
   }
 
   /**
-   * Puts an entry (a key-value pair) into the test map.
+   * Puts an entry (a key-value pair) into the test proof map.
    */
   @Transaction(PUT_TX_ID)
   public void putEntry(Transactions.PutTransactionArgs arguments,

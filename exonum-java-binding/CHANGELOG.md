@@ -16,17 +16,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Support of creation of various blockchain proofs:
+    - Block Proof
+    - Transaction Execution Proof
+    - Call Result Proof
+    - Service Data Proof.
+
+  See [`Blockchain`][blockchain-proofs], `BlockProof` and `IndexProof`
+  for details. (#1355)
 - Support of creation of Protobuf-based proofs for maps and lists.
   Such proofs can be easily serialized using Protocol Buffers
   and sent to the light clients.
-  See `ProofMapIndexProxy#getProof` and `MapProof`;
-  `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
-  `ListProof`.
+  See:
+     - `ProofMapIndexProxy#getProof` and `MapProof`;
+     - `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
+  `ListProof`;
+     - [`Blockchain`][blockchain-proofs].
 - `ProofEntryIndexProxy` collection.
 - `supervisor-mode` CLI parameter added for `generate-template` command. It
   allows to configure the mode of the Supervisor service. Possible values are
   "simple" and "decentralized". (#1361)
 - Service instances can be stopped now. (#1358)
+
+[blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 
 ### Changed
 - Transactions are now implemented as service methods annotated with

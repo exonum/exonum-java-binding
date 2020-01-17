@@ -47,7 +47,7 @@ import java.util.function.LongSupplier;
  * <p>The Merkle-Patricia tree backing the proof map uses internal 32-byte keys. The tree balance
  * relies on the internal keys being uniformly distributed.
  *
- * <h3><a name="key-hashing">Key hashing in proof maps</a></h3>
+ * <h3 id="key-hashing">Key hashing in proof maps></h3>
  *
  * <p>By default, when creating the proof map using methods
  * {@link #newInstance(String, View, Serializer, Serializer) #newInstance} and
@@ -317,6 +317,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @throws IllegalStateException if this map is not valid
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
    *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>)
+   * @see <a href="../../blockchain/Blockchain.html#proofs">Blockchain Proofs</a>
    */
   public MapProof getProof(K key, K... otherKeys) {
     if (otherKeys.length == 0) {
@@ -336,6 +337,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @throws IllegalArgumentException if the size of any of the keys is not 32 bytes (in case of a
    *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>) or
    *     keys collection is empty
+   * @see <a href="../../blockchain/Blockchain.html#proofs">Blockchain Proofs</a>
    */
   public MapProof getProof(Collection<? extends K> keys) {
     checkArgument(!keys.isEmpty(), "Keys collection should not be empty");

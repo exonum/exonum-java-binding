@@ -176,6 +176,7 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @param index the element index
    * @throws IndexOutOfBoundsException if the index is invalid
    * @throws IllegalStateException if this list is not valid
+   * @see <a href="../../blockchain/Blockchain.html#proofs">Blockchain Proofs</a>
    */
   public ListProof getProof(long index) {
     byte[] proofMessage = nativeGetProof(getNativeHandle(), index);

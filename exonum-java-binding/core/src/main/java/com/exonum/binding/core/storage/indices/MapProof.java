@@ -27,11 +27,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * Apart from proving the existing entries in the map, MapProof can assert absence of certain keys
  * in the underlying index.
  * <!--
- * TODO: Improve docs when the whole proof support is ready: explain their place in the
- *   full proof creation process. When verification arrives, explain how it is done.
+ * TODO: Improve docs: When verification arrives, explain how it is done.
  * -->
  *
  * @see ProofMapIndexProxy#getProof(Object, Object[])
+ * @see <a href="../../blockchain/Blockchain.html#service-data-proof">Service Data Proofs</a>
  */
 @AutoValue
 public abstract class MapProof {

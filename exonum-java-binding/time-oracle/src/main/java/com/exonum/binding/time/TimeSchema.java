@@ -53,8 +53,8 @@ public interface TimeSchema {
   ProofEntryIndexProxy<ZonedDateTime> getTime();
 
   /**
-   * Returns the table that stores time for every validator. Note that this is a
-   * <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>.
+   * Returns the table that stores time for every validator. Note that this is a proof map that
+   * uses non-hashed keys.
    */
   ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes();
 }
