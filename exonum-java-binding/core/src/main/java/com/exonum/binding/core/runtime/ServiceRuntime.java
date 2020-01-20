@@ -207,6 +207,23 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
+   * Initiates resuming of previously stopped service instance.
+   *
+   * @param instanceSpec a service instance specification; must reference a deployed artifact
+   * @param configuration service instance configuration parameters as a serialized protobuf
+   *     message
+   * @throws IllegalArgumentException if the given service instance is active
+   */
+  public void initializeResumingService(ServiceInstanceSpec instanceSpec,
+      byte[] configuration) {
+    synchronized (lock) {
+      checkStoppedService(instanceSpec.getId());
+      ServiceWrapper service = createServiceInstance(instanceSpec);
+      service.resume(new ServiceConfiguration(configuration));
+    }
+  }
+
+  /**
    * Modifies the state of the given service instance at the runtime either by activation it or
    * stopping. The service instance should be successfully initialized
    * by {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])} in advance.
@@ -486,14 +503,20 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   private ServiceWrapper getServiceById(Integer serviceId) {
-    checkService(serviceId);
+    checkActiveService(serviceId);
     return servicesById.get(serviceId);
   }
 
   /** Checks that the service with the given id is started in this runtime. */
-  private void checkService(Integer serviceId) {
+  private void checkActiveService(Integer serviceId) {
     checkArgument(servicesById.containsKey(serviceId),
         "No service with id=%s in the Java runtime", serviceId);
+  }
+
+  /** Checks that the service with the given id is started in this runtime. */
+  private void checkStoppedService(Integer serviceId) {
+    checkArgument(!servicesById.containsKey(serviceId),
+        "Service with id=%s should be stopped, but actually active", serviceId);
   }
 
   @VisibleForTesting

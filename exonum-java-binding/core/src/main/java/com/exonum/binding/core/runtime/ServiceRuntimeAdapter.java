@@ -152,6 +152,20 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
+   * Starts resuming a service with the given specification.
+   *
+   * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
+   *     protobuf message
+   * @param configuration the service initial configuration parameters as a serialized protobuf
+   *     message
+   * @see ServiceRuntime#initializeResumingService(ServiceInstanceSpec, byte[])
+   */
+  void initializeResumingService(byte[] instanceSpec, byte[] configuration) {
+    ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
+    serviceRuntime.initializeResumingService(javaInstanceSpec, configuration);
+  }
+
+  /**
    * Updates the status of the service instance.
    *
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}

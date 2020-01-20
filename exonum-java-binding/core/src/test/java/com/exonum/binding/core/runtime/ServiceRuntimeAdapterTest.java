@@ -137,6 +137,27 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
+  void initializeResumingService() {
+    int serviceId = 1;
+    String serviceName = "s1";
+    ArtifactId artifact = ARTIFACT_ID;
+    byte[] instanceSpec = InstanceSpec.newBuilder()
+        .setId(serviceId)
+        .setName(serviceName)
+        .setArtifact(artifact)
+        .build()
+        .toByteArray();
+    byte[] configuration = bytes(1, 2);
+
+    serviceRuntimeAdapter.initializeResumingService(instanceSpec, configuration);
+
+    // Check the runtime was invoked with correct config
+    ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
+        ServiceArtifactId.fromProto(artifact));
+    verify(serviceRuntime).initializeResumingService(expected, configuration);
+  }
+
+  @Test
   void afterTransactions() throws CloseFailuresException {
     int serviceId = 1;
     long forkHandle = 0x110b;

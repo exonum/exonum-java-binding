@@ -85,6 +85,14 @@ class ServiceWrapperTest {
   }
 
   @Test
+  void resume() {
+    Fork fork = mock(Fork.class);
+    Configuration config = new ServiceConfiguration(new byte[0]);
+    serviceWrapper.resume(config);
+    verify(service).resume(config);
+  }
+
+  @Test
   void initializePropagatesExecutionException() {
     ExecutionException e = new ExecutionException((byte) 1);
     Fork fork = mock(Fork.class);

@@ -54,6 +54,25 @@ public interface Service {
   }
 
   /**
+   * Performs resuming of previously stopped service instance. This method is called <em>once</em>
+   * after restarting a service instance.
+   *
+   * <p><em>Note that changing the data during resume operations is not allowed
+   * due to violation migration procedure.</em>
+   *
+   * @param configuration the service configuration parameters
+   * @throws ExecutionException if the configuration parameters are not valid (e.g.,
+   *     malformed, or do not meet the preconditions). Exonum will stop the service if
+   *     its initialization fails. It will save the error into
+   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   *     the registry of call errors}
+   * @see Configurable
+   */
+  default void resume(Configuration configuration) {
+    // No configuration
+  }
+
+  /**
    * Creates handlers that make up the public HTTP API of this service.
    * The handlers are added to the given router, which is then mounted at the following path:
    * {@code /api/services/<service-name>}.

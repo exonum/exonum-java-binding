@@ -106,6 +106,10 @@ final class ServiceWrapper {
     callServiceMethod(() -> service.initialize(view, configuration));
   }
 
+  void resume(Configuration configuration) {
+    callServiceMethod(() -> service.resume(configuration));
+  }
+
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
       TransactionContext context) {
     switch (interfaceName) {
