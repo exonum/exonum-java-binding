@@ -21,7 +21,7 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K3;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.google.common.collect.ImmutableMap;
 
 class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String> {
@@ -40,8 +40,8 @@ class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<S
   }
 
   @Override
-  ProofMapIndexProxy<String, String> createInGroup(byte[] mapId, View view) {
-    return ProofMapIndexProxy.newInGroupUnsafe(GROUP_NAME, mapId, view,
+  ProofMapIndexProxy<String, String> createInGroup(byte[] mapId, AbstractAccess access) {
+    return ProofMapIndexProxy.newInGroupUnsafe(GROUP_NAME, mapId, access,
         StandardSerializers.string(), StandardSerializers.string());
   }
 }

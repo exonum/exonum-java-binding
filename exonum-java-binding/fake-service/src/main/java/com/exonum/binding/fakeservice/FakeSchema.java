@@ -19,21 +19,21 @@ package com.exonum.binding.fakeservice;
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
 
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
 public final class FakeSchema implements Schema {
 
   private final String namespace;
-  private final View view;
+  private final AbstractAccess access;
 
-  public FakeSchema(String serviceName, View view) {
+  public FakeSchema(String serviceName, AbstractAccess access) {
     this.namespace = serviceName;
-    this.view = view;
+    this.access = access;
   }
 
   public ProofMapIndexProxy<String, String> testMap() {
     String fullName = namespace + ".test-map";
-    return ProofMapIndexProxy.newInstance(fullName, view, string(), string());
+    return ProofMapIndexProxy.newInstance(fullName, access, string(), string());
   }
 }

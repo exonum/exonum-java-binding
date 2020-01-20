@@ -20,7 +20,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.test.Bytes;
 import java.util.List;
 import java.util.stream.Stream;
@@ -53,15 +53,15 @@ class ProofMapIndexProxyIntegrationTest
   }
 
   @Override
-  ProofMapIndexProxy<HashCode, String> create(String name, View view) {
-    return ProofMapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
+  ProofMapIndexProxy<HashCode, String> create(String name, AbstractAccess access) {
+    return ProofMapIndexProxy.newInstance(name, access, StandardSerializers.hash(),
         StandardSerializers.string());
   }
 
   @Override
   ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
-      View view) {
-    return ProofMapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+      AbstractAccess access) {
+    return ProofMapIndexProxy.newInGroupUnsafe(groupName, idInGroup, access,
         StandardSerializers.hash(), StandardSerializers.string());
   }
 }

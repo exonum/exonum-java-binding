@@ -25,7 +25,7 @@ import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 
 /**
- * A fork is a database view, allowing both read and write operations.
+ * A fork is a database access, allowing both read and write operations.
  *
  * <p>A fork represents the database state at the time it was created <em>plus</em> any changes
  * to the database made using this fork.
@@ -34,7 +34,7 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  * which then may be <em>atomically</em> applied (i.e. committed) to the database and change
  * the database state.
  */
-public final class Fork extends View {
+public final class Fork extends AbstractAccess {
 
   /**
    * A destructor of the native fork object. This class keeps a destructor to be able
@@ -80,7 +80,7 @@ public final class Fork extends View {
     // Add an action destroying the native peer if necessary.
     ProxyDestructor destructor = ProxyDestructor.newRegistered(cleaner, h, Fork.class, nh -> {
       if (owningHandle) {
-        Views.nativeFree(nh);
+        Accesses.nativeFree(nh);
       }
     });
 

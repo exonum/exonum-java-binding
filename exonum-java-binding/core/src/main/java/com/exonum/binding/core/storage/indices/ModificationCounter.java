@@ -16,10 +16,10 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 
 /**
- * A counter of modification events of some objects (e.g., a collection, or a database view).
+ * A counter of modification events of some objects (e.g., a collection, or a database access).
  * It is updated each time the object notifies of an event. The clients that need
  * to detect modifications must save the current value of the counter, and check if it has changed
  * to determine if the corresponding source object is modified.
@@ -53,13 +53,13 @@ interface ModificationCounter {
   void notifyModified();
 
   /**
-   * Creates a modification counter for a collection using the given view.
+   * Creates a modification counter for a collection using the given access.
    *
-   * @param view a database view on which the collection needing the modification counter
+   * @param access a database access on which the collection needing the modification counter
    *     is based
    */
-  static ModificationCounter forView(View view) {
-    if (view.canModify()) {
+  static ModificationCounter forView(AbstractAccess access) {
+    if (access.canModify()) {
       return new IncrementalModificationCounter();
     } else {
       return ImmutableModificationCounter.INSTANCE;

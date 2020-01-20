@@ -54,8 +54,8 @@ class MyServiceIntegrationTest {
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       // Check that genesis block was committed
-      testKit.withSnapshot((view) -> {
-        Blockchain blockchain = Blockchain.newInstance(view);
+      testKit.withSnapshot((access) -> {
+        Blockchain blockchain = Blockchain.newInstance(access);
         assertThat(blockchain.getBlockHashes().size(), equalTo(1L));
       });
     }

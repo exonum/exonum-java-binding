@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest({
-    Views.class,
+    Accesses.class,
 })
 class SnapshotTest {
 
@@ -40,7 +40,7 @@ class SnapshotTest {
   class DestroysPeersIfNeeded {
     @BeforeEach
     void setUp() {
-      mockStatic(Views.class);
+      mockStatic(Accesses.class);
     }
 
     @Test
@@ -49,8 +49,8 @@ class SnapshotTest {
         Snapshot.newInstance(0x0A, false, cleaner);
       }
 
-      verifyStatic(Views.class, never());
-      Views.nativeFree(anyLong());
+      verifyStatic(Accesses.class, never());
+      Accesses.nativeFree(anyLong());
     }
 
     @Test
@@ -61,8 +61,8 @@ class SnapshotTest {
         Snapshot.newInstance(nativeHandle, true, cleaner);
       }
 
-      verifyStatic(Views.class);
-      Views.nativeFree(nativeHandle);
+      verifyStatic(Accesses.class);
+      Accesses.nativeFree(nativeHandle);
     }
   }
 

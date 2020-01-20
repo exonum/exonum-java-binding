@@ -30,7 +30,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.Iterator;
@@ -254,30 +254,30 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   /**
-   * Creates a view, a value set index and runs a test against the view and the set.
-   * Automatically closes the view and the set.
+   * Creates an access, a value set index and runs a test against the access and the set.
+   * Automatically closes the access and the set.
    *
-   * @param viewFactory a function creating a database view
+   * @param accessFactory a function creating a database access
    * @param valueSetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> accessFactory,
       Consumer<ValueSetIndexProxy<String>> valueSetTest) {
-    runTestWithView(viewFactory,
-        (view, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
+    runTestWithView(accessFactory,
+        (access, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
     );
   }
 
   /**
-   * Creates a view, a value set index and runs a test against the view and the set.
-   * Automatically closes the view and the set.
+   * Creates an access, a value set index and runs a test against the access and the set.
+   * Automatically closes the access and the set.
    *
-   * @param viewFactory a function creating a database view
-   * @param valueSetTest a test to run. Receives the created view and the set as arguments.
+   * @param accessFactory a function creating a database access
+   * @param valueSetTest a test to run. Receives the created access and the set as arguments.
    */
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, ValueSetIndexProxy<String>> valueSetTest) {
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> accessFactory,
+      BiConsumer<AbstractAccess, ValueSetIndexProxy<String>> valueSetTest) {
     IndicesTests.runTestWithView(
-        viewFactory,
+        accessFactory,
         VALUE_SET_NAME,
         ValueSetIndexProxy::newInstance,
         valueSetTest
@@ -291,19 +291,19 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Override
-  ValueSetIndexProxy<String> create(String name, View view) {
-    return ValueSetIndexProxy.newInstance(name, view, StandardSerializers.string());
+  ValueSetIndexProxy<String> create(String name, AbstractAccess access) {
+    return ValueSetIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
   @Override
-  ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return ValueSetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+  ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+    return ValueSetIndexProxy.newInGroupUnsafe(groupName, idInGroup, access,
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
   @Override

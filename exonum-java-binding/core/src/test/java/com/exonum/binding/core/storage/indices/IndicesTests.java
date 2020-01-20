@@ -19,36 +19,36 @@ package com.exonum.binding.core.storage.indices;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 class IndicesTests {
 
   /**
-   * Creates a view, an index and runs a test against the view and the index.
-   * Automatically closes the view and the index. Uses String as the element type.
+   * Creates an access, an index and runs a test against the access and the index.
+   * Automatically closes the access and the index. Uses String as the element type.
    *
    * @param <IndexT> type of the index
-   * @param viewFactory a function creating a database view
+   * @param accessFactory a function creating a database access
    * @param indexName an index name
    * @param indexSupplier an index factory
-   * @param indexTest a test to run. Receives the created view and the index as arguments.
-   * @throws RuntimeException if the native proxies (a view or an index) failed to destroy
+   * @param indexTest a test to run. Receives the created access and the index as arguments.
+   * @throws RuntimeException if the native proxies (an access or an index) failed to destroy
    *     the corresponding native objects
    */
   static <IndexT extends StorageIndex>
-      void runTestWithView(Function<Cleaner, View> viewFactory,
+      void runTestWithView(Function<Cleaner, AbstractAccess> accessFactory,
                            String indexName,
                            IndexConstructorOne<IndexT, String> indexSupplier,
-                           BiConsumer<View, IndexT> indexTest) {
+                           BiConsumer<AbstractAccess, IndexT> indexTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      // Create a view and an index.
-      View view = viewFactory.apply(cleaner);
-      IndexT index = indexSupplier.create(indexName, view, StandardSerializers.string());
+      // Create an access and an index.
+      AbstractAccess access = accessFactory.apply(cleaner);
+      IndexT index = indexSupplier.create(indexName, access, StandardSerializers.string());
 
       // Run the test
-      indexTest.accept(view, index);
+      indexTest.accept(access, index);
     } catch (CloseFailuresException e) {
       throw new RuntimeException(e);
     }

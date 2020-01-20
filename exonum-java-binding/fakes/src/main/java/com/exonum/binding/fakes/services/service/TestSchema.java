@@ -19,7 +19,7 @@ package com.exonum.binding.fakes.services.service;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.util.Collections;
 import java.util.List;
@@ -28,14 +28,14 @@ public final class TestSchema implements Schema {
   @SuppressWarnings("WeakerAccess")
   static final String TEST_MAP_NAME = TestService.NAME + "_test_map";
 
-  private final View view;
+  private final AbstractAccess access;
 
-  public TestSchema(View view) {
-    this.view = view;
+  public TestSchema(AbstractAccess access) {
+    this.access = access;
   }
 
   public ProofMapIndexProxy<HashCode, String> testMap() {
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(TEST_MAP_NAME, view, StandardSerializers.hash(),
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(TEST_MAP_NAME, access, StandardSerializers.hash(),
         StandardSerializers.string());
   }
 

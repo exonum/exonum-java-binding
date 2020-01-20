@@ -102,8 +102,8 @@ final class ServiceWrapper {
     return instanceSpec.getId();
   }
 
-  void initialize(Fork view, Configuration configuration) {
-    callServiceMethod(() -> service.initialize(view, configuration));
+  void initialize(Fork fork, Configuration configuration) {
+    callServiceMethod(() -> service.initialize(fork, configuration));
   }
 
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,

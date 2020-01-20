@@ -23,8 +23,8 @@ import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
@@ -58,8 +58,8 @@ public final class TestService extends AbstractService {
   }
 
   @Override
-  protected TestSchema createDataSchema(View view) {
-    return new TestSchema(view, getId());
+  protected TestSchema createDataSchema(AbstractAccess access) {
+    return new TestSchema(access, getId());
   }
 
   @Override

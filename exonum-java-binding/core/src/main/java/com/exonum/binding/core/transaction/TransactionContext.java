@@ -33,7 +33,7 @@ import com.exonum.binding.core.storage.database.Fork;
  */
 public interface TransactionContext {
   /**
-   * Returns database view allowing R/W operations.
+   * Returns database access allowing R/W operations.
    */
   Fork getFork();
 

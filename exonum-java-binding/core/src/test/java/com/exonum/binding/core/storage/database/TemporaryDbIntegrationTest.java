@@ -159,12 +159,12 @@ class TemporaryDbIntegrationTest {
     }
   }
 
-  private static ListIndex<String> newList(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  private static ListIndex<String> newList(String name, AbstractAccess access) {
+    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
-  private static MapIndex<String, String> newMap(String name, View view) {
-    return MapIndexProxy.newInstance(name, view, StandardSerializers.string(),
+  private static MapIndex<String, String> newMap(String name, AbstractAccess access) {
+    return MapIndexProxy.newInstance(name, access, StandardSerializers.string(),
         StandardSerializers.string());
   }
 }

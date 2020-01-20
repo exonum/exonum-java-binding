@@ -27,7 +27,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
@@ -53,7 +53,7 @@ import java.nio.ByteOrder;
  */
 final class CoreSchema {
 
-  private final View dbView;
+  private final AbstractAccess dbAccess;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final Serializer<TransactionLocation> TRANSACTION_LOCATION_SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
@@ -66,15 +66,15 @@ final class CoreSchema {
   private static final Serializer<Config> CONSENSUS_CONFIG_SERIALIZER =
       StandardSerializers.protobuf(Config.class);
 
-  private CoreSchema(View dbView) {
-    this.dbView = dbView;
+  private CoreSchema(AbstractAccess dbAccess) {
+    this.dbAccess = dbAccess;
   }
 
   /**
    * Constructs a schema for a given dbView.
    */
-  static CoreSchema newInstance(View dbView) {
-    return new CoreSchema(dbView);
+  static CoreSchema newInstance(AbstractAccess dbAccess) {
+    return new CoreSchema(dbAccess);
   }
 
   /**
@@ -96,7 +96,7 @@ final class CoreSchema {
    */
   ListIndex<HashCode> getBlockHashes() {
     return ListIndexProxy.newInstance(
-        CoreIndex.ALL_BLOCK_HASHES, dbView, StandardSerializers.hash());
+        CoreIndex.ALL_BLOCK_HASHES, dbAccess, StandardSerializers.hash());
   }
 
   /**
@@ -108,7 +108,7 @@ final class CoreSchema {
     checkBlockHeight(blockHeight);
     byte[] id = toCoreStorageKey(blockHeight);
     return ProofListIndexProxy.newInGroupUnsafe(
-        CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
+        CoreIndex.BLOCK_TRANSACTIONS, id, dbAccess, StandardSerializers.hash());
   }
 
   /**
@@ -116,14 +116,14 @@ final class CoreSchema {
    */
   MapIndex<HashCode, Block> getBlocks() {
     return MapIndexProxy.newInstance(
-        CoreIndex.BLOCKS, dbView, StandardSerializers.hash(), BLOCK_SERIALIZER);
+        CoreIndex.BLOCKS, dbAccess, StandardSerializers.hash(), BLOCK_SERIALIZER);
   }
 
   /**
    * Returns a map of transaction messages identified by their SHA-256 hashes.
    */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {
-    return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS, dbView, StandardSerializers.hash(),
+    return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS, dbAccess, StandardSerializers.hash(),
         TRANSACTION_MESSAGE_SERIALIZER);
   }
 
@@ -134,7 +134,7 @@ final class CoreSchema {
   ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
     checkBlockHeight(blockHeight);
     byte[] idInGroup = toCoreStorageKey(blockHeight);
-    return ProofMapIndexProxy.newInGroupUnsafe(CoreIndex.CALL_ERRORS, idInGroup, dbView,
+    return ProofMapIndexProxy.newInGroupUnsafe(CoreIndex.CALL_ERRORS, idInGroup, dbAccess,
         CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_SERIALIZER);
   }
 
@@ -143,7 +143,7 @@ final class CoreSchema {
    * transaction hash.
    */
   MapIndex<HashCode, TransactionLocation> getTxLocations() {
-    return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_LOCATIONS, dbView,
+    return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_LOCATIONS, dbAccess,
         StandardSerializers.hash(), TRANSACTION_LOCATION_SERIALIZER);
   }
 
@@ -155,7 +155,7 @@ final class CoreSchema {
    * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   KeySetIndexProxy<HashCode> getTransactionPool() {
-    return KeySetIndexProxy.newInstance(CoreIndex.TRANSACTIONS_POOL, dbView,
+    return KeySetIndexProxy.newInstance(CoreIndex.TRANSACTIONS_POOL, dbAccess,
         StandardSerializers.hash());
   }
 
@@ -167,7 +167,7 @@ final class CoreSchema {
   Config getConsensusConfiguration() {
     ProofEntryIndexProxy<Config> configEntry = ProofEntryIndexProxy
         .newInstance(CoreIndex.CONSENSUS_CONFIG,
-                     dbView, CONSENSUS_CONFIG_SERIALIZER);
+            dbAccess, CONSENSUS_CONFIG_SERIALIZER);
     checkState(configEntry.isPresent(), "No consensus configuration: requesting the configuration "
         + "before the genesis block was created");
     return configEntry.get();

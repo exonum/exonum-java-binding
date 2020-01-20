@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.List;
@@ -160,26 +160,26 @@ class KeySetIndexProxyIntegrationTest
   }
 
   /**
-   * Creates a view, a key set index and runs a test against the view and the set.
-   * Automatically closes the view and the set.
+   * Creates an access, a key set index and runs a test against the access and the set.
+   * Automatically closes the access and the set.
    *
-   * @param viewFactory a function creating a database view
+   * @param viewFactory a function creating a database access
    * @param keySetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
       Consumer<KeySetIndexProxy<String>> keySetTest) {
     runTestWithView(viewFactory, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
   }
 
   /**
-   * Creates a view, a key set index and runs a test against the view and the set.
-   * Automatically closes the view and the set.
+   * Creates an access, a key set index and runs a test against the access and the set.
+   * Automatically closes the access and the set.
    *
-   * @param viewFactory a function creating a database view
+   * @param viewFactory a function creating a database access
    * @param keySetTest a test to run. Receives the created view and the set as arguments.
    */
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, KeySetIndexProxy<String>> keySetTest) {
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
+      BiConsumer<AbstractAccess, KeySetIndexProxy<String>> keySetTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         KEY_SET_NAME,
@@ -189,19 +189,19 @@ class KeySetIndexProxyIntegrationTest
   }
 
   @Override
-  KeySetIndexProxy<String> create(String name, View view) {
-    return KeySetIndexProxy.newInstance(name, view, StandardSerializers.string());
+  KeySetIndexProxy<String> create(String name, AbstractAccess access) {
+    return KeySetIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
   @Override
-  KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return KeySetIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+  KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+    return KeySetIndexProxy.newInGroupUnsafe(groupName, idInGroup, access,
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
   @Override

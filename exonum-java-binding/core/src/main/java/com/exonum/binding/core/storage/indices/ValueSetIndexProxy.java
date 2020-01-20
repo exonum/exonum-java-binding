@@ -27,7 +27,7 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
@@ -52,18 +52,18 @@ import javax.annotation.Nullable;
  *
  * <p>The "destructive" methods of the set, i.e., the ones that change its contents,
  * are specified to throw {@link UnsupportedOperationException} if the set has been created with
- * a read-only database view.
+ * a read-only database access.
  *
  * <p>All method arguments are non-null by default.
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>When the view goes out of scope, this set is destroyed. Subsequent use of the closed set
+ * <p>When the access goes out of scope, this set is destroyed. Subsequent use of the closed set
  * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this set
  * @see KeySetIndexProxy
- * @see View
+ * @see AbstractAccess
  */
 public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     implements Iterable<ValueSetIndexProxy.Entry<E>> {
@@ -84,17 +84,17 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    *
    * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
    *             [a-zA-Z0-9_]
-   * @param view a database view. Must be valid. If a view is read-only,
+   * @param access a database access. Must be valid. If an access is read-only,
    *             "destructive" operations are not permitted.
    * @param valueType the class of values-protobuf messages
    * @param <E> the type of values in this set; must be a protobuf message
    *     that has a public static {@code #parseFrom(byte[])} method
-   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalStateException if the access is not valid
    * @throws IllegalArgumentException if the name is empty
    */
   public static <E extends MessageLite> ValueSetIndexProxy<E> newInstance(
-      String name, View view, Class<E> valueType) {
-    return newInstance(name, view, StandardSerializers.protobuf(valueType));
+      String name, AbstractAccess access, Class<E> valueType) {
+    return newInstance(name, access, StandardSerializers.protobuf(valueType));
   }
 
   /**
@@ -102,21 +102,21 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    *
    * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
    *             [a-zA-Z0-9_]
-   * @param view a database view. Must be valid. If a view is read-only,
+   * @param access a database access. Must be valid. If an access is read-only,
    *             "destructive" operations are not permitted.
    * @param serializer a serializer of values
    * @param <E> the type of values in this set
-   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalStateException if the access is not valid
    * @throws IllegalArgumentException if the name is empty
    * @see StandardSerializers
    */
-  public static <E> ValueSetIndexProxy<E> newInstance(String name, View view,
+  public static <E> ValueSetIndexProxy<E> newInstance(String name, AbstractAccess access,
                                                       Serializer<E> serializer) {
     IndexAddress address = IndexAddress.valueOf(name);
-    long viewNativeHandle = view.getViewNativeHandle();
-    LongSupplier nativeSetConstructor = () -> nativeCreate(name, viewNativeHandle);
+    long accessNativeHandle = access.getAccessNativeHandle();
+    LongSupplier nativeSetConstructor = () -> nativeCreate(name, accessNativeHandle);
 
-    return getOrCreate(address, view, serializer, nativeSetConstructor);
+    return getOrCreate(address, access, serializer, nativeSetConstructor);
   }
 
   /**
@@ -127,29 +127,29 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    *
    * @param groupName a name of the collection group
    * @param indexId an identifier of this collection in the group, see the caveats
-   * @param view a database view
+   * @param access a database access
    * @param serializer a serializer of set values
    * @param <E> the type of values in this set
    * @return a new value set
-   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalStateException if the access is not valid
    * @throws IllegalArgumentException if the name or index id is empty
    * @see StandardSerializers
    */
   public static <E> ValueSetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
-                                                           View view, Serializer<E> serializer) {
+                                                           AbstractAccess access, Serializer<E> serializer) {
     IndexAddress address = IndexAddress.valueOf(groupName, indexId);
-    long viewNativeHandle = view.getViewNativeHandle();
+    long accessNativeHandle = access.getAccessNativeHandle();
     LongSupplier nativeSetConstructor =
-        () -> nativeCreateInGroup(groupName, indexId, viewNativeHandle);
+        () -> nativeCreateInGroup(groupName, indexId, accessNativeHandle);
 
-    return getOrCreate(address, view, serializer, nativeSetConstructor);
+    return getOrCreate(address, access, serializer, nativeSetConstructor);
   }
 
-  private static <E> ValueSetIndexProxy<E> getOrCreate(IndexAddress address, View view,
+  private static <E> ValueSetIndexProxy<E> getOrCreate(IndexAddress address, AbstractAccess access,
       Serializer<E> serializer, LongSupplier nativeSetConstructor) {
-    return view.findOpenIndex(address)
+    return access.findOpenIndex(address)
         .map(ValueSetIndexProxy::<E>checkCachedInstance)
-        .orElseGet(() -> newValueSetProxy(address, view, serializer, nativeSetConstructor));
+        .orElseGet(() -> newValueSetProxy(address, access, serializer, nativeSetConstructor));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
@@ -158,29 +158,29 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     return (ValueSetIndexProxy<E>) cachedIndex;
   }
 
-  private static <E> ValueSetIndexProxy<E> newValueSetProxy(IndexAddress address, View view,
+  private static <E> ValueSetIndexProxy<E> newValueSetProxy(IndexAddress address, AbstractAccess access,
       Serializer<E> serializer, LongSupplier nativeSetConstructor) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle setNativeHandle = createNativeSet(view, nativeSetConstructor);
+    NativeHandle setNativeHandle = createNativeSet(access, nativeSetConstructor);
 
-    ValueSetIndexProxy<E> set = new ValueSetIndexProxy<>(setNativeHandle, address, view, s);
-    view.registerIndex(set);
+    ValueSetIndexProxy<E> set = new ValueSetIndexProxy<>(setNativeHandle, address, access, s);
+    access.registerIndex(set);
     return set;
   }
 
-  private static NativeHandle createNativeSet(View view, LongSupplier nativeSetConstructor) {
+  private static NativeHandle createNativeSet(AbstractAccess access, LongSupplier nativeSetConstructor) {
     NativeHandle setNativeHandle = new NativeHandle(nativeSetConstructor.getAsLong());
 
-    Cleaner cleaner = view.getCleaner();
+    Cleaner cleaner = access.getCleaner();
     ProxyDestructor.newRegistered(cleaner, setNativeHandle, ValueSetIndexProxy.class,
         ValueSetIndexProxy::nativeFree);
     return setNativeHandle;
   }
 
-  private ValueSetIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
+  private ValueSetIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
                              CheckingSerializerDecorator<E> serializer) {
-    super(nativeHandle, address, view);
+    super(nativeHandle, address, access);
     this.serializer = serializer;
   }
 
@@ -243,7 +243,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
         nativeCreateHashIterator(getNativeHandle()),
         this::nativeHashIteratorNext,
         this::nativeHashIteratorFree,
-        dbView,
+        dbAccess,
         modCounter,
         HashCode::fromBytes);
   }
@@ -261,7 +261,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
         nativeCreateIterator(getNativeHandle()),
         this::nativeIteratorNext,
         this::nativeIteratorFree,
-        dbView,
+        dbAccess,
         modCounter,
         (e) -> Entry.fromInternal(e, serializer));
   }
@@ -286,7 +286,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   }
 
   private int streamCharacteristics() {
-    if (dbView.canModify()) {
+    if (dbAccess.canModify()) {
       return BASE_SPLITERATOR_CHARACTERISTICS;
     } else {
       return BASE_SPLITERATOR_CHARACTERISTICS | Spliterator.IMMUTABLE;
@@ -373,10 +373,10 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     nativeRemoveByHash(getNativeHandle(), elementHash.asBytes());
   }
 
-  private static native long nativeCreate(String setName, long viewNativeHandle);
+  private static native long nativeCreate(String setName, long accessNativeHandle);
 
   private static native long nativeCreateInGroup(String familyName, byte[] setId,
-                                                 long viewNativeHandle);
+                                                 long accessNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 

@@ -23,9 +23,9 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
 import java.util.NoSuchElementException;
@@ -37,18 +37,18 @@ import java.util.Optional;
  * <p>An Entry is analogous to {@link java.util.Optional}, but provides modifying ("destructive")
  * operations when created with a {@link Fork}.
  * Such methods are specified to throw {@link UnsupportedOperationException} if
- * the entry is created with a {@link Snapshot} — a read-only database view.
+ * the entry is created with a {@link Snapshot} — a read-only database access.
  *
  * <p>All method arguments are non-null by default.
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>When the view goes out of scope, this entry is destroyed. Subsequent use of the closed entry
+ * <p>When the access goes out of scope, this entry is destroyed. Subsequent use of the closed entry
  * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <T> the type of an element in this entry
  *
- * @see View
+ * @see AbstractAccess
  */
 public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements HashableIndex {
 
@@ -63,18 +63,18 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
    *
    * @param name a unique alphanumeric non-empty identifier of the Entry in the underlying storage:
    *             [a-zA-Z0-9_]
-   * @param view a database view. Must be valid.
-   *             If a view is read-only, "destructive" operations are not permitted.
+   * @param access a database access. Must be valid.
+   *             If an access is read-only, "destructive" operations are not permitted.
    * @param elementType the class of an element-protobuf message
    * @param <E> the type of entry; must be a protobuf message
    *     that has a static {@code #parseFrom(byte[])} method
    *
    * @throws IllegalArgumentException if the name is empty
-   * @throws IllegalStateException if the view proxy is invalid
+   * @throws IllegalStateException if the access proxy is invalid
    */
   public static <E extends MessageLite> ProofEntryIndexProxy<E> newInstance(
-      String name, View view, Class<E> elementType) {
-    return newInstance(name, view, StandardSerializers.protobuf(elementType));
+      String name, AbstractAccess access, Class<E> elementType) {
+    return newInstance(name, access, StandardSerializers.protobuf(elementType));
   }
 
   /**
@@ -82,20 +82,20 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
    *
    * @param name a unique alphanumeric non-empty identifier of the Entry in the underlying storage:
    *             [a-zA-Z0-9_]
-   * @param view a database view. Must be valid.
-   *             If a view is read-only, "destructive" operations are not permitted.
+   * @param access a database access. Must be valid.
+   *             If an access is read-only, "destructive" operations are not permitted.
    * @param serializer an entry serializer
    *
    * @throws IllegalArgumentException if the name is empty
-   * @throws IllegalStateException if the view proxy is invalid
+   * @throws IllegalStateException if the access proxy is invalid
    * @see StandardSerializers
    */
   public static <E> ProofEntryIndexProxy<E> newInstance(
-      String name, View view, Serializer<E> serializer) {
+      String name, AbstractAccess access, Serializer<E> serializer) {
     IndexAddress address = IndexAddress.valueOf(name);
-    return view.findOpenIndex(address)
+    return access.findOpenIndex(address)
         .map(ProofEntryIndexProxy::<E>checkCachedInstance)
-        .orElseGet(() -> newEntryIndexProxy(address, view, serializer));
+        .orElseGet(() -> newEntryIndexProxy(address, access, serializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
@@ -104,31 +104,32 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
     return (ProofEntryIndexProxy<E>) cachedIndex;
   }
 
-  private static <E> ProofEntryIndexProxy<E> newEntryIndexProxy(IndexAddress address, View view,
+  private static <E> ProofEntryIndexProxy<E> newEntryIndexProxy(IndexAddress address, AbstractAccess access,
                                                                 Serializer<E> serializer) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle entryNativeHandle = createNativeEntry(address.getName(), view);
+    NativeHandle entryNativeHandle = createNativeEntry(address.getName(), access);
 
-    ProofEntryIndexProxy<E> entry = new ProofEntryIndexProxy<>(entryNativeHandle, address, view, s);
-    view.registerIndex(entry);
+    ProofEntryIndexProxy<E> entry = new ProofEntryIndexProxy<>(entryNativeHandle, address,
+        access, s);
+    access.registerIndex(entry);
     return entry;
   }
 
 
-  private static NativeHandle createNativeEntry(String name, View view) {
-    long viewNativeHandle = view.getViewNativeHandle();
-    NativeHandle entryNativeHandle = new NativeHandle(nativeCreate(name, viewNativeHandle));
+  private static NativeHandle createNativeEntry(String name, AbstractAccess access) {
+    long accessNativeHandle = access.getAccessNativeHandle();
+    NativeHandle entryNativeHandle = new NativeHandle(nativeCreate(name, accessNativeHandle));
 
-    Cleaner cleaner = view.getCleaner();
+    Cleaner cleaner = access.getCleaner();
     ProxyDestructor.newRegistered(cleaner, entryNativeHandle, ProofEntryIndexProxy.class,
         ProofEntryIndexProxy::nativeFree);
     return entryNativeHandle;
   }
 
-  private ProofEntryIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
+  private ProofEntryIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
                                CheckingSerializerDecorator<T> serializer) {
-    super(nativeHandle, address, view);
+    super(nativeHandle, address, access);
     this.serializer = serializer;
   }
 
@@ -221,7 +222,7 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
     }
   }
 
-  private static native long nativeCreate(String name, long viewNativeHandle);
+  private static native long nativeCreate(String name, long accessNativeHandle);
 
   private native void nativeSet(long nativeHandle, byte[] value);
 

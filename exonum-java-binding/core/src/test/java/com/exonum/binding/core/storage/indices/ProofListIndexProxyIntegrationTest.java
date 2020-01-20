@@ -34,7 +34,7 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.core.messages.ListProofOuterClass;
 import com.exonum.core.messages.ListProofOuterClass.ListProofEntry;
 import com.google.protobuf.ByteString;
@@ -59,19 +59,19 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   private static final String LIST_NAME = "test_proof_list";
 
   @Override
-  ProofListIndexProxy<String> create(String name, View view) {
-    return ProofListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  ProofListIndexProxy<String> create(String name, AbstractAccess access) {
+    return ProofListIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
   @Override
-  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
+  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, access,
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
   @Override
@@ -293,13 +293,13 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
                                       Consumer<ProofListIndexProxy<String>> listTest) {
     runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      BiConsumer<View, ProofListIndexProxy<String>> listTest) {
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
+                                      BiConsumer<AbstractAccess, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         LIST_NAME,

@@ -26,7 +26,7 @@ final class TestSchemaFactories {
       if (actualView.equals(expectedView)) {
         return schema;
       }
-      throw new AssertionError("Unexpected view: " + actualView + ", expected: " + expectedView);
+      throw new AssertionError("Unexpected access: " + actualView + ", expected: " + expectedView);
     };
   }
 

@@ -45,13 +45,13 @@ import org.apache.logging.log4j.Logger;
 public class ServiceRuntimeAdapter {
 
   private final ServiceRuntime serviceRuntime;
-  private final ViewFactory viewFactory;
+  private final AccessFactory accessFactory;
   private static final Logger logger = LogManager.getLogger(ServiceRuntimeAdapter.class);
 
   @Inject
-  public ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, ViewFactory viewFactory) {
+  public ServiceRuntimeAdapter(ServiceRuntime serviceRuntime, AccessFactory accessFactory) {
     this.serviceRuntime = serviceRuntime;
-    this.viewFactory = viewFactory;
+    this.accessFactory = accessFactory;
   }
 
   /**
@@ -142,7 +142,7 @@ public class ServiceRuntimeAdapter {
   void initiateAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Fork fork = viewFactory.createFork(forkHandle, cleaner);
+      Fork fork = accessFactory.createFork(forkHandle, cleaner);
       ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
 
       serviceRuntime.initiateAddingService(fork, javaInstanceSpec, configuration);
@@ -203,7 +203,7 @@ public class ServiceRuntimeAdapter {
       throws CloseFailuresException {
 
     try (Cleaner cleaner = new Cleaner("executeTransaction")) {
-      Fork fork = viewFactory.createFork(forkNativeHandle, cleaner);
+      Fork fork = accessFactory.createFork(forkNativeHandle, cleaner);
       HashCode hash = HashCode.fromBytes(txMessageHash);
       PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
 
@@ -227,7 +227,7 @@ public class ServiceRuntimeAdapter {
    */
   void afterTransactions(int serviceId, long forkHandle) throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("afterTransactions")) {
-      Fork fork = viewFactory.createFork(forkHandle, cleaner);
+      Fork fork = accessFactory.createFork(forkHandle, cleaner);
       serviceRuntime.afterTransactions(serviceId, fork);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
@@ -246,7 +246,7 @@ public class ServiceRuntimeAdapter {
   void afterCommit(long snapshotHandle, int validatorId, long height)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("afterCommit")) {
-      Snapshot snapshot = viewFactory.createSnapshot(snapshotHandle, cleaner);
+      Snapshot snapshot = accessFactory.createSnapshot(snapshotHandle, cleaner);
       OptionalInt optionalValidatorId = validatorId >= 0
           ? OptionalInt.of(validatorId)
           : OptionalInt.empty();

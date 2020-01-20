@@ -24,35 +24,35 @@ import com.exonum.binding.core.storage.indices.StorageIndex;
 import java.util.Optional;
 
 /**
- * Represents a view of the database.
+ * Represents an access to the database.
  *
  * <p>There are two sub-types:
  * <ul>
- *   <li>A snapshot, which is a <em>read-only</em> and immutable view.</li>
- *   <li>A fork, which is a <em>read-write</em> view.</li>
+ *   <li>A snapshot, which is a <em>read-only</em> and immutable access.</li>
+ *   <li>A fork, which is a <em>read-write</em> access.</li>
  * </ul>
  *
  * @see Snapshot
  * @see Fork
  */
-public abstract class View extends AbstractNativeProxy {
+public abstract class AbstractAccess extends AbstractNativeProxy implements Access {
 
   private final OpenIndexRegistry indexRegistry = new OpenIndexRegistry();
   private final boolean canModify;
 
   /**
-   * Create a new view proxy.
+   * Create a new access proxy.
    *
    * @param nativeHandle a native handle: an implementation-specific reference to a native object
-   * @param canModify if the view allows modifications
+   * @param canModify if the access allows modifications
    */
-  View(NativeHandle nativeHandle, boolean canModify) {
+  AbstractAccess(NativeHandle nativeHandle, boolean canModify) {
     super(nativeHandle);
     this.canModify = canModify;
   }
 
   /**
-   * Returns true if this view allows modifications to the database state; false if it is
+   * Returns true if this access allows modifications to the database state; false if it is
    * immutable.
    */
   public boolean canModify() {
@@ -60,11 +60,11 @@ public abstract class View extends AbstractNativeProxy {
   }
 
   /**
-   *  Returns a native handle of this view.
+   *  Returns a native handle of this access.
    *
-   *  @throws IllegalStateException if the view is invalid (closed or nullptr)
+   *  @throws IllegalStateException if the access is invalid (closed or nullptr)
    */
-  public long getViewNativeHandle() {
+  public long getAccessNativeHandle() {
     return super.getNativeHandle();
   }
 
@@ -76,14 +76,14 @@ public abstract class View extends AbstractNativeProxy {
    *
    * @param address the index address
    * @return an index with the given address; or {@code Optional.empty()} if no index
-   *     with such address was open in this view
+   *     with such address was open in this access
    */
   public Optional<StorageIndex> findOpenIndex(IndexAddress address) {
     return indexRegistry.findIndex(address);
   }
 
   /**
-   * Registers a new index created with this view.
+   * Registers a new index created with this access.
    *
    * <p><em>This method is for internal use. It is not designed to be used by services,
    * rather by index factories.</em>
@@ -107,8 +107,8 @@ public abstract class View extends AbstractNativeProxy {
   }
 
   /**
-   * Returns the cleaner of this view. It is supposed to be used with collections and other objects
-   * depending on this view.
+   * Returns the cleaner of this access. It is supposed to be used with collections
+   * and other objects depending on this access.
    */
   public abstract Cleaner getCleaner();
 }

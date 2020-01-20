@@ -23,14 +23,13 @@ import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 
 class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
@@ -39,7 +38,7 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
 
   @Test
   void setsInGroupMustBeIndependent() {
-    View view = db.createFork(cleaner);
+    AbstractAccess access = db.createFork(cleaner);
 
     // Values to be put in sets, indexed by a set identifier.
     SetMultimap<String, String> valuesById = HashMultimap.create();
@@ -54,7 +53,7 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     Map<String, KeySetIndexProxy<String>> setsById = new HashMap<>();
     for (String setId : valuesById.keySet()) {
       byte[] id = bytes(setId);
-      KeySetIndexProxy<String> set = createInGroup(id, view);
+      KeySetIndexProxy<String> set = createInGroup(id, access);
 
       setsById.put(setId, set);
     }
@@ -79,8 +78,8 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     }
   }
 
-  private KeySetIndexProxy<String> createInGroup(byte[] id1, View view) {
-    return KeySetIndexProxy.newInGroupUnsafe(GROUP_NAME, id1, view,
+  private KeySetIndexProxy<String> createInGroup(byte[] id1, AbstractAccess access) {
+    return KeySetIndexProxy.newInGroupUnsafe(GROUP_NAME, id1, access,
         StandardSerializers.string());
   }
 

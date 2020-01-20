@@ -25,11 +25,11 @@ import com.exonum.binding.core.storage.database.Snapshot;
  *
  * <p>This class is thread-safe.
  */
-public enum ViewProxyFactory implements ViewFactory {
+public enum AccessProxyFactory implements AccessFactory {
   INSTANCE;
 
   /** Returns an instance of this factory. */
-  public static ViewFactory getInstance() {
+  public static AccessFactory getInstance() {
     return INSTANCE;
   }
 

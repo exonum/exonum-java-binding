@@ -33,8 +33,8 @@ import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -98,8 +98,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  protected QaSchema createDataSchema(View view) {
-    return new QaSchema(view, getName());
+  protected QaSchema createDataSchema(AbstractAccess access) {
+    return new QaSchema(access, getName());
   }
 
   @Override
@@ -195,8 +195,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Optional<Counter> getValue(HashCode counterId) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((view) -> {
-      QaSchema schema = createDataSchema(view);
+    return node.withSnapshot((access) -> {
+      QaSchema schema = createDataSchema(access);
       MapIndex<HashCode, Long> counters = schema.counters();
       if (!counters.containsKey(counterId)) {
         return Optional.empty();
@@ -213,8 +213,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
+    return node.withSnapshot((access) -> {
+      Blockchain blockchain = Blockchain.newInstance(access);
 
       return blockchain.getConsensusConfiguration();
     });

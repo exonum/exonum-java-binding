@@ -20,18 +20,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.NativeHandle;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.View;
 
 /**
  * An abstract super class for proxies of all indices.
  *
- * <p>Each index is created with a database view, either an immutable Snapshot or a read-write Fork.
+ * <p>Each index is created with a database access, either an immutable Snapshot or a read-write Fork.
  * An index has a modification counter to detect when it is modified.
  */
 abstract class AbstractIndexProxy extends AbstractNativeProxy implements StorageIndex {
 
-  final View dbView;
+  final AbstractAccess dbAccess;
 
   /**
    * Needed to detect modifications of this index during iteration over this index.
@@ -47,14 +47,14 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    *
    * @param nativeHandle a native handle of the created index
    * @param address the address of this index
-   * @param view a database view from which the index has been created
+   * @param access a database access from which the index has been created
    * @throws NullPointerException if any parameter is null
    */
-  AbstractIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view) {
+  AbstractIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access) {
     super(nativeHandle);
     this.address = checkNotNull(address);
-    this.dbView = view;
-    this.modCounter = ModificationCounter.forView(view);
+    this.dbAccess = access;
+    this.modCounter = ModificationCounter.forView(access);
   }
 
   @Override
@@ -65,7 +65,7 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
   /**
    * Checks that this index <em>can</em> be modified and changes the modification counter.
    *
-   * @throws UnsupportedOperationException if the database view is read-only
+   * @throws UnsupportedOperationException if the database access is read-only
    */
   void notifyModified() {
     checkCanModify();
@@ -73,13 +73,13 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
   }
 
   /**
-   * Checks that a database view is an instance of {@link Fork} — a modifiable database view.
+   * Checks that a database access is an instance of {@link Fork} — a modifiable database access.
    *
-   * @throws UnsupportedOperationException if view is read-only or null.
+   * @throws UnsupportedOperationException if access is read-only or null.
    */
   private void checkCanModify() {
-    if (!(dbView.canModify())) {
-      throw new UnsupportedOperationException("Cannot modify the view: " + dbView
+    if (!(dbAccess.canModify())) {
+      throw new UnsupportedOperationException("Cannot modify the access: " + dbAccess
           + "\nUse a Fork to modify any collection.");
     }
   }

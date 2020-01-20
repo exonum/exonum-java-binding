@@ -34,11 +34,11 @@ final class TransactionUtils {
   private static final PublicKey DEFAULT_AUTHOR_KEY = PublicKey.fromHexString("abcd");
 
   /**
-   * Returns new context with default values for a given view.
+   * Returns new context with default values for a given fork.
    */
-  static TransactionContext.Builder newContext(Fork view) {
+  static TransactionContext.Builder newContext(Fork fork) {
     return TransactionContext.builder()
-        .fork(view)
+        .fork(fork)
         .txMessageHash(DEFAULT_HASH)
         .authorPk(DEFAULT_AUTHOR_KEY);
   }

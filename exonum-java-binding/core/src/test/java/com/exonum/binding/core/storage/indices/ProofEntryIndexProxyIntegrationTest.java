@@ -31,7 +31,7 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -152,13 +152,13 @@ class ProofEntryIndexProxyIntegrationTest
     });
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
       Consumer<ProofEntryIndexProxy<String>> entryTest) {
     runTestWithView(viewFactory, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, ProofEntryIndexProxy<String>> entryTest) {
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
+      BiConsumer<AbstractAccess, ProofEntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         ENTRY_NAME,
@@ -168,18 +168,18 @@ class ProofEntryIndexProxyIntegrationTest
   }
 
   @Override
-  ProofEntryIndexProxy<String> create(String name, View view) {
-    return ProofEntryIndexProxy.newInstance(name, view, SERIALIZER);
+  ProofEntryIndexProxy<String> create(String name, AbstractAccess access) {
+    return ProofEntryIndexProxy.newInstance(name, access, SERIALIZER);
   }
 
   @Override
-  ProofEntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+  ProofEntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
     return null; // Entry index does not support groups
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
   @Override

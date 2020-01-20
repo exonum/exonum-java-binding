@@ -17,7 +17,7 @@
 package com.exonum.binding.time;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
@@ -33,14 +33,14 @@ public interface TimeSchema {
   /**
    * Constructs a schema of the time oracle instance with the given name.
    *
-   * @param dbView the database view
+   * @param dbAccess the database access
    * @param name the name of the time oracle service instance to use
    *
    * @throws IllegalArgumentException if there is no service with the given name or it is not
    *     an Exonum time oracle
    */
-  static TimeSchema newInstance(View dbView, String name) {
-    return new TimeSchemaProxy(dbView, name);
+  static TimeSchema newInstance(AbstractAccess dbAccess, String name) {
+    return new TimeSchemaProxy(dbAccess, name);
   }
 
   /**

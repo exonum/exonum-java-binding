@@ -22,7 +22,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
@@ -35,10 +35,10 @@ public final class CryptocurrencySchema implements Schema {
   /** A namespace of cryptocurrency service collections. */
   private final String namespace;
 
-  private final View view;
+  private final AbstractAccess access;
 
-  public CryptocurrencySchema(View view, String serviceName) {
-    this.view = checkNotNull(view);
+  public CryptocurrencySchema(AbstractAccess access, String serviceName) {
+    this.access = checkNotNull(access);
     this.namespace = serviceName + ".";
   }
 
@@ -47,7 +47,7 @@ public final class CryptocurrencySchema implements Schema {
    */
   public ProofMapIndexProxy<PublicKey, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, view, StandardSerializers.publicKey(),
+    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, access, StandardSerializers.publicKey(),
         WalletSerializer.INSTANCE);
   }
 
@@ -61,7 +61,7 @@ public final class CryptocurrencySchema implements Schema {
   public ListIndexProxy<HashCode> transactionsHistory(PublicKey walletId) {
     String name = fullIndexName("transactions_history");
 
-    return ListIndexProxy.newInGroupUnsafe(name, walletId.toBytes(), view,
+    return ListIndexProxy.newInGroupUnsafe(name, walletId.toBytes(), access,
         StandardSerializers.hash());
   }
 

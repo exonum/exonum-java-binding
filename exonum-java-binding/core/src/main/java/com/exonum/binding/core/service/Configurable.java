@@ -47,7 +47,7 @@ public interface Configurable {
    * configuration is correct, this method shall return with no changes to the service data.
    * If it is not valid, this method shall throw an exception.
    *
-   * @param fork a view representing the current database state
+   * @param fork an access representing the current database state
    * @param configuration a proposed configuration
    * @throws com.exonum.binding.core.transaction.ExecutionException if the proposed configuration
    *     is not valid to prevent the configuration application

@@ -54,7 +54,7 @@ class ForkIntegrationTest {
 
       // Check that all created native proxies are no longer accessible
       assertAll(
-          () -> assertThrows(IllegalStateException.class, fork::getViewNativeHandle),
+          () -> assertThrows(IllegalStateException.class, fork::getAccessNativeHandle),
           () -> assertThrows(IllegalStateException.class, list1::size),
           () -> assertThrows(IllegalStateException.class, list2::size),
           () -> assertThrows(IllegalStateException.class, it::next)
@@ -84,7 +84,7 @@ class ForkIntegrationTest {
 
       // Check that the 'normal' collection and the fork are no longer accessible
       assertThrows(IllegalStateException.class, list1::size);
-      assertThrows(IllegalStateException.class, fork::getViewNativeHandle);
+      assertThrows(IllegalStateException.class, fork::getAccessNativeHandle);
     }
   }
 
@@ -112,7 +112,7 @@ class ForkIntegrationTest {
     // Check that all created native proxies are no longer accessible, i.e.,
     // the internal Fork cleaner is properly registered with the parent cleaner.
     assertAll(
-        () -> assertThrows(IllegalStateException.class, fork::getViewNativeHandle),
+        () -> assertThrows(IllegalStateException.class, fork::getAccessNativeHandle),
         () -> assertThrows(IllegalStateException.class, list1::size),
         () -> assertThrows(IllegalStateException.class, list2::size),
         () -> assertThrows(IllegalStateException.class, it::next)
@@ -276,7 +276,7 @@ class ForkIntegrationTest {
     }
   }
 
-  private static ListIndex<String> newList(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  private static ListIndex<String> newList(String name, AbstractAccess access) {
+    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 }

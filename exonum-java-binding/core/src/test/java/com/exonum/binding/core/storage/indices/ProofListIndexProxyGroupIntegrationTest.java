@@ -17,14 +17,14 @@
 package com.exonum.binding.core.storage.indices;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 
 class ProofListIndexProxyGroupIntegrationTest
     extends BaseListIndexProxyGroupTestable {
 
   @Override
-  ListIndex<String> createInGroup(byte[] id, View view) {
-    return ProofListIndexProxy.newInGroupUnsafe("proof_list_group_IT", id, view,
+  ListIndex<String> createInGroup(byte[] id, AbstractAccess access) {
+    return ProofListIndexProxy.newInGroupUnsafe("proof_list_group_IT", id, access,
         StandardSerializers.string());
   }
 }

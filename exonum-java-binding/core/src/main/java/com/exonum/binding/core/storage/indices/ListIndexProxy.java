@@ -24,7 +24,7 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.protobuf.MessageLite;
 import java.util.function.LongSupplier;
@@ -37,17 +37,17 @@ import java.util.function.LongSupplier;
  *
  * <p>The "destructive" methods of the list, i.e., those that change its contents,
  * are specified to throw {@link UnsupportedOperationException} if
- * this list has been created with a read-only database view.
+ * this list has been created with a read-only database access.
  *
  * <p>All method arguments are non-null by default.
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>When the view goes out of scope, this list is destroyed. Subsequent use of the closed list
+ * <p>When the access goes out of scope, this list is destroyed. Subsequent use of the closed list
  * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this list
- * @see View
+ * @see AbstractAccess
  */
 public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implements ListIndex<E> {
 
@@ -60,17 +60,17 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
    *
    * @param name a unique alphanumeric non-empty identifier of this list in the underlying storage:
    *             [a-zA-Z0-9_]
-   * @param view a database view. Must be valid.
-   *             If a view is read-only, "destructive" operations are not permitted.
+   * @param access a database access. Must be valid.
+   *             If an access is read-only, "destructive" operations are not permitted.
    * @param elementType the class of an element-protobuf message
    * @param <E> the type of elements in this list; must be a protobuf message
    *     that has a public static {@code #parseFrom(byte[])} method
-   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalStateException if the access is not valid
    * @throws IllegalArgumentException if the name is empty
    */
   public static <E extends MessageLite> ListIndexProxy<E> newInstance(
-      String name, View view, Class<E> elementType) {
-    return newInstance(name, view, StandardSerializers.protobuf(elementType));
+      String name, AbstractAccess access, Class<E> elementType) {
+    return newInstance(name, access, StandardSerializers.protobuf(elementType));
   }
 
   /**
@@ -78,21 +78,21 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
    *
    * @param name a unique alphanumeric non-empty identifier of this list in the underlying storage:
    *             [a-zA-Z0-9_]
-   * @param view a database view. Must be valid.
-   *             If a view is read-only, "destructive" operations are not permitted.
+   * @param access a database access. Must be valid.
+   *             If an access is read-only, "destructive" operations are not permitted.
    * @param serializer a serializer of elements
    * @param <E> the type of elements in this list
-   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalStateException if the access is not valid
    * @throws IllegalArgumentException if the name is empty
    * @see StandardSerializers
    */
   public static <E> ListIndexProxy<E> newInstance(
-      String name, View view, Serializer<E> serializer) {
+      String name, AbstractAccess access, Serializer<E> serializer) {
     IndexAddress address = IndexAddress.valueOf(name);
-    long viewNativeHandle = view.getViewNativeHandle();
-    LongSupplier nativeListConstructor = () -> nativeCreate(name, viewNativeHandle);
+    long accessNativeHandle = access.getAccessNativeHandle();
+    LongSupplier nativeListConstructor = () -> nativeCreate(name, accessNativeHandle);
 
-    return getOrCreate(address, view, serializer, nativeListConstructor);
+    return getOrCreate(address, access, serializer, nativeListConstructor);
   }
 
   /**
@@ -103,29 +103,29 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
    *
    * @param groupName a name of the collection group
    * @param listId an identifier of this collection in the group, see the caveats
-   * @param view a database view
+   * @param access a database access
    * @param serializer a serializer of list elements
    * @param <E> the type of elements in this list
    * @return a new list proxy
-   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalStateException if the access is not valid
    * @throws IllegalArgumentException if the name or index id is empty
    * @see StandardSerializers
    */
   public static <E> ListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
-                                                       View view, Serializer<E> serializer) {
+                                                       AbstractAccess access, Serializer<E> serializer) {
     IndexAddress address = IndexAddress.valueOf(groupName, listId);
-    long viewNativeHandle = view.getViewNativeHandle();
+    long accessNativeHandle = access.getAccessNativeHandle();
     LongSupplier nativeListConstructor =
-        () -> nativeCreateInGroup(groupName, listId, viewNativeHandle);
+        () -> nativeCreateInGroup(groupName, listId, accessNativeHandle);
 
-    return getOrCreate(address, view, serializer, nativeListConstructor);
+    return getOrCreate(address, access, serializer, nativeListConstructor);
   }
 
-  private static <E> ListIndexProxy<E> getOrCreate(IndexAddress address, View view,
+  private static <E> ListIndexProxy<E> getOrCreate(IndexAddress address, AbstractAccess access,
       Serializer<E> serializer, LongSupplier nativeListConstructor) {
-    return view.findOpenIndex(address)
+    return access.findOpenIndex(address)
         .map(ListIndexProxy::<E>checkCachedInstance)
-        .orElseGet(() -> newListIndexProxy(address, view, serializer, nativeListConstructor));
+        .orElseGet(() -> newListIndexProxy(address, access, serializer, nativeListConstructor));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
@@ -134,35 +134,35 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
     return (ListIndexProxy<E>) cachedIndex;
   }
 
-  private static <E> ListIndexProxy<E> newListIndexProxy(IndexAddress address, View view,
+  private static <E> ListIndexProxy<E> newListIndexProxy(IndexAddress address, AbstractAccess access,
       Serializer<E> serializer, LongSupplier nativeSetConstructor) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle listNativeHandle = createNativeList(view, nativeSetConstructor);
+    NativeHandle listNativeHandle = createNativeList(access, nativeSetConstructor);
 
-    ListIndexProxy<E> list = new ListIndexProxy<>(listNativeHandle, address, view, s);
-    view.registerIndex(list);
+    ListIndexProxy<E> list = new ListIndexProxy<>(listNativeHandle, address, access, s);
+    access.registerIndex(list);
     return list;
   }
 
-  private static NativeHandle createNativeList(View view, LongSupplier nativeListConstructor) {
+  private static NativeHandle createNativeList(AbstractAccess access, LongSupplier nativeListConstructor) {
     NativeHandle listNativeHandle = new NativeHandle(nativeListConstructor.getAsLong());
 
-    Cleaner cleaner = view.getCleaner();
+    Cleaner cleaner = access.getCleaner();
     ProxyDestructor.newRegistered(cleaner, listNativeHandle, ListIndexProxy.class,
         ListIndexProxy::nativeFree);
     return listNativeHandle;
   }
 
-  private ListIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
+  private ListIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
                          CheckingSerializerDecorator<E> serializer) {
-    super(nativeHandle, address, view, serializer);
+    super(nativeHandle, address, access, serializer);
   }
 
-  private static native long nativeCreate(String listName, long viewNativeHandle);
+  private static native long nativeCreate(String listName, long accessNativeHandle);
 
   private static native long nativeCreateInGroup(String groupName, byte[] listId,
-                                                 long viewNativeHandle);
+                                                 long accessNativeHandle);
 
   private static native void nativeFree(long nativeHandle);
 

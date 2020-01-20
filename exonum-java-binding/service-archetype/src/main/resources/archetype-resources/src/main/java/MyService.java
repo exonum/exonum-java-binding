@@ -20,7 +20,7 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 
@@ -32,9 +32,9 @@ public final class MyService extends AbstractService {
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
+  protected Schema createDataSchema(Access access) {
     String name = getName();
-    return new MySchema(view, name);
+    return new MySchema(access, name);
   }
 
   @Override

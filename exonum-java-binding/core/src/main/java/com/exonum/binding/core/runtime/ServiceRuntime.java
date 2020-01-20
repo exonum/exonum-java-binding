@@ -173,7 +173,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)}
    * is invoked with the {@code Status=Active}.
    *
-   * @param fork a database view to apply configuration
+   * @param fork a database access to apply configuration
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param configuration service instance configuration parameters as a serialized protobuf
    *     message

@@ -46,8 +46,8 @@ class CryptocurrencySchemaIntegrationTest {
 
   @Test
   void walletHistoryNoRecords(TestKit testKit) {
-    Snapshot view = testKit.getSnapshot();
-    CryptocurrencySchema schema = new CryptocurrencySchema(view, SERVICE_NAME);
+    Snapshot snapshot = testKit.getSnapshot();
+    CryptocurrencySchema schema = new CryptocurrencySchema(snapshot, SERVICE_NAME);
 
     assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
   }

@@ -35,8 +35,8 @@ import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.TestProtoMessages.Id;
 import com.exonum.binding.core.storage.indices.TestProtoMessages.Point;
 import com.google.common.collect.ImmutableList;
@@ -452,37 +452,37 @@ class MapIndexProxyIntegrationTest
     });
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
       Consumer<MapIndexProxy<String, String>> mapTest) {
     runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
+  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
+      BiConsumer<AbstractAccess, MapIndexProxy<String, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      View view = viewFactory.apply(cleaner);
-      MapIndexProxy<String, String> map = createMap(MAP_NAME, view);
+      AbstractAccess access = viewFactory.apply(cleaner);
+      MapIndexProxy<String, String> map = createMap(MAP_NAME, access);
 
-      mapTest.accept(view, map);
+      mapTest.accept(access, map);
     } catch (CloseFailuresException e) {
       throw new AssertionError("Unexpected exception", e);
     }
   }
 
   @Override
-  MapIndexProxy<String, String> create(String name, View view) {
-    return createMap(name, view);
+  MapIndexProxy<String, String> create(String name, AbstractAccess access) {
+    return createMap(name, access);
   }
 
   @Override
-  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return MapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string(),
+  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+    return MapIndexProxy.newInGroupUnsafe(groupName, idInGroup, access, StandardSerializers.string(),
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
   }
 
   @Override
@@ -495,8 +495,8 @@ class MapIndexProxyIntegrationTest
     index.put(K1, V1);
   }
 
-  private static MapIndexProxy<String, String> createMap(String name, View view) {
-    return MapIndexProxy.newInstance(name, view, StandardSerializers.string(),
+  private static MapIndexProxy<String, String> createMap(String name, AbstractAccess access) {
+    return MapIndexProxy.newInstance(name, access, StandardSerializers.string(),
         StandardSerializers.string());
   }
 

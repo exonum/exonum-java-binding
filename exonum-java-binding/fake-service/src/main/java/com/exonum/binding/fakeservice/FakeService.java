@@ -19,7 +19,7 @@ package com.exonum.binding.fakeservice;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -37,9 +37,9 @@ public final class FakeService extends AbstractService {
   }
 
   @Override
-  protected FakeSchema createDataSchema(View view) {
+  protected FakeSchema createDataSchema(AbstractAccess access) {
     String name = getName();
-    return new FakeSchema(name, view);
+    return new FakeSchema(name, access);
   }
 
   @Override

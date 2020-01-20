@@ -19,7 +19,7 @@ package com.exonum.binding.core.storage.indices;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
 import java.util.function.Function;
@@ -37,7 +37,7 @@ final class StorageIterators {
    * @param nativeHandle nativeHandle of this iterator
    * @param nextFunction a function to call to get the next item
    * @param disposeOperation an operation to call to destroy the corresponding native iterator
-   * @param collectionView a database view of the collection over which to iterate
+   * @param collectionAccess a database access of the collection over which to iterate
    * @param modificationCounter a modification counter of the collection
    * @param transformingFunction a function to apply to elements returned by native iterator
    *                             (usually, to an array of bytes)
@@ -46,13 +46,13 @@ final class StorageIterators {
       long nativeHandle,
       LongFunction<NativeT> nextFunction,
       LongConsumer disposeOperation,
-      View collectionView,
+      AbstractAccess collectionAccess,
       ModificationCounter modificationCounter,
       Function<? super NativeT, ? extends ElementT> transformingFunction) {
 
     // Register the destructor first.
     NativeHandle handle = new NativeHandle(nativeHandle);
-    Cleaner cleaner = collectionView.getCleaner();
+    Cleaner cleaner = collectionAccess.getCleaner();
     cleaner.add(new ProxyDestructor(handle, RustIter.class, disposeOperation));
 
     Iterator<NativeT> iterator = new RustIterAdapter<>(

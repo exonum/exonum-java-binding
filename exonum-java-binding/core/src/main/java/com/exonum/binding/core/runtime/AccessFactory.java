@@ -21,11 +21,11 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 
 /**
- * A factory of views.
+ * A factory of database accesses.
  *
  * <p>Enables easier testing of the service runtime adapter.
  */
-public interface ViewFactory {
+public interface AccessFactory {
 
   /**
    * Creates a new owning snapshot.

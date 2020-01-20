@@ -23,7 +23,7 @@ import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 
 /**
- * A snapshot is a read-only, immutable database view.
+ * A snapshot is a read-only, immutable database access.
  *
  * <p>A snapshot represents database state at the time it was created. Immutability implies that:
  * <ul>
@@ -35,7 +35,7 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  *
  * @see Fork
  */
-public final class Snapshot extends View {
+public final class Snapshot extends AbstractAccess {
 
   private final Cleaner cleaner;
 
@@ -65,7 +65,7 @@ public final class Snapshot extends View {
     NativeHandle h = new NativeHandle(nativeHandle);
     ProxyDestructor.newRegistered(cleaner, h, Snapshot.class, nh -> {
       if (owningHandle) {
-        Views.nativeFree(nh);
+        Accesses.nativeFree(nh);
       }
     });
 

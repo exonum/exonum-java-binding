@@ -19,7 +19,7 @@ package com.exonum.binding.fakes.services.invalidservice;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import io.vertx.ext.web.Router;
 import java.util.Collections;
 
@@ -33,7 +33,7 @@ public class NonInstantiableService extends AbstractService {
   }
 
   @Override
-  protected Schema createDataSchema(View view) {
+  protected Schema createDataSchema(AbstractAccess access) {
     // No schema
     return Collections::emptyList;
   }

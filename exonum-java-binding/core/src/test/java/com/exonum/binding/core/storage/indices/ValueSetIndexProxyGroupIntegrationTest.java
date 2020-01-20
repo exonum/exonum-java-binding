@@ -23,7 +23,7 @@ import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
@@ -31,7 +31,6 @@ import com.google.common.collect.SetMultimap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 
 class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
@@ -40,7 +39,7 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
 
   @Test
   void setsInGroupMustBeIndependent() {
-    View view = db.createFork(cleaner);
+    AbstractAccess access = db.createFork(cleaner);
 
     // Values to be put in sets, indexed by a set identifier.
     SetMultimap<String, String> valuesById = HashMultimap.create();
@@ -54,7 +53,7 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     Map<String, ValueSetIndexProxy<String>> setsById = new HashMap<>();
     for (String setId : valuesById.keySet()) {
       byte[] id = bytes(setId);
-      ValueSetIndexProxy<String> set = createInGroup(id, view);
+      ValueSetIndexProxy<String> set = createInGroup(id, access);
 
       setsById.put(setId, set);
     }
@@ -79,8 +78,8 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     }
   }
 
-  private ValueSetIndexProxy<String> createInGroup(byte[] id1, View view) {
-    return ValueSetIndexProxy.newInGroupUnsafe(GROUP_NAME, id1, view,
+  private ValueSetIndexProxy<String> createInGroup(byte[] id1, AbstractAccess access) {
+    return ValueSetIndexProxy.newInGroupUnsafe(GROUP_NAME, id1, access,
         StandardSerializers.string());
   }
 
