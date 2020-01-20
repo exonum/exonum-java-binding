@@ -47,7 +47,7 @@ import java.util.function.LongSupplier;
  * <p>The Merkle-Patricia tree backing the proof map uses internal 32-byte keys. The tree balance
  * relies on the internal keys being uniformly distributed.
  *
- * <h3 id="key-hashing">Key hashing in proof maps></h3>
+ * <h3 id="key-hashing">Key hashing in proof maps</h3>
  *
  * <p>By default, when creating the proof map using methods
  * {@link #newInstance(String, View, Serializer, Serializer) #newInstance} and
