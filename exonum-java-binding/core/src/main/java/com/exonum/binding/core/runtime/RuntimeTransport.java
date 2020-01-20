@@ -79,6 +79,9 @@ public final class RuntimeTransport implements AutoCloseable {
     logApiMountEvent(service, serviceApiPath, router);
   }
 
+  /**
+   * Removes service API routes from the web-server serving.
+   */
   void disconnectServiceApi(ServiceWrapper service) {
     String serviceApiPath = createServiceApiPath(service);
     server.removeSubRouter(serviceApiPath);
