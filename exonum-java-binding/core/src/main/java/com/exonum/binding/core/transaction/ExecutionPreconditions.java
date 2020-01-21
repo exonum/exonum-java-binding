@@ -37,12 +37,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *
  * <p>which can be replaced using Preconditions:
  * <pre>{@code
- *   check(amount <= balance, (byte)3,
+ *   checkExecution(amount <= balance, (byte)3,
  *       "Not enough money. Operation amount is %s, but actual balance was %s",
  *       amount, balance);
  * }</pre>
+ *
+ * @see ExecutionException
  */
-public final class Preconditions {
+public final class ExecutionPreconditions {
 
   /**
    * Verifies the truth of the given expression.
@@ -51,7 +53,7 @@ public final class Preconditions {
    * @param errorCode execution error code
    * @throws ExecutionException if {@code expression} is false
    */
-  public static void check(boolean expression, byte errorCode) {
+  public static void checkExecution(boolean expression, byte errorCode) {
     if (!expression) {
       throw new ExecutionException(errorCode);
     }
@@ -65,7 +67,8 @@ public final class Preconditions {
    * @param errorMessage execution error description to use if the check fails
    * @throws ExecutionException if {@code expression} is false
    */
-  public static void check(boolean expression, byte errorCode, @Nullable Object errorMessage) {
+  public static void checkExecution(boolean expression, byte errorCode,
+      @Nullable Object errorMessage) {
     if (!expression) {
       throw new ExecutionException(errorCode, String.valueOf(errorMessage));
     }
@@ -77,13 +80,13 @@ public final class Preconditions {
    * @param expression a boolean expression
    * @param errorCode execution error code
    * @param errorMessageTemplate execution error description template to use if the check fails.
-   *        The template could have placeholders {@code %s} which will be replaces by arguments
+   *        The template could have placeholders {@code %s} which will be replaced by arguments
    *        resolved by position
    * @param errorMessageArgs arguments to be used in the template. Each argument will be converted
    *        to string using {@link String#valueOf(Object)}
    * @throws ExecutionException if {@code expression} is false
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       @Nullable Object... errorMessageArgs) {
     if (!expression) {
@@ -95,9 +98,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       int arg1) {
     if (!expression) {
@@ -108,9 +111,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       int arg1, int arg2) {
     if (!expression) {
@@ -121,9 +124,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       int arg1, long arg2) {
     if (!expression) {
@@ -134,9 +137,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       int arg1, @Nullable Object arg2) {
     if (!expression) {
@@ -147,9 +150,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       long arg1) {
     if (!expression) {
@@ -160,9 +163,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       long arg1, int arg2) {
     if (!expression) {
@@ -173,9 +176,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       long arg1, long arg2) {
     if (!expression) {
@@ -186,9 +189,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       long arg1, @Nullable Object arg2) {
     if (!expression) {
@@ -199,9 +202,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       @Nullable Object arg1) {
     if (!expression) {
@@ -212,9 +215,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       @Nullable Object arg1, int arg2) {
     if (!expression) {
@@ -225,9 +228,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       @Nullable Object arg1, long arg2) {
     if (!expression) {
@@ -238,9 +241,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       @Nullable Object arg1, @Nullable Object arg2) {
     if (!expression) {
@@ -251,9 +254,9 @@ public final class Preconditions {
   /**
    * Verifies the truth of the given expression.
    *
-   * <p>See {@link #check(boolean, byte, String, Object...)} for details.
+   * <p>See {@link #checkExecution(boolean, byte, String, Object...)} for details.
    */
-  public static void check(boolean expression, byte errorCode,
+  public static void checkExecution(boolean expression, byte errorCode,
       @Nullable String errorMessageTemplate,
       @Nullable Object arg1, @Nullable Object arg2, @Nullable Object arg3) {
     if (!expression) {
@@ -262,6 +265,6 @@ public final class Preconditions {
     }
   }
 
-  private Preconditions() {
+  private ExecutionPreconditions() {
   }
 }

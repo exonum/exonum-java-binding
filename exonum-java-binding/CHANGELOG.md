@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
   `ListProof`.
 - `ProofEntryIndexProxy` collection.
-- Transaction precondition utility methods.
+- Transaction precondition utility methods, see ``.
 
 ### Changed
 - Transactions are now implemented as service methods annotated with

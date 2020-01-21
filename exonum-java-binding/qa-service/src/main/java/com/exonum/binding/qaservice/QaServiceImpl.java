@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.core.transaction.Preconditions.check;
 import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.QaExecutionError.EMPTY_TIME_ORACLE_NAME;
 import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
@@ -40,6 +39,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.ExecutionException;
+import com.exonum.binding.core.transaction.ExecutionPreconditions;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
@@ -287,7 +287,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     HashCode counterId = Hashing.defaultHashFunction()
         .hashString(counterName, UTF_8);
-    check(!counters.containsKey(counterId),
+    ExecutionPreconditions.checkExecution(!counters.containsKey(counterId),
         COUNTER_ALREADY_EXISTS.code, "Counter %s already exists", counterName);
     assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
 
@@ -306,7 +306,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
 
     // Increment the counter if there is such.
-    check(counters.containsKey(counterId), UNKNOWN_COUNTER.code);
+    ExecutionPreconditions.checkExecution(counters.containsKey(counterId), UNKNOWN_COUNTER.code);
 
     long newValue = counters.get(counterId) + 1;
     counters.put(counterId, newValue);
@@ -346,7 +346,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // We do *not* check if the time oracle is active to (a) allow running this service with
     // reduced read functionality without time oracle; (b) testing time schema when it is not
     // active.
-    check(!Strings.isNullOrEmpty(timeOracleName), EMPTY_TIME_ORACLE_NAME.code,
+    ExecutionPreconditions
+        .checkExecution(!Strings.isNullOrEmpty(timeOracleName), EMPTY_TIME_ORACLE_NAME.code,
         "Empty time oracle name: %s", timeOracleName);
   }
 

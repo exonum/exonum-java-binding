@@ -16,24 +16,23 @@
 
 package com.exonum.binding.core.transaction;
 
-import static com.exonum.binding.core.transaction.Preconditions.check;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-class PreconditionsTest {
+class ExecutionPreconditionsTest {
   private static final byte TEST_ERROR_CODE = 1;
 
   @Test
   void trueConditionDoesNothing() {
-    check(true, TEST_ERROR_CODE);
+    ExecutionPreconditions.checkExecution(true, TEST_ERROR_CODE);
   }
 
   @Test
   void errorCodeIsPresent() {
     ExecutionException e = assertThrows(ExecutionException.class,
-        () -> check(false, TEST_ERROR_CODE));
+        () -> ExecutionPreconditions.checkExecution(false, TEST_ERROR_CODE));
 
     assertThat(e.getErrorCode()).isEqualTo(TEST_ERROR_CODE);
   }
@@ -42,7 +41,7 @@ class PreconditionsTest {
   void errorDescriptionIsPresent() {
     String description = "evil error";
     ExecutionException e = assertThrows(ExecutionException.class,
-        () -> check(false, TEST_ERROR_CODE, description));
+        () -> ExecutionPreconditions.checkExecution(false, TEST_ERROR_CODE, description));
 
     assertThat(e.getErrorCode()).isEqualTo(TEST_ERROR_CODE);
     assertThat(e).hasMessage(description);
@@ -51,7 +50,7 @@ class PreconditionsTest {
   @Test
   void nullableDescription() {
     ExecutionException e = assertThrows(ExecutionException.class,
-        () -> check(false, TEST_ERROR_CODE, null));
+        () -> ExecutionPreconditions.checkExecution(false, TEST_ERROR_CODE, null));
 
     assertThat(e).hasMessage("null");
   }
@@ -62,7 +61,7 @@ class PreconditionsTest {
     int p2 = 20;
 
     ExecutionException e = assertThrows(ExecutionException.class,
-        () -> check(p1 == p2, TEST_ERROR_CODE, "%s != %s", p1, p2));
+        () -> ExecutionPreconditions.checkExecution(p1 == p2, TEST_ERROR_CODE, "%s != %s", p1, p2));
 
     assertThat(e).hasMessage("10 != 20");
   }
