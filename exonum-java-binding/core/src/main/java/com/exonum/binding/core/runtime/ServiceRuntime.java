@@ -80,7 +80,6 @@ public final class ServiceRuntime implements AutoCloseable {
   private final Map<Integer, ServiceWrapper> servicesById = new HashMap<>();
   private final Object lock = new Object();
 
-  // todo: [ECR-2334] Ensure the Node is properly destroyed when the runtime is stopped
   private Node node;
 
   /**
@@ -131,7 +130,7 @@ public final class ServiceRuntime implements AutoCloseable {
       synchronized (lock) {
         // Check the artifacts dir exists
         checkState(Files.isDirectory(artifactsDir), "Artifacts dir (%s) does not exist or is not "
-                + "a directory: check the runtime configuration", artifactsDir);
+            + "a directory: check the runtime configuration", artifactsDir);
         Path artifactLocation = artifactsDir.resolve(filename);
 
         // Load the service artifact
@@ -172,7 +171,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * It involves the initial configuration of the service instance with the given parameters.
    * The instance is not registered until
    * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)}
-   * is invoked.
+   * is invoked with the {@code Status=Active}.
    *
    * @param fork a database view to apply configuration
    * @param instanceSpec a service instance specification; must reference a deployed artifact
@@ -192,7 +191,7 @@ public final class ServiceRuntime implements AutoCloseable {
     try {
       synchronized (lock) {
         // Create a new service
-        ServiceWrapper service = createService(instanceSpec);
+        ServiceWrapper service = createServiceInstance(instanceSpec);
 
         // Initialize it
         service.initialize(fork, new ServiceConfiguration(configuration));
@@ -208,37 +207,69 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
-   * TODO(ECR-3919): fix the documentation of the method
-   * Adds a service instance to the runtime after it has been successfully initialized
-   * in {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])}. This operation
-   * completes the service instance registration, allowing subsequent operations on it:
+   * Modifies the state of the given service instance at the runtime either by activation it or
+   * stopping. The service instance should be successfully initialized
+   * by {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])} in advance.
+   * Activation leads to the service instance registration, allowing subsequent operations on it:
    * transactions, API requests.
+   * Stopping leads to the service disabling i.e. stopped service does not execute transactions,
+   * process events, provide APIs, etc. But the service data still exists.
    *
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param instanceStatus a new status of the service instance
-   * @throws IllegalArgumentException if the service is already started; or its artifact
-   *     is not deployed
+   * @throws IllegalArgumentException if activating already active service; or its artifact
+   *     is not deployed; or unrecognized service status received
    */
   public void updateInstanceStatus(ServiceInstanceSpec instanceSpec,
       InstanceState.Status instanceStatus) {
-    try {
-      synchronized (lock) {
-        // Create a previously added service
-        ServiceWrapper service = createService(instanceSpec);
-        // Register it in the runtime
-        registerService(service);
-        // Connect its API
-        connectServiceApi(service);
+    synchronized (lock) {
+      switch (instanceStatus) {
+        case ACTIVE:
+          activateService(instanceSpec);
+          break;
+        case STOPPED:
+          stopService(instanceSpec);
+          break;
+        default:
+          String msg = String.format("Unexpected status %s received for the service %s",
+              instanceStatus.name(), instanceSpec.getName());
+          logger.error(msg);
+          throw new IllegalArgumentException(msg);
       }
+    }
+  }
 
-      logger.info("Added a service: {}", instanceSpec);
+  private void activateService(ServiceInstanceSpec instanceSpec) {
+    try {
+      // Create a previously added service
+      ServiceWrapper service = createServiceInstance(instanceSpec);
+      // Register it in the runtime
+      registerService(service);
+      // Connect its API
+      connectServiceApi(service);
+      logger.info("Activated a service: {}", instanceSpec);
     } catch (Exception e) {
-      logger.error("Failed to add a service {} instance", instanceSpec, e);
+      logger.error("Failed to activate a service {} instance", instanceSpec, e);
       throw e;
     }
   }
 
-  private ServiceWrapper createService(ServiceInstanceSpec instanceSpec) {
+  private void stopService(ServiceInstanceSpec instanceSpec) {
+    String name = instanceSpec.getName();
+    Optional<ServiceWrapper> activeService = findService(name);
+    if (activeService.isPresent()) {
+      ServiceWrapper service = activeService.get();
+      service.requestToStop();
+      runtimeTransport.disconnectServiceApi(service);
+      unRegisterService(service);
+      logger.info("Stopped a service: {}", instanceSpec);
+    } else {
+      logger.warn("There is no active service with the given name {}. "
+          + "Possibly restoring services state after reboot?", name);
+    }
+  }
+
+  private ServiceWrapper createServiceInstance(ServiceInstanceSpec instanceSpec) {
     // Check no such service in the runtime
     String name = instanceSpec.getName();
     checkArgument(!findService(name).isPresent(),
@@ -250,7 +281,8 @@ public final class ServiceRuntime implements AutoCloseable {
         .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
     // Instantiate the service
-    return servicesFactory.createService(serviceDefinition, instanceSpec, node);
+    return servicesFactory.createService(serviceDefinition, instanceSpec,
+        new MultiplexingNodeDecorator(node));
   }
 
   private void registerService(ServiceWrapper service) {
@@ -259,6 +291,14 @@ public final class ServiceRuntime implements AutoCloseable {
 
     int id = service.getId();
     servicesById.put(id, service);
+  }
+
+  private void unRegisterService(ServiceWrapper service) {
+    String name = service.getName();
+    services.remove(name);
+
+    int id = service.getId();
+    servicesById.remove(id);
   }
 
   /**
@@ -341,7 +381,7 @@ public final class ServiceRuntime implements AutoCloseable {
         service.afterTransactions(fork);
       } catch (Exception e) {
         logger.error("Service {} threw exception in afterTransactions."
-                + " Any changes will be rolled-back", service.getName(), e);
+            + " Any changes will be rolled-back", service.getName(), e);
         throw e;
       }
     }
@@ -352,7 +392,7 @@ public final class ServiceRuntime implements AutoCloseable {
    */
   public void afterCommit(BlockCommittedEvent event) {
     synchronized (lock) {
-      for (ServiceWrapper service: services.values()) {
+      for (ServiceWrapper service : services.values()) {
         try {
           // todo: [ECR-3436] BCE carries a Snapshot which is based on a cleaner, which gets
           //   re-used by all services. If the total number of native proxies they create is large,
@@ -397,6 +437,10 @@ public final class ServiceRuntime implements AutoCloseable {
         // Finally, when no service classes remain in use, unload the service artifacts
         unloadArtifacts();
 
+        // Free-up native resources
+        if (node != null) {
+          node.close();
+        }
         logger.info("The runtime shutdown complete");
       } catch (Exception e) {
         logger.error("Shutdown failure", e);
@@ -456,6 +500,4 @@ public final class ServiceRuntime implements AutoCloseable {
   Optional<ServiceWrapper> findService(String name) {
     return Optional.ofNullable(services.get(name));
   }
-
-  // TODO: unloadArtifact and stopService, once they can be used/ECR-2275
 }

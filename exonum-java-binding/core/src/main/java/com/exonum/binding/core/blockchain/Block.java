@@ -16,14 +16,18 @@
 
 package com.exonum.binding.core.blockchain;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
 import com.exonum.binding.core.service.Schema;
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
+import com.google.protobuf.ByteString;
 
 /**
  * Exonum block header data structure.
@@ -90,6 +94,19 @@ public abstract class Block {
    */
   public abstract HashCode getStateHash();
 
+  /**
+   * Root hash of exceptions occurred in the block.
+   *
+   * @see Blockchain#getCallErrors(long)
+   */
+  public abstract HashCode getErrorHash();
+
+  /**
+   * Contains additional block headers of the block.
+   * The key is a block header; and the value is a header bytes value.
+   */
+  public abstract ImmutableMap<String, ByteString> getAdditionalHeaders();
+
   @Override
   public int hashCode() {
     // Use just the first 4 bytes of the SHA-256 hash of the binary object representation,
@@ -105,6 +122,27 @@ public abstract class Block {
    */
   public static TypeAdapter<Block> typeAdapter(Gson gson) {
     return new AutoValue_Block.GsonTypeAdapter(gson);
+  }
+
+  /**
+   * Creates a block from the block message.
+   * @param blockMessage a block
+   */
+  public static Block fromMessage(com.exonum.core.messages.Blockchain.Block blockMessage) {
+    // Such implementation prevents a redundant deserialization of Block message
+    // (in BlockSerializer#fromBytes).
+    HashCode blockHash = sha256().hashBytes(blockMessage.toByteArray());
+    return BlockSerializer.newBlockInternal(blockMessage, blockHash);
+  }
+
+  /**
+   * Creates a block from the serialized block message.
+   * @param serializedBlock a serialized block message
+   * @throws IllegalArgumentException if the block bytes are not a serialized
+   *     {@link com.exonum.core.messages.Blockchain.Block}
+   */
+  public static Block parseFrom(byte[] serializedBlock) {
+    return BlockSerializer.INSTANCE.fromBytes(serializedBlock);
   }
 
   /**
@@ -157,9 +195,22 @@ public abstract class Block {
      * Sets the blockchain state hash at the moment this block was committed. The blockchain
      * state hash reflects the state of each service in the database.
      *
-     * @see Schema#getStateHashes()
+     * @see Schema
      */
     public abstract Builder stateHash(HashCode blockchainStateHash);
+
+    /**
+     * Sets error hash.
+     *
+     * @see Blockchain#getCallErrors()
+     */
+    public abstract Builder errorHash(HashCode errorHash);
+
+    /**
+     * Sets additional block headers. Headers should have exactly the same order
+     * as its native equivalent. Changing headers order will lead to the block hash violation.
+     */
+    public abstract Builder additionalHeaders(ImmutableMap<String, ByteString> additionalHeaders);
 
     abstract Block autoBuild();
 

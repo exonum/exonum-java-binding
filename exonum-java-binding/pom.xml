@@ -114,7 +114,7 @@
     <log4j.version>2.13.0</log4j.version>
     <hamcrest.version>2.2</hamcrest.version>
     <junit.version>4.13</junit.version>
-    <junit.jupiter.version>5.5.2</junit.jupiter.version>
+    <junit.jupiter.version>5.6.0</junit.jupiter.version>
     <powermock.version>2.0.4</powermock.version>
     <protobuf.version>3.11.0</protobuf.version>
     <mockito.version>3.2.4</mockito.version>
@@ -123,7 +123,7 @@
     <equalsverifier.version>3.1.11</equalsverifier.version>
     <javax-annotation-api.version>1.3.2</javax-annotation-api.version>
     <gson.version>2.8.6</gson.version>
-    <auto-value-gson.version>1.1.1</auto-value-gson.version>
+    <auto-value-gson.version>1.3.0</auto-value-gson.version>
     <!-- Default values of properties set by Jacoco when coverage is enabled.
          Passed to the JVM running tests. -->
     <jacoco.args></jacoco.args>
@@ -179,9 +179,18 @@
         <version>${auto-value-gson.version}</version>
       </dependency>
 
+      <!-- Basic support for Gson type adapters for AutoValue. -->
       <dependency>
         <groupId>com.ryanharter.auto.value</groupId>
-        <artifactId>auto-value-gson</artifactId>
+        <artifactId>auto-value-gson-extension</artifactId>
+        <version>${auto-value-gson.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <!-- Support for TypeAdapter factories: https://github.com/rharter/auto-value-gson#factory -->
+      <dependency>
+        <groupId>com.ryanharter.auto.value</groupId>
+        <artifactId>auto-value-gson-factory</artifactId>
         <version>${auto-value-gson.version}</version>
         <scope>provided</scope>
       </dependency>

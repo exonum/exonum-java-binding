@@ -20,10 +20,13 @@ import static com.exonum.binding.core.transport.VertxServer.State.IDLE;
 import static com.exonum.binding.core.transport.VertxServer.State.STARTED;
 import static com.exonum.binding.core.transport.VertxServer.State.STOPPED;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
+import java.util.List;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
@@ -83,6 +86,22 @@ final class VertxServer implements Server {
       checkNotStopped();
       rootRouter.mountSubRouter(mountPoint, subRouter);
     }
+  }
+
+  @Override
+  public void removeSubRouter(String mountPoint) {
+    synchronized (lock) {
+      checkNotStopped();
+      rootRouter.getRoutes()
+          .stream()
+          .filter(r -> r.getPath().equals(mountPoint))
+          .forEach(Route::remove);
+    }
+  }
+
+  @VisibleForTesting
+  List<Route> getMountedRoutes() {
+    return rootRouter.getRoutes();
   }
 
   private void checkNotStopped() {
@@ -176,10 +195,10 @@ final class VertxServer implements Server {
   public String toString() {
     synchronized (lock) {
       return "Server{"
-              + "port=" + server.actualPort()
-              + ", state=" + state
-              + ", stopFuture=" + stopFuture
-              + '}';
+          + "port=" + server.actualPort()
+          + ", state=" + state
+          + ", stopFuture=" + stopFuture
+          + '}';
     }
   }
 

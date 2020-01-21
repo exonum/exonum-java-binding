@@ -70,7 +70,7 @@
     <okhttp.version>4.3.1</okhttp.version>
     <lombok.version>1.18.10</lombok.version>
     <!--Test dependencies-->
-    <junit.jupiter.version>5.5.2</junit.jupiter.version>
+    <junit.jupiter.version>5.6.0</junit.jupiter.version>
     <mockito.version>3.2.4</mockito.version>
     <hamcrest.version>2.2</hamcrest.version>
     <equalsverifier.version>3.1.11</equalsverifier.version>
@@ -293,7 +293,7 @@
       <plugin>
         <groupId>org.pitest</groupId>
         <artifactId>pitest-maven</artifactId>
-        <version>1.4.10</version>
+        <version>1.4.11</version>
         <dependencies>
           <dependency>
             <groupId>org.pitest</groupId>

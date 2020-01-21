@@ -38,6 +38,7 @@ export RUST_LOG="${RUST_LOG-error,exonum=info,exonum-java=info,java_bindings=inf
 header "GENERATE COMMON CONFIG"
 ${EXONUM_JAVA_APP} generate-template \
     --validators-count=1 \
+    --supervisor-mode simple \
     testnet/common.toml
 
 header "GENERATE CONFIG"

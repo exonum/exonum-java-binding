@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-use exonum_supervisor::Supervisor;
-use exonum_time::{time_provider::SystemTimeProvider, TimeServiceFactory};
+use exonum_explorer_service::ExplorerFactory;
+use exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor};
+use exonum_time::TimeServiceFactory;
 use java_bindings::{
     create_java_vm, create_service_runtime,
     exonum::{
@@ -24,10 +25,11 @@ use java_bindings::{
             Blockchain, BlockchainBuilder, BlockchainMut,
         },
         exonum_merkledb::{Database, RocksDB},
-        node::{ApiSender, Node, NodeChannel},
-        runtime::rust::{RustRuntime, ServiceFactory},
+        node::{ApiSender, Node, NodeChannel, NodeConfig as CoreNodeConfig},
+        runtime::rust::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory},
     },
-    Command, Config, EjbCommand, EjbCommandResult, Executor, InternalConfig, JavaRuntimeProxy,
+    Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
+    JavaRuntimeProxy,
 };
 
 use std::sync::Arc;
@@ -43,22 +45,17 @@ pub fn run_node(command: Command) -> Result<(), failure::Error> {
 
 fn create_node(config: Config) -> Result<Node, failure::Error> {
     let node_config = config.run_config.node_config.clone();
-    let events_pool_capacity = &node_config.mempool.events_pool_capacity;
+    let events_pool_capacity = &node_config.private_config.mempool.events_pool_capacity;
     let channel = NodeChannel::new(events_pool_capacity);
     let blockchain = create_blockchain(&config, &channel)?;
 
-    let node_config_path = config
-        .run_config
-        .node_config_path
-        .to_str()
-        .expect("Cannot convert node_config_path to String")
-        .to_owned();
+    let config_manager = DefaultConfigManager::new(config.run_config.node_config_path);
 
     Ok(Node::with_blockchain(
         blockchain,
         channel,
-        node_config,
-        Some(node_config_path),
+        node_config.into(),
+        Some(Box::new(config_manager)),
     ))
 }
 
@@ -66,34 +63,36 @@ fn create_blockchain(
     config: &Config,
     channel: &NodeChannel,
 ) -> Result<BlockchainMut, failure::Error> {
-    let node_config = &config.run_config.node_config;
+    let node_config: CoreNodeConfig = config.run_config.node_config.clone().into();
     let database = create_database(config)?;
     let keypair = node_config.service_keypair();
     let api_sender = ApiSender::new(channel.api_requests.0.clone());
 
     let blockchain = Blockchain::new(database, keypair, api_sender);
 
-    let supervisor_service = supervisor_service();
-    let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus.clone())
+    let supervisor_service = supervisor_service(&config);
+    let genesis_config = GenesisConfigBuilder::with_consensus_config(node_config.consensus)
         .with_artifact(Supervisor.artifact_id())
         .with_instance(supervisor_service)
+        .with_artifact(ExplorerFactory.artifact_id())
+        .with_instance(ExplorerFactory.default_instance())
         .build();
 
     let rust_runtime = create_rust_runtime(channel);
     let java_runtime = create_java_runtime(&config);
 
-    BlockchainBuilder::new(blockchain, genesis_config)
+    Ok(BlockchainBuilder::new(blockchain, genesis_config)
         .with_runtime(rust_runtime)
         .with_runtime(java_runtime)
-        .build()
+        .build())
 }
 
 fn create_rust_runtime(channel: &NodeChannel) -> RustRuntime {
-    let service_factories = standard_exonum_service_factories();
-    service_factories.into_iter().fold(
-        RustRuntime::new(channel.endpoints.0.clone()),
-        |runtime, factory| runtime.with_factory(factory),
-    )
+    RustRuntimeBuilder::new()
+        .with_factory(TimeServiceFactory::default())
+        .with_factory(Supervisor)
+        .with_factory(ExplorerFactory)
+        .build(channel.endpoints.0.clone())
 }
 
 fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
@@ -109,18 +108,20 @@ fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
 fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error> {
     let database = Arc::new(RocksDB::open(
         &config.run_config.db_path,
-        &config.run_config.node_config.database,
+        &config.run_config.node_config.private_config.database,
     )?) as Arc<dyn Database>;
     Ok(database)
 }
 
-fn standard_exonum_service_factories() -> Vec<Box<dyn ServiceFactory>> {
-    vec![
-        Box::new(TimeServiceFactory::with_provider(SystemTimeProvider)),
-        Box::new(Supervisor),
-    ]
-}
-
-fn supervisor_service() -> InstanceInitParams {
-    Supervisor::simple()
+fn supervisor_service(config: &Config) -> InstanceInitParams {
+    let mode = &config
+        .run_config
+        .node_config
+        .public_config
+        .general
+        .supervisor_mode;
+    match *mode {
+        SupervisorMode::Simple => Supervisor::simple(),
+        SupervisorMode::Decentralized => Supervisor::decentralized(),
+    }
 }

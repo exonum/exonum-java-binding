@@ -27,12 +27,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * elements in the list, ListProof can assert that the list is shorter than the requested
  * range of indexes.
  * <!--
- * TODO: Improve docs when the whole proof support is ready: explain their place in the
- *   full proof creation process. When verification arrives, explain how it is done.
+ * TODO: Improve docs when verification arrives: explain how it is done.
  * -->
  *
  * @see ProofListIndexProxy#getProof(long)
  * @see ProofListIndexProxy#getRangeProof(long, long)
+ * @see <a href="../../blockchain/Blockchain.html#service-data-proof">Service Data Proofs</a>
  */
 @AutoValue
 public abstract class ListProof {

@@ -209,4 +209,11 @@ final class ServiceWrapper {
     return UrlEscapers.urlPathSegmentEscaper()
         .escape(getName());
   }
+
+  /**
+   * Closes an access to the node within the service.
+   */
+  void requestToStop() {
+    node.close();
+  }
 }

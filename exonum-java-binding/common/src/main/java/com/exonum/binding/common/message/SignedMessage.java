@@ -16,9 +16,10 @@
 
 package com.exonum.binding.common.message;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
+
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.core.messages.Consensus;
 import com.exonum.core.messages.Consensus.ExonumMessage;
 import com.google.protobuf.ByteString;
@@ -31,7 +32,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * <p>It currently does not support verification of the signature against the author's public
  * key — such functionality may be added later if needed.
  */
-final class SignedMessage {
+public final class SignedMessage {
 
   private final ExonumMessage payload;
   private final PublicKey authorPk;
@@ -56,10 +57,11 @@ final class SignedMessage {
    *     {@link Consensus.SignedMessage}; or if the payload of the message is not
    *     {@link Consensus.ExonumMessage}
    */
-  static SignedMessage parseFrom(byte[] messageBytes) throws InvalidProtocolBufferException {
+  public static SignedMessage parseFrom(byte[] messageBytes) throws InvalidProtocolBufferException {
     // Try to decode the SignedMessage container
+    HashCode hash = sha256().hashBytes(messageBytes);
     Consensus.SignedMessage message = Consensus.SignedMessage.parseFrom(messageBytes);
-    return fromProto(message);
+    return fromProto(message, hash);
   }
 
   /**
@@ -69,26 +71,28 @@ final class SignedMessage {
    * @throws InvalidProtocolBufferException if a signed message does not contain a valid payload
    *     that is a serialized {@link Consensus.ExonumMessage}
    */
-  static SignedMessage fromProto(Consensus.SignedMessage message)
+  public static SignedMessage fromProto(Consensus.SignedMessage message)
       throws InvalidProtocolBufferException {
+    HashCode hash = sha256().hashBytes(message.toByteArray());
+    return fromProto(message, hash);
+  }
+
+  private static SignedMessage fromProto(Consensus.SignedMessage message,
+      HashCode messageHash) throws InvalidProtocolBufferException {
     // Try to decode the payload, which is stored as bytes. It is expected to be an ExonumMessage
     ByteString payloadBytes = message.getPayload();
     ExonumMessage payload = ExonumMessage.parseFrom(payloadBytes);
-
     PublicKey authorPk = PublicKey.fromBytes(message.getAuthor()
         .getData()
         .toByteArray());
     ByteString signature = message.getSignature().getData();
-
-    HashCode hash = Hashing.sha256().hashBytes(message.toByteArray());
-
-    return new SignedMessage(payload, authorPk, signature, hash);
+    return new SignedMessage(payload, authorPk, signature, messageHash);
   }
 
   /**
    * Returns the message payload.
    */
-  Consensus.ExonumMessage getPayload() {
+  public Consensus.ExonumMessage getPayload() {
     return payload;
   }
 
@@ -98,7 +102,7 @@ final class SignedMessage {
    * <p>The correctness of the signature is <strong>not</strong> verified against this key
    * and must be done separately if needed.
    */
-  PublicKey getAuthorPk() {
+  public PublicKey getAuthorPk() {
     return authorPk;
   }
 
@@ -109,7 +113,7 @@ final class SignedMessage {
    * <p>The correctness of the signature is <strong>not</strong> verified against this key
    * and must be done separately if needed.
    */
-  byte[] getSignature() {
+  public byte[] getSignature() {
     return signature.toByteArray();
   }
 
@@ -117,7 +121,7 @@ final class SignedMessage {
    * Returns the hash of the signed message, which is the hash of the protobuf-serialized
    * representation.
    */
-  HashCode hash() {
+  public HashCode hash() {
     return hash;
   }
 }
