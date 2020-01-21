@@ -23,7 +23,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Utility methods that helps verifying conditions conducted in expression
  * while transaction execution.
- * If the condition is not met, the {@code Preconditions} method throws {@link ExecutionException}.
+ * If the condition is not met, the {@code ExecutionPreconditions} method
+ * throws {@link ExecutionException}.
  *
  * <p>Consider the following example:
  * <pre>{@code
@@ -35,7 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *   }
  * }</pre>
  *
- * <p>which can be replaced using Preconditions:
+ * <p>which can be replaced using ExecutionPreconditions:
  * <pre>{@code
  *   checkExecution(amount <= balance, (byte)3,
  *       "Not enough money. Operation amount is %s, but actual balance was %s",
