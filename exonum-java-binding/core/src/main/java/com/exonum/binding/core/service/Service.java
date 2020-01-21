@@ -54,20 +54,22 @@ public interface Service {
   }
 
   /**
-   * Performs resuming of previously stopped service instance. This method is called <em>once</em>
-   * after restarting a service instance.
+   * Resumes the previously stopped service instance. This method is called when
+   * a stopped service instance is restarted.
    *
-   * <p><em>Note that changing the data during resume operations is not allowed
-   * due to violation migration procedure.</em>
+   * <p>This method may perform any changes to the database. For example, update some service
+   * parameters, deprecate old entries etc.
    *
+   * <p>Also, note that performing any bulk operations or data migration
+   * <em>is not recommended</em> here.
+   * <!--TODO: Add a link to the migration procedure -->
+   *
+   * @param fork a database fork to apply changes to. Not valid after this method returns
    * @param configuration the service configuration parameters
    * @throws ExecutionException if the configuration parameters are not valid (e.g.,
-   *     malformed, or do not meet the preconditions). Exonum will save the error into
-   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
-   *     the registry of call errors} if the resuming fails
-   * @see Configurable
+   *     malformed, or do not meet the preconditions)
    */
-  default void resume(Configuration configuration) {
+  default void resume(Fork fork, Configuration configuration) {
     // No configuration
   }
 

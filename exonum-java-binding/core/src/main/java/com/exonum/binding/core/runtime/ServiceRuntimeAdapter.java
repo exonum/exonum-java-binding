@@ -154,15 +154,22 @@ public class ServiceRuntimeAdapter {
   /**
    * Starts resuming a service with the given specification.
    *
+   * @param forkHandle a handle to a native fork object
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
    * @param configuration the service initial configuration parameters as a serialized protobuf
    *     message
-   * @see ServiceRuntime#initializeResumingService(ServiceInstanceSpec, byte[])
+   * @see ServiceRuntime#initializeResumingService(Fork, ServiceInstanceSpec, byte[])
    */
-  void initializeResumingService(byte[] instanceSpec, byte[] configuration) {
-    ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
-    serviceRuntime.initializeResumingService(javaInstanceSpec, configuration);
+  void initializeResumingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
+      throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner()) {
+      Fork fork = viewFactory.createFork(forkHandle, cleaner);
+      ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
+      serviceRuntime.initializeResumingService(fork, javaInstanceSpec, configuration);
+    } catch (CloseFailuresException e) {
+      handleCloseFailure(e);
+    }
   }
 
   /**

@@ -36,7 +36,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `supervisor-mode` CLI parameter added for `generate-template` command. It
   allows to configure the mode of the Supervisor service. Possible values are
   "simple" and "decentralized". (#1361)
-- Service instances can be stopped and resumed now. (#1358, #1372)
+- Support of service instances lifecycle: they can be activated, stopped and resumed now.
+  Also, service instance artifacts can be upgraded before resuming (but with no data changes)
+  which allows services API update, add new service transactions etc. (#1358, #1372)
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 

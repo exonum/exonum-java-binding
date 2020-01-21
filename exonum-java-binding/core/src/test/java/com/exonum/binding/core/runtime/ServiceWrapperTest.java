@@ -88,8 +88,8 @@ class ServiceWrapperTest {
   void resume() {
     Fork fork = mock(Fork.class);
     Configuration config = new ServiceConfiguration(new byte[0]);
-    serviceWrapper.resume(config);
-    verify(service).resume(config);
+    serviceWrapper.resume(fork, config);
+    verify(service).resume(fork, config);
   }
 
   @Test

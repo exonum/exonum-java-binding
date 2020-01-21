@@ -137,7 +137,13 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
-  void initializeResumingService() {
+  void initializeResumingService() throws CloseFailuresException {
+    long forkHandle = 0x110b;
+    Cleaner cleaner = new Cleaner();
+    Fork fork = Fork.newInstance(forkHandle, false, cleaner);
+    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+        .thenReturn(fork);
+
     int serviceId = 1;
     String serviceName = "s1";
     ArtifactId artifact = ARTIFACT_ID;
@@ -149,12 +155,12 @@ class ServiceRuntimeAdapterTest {
         .toByteArray();
     byte[] configuration = bytes(1, 2);
 
-    serviceRuntimeAdapter.initializeResumingService(instanceSpec, configuration);
+    serviceRuntimeAdapter.initializeResumingService(forkHandle, instanceSpec, configuration);
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
         ServiceArtifactId.fromProto(artifact));
-    verify(serviceRuntime).initializeResumingService(expected, configuration);
+    verify(serviceRuntime).initializeResumingService(fork, expected, configuration);
   }
 
   @Test
