@@ -62,10 +62,9 @@ public interface Service {
    *
    * @param configuration the service configuration parameters
    * @throws ExecutionException if the configuration parameters are not valid (e.g.,
-   *     malformed, or do not meet the preconditions). Exonum will stop the service if
-   *     its initialization fails. It will save the error into
+   *     malformed, or do not meet the preconditions). Exonum will save the error into
    *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
-   *     the registry of call errors}
+   *     the registry of call errors} if the resuming fails
    * @see Configurable
    */
   default void resume(Configuration configuration) {

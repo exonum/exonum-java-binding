@@ -513,7 +513,7 @@ public final class ServiceRuntime implements AutoCloseable {
         "No service with id=%s in the Java runtime", serviceId);
   }
 
-  /** Checks that the service with the given id is started in this runtime. */
+  /** Checks that the service with the given id is not active in this runtime. */
   private void checkStoppedService(Integer serviceId) {
     checkArgument(!servicesById.containsKey(serviceId),
         "Service with id=%s should be stopped, but actually active", serviceId);
