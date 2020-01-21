@@ -179,9 +179,18 @@
         <version>${auto-value-gson.version}</version>
       </dependency>
 
+      <!-- Basic support for Gson type adapters for AutoValue. -->
       <dependency>
         <groupId>com.ryanharter.auto.value</groupId>
-        <artifactId>auto-value-gson</artifactId>
+        <artifactId>auto-value-gson-extension</artifactId>
+        <version>${auto-value-gson.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <!-- Support for TypeAdapter factories: https://github.com/rharter/auto-value-gson#factory -->
+      <dependency>
+        <groupId>com.ryanharter.auto.value</groupId>
+        <artifactId>auto-value-gson-factory</artifactId>
         <version>${auto-value-gson.version}</version>
         <scope>provided</scope>
       </dependency>
