@@ -16,14 +16,10 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import com.exonum.binding.core.storage.database.AbstractAccess;
-
 /**
  * Storage index is a persistent, named collection built on top of Exonum key-value storage.
  *
- * <p>Also known as a collection, a table, and also as (rarely) a view for
- * <!-- todo: rewrite the 'why' -->
- * a {@linkplain AbstractAccess database view} is inherently associated with an index.
+ * <p>Also known as a collection, a table, and also as (rarely) a database view.
  */
 public interface StorageIndex {
 

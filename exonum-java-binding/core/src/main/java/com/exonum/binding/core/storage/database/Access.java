@@ -63,8 +63,6 @@ import com.exonum.binding.core.storage.indices.ValueSetIndexProxy;
  * @see StandardSerializers
  */
 public interface Access {
-  // todo: Put together some interfaces:
-  //  https://wiki.bf.local/display/EJB/Java+Database+Accesses+Design#JavaDatabaseAccessesDesign-StorageAccessControl
 
   /**
    * Creates a new ProofListIndex.

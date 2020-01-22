@@ -50,12 +50,11 @@ import javax.annotation.Nullable;
  *
  * <h3 id="key-hashing">Key hashing in proof maps</h3>
  *
- * <!-- TODO: consider better place for this discussion -->
  * <p>By default, when creating the proof map using method
  * {@link #newInstance(IndexAddress, AbstractAccess, Serializer, Serializer) #newInstance},
  * the user keys are converted into internal keys through hashing. This allows to use keys of
  * an arbitrary size and ensures the balance of the internal tree.
- * It is also possible to create a proof map that will not hash keys with methods
+ * It is also possible to create a proof map that will not hash keys with method
  * {@link #newInstanceNoKeyHashing(IndexAddress, AbstractAccess, Serializer, Serializer)
  * #newInstanceNoKeyHashing}. In this mode the map will use the user keys as internal
  * tree keys. Such mode of operation is appropriate iff <em>all</em> of the following conditions

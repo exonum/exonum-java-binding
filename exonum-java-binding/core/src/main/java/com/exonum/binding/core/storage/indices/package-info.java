@@ -17,10 +17,7 @@
 /**
  * Contains Exonum indexes — persistent, named collections built on top of Exonum key-value storage.
  *
- * <!-- TODO: rewrite the bit below -->
- * <p>Indexes are also known as collections, tables, and rarely as views for
- * a {@linkplain com.exonum.binding.core.storage.database.AbstractAccess database view} is inherently
- * associated with an index.
+ * <p>Indexes are also known as collections, tables, and rarely as database views.
  *
  * <h2 id="families">Index families</h2>
  *

@@ -74,7 +74,8 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
    * @see StandardSerializers
    */
   public static <E> ProofEntryIndexProxy<E> newInstance(IndexAddress address,
-      /* todo: (here and elsewhere) or Access? Current AbstractAccess _may_ prevent direct usage of this family of methods */ AbstractAccess access,
+      /* todo: (here and elsewhere) or Access? That would require pulling up #getCleaner
+          in the interface as well. */ AbstractAccess access,
       Serializer<E> serializer) {
     checkArgument(!address.getIdInGroup().isPresent(),
         "Groups of Entries are not supported, use a ProofMapIndex instead");
