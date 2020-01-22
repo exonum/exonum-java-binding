@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Fork;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
@@ -39,7 +40,7 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
 
   @Test
   void setsInGroupMustBeIndependent() {
-    AbstractAccess access = db.createFork(cleaner);
+    Fork fork = db.createFork(cleaner);
 
     // Values to be put in sets, indexed by a set identifier.
     SetMultimap<String, String> valuesById = HashMultimap.create();
@@ -53,7 +54,7 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     Map<String, ValueSetIndexProxy<String>> setsById = new HashMap<>();
     for (String setId : valuesById.keySet()) {
       byte[] id = bytes(setId);
-      ValueSetIndexProxy<String> set = createInGroup(id, access);
+      ValueSetIndexProxy<String> set = createInGroup(id, fork);
 
       setsById.put(setId, set);
     }
@@ -79,7 +80,7 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
   }
 
   private ValueSetIndexProxy<String> createInGroup(byte[] id1, AbstractAccess access) {
-    return ValueSetIndexProxy.newInGroupUnsafe(GROUP_NAME, id1, access,
+    return access.getValueSet(IndexAddress.valueOf(GROUP_NAME, id1),
         StandardSerializers.string());
   }
 

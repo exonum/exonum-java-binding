@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
+
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkRange;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -27,10 +27,10 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.MessageLite;
-import java.util.function.LongSupplier;
+import javax.annotation.Nullable;
 
 /**
  * A proof list index proxy is a contiguous list of elements, capable of providing
@@ -51,7 +51,7 @@ import java.util.function.LongSupplier;
  * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this list
- * @see AbstractAccess
+ * @see Access
  */
 public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
     implements ListIndex<E>, HashableIndex {
@@ -61,28 +61,9 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   }
 
   /**
-   * Creates a new ProofListIndexProxy storing protobuf messages.
-   *
-   * @param name a unique alphanumeric non-empty identifier of this list in the underlying storage:
-   *             [a-zA-Z0-9_]
-   * @param access a database access. Must be valid.
-   *             If an access is read-only, "destructive" operations are not permitted.
-   * @param elementType the class of elements-protobuf messages
-   * @param <E> the type of elements in this list; must be a protobuf message
-   *     that has a public static {@code #parseFrom(byte[])} method
-   * @throws IllegalStateException if the access is not valid
-   * @throws IllegalArgumentException if the name is empty
-   */
-  public static <E extends MessageLite> ProofListIndexProxy<E> newInstance(
-      String name, AbstractAccess access, Class<E> elementType) {
-    return newInstance(name, access, StandardSerializers.protobuf(elementType));
-  }
-
-  /**
    * Creates a new ProofListIndexProxy.
    *
-   * @param name a unique alphanumeric non-empty identifier of this list in the underlying storage:
-   *             [a-zA-Z0-9_]
+   * @param address an index address
    * @param access a database access. Must be valid.
    *             If an access is read-only, "destructive" operations are not permitted.
    * @param serializer a serializer of elements
@@ -92,78 +73,29 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * @see StandardSerializers
    */
   public static <E> ProofListIndexProxy<E> newInstance(
-      String name, AbstractAccess access, Serializer<E> serializer) {
-    IndexAddress address = IndexAddress.valueOf(name);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeListConstructor = () -> nativeCreate(name, accessNativeHandle);
-
-    return getOrCreate(address, access, serializer, nativeListConstructor);
-  }
-
-  private static native long nativeCreate(String listName, long accessNativeHandle);
-
-  /**
-   * Creates a new list in a <a href="package-summary.html#families">collection group</a>
-   * with the given name.
-   *
-   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
-   *
-   * @param groupName a name of the collection group
-   * @param listId an identifier of this collection in the group, see the caveats
-   * @param access a database access
-   * @param serializer a serializer of list elements
-   * @param <E> the type of elements in this list
-   * @return a new list proxy
-   * @throws IllegalStateException if the access is not valid
-   * @throws IllegalArgumentException if the name or index id is empty
-   * @see StandardSerializers
-   */
-  public static <E> ProofListIndexProxy<E> newInGroupUnsafe(String groupName, byte[] listId,
-                                                            AbstractAccess access, Serializer<E> serializer) {
-    IndexAddress address = IndexAddress.valueOf(groupName, listId);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeListConstructor =
-        () -> nativeCreateInGroup(groupName, listId, accessNativeHandle);
-
-    return getOrCreate(address, access, serializer, nativeListConstructor);
-  }
-
-  private static native long nativeCreateInGroup(String groupName, byte[] listId,
-                                                 long accessNativeHandle);
-
-  private static <E> ProofListIndexProxy<E> getOrCreate(IndexAddress address, AbstractAccess access,
-      Serializer<E> serializer, LongSupplier nativeListConstructor) {
-    return access.findOpenIndex(address)
-        .map(ProofListIndexProxy::<E>checkCachedInstance)
-        .orElseGet(() -> newListIndexProxy(address, access, serializer, nativeListConstructor));
-  }
-
-  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
-  private static <E> ProofListIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
-    checkIndexType(cachedIndex, ProofListIndexProxy.class);
-    return (ProofListIndexProxy<E>) cachedIndex;
-  }
-
-  private static <E> ProofListIndexProxy<E> newListIndexProxy(IndexAddress address, AbstractAccess access,
-      Serializer<E> serializer, LongSupplier nativeListConstructor) {
+      IndexAddress address, AbstractAccess access, Serializer<E> serializer) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle listNativeHandle = createNativeList(access, nativeListConstructor);
+    NativeHandle listNativeHandle = createNativeList(address, access);
 
-    ProofListIndexProxy<E> list = new ProofListIndexProxy<>(listNativeHandle, address,
+    return new ProofListIndexProxy<>(listNativeHandle, address,
         access, s);
-    access.registerIndex(list);
-    return list;
   }
 
-  private static NativeHandle createNativeList(AbstractAccess access, LongSupplier nativeListConstructor) {
-    NativeHandle listNativeHandle = new NativeHandle(nativeListConstructor.getAsLong());
+  private static NativeHandle createNativeList(IndexAddress address, AbstractAccess access) {
+    long accessNativeHandle = access.getAccessNativeHandle();
+    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
+        accessNativeHandle);
+    NativeHandle listNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
     ProxyDestructor.newRegistered(cleaner, listNativeHandle, ProofListIndexProxy.class,
         ProofListIndexProxy::nativeFree);
     return listNativeHandle;
   }
+
+  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
+      long accessNativeHandle);
 
   private ProofListIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
                               CheckingSerializerDecorator<E> serializer) {

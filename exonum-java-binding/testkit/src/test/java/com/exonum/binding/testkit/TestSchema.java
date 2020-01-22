@@ -19,22 +19,24 @@ package com.exonum.binding.testkit;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
 final class TestSchema implements Schema {
 
   private final String testMapName;
 
-  private final AbstractAccess access;
+  private final Access access;
 
-  TestSchema(AbstractAccess access, int serviceInstanceId) {
+  TestSchema(Access access, int serviceInstanceId) {
     this.access = access;
     this.testMapName = "TestKitService_map." + serviceInstanceId;
   }
 
   ProofMapIndexProxy<HashCode, String> testMap() {
-    return ProofMapIndexProxy.newInstance(testMapName, access, StandardSerializers.hash(),
-        StandardSerializers.string());
+    return access
+        .getProofMap(IndexAddress.valueOf(testMapName),
+            StandardSerializers.hash(), StandardSerializers.string());
   }
 }

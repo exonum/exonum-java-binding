@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
@@ -26,11 +25,11 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.google.protobuf.MessageLite;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.LongSupplier;
+import javax.annotation.Nullable;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -51,7 +50,7 @@ import java.util.function.LongSupplier;
  *
  * @param <K> the type of keys in this map
  * @param <V> the type of values in this map
- * @see AbstractAccess
+ * @see Access
  */
 public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
 
@@ -63,35 +62,9 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   private final CheckingSerializerDecorator<V> valueSerializer;
 
   /**
-   * Creates a new MapIndexProxy using protobuf messages.
-   *
-   * <p>If only a key or a value is a protobuf message, use
-   * {@link MapIndexProxy#newInstance(String, AbstractAccess, Serializer, Serializer)}
-   * and {@link com.exonum.binding.common.serialization.StandardSerializers#protobuf(Class)}.
-   *
-   * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
-   *             [a-zA-Z0-9_]
-   * @param access a database access. Must be valid
-   *             If an access is read-only, "destructive" operations are not permitted
-   * @param keyType the class of keys-protobuf messages
-   * @param valueType the class of values-protobuf messages
-   * @param <K> the type of keys in the map; must be a protobuf message
-   * @param <V> the type of values in the map; must be a protobuf message
-   * @throws IllegalStateException if the access is not valid
-   * @throws IllegalArgumentException if the name is empty; or a key or value class is
-   *     not a valid protobuf message that has a public static {@code #parseFrom(byte[])} method
-   */
-  public static <K extends MessageLite, V extends MessageLite> MapIndexProxy<K, V> newInstance(
-      String name, AbstractAccess access, Class<K> keyType, Class<V> valueType) {
-    return newInstance(name, access, StandardSerializers.protobuf(keyType),
-        StandardSerializers.protobuf(valueType));
-  }
-
-  /**
    * Creates a new MapIndexProxy.
    *
-   * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
-   *             [a-zA-Z0-9_]
+   * @param address an index address
    * @param access a database access. Must be valid.
    *             If an access is read-only, "destructive" operations are not permitted.
    * @param keySerializer a serializer of keys
@@ -102,77 +75,22 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
    * @throws IllegalArgumentException if the name is empty
    * @see StandardSerializers
    */
-  public static <K, V> MapIndexProxy<K, V> newInstance(String name, AbstractAccess access,
+  public static <K, V> MapIndexProxy<K, V> newInstance(IndexAddress address, AbstractAccess access,
                                                        Serializer<K> keySerializer,
                                                        Serializer<V> valueSerializer) {
-    IndexAddress address = IndexAddress.valueOf(name);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeMapConstructor = () -> nativeCreate(name, accessNativeHandle);
-
-    return getOrCreate(address, access, keySerializer, valueSerializer, nativeMapConstructor);
-  }
-
-  /**
-   * Creates a new map in a <a href="package-summary.html#families">collection group</a>
-   * with the given name.
-   *
-   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
-   *
-   * @param groupName a name of the collection group
-   * @param mapId an identifier of this collection in the group, see the caveats
-   * @param access a database access
-   * @param keySerializer a serializer of keys
-   * @param valueSerializer a serializer of values
-   * @param <K> the type of keys in the map
-   * @param <V> the type of values in the map
-   * @return a new map proxy
-   * @throws IllegalStateException if the access is not valid
-   * @throws IllegalArgumentException if the name or index id is empty
-   * @see StandardSerializers
-   */
-  public static <K, V> MapIndexProxy<K, V> newInGroupUnsafe(String groupName,
-                                                            byte[] mapId,
-                                                            AbstractAccess access,
-                                                            Serializer<K> keySerializer,
-                                                            Serializer<V> valueSerializer) {
-    IndexAddress address = IndexAddress.valueOf(groupName, mapId);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeMapConstructor =
-        () -> nativeCreateInGroup(groupName, mapId, accessNativeHandle);
-
-    return getOrCreate(address, access, keySerializer, valueSerializer, nativeMapConstructor);
-  }
-
-  private static <K, V> MapIndexProxy<K, V> getOrCreate(IndexAddress address, AbstractAccess access,
-      Serializer<K> keySerializer, Serializer<V> valueSerializer,
-      LongSupplier nativeMapConstructor) {
-    return access.findOpenIndex(address)
-        .map(MapIndexProxy::<K, V>checkCachedInstance)
-        .orElseGet(() -> newMapIndexProxy(address, access, keySerializer, valueSerializer,
-            nativeMapConstructor));
-  }
-
-  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
-  private static <K, V> MapIndexProxy<K, V> checkCachedInstance(StorageIndex cachedIndex) {
-    checkIndexType(cachedIndex, MapIndexProxy.class);
-    return (MapIndexProxy<K, V>) cachedIndex;
-  }
-
-  private static <K, V> MapIndexProxy<K, V> newMapIndexProxy(IndexAddress address, AbstractAccess access,
-      Serializer<K> keySerializer, Serializer<V> valueSerializer,
-      LongSupplier nativeMapConstructor) {
     CheckingSerializerDecorator<K> ks = CheckingSerializerDecorator.from(keySerializer);
     CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
 
-    NativeHandle mapNativeHandle = createNativeMap(access, nativeMapConstructor);
+    NativeHandle mapNativeHandle = createNativeMap(address, access);
 
-    MapIndexProxy<K, V> map = new MapIndexProxy<>(mapNativeHandle, address, access, ks, vs);
-    access.registerIndex(map);
-    return map;
+    return new MapIndexProxy<>(mapNativeHandle, address, access, ks, vs);
   }
 
-  private static NativeHandle createNativeMap(AbstractAccess access, LongSupplier nativeMapConstructor) {
-    NativeHandle mapNativeHandle = new NativeHandle(nativeMapConstructor.getAsLong());
+  private static NativeHandle createNativeMap(IndexAddress address, AbstractAccess access) {
+    long accessNativeHandle = access.getAccessNativeHandle();
+    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
+        accessNativeHandle);
+    NativeHandle mapNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
     ProxyDestructor.newRegistered(cleaner, mapNativeHandle, MapIndexProxy.class,
@@ -277,10 +195,8 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
     nativeClear(getNativeHandle());
   }
 
-  private static native long nativeCreate(String name, long accessNativeHandle);
-
-  private static native long nativeCreateInGroup(String groupName, byte[] mapId,
-                                                 long accessNativeHandle);
+  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
+      long accessNativeHandle);
 
   private native boolean nativeContainsKey(long nativeHandle, byte[] key);
 

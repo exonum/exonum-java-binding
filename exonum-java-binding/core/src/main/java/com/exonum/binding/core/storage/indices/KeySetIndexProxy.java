@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
@@ -25,14 +24,14 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.google.protobuf.MessageLite;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 
 /**
  * A key set is an index that contains no duplicate elements (keys).
@@ -57,7 +56,7 @@ import java.util.stream.StreamSupport;
  *
  * @param <E> the type of elements in this set
  * @see ValueSetIndexProxy
- * @see AbstractAccess
+ * @see Access
  */
 public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Iterable<E> {
 
@@ -73,28 +72,9 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
   private final CheckingSerializerDecorator<E> serializer;
 
   /**
-   * Creates a new key set storing protobuf messages.
-   *
-   * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
-   *             [a-zA-Z0-9_]
-   * @param access a database access. Must be valid. If an access is read-only,
-   *             "destructive" operations are not permitted.
-   * @param keyType the class of a key-protobuf message
-   * @param <E> the type of keys in this set; must be a protobuf message
-   *     that has a public static {@code #parseFrom(byte[])} method
-   * @throws IllegalStateException if the access is not valid
-   * @throws IllegalArgumentException if the name is empty
-   */
-  public static <E extends MessageLite> KeySetIndexProxy<E> newInstance(
-      String name, AbstractAccess access, Class<E> keyType) {
-    return newInstance(name, access, StandardSerializers.protobuf(keyType));
-  }
-
-  /**
    * Creates a new key set proxy.
    *
-   * @param name a unique alphanumeric non-empty identifier of this set in the underlying storage:
-   *             [a-zA-Z0-9_]
+   * @param address an index address
    * @param access a database access. Must be valid. If an access is read-only,
    *             "destructive" operations are not permitted.
    * @param serializer a serializer of set keys
@@ -104,67 +84,21 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    * @see StandardSerializers
    */
   public static <E> KeySetIndexProxy<E> newInstance(
-      String name, AbstractAccess access, Serializer<E> serializer) {
-    IndexAddress address = IndexAddress.valueOf(name);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeSetConstructor = () -> nativeCreate(name, accessNativeHandle);
-
-    return getOrCreate(address, access, serializer, nativeSetConstructor);
-  }
-
-  /**
-   * Creates a new key set in a <a href="package-summary.html#families">collection group</a>
-   * with the given name.
-   *
-   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
-   *
-   * @param groupName a name of the collection group
-   * @param indexId an identifier of this collection in the group, see the caveats
-   * @param access a database access
-   * @param serializer a serializer of set keys
-   * @param <E> the type of keys in this set
-   * @return a new key set
-   * @throws IllegalStateException if the access is not valid
-   * @throws IllegalArgumentException if the name or index id is empty
-   * @see StandardSerializers
-   */
-  public static <E> KeySetIndexProxy<E> newInGroupUnsafe(String groupName, byte[] indexId,
-      AbstractAccess access, Serializer<E> serializer) {
-    IndexAddress address = IndexAddress.valueOf(groupName, indexId);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeSetConstructor =
-        () -> nativeCreateInGroup(groupName, indexId, accessNativeHandle);
-
-    return getOrCreate(address, access, serializer, nativeSetConstructor);
-  }
-
-  private static <E> KeySetIndexProxy<E> getOrCreate(IndexAddress address, AbstractAccess access,
-      Serializer<E> serializer, LongSupplier nativeSetConstructor) {
-    return access.findOpenIndex(address)
-        .map(KeySetIndexProxy::<E>checkCachedInstance)
-        .orElseGet(() -> newKeySetProxy(address, access, serializer, nativeSetConstructor));
-  }
-
-  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
-  private static <E> KeySetIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
-    checkIndexType(cachedIndex, KeySetIndexProxy.class);
-    return (KeySetIndexProxy<E>) cachedIndex;
-  }
-
-  private static <E> KeySetIndexProxy<E> newKeySetProxy(IndexAddress address, AbstractAccess access,
-      Serializer<E> serializer, LongSupplier nativeSetConstructor) {
+      IndexAddress address, AbstractAccess access, Serializer<E> serializer) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
-    NativeHandle setNativeHandle = createNativeSet(access, nativeSetConstructor);
+    NativeHandle setNativeHandle = createNativeSet(address, access);
 
-    KeySetIndexProxy<E> set = new KeySetIndexProxy<>(setNativeHandle, address, access, s);
-    access.registerIndex(set);
-    return set;
+    return new KeySetIndexProxy<>(setNativeHandle, address, access, s);
   }
 
-  private static NativeHandle createNativeSet(AbstractAccess access, LongSupplier nativeSetConstructor) {
+  private static NativeHandle createNativeSet(IndexAddress address, AbstractAccess access) {
+    long accessNativeHandle = access.getAccessNativeHandle();
+    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
+        accessNativeHandle);
+    NativeHandle setNativeHandle = new NativeHandle(handle);
+
     Cleaner cleaner = access.getCleaner();
-    NativeHandle setNativeHandle = new NativeHandle(nativeSetConstructor.getAsLong());
     ProxyDestructor.newRegistered(cleaner, setNativeHandle, KeySetIndexProxy.class,
         KeySetIndexProxy::nativeFree);
     return setNativeHandle;
@@ -261,10 +195,8 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
     nativeRemove(getNativeHandle(), dbElement);
   }
 
-  private static native long nativeCreate(String setName, long accessNativeHandle);
-
-  private static native long nativeCreateInGroup(String groupName, byte[] setId,
-                                                 long accessNativeHandle);
+  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
+      long accessNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 

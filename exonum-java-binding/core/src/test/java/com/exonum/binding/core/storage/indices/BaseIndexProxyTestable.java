@@ -59,7 +59,8 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     }
   }
 
-  abstract IndexT create(String name, AbstractAccess access);
+  abstract IndexT create(String name, /* todo: fix to just Access: here and below */
+      AbstractAccess access);
 
   abstract @Nullable IndexT createInGroup(String groupName, byte[] idInGroup,
       AbstractAccess access);

@@ -33,7 +33,7 @@ import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
@@ -57,8 +57,6 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A simple QA service.
@@ -72,8 +70,6 @@ import org.apache.logging.log4j.Logger;
  *     of a user service.
  */
 public final class QaServiceImpl extends AbstractService implements QaService {
-
-  private static final Logger logger = LogManager.getLogger(QaService.class);
 
   static final int CREATE_COUNTER_TX_ID = 0;
   static final int INCREMENT_COUNTER_TX_ID = 1;
@@ -98,7 +94,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  protected QaSchema createDataSchema(AbstractAccess access) {
+  protected QaSchema createDataSchema(Access access) {
     return new QaSchema(access, getName());
   }
 

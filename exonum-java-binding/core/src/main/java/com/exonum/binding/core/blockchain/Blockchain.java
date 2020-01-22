@@ -27,7 +27,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.proofs.BlockProof;
 import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.service.Configuration;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
@@ -145,11 +145,11 @@ import java.util.Optional;
  */
 public final class Blockchain {
 
-  private final AbstractAccess access;
+  private final Access access;
   private final CoreSchema schema;
 
   @VisibleForTesting
-  Blockchain(AbstractAccess access, CoreSchema schema) {
+  Blockchain(Access access, CoreSchema schema) {
     this.access = access;
     this.schema = schema;
   }
@@ -157,7 +157,7 @@ public final class Blockchain {
   /**
    * Constructs a new blockchain instance for the given database access.
    */
-  public static Blockchain newInstance(AbstractAccess access) {
+  public static Blockchain newInstance(Access access) {
     CoreSchema coreSchema = CoreSchema.newInstance(access);
     return new Blockchain(access, coreSchema);
   }
@@ -200,6 +200,9 @@ public final class Blockchain {
   public IndexProof createIndexProof(String fullIndexName) {
     checkState(!access.canModify(), "Cannot create an index proof for a mutable access (%s).",
         access);
+    // FIXME: As #canModify is moved to Access-interface, it is no longer correct to assume
+    //  that a Snapshot is the only non-modifiable impl. On top of that, RoFork will be
+    //  unmodifiable, but it does not make sense to create IndexProofs for it.
     return BlockchainProofs.createIndexProof((Snapshot) access, fullIndexName)
         .map(IndexProof::newInstance)
         .orElseThrow(() -> new IllegalArgumentException(

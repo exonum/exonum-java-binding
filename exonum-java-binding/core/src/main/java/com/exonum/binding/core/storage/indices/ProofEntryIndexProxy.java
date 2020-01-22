@@ -16,6 +16,8 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
@@ -24,10 +26,10 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.google.protobuf.MessageLite;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -48,7 +50,7 @@ import java.util.Optional;
  *
  * @param <T> the type of an element in this entry
  *
- * @see AbstractAccess
+ * @see Access
  */
 public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements HashableIndex {
 
@@ -59,63 +61,29 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
   private final CheckingSerializerDecorator<T> serializer;
 
   /**
-   * Creates a new Entry storing protobuf messages.
-   *
-   * @param name a unique alphanumeric non-empty identifier of the Entry in the underlying storage:
-   *             [a-zA-Z0-9_]
-   * @param access a database access. Must be valid.
-   *             If an access is read-only, "destructive" operations are not permitted.
-   * @param elementType the class of an element-protobuf message
-   * @param <E> the type of entry; must be a protobuf message
-   *     that has a static {@code #parseFrom(byte[])} method
-   *
-   * @throws IllegalArgumentException if the name is empty
-   * @throws IllegalStateException if the access proxy is invalid
-   */
-  public static <E extends MessageLite> ProofEntryIndexProxy<E> newInstance(
-      String name, AbstractAccess access, Class<E> elementType) {
-    return newInstance(name, access, StandardSerializers.protobuf(elementType));
-  }
-
-  /**
    * Creates a new Entry.
    *
-   * @param name a unique alphanumeric non-empty identifier of the Entry in the underlying storage:
-   *             [a-zA-Z0-9_]
+   * @param address an index address. Must correspond to a regular index, not a group.
+   *     Use MapIndex instead of groups of entries.
    * @param access a database access. Must be valid.
-   *             If an access is read-only, "destructive" operations are not permitted.
+   *     If an access is read-only, "destructive" operations are not permitted.
    * @param serializer an entry serializer
    *
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the access proxy is invalid
    * @see StandardSerializers
    */
-  public static <E> ProofEntryIndexProxy<E> newInstance(
-      String name, AbstractAccess access, Serializer<E> serializer) {
-    IndexAddress address = IndexAddress.valueOf(name);
-    return access.findOpenIndex(address)
-        .map(ProofEntryIndexProxy::<E>checkCachedInstance)
-        .orElseGet(() -> newEntryIndexProxy(address, access, serializer));
-  }
-
-  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
-  private static <E> ProofEntryIndexProxy<E> checkCachedInstance(StorageIndex cachedIndex) {
-    StoragePreconditions.checkIndexType(cachedIndex, ProofEntryIndexProxy.class);
-    return (ProofEntryIndexProxy<E>) cachedIndex;
-  }
-
-  private static <E> ProofEntryIndexProxy<E> newEntryIndexProxy(IndexAddress address, AbstractAccess access,
-                                                                Serializer<E> serializer) {
+  public static <E> ProofEntryIndexProxy<E> newInstance(IndexAddress address,
+      /* todo: (here and elsewhere) or Access? Current AbstractAccess _may_ prevent direct usage of this family of methods */ AbstractAccess access,
+      Serializer<E> serializer) {
+    checkArgument(!address.getIdInGroup().isPresent(),
+        "Groups of Entries are not supported, use a ProofMapIndex instead");
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
     NativeHandle entryNativeHandle = createNativeEntry(address.getName(), access);
 
-    ProofEntryIndexProxy<E> entry = new ProofEntryIndexProxy<>(entryNativeHandle, address,
-        access, s);
-    access.registerIndex(entry);
-    return entry;
+    return new ProofEntryIndexProxy<>(entryNativeHandle, address, access, s);
   }
-
 
   private static NativeHandle createNativeEntry(String name, AbstractAccess access) {
     long accessNativeHandle = access.getAccessNativeHandle();

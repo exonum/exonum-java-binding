@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.blockchain;
 
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.core.messages.Proofs.BlockProof;
@@ -41,7 +41,7 @@ final class BlockchainProofs {
    */
   static BlockProof createBlockProof(
       /* todo: here snapshot is not strictly required — but shall we allow Forks (see the ticket) */
-      AbstractAccess access,
+      Access access,
       long height) {
     byte[] blockProof = nativeCreateBlockProof(access.getAccessNativeHandle(), height);
     try {

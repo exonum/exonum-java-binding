@@ -26,6 +26,7 @@ import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.storage.indices.ValueSetIndexProxy;
 
 /**
  * Provides <em>access</em> to Exonum MerkleDB indexes. An access object corresponds to
@@ -156,7 +157,7 @@ public interface Access {
    * @see #getKeySet(IndexAddress, Serializer)
    * @see StandardSerializers
    */
-  <E> KeySetIndexProxy<E> getValueSet(IndexAddress address, Serializer<E> serializer);
+  <E> ValueSetIndexProxy<E> getValueSet(IndexAddress address, Serializer<E> serializer);
 
   /**
    * Creates a new ProofEntry.
@@ -168,4 +169,17 @@ public interface Access {
    * @see StandardSerializers
    */
   <E> ProofEntryIndexProxy<E> getProofEntry(IndexAddress address, Serializer<E> serializer);
+
+  /**
+   * Returns true if this access allows modifications to the database state; false if it is
+   * immutable.
+   */
+  boolean canModify();
+
+  /**
+   *  Returns a native handle of this access.
+   *
+   *  @throws IllegalStateException if the access is invalid (closed or nullptr)
+   */
+  long getAccessNativeHandle();
 }

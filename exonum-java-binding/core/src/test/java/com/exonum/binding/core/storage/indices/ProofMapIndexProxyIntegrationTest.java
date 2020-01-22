@@ -54,14 +54,14 @@ class ProofMapIndexProxyIntegrationTest
 
   @Override
   ProofMapIndexProxy<HashCode, String> create(String name, AbstractAccess access) {
-    return ProofMapIndexProxy.newInstance(name, access, StandardSerializers.hash(),
+    return access.getProofMap(IndexAddress.valueOf(name), StandardSerializers.hash(),
         StandardSerializers.string());
   }
 
   @Override
   ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
       AbstractAccess access) {
-    return ProofMapIndexProxy.newInGroupUnsafe(groupName, idInGroup, access,
+    return access.getProofMap(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.hash(), StandardSerializers.string());
   }
 }

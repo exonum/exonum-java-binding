@@ -16,6 +16,8 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K9;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
@@ -29,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.List;
@@ -166,7 +169,7 @@ class KeySetIndexProxyIntegrationTest
    * @param viewFactory a function creating a database access
    * @param keySetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
       Consumer<KeySetIndexProxy<String>> keySetTest) {
     runTestWithView(viewFactory, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
   }
@@ -178,30 +181,30 @@ class KeySetIndexProxyIntegrationTest
    * @param viewFactory a function creating a database access
    * @param keySetTest a test to run. Receives the created view and the set as arguments.
    */
-  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
-      BiConsumer<AbstractAccess, KeySetIndexProxy<String>> keySetTest) {
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+      BiConsumer<Access, KeySetIndexProxy<String>> keySetTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         KEY_SET_NAME,
-        KeySetIndexProxy::newInstance,
+        ((address, access, serializer) -> access.getKeySet(address, serializer)),
         keySetTest
     );
   }
 
   @Override
   KeySetIndexProxy<String> create(String name, AbstractAccess access) {
-    return KeySetIndexProxy.newInstance(name, access, StandardSerializers.string());
+    return access.getKeySet(valueOf(name), string());
   }
 
   @Override
   KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
-    return KeySetIndexProxy.newInGroupUnsafe(groupName, idInGroup, access,
+    return access.getKeySet(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.string());
   }
 
   @Override
   StorageIndex createOfOtherType(String name, AbstractAccess access) {
-    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
+    return access.getList(valueOf(name), string());
   }
 
   @Override

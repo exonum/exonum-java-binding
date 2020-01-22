@@ -16,12 +16,23 @@
 
 package com.exonum.binding.core.storage.database;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.storage.indices.IndexAddress;
+import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
+import com.exonum.binding.core.storage.indices.ListIndexProxy;
+import com.exonum.binding.core.storage.indices.MapIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.storage.indices.StorageIndex;
+import com.exonum.binding.core.storage.indices.ValueSetIndexProxy;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Represents an access to the database.
@@ -51,48 +62,114 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
     this.canModify = canModify;
   }
 
-  /**
-   * Returns true if this access allows modifications to the database state; false if it is
-   * immutable.
-   */
-  public boolean canModify() {
-    return canModify;
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <E> ProofListIndexProxy<E> getProofList(IndexAddress address, Serializer<E> serializer) {
+    return findOrCreate(address, ProofListIndexProxy.class,
+        () -> ProofListIndexProxy.newInstance(address, this, serializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <E> ListIndexProxy<E> getList(IndexAddress address, Serializer<E> serializer) {
+    return findOrCreate(address, ListIndexProxy.class,
+        () -> ListIndexProxy.newInstance(address, this, serializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <K, V> ProofMapIndexProxy<K, V> getProofMap(IndexAddress address,
+      Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return findOrCreate(address, ProofMapIndexProxy.class,
+        () -> ProofMapIndexProxy.newInstance(address, this, keySerializer,
+            valueSerializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <K, V> ProofMapIndexProxy<K, V> getRawProofMap(IndexAddress address,
+      Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return findOrCreate(address, ProofMapIndexProxy.class,
+        () -> ProofMapIndexProxy.newInstanceNoKeyHashing(address, this, keySerializer,
+            valueSerializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <K, V> MapIndexProxy<K, V> getMap(IndexAddress address, Serializer<K> keySerializer,
+      Serializer<V> valueSerializer) {
+    return findOrCreate(address, MapIndexProxy.class,
+        () -> MapIndexProxy.newInstance(address, this, keySerializer, valueSerializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <E> KeySetIndexProxy<E> getKeySet(IndexAddress address, Serializer<E> serializer) {
+    return findOrCreate(address, KeySetIndexProxy.class,
+        () -> KeySetIndexProxy.newInstance(address, this, serializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <E> ValueSetIndexProxy<E> getValueSet(IndexAddress address, Serializer<E> serializer) {
+    return findOrCreate(address, ValueSetIndexProxy.class,
+        () -> ValueSetIndexProxy.newInstance(address, this, serializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <E> ProofEntryIndexProxy<E> getProofEntry(IndexAddress address, Serializer<E> serializer) {
+    return findOrCreate(address, ProofEntryIndexProxy.class,
+        () -> ProofEntryIndexProxy.newInstance(address, this, serializer));
+  }
+
+  private <T extends StorageIndex> T findOrCreate(IndexAddress address, Class<T> indexType,
+      Supplier<T> indexSupplier) {
+    return findOpenIndex(address, indexType)
+        .orElseGet(() -> createIndex(indexSupplier));
   }
 
   /**
-   *  Returns a native handle of this access.
-   *
-   *  @throws IllegalStateException if the access is invalid (closed or nullptr)
-   */
-  public long getAccessNativeHandle() {
-    return super.getNativeHandle();
-  }
-
-  /**
-   * Finds an open index by the given address.
-   *
-   * <p><em>This method is for internal use. It is not designed to be used by services,
-   * rather by index factories.</em>
+   * Finds an open index by the given address and checks it has matching type.
    *
    * @param address the index address
+   * @param indexType the requested index type
    * @return an index with the given address; or {@code Optional.empty()} if no index
    *     with such address was open in this access
+   * @throws IllegalArgumentException if the open index has a different type from the requested
    */
-  public Optional<StorageIndex> findOpenIndex(IndexAddress address) {
-    return indexRegistry.findIndex(address);
+  private <T extends StorageIndex> Optional<T> findOpenIndex(IndexAddress address,
+      Class<T> indexType) {
+    return indexRegistry.findIndex(address)
+        .map(index -> checkedCast(index, indexType));
+  }
+
+  /**
+   * Checks the type of the <em>cached</em> index instance and casts it to the given type.
+   *
+   * @param cachedIndex a cached index
+   * @param requestedIndexType a index type requested for the index address
+   * @throws IllegalArgumentException if the type of the cached index does not match the
+   *     requested index type
+   */
+  private static <IndexT extends StorageIndex> IndexT checkedCast(StorageIndex cachedIndex,
+      Class<IndexT> requestedIndexType) {
+    checkArgument(requestedIndexType.isInstance(cachedIndex),
+        "Cannot create index of type %s: the index with such address (%s) was already created"
+            + "of another type (%s)", requestedIndexType, cachedIndex.getAddress(), cachedIndex);
+    return requestedIndexType.cast(cachedIndex);
+  }
+
+  private <T extends StorageIndex> T createIndex(Supplier<T> indexSupplier) {
+    T newIndex = indexSupplier.get();
+    registerIndex(newIndex);
+    return newIndex;
   }
 
   /**
    * Registers a new index created with this access.
-   *
-   * <p><em>This method is for internal use. It is not designed to be used by services,
-   * rather by index factories.</em>
-   *
-   * @param index a new index to register
-   * @throws IllegalArgumentException if the index is already registered
-   * @see #findOpenIndex(IndexAddress)
    */
-  public void registerIndex(StorageIndex index) {
+  private void registerIndex(StorageIndex index) {
     indexRegistry.registerIndex(index);
   }
 
@@ -104,6 +181,16 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    */
   void clearOpenIndexes() {
     indexRegistry.clear();
+  }
+
+  @Override
+  public boolean canModify() {
+    return canModify;
+  }
+
+  @Override
+  public long getAccessNativeHandle() {
+    return super.getNativeHandle();
   }
 
   /**

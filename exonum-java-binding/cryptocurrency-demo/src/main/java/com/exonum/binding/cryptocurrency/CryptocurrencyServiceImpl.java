@@ -33,7 +33,7 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -64,7 +64,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   @Override
-  protected CryptocurrencySchema createDataSchema(AbstractAccess access) {
+  protected CryptocurrencySchema createDataSchema(Access access) {
     String name = getName();
     return new CryptocurrencySchema(access, name);
   }

@@ -17,7 +17,7 @@
 package com.exonum.binding.time;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
@@ -39,7 +39,7 @@ public interface TimeSchema {
    * @throws IllegalArgumentException if there is no service with the given name or it is not
    *     an Exonum time oracle
    */
-  static TimeSchema newInstance(AbstractAccess dbAccess, String name) {
+  static TimeSchema newInstance(Access dbAccess, String name) {
     return new TimeSchemaProxy(dbAccess, name);
   }
 

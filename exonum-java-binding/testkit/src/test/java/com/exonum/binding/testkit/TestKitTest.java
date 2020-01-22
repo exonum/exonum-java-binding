@@ -48,7 +48,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
@@ -480,8 +480,8 @@ class TestKitTest {
     assertThat(block.getHeight()).isEqualTo(1);
 
     // Check the transactions are indeed executed by the core
-    testKit.withSnapshot((view) -> checkCommittedBlockWithMessages(
-        view, block, message, message2));
+    testKit.withSnapshot((snapshot) -> checkCommittedBlockWithMessages(
+        snapshot, block, message, message2));
   }
 
   @Test
@@ -495,8 +495,8 @@ class TestKitTest {
     assertThat(block.getHeight()).isEqualTo(1);
 
     // Check the transactions are indeed executed by the core
-    testKit.withSnapshot((view) -> checkCommittedBlockWithMessages(
-        view, block, message, message2));
+    testKit.withSnapshot((snapshot) -> checkCommittedBlockWithMessages(
+        snapshot, block, message, message2));
   }
 
   private TransactionMessage constructTestTransactionMessage(String payload) {
@@ -511,7 +511,7 @@ class TestKitTest {
         .sign(keyPair);
   }
 
-  private void checkCommittedBlockWithMessages(AbstractAccess access, Block lastBlock,
+  private void checkCommittedBlockWithMessages(Access access, Block lastBlock,
       TransactionMessage... messages) {
     // Check the info in blockchain matches the block
     Blockchain blockchain = Blockchain.newInstance(access);

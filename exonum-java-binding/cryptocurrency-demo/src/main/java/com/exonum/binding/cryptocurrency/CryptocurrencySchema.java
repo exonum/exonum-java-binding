@@ -22,7 +22,8 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
@@ -35,9 +36,9 @@ public final class CryptocurrencySchema implements Schema {
   /** A namespace of cryptocurrency service collections. */
   private final String namespace;
 
-  private final AbstractAccess access;
+  private final Access access;
 
-  public CryptocurrencySchema(AbstractAccess access, String serviceName) {
+  public CryptocurrencySchema(Access access, String serviceName) {
     this.access = checkNotNull(access);
     this.namespace = serviceName + ".";
   }
@@ -47,7 +48,7 @@ public final class CryptocurrencySchema implements Schema {
    */
   public ProofMapIndexProxy<PublicKey, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, access, StandardSerializers.publicKey(),
+    return access.getRawProofMap(IndexAddress.valueOf(name), StandardSerializers.publicKey(),
         WalletSerializer.INSTANCE);
   }
 
@@ -60,9 +61,8 @@ public final class CryptocurrencySchema implements Schema {
    */
   public ListIndexProxy<HashCode> transactionsHistory(PublicKey walletId) {
     String name = fullIndexName("transactions_history");
-
-    return ListIndexProxy.newInGroupUnsafe(name, walletId.toBytes(), access,
-        StandardSerializers.hash());
+    IndexAddress address = IndexAddress.valueOf(name, walletId.toBytes());
+    return access.getList(address, StandardSerializers.hash());
   }
 
   private String fullIndexName(String name) {

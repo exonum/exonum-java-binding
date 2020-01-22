@@ -16,12 +16,12 @@
 
 package com.exonum.binding.core.storage.database;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import org.junit.jupiter.api.Test;
 
@@ -73,7 +73,8 @@ class NativeResourceManagerIntegrationTest {
     Snapshot s = Snapshot.newInstance(snapshotNativeHandle, cleaner);
 
     RuntimeException thrown = assertThrows(RuntimeException.class,
-        () -> ListIndexProxy.newInstance("foo", s, StandardSerializers.string()));
+        () -> s.getList(valueOf("foo"),
+            string()));
     assertThat(thrown).hasMessageContaining("Invalid handle value: '"
         + handleToHex(snapshotNativeHandle));
     // No cleaner#close on purpose.

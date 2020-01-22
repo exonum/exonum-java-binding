@@ -78,12 +78,12 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   @Override
   ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
                                                      AbstractAccess access) {
-    return ProofMapIndexProxy.newInGroupUnsafeNoKeyHashing(groupName, idInGroup, access,
+    return access.getRawProofMap(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.hash(), StandardSerializers.string());
   }
 
   private static ProofMapIndexProxy<HashCode, String> createProofMap(String name, AbstractAccess access) {
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, access, StandardSerializers.hash(),
+    return access.getRawProofMap(IndexAddress.valueOf(name), StandardSerializers.hash(),
         StandardSerializers.string());
   }
 

@@ -16,6 +16,8 @@
 
 package com.exonum.binding.core.storage.database;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
@@ -24,13 +26,10 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.indices.ListIndex;
-import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.TestStorageItems;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.List;
@@ -160,11 +159,12 @@ class TemporaryDbIntegrationTest {
   }
 
   private static ListIndex<String> newList(String name, AbstractAccess access) {
-    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
+    return access.getList(valueOf(name),
+        string());
   }
 
   private static MapIndex<String, String> newMap(String name, AbstractAccess access) {
-    return MapIndexProxy.newInstance(name, access, StandardSerializers.string(),
-        StandardSerializers.string());
+    return access.getMap(valueOf(name),
+        string(), string());
   }
 }

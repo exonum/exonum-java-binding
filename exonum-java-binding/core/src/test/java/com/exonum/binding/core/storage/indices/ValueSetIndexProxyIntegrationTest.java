@@ -16,6 +16,8 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V9;
@@ -31,6 +33,7 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedBytes;
 import java.util.Iterator;
@@ -260,7 +263,7 @@ class ValueSetIndexProxyIntegrationTest
    * @param accessFactory a function creating a database access
    * @param valueSetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Function<Cleaner, AbstractAccess> accessFactory,
+  private static void runTestWithView(Function<Cleaner, Access> accessFactory,
       Consumer<ValueSetIndexProxy<String>> valueSetTest) {
     runTestWithView(accessFactory,
         (access, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
@@ -274,12 +277,12 @@ class ValueSetIndexProxyIntegrationTest
    * @param accessFactory a function creating a database access
    * @param valueSetTest a test to run. Receives the created access and the set as arguments.
    */
-  private static void runTestWithView(Function<Cleaner, AbstractAccess> accessFactory,
-      BiConsumer<AbstractAccess, ValueSetIndexProxy<String>> valueSetTest) {
+  private static void runTestWithView(Function<Cleaner, Access> accessFactory,
+      BiConsumer<Access, ValueSetIndexProxy<String>> valueSetTest) {
     IndicesTests.runTestWithView(
         accessFactory,
         VALUE_SET_NAME,
-        ValueSetIndexProxy::newInstance,
+        ((address, access, serializer) -> access.getValueSet(address, serializer)),
         valueSetTest
     );
   }
@@ -292,18 +295,18 @@ class ValueSetIndexProxyIntegrationTest
 
   @Override
   ValueSetIndexProxy<String> create(String name, AbstractAccess access) {
-    return ValueSetIndexProxy.newInstance(name, access, StandardSerializers.string());
+    return access.getValueSet(valueOf(name), string());
   }
 
   @Override
   ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
-    return ValueSetIndexProxy.newInGroupUnsafe(groupName, idInGroup, access,
+    return access.getValueSet(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.string());
   }
 
   @Override
   StorageIndex createOfOtherType(String name, AbstractAccess access) {
-    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
+    return access.getList(valueOf(name), string());
   }
 
   @Override

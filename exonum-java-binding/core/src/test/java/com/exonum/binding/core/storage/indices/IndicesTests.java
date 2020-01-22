@@ -19,7 +19,7 @@ package com.exonum.binding.core.storage.indices;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -38,14 +38,15 @@ class IndicesTests {
    *     the corresponding native objects
    */
   static <IndexT extends StorageIndex>
-      void runTestWithView(Function<Cleaner, AbstractAccess> accessFactory,
+      void runTestWithView(Function<Cleaner, Access> accessFactory,
                            String indexName,
                            IndexConstructorOne<IndexT, String> indexSupplier,
-                           BiConsumer<AbstractAccess, IndexT> indexTest) {
+                           BiConsumer<Access, IndexT> indexTest) {
     try (Cleaner cleaner = new Cleaner()) {
       // Create an access and an index.
-      AbstractAccess access = accessFactory.apply(cleaner);
-      IndexT index = indexSupplier.create(indexName, access, StandardSerializers.string());
+      Access access = accessFactory.apply(cleaner);
+      IndexAddress address = IndexAddress.valueOf(indexName);
+      IndexT index = indexSupplier.create(address, access, StandardSerializers.string());
 
       // Run the test
       indexTest.accept(access, index);

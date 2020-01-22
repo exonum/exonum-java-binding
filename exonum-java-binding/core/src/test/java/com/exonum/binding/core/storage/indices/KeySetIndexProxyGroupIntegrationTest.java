@@ -79,7 +79,7 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
   }
 
   private KeySetIndexProxy<String> createInGroup(byte[] id1, AbstractAccess access) {
-    return KeySetIndexProxy.newInGroupUnsafe(GROUP_NAME, id1, access,
+    return access.getKeySet(IndexAddress.valueOf(GROUP_NAME, id1),
         StandardSerializers.string());
   }
 

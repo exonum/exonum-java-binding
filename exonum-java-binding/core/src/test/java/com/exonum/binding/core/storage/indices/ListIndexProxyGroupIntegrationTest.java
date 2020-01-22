@@ -23,7 +23,7 @@ class ListIndexProxyGroupIntegrationTest extends BaseListIndexProxyGroupTestable
 
   @Override
   ListIndex<String> createInGroup(byte[] id, AbstractAccess access) {
-    return ListIndexProxy.newInGroupUnsafe("list_index_group_IT", id, access,
-        StandardSerializers.string());
+    IndexAddress address = IndexAddress.valueOf("list_index_group_IT", id);
+    return access.getList(address, StandardSerializers.string());
   }
 }

@@ -24,7 +24,7 @@ class ProofListIndexProxyGroupIntegrationTest
 
   @Override
   ListIndex<String> createInGroup(byte[] id, AbstractAccess access) {
-    return ProofListIndexProxy.newInGroupUnsafe("proof_list_group_IT", id, access,
+    return access.getProofList(IndexAddress.valueOf("proof_list_group_IT", id),
         StandardSerializers.string());
   }
 }

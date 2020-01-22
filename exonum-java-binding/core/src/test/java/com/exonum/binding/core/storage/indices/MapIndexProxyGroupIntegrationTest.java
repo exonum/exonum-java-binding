@@ -111,7 +111,7 @@ class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String
 
   @Override
   MapIndex<String, String> createInGroup(byte[] mapId, AbstractAccess access) {
-    return MapIndexProxy.newInGroupUnsafe(GROUP_NAME, mapId, access,
+    return access.getMap(IndexAddress.valueOf(GROUP_NAME, mapId),
         StandardSerializers.string(), StandardSerializers.string());
   }
 }

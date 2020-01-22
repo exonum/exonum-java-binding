@@ -22,7 +22,7 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.google.inject.Inject;
@@ -52,7 +52,7 @@ public final class TestService extends AbstractService {
   }
 
   @Override
-  protected TestSchema createDataSchema(AbstractAccess access) {
+  protected TestSchema createDataSchema(Access access) {
     return SCHEMA_FACTORY.from(access);
   }
 

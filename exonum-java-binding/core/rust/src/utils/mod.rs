@@ -16,13 +16,9 @@
 
 #![deny(non_snake_case)]
 
-mod conversion;
-mod errors;
-mod jni;
-pub mod jni_cache;
-
 pub use self::conversion::{
-    convert_hash, convert_to_hash, convert_to_string, java_arrays_to_rust, proto_to_java_bytes,
+    convert_hash, convert_to_hash, convert_to_index_address, convert_to_string,
+    java_arrays_to_rust, proto_to_java_bytes,
 };
 pub use self::errors::{
     any_to_string, check_error_on_exception, describe_java_exception, get_and_clear_java_exception,
@@ -30,6 +26,11 @@ pub use self::errors::{
     unwrap_jni_verbose,
 };
 pub use self::jni::{get_class_name, get_exception_message};
+
+mod conversion;
+mod errors;
+mod jni;
+pub mod jni_cache;
 
 /// Asserts that given closure panics while executed and the resulting error message contains given
 /// substring.

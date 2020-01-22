@@ -23,7 +23,8 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.RuntimeId;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -42,10 +43,10 @@ class TimeSchemaProxy implements TimeSchema {
   private static final Serializer<ZonedDateTime> ZONED_DATE_TIME_SERIALIZER =
       UtcZonedDateTimeSerializer.INSTANCE;
 
-  private final AbstractAccess access;
+  private final Access access;
   private final String name;
 
-  TimeSchemaProxy(AbstractAccess access, String name) {
+  TimeSchemaProxy(Access access, String name) {
     this.name = name;
     this.access = access;
     checkIfEnabled();
@@ -71,19 +72,18 @@ class TimeSchemaProxy implements TimeSchema {
 
   @Override
   public ProofEntryIndexProxy<ZonedDateTime> getTime() {
-    return ProofEntryIndexProxy.newInstance(
-        indexName(TimeIndex.TIME), access, ZONED_DATE_TIME_SERIALIZER);
+    IndexAddress address = indexAddress(TimeIndex.TIME);
+    return access.getProofEntry(address, ZONED_DATE_TIME_SERIALIZER);
   }
 
   @Override
   public ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes() {
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(indexName(TimeIndex.VALIDATORS_TIMES),
-        access,
-        PUBLIC_KEY_SERIALIZER, ZONED_DATE_TIME_SERIALIZER);
+    IndexAddress address = indexAddress(TimeIndex.VALIDATORS_TIMES);
+    return access.getRawProofMap(address, PUBLIC_KEY_SERIALIZER, ZONED_DATE_TIME_SERIALIZER);
   }
 
-  private String indexName(String simpleName) {
-    return name + "." + simpleName;
+  private IndexAddress indexAddress(String simpleName) {
+    return IndexAddress.valueOf(name + "." + simpleName);
   }
 
   /**

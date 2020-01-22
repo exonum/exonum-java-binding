@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.collect.MapEntry;
@@ -28,13 +28,14 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.Lists;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.LongSupplier;
+import javax.annotation.Nullable;
 
 /**
  * A ProofMapIndexProxy is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -49,15 +50,14 @@ import java.util.function.LongSupplier;
  *
  * <h3 id="key-hashing">Key hashing in proof maps</h3>
  *
- * <p>By default, when creating the proof map using methods
- * {@link #newInstance(String, AbstractAccess, Serializer, Serializer) #newInstance} and
- * {@link #newInGroupUnsafe(String, byte[], AbstractAccess, Serializer, Serializer) #newInGroupUnsafe},
+ * <!-- TODO: consider better place for this discussion -->
+ * <p>By default, when creating the proof map using method
+ * {@link #newInstance(IndexAddress, AbstractAccess, Serializer, Serializer) #newInstance},
  * the user keys are converted into internal keys through hashing. This allows to use keys of
  * an arbitrary size and ensures the balance of the internal tree.
  * It is also possible to create a proof map that will not hash keys with methods
- * {@link #newInstanceNoKeyHashing(String, AbstractAccess, Serializer, Serializer) #newInstanceNoKeyHashing}
- * and {@link #newInGroupUnsafeNoKeyHashing(String, byte[], AbstractAccess, Serializer, Serializer)
- * #newInGroupUnsafeNoKeyHashing}. In this mode the map will use the user keys as internal
+ * {@link #newInstanceNoKeyHashing(IndexAddress, AbstractAccess, Serializer, Serializer)
+ * #newInstanceNoKeyHashing}. In this mode the map will use the user keys as internal
  * tree keys. Such mode of operation is appropriate iff <em>all</em> of the following conditions
  * hold:
  *
@@ -83,7 +83,7 @@ import java.util.function.LongSupplier;
  *
  * @param <K> the type of keys in this map
  * @param <V> the type of values in this map
- * @see AbstractAccess
+ * @see Access
  */
 public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V>,
     HashableIndex {
@@ -94,8 +94,7 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   /**
    * Creates a ProofMapIndexProxy.
    *
-   * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
-   *             [a-zA-Z0-9_]
+   * @param address an index address
    * @param access a database access. Must be valid.
    *             If an access is read-only, "destructive" operations are not permitted.
    * @param keySerializer a serializer of keys
@@ -107,20 +106,15 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @see StandardSerializers
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInstance(
-      String name, AbstractAccess access, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
-    IndexAddress address = IndexAddress.valueOf(name);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeMapConstructor = () -> nativeCreate(name, accessNativeHandle, true);
-
-    return getOrCreate(address, access, keySerializer, valueSerializer, nativeMapConstructor, true);
+      IndexAddress address, AbstractAccess access, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return newMapIndexProxy(address, access, keySerializer, valueSerializer, true);
   }
 
   /**
    * Creates a <a href="ProofMapIndexProxy.html#key-hashing">ProofMapIndexProxy that uses non-hashed keys</a>.
    * Requires that keys are 32-byte long.
    *
-   * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
-   *             [a-zA-Z0-9_]
+   * @param address an index address
    * @param access a database access. Must be valid.
    *             If an access is read-only, "destructive" operations are not permitted.
    * @param keySerializer a serializer of keys, must always produce 32-byte long values
@@ -132,100 +126,20 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @see StandardSerializers
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInstanceNoKeyHashing(
-      String name, AbstractAccess access, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
-    IndexAddress address = IndexAddress.valueOf(name);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeMapConstructor = () -> nativeCreate(name, accessNativeHandle, false);
-
-    return getOrCreate(address, access, keySerializer, valueSerializer, nativeMapConstructor, false);
+      IndexAddress address, AbstractAccess access, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return newMapIndexProxy(address, access, keySerializer, valueSerializer, false);
   }
 
-  /**
-   * Creates a new proof map in a <a href="package-summary.html#families">collection group</a>
-   * with the given name.
-   *
-   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
-   *
-   * @param groupName a name of the collection group
-   * @param mapId an identifier of this collection in the group, see the caveats
-   * @param access a database access
-   * @param keySerializer a serializer of keys
-   * @param valueSerializer a serializer of values
-   * @param <K> the type of keys in the map
-   * @param <V> the type of values in the map
-   * @return a new map proxy
-   * @throws IllegalStateException if the access is not valid
-   * @throws IllegalArgumentException if the name or index id is empty
-   * @see StandardSerializers
-   */
-  public static <K, V> ProofMapIndexProxy<K, V> newInGroupUnsafe(
-      String groupName, byte[] mapId, AbstractAccess access, Serializer<K> keySerializer,
-      Serializer<V> valueSerializer) {
-    IndexAddress address = IndexAddress.valueOf(groupName, mapId);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeMapConstructor =
-        () -> nativeCreateInGroup(groupName, mapId, accessNativeHandle, true);
-
-    return getOrCreate(address, access, keySerializer, valueSerializer, nativeMapConstructor, true);
-  }
-
-  /**
-   * Creates a new <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>
-   * in a <a href="package-summary.html#families">collection group</a> with the given name.
-   * Requires that keys are 32-byte long.
-   *
-   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
-   *
-   * @param groupName a name of the collection group
-   * @param mapId an identifier of this collection in the group, see the caveats
-   * @param access a database access
-   * @param keySerializer a serializer of keys, must always produce 32-byte long values
-   * @param valueSerializer a serializer of values
-   * @param <K> the type of keys in the map
-   * @param <V> the type of values in the map
-   * @return a new map proxy
-   * @throws IllegalStateException if the access is not valid
-   * @throws IllegalArgumentException if the name or index id is empty
-   * @see StandardSerializers
-   */
-  public static <K, V> ProofMapIndexProxy<K, V> newInGroupUnsafeNoKeyHashing(
-      String groupName, byte[] mapId, AbstractAccess access, Serializer<K> keySerializer,
-      Serializer<V> valueSerializer) {
-    IndexAddress address = IndexAddress.valueOf(groupName, mapId);
-    long accessNativeHandle = access.getAccessNativeHandle();
-    LongSupplier nativeMapConstructor =
-        () -> nativeCreateInGroup(groupName, mapId, accessNativeHandle, false);
-
-    return getOrCreate(address, access, keySerializer, valueSerializer, nativeMapConstructor, false);
-  }
-
-  private static <K, V> ProofMapIndexProxy<K, V> getOrCreate(IndexAddress address, AbstractAccess access,
-      Serializer<K> keySerializer, Serializer<V> valueSerializer,
-      LongSupplier nativeMapConstructor, boolean keyHashing) {
-    return access.findOpenIndex(address)
-        .map(ProofMapIndexProxy::<K, V>checkCachedInstance)
-        .orElseGet(() -> newMapIndexProxy(address, access, keySerializer, valueSerializer,
-            nativeMapConstructor, keyHashing));
-  }
-
-  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
-  private static <K, V> ProofMapIndexProxy<K, V> checkCachedInstance(StorageIndex cachedIndex) {
-    checkIndexType(cachedIndex, ProofMapIndexProxy.class);
-    return (ProofMapIndexProxy<K, V>) cachedIndex;
-  }
-
-  private static <K, V> ProofMapIndexProxy<K, V> newMapIndexProxy(IndexAddress address, AbstractAccess access,
-      Serializer<K> keySerializer, Serializer<V> valueSerializer,
-      LongSupplier nativeMapConstructor, boolean keyHashing) {
+  private static <K, V> ProofMapIndexProxy<K, V> newMapIndexProxy(IndexAddress address,
+      AbstractAccess access,
+      Serializer<K> keySerializer, Serializer<V> valueSerializer, boolean keyHashing) {
     Serializer<K> ks = decorateKeySerializer(keySerializer, keyHashing);
     CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
 
-    NativeHandle mapNativeHandle = createNativeMap(access, nativeMapConstructor);
+    NativeHandle mapNativeHandle = createNativeMap(address, access, keyHashing);
 
-    ProofMapIndexProxy<K, V> map = new ProofMapIndexProxy<>(mapNativeHandle, address,
+    return new ProofMapIndexProxy<>(mapNativeHandle, address,
         access, ks, vs);
-    access.registerIndex(map);
-    return map;
   }
 
   private static <K> Serializer<K> decorateKeySerializer(
@@ -237,8 +151,12 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     }
   }
 
-  private static NativeHandle createNativeMap(AbstractAccess access, LongSupplier nativeMapConstructor) {
-    NativeHandle mapNativeHandle = new NativeHandle(nativeMapConstructor.getAsLong());
+  private static NativeHandle createNativeMap(IndexAddress address, AbstractAccess access,
+      boolean keyHashing) {
+    long accessNativeHandle = access.getAccessNativeHandle();
+    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
+        accessNativeHandle, keyHashing);
+    NativeHandle mapNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
     ProxyDestructor.newRegistered(cleaner, mapNativeHandle, ProofMapIndexProxy.class,
@@ -246,10 +164,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
     return mapNativeHandle;
   }
 
-  private static native long nativeCreate(String name, long accessNativeHandle, boolean keyHashing);
-
-  private static native long nativeCreateInGroup(String groupName, byte[] mapId,
-                                                 long accessNativeHandle, boolean keyHashing);
+  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
+      long accessNativeHandle, boolean keyHashing);
 
   private ProofMapIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
                              Serializer<K> keySerializer,

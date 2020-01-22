@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{
-    access::FromAccess, indexes::list::Iter, Fork, IndexAddress, ListIndex, Snapshot,
-};
+use std::{panic, ptr};
+
+use exonum_merkledb::{access::FromAccess, Fork, indexes::list::Iter, ListIndex, Snapshot};
 use jni::{
+    JNIEnv,
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray, jlong},
-    JNIEnv,
 };
-
-use std::{panic, ptr};
 
 use handle::{self, Handle};
 use storage::db::{Value, View, ViewRef};
@@ -40,37 +38,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     env: JNIEnv,
     _: JClass,
     name: JString,
+    id_in_group: jbyteArray,
     view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let name = utils::convert_to_string(&env, name)?;
-        Ok(handle::to_handle(
-            match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::from_access(snapshot, name.into()).unwrap())
-                }
-                ViewRef::Fork(fork) => {
-                    IndexType::ForkIndex(Index::from_access(fork, name.into()).unwrap())
-                }
-            },
-        ))
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns a pointer to the created `ListIndex` instance in an index family (= group).
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexProxy_nativeCreateInGroup(
-    env: JNIEnv,
-    _: JClass,
-    group_name: JString,
-    list_id: jbyteArray,
-    view_handle: Handle,
-) -> Handle {
-    let res = panic::catch_unwind(|| {
-        let group_name = utils::convert_to_string(&env, group_name)?;
-        let list_id = env.convert_byte_array(list_id)?;
-        let address = IndexAddress::from_root(group_name).append_key(&list_id);
+        let address = utils::convert_to_index_address(&env, name, id_in_group)?;
         let view_ref = handle::cast_handle::<View>(view_handle).get();
         Ok(handle::to_handle(match view_ref {
             ViewRef::Snapshot(snapshot) => {

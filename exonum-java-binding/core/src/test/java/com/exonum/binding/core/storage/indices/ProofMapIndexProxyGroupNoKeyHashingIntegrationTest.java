@@ -45,7 +45,7 @@ class ProofMapIndexProxyGroupNoKeyHashingIntegrationTest
 
   @Override
   ProofMapIndexProxy<HashCode, String> createInGroup(byte[] mapId, AbstractAccess access) {
-    return ProofMapIndexProxy.newInGroupUnsafeNoKeyHashing(GROUP_NAME, mapId, access,
+    return access.getRawProofMap(IndexAddress.valueOf(GROUP_NAME, mapId),
         StandardSerializers.hash(), StandardSerializers.string());
   }
 }

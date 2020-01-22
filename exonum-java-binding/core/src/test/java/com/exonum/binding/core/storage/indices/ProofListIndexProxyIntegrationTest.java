@@ -17,6 +17,8 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesAbsence;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
@@ -35,6 +37,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.core.messages.ListProofOuterClass;
 import com.exonum.core.messages.ListProofOuterClass.ListProofEntry;
 import com.google.protobuf.ByteString;
@@ -60,18 +63,18 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Override
   ProofListIndexProxy<String> create(String name, AbstractAccess access) {
-    return ProofListIndexProxy.newInstance(name, access, StandardSerializers.string());
+    return access.getProofList(valueOf(name), string());
   }
 
   @Override
   ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
-    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, access,
+    return access.getProofList(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.string());
   }
 
   @Override
   StorageIndex createOfOtherType(String name, AbstractAccess access) {
-    return ListIndexProxy.newInstance(name, access, StandardSerializers.string());
+    return access.getList(valueOf(name), string());
   }
 
   @Override
@@ -293,17 +296,17 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
                                       Consumer<ProofListIndexProxy<String>> listTest) {
     runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
-                                      BiConsumer<AbstractAccess, ProofListIndexProxy<String>> listTest) {
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+                                      BiConsumer<Access, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         LIST_NAME,
-        ProofListIndexProxy::newInstance,
+        ((address, access, serializer) -> access.getProofList(address, serializer)),
         listTest
     );
   }

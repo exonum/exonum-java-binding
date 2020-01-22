@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{panic, ptr};
+
 use exonum_merkledb::{
     access::FromAccess,
-    indexes::map::{Iter as IndexIter, Keys, Values},
-    Fork, IndexAddress, MapIndex, Snapshot,
+    Fork,
+    indexes::map::{Iter as IndexIter, Keys, Values}, MapIndex, Snapshot,
 };
 use jni::{
+    JNIEnv,
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray, jobject},
-    JNIEnv,
 };
-
-use std::{panic, ptr};
 
 use handle::{self, Handle};
 use storage::{
@@ -49,44 +49,21 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProx
     env: JNIEnv,
     _: JClass,
     name: JString,
+    id_in_group: jbyteArray,
     view_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let name = utils::convert_to_string(&env, name)?;
+        let address = utils::convert_to_index_address(&env, name, id_in_group)?;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {
                 ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::from_access(snapshot, name.into()).unwrap())
+                    IndexType::SnapshotIndex(Index::from_access(snapshot, address).unwrap())
                 }
                 ViewRef::Fork(fork) => {
-                    IndexType::ForkIndex(Index::from_access(fork, name.into()).unwrap())
+                    IndexType::ForkIndex(Index::from_access(fork, address).unwrap())
                 }
             },
         ))
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns a pointer to the created `MapIndex` instance in an index family (= group).
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProxy_nativeCreateInGroup(
-    env: JNIEnv,
-    _: JClass,
-    group_name: JString,
-    map_id: jbyteArray,
-    view_handle: Handle,
-) -> Handle {
-    let res = panic::catch_unwind(|| {
-        let group_name = utils::convert_to_string(&env, group_name)?;
-        let map_id = env.convert_byte_array(map_id)?;
-        let address = IndexAddress::from_root(group_name).append_key(&map_id);
-        let view_ref = handle::cast_handle::<View>(view_handle).get();
-        Ok(handle::to_handle(match view_ref {
-            ViewRef::Snapshot(snapshot) => {
-                IndexType::SnapshotIndex(Index::from_access(snapshot, address).unwrap())
-            }
-            ViewRef::Fork(fork) => IndexType::ForkIndex(Index::from_access(fork, address).unwrap()),
-        }))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
