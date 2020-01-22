@@ -32,15 +32,14 @@ import com.exonum.binding.core.storage.indices.ValueSetIndexProxy;
  * Provides <em>access</em> to Exonum MerkleDB indexes. An access object corresponds to
  * a certain database state.
  *
- * <p>An access can be read-only or read-write. Read-only accesses produce indexes that forbid
- * modifying operations.
- * <!-- todo: document 'read-only' indexes in package-info? -->
+ * <p>An access can be read-only or read-write. Read-only accesses produce indexes that
+ * <a href="../indices/package-summary.html#modifications">
+ * forbid modifying operations.
+ * </a>
  *
- * <!-- todo: rewrite: can/shall we reference 'transaction processing' or keep it about MerkleDB
- *        only?
  * <p>The changes made to read-write accesses are not usually applied immediately to the database
- * state, but are performed by the framework.
- * -->
+ * state, but are performed separately. For example, Exonum will apply the changes
+ * made by all transactions when a block is confirmed.
  *
  * <p>Accesses may perform index address resolution: they may modify the passed index address
  * before fetching it from the database. That implies that addresses passed to index factory

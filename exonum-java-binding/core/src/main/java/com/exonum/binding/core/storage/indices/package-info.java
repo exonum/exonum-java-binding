@@ -19,6 +19,17 @@
  *
  * <p>Indexes are also known as collections, tables, and rarely as database views.
  *
+ * <h2>Accessing indexes</h2>
+ *
+ * <p>Indexes shall be created using the database
+ * {@link com.exonum.binding.core.storage.database.Access} object.
+ *
+ * <h3 id="modifications">Modifications</h3>
+ *
+ * <p>Whether an index can be modified is inherited from the Access object. If the database access
+ * objects forbids modifications, any modifying (or "destructive") methods of the index
+ * will throw {@link java.lang.UnsupportedOperationException}.
+ *
  * <h2 id="families">Index families</h2>
  *
  * <p>An index family is a named group of indexes of the same type. Each index in the group
