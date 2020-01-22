@@ -95,8 +95,7 @@ final class CoreSchema {
    * (represented by list index id).
    */
   ListIndex<HashCode> getBlockHashes() {
-    return dbAccess
-        .getList(IndexAddress.valueOf(CoreIndex.ALL_BLOCK_HASHES), hash());
+    return dbAccess.getList(CoreIndex.ALL_BLOCK_HASHES, hash());
   }
 
   /**
@@ -107,24 +106,22 @@ final class CoreSchema {
   ProofListIndexProxy<HashCode> getBlockTransactions(long blockHeight) {
     checkBlockHeight(blockHeight);
     byte[] id = toCoreStorageKey(blockHeight);
-    return dbAccess.getProofList(IndexAddress.valueOf(CoreIndex.BLOCK_TRANSACTIONS, id),
-        StandardSerializers.hash());
+    IndexAddress address = IndexAddress.valueOf(CoreIndex.BLOCK_TRANSACTIONS, id);
+    return dbAccess.getProofList(address, hash());
   }
 
   /**
    * Returns a map that stores a block object for every block hash.
    */
   MapIndex<HashCode, Block> getBlocks() {
-    return dbAccess.getMap(IndexAddress.valueOf(CoreIndex.BLOCKS), hash(),
-        BLOCK_SERIALIZER);
+    return dbAccess.getMap(CoreIndex.BLOCKS, hash(), BLOCK_SERIALIZER);
   }
 
   /**
    * Returns a map of transaction messages identified by their SHA-256 hashes.
    */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {
-    return dbAccess.getMap(IndexAddress.valueOf(CoreIndex.TRANSACTIONS), hash(),
-        TRANSACTION_MESSAGE_SERIALIZER);
+    return dbAccess.getMap(CoreIndex.TRANSACTIONS, hash(), TRANSACTION_MESSAGE_SERIALIZER);
   }
 
   /**
@@ -134,8 +131,8 @@ final class CoreSchema {
   ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
     checkBlockHeight(blockHeight);
     byte[] idInGroup = toCoreStorageKey(blockHeight);
-    return dbAccess.getProofMap(IndexAddress.valueOf(CoreIndex.CALL_ERRORS, idInGroup),
-        CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_SERIALIZER);
+    IndexAddress address = IndexAddress.valueOf(CoreIndex.CALL_ERRORS, idInGroup);
+    return dbAccess.getProofMap(address, CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_SERIALIZER);
   }
 
   /**
@@ -143,9 +140,8 @@ final class CoreSchema {
    * transaction hash.
    */
   MapIndex<HashCode, TransactionLocation> getTxLocations() {
-    return dbAccess
-        .getMap(IndexAddress.valueOf(CoreIndex.TRANSACTIONS_LOCATIONS), hash(),
-            TRANSACTION_LOCATION_SERIALIZER);
+    return dbAccess.getMap(CoreIndex.TRANSACTIONS_LOCATIONS, hash(),
+        TRANSACTION_LOCATION_SERIALIZER);
   }
 
   /**
@@ -156,8 +152,7 @@ final class CoreSchema {
    * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   KeySetIndexProxy<HashCode> getTransactionPool() {
-    return dbAccess.getKeySet(IndexAddress.valueOf(CoreIndex.TRANSACTIONS_POOL),
-        hash());
+    return dbAccess.getKeySet(CoreIndex.TRANSACTIONS_POOL, hash());
   }
 
   /**
@@ -201,12 +196,15 @@ final class CoreSchema {
 
     private static final String PREFIX = "core.";
     private static final String BLOCK_TRANSACTIONS = PREFIX + "block_transactions";
-    private static final String ALL_BLOCK_HASHES = PREFIX + "block_hashes_by_height";
-    private static final String TRANSACTIONS = PREFIX + "transactions";
-    private static final String BLOCKS = PREFIX + "blocks";
+    private static final IndexAddress ALL_BLOCK_HASHES = IndexAddress
+        .valueOf(PREFIX + "block_hashes_by_height");
+    private static final IndexAddress TRANSACTIONS = IndexAddress.valueOf(PREFIX + "transactions");
+    private static final IndexAddress BLOCKS = IndexAddress.valueOf(PREFIX + "blocks");
     private static final String CALL_ERRORS = PREFIX + "call_errors";
-    private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
-    private static final String TRANSACTIONS_POOL = PREFIX + "transactions_pool";
+    private static final IndexAddress TRANSACTIONS_LOCATIONS = IndexAddress
+        .valueOf(PREFIX + "transactions_locations");
+    private static final IndexAddress TRANSACTIONS_POOL = IndexAddress
+        .valueOf(PREFIX + "transactions_pool");
     private static final IndexAddress CONSENSUS_CONFIG = IndexAddress
         .valueOf(PREFIX + "consensus_config");
   }
