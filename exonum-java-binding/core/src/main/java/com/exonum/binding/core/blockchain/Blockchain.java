@@ -203,6 +203,8 @@ public final class Blockchain {
     // FIXME: As #canModify is moved to Access-interface, it is no longer correct to assume
     //  that a Snapshot is the only non-modifiable impl. On top of that, RoFork will be
     //  unmodifiable, but it does not make sense to create IndexProofs for it.
+    //  Finally, Snapshot might get wrapped in Prefixed accesses, therefore, a simple type test
+    //  won't work either.
     return BlockchainProofs.createIndexProof((Snapshot) access, fullIndexName)
         .map(IndexProof::newInstance)
         .orElseThrow(() -> new IllegalArgumentException(
