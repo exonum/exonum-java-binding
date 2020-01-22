@@ -534,7 +534,7 @@
     <profile>
       <id>ci-build</id>
       <properties>
-        <checkstyle.severity>error</checkstyle.severity>
+        <checkstyle.severity>warning</checkstyle.severity>
         <jacoco.args>${argLine}</jacoco.args>
         <jacoco.it.args>${itCoverageAgent}</jacoco.it.args>
         <excludeTags>none</excludeTags>
