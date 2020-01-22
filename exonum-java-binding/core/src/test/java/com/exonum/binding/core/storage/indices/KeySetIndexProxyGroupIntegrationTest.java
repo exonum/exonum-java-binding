@@ -23,7 +23,8 @@ import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.database.Fork;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
@@ -38,7 +39,7 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
 
   @Test
   void setsInGroupMustBeIndependent() {
-    AbstractAccess access = db.createFork(cleaner);
+    Fork fork = db.createFork(cleaner);
 
     // Values to be put in sets, indexed by a set identifier.
     SetMultimap<String, String> valuesById = HashMultimap.create();
@@ -53,7 +54,7 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     Map<String, KeySetIndexProxy<String>> setsById = new HashMap<>();
     for (String setId : valuesById.keySet()) {
       byte[] id = bytes(setId);
-      KeySetIndexProxy<String> set = createInGroup(id, access);
+      KeySetIndexProxy<String> set = createInGroup(id, fork);
 
       setsById.put(setId, set);
     }
@@ -78,7 +79,7 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     }
   }
 
-  private KeySetIndexProxy<String> createInGroup(byte[] id1, AbstractAccess access) {
+  private KeySetIndexProxy<String> createInGroup(byte[] id1, Access access) {
     return access.getKeySet(IndexAddress.valueOf(GROUP_NAME, id1),
         StandardSerializers.string());
   }

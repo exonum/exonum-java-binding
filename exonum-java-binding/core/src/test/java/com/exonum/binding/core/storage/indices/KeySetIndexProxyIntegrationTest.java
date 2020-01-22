@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
@@ -192,18 +191,18 @@ class KeySetIndexProxyIntegrationTest
   }
 
   @Override
-  KeySetIndexProxy<String> create(String name, AbstractAccess access) {
+  KeySetIndexProxy<String> create(String name, Access access) {
     return access.getKeySet(valueOf(name), string());
   }
 
   @Override
-  KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+  KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
     return access.getKeySet(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+  StorageIndex createOfOtherType(String name, Access access) {
     return access.getList(valueOf(name), string());
   }
 

@@ -55,7 +55,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.core.messages.MapProofOuterClass;
 import com.exonum.core.messages.MapProofOuterClass.OptionalEntry;
 import com.google.common.collect.ImmutableList;
@@ -519,16 +519,16 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
     return checkProofKey(proofKey);
   }
 
-  void runTestWithView(Function<Cleaner, AbstractAccess> accessFactory,
+  void runTestWithView(Function<Cleaner, Access> accessFactory,
       Consumer<ProofMapIndexProxy<HashCode, String>> mapTest) {
     runTestWithView(accessFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
   private void runTestWithView(
-      Function<Cleaner, AbstractAccess> accessFactory,
-      BiConsumer<AbstractAccess, ProofMapIndexProxy<HashCode, String>> mapTest) {
+      Function<Cleaner, Access> accessFactory,
+      BiConsumer<Access, ProofMapIndexProxy<HashCode, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      AbstractAccess access = accessFactory.apply(cleaner);
+      Access access = accessFactory.apply(cleaner);
       ProofMapIndexProxy<HashCode, String> map = this.create(MAP_NAME, access);
 
       mapTest.accept(access, map);
@@ -538,7 +538,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+  StorageIndex createOfOtherType(String name, Access access) {
     return access.getList(valueOf(name), string());
   }
 

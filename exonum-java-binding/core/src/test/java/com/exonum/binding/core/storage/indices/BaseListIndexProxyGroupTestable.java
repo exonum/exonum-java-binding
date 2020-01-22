@@ -22,7 +22,8 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.database.Fork;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
@@ -35,7 +36,7 @@ abstract class BaseListIndexProxyGroupTestable extends BaseIndexGroupTestable {
 
   @Test
   void listsInGroupMustBeIndependent() {
-    AbstractAccess access = db.createFork(cleaner);
+    Fork fork = db.createFork(cleaner);
 
     // Values to be put in lists, indexed by a list identifier
     ListMultimap<String, String> elementsById = getTestElementsById();
@@ -44,7 +45,7 @@ abstract class BaseListIndexProxyGroupTestable extends BaseIndexGroupTestable {
     Map<String, ListIndex<String>> listsById = new HashMap<>();
     for (String listId : elementsById.keySet()) {
       byte[] id = bytes(listId);
-      ListIndex<String> list = createInGroup(id, access);
+      ListIndex<String> list = createInGroup(id, fork);
 
       listsById.put(listId, list);
     }
@@ -83,7 +84,7 @@ abstract class BaseListIndexProxyGroupTestable extends BaseIndexGroupTestable {
   /**
    * Creates a list-under-test in some group with the given id.
    */
-  abstract ListIndex<String> createInGroup(byte[] id, AbstractAccess access);
+  abstract ListIndex<String> createInGroup(byte[] id, Access access);
 
   private static <E> List<E> getAllValuesFrom(ListIndex<E> list) {
     return ImmutableList.copyOf(list.iterator());

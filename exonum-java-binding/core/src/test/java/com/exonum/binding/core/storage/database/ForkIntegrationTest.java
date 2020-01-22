@@ -276,7 +276,7 @@ class ForkIntegrationTest {
     }
   }
 
-  private static ListIndex<String> newList(String name, AbstractAccess access) {
+  private static ListIndex<String> newList(String name, Access access) {
     return access.getList(valueOf(name),
         string());
   }

@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.google.common.collect.ImmutableList;
@@ -564,10 +564,10 @@ abstract class BaseListIndexIntegrationTestable
     });
   }
 
-  private void runTestWithView(Function<Cleaner, AbstractAccess> accessFactory,
+  private void runTestWithView(Function<Cleaner, Access> accessFactory,
       Consumer<ListIndex<String>> listTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      AbstractAccess access = accessFactory.apply(cleaner);
+      Access access = accessFactory.apply(cleaner);
       ListIndex<String> list = this.create(LIST_NAME, access);
 
       listTest.accept(list);

@@ -32,7 +32,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedBytes;
@@ -294,18 +293,18 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   @Override
-  ValueSetIndexProxy<String> create(String name, AbstractAccess access) {
+  ValueSetIndexProxy<String> create(String name, Access access) {
     return access.getValueSet(valueOf(name), string());
   }
 
   @Override
-  ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+  ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
     return access.getValueSet(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+  StorageIndex createOfOtherType(String name, Access access) {
     return access.getList(valueOf(name), string());
   }
 

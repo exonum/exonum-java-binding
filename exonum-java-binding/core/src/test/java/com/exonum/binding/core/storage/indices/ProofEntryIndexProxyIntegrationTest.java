@@ -36,7 +36,6 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Snapshot;
 import java.util.NoSuchElementException;
@@ -186,18 +185,18 @@ class ProofEntryIndexProxyIntegrationTest
   }
 
   @Override
-  ProofEntryIndexProxy<String> create(String name, AbstractAccess access) {
+  ProofEntryIndexProxy<String> create(String name, Access access) {
     IndexAddress address = IndexAddress.valueOf(name);
     return access.getProofEntry(address, SERIALIZER);
   }
 
   @Override
-  ProofEntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+  ProofEntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
     return null; // Entry index does not support groups
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+  StorageIndex createOfOtherType(String name, Access access) {
     return access.getList(valueOf(name), string());
   }
 

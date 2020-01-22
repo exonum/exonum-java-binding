@@ -20,7 +20,7 @@ import static com.exonum.binding.core.storage.indices.ProofMapIndexProxyNoKeyHas
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.ImmutableMap;
 
 class ProofMapIndexProxyGroupNoKeyHashingIntegrationTest
@@ -44,7 +44,7 @@ class ProofMapIndexProxyGroupNoKeyHashingIntegrationTest
   }
 
   @Override
-  ProofMapIndexProxy<HashCode, String> createInGroup(byte[] mapId, AbstractAccess access) {
+  ProofMapIndexProxy<HashCode, String> createInGroup(byte[] mapId, Access access) {
     return access.getRawProofMap(IndexAddress.valueOf(GROUP_NAME, mapId),
         StandardSerializers.hash(), StandardSerializers.string());
   }

@@ -158,12 +158,12 @@ class TemporaryDbIntegrationTest {
     }
   }
 
-  private static ListIndex<String> newList(String name, AbstractAccess access) {
+  private static ListIndex<String> newList(String name, Access access) {
     return access.getList(valueOf(name),
         string());
   }
 
-  private static MapIndex<String, String> newMap(String name, AbstractAccess access) {
+  private static MapIndex<String, String> newMap(String name, Access access) {
     return access.getMap(valueOf(name),
         string(), string());
   }

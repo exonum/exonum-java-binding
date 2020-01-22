@@ -21,7 +21,7 @@ import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 
 /**
  * Inherits base tests of ListIndex interface methods and may contain
@@ -30,18 +30,18 @@ import com.exonum.binding.core.storage.database.AbstractAccess;
 class ListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   @Override
-  ListIndexProxy<String> create(String name, AbstractAccess access) {
+  ListIndexProxy<String> create(String name, Access access) {
     return access.getList(valueOf(name), string());
   }
 
   @Override
-  ListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+  ListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
     IndexAddress address = IndexAddress.valueOf(groupName, idInGroup);
     return access.getList(address, StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+  StorageIndex createOfOtherType(String name, Access access) {
     return access.getProofEntry(IndexAddress.valueOf(name), StandardSerializers.string());
   }
 

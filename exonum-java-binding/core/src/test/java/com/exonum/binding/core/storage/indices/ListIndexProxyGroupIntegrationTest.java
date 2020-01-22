@@ -17,12 +17,12 @@
 package com.exonum.binding.core.storage.indices;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 
 class ListIndexProxyGroupIntegrationTest extends BaseListIndexProxyGroupTestable {
 
   @Override
-  ListIndex<String> createInGroup(byte[] id, AbstractAccess access) {
+  ListIndex<String> createInGroup(byte[] id, Access access) {
     IndexAddress address = IndexAddress.valueOf("list_index_group_IT", id);
     return access.getList(address, StandardSerializers.string());
   }

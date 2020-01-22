@@ -36,7 +36,6 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.core.messages.ListProofOuterClass;
 import com.exonum.core.messages.ListProofOuterClass.ListProofEntry;
@@ -62,18 +61,18 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   private static final String LIST_NAME = "test_proof_list";
 
   @Override
-  ProofListIndexProxy<String> create(String name, AbstractAccess access) {
+  ProofListIndexProxy<String> create(String name, Access access) {
     return access.getProofList(valueOf(name), string());
   }
 
   @Override
-  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
     return access.getProofList(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+  StorageIndex createOfOtherType(String name, Access access) {
     return access.getList(valueOf(name), string());
   }
 

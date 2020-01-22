@@ -23,7 +23,7 @@ import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -79,7 +79,7 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
     }
   }
 
-  private ValueSetIndexProxy<String> createInGroup(byte[] id1, AbstractAccess access) {
+  private ValueSetIndexProxy<String> createInGroup(byte[] id1, Access access) {
     return access.getValueSet(IndexAddress.valueOf(GROUP_NAME, id1),
         StandardSerializers.string());
   }

@@ -37,7 +37,7 @@ import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
@@ -428,15 +428,15 @@ class MapIndexProxyIntegrationTest
     });
   }
 
-  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
       Consumer<MapIndexProxy<String, String>> mapTest) {
     runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private static void runTestWithView(Function<Cleaner, AbstractAccess> viewFactory,
-      BiConsumer<AbstractAccess, MapIndexProxy<String, String>> mapTest) {
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+      BiConsumer<Access, MapIndexProxy<String, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      AbstractAccess access = viewFactory.apply(cleaner);
+      Access access = viewFactory.apply(cleaner);
       MapIndexProxy<String, String> map = createMap(MAP_NAME, access);
 
       mapTest.accept(access, map);
@@ -446,18 +446,18 @@ class MapIndexProxyIntegrationTest
   }
 
   @Override
-  MapIndexProxy<String, String> create(String name, AbstractAccess access) {
+  MapIndexProxy<String, String> create(String name, Access access) {
     return createMap(name, access);
   }
 
   @Override
-  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, AbstractAccess access) {
+  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, Access access) {
     return access.getMap(IndexAddress.valueOf(groupName, idInGroup), StandardSerializers.string(),
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, AbstractAccess access) {
+  StorageIndex createOfOtherType(String name, Access access) {
     return access.getList(valueOf(name), string());
   }
 
@@ -471,7 +471,7 @@ class MapIndexProxyIntegrationTest
     index.put(K1, V1);
   }
 
-  private static MapIndexProxy<String, String> createMap(String name, AbstractAccess access) {
+  private static MapIndexProxy<String, String> createMap(String name, Access access) {
     return access.getMap(valueOf(name), string(),
         string());
   }

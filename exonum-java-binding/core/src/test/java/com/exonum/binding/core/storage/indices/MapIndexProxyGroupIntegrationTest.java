@@ -21,7 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.test.CiOnly;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
@@ -37,7 +38,7 @@ class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String
   @Test
   @CiOnly
   void mapsInGroupWithPrefixIdsAreIndependent() {
-    AbstractAccess access = db.createFork(cleaner);
+    Fork fork = db.createFork(cleaner);
 
     // A string that will be sliced into pairs of an id and a user key that result
     // in the same database key. Lengths of index ids are in range [1, N-1],
@@ -58,7 +59,7 @@ class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String
     // Create a map for each id
     Map<String, MapIndex<String, String>> mapsById = new HashMap<>();
     for (String mapId : entryById.keySet()) {
-      MapIndex<String, String> map = createInGroup(bytes(mapId), access);
+      MapIndex<String, String> map = createInGroup(bytes(mapId), fork);
       mapsById.put(mapId, map);
     }
 
@@ -110,7 +111,7 @@ class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String
   }
 
   @Override
-  MapIndex<String, String> createInGroup(byte[] mapId, AbstractAccess access) {
+  MapIndex<String, String> createInGroup(byte[] mapId, Access access) {
     return access.getMap(IndexAddress.valueOf(GROUP_NAME, mapId),
         StandardSerializers.string(), StandardSerializers.string());
   }

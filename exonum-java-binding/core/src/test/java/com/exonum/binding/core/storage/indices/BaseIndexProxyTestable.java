@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
@@ -59,13 +59,11 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     }
   }
 
-  abstract IndexT create(String name, /* todo: fix to just Access: here and below */
-      AbstractAccess access);
+  abstract IndexT create(String name, Access access);
 
-  abstract @Nullable IndexT createInGroup(String groupName, byte[] idInGroup,
-      AbstractAccess access);
+  abstract @Nullable IndexT createInGroup(String groupName, byte[] idInGroup, Access access);
 
-  abstract StorageIndex createOfOtherType(String name, AbstractAccess access);
+  abstract StorageIndex createOfOtherType(String name, Access access);
 
   /**
    * Get any element from this index.
@@ -87,10 +85,10 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     String name = "test_index";
 
     try (Cleaner cleaner = new Cleaner()) {
-      AbstractAccess access = database.createSnapshot(cleaner);
+      Snapshot snapshot = database.createSnapshot(cleaner);
 
       int numAddedActions = cleaner.getNumRegisteredActions();
-      IndexT index = create(name, access);
+      IndexT index = create(name, snapshot);
 
       // Check that the index constructor registered a single clean action.
       int numActionsExpected = numAddedActions + 1;
@@ -205,7 +203,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   void getName() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
-      AbstractAccess access = database.createSnapshot(cleaner);
+      Access access = database.createSnapshot(cleaner);
       IndexT index = create(name, access);
 
       assertThat(index.getName(), equalTo(name));
@@ -216,7 +214,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   void getAddress() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
-      AbstractAccess access = database.createSnapshot(cleaner);
+      Access access = database.createSnapshot(cleaner);
       IndexT index = create(name, access);
 
       IndexAddress expected = IndexAddress.valueOf(name);
@@ -229,7 +227,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     try (Cleaner cleaner = new Cleaner()) {
       String groupName = "test_index";
       byte[] idInGroup = bytes("prefix");
-      AbstractAccess access = database.createSnapshot(cleaner);
+      Access access = database.createSnapshot(cleaner);
       IndexT index = createInGroup(groupName, idInGroup, access);
 
       assumeFalse(index == null, "Groups are not supported by EntryIndex");
@@ -243,7 +241,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   void toStringIncludesNameAndType() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
-      AbstractAccess access = database.createSnapshot(cleaner);
+      Access access = database.createSnapshot(cleaner);
       IndexT index = create(name, access);
 
       String indexInfo = index.toString();
