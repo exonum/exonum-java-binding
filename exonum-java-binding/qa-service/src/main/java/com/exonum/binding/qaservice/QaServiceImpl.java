@@ -16,6 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.core.transaction.ExecutionPreconditions.checkExecution;
 import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.QaExecutionError.EMPTY_TIME_ORACLE_NAME;
@@ -30,7 +31,6 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
@@ -379,9 +379,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   private QaResumeArguments parseResumeArguments(byte[] arguments) {
-    Serializer<QaResumeArguments> serializer = StandardSerializers
-        .protobuf(QaResumeArguments.class);
+    Serializer<QaResumeArguments> serializer = protobuf(QaResumeArguments.class);
     return serializer.fromBytes(arguments);
   }
-
 }
