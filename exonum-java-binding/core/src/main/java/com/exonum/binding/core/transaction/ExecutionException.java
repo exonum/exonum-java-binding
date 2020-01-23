@@ -53,6 +53,7 @@ import javax.annotation.Nullable;
  * @see Blockchain#getTxResult(HashCode)
  * @see Blockchain#getCallErrors(long)
  * @see ExecutionStatus
+ * @see ExecutionPreconditions
  */
 public class ExecutionException extends RuntimeException {
 

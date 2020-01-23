@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `ListProof`;
      - [`Blockchain`][blockchain-proofs].
 - `ProofEntryIndexProxy` collection.
+- Transaction precondition utility methods,
+  see `com.exonum.binding.core.transaction.ExecutionPreconditions`.(#1351)
 - `supervisor-mode` CLI parameter added for `generate-template` command. It
   allows to configure the mode of the Supervisor service. Possible values are
   "simple" and "decentralized". (#1361)
