@@ -41,7 +41,7 @@ public final class IndexAddress {
    * Creates an address of an individual index.
    *
    * @param name the name of the index: a alphanumeric non-empty identifier of the index
-   *     in the MerkleDB: [a-zA-Z0-9_]
+   *     in the MerkleDB: [a-zA-Z0-9_.]
    */
   public static IndexAddress valueOf(String name) {
     return new IndexAddress(checkIndexName(name), null);
@@ -52,7 +52,7 @@ public final class IndexAddress {
    * an <a href="package-summary.html#families">index group</a>.
    *
    * @param groupName the name of the index group: a alphanumeric non-empty identifier of the index
-   *     group in the MerkleDB: [a-zA-Z0-9_]
+   *     group in the MerkleDB: [a-zA-Z0-9_.]
    * @param idInGroup the id of the index in group. See a
    *     <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
    */
