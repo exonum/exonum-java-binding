@@ -21,7 +21,7 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 
 /**
- * A factory of View proxies.
+ * A factory of Access proxies.
  *
  * <p>This class is thread-safe.
  */
