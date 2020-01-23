@@ -157,8 +157,7 @@ public class ServiceRuntimeAdapter {
    * @param forkHandle a handle to a native fork object
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
-   * @param arguments the service initial arguments parameters as a serialized protobuf
-   *     message
+   * @param arguments the service arguments as a serialized protobuf message
    * @see ServiceRuntime#initializeResumingService(Fork, ServiceInstanceSpec, byte[])
    */
   void initializeResumingService(long forkHandle, byte[] instanceSpec, byte[] arguments)
