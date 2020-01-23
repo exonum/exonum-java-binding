@@ -28,8 +28,7 @@ class ExecutionExceptionTest {
     byte errorCode = 2;
     ExecutionException e = new ExecutionException(errorCode);
 
-    assertThat(e.toString(),
-        containsString("ExecutionException: errorCode=2"));
+    assertThat(e.toString(), containsString("ExecutionException: errorCode=2"));
   }
 
   @Test
@@ -38,7 +37,6 @@ class ExecutionExceptionTest {
     String description = "Foo";
     ExecutionException e = new ExecutionException(errorCode, description);
 
-    assertThat(e.toString(),
-        containsString("ExecutionException: Foo, errorCode=2"));
+    assertThat(e.toString(), containsString("ExecutionException: Foo, errorCode=2"));
   }
 }

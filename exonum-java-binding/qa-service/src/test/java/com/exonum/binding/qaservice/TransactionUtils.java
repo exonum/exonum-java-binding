@@ -25,17 +25,13 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.TransactionContext;
 
-/**
- * Helper class with utilities aiding in testing some transactions.
- */
+/** Helper class with utilities aiding in testing some transactions. */
 final class TransactionUtils {
 
   private static final HashCode DEFAULT_HASH = HashCode.fromString("a0b0c0d0");
   private static final PublicKey DEFAULT_AUTHOR_KEY = PublicKey.fromHexString("abcd");
 
-  /**
-   * Returns new context with default values for a given fork.
-   */
+  /** Returns new context with default values for a given fork. */
   static TransactionContext.Builder newContext(Fork fork) {
     return TransactionContext.builder()
         .fork(fork)

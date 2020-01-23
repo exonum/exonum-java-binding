@@ -47,11 +47,12 @@ final class RustIterAdapter<E> implements Iterator<E> {
   @Override
   public E next() {
     if (!hasNext()) {
-      throw new NoSuchElementException("Reached the end of the underlying collection. "
-          + "Use #hasNext to check if you have reached the end of the collection.");
+      throw new NoSuchElementException(
+          "Reached the end of the underlying collection. "
+              + "Use #hasNext to check if you have reached the end of the collection.");
     }
     Optional<E> nextElement = nextItem;
-    nextItem = rustIter.next();  // an after-the-next item
+    nextItem = rustIter.next(); // an after-the-next item
     return nextElement.get();
   }
 }

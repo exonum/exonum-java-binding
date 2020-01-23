@@ -36,15 +36,12 @@ class ClassLoadingScopeCheckerTest {
   @Test
   void checkNoCopiesOfAppClasses() throws ClassNotFoundException {
     Class<?> referenceClass = Vertx.class;
-    Map<String, Class<?>> referenceClasses = ImmutableMap.of(
-        "vertx", referenceClass
-    );
+    Map<String, Class<?>> referenceClasses = ImmutableMap.of("vertx", referenceClass);
 
     ClassLoadingScopeChecker checker = new ClassLoadingScopeChecker(referenceClasses);
 
     ClassLoader classLoader = mock(ClassLoader.class);
-    when(classLoader.loadClass(referenceClass.getName()))
-        .thenReturn((Class) referenceClass);
+    when(classLoader.loadClass(referenceClass.getName())).thenReturn((Class) referenceClass);
 
     checker.checkNoCopiesOfAppClasses(classLoader);
   }
@@ -53,9 +50,7 @@ class ClassLoadingScopeCheckerTest {
   void checkNoCopiesOfAppClassesDetectsCopies() throws ClassNotFoundException {
     String dependency = "vertx";
     Class<?> referenceClass = Vertx.class;
-    Map<String, Class<?>> referenceClasses = ImmutableMap.of(
-        dependency, referenceClass
-    );
+    Map<String, Class<?>> referenceClasses = ImmutableMap.of(dependency, referenceClass);
 
     ClassLoadingScopeChecker checker = new ClassLoadingScopeChecker(referenceClasses);
 
@@ -64,11 +59,11 @@ class ClassLoadingScopeCheckerTest {
     // binary name, we have to resort to it because it isn't (easily) possible to instantiate
     // a different class
     Class actual = Set.class;
-    when(classLoader.loadClass(referenceClass.getName()))
-        .thenReturn(actual);
+    when(classLoader.loadClass(referenceClass.getName())).thenReturn(actual);
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> checker.checkNoCopiesOfAppClasses(classLoader));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class, () -> checker.checkNoCopiesOfAppClasses(classLoader));
 
     assertThat(e).hasMessageContaining(dependency);
   }
@@ -77,11 +72,11 @@ class ClassLoadingScopeCheckerTest {
   void checkNoCopiesOfAppClassesDetectsAllCopies() throws ClassNotFoundException {
     Set<String> copiedLibraries = ImmutableSet.of("vertx", "gson");
     Set<String> nonCopiedLibraries = ImmutableSet.of("guice");
-    Map<String, Class<?>> referenceClasses = ImmutableMap.of(
-        "vertx", Vertx.class,
-        "guice", Guice.class,
-        "gson", Gson.class
-    );
+    Map<String, Class<?>> referenceClasses =
+        ImmutableMap.of(
+            "vertx", Vertx.class,
+            "guice", Guice.class,
+            "gson", Gson.class);
     assertThat(Sets.union(copiedLibraries, nonCopiedLibraries))
         .isEqualTo(referenceClasses.keySet());
 
@@ -94,17 +89,16 @@ class ClassLoadingScopeCheckerTest {
     for (String library : copiedLibraries) {
       Class actual = Set.class;
       Class<?> referenceClass = referenceClasses.get(library);
-      when(classLoader.loadClass(referenceClass.getName()))
-          .thenReturn(actual);
+      when(classLoader.loadClass(referenceClass.getName())).thenReturn(actual);
     }
     for (String library : nonCopiedLibraries) {
       Class actual = referenceClasses.get(library);
-      when(classLoader.loadClass(actual.getName()))
-          .thenReturn(actual);
+      when(classLoader.loadClass(actual.getName())).thenReturn(actual);
     }
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> checker.checkNoCopiesOfAppClasses(classLoader));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class, () -> checker.checkNoCopiesOfAppClasses(classLoader));
 
     for (String libraryName : copiedLibraries) {
       assertThat(e).hasMessageContaining(libraryName);
@@ -117,9 +111,7 @@ class ClassLoadingScopeCheckerTest {
   @Test
   void checkNoCopiesOfAppClassesClassloaderFailsToDelegate() throws ClassNotFoundException {
     Class<?> referenceClass = Vertx.class;
-    Map<String, Class<?>> referenceClasses = ImmutableMap.of(
-        "vertx", referenceClass
-    );
+    Map<String, Class<?>> referenceClasses = ImmutableMap.of("vertx", referenceClass);
 
     ClassLoadingScopeChecker checker = new ClassLoadingScopeChecker(referenceClasses);
 
@@ -127,10 +119,14 @@ class ClassLoadingScopeCheckerTest {
     when(pluginClassLoader.loadClass(referenceClass.getName()))
         .thenThrow(ClassNotFoundException.class);
 
-    Exception e = assertThrows(IllegalStateException.class,
-        () -> checker.checkNoCopiesOfAppClasses(pluginClassLoader));
+    Exception e =
+        assertThrows(
+            IllegalStateException.class,
+            () -> checker.checkNoCopiesOfAppClasses(pluginClassLoader));
 
-    assertThat(e).hasMessageFindingMatch("Classloader .+ failed to load the reference "
-        + "application class .+ from vertx library");
+    assertThat(e)
+        .hasMessageFindingMatch(
+            "Classloader .+ failed to load the reference "
+                + "application class .+ from vertx library");
   }
 }

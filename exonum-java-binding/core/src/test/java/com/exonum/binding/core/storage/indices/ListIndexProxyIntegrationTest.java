@@ -23,8 +23,8 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.Access;
 
 /**
- * Inherits base tests of ListIndex interface methods and may contain
- * tests for methods that are not present in {@link ListIndex} interface.
+ * Inherits base tests of ListIndex interface methods and may contain tests for methods that are not
+ * present in {@link ListIndex} interface.
  */
 class ListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 

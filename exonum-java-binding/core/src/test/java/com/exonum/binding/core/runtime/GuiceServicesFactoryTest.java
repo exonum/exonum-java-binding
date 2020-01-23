@@ -46,10 +46,10 @@ class GuiceServicesFactoryTest {
   @Test
   void createService() {
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
-    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
-    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
-        TEST_ID, artifactId);
+    LoadedServiceDefinition serviceDefinition =
+        LoadedServiceDefinition.newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec =
+        ServiceInstanceSpec.newInstance(TEST_NAME, TEST_ID, artifactId);
     Node node = mock(Node.class);
 
     // Create the service
@@ -62,17 +62,19 @@ class GuiceServicesFactoryTest {
 
   @Test
   void createServiceFailsIfNoServiceBindingsInModule() {
-    ServiceArtifactId artifactId = ServiceArtifactId
-        .newJavaId("com.acme/incomplete-service", "1.0.0");
-    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, IncompleteServiceModule::new);
-    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
-        TEST_ID, artifactId);
+    ServiceArtifactId artifactId =
+        ServiceArtifactId.newJavaId("com.acme/incomplete-service", "1.0.0");
+    LoadedServiceDefinition serviceDefinition =
+        LoadedServiceDefinition.newInstance(artifactId, IncompleteServiceModule::new);
+    ServiceInstanceSpec instanceSpec =
+        ServiceInstanceSpec.newInstance(TEST_NAME, TEST_ID, artifactId);
     Node node = mock(Node.class);
 
     // Try to create the service
-    Exception e = assertThrows(ConfigurationException.class,
-        () -> factory.createService(serviceDefinition, instanceSpec, node));
+    Exception e =
+        assertThrows(
+            ConfigurationException.class,
+            () -> factory.createService(serviceDefinition, instanceSpec, node));
 
     // Check the message indicates missing bindings
     assertThat(e).hasMessageContaining(Service.class.getSimpleName());

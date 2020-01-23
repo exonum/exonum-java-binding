@@ -55,8 +55,8 @@ final class PublicKeyJsonSerializer
    * @throws NullPointerException in case of src is null
    */
   @Override
-  public PublicKey deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+  public PublicKey deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
     checkNotNull(json, "PublicKey json input is null");
 
     return PublicKey.fromHexString(json.getAsString());

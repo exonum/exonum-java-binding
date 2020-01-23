@@ -37,9 +37,8 @@ import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 
 /**
- * A loader of services as PF4J plugins. Such plugins are required to have PluginId set in
- * a certain format ('groupId:artifactId:version'); have a single {@link ServiceModule} as
- * an extension.
+ * A loader of services as PF4J plugins. Such plugins are required to have PluginId set in a certain
+ * format ('groupId:artifactId:version'); have a single {@link ServiceModule} as an extension.
  *
  * <p>This class is not thread-safe.
  *
@@ -49,8 +48,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
   private static final Comparator<ServiceArtifactId> SERVICE_ID_COMPARATOR =
       // No need to compare id — it is always Java
-      Comparator.comparing(ServiceArtifactId::getName)
-          .thenComparing(ServiceArtifactId::getVersion);
+      Comparator.comparing(ServiceArtifactId::getName).thenComparing(ServiceArtifactId::getVersion);
 
   private final PluginManager pluginManager;
   private final ClassLoadingScopeChecker classLoadingChecker;
@@ -70,8 +68,7 @@ final class Pf4jServiceLoader implements ServiceLoader {
    * a single ServiceModule as an extension.
    */
   @Override
-  public LoadedServiceDefinition loadService(Path artifactPath)
-      throws ServiceLoadingException {
+  public LoadedServiceDefinition loadService(Path artifactPath) throws ServiceLoadingException {
     // Load a plugin
     String pluginId = loadPlugin(artifactPath);
     try {
@@ -109,8 +106,11 @@ final class Pf4jServiceLoader implements ServiceLoader {
   private void startPlugin(String pluginId) throws ServiceLoadingException {
     try {
       PluginState pluginState = pluginManager.startPlugin(pluginId);
-      checkState(pluginState == PluginState.STARTED,
-          "Failed to start the plugin %s, its state=%s", pluginId, pluginState);
+      checkState(
+          pluginState == PluginState.STARTED,
+          "Failed to start the plugin %s, its state=%s",
+          pluginId,
+          pluginState);
     } catch (Exception e) {
       // Catch any exception, as it may originate either from PluginManager code or
       // from Plugin#start (= service code).
@@ -134,29 +134,33 @@ final class Pf4jServiceLoader implements ServiceLoader {
       throws ServiceLoadingException {
     try {
       ServiceArtifactId serviceArtifactId = ServiceArtifactId.parseFrom(pluginId);
-      checkArgument(serviceArtifactId.getRuntimeId() == JAVA.getId(),
+      checkArgument(
+          serviceArtifactId.getRuntimeId() == JAVA.getId(),
           "Required Java (%s) runtime id, but actually was %s",
-          JAVA.getId(), serviceArtifactId.getRuntimeId());
+          JAVA.getId(),
+          serviceArtifactId.getRuntimeId());
       return serviceArtifactId;
     } catch (IllegalArgumentException e) {
-      String message = String.format(
-          "Invalid plugin id (%s) is specified in service artifact metadata", pluginId);
+      String message =
+          String.format(
+              "Invalid plugin id (%s) is specified in service artifact metadata", pluginId);
       throw new ServiceLoadingException(message, e);
     }
   }
 
   private Supplier<ServiceModule> findServiceModuleSupplier(String pluginId)
       throws ServiceLoadingException {
-    List<Class<? extends ServiceModule>> extensionClasses = pluginManager
-        .getExtensionClasses(ServiceModule.class, pluginId);
+    List<Class<? extends ServiceModule>> extensionClasses =
+        pluginManager.getExtensionClasses(ServiceModule.class, pluginId);
     checkServiceModules(pluginId, extensionClasses);
 
     Class<? extends ServiceModule> serviceModuleClass = extensionClasses.get(0);
     try {
       return new ReflectiveModuleSupplier(serviceModuleClass);
     } catch (NoSuchMethodException | IllegalAccessException e) {
-      String message = String.format("Cannot load a plugin (%s): module (%s) is not valid",
-          pluginId, serviceModuleClass);
+      String message =
+          String.format(
+              "Cannot load a plugin (%s): module (%s) is not valid", pluginId, serviceModuleClass);
       throw new ServiceLoadingException(message, e);
     }
   }
@@ -169,15 +173,19 @@ final class Pf4jServiceLoader implements ServiceLoader {
     }
     String message;
     if (numServiceModules == 0) {
-      message = String.format("A plugin (%s) must provide exactly one service module as "
-              + "an extension, but no modules found.%nCheck that your %s implementation "
-              + "is annotated with @%s",
-          pluginId, ServiceModule.class.getSimpleName(), Extension.class.getSimpleName());
+      message =
+          String.format(
+              "A plugin (%s) must provide exactly one service module as "
+                  + "an extension, but no modules found.%nCheck that your %s implementation "
+                  + "is annotated with @%s",
+              pluginId, ServiceModule.class.getSimpleName(), Extension.class.getSimpleName());
     } else {
-      message = String.format("A plugin (%s) must provide exactly one service module as "
-              + "an extension, but %d modules found:%n%s.%nMultiple modules are not currently "
-              + "supported, but please let us know if you need them.",
-          pluginId, numServiceModules, extensions);
+      message =
+          String.format(
+              "A plugin (%s) must provide exactly one service module as "
+                  + "an extension, but %d modules found:%n%s.%nMultiple modules are not currently "
+                  + "supported, but please let us know if you need them.",
+              pluginId, numServiceModules, extensions);
     }
     throw new ServiceLoadingException(message);
   }
@@ -227,8 +235,8 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
     // Communicate the errors, if any
     if (!errors.isEmpty()) {
-      IllegalStateException e = new IllegalStateException(
-          "Failed to unload some plugins (see suppressed)");
+      IllegalStateException e =
+          new IllegalStateException("Failed to unload some plugins (see suppressed)");
       errors.forEach(e::addSuppressed);
       throw e;
     }
@@ -236,8 +244,6 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("loadedServices", loadedServices)
-        .toString();
+    return MoreObjects.toStringHelper(this).add("loadedServices", loadedServices).toString();
   }
 }

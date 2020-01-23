@@ -35,11 +35,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 class CryptocurrencySchemaIntegrationTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-          .withArtifactsDirectory(artifactsDirectory));
+  TestKitExtension testKitExtension =
+      new TestKitExtension(
+          TestKit.builder()
+              .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+              .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+              .withArtifactsDirectory(artifactsDirectory));
 
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();

@@ -29,9 +29,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 
-/**
- * Tests that our configuration works in a basic scenario of loading a JAR service.
- */
+/** Tests that our configuration works in a basic scenario of loading a JAR service. */
 class JarPluginManagerSmokeIntegrationTest {
 
   @Test
@@ -57,8 +55,8 @@ class JarPluginManagerSmokeIntegrationTest {
     assertThat(pluginState).isEqualTo(PluginState.STARTED);
 
     // Check the extensions
-    List<Class<? extends ServiceModule>> extensionClasses = pluginManager
-        .getExtensionClasses(ServiceModule.class, pluginId);
+    List<Class<? extends ServiceModule>> extensionClasses =
+        pluginManager.getExtensionClasses(ServiceModule.class, pluginId);
     assertThat(extensionClasses).hasSize(1);
     Class<?> extensionType = extensionClasses.get(0);
     assertNamesEqual(extensionType, TestServiceModule1.class);

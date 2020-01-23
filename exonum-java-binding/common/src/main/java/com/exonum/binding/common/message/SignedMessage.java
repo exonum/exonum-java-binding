@@ -26,11 +26,11 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * A wrapper around {@link Consensus.SignedMessage} protobuf message containing
- * {@link Consensus.ExonumMessage}, which converts protobuf types into internal types.
+ * A wrapper around {@link Consensus.SignedMessage} protobuf message containing {@link
+ * Consensus.ExonumMessage}, which converts protobuf types into internal types.
  *
- * <p>It currently does not support verification of the signature against the author's public
- * key — such functionality may be added later if needed.
+ * <p>It currently does not support verification of the signature against the author's public key —
+ * such functionality may be added later if needed.
  */
 public final class SignedMessage {
 
@@ -39,8 +39,8 @@ public final class SignedMessage {
   private final ByteString signature;
   private final HashCode hash;
 
-  private SignedMessage(ExonumMessage payload, PublicKey authorPk,
-                        ByteString signature, HashCode hash) {
+  private SignedMessage(
+      ExonumMessage payload, PublicKey authorPk, ByteString signature, HashCode hash) {
     this.payload = payload;
     this.authorPk = authorPk;
     this.signature = signature;
@@ -48,14 +48,14 @@ public final class SignedMessage {
   }
 
   /**
-   * Parses the signed message bytes. The parsing does not involve the signature verification —
-   * do it separately if needed.
+   * Parses the signed message bytes. The parsing does not involve the signature verification — do
+   * it separately if needed.
    *
    * @param messageBytes the serialized message to parse
    * @return a signed message with exonum message as its payload
-   * @throws InvalidProtocolBufferException if the given bytes are not a serialized
-   *     {@link Consensus.SignedMessage}; or if the payload of the message is not
-   *     {@link Consensus.ExonumMessage}
+   * @throws InvalidProtocolBufferException if the given bytes are not a serialized {@link
+   *     Consensus.SignedMessage}; or if the payload of the message is not {@link
+   *     Consensus.ExonumMessage}
    */
   public static SignedMessage parseFrom(byte[] messageBytes) throws InvalidProtocolBufferException {
     // Try to decode the SignedMessage container
@@ -77,21 +77,17 @@ public final class SignedMessage {
     return fromProto(message, hash);
   }
 
-  private static SignedMessage fromProto(Consensus.SignedMessage message,
-      HashCode messageHash) throws InvalidProtocolBufferException {
+  private static SignedMessage fromProto(Consensus.SignedMessage message, HashCode messageHash)
+      throws InvalidProtocolBufferException {
     // Try to decode the payload, which is stored as bytes. It is expected to be an ExonumMessage
     ByteString payloadBytes = message.getPayload();
     ExonumMessage payload = ExonumMessage.parseFrom(payloadBytes);
-    PublicKey authorPk = PublicKey.fromBytes(message.getAuthor()
-        .getData()
-        .toByteArray());
+    PublicKey authorPk = PublicKey.fromBytes(message.getAuthor().getData().toByteArray());
     ByteString signature = message.getSignature().getData();
     return new SignedMessage(payload, authorPk, signature, messageHash);
   }
 
-  /**
-   * Returns the message payload.
-   */
+  /** Returns the message payload. */
   public Consensus.ExonumMessage getPayload() {
     return payload;
   }
@@ -99,19 +95,19 @@ public final class SignedMessage {
   /**
    * Returns the key of the message author.
    *
-   * <p>The correctness of the signature is <strong>not</strong> verified against this key
-   * and must be done separately if needed.
+   * <p>The correctness of the signature is <strong>not</strong> verified against this key and must
+   * be done separately if needed.
    */
   public PublicKey getAuthorPk() {
     return authorPk;
   }
 
   /**
-   * Returns the signature of the payload, created with the private key, corresponding
-   * to the author's {@linkplain #getAuthorPk() key}.
+   * Returns the signature of the payload, created with the private key, corresponding to the
+   * author's {@linkplain #getAuthorPk() key}.
    *
-   * <p>The correctness of the signature is <strong>not</strong> verified against this key
-   * and must be done separately if needed.
+   * <p>The correctness of the signature is <strong>not</strong> verified against this key and must
+   * be done separately if needed.
    */
   public byte[] getSignature() {
     return signature.toByteArray();

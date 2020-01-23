@@ -37,10 +37,11 @@ class TransactionMessageGsonSerializerTest {
 
   @BeforeAll
   static void setup() {
-    gson = JsonSerializer.builder()
-        .registerTypeHierarchyAdapter(TransactionMessage.class,
-            new TransactionMessageJsonSerializer())
-        .create();
+    gson =
+        JsonSerializer.builder()
+            .registerTypeHierarchyAdapter(
+                TransactionMessage.class, new TransactionMessageJsonSerializer())
+            .create();
   }
 
   @ParameterizedTest
@@ -65,8 +66,6 @@ class TransactionMessageGsonSerializerTest {
             .serviceId((short) 0)
             .transactionId((short) 127)
             .payload(bytes(0x00, 0x01, 0x02))
-            .sign(keys)
-    );
+            .sign(keys));
   }
-
 }

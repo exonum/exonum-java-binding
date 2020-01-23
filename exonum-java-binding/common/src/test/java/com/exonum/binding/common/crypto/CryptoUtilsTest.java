@@ -41,9 +41,8 @@ class CryptoUtilsTest {
 
   @Test
   void byteArrayToHex() {
-    String hex = CryptoUtils.byteArrayToHex(new byte[]{-85, -51});
+    String hex = CryptoUtils.byteArrayToHex(new byte[] {-85, -51});
 
     assertEquals("abcd", hex);
   }
-
 }

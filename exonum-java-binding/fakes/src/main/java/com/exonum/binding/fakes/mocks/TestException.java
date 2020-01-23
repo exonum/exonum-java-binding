@@ -16,9 +16,6 @@
 
 package com.exonum.binding.fakes.mocks;
 
-/**
- * Marker exception that is used for testing purposes only.
- */
+/** Marker exception that is used for testing purposes only. */
 @SuppressWarnings("unused") // Used in native ITs
-public class TestException extends RuntimeException {
-}
+public class TestException extends RuntimeException {}

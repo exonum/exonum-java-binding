@@ -18,32 +18,24 @@ package com.exonum.binding.common.crypto;
 
 import static com.exonum.binding.common.crypto.CryptoUtils.hexToByteArray;
 
-/**
- * Represent a public key in a digital signature system.
- */
+/** Represent a public key in a digital signature system. */
 public final class PublicKey extends AbstractKey {
 
   private PublicKey(byte[] publicKey) {
     super(publicKey);
   }
 
-  /**
-   * Creates a {@code PublicKey} from a byte array. The array is defensively copied.
-   */
+  /** Creates a {@code PublicKey} from a byte array. The array is defensively copied. */
   public static PublicKey fromBytes(byte[] bytes) {
     return fromBytesNoCopy(bytes.clone());
   }
 
-  /**
-   * Creates a {@code PublicKey} from a byte array. The array is not copied defensively.
-   */
+  /** Creates a {@code PublicKey} from a byte array. The array is not copied defensively. */
   static PublicKey fromBytesNoCopy(byte[] bytes) {
     return new PublicKey(bytes);
   }
 
-  /**
-   * Creates a {@code PublicKey} from a hexadecimal string.
-   */
+  /** Creates a {@code PublicKey} from a hexadecimal string. */
   public static PublicKey fromHexString(String stringKey) {
     return new PublicKey(hexToByteArray(stringKey));
   }

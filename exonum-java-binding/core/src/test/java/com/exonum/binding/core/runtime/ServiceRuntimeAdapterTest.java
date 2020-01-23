@@ -47,20 +47,12 @@ class ServiceRuntimeAdapterTest {
   private static final long HEIGHT = 1;
   private static final int VALIDATOR_ID = 1;
   private static final ArtifactId ARTIFACT_ID =
-      ArtifactId.newBuilder()
-          .setRuntimeId(1)
-          .setName("com.acme/foo")
-          .setVersion("1.2.3")
-          .build();
+      ArtifactId.newBuilder().setRuntimeId(1).setName("com.acme/foo").setVersion("1.2.3").build();
 
-
-  @Mock
-  private ServiceRuntime serviceRuntime;
-  @Mock
-  private AccessFactory accessFactory;
+  @Mock private ServiceRuntime serviceRuntime;
+  @Mock private AccessFactory accessFactory;
   private ServiceRuntimeAdapter serviceRuntimeAdapter;
-  @Mock
-  private Snapshot snapshot;
+  @Mock private Snapshot snapshot;
 
   @BeforeEach
   void setUp() {
@@ -70,9 +62,8 @@ class ServiceRuntimeAdapterTest {
   @Test
   void deployArtifact() throws ServiceLoadingException {
     String artifactFilename = "foo-1.2.3.jar";
-    DeployArguments deployArguments = DeployArguments.newBuilder()
-        .setArtifactFilename(artifactFilename)
-        .build();
+    DeployArguments deployArguments =
+        DeployArguments.newBuilder().setArtifactFilename(artifactFilename).build();
     byte[] deploySpec = deployArguments.toByteArray();
 
     ArtifactId artifact = ARTIFACT_ID;
@@ -89,8 +80,7 @@ class ServiceRuntimeAdapterTest {
     ArtifactId artifact = ARTIFACT_ID;
     byte[] artifactBytes = artifact.toByteArray();
 
-    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.fromProto(artifact)))
-        .thenReturn(true);
+    when(serviceRuntime.isArtifactDeployed(ServiceArtifactId.fromProto(artifact))).thenReturn(true);
 
     assertTrue(serviceRuntimeAdapter.isArtifactDeployed(artifactBytes));
   }
@@ -101,8 +91,10 @@ class ServiceRuntimeAdapterTest {
     byte[] artifactBytes = artifact.toByteArray();
     byte[] deploySpec = bytes("Some rubbish");
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntimeAdapter.deployArtifact(artifactBytes, deploySpec));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> serviceRuntimeAdapter.deployArtifact(artifactBytes, deploySpec));
 
     assertThat(e).hasMessageContaining(artifact.getName());
     assertThat(e).hasMessageContaining(artifact.getVersion());
@@ -114,25 +106,26 @@ class ServiceRuntimeAdapterTest {
     long forkHandle = 0x110b;
     Cleaner cleaner = new Cleaner();
     Fork fork = Fork.newInstance(forkHandle, false, cleaner);
-    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
-        .thenReturn(fork);
+    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class))).thenReturn(fork);
 
     String serviceName = "s1";
     ArtifactId artifact = ARTIFACT_ID;
-    byte[] instanceSpec = InstanceSpec.newBuilder()
-        .setId(serviceId)
-        .setName(serviceName)
-        .setArtifact(artifact)
-        .build()
-        .toByteArray();
+    byte[] instanceSpec =
+        InstanceSpec.newBuilder()
+            .setId(serviceId)
+            .setName(serviceName)
+            .setArtifact(artifact)
+            .build()
+            .toByteArray();
     byte[] configuration = bytes(1, 2);
 
     // Initialize the service
     serviceRuntimeAdapter.initiateAddingService(forkHandle, instanceSpec, configuration);
 
     // Check the runtime was invoked with correct config
-    ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
-        ServiceArtifactId.fromProto(artifact));
+    ServiceInstanceSpec expected =
+        ServiceInstanceSpec.newInstance(
+            serviceName, serviceId, ServiceArtifactId.fromProto(artifact));
     verify(serviceRuntime).initiateAddingService(fork, expected, configuration);
   }
 
@@ -141,8 +134,7 @@ class ServiceRuntimeAdapterTest {
     int serviceId = 1;
     long forkHandle = 0x110b;
     Fork fork = mock(Fork.class);
-    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
-        .thenReturn(fork);
+    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class))).thenReturn(fork);
 
     serviceRuntimeAdapter.afterTransactions(serviceId, forkHandle);
 
@@ -181,5 +173,4 @@ class ServiceRuntimeAdapterTest {
     assertThat(event.getHeight()).isEqualTo(HEIGHT);
     assertThat(event.getValidatorId()).isEmpty();
   }
-
 }

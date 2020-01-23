@@ -19,6 +19,4 @@ package com.exonum.binding.core.runtime;
 import com.exonum.binding.core.service.AbstractServiceModule;
 
 @SuppressWarnings("WeakerAccess")
-public final class TestServiceModule2 extends AbstractServiceModule {
-
-}
+public final class TestServiceModule2 extends AbstractServiceModule {}

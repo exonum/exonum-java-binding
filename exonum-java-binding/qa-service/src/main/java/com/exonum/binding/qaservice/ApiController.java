@@ -66,9 +66,7 @@ final class ApiController {
 
   void mountApi(Router router) {
     // Mount the body handler to process bodies of some POST queries, and the handler of failures.
-    router.route()
-        .handler(BodyHandler.create())
-        .failureHandler(this::failureHandler);
+    router.route().handler(BodyHandler.create()).failureHandler(this::failureHandler);
 
     // Mount the handlers of each request
     ImmutableMap<String, Handler<RoutingContext>> handlers =
@@ -81,9 +79,7 @@ final class ApiController {
             .put(VALIDATORS_TIMES_PATH, this::getValidatorsTimes)
             .build();
 
-    handlers.forEach((path, handler) ->
-        router.route(path).handler(handler)
-    );
+    handlers.forEach((path, handler) -> router.route(path).handler(handler));
   }
 
   private void submitIncrementCounter(RoutingContext rc) {
@@ -126,15 +122,18 @@ final class ApiController {
     respondWithJson(rc, validatorsTimes);
   }
 
-  private static <T> T getRequiredParameter(HttpServerRequest request, String key,
-      Function<String, T> converter) {
+  private static <T> T getRequiredParameter(
+      HttpServerRequest request, String key, Function<String, T> converter) {
     return getRequiredParameter(request.params(), key, converter);
   }
 
-  private static <T> T getRequiredParameter(MultiMap parameters, String key,
-      Function<String, T> converter) {
-    checkArgument(parameters.contains(key), "No required key (%s) in request parameters: %s",
-        key, parameters);
+  private static <T> T getRequiredParameter(
+      MultiMap parameters, String key, Function<String, T> converter) {
+    checkArgument(
+        parameters.contains(key),
+        "No required key (%s) in request parameters: %s",
+        key,
+        parameters);
     String parameter = parameters.get(key);
     try {
       return converter.apply(parameter);
@@ -170,19 +169,14 @@ final class ApiController {
         response.setStatusCode(HTTP_INTERNAL_ERROR);
       }
       String description = Strings.nullToEmpty(requestFailure.getMessage());
-      response.putHeader(CONTENT_TYPE, "text/plain")
-          .end(description);
+      response.putHeader(CONTENT_TYPE, "text/plain").end(description);
     } else {
       int failureStatusCode = rc.statusCode();
-      rc.response()
-          .setStatusCode(failureStatusCode)
-          .end();
+      rc.response().setStatusCode(failureStatusCode).end();
     }
   }
 
-  /**
-   * Returns true if the passed throwable corresponds to a bad request; false — otherwise.
-   */
+  /** Returns true if the passed throwable corresponds to a bad request; false — otherwise. */
   private boolean isBadRequest(Throwable requestFailure) {
     // All IllegalArgumentExceptions (including NumberFormatException) and IndexOutOfBoundsException
     // are considered to be caused by a bad request. Other Throwables are considered internal
@@ -200,30 +194,25 @@ final class ApiController {
   }
 
   private void respondWithJson(RoutingContext rc, Object responseBody) {
-    rc.response()
-        .putHeader(CONTENT_TYPE, "application/json")
-        .end(json().toJson(responseBody));
+    rc.response().putHeader(CONTENT_TYPE, "application/json").end(json().toJson(responseBody));
   }
 
   private void respondNotFound(RoutingContext rc) {
-    rc.response()
-        .setStatusCode(HTTP_NOT_FOUND)
-        .end();
+    rc.response().setStatusCode(HTTP_NOT_FOUND).end();
   }
 
   static class QaPaths {
     @VisibleForTesting
     static final String SUBMIT_INCREMENT_COUNTER_TX_PATH = "/submit-increment-counter";
-    @VisibleForTesting
-    static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
+
+    @VisibleForTesting static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
     static final String COUNTER_ID_PARAM = "counterId";
     static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
+
     @VisibleForTesting
     static final String GET_CONSENSUS_CONFIGURATION_PATH = "/consensusConfiguration";
-    @VisibleForTesting
-    static final String TIME_PATH = "/time";
-    @VisibleForTesting
-    static final String VALIDATORS_TIMES_PATH = TIME_PATH + "/validators";
-  }
 
+    @VisibleForTesting static final String TIME_PATH = "/time";
+    @VisibleForTesting static final String VALIDATORS_TIMES_PATH = TIME_PATH + "/validators";
+  }
 }

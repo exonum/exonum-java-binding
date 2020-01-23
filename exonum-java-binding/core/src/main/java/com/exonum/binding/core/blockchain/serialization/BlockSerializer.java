@@ -42,16 +42,17 @@ public enum BlockSerializer implements Serializer<Block> {
 
   @Override
   public byte[] toBytes(Block value) {
-    Blockchain.Block block = Blockchain.Block.newBuilder()
-        .setProposerId(value.getProposerId())
-        .setHeight(value.getHeight())
-        .setTxCount(value.getNumTransactions())
-        .setPrevHash(toHashProto(value.getPreviousBlockHash()))
-        .setTxHash(toHashProto(value.getTxRootHash()))
-        .setStateHash(toHashProto(value.getStateHash()))
-        .setErrorHash(toHashProto(value.getErrorHash()))
-        .setAdditionalHeaders(toHeadersProto(value.getAdditionalHeaders()))
-        .build();
+    Blockchain.Block block =
+        Blockchain.Block.newBuilder()
+            .setProposerId(value.getProposerId())
+            .setHeight(value.getHeight())
+            .setTxCount(value.getNumTransactions())
+            .setPrevHash(toHashProto(value.getPreviousBlockHash()))
+            .setTxHash(toHashProto(value.getTxRootHash()))
+            .setStateHash(toHashProto(value.getStateHash()))
+            .setErrorHash(toHashProto(value.getErrorHash()))
+            .setAdditionalHeaders(toHeadersProto(value.getAdditionalHeaders()))
+            .build();
     return block.toByteArray();
   }
 
@@ -82,9 +83,7 @@ public enum BlockSerializer implements Serializer<Block> {
 
   private static Types.Hash toHashProto(HashCode hash) {
     ByteString bytes = ByteString.copyFrom(hash.asBytes());
-    return Types.Hash.newBuilder()
-        .setData(bytes)
-        .build();
+    return Types.Hash.newBuilder().setData(bytes).build();
   }
 
   private static HashCode toHashCode(Hash hash) {
@@ -94,8 +93,7 @@ public enum BlockSerializer implements Serializer<Block> {
 
   @VisibleForTesting
   static ImmutableMap<String, ByteString> toHeadersMap(AdditionalHeaders headers) {
-    return headers.getHeaders().getEntryList()
-        .stream()
+    return headers.getHeaders().getEntryList().stream()
         .collect(toImmutableMap(KeyValue::getKey, KeyValue::getValue));
   }
 
@@ -105,16 +103,10 @@ public enum BlockSerializer implements Serializer<Block> {
 
     headers.forEach((k, v) -> additionalHeadersBuilder.addEntry(toProtoEntry(k, v)));
 
-    return AdditionalHeaders.newBuilder()
-        .setHeaders(additionalHeadersBuilder.build())
-        .build();
+    return AdditionalHeaders.newBuilder().setHeaders(additionalHeadersBuilder.build()).build();
   }
 
   private static KeyValue toProtoEntry(String key, ByteString value) {
-    return KeyValue.newBuilder()
-        .setKey(key)
-        .setValue(value)
-        .build();
+    return KeyValue.newBuilder().setKey(key).setValue(value).build();
   }
-
 }

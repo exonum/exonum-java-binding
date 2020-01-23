@@ -38,33 +38,35 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
-class KeySetIndexProxyIntegrationTest
-    extends BaseIndexProxyTestable<KeySetIndexProxy<String>> {
+class KeySetIndexProxyIntegrationTest extends BaseIndexProxyTestable<KeySetIndexProxy<String>> {
 
   private static final String KEY_SET_NAME = "test_key_set";
 
   @Test
   void addSingleElement() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(K1);
-      assertTrue(set.contains(K1));
-    });
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(K1);
+          assertTrue(set.contains(K1));
+        });
   }
 
   @Test
   void addMultipleElements() {
-    runTestWithView(database::createFork, (set) -> {
-      List<String> keys = TestStorageItems.keys.subList(0, 3);
-      keys.forEach(set::add);
-      keys.forEach(
-          (k) -> assertTrue(set.contains(k))
-      );
-    });
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          List<String> keys = TestStorageItems.keys.subList(0, 3);
+          keys.forEach(set::add);
+          keys.forEach((k) -> assertTrue(set.contains(k)));
+        });
   }
 
   @Test
   void addFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot,
+    runTestWithView(
+        database::createSnapshot,
         (set) -> assertThrows(UnsupportedOperationException.class, () -> set.add(K1)));
   }
 
@@ -75,21 +77,22 @@ class KeySetIndexProxyIntegrationTest
 
   @Test
   void clearNonEmptyRemovesAllElements() {
-    runTestWithView(database::createFork, (set) -> {
-      List<String> keys = TestStorageItems.keys.subList(0, 3);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          List<String> keys = TestStorageItems.keys.subList(0, 3);
 
-      keys.forEach(set::add);
+          keys.forEach(set::add);
 
-      set.clear();
-      keys.forEach(
-          (k) -> assertFalse(set.contains(k))
-      );
-    });
+          set.clear();
+          keys.forEach((k) -> assertFalse(set.contains(k)));
+        });
   }
 
   @Test
   void clearFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot,
+    runTestWithView(
+        database::createSnapshot,
         (set) -> assertThrows(UnsupportedOperationException.class, set::clear));
   }
 
@@ -100,64 +103,71 @@ class KeySetIndexProxyIntegrationTest
 
   @Test
   void testIterator() {
-    runTestWithView(database::createFork, (set) -> {
-      List<String> elements = TestStorageItems.keys;
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          List<String> elements = TestStorageItems.keys;
 
-      elements.forEach(set::add);
+          elements.forEach(set::add);
 
-      Iterator<String> iterator = set.iterator();
-      List<String> iterElements = ImmutableList.copyOf(iterator);
+          Iterator<String> iterator = set.iterator();
+          List<String> iterElements = ImmutableList.copyOf(iterator);
 
-      // Check that iterator includes all the elements added
-      // and that they appear in lexicographical order (the order of TestStorageItems.keys).
-      assertThat(iterElements, equalTo(elements));
-    });
+          // Check that iterator includes all the elements added
+          // and that they appear in lexicographical order (the order of TestStorageItems.keys).
+          assertThat(iterElements, equalTo(elements));
+        });
   }
 
   @Test
   void testStream() {
-    runTestWithView(database::createFork, (set) -> {
-      List<String> elements = TestStorageItems.keys;
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          List<String> elements = TestStorageItems.keys;
 
-      elements.forEach(set::add);
+          elements.forEach(set::add);
 
-      List<String> streamElements = set.stream()
-          .collect(toList());
+          List<String> streamElements = set.stream().collect(toList());
 
-      // Check that the stream includes all the elements added
-      // and that they appear in lexicographical order (the order of TestStorageItems.keys).
-      assertThat(streamElements, equalTo(elements));
-    });
+          // Check that the stream includes all the elements added
+          // and that they appear in lexicographical order (the order of TestStorageItems.keys).
+          assertThat(streamElements, equalTo(elements));
+        });
   }
 
   @Test
   void removesAddedElement() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(K1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(K1);
 
-      set.remove(K1);
+          set.remove(K1);
 
-      assertFalse(set.contains(K1));
-    });
+          assertFalse(set.contains(K1));
+        });
   }
 
   @Test
   void removeNotPresentElementDoesNothing() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(K1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(K1);
 
-      set.remove(K9);
+          set.remove(K9);
 
-      assertFalse(set.contains(K9));
-      assertTrue(set.contains(K1));
-    });
+          assertFalse(set.contains(K9));
+          assertTrue(set.contains(K1));
+        });
   }
 
   @Test
   void removeFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot,
-        (set) -> assertThrows(UnsupportedOperationException.class, () -> set.remove(
-            K1)));
+    runTestWithView(
+        database::createSnapshot,
+        (set) -> assertThrows(UnsupportedOperationException.class, () -> set.remove(K1)));
   }
 
   /**
@@ -167,8 +177,8 @@ class KeySetIndexProxyIntegrationTest
    * @param viewFactory a function creating a database access
    * @param keySetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
-      Consumer<KeySetIndexProxy<String>> keySetTest) {
+  private static void runTestWithView(
+      Function<Cleaner, Access> viewFactory, Consumer<KeySetIndexProxy<String>> keySetTest) {
     runTestWithView(viewFactory, (view, keySetUnderTest) -> keySetTest.accept(keySetUnderTest));
   }
 
@@ -179,14 +189,14 @@ class KeySetIndexProxyIntegrationTest
    * @param viewFactory a function creating a database access
    * @param keySetTest a test to run. Receives the created view and the set as arguments.
    */
-  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+  private static void runTestWithView(
+      Function<Cleaner, Access> viewFactory,
       BiConsumer<Access, KeySetIndexProxy<String>> keySetTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         KEY_SET_NAME,
         ((address, access, serializer) -> access.getKeySet(address, serializer)),
-        keySetTest
-    );
+        keySetTest);
   }
 
   @Override
@@ -196,8 +206,8 @@ class KeySetIndexProxyIntegrationTest
 
   @Override
   KeySetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
-    return access.getKeySet(IndexAddress.valueOf(groupName, idInGroup),
-        StandardSerializers.string());
+    return access.getKeySet(
+        IndexAddress.valueOf(groupName, idInGroup), StandardSerializers.string());
   }
 
   @Override

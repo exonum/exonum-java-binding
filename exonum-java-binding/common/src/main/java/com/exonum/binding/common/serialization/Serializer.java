@@ -19,14 +19,13 @@ package com.exonum.binding.common.serialization;
 /**
  * Converts Java objects into a binary representation in some format, and vice versa.
  *
- * <p>Implementations <strong>must</strong> ensure that for any object o,
- * {@link #toBytes(Object)} produces such an array, that being passed to {@link #fromBytes(byte[])},
- * is converted to another object o2, that is equal to the original object o.
+ * <p>Implementations <strong>must</strong> ensure that for any object o, {@link #toBytes(Object)}
+ * produces such an array, that being passed to {@link #fromBytes(byte[])}, is converted to another
+ * object o2, that is equal to the original object o.
  *
  * <p>This interface is designed to be primarily used by storage proxies and proof validators.
  *
  * @param <T> a type of serializable object
- *
  * @see StandardSerializers
  */
 public interface Serializer<T> {
@@ -46,8 +45,8 @@ public interface Serializer<T> {
    * @param serializedValue an array containing a serialized value of type T, must not be null
    * @return a value
    * @throws NullPointerException if the array is null
-   * @throws IllegalArgumentException if the array cannot be decoded into a value of type T
-   *     (e.g., contains 2 bytes when 4 are expected)
+   * @throws IllegalArgumentException if the array cannot be decoded into a value of type T (e.g.,
+   *     contains 2 bytes when 4 are expected)
    */
   T fromBytes(byte[] serializedValue);
 }

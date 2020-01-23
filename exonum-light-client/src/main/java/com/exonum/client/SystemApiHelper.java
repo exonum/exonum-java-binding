@@ -24,9 +24,7 @@ import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.SystemStatistics;
 import lombok.Value;
 
-/**
- * Utility class for Exonum System API.
- */
+/** Utility class for Exonum System API. */
 final class SystemApiHelper {
 
   static HealthCheckInfo parseHealthCheckJson(String json) {
@@ -34,9 +32,7 @@ final class SystemApiHelper {
     String consensusStatus = response.getConsensusStatus().toUpperCase();
 
     return new HealthCheckInfo(
-        ConsensusStatus.valueOf(consensusStatus),
-        response.getConnectedPeers()
-    );
+        ConsensusStatus.valueOf(consensusStatus), response.getConnectedPeers());
   }
 
   static SystemStatistics parseStatsJson(String json) {
@@ -44,18 +40,14 @@ final class SystemApiHelper {
     return new SystemStatistics(response.txPoolSize, response.txCount);
   }
 
-  /**
-   * Json object wrapper for memory pool response.
-   */
+  /** Json object wrapper for memory pool response. */
   @Value
   private static class StatsResponse {
     int txPoolSize;
     long txCount;
   }
 
-  /**
-   * Json object wrapper for health check response.
-   */
+  /** Json object wrapper for health check response. */
   @Value
   private static class HealthCheckResponse {
     String consensusStatus;

@@ -25,9 +25,7 @@ import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Runtime.InstanceState;
 
-/**
- * Exonum service instances database schema.
- */
+/** Exonum service instances database schema. */
 public class DispatcherSchema {
 
   private static final IndexAddress DISPATCHER_INSTANCES =

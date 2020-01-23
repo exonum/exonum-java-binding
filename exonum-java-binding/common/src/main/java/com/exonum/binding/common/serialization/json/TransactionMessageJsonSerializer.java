@@ -29,13 +29,13 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 
-final class TransactionMessageJsonSerializer implements JsonSerializer<TransactionMessage>,
-    JsonDeserializer<TransactionMessage> {
+final class TransactionMessageJsonSerializer
+    implements JsonSerializer<TransactionMessage>, JsonDeserializer<TransactionMessage> {
   private static final BaseEncoding HEX_ENCODER = BaseEncoding.base16().lowerCase();
 
   @Override
-  public JsonElement serialize(TransactionMessage src, Type typeOfSrc,
-      JsonSerializationContext context) {
+  public JsonElement serialize(
+      TransactionMessage src, Type typeOfSrc, JsonSerializationContext context) {
     checkNotNull(src, "Transaction message value is null");
     byte[] bytes = src.toBytes();
     String hex = HEX_ENCODER.encode(bytes);
@@ -44,13 +44,13 @@ final class TransactionMessageJsonSerializer implements JsonSerializer<Transacti
   }
 
   @Override
-  public TransactionMessage deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+  public TransactionMessage deserialize(
+      JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
     checkNotNull(json, "Transaction message json input is null");
     String hex = json.getAsString();
     byte[] bytes = HEX_ENCODER.decode(hex);
 
     return TransactionMessage.fromBytes(bytes);
   }
-
 }

@@ -38,8 +38,7 @@ class RuntimeTransportTest {
 
   private static final int PORT = 8080;
 
-  @Mock
-  private Server server;
+  @Mock private Server server;
   private RuntimeTransport transport;
 
   @BeforeEach
@@ -100,8 +99,7 @@ class RuntimeTransportTest {
 
     when(server.stop()).thenReturn(stopResult);
 
-    IllegalStateException e = assertThrows(IllegalStateException.class,
-        () -> transport.close());
+    IllegalStateException e = assertThrows(IllegalStateException.class, () -> transport.close());
 
     assertThat(e).hasCause(stopCause);
   }

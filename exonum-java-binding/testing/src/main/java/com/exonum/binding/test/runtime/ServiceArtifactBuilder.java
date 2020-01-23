@@ -46,12 +46,9 @@ import java.util.zip.ZipEntry;
  */
 public final class ServiceArtifactBuilder {
 
-  @VisibleForTesting
-  static final String PLUGIN_ID_ATTRIBUTE_NAME = "Plugin-Id";
-  @VisibleForTesting
-  static final String PLUGIN_VERSION_ATTRIBUTE_NAME = "Plugin-Version";
-  @VisibleForTesting
-  static final String EXTENSIONS_INDEX_NAME = "META-INF/extensions.idx";
+  @VisibleForTesting static final String PLUGIN_ID_ATTRIBUTE_NAME = "Plugin-Id";
+  @VisibleForTesting static final String PLUGIN_VERSION_ATTRIBUTE_NAME = "Plugin-Version";
+  @VisibleForTesting static final String EXTENSIONS_INDEX_NAME = "META-INF/extensions.idx";
 
   private final Manifest manifest;
   private final Set<Class<?>> artifactClasses;
@@ -69,9 +66,11 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Sets a PF4J plugin identifier.
+   *
    * @param pluginId a plugin id to set; in Exonum it must have a certain format, but this class
    *     allows any to be set
-   * @see <a href="https://pf4j.org/doc/plugins.html#how-plugin-metadata-is-defined">Plugin meta data</a>
+   * @see <a href="https://pf4j.org/doc/plugins.html#how-plugin-metadata-is-defined">Plugin meta
+   *     data</a>
    */
   public ServiceArtifactBuilder setPluginId(String pluginId) {
     return setManifestEntry(PLUGIN_ID_ATTRIBUTE_NAME, pluginId);
@@ -79,8 +78,10 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Sets a PF4J plugin version.
+   *
    * @param version a plugin version to set
-   * @see <a href="https://pf4j.org/doc/plugins.html#how-plugin-metadata-is-defined">Plugin meta data</a>
+   * @see <a href="https://pf4j.org/doc/plugins.html#how-plugin-metadata-is-defined">Plugin meta
+   *     data</a>
    */
   public ServiceArtifactBuilder setPluginVersion(String version) {
     return setManifestEntry(PLUGIN_VERSION_ATTRIBUTE_NAME, version);
@@ -88,10 +89,11 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Sets a manifest entry in the {@linkplain Manifest main section} of the manifest.
+   *
    * @param name an attribute name
    * @param value an attribute value
-   * @throws IllegalArgumentException if the attribute name is
-   *     {@linkplain java.util.jar.Attributes invalid}
+   * @throws IllegalArgumentException if the attribute name is {@linkplain java.util.jar.Attributes
+   *     invalid}
    */
   public ServiceArtifactBuilder setManifestEntry(String name, String value) {
     manifest.getMainAttributes().putValue(name, value);
@@ -100,6 +102,7 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Adds classes to the archive.
+   *
    * @param artifactClasses classes to add
    */
   public ServiceArtifactBuilder addClasses(Class<?>... artifactClasses) {
@@ -108,6 +111,7 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Adds classes to the archive.
+   *
    * @param artifactClasses classes to add
    */
   public ServiceArtifactBuilder addClasses(Iterable<? extends Class<?>> artifactClasses) {
@@ -117,6 +121,7 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Adds a class to the archive.
+   *
    * @param artifactClass a class to add
    */
   public ServiceArtifactBuilder addClass(Class<?> artifactClass) {
@@ -126,8 +131,9 @@ public final class ServiceArtifactBuilder {
   }
 
   /**
-   * <em>Replaces</em> extension classes with the given list. All previously added extension
-   * entries will be <em>removed</em>.
+   * <em>Replaces</em> extension classes with the given list. All previously added extension entries
+   * will be <em>removed</em>.
+   *
    * @param extensionClasses extension classes to set
    * @see #addExtensionClass(Class)
    */
@@ -139,6 +145,7 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Adds classes providing extensions.
+   *
    * @param extensionClasses extension classes to add
    * @see #addExtensionClass(Class)
    */
@@ -148,6 +155,7 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Adds classes providing extensions.
+   *
    * @param extensionClasses extension classes to add
    * @see #addExtensionClass(Class)
    */
@@ -158,6 +166,7 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Adds a class that provides an extension.
+   *
    * @param extensionClass an extension class to add
    * @see #addClass(Class)
    * @see #addExtensionEntry(String)
@@ -169,13 +178,16 @@ public final class ServiceArtifactBuilder {
   }
 
   private static void checkValidClass(Class<?> artifactClass) {
-    checkArgument(!(artifactClass.isPrimitive() || artifactClass.isArray()),
-        "Cannot write %s to the archive", artifactClass);
+    checkArgument(
+        !(artifactClass.isPrimitive() || artifactClass.isArray()),
+        "Cannot write %s to the archive",
+        artifactClass);
   }
 
   /**
-   * Adds an entry to put in the extensions index file.
-   * If no entries are added, an empty file will be written.
+   * Adds an entry to put in the extensions index file. If no entries are added, an empty file will
+   * be written.
+   *
    * @see <a href="https://pf4j.org/doc/extensions.html#about-extensions">Extensions</a>
    */
   public ServiceArtifactBuilder addExtensionEntry(String extensionEntry) {
@@ -185,13 +197,14 @@ public final class ServiceArtifactBuilder {
 
   /**
    * Writes the JAR artifact to the specified location.
+   *
    * @param artifactLocation a filesystem path where to put an artifact archive
    * @throws IOException if the archive file cannot be written
    */
   public void writeTo(Path artifactLocation) throws IOException {
-    try (JarOutputStream out = new JarOutputStream(new BufferedOutputStream(
-        new FileOutputStream(artifactLocation.toFile())),
-        manifest)) {
+    try (JarOutputStream out =
+        new JarOutputStream(
+            new BufferedOutputStream(new FileOutputStream(artifactLocation.toFile())), manifest)) {
       // Write directories corresponding to the class packages
       writePackages(out);
 
@@ -204,20 +217,19 @@ public final class ServiceArtifactBuilder {
   }
 
   private void writePackages(JarOutputStream out) {
-    Stream<String> packageDirs = artifactClasses.stream()
-        .map(Class::getPackage)
-        .distinct()
-        .map(this::getPath);
+    Stream<String> packageDirs =
+        artifactClasses.stream().map(Class::getPackage).distinct().map(this::getPath);
 
-    packageDirs.forEach(path -> {
-      ZipEntry packageEntry = new ZipEntry(path);
-      try {
-        out.putNextEntry(packageEntry);
-        out.closeEntry();
-      } catch (IOException e1) {
-        throw new RuntimeException(e1);
-      }
-    });
+    packageDirs.forEach(
+        path -> {
+          ZipEntry packageEntry = new ZipEntry(path);
+          try {
+            out.putNextEntry(packageEntry);
+            out.closeEntry();
+          } catch (IOException e1) {
+            throw new RuntimeException(e1);
+          }
+        });
   }
 
   private void writeClasses(JarOutputStream out) throws IOException {

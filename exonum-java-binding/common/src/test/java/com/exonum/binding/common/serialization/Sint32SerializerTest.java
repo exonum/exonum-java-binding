@@ -38,5 +38,4 @@ class Sint32SerializerTest {
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
   }
-
 }

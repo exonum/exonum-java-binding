@@ -18,15 +18,11 @@ package com.exonum.binding.common.proofs.list;
 
 import com.google.auto.value.AutoValue;
 
-/**
- * A value stored in the Merkle tree at its bottom level (at height 0).
- */
+/** A value stored in the Merkle tree at its bottom level (at height 0). */
 @AutoValue
 abstract class ListProofElementEntry implements ListProofEntry {
 
-  /**
-   * Returns a value of the element stored at this index in the list.
-   */
+  /** Returns a value of the element stored at this index in the list. */
   abstract byte[] getElement();
 
   static ListProofElementEntry newInstance(long index, byte[] element) {

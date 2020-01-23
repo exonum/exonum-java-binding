@@ -36,30 +36,21 @@ class TransactionResponseTest {
 
   @Test
   void toStringInPoolTxTest() {
-    TransactionResponse response =
-        new TransactionResponse(IN_POOL,
-        withTxMessage(),
-        null,
-        null);
+    TransactionResponse response = new TransactionResponse(IN_POOL, withTxMessage(), null, null);
 
-    assertThat(response.toString(), allOf(
-        not(containsString("executionResult")),
-        not(containsString("location"))
-    ));
+    assertThat(
+        response.toString(),
+        allOf(not(containsString("executionResult")), not(containsString("location"))));
   }
 
   @Test
   void toStringCommittedTxTest() {
     TransactionResponse response =
-        new TransactionResponse(COMMITTED,
-            withTxMessage(),
-            ExecutionStatuses.success(),
-            withTxLocation());
+        new TransactionResponse(
+            COMMITTED, withTxMessage(), ExecutionStatuses.success(), withTxLocation());
 
-    assertThat(response.toString(), allOf(
-        containsString("executionResult"),
-        containsString("location")
-    ));
+    assertThat(
+        response.toString(), allOf(containsString("executionResult"), containsString("location")));
   }
 
   @Test
@@ -76,12 +67,11 @@ class TransactionResponseTest {
     return TransactionMessage.builder()
         .serviceId(1)
         .transactionId(1)
-        .payload(new byte[]{})
+        .payload(new byte[] {})
         .sign(ed25519().generateKeyPair());
   }
 
   private static TransactionLocation withTxLocation() {
     return TransactionLocation.valueOf(1L, 0L);
   }
-
 }

@@ -43,25 +43,25 @@ import org.junit.jupiter.api.Test;
 class ProofMapIndexProxyNoKeyHashingIntegrationTest
     extends BaseProofMapIndexProxyIntegrationTestable {
 
-  static final List<HashCode> TEST_KEYS = Stream.of(
-      Bytes.bytes(0x00),
-      Bytes.bytes(0x01),
-      Bytes.bytes(0x02),
-      Bytes.bytes(0x08),
-      Bytes.bytes(0x0f),
-      Bytes.bytes(0x10),
-      Bytes.bytes(0x20),
-      Bytes.bytes(0x80),
-      Bytes.bytes(0xf0),
-      Bytes.bytes(0xff),
-      Bytes.bytes(0x01, 0x01),
-      Bytes.bytes(0x01, 0x10),
-      Bytes.bytes(0x10, 0x01),
-      Bytes.bytes(0x10, 0x10)
-  )
-      .map(BaseProofMapIndexProxyIntegrationTestable::createRawProofKey)
-      .map(HashCode::fromBytes)
-      .collect(toImmutableList());
+  static final List<HashCode> TEST_KEYS =
+      Stream.of(
+              Bytes.bytes(0x00),
+              Bytes.bytes(0x01),
+              Bytes.bytes(0x02),
+              Bytes.bytes(0x08),
+              Bytes.bytes(0x0f),
+              Bytes.bytes(0x10),
+              Bytes.bytes(0x20),
+              Bytes.bytes(0x80),
+              Bytes.bytes(0xf0),
+              Bytes.bytes(0xff),
+              Bytes.bytes(0x01, 0x01),
+              Bytes.bytes(0x01, 0x10),
+              Bytes.bytes(0x10, 0x01),
+              Bytes.bytes(0x10, 0x10))
+          .map(BaseProofMapIndexProxyIntegrationTestable::createRawProofKey)
+          .map(HashCode::fromBytes)
+          .collect(toImmutableList());
 
   private static final HashCode INVALID_PROOF_KEY = HashCode.fromString("1234");
 
@@ -76,276 +76,287 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Override
-  ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
-                                                     Access access) {
-    return access.getRawProofMap(IndexAddress.valueOf(groupName, idInGroup),
-        StandardSerializers.hash(), StandardSerializers.string());
+  ProofMapIndexProxy<HashCode, String> createInGroup(
+      String groupName, byte[] idInGroup, Access access) {
+    return access.getRawProofMap(
+        IndexAddress.valueOf(groupName, idInGroup),
+        StandardSerializers.hash(),
+        StandardSerializers.string());
   }
 
   private static ProofMapIndexProxy<HashCode, String> createProofMap(String name, Access access) {
-    return access.getRawProofMap(IndexAddress.valueOf(name), StandardSerializers.hash(),
-        StandardSerializers.string());
+    return access.getRawProofMap(
+        IndexAddress.valueOf(name), StandardSerializers.hash(), StandardSerializers.string());
   }
 
   @Test
   void containsThrowsIfInvalidKey() {
-    runTestWithView(database::createSnapshot, (map) -> assertThrows(IllegalArgumentException.class,
-        () -> map.containsKey(INVALID_PROOF_KEY)));
+    runTestWithView(
+        database::createSnapshot,
+        (map) ->
+            assertThrows(IllegalArgumentException.class, () -> map.containsKey(INVALID_PROOF_KEY)));
   }
 
   @Test
   void putFailsIfInvalidKey() {
-    runTestWithView(database::createFork, (map) -> assertThrows(IllegalArgumentException.class,
-        () -> map.put(INVALID_PROOF_KEY, V1)));
+    runTestWithView(
+        database::createFork,
+        (map) ->
+            assertThrows(IllegalArgumentException.class, () -> map.put(INVALID_PROOF_KEY, V1)));
   }
 
   @Test
   void removeFailsIfInvalidKey() {
-    runTestWithView(database::createFork,
+    runTestWithView(
+        database::createFork,
         (map) -> assertThrows(IllegalArgumentException.class, () -> map.remove(INVALID_PROOF_KEY)));
   }
 
   @Test
   @DisabledProofTest
   void verifyProof_FourEntryMap_LastByte_Contains1() {
-    runTestWithView(database::createFork, (map) -> {
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          Stream<HashCode> proofKeys =
+              Stream.of(
+                      (byte) 0b0000_0000,
+                      (byte) 0b0000_0001,
+                      (byte) 0b1000_0000,
+                      (byte) 0b1000_0001)
+                  .map(BaseProofMapIndexProxyIntegrationTestable::createProofKey);
 
-      Stream<HashCode> proofKeys = Stream.of(
-          (byte) 0b0000_0000,
-          (byte) 0b0000_0001,
-          (byte) 0b1000_0000,
-          (byte) 0b1000_0001
-      ).map(BaseProofMapIndexProxyIntegrationTestable::createProofKey);
+          List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
 
-      List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
+          putAll(map, entries);
 
-      putAll(map, entries);
-
-      for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
-      }
-    });
+          for (MapEntry<HashCode, String> e : entries) {
+            assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
+          }
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyProof_FourEntryMap_LastByte_Contains2() {
-    runTestWithView(database::createFork, (map) -> {
-      Stream<HashCode> proofKeys = Stream.of(
-          (byte) 0b00,
-          (byte) 0b01,
-          (byte) 0b10,
-          (byte) 0b11
-      ).map(BaseProofMapIndexProxyIntegrationTestable::createProofKey);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          Stream<HashCode> proofKeys =
+              Stream.of((byte) 0b00, (byte) 0b01, (byte) 0b10, (byte) 0b11)
+                  .map(BaseProofMapIndexProxyIntegrationTestable::createProofKey);
 
-      List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
+          List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
 
-      putAll(map, entries);
+          putAll(map, entries);
 
-      for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
-      }
-    });
+          for (MapEntry<HashCode, String> e : entries) {
+            assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
+          }
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyProof_FourEntryMap_FirstByte_Contains() {
-    runTestWithView(database::createFork, (map) -> {
-      byte[] key1 = createRawProofKey();
-      byte[] key2 = createRawProofKey();
-      key2[0] = (byte) 0b0000_0001;
-      byte[] key3 = createRawProofKey();
-      key3[0] = (byte) 0b1000_0000;
-      byte[] key4 = createRawProofKey();
-      key4[0] = (byte) 0b1000_0001;
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          byte[] key1 = createRawProofKey();
+          byte[] key2 = createRawProofKey();
+          key2[0] = (byte) 0b0000_0001;
+          byte[] key3 = createRawProofKey();
+          key3[0] = (byte) 0b1000_0000;
+          byte[] key4 = createRawProofKey();
+          key4[0] = (byte) 0b1000_0001;
 
-      List<MapEntry<HashCode, String>> entries = createMapEntries(
-          Stream.of(key1, key2, key3, key4)
-              .map(HashCode::fromBytes)
-      );
+          List<MapEntry<HashCode, String>> entries =
+              createMapEntries(Stream.of(key1, key2, key3, key4).map(HashCode::fromBytes));
 
-      putAll(map, entries);
+          putAll(map, entries);
 
-      for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
-      }
-    });
+          for (MapEntry<HashCode, String> e : entries) {
+            assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
+          }
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyProof_FourEntryMap_FirstAndLastByte_Contains() {
-    runTestWithView(database::createFork, (map) -> {
-      byte[] key1 = createRawProofKey();  // 000…0
-      byte[] key2 = createRawProofKey();  // 100…0
-      key2[0] = (byte) 0x01;
-      byte[] key3 = createRawProofKey((byte) 0x80);  // 000…01
-      byte[] key4 = createRawProofKey((byte) 0x80);  // 100…01
-      key4[0] = (byte) 0x01;
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          byte[] key1 = createRawProofKey(); // 000…0
+          byte[] key2 = createRawProofKey(); // 100…0
+          key2[0] = (byte) 0x01;
+          byte[] key3 = createRawProofKey((byte) 0x80); // 000…01
+          byte[] key4 = createRawProofKey((byte) 0x80); // 100…01
+          key4[0] = (byte) 0x01;
 
-      List<MapEntry<HashCode, String>> entries = createMapEntries(
-          Stream.of(key1, key2, key3, key4)
-              .map(HashCode::fromBytes)
-      );
+          List<MapEntry<HashCode, String>> entries =
+              createMapEntries(Stream.of(key1, key2, key3, key4).map(HashCode::fromBytes));
 
-      putAll(map, entries);
+          putAll(map, entries);
 
-      for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
-      }
-    });
+          for (MapEntry<HashCode, String> e : entries) {
+            assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
+          }
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyMultiProof_FourEntryMap_LastByte_Contains1() {
-    runTestWithView(database::createFork, (map) -> {
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          Stream<HashCode> proofKeys =
+              Stream.of(
+                      (byte) 0b0000_0000,
+                      (byte) 0b0000_0001,
+                      (byte) 0b1000_0000,
+                      (byte) 0b1000_0001)
+                  .map(BaseProofMapIndexProxyIntegrationTestable::createProofKey);
 
-      Stream<HashCode> proofKeys = Stream.of(
-          (byte) 0b0000_0000,
-          (byte) 0b0000_0001,
-          (byte) 0b1000_0000,
-          (byte) 0b1000_0001
-      ).map(BaseProofMapIndexProxyIntegrationTestable::createProofKey);
+          List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
 
-      List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
+          putAll(map, entries);
 
-      putAll(map, entries);
-
-      assertThat(map, provesThatPresent(entries));
-    });
+          assertThat(map, provesThatPresent(entries));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyMultiProof_FourEntryMap_LastByte_Contains2() {
-    runTestWithView(database::createFork, (map) -> {
-      Stream<HashCode> proofKeys = Stream.of(
-          (byte) 0b00,
-          (byte) 0b01,
-          (byte) 0b10,
-          (byte) 0b11
-      ).map(BaseProofMapIndexProxyIntegrationTestable::createProofKey);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          Stream<HashCode> proofKeys =
+              Stream.of((byte) 0b00, (byte) 0b01, (byte) 0b10, (byte) 0b11)
+                  .map(BaseProofMapIndexProxyIntegrationTestable::createProofKey);
 
-      List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
+          List<MapEntry<HashCode, String>> entries = createMapEntries(proofKeys);
 
-      putAll(map, entries);
+          putAll(map, entries);
 
-      assertThat(map, provesThatPresent(entries));
-    });
+          assertThat(map, provesThatPresent(entries));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyMultiProof_FourEntryMap_FirstByte_Contains() {
-    runTestWithView(database::createFork, (map) -> {
-      byte[] key1 = createRawProofKey();
-      byte[] key2 = createRawProofKey();
-      key2[0] = (byte) 0b0000_0001;
-      byte[] key3 = createRawProofKey();
-      key3[0] = (byte) 0b1000_0000;
-      byte[] key4 = createRawProofKey();
-      key4[0] = (byte) 0b1000_0001;
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          byte[] key1 = createRawProofKey();
+          byte[] key2 = createRawProofKey();
+          key2[0] = (byte) 0b0000_0001;
+          byte[] key3 = createRawProofKey();
+          key3[0] = (byte) 0b1000_0000;
+          byte[] key4 = createRawProofKey();
+          key4[0] = (byte) 0b1000_0001;
 
-      List<MapEntry<HashCode, String>> entries = createMapEntries(
-          Stream.of(key1, key2, key3, key4)
-              .map(HashCode::fromBytes)
-      );
+          List<MapEntry<HashCode, String>> entries =
+              createMapEntries(Stream.of(key1, key2, key3, key4).map(HashCode::fromBytes));
 
-      putAll(map, entries);
+          putAll(map, entries);
 
-      assertThat(map, provesThatPresent(entries));
-    });
+          assertThat(map, provesThatPresent(entries));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyMultiProof_FourEntryMap_FirstAndLastByte_Contains() {
-    runTestWithView(database::createFork, (map) -> {
-      byte[] key1 = createRawProofKey();  // 000…0
-      byte[] key2 = createRawProofKey();  // 100…0
-      key2[0] = (byte) 0x01;
-      byte[] key3 = createRawProofKey((byte) 0x80);  // 000…01
-      byte[] key4 = createRawProofKey((byte) 0x80);  // 100…01
-      key4[0] = (byte) 0x01;
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          byte[] key1 = createRawProofKey(); // 000…0
+          byte[] key2 = createRawProofKey(); // 100…0
+          key2[0] = (byte) 0x01;
+          byte[] key3 = createRawProofKey((byte) 0x80); // 000…01
+          byte[] key4 = createRawProofKey((byte) 0x80); // 100…01
+          key4[0] = (byte) 0x01;
 
-      List<MapEntry<HashCode, String>> entries = createMapEntries(
-          Stream.of(key1, key2, key3, key4)
-              .map(HashCode::fromBytes)
-      );
+          List<MapEntry<HashCode, String>> entries =
+              createMapEntries(Stream.of(key1, key2, key3, key4).map(HashCode::fromBytes));
 
-      putAll(map, entries);
+          putAll(map, entries);
 
-      assertThat(map, provesThatPresent(entries));
-    });
+          assertThat(map, provesThatPresent(entries));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyMultiProof_FourEntryMap_DoesNotContain() {
-    runTestWithView(database::createFork, (map) -> {
-      /*
-       This map will have the following structure:
-                   <00xxxx>
-                   /        \
-           <00|00xx>          <00|10xx>
-          /         \        /         \
-       <0000|01>  <0000|11>  <0010|00>   <0010|10>
-      */
-      List<MapEntry<HashCode, String>> entries = createMapEntries(
-          Stream.of(
-              proofKeyFromPrefix("0000|01"),
-              proofKeyFromPrefix("0000|11"),
-              proofKeyFromPrefix("0010|00"),
-              proofKeyFromPrefix("0010|10")
-          )
-      );
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          /*
+           This map will have the following structure:
+                       <00xxxx>
+                       /        \
+               <00|00xx>          <00|10xx>
+              /         \        /         \
+           <0000|01>  <0000|11>  <0010|00>   <0010|10>
+          */
+          List<MapEntry<HashCode, String>> entries =
+              createMapEntries(
+                  Stream.of(
+                      proofKeyFromPrefix("0000|01"),
+                      proofKeyFromPrefix("0000|11"),
+                      proofKeyFromPrefix("0010|00"),
+                      proofKeyFromPrefix("0010|10")));
 
-      putAll(map, entries);
+          putAll(map, entries);
 
-      List<HashCode> proofKeys = Arrays.asList(
-          // Should be rejected on root level
-          proofKeyFromPrefix("01|0000"),
-          // Should be rejected on intermediate level
-          proofKeyFromPrefix("00|01"),
-          proofKeyFromPrefix("00|11"),
-          // Should be rejected on leaf level
-          proofKeyFromPrefix("0000|00"),
-          proofKeyFromPrefix("0000|10"),
-          proofKeyFromPrefix("0010|01"),
-          proofKeyFromPrefix("0010|11")
-      );
+          List<HashCode> proofKeys =
+              Arrays.asList(
+                  // Should be rejected on root level
+                  proofKeyFromPrefix("01|0000"),
+                  // Should be rejected on intermediate level
+                  proofKeyFromPrefix("00|01"),
+                  proofKeyFromPrefix("00|11"),
+                  // Should be rejected on leaf level
+                  proofKeyFromPrefix("0000|00"),
+                  proofKeyFromPrefix("0000|10"),
+                  proofKeyFromPrefix("0010|01"),
+                  proofKeyFromPrefix("0010|11"));
 
-      assertThat(map, provesThatAbsent(proofKeys));
-    });
+          assertThat(map, provesThatAbsent(proofKeys));
+        });
   }
 
   @CiOnly
   @DisabledProofTest
   @Test
   /*
-    Takes quite a lot of time (validating 257 proofs), but it's an integration test, isn't it? :-)
-    Consider adding a similar test for left-leaning MPT
-   */
+   Takes quite a lot of time (validating 257 proofs), but it's an integration test, isn't it? :-)
+   Consider adding a similar test for left-leaning MPT
+  */
   void verifyProof_MapContainsRightLeaningMaxHeightMpt() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<HashCode, String>> entries = createEntriesForRightLeaningMpt();
-      putAll(map, entries);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          List<MapEntry<HashCode, String>> entries = createEntriesForRightLeaningMpt();
+          putAll(map, entries);
 
-      for (MapEntry<HashCode, String> e : entries) {
-        assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
-      }
-    });
+          for (MapEntry<HashCode, String> e : entries) {
+            assertThat(map, provesThatPresent(e.getKey(), e.getValue()));
+          }
+        });
   }
 
   /**
    * Returns a new key with the given prefix.
    *
-   * @param prefix a key prefix — from the least significant bit to the most significant,
-   *        i.e., "00 01" is 8, "10 00" is 1.
-   *        May contain spaces, underscores or bars (e.g., "00 01|01 11" and "11_10"
-   *        are valid strings).
+   * @param prefix a key prefix — from the least significant bit to the most significant, i.e., "00
+   *     01" is 8, "10 00" is 1. May contain spaces, underscores or bars (e.g., "00 01|01 11" and
+   *     "11_10" are valid strings).
    */
   private static HashCode proofKeyFromPrefix(String prefix) {
     prefix = filterBitPrefix(prefix);
@@ -353,9 +364,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
     return HashCode.fromBytes(key);
   }
 
-  /**
-   * Replaces spaces that may be used to separate groups of binary digits.
-   */
+  /** Replaces spaces that may be used to separate groups of binary digits. */
   private static String filterBitPrefix(String prefix) {
     String filtered = prefix.replaceAll("[ _|]", "");
     // Check that the string is correct
@@ -364,9 +373,7 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
     return filtered;
   }
 
-  /**
-   * Creates a 32-byte key from the bit prefix.
-   */
+  /** Creates a 32-byte key from the bit prefix. */
   private static byte[] keyFromString(String prefix) {
     BitSet keyPrefixBits = new BitSet(prefix.length());
     for (int i = 0; i < prefix.length(); i++) {
@@ -380,36 +387,18 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
 
   /**
    * Creates 257 entries for a ProofMap that, when added to it, will make the underlying
-   * Merkle-Patricia tree of the maximum height (256). Leaf nodes will be at depths
-   * ranging from 1 to 256.
+   * Merkle-Patricia tree of the maximum height (256). Leaf nodes will be at depths ranging from 1
+   * to 256.
    *
-   * Bits of 32-byte keys:
-   * 00…0000
-   * 100…000
-   * 0100…00
-   * 00100…0
-   * …
-   * 00…0100
-   * 00…0010
-   * 00…0001.
+   * <p>Bits of 32-byte keys: 00…0000 100…000 0100…00 00100…0 … 00…0100 00…0010 00…0001.
    *
-   * When all the keys above are added to the ProofMap, the underlying Merkle-Patricia tree
-   * has the following structure (only key bits in leaf nodes are shown; the intermediate
-   * nodes are shown as 'o' character):
+   * <p>When all the keys above are added to the ProofMap, the underlying Merkle-Patricia tree has
+   * the following structure (only key bits in leaf nodes are shown; the intermediate nodes are
+   * shown as 'o' character):
    *
-   *                    o — the root node
-   *                   / \
-   *                  o   100…000 — a leaf node
-   *                 / \
-   *                o   0100…00
-   *               / \
-   *              o   00100…0
-   *             / \
-   *            …   00010…0
-   *           /
-   *          o — an intermediate node with key prefix 00…0 of size 255 bits.
-   *         / \
-   *  00…0000  00…0001 — leaf nodes at depth 256 with a common prefix of 255 bits.
+   * <p>o — the root node / \ o 100…000 — a leaf node / \ o 0100…00 / \ o 00100…0 / \ … 00010…0 / o
+   * — an intermediate node with key prefix 00…0 of size 255 bits. / \ 00…0000 00…0001 — leaf nodes
+   * at depth 256 with a common prefix of 255 bits.
    */
   private static List<MapEntry<HashCode, String>> createEntriesForRightLeaningMpt() {
     int numKeyBits = Byte.SIZE * PROOF_MAP_KEY_SIZE;

@@ -59,8 +59,8 @@ class FunnelsTest {
   @Test
   void testForBytes() {
     PrimitiveSink primitiveSink = mock(PrimitiveSink.class);
-    Funnels.byteArrayFunnel().funnel(new byte[]{4, 3, 2, 1}, primitiveSink);
-    verify(primitiveSink).putBytes(new byte[]{4, 3, 2, 1});
+    Funnels.byteArrayFunnel().funnel(new byte[] {4, 3, 2, 1}, primitiveSink);
+    verify(primitiveSink).putBytes(new byte[] {4, 3, 2, 1});
   }
 
   @Test

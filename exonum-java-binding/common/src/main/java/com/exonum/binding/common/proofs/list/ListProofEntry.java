@@ -20,31 +20,27 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 interface ListProofEntry {
 
-  /**
-   * The maximum height of a list proof tree.
-   */
+  /** The maximum height of a list proof tree. */
   int MAX_HEIGHT = 56;
 
-  /**
-   * The maximum index of a list proof node: 2^56 - 1.
-   */
+  /** The maximum index of a list proof node: 2^56 - 1. */
   long MAX_INDEX = 0xFF_FFFF_FFFF_FFFFL;
 
   /**
-   * Returns the index of the proof tree node at the height of its level. Indexes start
-   * from 0 for the leftmost node and up to <em>2^d - 1</em> for the rightmost node,
-   * where <em>d = ceil(log2(N)) - h</em> is the depth of the node at height <em>h</em>;
-   * <em>N</em> is the number of elements in the tree.
+   * Returns the index of the proof tree node at the height of its level. Indexes start from 0 for
+   * the leftmost node and up to <em>2^d - 1</em> for the rightmost node, where <em>d =
+   * ceil(log2(N)) - h</em> is the depth of the node at height <em>h</em>; <em>N</em> is the number
+   * of elements in the tree.
    */
   long getIndex();
 
   static void checkIndex(long index) {
-    checkArgument(0 <= index && index <= MAX_INDEX,
-        "Entry index (%s) is out of range [0; 2^56]", index);
+    checkArgument(
+        0 <= index && index <= MAX_INDEX, "Entry index (%s) is out of range [0; 2^56]", index);
   }
 
   static void checkHeight(int height) {
-    checkArgument(0 <= height && height <= MAX_HEIGHT,
-        "Entry height (%s) is out of range [0; 56]", height);
+    checkArgument(
+        0 <= height && height <= MAX_HEIGHT, "Entry height (%s) is out of range [0; 56]", height);
   }
 }

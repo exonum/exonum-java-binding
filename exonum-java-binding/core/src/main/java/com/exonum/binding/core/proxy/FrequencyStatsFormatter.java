@@ -27,18 +27,16 @@ import java.util.stream.Collectors;
 
 final class FrequencyStatsFormatter {
 
-  static <ElementT, KeyT>
-      String itemsFrequency(Collection<? extends ElementT> items,
-                            Function<? super ElementT, KeyT> keyExtractor) {
+  static <ElementT, KeyT> String itemsFrequency(
+      Collection<? extends ElementT> items, Function<? super ElementT, KeyT> keyExtractor) {
 
-    Map<KeyT, Long> numItemsByType = items.stream()
-        .collect(groupingBy(keyExtractor, counting()));
+    Map<KeyT, Long> numItemsByType = items.stream().collect(groupingBy(keyExtractor, counting()));
 
-    String itemsFrequency = numItemsByType.entrySet().stream()
-        .sorted(Comparator.<Map.Entry<KeyT, Long>>
-            comparingLong(Map.Entry::getValue).reversed())
-        .map(Object::toString)
-        .collect(Collectors.joining(", "));
+    String itemsFrequency =
+        numItemsByType.entrySet().stream()
+            .sorted(Comparator.<Map.Entry<KeyT, Long>>comparingLong(Map.Entry::getValue).reversed())
+            .map(Object::toString)
+            .collect(Collectors.joining(", "));
 
     return "{" + itemsFrequency + "}";
   }

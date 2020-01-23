@@ -21,11 +21,10 @@ import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * A view of a {@link ProofListIndexProxy}, i.e., a subset of its elements coupled
- * with a <em>proof</em>, which jointly allow restoring the
- * {@linkplain ProofListIndexProxy#getIndexHash() index hash} of the list. Apart from proving
- * elements in the list, ListProof can assert that the list is shorter than the requested
- * range of indexes.
+ * A view of a {@link ProofListIndexProxy}, i.e., a subset of its elements coupled with a
+ * <em>proof</em>, which jointly allow restoring the {@linkplain ProofListIndexProxy#getIndexHash()
+ * index hash} of the list. Apart from proving elements in the list, ListProof can assert that the
+ * list is shorter than the requested range of indexes.
  * <!--
  * TODO: Improve docs when verification arrives: explain how it is done.
  * -->
@@ -37,23 +36,20 @@ import com.google.protobuf.InvalidProtocolBufferException;
 @AutoValue
 public abstract class ListProof {
 
-  /**
-   * Returns the proof as a protobuf message.
-   */
+  /** Returns the proof as a protobuf message. */
   public abstract ListProofOuterClass.ListProof getAsMessage();
 
   /**
    * Creates a new ListProof given the serialized map proof message.
-   * @throws InvalidProtocolBufferException if the message is not
-   *     {@link com.exonum.core.messages.MapProofOuterClass.MapProof}
+   *
+   * @throws InvalidProtocolBufferException if the message is not {@link
+   *     com.exonum.core.messages.MapProofOuterClass.MapProof}
    */
   public static ListProof parseFrom(byte[] proofMessage) throws InvalidProtocolBufferException {
     return newInstance(ListProofOuterClass.ListProof.parseFrom(proofMessage));
   }
 
-  /**
-   * Creates a new ListProof given the list proof message.
-   */
+  /** Creates a new ListProof given the list proof message. */
   private static ListProof newInstance(ListProofOuterClass.ListProof proofMessage) {
     return new AutoValue_ListProof(proofMessage);
   }

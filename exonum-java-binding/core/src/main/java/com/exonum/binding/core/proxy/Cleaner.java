@@ -28,42 +28,41 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A context controlling lifecycle of native proxies. When a proxy of a native object is created,
- * it must register a cleaner of the native object in a context.
- * The context performs the cleaning actions in a reversed order of their registration
- * when it is {@linkplain #close() closed}. Once closed, the context must no longer be used
- * to register new clean actions.
+ * A context controlling lifecycle of native proxies. When a proxy of a native object is created, it
+ * must register a cleaner of the native object in a context. The context performs the cleaning
+ * actions in a reversed order of their registration when it is {@linkplain #close() closed}. Once
+ * closed, the context must no longer be used to register new clean actions.
  *
- * <p>The context might have a description of its origin so that it can be identified
- * for a particular context.
+ * <p>The context might have a description of its origin so that it can be identified for a
+ * particular context.
  *
  * <p>All method arguments are non-null by default.
  *
  * <p>This class is not thread-safe.
  *
- * @see <a href="https://github.com/exonum/exonum-java-binding/wiki/Native-peers-management-approaches">
- *   Discussion of various approaches to the management of native peers</a>
+ * @see <a
+ *     href="https://github.com/exonum/exonum-java-binding/wiki/Native-peers-management-approaches">
+ *     Discussion of various approaches to the management of native peers</a>
  */
 public final class Cleaner implements AutoCloseable {
 
   private static final Logger logger = LogManager.getLogger(Cleaner.class);
 
   /**
-   * The number of registered clean actions at which we start to log warnings when more are added
-   * at {@link #TOO_MANY_CLEAN_ACTIONS_LOG_FREQUENCY}.
+   * The number of registered clean actions at which we start to log warnings when more are added at
+   * {@link #TOO_MANY_CLEAN_ACTIONS_LOG_FREQUENCY}.
    *
    * @see #logIfTooManyCleaners()
    */
   private static final int TOO_MANY_CLEAN_ACTIONS_LOG_THRESHOLD = 1000;
+
   private static final int TOO_MANY_CLEAN_ACTIONS_LOG_FREQUENCY = 100;
 
   private final Deque<CleanAction<?>> registeredCleanActions;
   private final String description;
   private boolean closed;
 
-  /**
-   * Creates a new cleaner with no (an empty) description.
-   */
+  /** Creates a new cleaner with no (an empty) description. */
   public Cleaner() {
     this("");
   }
@@ -71,8 +70,8 @@ public final class Cleaner implements AutoCloseable {
   /**
    * Creates a new cleaner.
    *
-   * @param description a description of this context, which describes its origin
-   *                    and is included in {@link #toString()}
+   * @param description a description of this context, which describes its origin and is included in
+   *     {@link #toString()}
    */
   public Cleaner(String description) {
     registeredCleanActions = new ArrayDeque<>();
@@ -86,11 +85,10 @@ public final class Cleaner implements AutoCloseable {
   }
 
   /**
-   * Registers a new clean action with this context. If the context is already closed,
-   * the clean action will be executed immediately.
+   * Registers a new clean action with this context. If the context is already closed, the clean
+   * action will be executed immediately.
    *
    * @param cleanAction a clean action to register; must not be null
-   *
    * @throws IllegalStateException if it’s attempted to add a clean action to a closed context
    */
   public void add(CleanAction<?> cleanAction) {
@@ -104,8 +102,8 @@ public final class Cleaner implements AutoCloseable {
         cleanActionError = t;
       }
 
-      String message = String.format("Cannot register a clean action (%s) in a closed context",
-          cleanAction);
+      String message =
+          String.format("Cannot register a clean action (%s) in a closed context", cleanAction);
       RuntimeException e = new IllegalStateException(message);
       if (cleanActionError != null) {
         e.addSuppressed(cleanActionError);
@@ -129,8 +127,11 @@ public final class Cleaner implements AutoCloseable {
       String proxiesByTypeFrequency =
           FrequencyStatsFormatter.itemsFrequency(registeredCleanActions, Cleaner::getActionType);
 
-      logger.warn("Many cleaners ({}) are registered in a context ({}): {}",
-          numRegisteredCleaners, this, proxiesByTypeFrequency);
+      logger.warn(
+          "Many cleaners ({}) are registered in a context ({}): {}",
+          numRegisteredCleaners,
+          this,
+          proxiesByTypeFrequency);
     }
   }
 
@@ -147,13 +148,13 @@ public final class Cleaner implements AutoCloseable {
    * Performs all the clean operations that has been registered in this context in a reversed order
    * of the registration order.
    *
-   * <p>If any clean operation throws an exception in its {@link CleanAction#clean()},
-   * the context logs the exception and attempts to perform the remaining operations.
+   * <p>If any clean operation throws an exception in its {@link CleanAction#clean()}, the context
+   * logs the exception and attempts to perform the remaining operations.
    *
    * <p>The implementation is idempotent — subsequent invocations have no effect.
    *
-   * @throws CloseFailuresException if any clean action failed. The exception includes all
-   *     thrown exceptions as suppressed
+   * @throws CloseFailuresException if any clean action failed. The exception includes all thrown
+   *     exceptions as suppressed
    */
   @Override
   public void close() throws CloseFailuresException {
@@ -181,9 +182,11 @@ public final class Cleaner implements AutoCloseable {
 
     // If there have been any failures, throw an exception with a detailed error message.
     if (!suppressedExceptions.isEmpty()) {
-      String message = String.format("%d exception(s) occurred when closing this context (%s), "
-          + "see the log messages above or the list of suppressed exceptions",
-          suppressedExceptions.size(), this);
+      String message =
+          String.format(
+              "%d exception(s) occurred when closing this context (%s), "
+                  + "see the log messages above or the list of suppressed exceptions",
+              suppressedExceptions.size(), this);
       CloseFailuresException e = new CloseFailuresException(message);
       suppressedExceptions.forEach(e::addSuppressed);
       throw e;
@@ -191,20 +194,20 @@ public final class Cleaner implements AutoCloseable {
   }
 
   private void logCleanActionFailure(CleanAction cleanAction, Throwable cleanException) {
-    logger.error("Exception occurred when this context ({}) attempted to perform "
-        + "a clean operation ({}):", this, cleanAction, cleanException);
+    logger.error(
+        "Exception occurred when this context ({}) attempted to perform "
+            + "a clean operation ({}):",
+        this,
+        cleanAction,
+        cleanException);
   }
 
-  /**
-   * Returns a description of this cleaner. May be empty.
-   */
+  /** Returns a description of this cleaner. May be empty. */
   public String getDescription() {
     return description;
   }
 
-  /**
-   * Returns the number of the registered clean actions.
-   */
+  /** Returns the number of the registered clean actions. */
   public int getNumRegisteredActions() {
     return registeredCleanActions.size();
   }
@@ -221,8 +224,7 @@ public final class Cleaner implements AutoCloseable {
     if (!description.isEmpty()) {
       sb.add("description", description);
     }
-    return sb
-        .add("numRegisteredActions", getNumRegisteredActions())
+    return sb.add("numRegisteredActions", getNumRegisteredActions())
         .add("closed", closed)
         .toString();
   }

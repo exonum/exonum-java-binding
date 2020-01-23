@@ -28,12 +28,12 @@ import org.pf4j.PluginLoader;
 import org.pf4j.PluginRepository;
 
 /**
- * A plugin manager that strips most operations that use ZIP plugin format, because we only
- * support JARs. That allows to reduce the number of I/O operations during plugin loading
- * and the number of redundant log messages.
+ * A plugin manager that strips most operations that use ZIP plugin format, because we only support
+ * JARs. That allows to reduce the number of I/O operations during plugin loading and the number of
+ * redundant log messages.
  *
- * <p><b>If anything, this plugin manager can be utilized and replaced with the
- * {@link DefaultPluginManager}.</b>
+ * <p><b>If anything, this plugin manager can be utilized and replaced with the {@link
+ * DefaultPluginManager}.</b>
  */
 class JarPluginManager extends DefaultPluginManager {
 

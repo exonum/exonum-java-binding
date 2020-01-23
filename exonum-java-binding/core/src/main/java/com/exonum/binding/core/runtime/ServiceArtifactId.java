@@ -36,21 +36,17 @@ public abstract class ServiceArtifactId {
   private static final String DELIMITER = ":";
   private static final int KEEP_EMPTY = -1;
 
-  /**
-   * Returns the runtime id in which the service shall be deployed.
-   */
+  /** Returns the runtime id in which the service shall be deployed. */
   public abstract int getRuntimeId();
 
   /**
-   * Returns the artifact name of this service.
-   * The name of Java artifacts usually (but not necessary) contains the two coordinates:
-   * groupId and artifactId separated by "/" (e.g., "com.acme/land-registry").
+   * Returns the artifact name of this service. The name of Java artifacts usually (but not
+   * necessary) contains the two coordinates: groupId and artifactId separated by "/" (e.g.,
+   * "com.acme/land-registry").
    */
   public abstract String getName();
 
-  /**
-   * Returns the artifact version of this service (e.g., "1.2.0").
-   */
+  /** Returns the artifact version of this service (e.g., "1.2.0"). */
   public abstract String getVersion();
 
   /**
@@ -64,7 +60,8 @@ public abstract class ServiceArtifactId {
   public static ServiceArtifactId parseFrom(String serviceArtifactId) {
     JavaArtifactUtils.checkNoForbiddenChars(serviceArtifactId);
     String[] coordinates = serviceArtifactId.split(DELIMITER, KEEP_EMPTY);
-    checkArgument(coordinates.length == 3,
+    checkArgument(
+        coordinates.length == 3,
         "Invalid artifact id (%s), must have 'runtimeId:artifactName:version' format",
         serviceArtifactId);
     int runtimeId = parseInt(coordinates[0]);
@@ -94,16 +91,12 @@ public abstract class ServiceArtifactId {
     return new AutoValue_ServiceArtifactId(runtimeId, name, version);
   }
 
-  /**
-   * Creates a new service artifact from the given artifact id message.
-   */
+  /** Creates a new service artifact from the given artifact id message. */
   public static ServiceArtifactId fromProto(ArtifactId artifactId) {
     return valueOf(artifactId.getRuntimeId(), artifactId.getName(), artifactId.getVersion());
   }
 
-  /**
-   * Returns an artifact id in the following format: "runtimeId:serviceName:version".
-   */
+  /** Returns an artifact id in the following format: "runtimeId:serviceName:version". */
   @Override
   public final String toString() {
     return getRuntimeId() + DELIMITER + getName() + DELIMITER + getVersion();

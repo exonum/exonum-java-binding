@@ -38,12 +38,13 @@ class TestKitAuditorParameterizationTest {
   static Path artifactsDirectory;
 
   @RegisterExtension
-  TestKitExtension testKitAuditorExtension = new TestKitExtension(
-      TestKit.builder()
-          .withNodeType(EmulatedNodeType.AUDITOR)
-          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
-          .withArtifactsDirectory(artifactsDirectory));
+  TestKitExtension testKitAuditorExtension =
+      new TestKitExtension(
+          TestKit.builder()
+              .withNodeType(EmulatedNodeType.AUDITOR)
+              .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+              .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+              .withArtifactsDirectory(artifactsDirectory));
 
   @BeforeAll
   static void setUp() throws IOException {

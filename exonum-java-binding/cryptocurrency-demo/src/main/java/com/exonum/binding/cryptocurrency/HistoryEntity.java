@@ -28,8 +28,8 @@ public class HistoryEntity {
   private final long amount;
   private final HashCode txMessageHash;
 
-  private HistoryEntity(long seed, PublicKey walletFrom,
-      PublicKey walletTo, long amount, HashCode txMessageHash) {
+  private HistoryEntity(
+      long seed, PublicKey walletFrom, PublicKey walletTo, long amount, HashCode txMessageHash) {
     this.seed = seed;
     this.walletFrom = walletFrom;
     this.walletTo = walletTo;
@@ -100,8 +100,7 @@ public class HistoryEntity {
     private long amount;
     private HashCode txMessageHash;
 
-    private Builder() {
-    }
+    private Builder() {}
 
     public Builder setSeed(long seed) {
       this.seed = seed;

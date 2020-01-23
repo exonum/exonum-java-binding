@@ -17,21 +17,14 @@
 
 package com.exonum.client.response;
 
-/**
- * Consensus status of a particular node.
- */
+/** Consensus status of a particular node. */
 public enum ConsensusStatus {
   /**
-   * Shows that consensus is active,
-   * i.e., it is enabled and the node has enough connected peers.
+   * Shows that consensus is active, i.e., it is enabled and the node has enough connected peers.
    */
   ACTIVE,
-  /**
-   * Shows that consensus is enabled on the node.
-   */
+  /** Shows that consensus is enabled on the node. */
   ENABLED,
-  /**
-   * Shows that consensus is disabled on the node.
-   */
+  /** Shows that consensus is disabled on the node. */
   DISABLED
 }

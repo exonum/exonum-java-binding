@@ -58,5 +58,4 @@ enum Sint64Serializer implements Serializer<Long> {
   private static long decodeZigZag64(long n) {
     return (n >>> 1) ^ -(n & 1);
   }
-
 }

@@ -44,54 +44,54 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
 
 /**
- * Provides read-only access to the subset of
- * <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">
- * blockchain::Schema</a> features in the Core API: blocks, transaction messages, execution
- * results.
- *
+ * Provides read-only access to the subset of <a
+ * href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">blockchain::Schema</a>
+ * features in the Core API: blocks, transaction messages, execution results.
  * <!-- This section is suppossed to be the main Javadoc on proofs, documenting how
  *      to create various blockchain proofs from their components.
  *
  *      Link here with <a href="<relative path>/Blockchain.html#proofs">Blockchain Proofs</a>.
  *      See also: https://stackoverflow.com/a/27522316/ -->
+ *
  * <h2 id="proofs">Proofs</h2>
  *
- * <p>Blockchain allows creating cryptographic proofs that some data is indeed stored
- * in the database. Exonum supports the following types of proofs:
+ * <p>Blockchain allows creating cryptographic proofs that some data is indeed stored in the
+ * database. Exonum supports the following types of proofs:
+ *
  * <ul>
- *   <li>Block Proof</li>
- *   <li>Transaction Execution Proof</li>
- *   <li>Call Result Proof</li>
- *   <li>Service Data Proof</li>
+ *   <li>Block Proof
+ *   <li>Transaction Execution Proof
+ *   <li>Call Result Proof
+ *   <li>Service Data Proof
  * </ul>
  *
  * <h3 id="block-proof">Block Proof</h3>
  *
- * <p>A block proof proves correctness of a blockchain block. It can be created with
- * {@link #createBlockProof(long)} for any committed block. See also {@link BlockProof}.
+ * <p>A block proof proves correctness of a blockchain block. It can be created with {@link
+ * #createBlockProof(long)} for any committed block. See also {@link BlockProof}.
  *
  * <h3 id="tx-execution-proof">Transaction Execution Proof</h3>
  *
- * <p>A transaction execution proof proves that a transaction with a given message hash was
- * executed in a block at a certain height at a certain
- * <em>{@linkplain TransactionLocation location}</em>. It consists of a block proof,
- * and a list proof from {@link #getBlockTransactions(long)}. It may be extended to
- * a <em>call result</em> proof — read the next section.
+ * <p>A transaction execution proof proves that a transaction with a given message hash was executed
+ * in a block at a certain height at a certain <em>{@linkplain TransactionLocation location}</em>.
+ * It consists of a block proof, and a list proof from {@link #getBlockTransactions(long)}. It may
+ * be extended to a <em>call result</em> proof — read the next section.
  *
  * <h3 id="call-result-proof">Call Result Proof</h3>
  *
- * <p>A call result proof proves that a given service call completed with a particular
- * result in a block at a certain height. It consists of a block proof and a map proof
- * from {@link #getCallErrors(long)}. In case of <em>transaction</em> calls, it also
- * includes a list proof from {@link #getBlockTransactions(long)}.
+ * <p>A call result proof proves that a given service call completed with a particular result in a
+ * block at a certain height. It consists of a block proof and a map proof from {@link
+ * #getCallErrors(long)}. In case of <em>transaction</em> calls, it also includes a list proof from
+ * {@link #getBlockTransactions(long)}.
  *
  * <h3 id="service-data-proof">Service Data Proof</h3>
  *
  * <p>A service data proof proves that some service index contains certain data as of the last
  * committed block. It includes:
+ *
  * <ul>
- *   <li>An index proof: a block proof + a proof from the aggregating collection.</li>
- *   <li>A proof from the service index.</li>
+ *   <li>An index proof: a block proof + a proof from the aggregating collection.
+ *   <li>A proof from the service index.
  * </ul>
  *
  * <p>An index proof is created with {@link #createIndexProof(String)}.
@@ -110,8 +110,8 @@ import java.util.Optional;
  *   }
  * </pre>
  *
- * <p>Then create the two components: timestamp proof from a service index and index proof
- * for that index from the blockchain:
+ * <p>Then create the two components: timestamp proof from a service index and index proof for that
+ * index from the blockchain:
  *
  * <pre>
  *   TimestampProof createTimestampProof(Snapshot s,
@@ -138,7 +138,7 @@ import java.util.Optional;
  *
  * <p>Finally, serialize the proof and send it to the client.
  *
- * <hr/>
+ * <p><hr/>
  *
  * <p>All method arguments are non-null by default.
  * <!-- TODO: Link a page on proofs from exonum.com when one arrives: ECR-4106 -->
@@ -154,9 +154,7 @@ public final class Blockchain {
     this.schema = schema;
   }
 
-  /**
-   * Constructs a new blockchain instance for the given database access.
-   */
+  /** Constructs a new blockchain instance for the given database access. */
   public static Blockchain newInstance(Access access) {
     CoreSchema coreSchema = CoreSchema.newInstance(access);
     return new Blockchain(access, coreSchema);
@@ -165,11 +163,12 @@ public final class Blockchain {
   /**
    * Creates a proof for the block at the given height.
    *
-   * <p>It allows creating genesis block proofs, but they make little sense, as a genesis
-   * block is supposed to be a "root of trust", hence, well-known to the clients verifying
-   * any subsequent proofs coming from the blockchain.
+   * <p>It allows creating genesis block proofs, but they make little sense, as a genesis block is
+   * supposed to be a "root of trust", hence, well-known to the clients verifying any subsequent
+   * proofs coming from the blockchain.
    *
    * <p>If you need to create a proof for a service index, use {@link #createIndexProof(String)}.
+   *
    * @param blockHeight a height of the block for which to create a proof
    * @throws IndexOutOfBoundsException if the height is not valid
    * @see #createIndexProof(String)
@@ -181,25 +180,24 @@ public final class Blockchain {
   }
 
   /**
-   * Creates a proof for a single index in the database. It is usually a part
-   * of a <a href="#service-data-proof">Service Data Proof</a>.
+   * Creates a proof for a single index in the database. It is usually a part of a <a
+   * href="#service-data-proof">Service Data Proof</a>.
    *
    * @param fullIndexName the full index name for which to create a proof
-   * @throws IllegalStateException if the access is not a snapshot, because a state of a service index
-   *     can be proved only for the latest committed block, not for any intermediate state during
-   *     transaction processing
-   * @throws IllegalArgumentException if the index with the given name does not exist;
-   *     or is not Merkelized. An index does not exist until it is <em>initialized</em> —
-   *     created for the first time
-   *     with a {@link com.exonum.binding.core.storage.database.Fork}. Depending on the service
-   *     logic, an index may remain uninitialized indefinitely. Therefore, if proofs for an
+   * @throws IllegalStateException if the access is not a snapshot, because a state of a service
+   *     index can be proved only for the latest committed block, not for any intermediate state
+   *     during transaction processing
+   * @throws IllegalArgumentException if the index with the given name does not exist; or is not
+   *     Merkelized. An index does not exist until it is <em>initialized</em> — created for the
+   *     first time with a {@link com.exonum.binding.core.storage.database.Fork}. Depending on the
+   *     service logic, an index may remain uninitialized indefinitely. Therefore, if proofs for an
    *     empty index need to be created, it must be initialized early in the service lifecycle
    *     (e.g., in {@link com.exonum.binding.core.service.Service#initialize(Fork, Configuration)}.
    *     <!-- TODO: Simplify once initialization happens automatically: ECR-4121 -->
    */
   public IndexProof createIndexProof(String fullIndexName) {
-    checkState(!access.canModify(), "Cannot create an index proof for a mutable access (%s).",
-        access);
+    checkState(
+        !access.canModify(), "Cannot create an index proof for a mutable access (%s).", access);
     // FIXME: As #canModify is moved to Access-interface, it is no longer correct to assume
     //  that a Snapshot is the only non-modifiable impl. On top of that, RoFork will be
     //  unmodifiable, but it does not make sense to create IndexProofs for it.
@@ -207,31 +205,30 @@ public final class Blockchain {
     //  won't work either.
     return BlockchainProofs.createIndexProof((Snapshot) access, fullIndexName)
         .map(IndexProof::newInstance)
-        .orElseThrow(() -> new IllegalArgumentException(
-            String.format("Index %s does not exist or is not Merkelized", fullIndexName)));
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    String.format("Index %s does not exist or is not Merkelized", fullIndexName)));
   }
 
   /**
-   * Returns true if the blockchain contains <em>exactly</em> the same block as the passed
-   * value; false if it does not contain such block. Please note that all block fields
-   * are compared, not only its hash.
+   * Returns true if the blockchain contains <em>exactly</em> the same block as the passed value;
+   * false if it does not contain such block. Please note that all block fields are compared, not
+   * only its hash.
    *
    * @param block a value to check for presence in the blockchain
    */
   public boolean containsBlock(Block block) {
-    return findBlock(block.getBlockHash())
-        .map(block::equals)
-        .orElse(false);
+    return findBlock(block.getBlockHash()).map(block::equals).orElse(false);
   }
 
   /**
-   * Returns the <em>blockchain height</em> which is the height of the latest committed block
-   * in the blockchain. The block height is a distance between the last block
-   * and the "genesis", or initial, block. Therefore, the blockchain height is equal to the number
-   * of blocks plus one.
+   * Returns the <em>blockchain height</em> which is the height of the latest committed block in the
+   * blockchain. The block height is a distance between the last block and the "genesis", or
+   * initial, block. Therefore, the blockchain height is equal to the number of blocks plus one.
    *
-   * <p>For example, the "genesis" block has height {@code h = 0}. The latest committed block
-   * has height {@code h = getBlockHashes().size() - 1}.
+   * <p>For example, the "genesis" block has height {@code h = 0}. The latest committed block has
+   * height {@code h = getBlockHashes().size() - 1}.
    *
    * @throws RuntimeException if the "genesis block" was not created
    */
@@ -240,10 +237,9 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a list of all block hashes, indexed by the block height.
-   * For example, the "genesis block" will be at index 0,
-   * the block at height {@code h = 10} — at index 10.
-   * The last committed block will be at height {@code h = getBlockHashes().size() - 1}.
+   * Returns a list of all block hashes, indexed by the block height. For example, the "genesis
+   * block" will be at index 0, the block at height {@code h = 10} — at index 10. The last committed
+   * block will be at height {@code h = getBlockHashes().size() - 1}.
    */
   public ListIndex<HashCode> getBlockHashes() {
     return schema.getBlockHashes();
@@ -252,15 +248,15 @@ public final class Blockchain {
   /**
    * Returns a proof list of transaction hashes committed in the block at the given height.
    *
-   * <p>The {@linkplain ProofListIndexProxy#getIndexHash() index hash} of this index is recorded
-   * in the block header as {@link Block#getTxRootHash()}. That allows constructing
-   * <a href="Blockchain.html#tx-execution-proof">proofs</a> that a transaction
-   * with a certain message hash was executed at a certain
-   * <em>{@linkplain TransactionLocation location}</em>: (block_height, tx_index_in_block) pair.
+   * <p>The {@linkplain ProofListIndexProxy#getIndexHash() index hash} of this index is recorded in
+   * the block header as {@link Block#getTxRootHash()}. That allows constructing <a
+   * href="Blockchain.html#tx-execution-proof">proofs</a> that a transaction with a certain message
+   * hash was executed at a certain <em>{@linkplain TransactionLocation location}</em>:
+   * (block_height, tx_index_in_block) pair.
    *
    * @param height block height starting from 0
-   * @throws IllegalArgumentException if the height is invalid: negative or exceeding
-   *     the {@linkplain #getHeight() blockchain height}
+   * @throws IllegalArgumentException if the height is invalid: negative or exceeding the
+   *     {@linkplain #getHeight() blockchain height}
    */
   public ProofListIndexProxy<HashCode> getBlockTransactions(long height) {
     return schema.getBlockTransactions(height);
@@ -280,8 +276,8 @@ public final class Blockchain {
   }
 
   /**
-   * Returns a proof list of transaction hashes committed in the given block.
-   * The given block must match exactly the block that is stored in the database.
+   * Returns a proof list of transaction hashes committed in the given block. The given block must
+   * match exactly the block that is stored in the database.
    *
    * @param block block of which list of transaction hashes should be returned
    * @throws IllegalArgumentException if there is no such block in the blockchain
@@ -301,21 +297,19 @@ public final class Blockchain {
   }
 
   /**
-   * Returns execution errors that occurred in the block at the given height. Execution errors
-   * are preserved for transactions and before/after transaction handlers.
+   * Returns execution errors that occurred in the block at the given height. Execution errors are
+   * preserved for transactions and before/after transaction handlers.
    *
-   * <p>The {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of this index is recorded
-   * in the block header as {@link Block#getErrorHash()}. That
-   * enables constructing <a href="Blockchain.html#call-result-proof">proofs</a>
-   * that a certain operation was executed with a particular result. For example,
-   * a proof that a transaction with a certain message hash at
-   * a certain {@linkplain TransactionLocation location} had a certain result must include
-   * a BlockProof, a proof from this collection, and a proof from
-   * {@link #getBlockTransactions(long)}.
+   * <p>The {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of this index is recorded in
+   * the block header as {@link Block#getErrorHash()}. That enables constructing <a
+   * href="Blockchain.html#call-result-proof">proofs</a> that a certain operation was executed with
+   * a particular result. For example, a proof that a transaction with a certain message hash at a
+   * certain {@linkplain TransactionLocation location} had a certain result must include a
+   * BlockProof, a proof from this collection, and a proof from {@link #getBlockTransactions(long)}.
    *
    * @param blockHeight the height of the block
-   * @throws IllegalArgumentException if the height is invalid: negative or exceeding
-   *     the {@linkplain #getHeight() blockchain height}
+   * @throws IllegalArgumentException if the height is invalid: negative or exceeding the
+   *     {@linkplain #getHeight() blockchain height}
    * @see CallInBlocks
    */
   public ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
@@ -325,12 +319,11 @@ public final class Blockchain {
   /**
    * Returns a transaction execution result for the given message hash.
    *
-   * @return a transaction execution result, or {@code Optional.empty()} if this transaction
-   *         is unknown or was not yet executed
+   * @return a transaction execution result, or {@code Optional.empty()} if this transaction is
+   *     unknown or was not yet executed
    */
   public Optional<ExecutionStatus> getTxResult(HashCode messageHash) {
-    return getTxLocation(messageHash)
-        .map(this::getExecutionStatus);
+    return getTxLocation(messageHash).map(this::getExecutionStatus);
   }
 
   private ExecutionStatus getExecutionStatus(TransactionLocation txLocation) {
@@ -339,9 +332,7 @@ public final class Blockchain {
     CallInBlock txCall = CallInBlocks.transaction(txLocation.getIndexInBlock());
     if (callErrors.containsKey(txCall)) {
       ExecutionError txError = callErrors.get(txCall);
-      return ExecutionStatus.newBuilder()
-          .setError(txError)
-          .build();
+      return ExecutionStatus.newBuilder().setError(txError).build();
     }
     // No error: tx completed successfully
     return ExecutionStatuses.SUCCESS;
@@ -358,8 +349,8 @@ public final class Blockchain {
   /**
    * Returns transaction position inside the blockchain for given message hash.
    *
-   * @return a transaction execution result, or {@code Optional.empty()} if this transaction
-   *         is unknown or was not yet executed
+   * @return a transaction execution result, or {@code Optional.empty()} if this transaction is
+   *     unknown or was not yet executed
    */
   public Optional<TransactionLocation> getTxLocation(HashCode messageHash) {
     MapIndex<HashCode, TransactionLocation> txLocations = getTxLocations();
@@ -367,9 +358,7 @@ public final class Blockchain {
     return Optional.ofNullable(transactionLocation);
   }
 
-  /**
-   * Returns a map that stores a block object for every block hash.
-   */
+  /** Returns a map that stores a block object for every block hash. */
   public MapIndex<HashCode, Block> getBlocks() {
     return schema.getBlocks();
   }
@@ -377,8 +366,8 @@ public final class Blockchain {
   /**
    * Returns the block at the given height.
    *
-   * @param height the height of the block; must be non-negative and less than or equal to
-   *     the current {@linkplain #getHeight() blockchain height}
+   * @param height the height of the block; must be non-negative and less than or equal to the
+   *     current {@linkplain #getHeight() blockchain height}
    * @return a block at the height
    * @throws IndexOutOfBoundsException if the height is not valid
    */
@@ -395,8 +384,8 @@ public final class Blockchain {
   private void checkHeight(long height) {
     long blockchainHeight = getHeight();
     if (height < 0 || height > blockchainHeight) {
-      throw new IndexOutOfBoundsException("Block height (" + height + ") is out of range [0, "
-          + blockchainHeight + "]");
+      throw new IndexOutOfBoundsException(
+          "Block height (" + height + ") is out of range [0, " + blockchainHeight + "]");
     }
   }
 
@@ -404,7 +393,7 @@ public final class Blockchain {
    * Returns a block object for given block hash.
    *
    * @return a corresponding block, or {@code Optional.empty()} if there is no block with given
-   *         block hash
+   *     block hash
    */
   public Optional<Block> findBlock(HashCode blockHash) {
     MapIndex<HashCode, Block> blocks = getBlocks();
@@ -419,8 +408,7 @@ public final class Blockchain {
    */
   public Block getLastBlock() {
     ListIndex<HashCode> blockHashes = getBlockHashes();
-    checkState(!blockHashes.isEmpty(),
-        "No genesis block created yet (block hashes list is empty)");
+    checkState(!blockHashes.isEmpty(), "No genesis block created yet (block hashes list is empty)");
     HashCode lastBlockHash = blockHashes.getLast();
     return getBlocks().get(lastBlockHash);
   }
@@ -429,8 +417,8 @@ public final class Blockchain {
    * Returns the current consensus configuration of the network.
    *
    * @throws IllegalStateException if the "genesis block" was not created
-   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/configuration/">Exonum configuration</a> for
-   *     consensus configuration information.
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/configuration/">Exonum
+   *     configuration</a> for consensus configuration information.
    */
   public Config getConsensusConfiguration() {
     return schema.getConsensusConfiguration();
@@ -441,7 +429,9 @@ public final class Blockchain {
    * Note that this pool represents the state as of the current snapshot, and its state is volatile
    * even between block commits.
    *
-   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+   * @see <a
+   *     href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool
+   *     of Unconfirmed Transactions</a>
    */
   public KeySetIndexProxy<HashCode> getTransactionPool() {
     return schema.getTransactionPool();

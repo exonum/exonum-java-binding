@@ -38,5 +38,4 @@ class BoolSerializerTest {
     byte[] invalidValue = {2};
     invalidBytesValueTest(invalidValue, serializer);
   }
-
 }

@@ -55,14 +55,19 @@ class TimeSchemaProxy implements TimeSchema {
   private void checkIfEnabled() {
     MapIndex<String, InstanceState> serviceInstances =
         new DispatcherSchema(access).serviceInstances();
-    checkArgument(serviceInstances.containsKey(name), "No time service instance "
-        + "with the given name (%s) started.", name);
+    checkArgument(
+        serviceInstances.containsKey(name),
+        "No time service instance " + "with the given name (%s) started.",
+        name);
 
     // TODO(ECR-3953): check instance status
     InstanceSpec serviceSpec = serviceInstances.get(name).getSpec();
     ArtifactId artifactId = serviceSpec.getArtifact();
-    checkArgument(isTimeOracleInstance(artifactId), "Service with the given name (%s) is not "
-        + "an Exonum time oracle, but %s.", name, artifactId);
+    checkArgument(
+        isTimeOracleInstance(artifactId),
+        "Service with the given name (%s) is not " + "an Exonum time oracle, but %s.",
+        name,
+        artifactId);
   }
 
   private static boolean isTimeOracleInstance(ArtifactId artifactId) {
@@ -86,9 +91,7 @@ class TimeSchemaProxy implements TimeSchema {
     return IndexAddress.valueOf(name + "." + simpleName);
   }
 
-  /**
-   * Mapping for Exonum time indexes by name.
-   */
+  /** Mapping for Exonum time indexes by name. */
   private static final class TimeIndex {
     private static final String VALIDATORS_TIMES = "validators_times";
     private static final String TIME = "time";

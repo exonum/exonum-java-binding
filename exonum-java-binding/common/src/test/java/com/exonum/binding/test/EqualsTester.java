@@ -136,7 +136,8 @@ public final class EqualsTester {
       assertThat(item + " must not be Object#equals to null", item, not(equalTo(null)));
       assertThat(
           item + " must not be Object#equals to an arbitrary object of another class",
-          item, not(equalTo(NotAnInstance.EQUAL_TO_NOTHING)));
+          item,
+          not(equalTo(NotAnInstance.EQUAL_TO_NOTHING)));
       assertThat(item + " must be Object#equals to itself", item, is(item));
       assertThat(
           "the Object#hashCode of " + item + " must be consistent",

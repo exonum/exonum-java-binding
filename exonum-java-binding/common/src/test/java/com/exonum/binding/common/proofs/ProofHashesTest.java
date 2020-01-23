@@ -32,8 +32,8 @@ class ProofHashesTest {
   void checkInvalidSha256HashInvalidHashes(int size) {
     HashCode hash = HashCode.fromBytes(new byte[size]);
 
-    Exception e = assertThrows(InvalidProofException.class,
-        () -> ProofHashes.checkSha256Hash(hash));
+    Exception e =
+        assertThrows(InvalidProofException.class, () -> ProofHashes.checkSha256Hash(hash));
     int sizeBits = Byte.SIZE * size;
     assertThat(e.getMessage()).contains(Integer.toString(sizeBits));
   }

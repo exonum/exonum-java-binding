@@ -19,10 +19,10 @@ package com.exonum.binding.core.storage.indices;
 import com.exonum.binding.core.storage.database.Access;
 
 /**
- * A counter of modification events of some objects (e.g., a collection, or a database access).
- * It is updated each time the object notifies of an event. The clients that need
- * to detect modifications must save the current value of the counter, and check if it has changed
- * to determine if the corresponding source object is modified.
+ * A counter of modification events of some objects (e.g., a collection, or a database access). It
+ * is updated each time the object notifies of an event. The clients that need to detect
+ * modifications must save the current value of the counter, and check if it has changed to
+ * determine if the corresponding source object is modified.
  *
  * <p>Implementations must reliably detect up to 4 billion modifications (2^32-1).
  *
@@ -39,8 +39,8 @@ interface ModificationCounter {
   boolean isModifiedSince(int lastValue);
 
   /**
-   * Returns the current value of the counter. No assumptions must be made on how it changes
-   * when a notification is received.
+   * Returns the current value of the counter. No assumptions must be made on how it changes when a
+   * notification is received.
    */
   int getCurrentValue();
 
@@ -55,8 +55,8 @@ interface ModificationCounter {
   /**
    * Creates a modification counter for a collection using the given access.
    *
-   * @param access a database access on which the collection needing the modification counter
-   *     is based
+   * @param access a database access on which the collection needing the modification counter is
+   *     based
    */
   static ModificationCounter forAccess(Access access) {
     if (access.canModify()) {

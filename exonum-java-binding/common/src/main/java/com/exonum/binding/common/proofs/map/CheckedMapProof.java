@@ -22,10 +22,9 @@ import com.google.protobuf.ByteString;
 import java.util.Set;
 
 /**
- * A checked map proof.
- * In case of incorrect proof all methods (except for getProofStatus)
- * throw IllegalStateException.
- * Example usage:
+ * A checked map proof. In case of incorrect proof all methods (except for getProofStatus) throw
+ * IllegalStateException. Example usage:
+ *
  * <pre>{@code
  * ByteString key = "The key for which I want a proved value".getBytes();
  * HashCode expectedIndexHash = // get a known index hash from block proof //
@@ -42,33 +41,35 @@ import java.util.Set;
 public interface CheckedMapProof extends CheckedProof {
   /**
    * Get all leaf entries of this proof.
+   *
    * @throws IllegalStateException if the proof is not valid
    */
   Set<MapEntry<ByteString, ByteString>> getEntries();
 
   /**
    * Get all keys that were requested, but did not appear in this proof.
+   *
    * @throws IllegalStateException if the proof is not valid
    */
   Set<ByteString> getMissingKeys();
 
   /**
-   * If this proof is valid, returns true if there is a given key in the proof;
-   * false — if there is no such key.
+   * If this proof is valid, returns true if there is a given key in the proof; false — if there is
+   * no such key.
+   *
    * @throws IllegalStateException if the proof is not valid
    */
   boolean containsKey(ByteString key);
 
   /**
-   * If this proof is valid, returns the value corresponding to the specified key
-   * or null if there is no such key in the proof.
+   * If this proof is valid, returns the value corresponding to the specified key or null if there
+   * is no such key in the proof.
+   *
    * @throws IllegalStateException if the proof is not valid
    */
   ByteString get(ByteString key);
 
-  /**
-   * Returns the status of this proof: whether it is structurally valid.
-   */
+  /** Returns the status of this proof: whether it is structurally valid. */
   @Override
   MapProofStatus getProofStatus();
 }

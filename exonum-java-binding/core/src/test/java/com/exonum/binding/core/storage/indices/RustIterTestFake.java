@@ -33,7 +33,6 @@ public class RustIterTestFake implements RustIter<Integer> {
 
   @Override
   public Optional<Integer> next() {
-    return iterator.hasNext() ? Optional.of(iterator.next())
-                              : Optional.empty();
+    return iterator.hasNext() ? Optional.of(iterator.next()) : Optional.empty();
   }
 }

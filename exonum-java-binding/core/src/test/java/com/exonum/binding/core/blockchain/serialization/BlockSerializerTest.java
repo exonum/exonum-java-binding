@@ -62,53 +62,45 @@ class BlockSerializerTest {
   }
 
   private static Stream<Block> testSource() {
-    Block block1 = Block.builder()
-        .proposerId(0)
-        .height(1)
-        .numTransactions(2)
-        .blockHash(HashCode.fromString("ab"))
-        .previousBlockHash(HashCode.fromString("bc"))
-        .txRootHash(HashCode.fromString("cd"))
-        .stateHash(HashCode.fromString("ab"))
-        .additionalHeaders(ImmutableMap.of())
-        .errorHash(HashCode.fromString("ef"))
-        .build();
-    Block block2 = Block.builder()
-        .proposerId(Integer.MAX_VALUE)
-        .height(Long.MAX_VALUE)
-        .numTransactions(Integer.MAX_VALUE)
-        .blockHash(HashCode.fromString("ab"))
-        .previousBlockHash(HashCode.fromString("bc"))
-        .txRootHash(HashCode.fromString("cd"))
-        .stateHash(HashCode.fromString("ab"))
-        .additionalHeaders(ImmutableMap.of("one", ByteString.copyFromUtf8("abcd01")))
-        .errorHash(HashCode.fromString("ef"))
-        .build();
+    Block block1 =
+        Block.builder()
+            .proposerId(0)
+            .height(1)
+            .numTransactions(2)
+            .blockHash(HashCode.fromString("ab"))
+            .previousBlockHash(HashCode.fromString("bc"))
+            .txRootHash(HashCode.fromString("cd"))
+            .stateHash(HashCode.fromString("ab"))
+            .additionalHeaders(ImmutableMap.of())
+            .errorHash(HashCode.fromString("ef"))
+            .build();
+    Block block2 =
+        Block.builder()
+            .proposerId(Integer.MAX_VALUE)
+            .height(Long.MAX_VALUE)
+            .numTransactions(Integer.MAX_VALUE)
+            .blockHash(HashCode.fromString("ab"))
+            .previousBlockHash(HashCode.fromString("bc"))
+            .txRootHash(HashCode.fromString("cd"))
+            .stateHash(HashCode.fromString("ab"))
+            .additionalHeaders(ImmutableMap.of("one", ByteString.copyFromUtf8("abcd01")))
+            .errorHash(HashCode.fromString("ef"))
+            .build();
 
-    return Stream.of(block1, block2)
-        .map(Blocks::withProperHash);
+    return Stream.of(block1, block2).map(Blocks::withProperHash);
   }
 
   @Test
   void headersMapStrictOrderRoundTripTest() {
-    KeyValue first = KeyValue.newBuilder()
-        .setKey("foo")
-        .setValue(ByteString.EMPTY)
-        .build();
-    KeyValue second = KeyValue.newBuilder()
-        .setKey("bar")
-        .setValue(ByteString.EMPTY)
-        .build();
-    AdditionalHeaders expected = AdditionalHeaders.newBuilder()
-        .setHeaders(KeyValueSequence.newBuilder()
-            .addEntry(first)
-            .addEntry(second)
-            .build())
-        .build();
+    KeyValue first = KeyValue.newBuilder().setKey("foo").setValue(ByteString.EMPTY).build();
+    KeyValue second = KeyValue.newBuilder().setKey("bar").setValue(ByteString.EMPTY).build();
+    AdditionalHeaders expected =
+        AdditionalHeaders.newBuilder()
+            .setHeaders(KeyValueSequence.newBuilder().addEntry(first).addEntry(second).build())
+            .build();
 
     AdditionalHeaders actual = toHeadersProto(toHeadersMap(expected));
 
     assertThat(actual, is(expected));
   }
-
 }

@@ -24,30 +24,31 @@ import com.exonum.core.messages.Runtime.ExecutionStatus;
 import javax.annotation.Nullable;
 
 /**
- * An error occurred during the execution of a Service method. The execution exception includes
- * an integer error code, that may be either service-specific or operation-specific;
- * and an optional description — an exception message. Different error codes allow the clients
- * of the operation to distinguish between different error conditions.
+ * An error occurred during the execution of a Service method. The execution exception includes an
+ * integer error code, that may be either service-specific or operation-specific; and an optional
+ * description — an exception message. Different error codes allow the clients of the operation to
+ * distinguish between different error conditions.
  *
- * <p>Exonum translates this exception into an {@link ExecutionError} type
- * with error kind equal to {@linkplain ErrorKind#SERVICE}. The execution error copies
- * the error code and the description from this exception. Exonum saves it into the database in
- * {@linkplain Blockchain#getCallErrors(long) the registry of call errors}.
- * Note that only the value of the error code affects the blockchain state.
+ * <p>Exonum translates this exception into an {@link ExecutionError} type with error kind equal to
+ * {@linkplain ErrorKind#SERVICE}. The execution error copies the error code and the description
+ * from this exception. Exonum saves it into the database in {@linkplain
+ * Blockchain#getCallErrors(long) the registry of call errors}. Note that only the value of the
+ * error code affects the blockchain state.
  *
- * <p>The other attributes of a Java exception — a stack trace, a cause, suppressed exceptions —
- * are not saved in the database. They are used for logging only.
+ * <p>The other attributes of a Java exception — a stack trace, a cause, suppressed exceptions — are
+ * not saved in the database. They are used for logging only.
  *
  * <h3>Requesting Execution Errors</h3>
  *
  * <p>An execution error, including the error code and description, can be requested:
+ *
  * <ul>
- *   <li>by any Exonum Service, using {@link Blockchain#getCallErrors(long)}</li>
- *   <li>by an authorized Light Client, using the Exonum endpoints. For example, when
- *   the clients requests the transaction information, it will get the execution error,
- *   if it occurred. See
- *   <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/node-management/#transaction">the API endpoint documentation</a>
- *   for more information.</li>
+ *   <li>by any Exonum Service, using {@link Blockchain#getCallErrors(long)}
+ *   <li>by an authorized Light Client, using the Exonum endpoints. For example, when the clients
+ *       requests the transaction information, it will get the execution error, if it occurred. See
+ *       <a
+ *       href="https://exonum.com/doc/version/0.13-rc.2/advanced/node-management/#transaction">the
+ *       API endpoint documentation</a> for more information.
  * </ul>
  *
  * @see Blockchain#getTxResult(HashCode)
@@ -72,8 +73,8 @@ public class ExecutionException extends RuntimeException {
    * Constructs a new transaction exception with the specified description.
    *
    * @param errorCode the transaction error code
-   * @param description the error description. The detail description is saved for
-   *     later retrieval by the {@link #getMessage()} method.
+   * @param description the error description. The detail description is saved for later retrieval
+   *     by the {@link #getMessage()} method.
    */
   public ExecutionException(byte errorCode, @Nullable String description) {
     this(errorCode, description, null);
@@ -86,30 +87,30 @@ public class ExecutionException extends RuntimeException {
    * incorporated in this exception’s detail message.
    *
    * @param errorCode the transaction error code
-   * @param description the error description. The detail description is saved for
-   *     later retrieval by the {@link #getMessage()} method.
+   * @param description the error description. The detail description is saved for later retrieval
+   *     by the {@link #getMessage()} method.
    * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method).
    *     A <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown.
    */
-  public ExecutionException(byte errorCode,
-      @Nullable String description,
-      @Nullable Throwable cause) {
+  public ExecutionException(
+      byte errorCode, @Nullable String description, @Nullable Throwable cause) {
     super(description, cause);
     this.errorCode = errorCode;
   }
 
   /**
    * Returns the transaction error code.
+   *
    * @see ExecutionError#getCode()
    */
-  @SuppressWarnings("unused")  // Native API
+  @SuppressWarnings("unused") // Native API
   public final byte getErrorCode() {
     return errorCode;
   }
 
   /**
-   * Returns a string representation of this error. Includes the actual class name,
-   * the optional description and the error code.
+   * Returns a string representation of this error. Includes the actual class name, the optional
+   * description and the error code.
    */
   @Override
   public String toString() {

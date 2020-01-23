@@ -179,6 +179,13 @@
         </configuration>
       </plugin>
 
+      <!-- Google Java Format plugin. No executions in dev builds; 'check' during CI build. -->
+      <plugin>
+        <groupId>com.coveo</groupId>
+        <artifactId>fmt-maven-plugin</artifactId>
+        <version>2.9</version>
+      </plugin>
+
       <!-- Checkstyle plugin is run during validate phase (before javac) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -353,6 +360,20 @@
                 <configuration>
                   <dataFile>${jacoco.reports-path}/jacoco-unit.exec</dataFile>
                 </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>com.coveo</groupId>
+            <artifactId>fmt-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>check-java-code-style</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
               </execution>
             </executions>
           </plugin>

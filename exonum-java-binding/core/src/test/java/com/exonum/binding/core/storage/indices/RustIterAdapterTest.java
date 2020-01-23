@@ -37,16 +37,14 @@ class RustIterAdapterTest {
 
   @Test
   void nextThrowsIfNoNextItem0() {
-    adapter = new RustIterAdapter<>(
-        new RustIterTestFake(emptyList()));
+    adapter = new RustIterAdapter<>(new RustIterTestFake(emptyList()));
 
     assertThrows(NoSuchElementException.class, () -> adapter.next());
   }
 
   @Test
   void nextThrowsIfNoNextItem1() {
-    adapter = new RustIterAdapter<>(
-        new RustIterTestFake(singletonList(1)));
+    adapter = new RustIterAdapter<>(new RustIterTestFake(singletonList(1)));
 
     adapter.next();
 
@@ -57,8 +55,8 @@ class RustIterAdapterTest {
   @MethodSource("testData")
   void iteratorMustIncludeAllTheItemsFromTheList(List<Integer> underlyingList) {
     // Create an adapter under test, converting a list to rustIter.
-    RustIterAdapter<Integer> iterAdapter = new RustIterAdapter<>(
-        rustIterMockFromIterable(underlyingList));
+    RustIterAdapter<Integer> iterAdapter =
+        new RustIterAdapter<>(rustIterMockFromIterable(underlyingList));
 
     // Use an adapter as Iterator to collect all items in a list
     List<Integer> itemsFromIterAdapter = ImmutableList.copyOf(iterAdapter);
@@ -73,11 +71,6 @@ class RustIterAdapterTest {
 
   private static List<List<Integer>> testData() {
     return Arrays.asList(
-        emptyList(),
-        singletonList(1),
-        asList(1, 2),
-        asList(1, 2, 3),
-        asList(1, 2, 3, 4, 5)
-    );
+        emptyList(), singletonList(1), asList(1, 2), asList(1, 2, 3), asList(1, 2, 3, 4, 5));
   }
 }

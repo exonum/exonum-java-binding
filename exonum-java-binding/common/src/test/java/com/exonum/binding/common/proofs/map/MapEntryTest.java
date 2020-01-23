@@ -29,8 +29,7 @@ class MapEntryTest {
 
   @Test
   void staticFactoryMethodsRejectsNulls() {
-    new NullPointerTester()
-        .testStaticMethods(MapEntry.class, Visibility.PUBLIC);
+    new NullPointerTester().testStaticMethods(MapEntry.class, Visibility.PUBLIC);
   }
 
   @Test
@@ -42,5 +41,4 @@ class MapEntryTest {
             ByteString.class, ByteString.copyFromUtf8("a"), ByteString.copyFromUtf8("b"))
         .verify();
   }
-
 }

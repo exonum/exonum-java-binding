@@ -37,8 +37,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * The adapter of {@link ServiceRuntime} to the interface, convenient to the native code
- * accessing it through JNI (simpler, faster, more reliable).
+ * The adapter of {@link ServiceRuntime} to the interface, convenient to the native code accessing
+ * it through JNI (simpler, faster, more reliable).
  *
  * <p>For more detailed documentation on the operations, see the {@link ServiceRuntime}.
  */
@@ -54,9 +54,7 @@ public class ServiceRuntimeAdapter {
     this.accessFactory = accessFactory;
   }
 
-  /**
-   * Returns the corresponding service runtime.
-   */
+  /** Returns the corresponding service runtime. */
   public ServiceRuntime getServiceRuntime() {
     return serviceRuntime;
   }
@@ -76,9 +74,8 @@ public class ServiceRuntimeAdapter {
    * Deploys the Java service artifact.
    *
    * @param artifactId bytes representation of the Java service artifact id as a serialized message
-   * @param deploySpec the deploy specification as a serialized
-   *     {@link com.exonum.binding.core.runtime.DeployArguments}
-   *     protobuf message
+   * @param deploySpec the deploy specification as a serialized {@link
+   *     com.exonum.binding.core.runtime.DeployArguments} protobuf message
    * @throws IllegalArgumentException if the deploy specification or id are not valid
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
    * @see ServiceRuntime#deployArtifact(ServiceArtifactId, String)
@@ -94,14 +91,15 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
-   * Returns true if the artifact with the given name is deployed in this runtime;
-   * false — otherwise.
+   * Returns true if the artifact with the given name is deployed in this runtime; false —
+   * otherwise.
+   *
    * @param artifactId bytes representation of the service artifact
    */
   boolean isArtifactDeployed(byte[] artifactId) {
     ArtifactId artifact = parseArtifact(artifactId);
-    ServiceArtifactId serviceArtifact = ServiceArtifactId.newJavaId(
-        artifact.getName(), artifact.getVersion());
+    ServiceArtifactId serviceArtifact =
+        ServiceArtifactId.newJavaId(artifact.getName(), artifact.getVersion());
     return serviceRuntime.isArtifactDeployed(serviceArtifact);
   }
 
@@ -135,8 +133,8 @@ public class ServiceRuntimeAdapter {
    *     message
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @throws ExecutionException if the service initialization failed
-   * @throws UnexpectedExecutionException if the service initialization failed
-   *     with an unexpected exception
+   * @throws UnexpectedExecutionException if the service initialization failed with an unexpected
+   *     exception
    * @see ServiceRuntime#initiateAddingService(Fork, ServiceInstanceSpec, byte[])
    */
   void initiateAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
@@ -156,14 +154,13 @@ public class ServiceRuntimeAdapter {
    *
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
-   * @param numericInstanceStatus new status of the service instance as a numeric
-   *     representation of the {@link InstanceState.Status} enum.
+   * @param numericInstanceStatus new status of the service instance as a numeric representation of
+   *     the {@link InstanceState.Status} enum.
    * @see ServiceRuntime#updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)
    */
   void updateServiceStatus(byte[] instanceSpec, int numericInstanceStatus) {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
-    InstanceState.Status instanceStatus =
-        InstanceState.Status.forNumber(numericInstanceStatus);
+    InstanceState.Status instanceStatus = InstanceState.Status.forNumber(numericInstanceStatus);
     serviceRuntime.updateInstanceStatus(javaInstanceSpec, instanceStatus);
   }
 
@@ -187,19 +184,26 @@ public class ServiceRuntimeAdapter {
    * @param txId the transaction type identifier within the service
    * @param arguments the transaction arguments
    * @param forkNativeHandle a handle to a native fork object
-   * @param callerServiceId the id of the service which invoked the transaction (in case of
-   *      inner transactions); or 0 when the caller is an external message
+   * @param callerServiceId the id of the service which invoked the transaction (in case of inner
+   *     transactions); or 0 when the caller is an external message
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
    * @throws ExecutionException if the transaction execution failed
-   * @throws UnexpectedExecutionException if the transaction execution failed
-   *     with an unexpected exception
+   * @throws UnexpectedExecutionException if the transaction execution failed with an unexpected
+   *     exception
    * @throws IllegalArgumentException if any argument is not valid
    * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
-   *      PublicKey)
+   *     PublicKey)
    */
-  void executeTransaction(int serviceId, String interfaceName, int txId, byte[] arguments,
-      long forkNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)
+  void executeTransaction(
+      int serviceId,
+      String interfaceName,
+      int txId,
+      byte[] arguments,
+      long forkNativeHandle,
+      int callerServiceId,
+      byte[] txMessageHash,
+      byte[] authorPublicKey)
       throws CloseFailuresException {
 
     try (Cleaner cleaner = new Cleaner("executeTransaction")) {
@@ -207,8 +211,8 @@ public class ServiceRuntimeAdapter {
       HashCode hash = HashCode.fromBytes(txMessageHash);
       PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
 
-      serviceRuntime.executeTransaction(serviceId, interfaceName, txId, arguments, fork,
-          callerServiceId, hash, authorPk);
+      serviceRuntime.executeTransaction(
+          serviceId, interfaceName, txId, arguments, fork, callerServiceId, hash, authorPk);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
@@ -217,11 +221,11 @@ public class ServiceRuntimeAdapter {
   /**
    * Performs the after transactions operation for services in this runtime.
    *
-   * @param forkHandle a handle to the native fork object, which must support checkpoints
-   *                   and rollbacks
+   * @param forkHandle a handle to the native fork object, which must support checkpoints and
+   *     rollbacks
    * @throws ExecutionException if the transaction execution failed
-   * @throws UnexpectedExecutionException if the transaction execution failed
-   *     with an unexpected exception
+   * @throws UnexpectedExecutionException if the transaction execution failed with an unexpected
+   *     exception
    * @throws CloseFailuresException if there was a failure in destroying some native peers
    * @see ServiceRuntime#afterTransactions(int, Fork)
    */
@@ -247,9 +251,8 @@ public class ServiceRuntimeAdapter {
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("afterCommit")) {
       Snapshot snapshot = accessFactory.createSnapshot(snapshotHandle, cleaner);
-      OptionalInt optionalValidatorId = validatorId >= 0
-          ? OptionalInt.of(validatorId)
-          : OptionalInt.empty();
+      OptionalInt optionalValidatorId =
+          validatorId >= 0 ? OptionalInt.of(validatorId) : OptionalInt.empty();
       BlockCommittedEvent event =
           BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
 

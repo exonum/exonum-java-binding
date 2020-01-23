@@ -25,9 +25,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
 
-/**
- * Node decorator which can restrict an access to the node by calling {@link #close()} method.
- */
+/** Node decorator which can restrict an access to the node by calling {@link #close()} method. */
 class MultiplexingNodeDecorator implements Node {
 
   private final Node node;
@@ -54,9 +52,9 @@ class MultiplexingNodeDecorator implements Node {
   }
 
   /**
-   * Closes an access to the node. After calling this method subsequent calling
-   * {@link #submitTransaction(RawTransaction)} or {@link #withSnapshot(Function)} methods
-   * will cause {@link IllegalStateException}.
+   * Closes an access to the node. After calling this method subsequent calling {@link
+   * #submitTransaction(RawTransaction)} or {@link #withSnapshot(Function)} methods will cause
+   * {@link IllegalStateException}.
    */
   @Override
   public void close() {

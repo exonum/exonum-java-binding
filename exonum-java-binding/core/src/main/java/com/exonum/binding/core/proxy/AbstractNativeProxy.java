@@ -16,9 +16,7 @@
 
 package com.exonum.binding.core.proxy;
 
-/**
- * A base class of a native proxy.
- */
+/** A base class of a native proxy. */
 public abstract class AbstractNativeProxy {
 
   /** A handle to the native object. */
@@ -34,8 +32,8 @@ public abstract class AbstractNativeProxy {
    *
    * <p>The returned value shall only be passed as an argument to native methods.
    *
-   * <p><strong>Warning:</strong> do not cache the return value, as you won't be able
-   * to catch use-after-free.
+   * <p><strong>Warning:</strong> do not cache the return value, as you won't be able to catch
+   * use-after-free.
    *
    * @throws IllegalStateException if the native handle is invalid (closed or nullptr)
    */
@@ -43,9 +41,7 @@ public abstract class AbstractNativeProxy {
     return nativeHandle.get();
   }
 
-  /**
-   * Returns true if this proxy has a valid native handle.
-   */
+  /** Returns true if this proxy has a valid native handle. */
   protected final boolean isValidHandle() {
     return nativeHandle.isValid();
   }

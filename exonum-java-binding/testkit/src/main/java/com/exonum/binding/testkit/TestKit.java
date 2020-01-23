@@ -72,24 +72,26 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 /**
- * TestKit for testing blockchain services. It offers simple network configuration emulation
- * (with no real network setup). Although it is possible to add several validator nodes to this
- * network, only one node will create the service instances, execute their operations (e.g.,
- * {@linkplain Service#afterCommit(BlockCommittedEvent)} method logic), and provide access to its
- * state.
+ * TestKit for testing blockchain services. It offers simple network configuration emulation (with
+ * no real network setup). Although it is possible to add several validator nodes to this network,
+ * only one node will create the service instances, execute their operations (e.g., {@linkplain
+ * Service#afterCommit(BlockCommittedEvent)} method logic), and provide access to its state.
  *
  * <p>Only the emulated node has a pool of unconfirmed transactions where a service can submit new
- * transaction messages through {@link Node#submitTransaction(RawTransaction)}; or the test
- * code through {@link #createBlockWithTransactions(TransactionMessage...)}. All transactions
- * from the pool are committed when a new block is created with {@link #createBlock()}.
+ * transaction messages through {@link Node#submitTransaction(RawTransaction)}; or the test code
+ * through {@link #createBlockWithTransactions(TransactionMessage...)}. All transactions from the
+ * pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized — service instances are
  * {@linkplain Service#initialize(Fork, Configuration) initialized} and genesis block is committed.
  * Then the {@linkplain Service#createPublicApiHandlers(Node, Router) public API handlers} are
  * created.
  *
- * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/test-service/">TestKit documentation</a>
- * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/test-service/">TestKit
+ *     documentation</a>
+ * @see <a
+ *     href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool
+ *     of Unconfirmed Transactions</a>
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
@@ -104,12 +106,10 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * single emulated node submits them.
    */
   public static final short MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE = 3;
-  @VisibleForTesting
-  static final short MAX_SERVICE_NUMBER = 256;
-  @VisibleForTesting
-  static final int MAX_SERVICE_INSTANCE_ID = 1023;
-  @VisibleForTesting
-  static final Any DEFAULT_CONFIGURATION = Any.getDefaultInstance();
+
+  @VisibleForTesting static final short MAX_SERVICE_NUMBER = 256;
+  @VisibleForTesting static final int MAX_SERVICE_INSTANCE_ID = 1023;
+  @VisibleForTesting static final Any DEFAULT_CONFIGURATION = Any.getDefaultInstance();
   // Set 0 as a server port so it will assign a random suitable port by default
   private static final int SERVER_PORT = 0;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
@@ -118,35 +118,46 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   private final Integer timeServiceId;
   private final int port;
 
-  @VisibleForTesting
-  final Cleaner snapshotCleaner = new Cleaner("TestKit#getSnapshot");
+  @VisibleForTesting final Cleaner snapshotCleaner = new Cleaner("TestKit#getSnapshot");
 
-  private TestKit(long nativeHandle, @Nullable TimeServiceSpec timeServiceSpec,
-      ServiceRuntime serviceRuntime, int port) {
+  private TestKit(
+      long nativeHandle,
+      @Nullable TimeServiceSpec timeServiceSpec,
+      ServiceRuntime serviceRuntime,
+      int port) {
     super(nativeHandle, true);
     this.serviceRuntime = serviceRuntime;
     timeServiceId = timeServiceSpec == null ? null : timeServiceSpec.serviceId;
     this.port = port;
   }
 
-  private static TestKit newInstance(TestKitServiceInstances serviceInstances,
-                                     EmulatedNodeType nodeType, short validatorCount,
-                                     @Nullable TimeServiceSpec timeServiceSpec,
-                                     Path artifactsDirectory) {
+  private static TestKit newInstance(
+      TestKitServiceInstances serviceInstances,
+      EmulatedNodeType nodeType,
+      short validatorCount,
+      @Nullable TimeServiceSpec timeServiceSpec,
+      Path artifactsDirectory) {
     // Create the test network
     Injector frameworkInjector = createTestRuntimeInjector(artifactsDirectory);
     ServiceRuntimeAdapter serviceRuntimeAdapter =
         frameworkInjector.getInstance(ServiceRuntimeAdapter.class);
     boolean isAuditorNode = nodeType == EmulatedNodeType.AUDITOR;
-    long nativeHandle = nativeCreateTestKit(serviceInstances.toByteArray(), isAuditorNode,
-            validatorCount, timeServiceSpec, serviceRuntimeAdapter);
+    long nativeHandle =
+        nativeCreateTestKit(
+            serviceInstances.toByteArray(),
+            isAuditorNode,
+            validatorCount,
+            timeServiceSpec,
+            serviceRuntimeAdapter);
 
     try {
       // Get the actual port: it must have been set as testkit initialized the runtimes.
       Server serviceServer = frameworkInjector.getInstance(Server.class);
-      int port = serviceServer.getActualPort()
-          .orElseThrow(() -> new IllegalStateException(
-              "No port set after testkit has been created"));
+      int port =
+          serviceServer
+              .getActualPort()
+              .orElseThrow(
+                  () -> new IllegalStateException("No port set after testkit has been created"));
       ServiceRuntime serviceRuntime = serviceRuntimeAdapter.getServiceRuntime();
       return new TestKit(nativeHandle, timeServiceSpec, serviceRuntime, port);
     } catch (Exception e) {
@@ -157,8 +168,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   private static Injector createTestRuntimeInjector(Path artifactsDirectory) {
-    Module frameworkModule = new FrameworkModule(artifactsDirectory, SERVER_PORT,
-        DEPENDENCY_REFERENCE_CLASSES);
+    Module frameworkModule =
+        new FrameworkModule(artifactsDirectory, SERVER_PORT, DEPENDENCY_REFERENCE_CLASSES);
     return Guice.createInjector(frameworkModule);
   }
 
@@ -169,16 +180,17 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * @param artifactId the id of the artifact
    * @param artifactFilename a filename of the service artifact in the directory for artifacts
    * @param serviceName the name of the service
-   * @param serviceId the id of the service, must be in range
-   *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
-   * @param artifactsDirectory the directory from which the service runtime loads service
-   *     artifacts
-   *
-   * @throws IllegalArgumentException if serviceId is not in range
-   *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
+   * @param serviceId the id of the service, must be in range [0; {@value #MAX_SERVICE_INSTANCE_ID}]
+   * @param artifactsDirectory the directory from which the service runtime loads service artifacts
+   * @throws IllegalArgumentException if serviceId is not in range [0; {@value
+   *     #MAX_SERVICE_INSTANCE_ID}]
    */
-  public static TestKit forService(ServiceArtifactId artifactId, String artifactFilename,
-                                   String serviceName, int serviceId, Path artifactsDirectory) {
+  public static TestKit forService(
+      ServiceArtifactId artifactId,
+      String artifactFilename,
+      String serviceName,
+      int serviceId,
+      Path artifactsDirectory) {
     return new Builder()
         .withNodeType(EmulatedNodeType.VALIDATOR)
         .withDeployedArtifact(artifactId, artifactFilename)
@@ -192,8 +204,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws RuntimeException if any transaction does not belong to a started service
-   *     (i.e., has an unknown service id)
+   * @throws RuntimeException if any transaction does not belong to a started service (i.e., has an
+   *     unknown service id)
    */
   public Block createBlockWithTransactions(TransactionMessage... transactions) {
     return createBlockWithTransactions(asList(transactions));
@@ -204,14 +216,13 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * order of their hashes. In-pool transactions will be ignored.
    *
    * @return created block
-   * @throws RuntimeException if any transaction does not belong to a started service
-   *     (i.e., has an unknown service id)
+   * @throws RuntimeException if any transaction does not belong to a started service (i.e., has an
+   *     unknown service id)
    */
   public Block createBlockWithTransactions(Iterable<TransactionMessage> transactions) {
     List<TransactionMessage> messageList = ImmutableList.copyOf(transactions);
-    byte[][] transactionMessagesArr = messageList.stream()
-        .map(TransactionMessage::toBytes)
-        .toArray(byte[][]::new);
+    byte[][] transactionMessagesArr =
+        messageList.stream().map(TransactionMessage::toBytes).toArray(byte[][]::new);
     byte[] block = nativeCreateBlockWithTransactions(nativeHandle.get(), transactionMessagesArr);
     return BLOCK_SERIALIZER.fromBytes(block);
   }
@@ -228,26 +239,22 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Returns a list of in-pool transactions. Please note that the order of transactions in pool
-   * does not necessarily match the order in which the clients submitted the messages.
+   * Returns a list of in-pool transactions. Please note that the order of transactions in pool does
+   * not necessarily match the order in which the clients submitted the messages.
    */
   public List<TransactionMessage> getTransactionPool() {
     return findTransactionsInPool(transactionMessage -> true);
   }
 
-  /**
-   * Returns a list of in-pool transactions that match the given predicate.
-   */
+  /** Returns a list of in-pool transactions that match the given predicate. */
   public List<TransactionMessage> findTransactionsInPool(Predicate<TransactionMessage> predicate) {
-    return applySnapshot((snapshot) -> {
-      Blockchain blockchain = Blockchain.newInstance(snapshot);
-      MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
-      KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
-      return poolTxsHashes.stream()
-          .map(txMessages::get)
-          .filter(predicate)
-          .collect(toList());
-    });
+    return applySnapshot(
+        (snapshot) -> {
+          Blockchain blockchain = Blockchain.newInstance(snapshot);
+          MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
+          KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
+          return poolTxsHashes.stream().map(txMessages::get).filter(predicate).collect(toList());
+        });
   }
 
   /**
@@ -255,27 +262,28 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * corresponds to the latest committed block). In-pool (not yet processed) transactions are also
    * accessible with it in {@linkplain Blockchain#getTxMessages() blockchain}.
    *
-   * <p>This method destroys the snapshot once the passed closure completes, compared to
-   * {@link #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
+   * <p>This method destroys the snapshot once the passed closure completes, compared to {@link
+   * #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
    *
    * @param snapshotFunction a function to execute
    * @see #applySnapshot(Function)
    */
   public void withSnapshot(Consumer<Snapshot> snapshotFunction) {
-    applySnapshot(s -> {
-      snapshotFunction.accept(s);
-      return null;
-    });
+    applySnapshot(
+        s -> {
+          snapshotFunction.accept(s);
+          return null;
+        });
   }
 
   /**
    * Performs the given function with a snapshot of the current database state (i.e., the one that
-   * corresponds to the latest committed block) and returns a result of its execution. In-pool
-   * (not yet processed) transactions are also accessible with it in
-   * {@linkplain Blockchain#getTxMessages() blockchain}.
+   * corresponds to the latest committed block) and returns a result of its execution. In-pool (not
+   * yet processed) transactions are also accessible with it in {@linkplain
+   * Blockchain#getTxMessages() blockchain}.
    *
-   * <p>This method destroys the snapshot once the passed closure completes, compared to
-   * {@link #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
+   * <p>This method destroys the snapshot once the passed closure completes, compared to {@link
+   * #getSnapshot()}, which disposes created snapshots only when TestKit is closed.
    *
    * <p>Consider using {@link #withSnapshot(Consumer)} when returning the result of given function
    * is not needed.
@@ -294,12 +302,12 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
-   * Returns a snapshot of the current database state (i.e., the one that
-   * corresponds to the latest committed block). In-pool (not yet processed) transactions are also
-   * accessible with it in {@linkplain Blockchain#getTxMessages() blockchain}.
+   * Returns a snapshot of the current database state (i.e., the one that corresponds to the latest
+   * committed block). In-pool (not yet processed) transactions are also accessible with it in
+   * {@linkplain Blockchain#getTxMessages() blockchain}.
    *
-   * <p>All created snapshots are deleted when this TestKit is {@linkplain #close() closed}.
-   * It is forbidden to access the snapshots once the TestKit is closed.
+   * <p>All created snapshots are deleted when this TestKit is {@linkplain #close() closed}. It is
+   * forbidden to access the snapshots once the TestKit is closed.
    *
    * <p>If you need to create a large number (e.g. more than a hundred) of snapshots, it is
    * recommended to use {@link #withSnapshot(Consumer)} or {@link #applySnapshot(Function)}, which
@@ -322,9 +330,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     return nativeGetEmulatedNode(nativeHandle.get());
   }
 
-  /**
-   * Returns the TCP port on which the service REST API is mounted.
-   */
+  /** Returns the TCP port on which the service REST API is mounted. */
   public int getPort() {
     return port;
   }
@@ -340,10 +346,12 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
   }
 
-  private static native long nativeCreateTestKit(byte[] services,
-                                                 boolean auditor, short withValidatorCount,
-                                                 TimeServiceSpec timeProviderSpec,
-                                                 ServiceRuntimeAdapter serviceRuntimeAdapter);
+  private static native long nativeCreateTestKit(
+      byte[] services,
+      boolean auditor,
+      short withValidatorCount,
+      TimeServiceSpec timeProviderSpec,
+      ServiceRuntimeAdapter serviceRuntimeAdapter);
 
   private native long nativeCreateSnapshot(long nativeHandle);
 
@@ -363,15 +371,13 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     return new Builder();
   }
 
-  /**
-   * Builder for the TestKit.
-   */
+  /** Builder for the TestKit. */
   public static final class Builder {
 
     private EmulatedNodeType nodeType = EmulatedNodeType.VALIDATOR;
     private short validatorCount = 1;
     private Multimap<ServiceArtifactId, Runtime.InstanceInitParams> services =
-            ArrayListMultimap.create();
+        ArrayListMultimap.create();
     private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
     private Path artifactsDirectory;
     private TimeServiceSpec timeServiceSpec;
@@ -384,10 +390,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * <p>Note that the remaining mutable state are {@linkplain TimeProvider time providers}.
      */
     Builder shallowCopy() {
-      Builder builder = new Builder()
-          .withNodeType(nodeType)
-          .withValidators(validatorCount)
-          .withArtifactsDirectory(artifactsDirectory);
+      Builder builder =
+          new Builder()
+              .withNodeType(nodeType)
+              .withValidators(validatorCount)
+              .withArtifactsDirectory(artifactsDirectory);
       builder.timeServiceSpec = timeServiceSpec;
       builder.services = MultimapBuilder.hashKeys().arrayListValues().build(services);
       builder.serviceArtifactFilenames = new HashMap<>(serviceArtifactFilenames);
@@ -395,9 +402,9 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
 
     /**
-     * Sets the type of the main TestKit node - either validator or auditor. Note that
-     * {@link Service#afterCommit(BlockCommittedEvent)} logic will only be called on the main
-     * TestKit node of this type
+     * Sets the type of the main TestKit node - either validator or auditor. Note that {@link
+     * Service#afterCommit(BlockCommittedEvent)} logic will only be called on the main TestKit node
+     * of this type
      */
     public Builder withNodeType(EmulatedNodeType nodeType) {
       this.nodeType = nodeType;
@@ -409,8 +416,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      * regardless of the configured number of validators, only a single service will be
      * instantiated. Equal to one by default.
      *
-     * <p>Note that validator count should be
-     * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
+     * <p>Note that validator count should be {@value
+     * #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
      *
      * @throws IllegalArgumentException if validatorCount is less than one
      */
@@ -421,11 +428,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
     }
 
     /**
-     * Adds a service artifact which would be deployed by the TestKit. Several service artifacts
-     * can be added.
+     * Adds a service artifact which would be deployed by the TestKit. Several service artifacts can
+     * be added.
      *
-     * <p>Once the service artifact is deployed, the service instances can be added with
-     * {@link #withService(ServiceArtifactId, String, int, MessageLite)}.
+     * <p>Once the service artifact is deployed, the service instances can be added with {@link
+     * #withService(ServiceArtifactId, String, int, MessageLite)}.
      */
     public Builder withDeployedArtifact(
         ServiceArtifactId serviceArtifactId, String artifactFilename) {
@@ -454,74 +461,82 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      *
      * @param serviceArtifactId the id of the artifact
      * @param serviceName the name of the service
-     * @param serviceId the id of the service, must be in range
-     *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
+     * @param serviceId the id of the service, must be in range [0; {@value
+     *     #MAX_SERVICE_INSTANCE_ID}]
      * @param configuration the service configuration parameters
-     *
-     * @throws IllegalArgumentException if serviceId is not in range
-     *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
-     * @throws IllegalArgumentException if service artifact with equal serviceArtifactId
-     *     was not deployed
+     * @throws IllegalArgumentException if serviceId is not in range [0; {@value
+     *     #MAX_SERVICE_INSTANCE_ID}]
+     * @throws IllegalArgumentException if service artifact with equal serviceArtifactId was not
+     *     deployed
      */
-    public Builder withService(ServiceArtifactId serviceArtifactId, String serviceName,
-                               int serviceId, MessageLite configuration) {
+    public Builder withService(
+        ServiceArtifactId serviceArtifactId,
+        String serviceName,
+        int serviceId,
+        MessageLite configuration) {
       checkServiceId(serviceId, serviceName);
       checkServiceArtifactIsDeployed(serviceArtifactId);
 
       // Collect specifications of service instances in their protobuf representation.
-      Runtime.InstanceSpec instanceSpec = Runtime.InstanceSpec.newBuilder()
-          .setId(serviceId)
-          .setName(serviceName)
-          .setArtifact(artifactIdToProto(serviceArtifactId))
-          .build();
-      Runtime.InstanceInitParams params = Runtime.InstanceInitParams.newBuilder()
-          .setInstanceSpec(instanceSpec)
-          .setConstructor(configuration.toByteString())
-          .build();
+      Runtime.InstanceSpec instanceSpec =
+          Runtime.InstanceSpec.newBuilder()
+              .setId(serviceId)
+              .setName(serviceName)
+              .setArtifact(artifactIdToProto(serviceArtifactId))
+              .build();
+      Runtime.InstanceInitParams params =
+          Runtime.InstanceInitParams.newBuilder()
+              .setInstanceSpec(instanceSpec)
+              .setConstructor(configuration.toByteString())
+              .build();
       services.put(serviceArtifactId, params);
       return this;
     }
 
     /**
      * Adds a service specification with which the TestKit would create the corresponding service
-     * instance with no configuration. Several service specifications can be added. All
-     * services are started and configured before the genesis block.
+     * instance with no configuration. Several service specifications can be added. All services are
+     * started and configured before the genesis block.
      *
      * <p>Note that the corresponding service artifact with equal serviceArtifactId should be
      * deployed with {@link #withDeployedArtifact(ServiceArtifactId, String)}.
      *
      * @param serviceArtifactId the id of the artifact
      * @param serviceName the name of the service
-     * @param serviceId the id of the service, must be in range
-     *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
-     *
-     * @throws IllegalArgumentException if serviceId is not in range
-     *     [0; {@value #MAX_SERVICE_INSTANCE_ID}]
-     * @throws IllegalArgumentException if service artifact with equal serviceArtifactId
-     *     was not deployed
+     * @param serviceId the id of the service, must be in range [0; {@value
+     *     #MAX_SERVICE_INSTANCE_ID}]
+     * @throws IllegalArgumentException if serviceId is not in range [0; {@value
+     *     #MAX_SERVICE_INSTANCE_ID}]
+     * @throws IllegalArgumentException if service artifact with equal serviceArtifactId was not
+     *     deployed
      */
-    public Builder withService(ServiceArtifactId serviceArtifactId, String serviceName,
-                               int serviceId) {
+    public Builder withService(
+        ServiceArtifactId serviceArtifactId, String serviceName, int serviceId) {
       return withService(serviceArtifactId, serviceName, serviceId, DEFAULT_CONFIGURATION);
     }
 
     private void checkServiceId(int serviceId, String serviceName) {
-      checkArgument(0 <= serviceId && serviceId <= MAX_SERVICE_INSTANCE_ID,
+      checkArgument(
+          0 <= serviceId && serviceId <= MAX_SERVICE_INSTANCE_ID,
           "Service (%s) id must be in range [0; %s], but was %s",
-          serviceName, MAX_SERVICE_INSTANCE_ID, serviceId);
+          serviceName,
+          MAX_SERVICE_INSTANCE_ID,
+          serviceId);
     }
 
     private void checkServiceArtifactIsDeployed(ServiceArtifactId serviceArtifactId) {
-      checkArgument(serviceArtifactFilenames.containsKey(serviceArtifactId),
-          "Service %s should be deployed first in order to be created", serviceArtifactId);
+      checkArgument(
+          serviceArtifactFilenames.containsKey(serviceArtifactId),
+          "Service %s should be deployed first in order to be created",
+          serviceArtifactId);
     }
 
     /**
-     * Adds a time service specification with which the TestKit would create the corresponding
-     * time service instance. Only a single time service specification can be added.
+     * Adds a time service specification with which the TestKit would create the corresponding time
+     * service instance. Only a single time service specification can be added.
      *
-     * <p>Note that validator count should be
-     * {@value #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
+     * <p>Note that validator count should be {@value
+     * #MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE} or less if time service is enabled.
      */
     public Builder withTimeService(String serviceName, int serviceId, TimeProvider timeProvider) {
       TimeProviderAdapter timeProviderAdapter = new TimeProviderAdapter(timeProvider);
@@ -534,21 +549,21 @@ public final class TestKit extends AbstractCloseableNativeProxy {
      *
      * @throws IllegalArgumentException if validator count is invalid
      * @throws IllegalArgumentException if service number is invalid
-     * @throws IllegalArgumentException if service artifacts were deployed, but no service
-     *     instances with same service artifact id were created
+     * @throws IllegalArgumentException if service artifacts were deployed, but no service instances
+     *     with same service artifact id were created
      */
     public TestKit build() {
       checkCorrectServiceNumber(services.size());
       checkCorrectValidatorNumber();
       checkArtifactsDirectory();
       TestKitServiceInstances testKitServiceInstances = prepareServicesConfiguration();
-      return newInstance(testKitServiceInstances, nodeType, validatorCount,
-          timeServiceSpec, artifactsDirectory);
+      return newInstance(
+          testKitServiceInstances, nodeType, validatorCount, timeServiceSpec, artifactsDirectory);
     }
 
     /**
-     * Turn collections of artifacts and service instances into a
-     * {@linkplain TestKitServiceInstances} object for native to work with.
+     * Turn collections of artifacts and service instances into a {@linkplain
+     * TestKitServiceInstances} object for native to work with.
      */
     private TestKitServiceInstances prepareServicesConfiguration() {
       checkDeployedArtifactsAreUsed();
@@ -557,13 +572,15 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       // Add specifications of artifacts to deploy.
       for (Map.Entry<ServiceArtifactId, String> entry : serviceArtifactFilenames.entrySet()) {
         ServiceArtifactId artifactId = entry.getKey();
-        Runtime.ArtifactSpec artifactSpec = Runtime.ArtifactSpec.newBuilder()
-            .setArtifact(artifactIdToProto(artifactId))
-            .setPayload(DeployArguments.newBuilder()
-                .setArtifactFilename(entry.getValue())
-                .build()
-                .toByteString())
-            .build();
+        Runtime.ArtifactSpec artifactSpec =
+            Runtime.ArtifactSpec.newBuilder()
+                .setArtifact(artifactIdToProto(artifactId))
+                .setPayload(
+                    DeployArguments.newBuilder()
+                        .setArtifactFilename(entry.getValue())
+                        .build()
+                        .toByteString())
+                .build();
 
         builder.addArtifactSpecs(artifactSpec);
       }
@@ -589,24 +606,29 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       Set<ServiceArtifactId> deployedArtifactIds = serviceArtifactFilenames.keySet();
       Sets.SetView<ServiceArtifactId> unusedArtifacts =
           Sets.difference(deployedArtifactIds, serviceArtifactIds);
-      checkArgument(unusedArtifacts.isEmpty(),
+      checkArgument(
+          unusedArtifacts.isEmpty(),
           "Following service artifacts were deployed, but not used for service instantiation: %s",
           unusedArtifacts);
     }
 
     private void checkCorrectValidatorNumber() {
       if (timeServiceSpec != null) {
-        checkArgument(validatorCount <= MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE,
+        checkArgument(
+            validatorCount <= MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE,
             "Number of validators (%s) should be less than or equal to %s when TimeService is"
                 + " instantiated.",
-            validatorCount, MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
+            validatorCount,
+            MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
       }
     }
 
     private void checkCorrectServiceNumber(int serviceCount) {
-      checkArgument(0 <= serviceCount && serviceCount <= MAX_SERVICE_NUMBER,
+      checkArgument(
+          0 <= serviceCount && serviceCount <= MAX_SERVICE_NUMBER,
           "Number of services must be in range [0; %s], but was %s",
-          MAX_SERVICE_NUMBER, serviceCount);
+          MAX_SERVICE_NUMBER,
+          serviceCount);
     }
 
     private void checkArtifactsDirectory() {

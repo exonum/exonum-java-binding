@@ -28,12 +28,11 @@ final class TestUtils {
     return TransactionMessage.builder()
         .serviceId(10)
         .transactionId(15)
-        .payload(new byte[]{0x01, 0x02, 0x03})
+        .payload(new byte[] {0x01, 0x02, 0x03})
         .sign(ed25519().generateKeyPair());
   }
 
   static String toHex(TransactionMessage message) {
     return HEX_ENCODER.encode(message.toBytes());
   }
-
 }

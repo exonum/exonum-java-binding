@@ -29,14 +29,16 @@ class StringSerializerTest {
   private Serializer<String> serializer = StringSerializer.INSTANCE;
 
   @ParameterizedTest
-  @ValueSource(strings = {
-      "",
-      "a",
-      "δ", // A two-byte character
-      "\uD83E\uDD37", // A four-byte character: a shrug emoji
-      "ab",
-      "cat",
-      "Iñtërnâtiônàlizætiøn"})
+  @ValueSource(
+      strings = {
+        "",
+        "a",
+        "δ", // A two-byte character
+        "\uD83E\uDD37", // A four-byte character: a shrug emoji
+        "ab",
+        "cat",
+        "Iñtërnâtiônàlizætiøn"
+      })
   void roundTrip(String value) {
     roundTripTest(value, serializer);
   }
@@ -46,5 +48,4 @@ class StringSerializerTest {
     byte[] invalidValue = {-1};
     invalidBytesValueTest(invalidValue, serializer);
   }
-
 }

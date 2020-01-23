@@ -57,8 +57,8 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     CheckedListProof checkedProof = null;
 
     Set<Map.Entry<Long, ByteString>> entrySet = checkedProof.getElements().entrySet();
-    Map<Long, String> actualElements = entrySet.stream()
-        .collect(toMap(Map.Entry::getKey, e -> e.getValue().toStringUtf8()));
+    Map<Long, String> actualElements =
+        entrySet.stream().collect(toMap(Map.Entry::getKey, e -> e.getValue().toStringUtf8()));
 
     return checkedProof.isValid()
         // todo: [ECR-3673] verify the list size also
@@ -68,25 +68,26 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
 
   @Override
   public void describeTo(Description description) {
-    description.appendText("proof list containing elements: ")
-        .appendDescriptionOf(elementsMatcher);
+    description.appendText("proof list containing elements: ").appendDescriptionOf(elementsMatcher);
   }
 
   @Override
-  protected void describeMismatchSafely(ProofListIndexProxy<String> list,
-                                        Description mismatchDescription) {
+  protected void describeMismatchSafely(
+      ProofListIndexProxy<String> list, Description mismatchDescription) {
     ListProof proof = proofFunction.apply(list);
     // TODO: check the proof in 'Java Proofs P3' [ECR-3784]!
     CheckedListProof checkedProof = null;
 
     if (!checkedProof.isValid()) {
-      mismatchDescription.appendText("proof was not valid: ")
+      mismatchDescription
+          .appendText("proof was not valid: ")
           .appendValue(checkedProof.getProofStatus().getDescription());
       return;
     }
 
     if (!list.getIndexHash().equals(checkedProof.getIndexHash())) {
-      mismatchDescription.appendText("calculated index hash doesn't match: ")
+      mismatchDescription
+          .appendText("calculated index hash doesn't match: ")
           .appendValue(checkedProof.getIndexHash())
           .appendText("expected index hash: ")
           .appendValue(list.getIndexHash());
@@ -94,15 +95,17 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     }
 
     if (!elementsMatcher.matches(checkedProof.getElements())) {
-      mismatchDescription.appendText("valid proof: ").appendValue(checkedProof)
+      mismatchDescription
+          .appendText("valid proof: ")
+          .appendValue(checkedProof)
           .appendText(", elements mismatch: ");
       elementsMatcher.describeMismatch(checkedProof.getElements(), mismatchDescription);
     }
   }
 
   /**
-   * Creates a matcher for a proof list that will match iff the list contains the specified value
-   * at the specified position and provides a <em>valid</em> cryptographic proof of that.
+   * Creates a matcher for a proof list that will match iff the list contains the specified value at
+   * the specified position and provides a <em>valid</em> cryptographic proof of that.
    *
    * <p>The proof is obtained via {@link ProofListIndexProxy#getProof(long)}.
    *
@@ -113,27 +116,26 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
     checkArgument(0 <= index);
     checkNotNull(expectedValue);
 
-    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
-        (list) -> list.getProof(index);
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction = (list) -> list.getProof(index);
 
-    return new ProofListContainsMatcher(proofFunction,
-        Collections.singletonMap(index, expectedValue));
+    return new ProofListContainsMatcher(
+        proofFunction, Collections.singletonMap(index, expectedValue));
   }
 
   /**
    * Creates a matcher for a proof list that will match iff the list contains the specified values
    * starting at the specified position and provides a <em>valid</em> cryptographic proof of that.
    *
-   * <p>The proof is obtained via {@link ProofListIndexProxy#getRangeProof(long, long)}.
-   * The value of {@code to} parameter is inferred from the size of the list of expected values.
+   * <p>The proof is obtained via {@link ProofListIndexProxy#getRangeProof(long, long)}. The value
+   * of {@code to} parameter is inferred from the size of the list of expected values.
    *
    * @param from an index of the first element
-   * @param expectedValues a list of elements, that are expected to be in the list
-   *                       starting at the given index
+   * @param expectedValues a list of elements, that are expected to be in the list starting at the
+   *     given index
    * @throws IllegalArgumentException if from is negative or the list is empty
    */
-  public static ProofListContainsMatcher provesThatContains(long from,
-                                                            List<String> expectedValues) {
+  public static ProofListContainsMatcher provesThatContains(
+      long from, List<String> expectedValues) {
     checkArgument(0 <= from, "Range start index (%s) is negative", from);
     checkArgument(!expectedValues.isEmpty(), "Empty list of expected values");
 
@@ -159,8 +161,7 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
   public static ProofListContainsMatcher provesAbsence(long index) {
     checkArgument(0 <= index);
 
-    Function<ProofListIndexProxy<String>, ListProof> proofFunction =
-        (list) -> list.getProof(index);
+    Function<ProofListIndexProxy<String>, ListProof> proofFunction = (list) -> list.getProof(index);
 
     return new ProofListContainsMatcher(proofFunction, emptyMap());
   }
@@ -169,8 +170,8 @@ class ProofListContainsMatcher extends TypeSafeMatcher<ProofListIndexProxy<Strin
    * Creates a matcher for a proof list that will match iff the list provides a <em>valid</em>
    * cryptographic proof of absence of values in given range.
    *
-   * <p>The proof is obtained via {@link ProofListIndexProxy#getRangeProof(long, long)}.
-   * The value of {@code to} parameter is inferred from the size of the list of expected values.
+   * <p>The proof is obtained via {@link ProofListIndexProxy#getRangeProof(long, long)}. The value
+   * of {@code to} parameter is inferred from the size of the list of expected values.
    *
    * @param from an index of the first element of the range
    * @param to an index of the last element of the range

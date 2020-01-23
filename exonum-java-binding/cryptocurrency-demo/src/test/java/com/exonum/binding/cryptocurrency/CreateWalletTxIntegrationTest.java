@@ -44,11 +44,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 class CreateWalletTxIntegrationTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-          .withArtifactsDirectory(artifactsDirectory));
+  TestKitExtension testKitExtension =
+      new TestKitExtension(
+          TestKit.builder()
+              .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+              .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+              .withArtifactsDirectory(artifactsDirectory));
 
   private static final KeyPair OWNER_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
 
@@ -66,8 +67,7 @@ class CreateWalletTxIntegrationTest {
 
     PublicKey emulatedNodePublicKey = OWNER_KEY_PAIR.getPublicKey();
     assertThat(wallets.containsKey(emulatedNodePublicKey)).isTrue();
-    assertThat(wallets.get(emulatedNodePublicKey).getBalance())
-        .isEqualTo(DEFAULT_INITIAL_BALANCE);
+    assertThat(wallets.get(emulatedNodePublicKey).getBalance()).isEqualTo(DEFAULT_INITIAL_BALANCE);
   }
 
   @Test

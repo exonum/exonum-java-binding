@@ -16,13 +16,11 @@
 
 package com.exonum.binding.common.proofs;
 
-/**
- * Indicates that the corresponding proof has invalid structure and must be rejected.
- */
+/** Indicates that the corresponding proof has invalid structure and must be rejected. */
 public class InvalidProofException extends RuntimeException {
 
   /**
-   * Constructs a new runtime exception with {@code null} as its detail message.  The cause is not
+   * Constructs a new runtime exception with {@code null} as its detail message. The cause is not
    * initialized, and may subsequently be initialized by a call to {@link #initCause}.
    */
   public InvalidProofException() {
@@ -34,7 +32,7 @@ public class InvalidProofException extends RuntimeException {
    * initialized, and may subsequently be initialized by a call to {@link #initCause}.
    *
    * @param message the detail message. The detail message is saved for later retrieval by the
-   *                {@link #getMessage()} method.
+   *     {@link #getMessage()} method.
    */
   public InvalidProofException(String message) {
     super(message);

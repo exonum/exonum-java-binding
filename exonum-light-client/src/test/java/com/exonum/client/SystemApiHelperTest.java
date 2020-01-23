@@ -51,13 +51,13 @@ class SystemApiHelperTest {
         arguments(formatStats(0, 0), new SystemStatistics(0, 0)),
         arguments(formatStats(1, 2), new SystemStatistics(1, 2)),
         // Check deserializer accepts longs-as-numbers (which is non-standard, but used by Exonum)
-        arguments(formatStats(Integer.MAX_VALUE, Long.MAX_VALUE),
+        arguments(
+            formatStats(Integer.MAX_VALUE, Long.MAX_VALUE),
             new SystemStatistics(Integer.MAX_VALUE, Long.MAX_VALUE)),
         // and longs-as-strings (a common approach to represent longs)
-        arguments("{\"tx_pool_size\": " + 0 + ", \"tx_count\": \"" + Long.MAX_VALUE
-                + "\"}",
-            new SystemStatistics(0, Long.MAX_VALUE))
-    );
+        arguments(
+            "{\"tx_pool_size\": " + 0 + ", \"tx_count\": \"" + Long.MAX_VALUE + "\"}",
+            new SystemStatistics(0, Long.MAX_VALUE)));
   }
 
   private static String formatStats(int txPoolSize, long txCount) {
@@ -66,13 +66,14 @@ class SystemApiHelperTest {
 
   private static List<Arguments> healthCheckSource() {
     return ImmutableList.of(
-        arguments("{\"consensus_status\": \"Enabled\", \"connected_peers\": 0}",
+        arguments(
+            "{\"consensus_status\": \"Enabled\", \"connected_peers\": 0}",
             new HealthCheckInfo(ConsensusStatus.ENABLED, 0)),
-        arguments("{\"consensus_status\": \"Disabled\", \"connected_peers\": 0}",
+        arguments(
+            "{\"consensus_status\": \"Disabled\", \"connected_peers\": 0}",
             new HealthCheckInfo(ConsensusStatus.DISABLED, 0)),
-        arguments("{\"consensus_status\": \"Active\", \"connected_peers\": 1 }",
-            new HealthCheckInfo(ConsensusStatus.ACTIVE, 1))
-    );
+        arguments(
+            "{\"consensus_status\": \"Active\", \"connected_peers\": 1 }",
+            new HealthCheckInfo(ConsensusStatus.ACTIVE, 1)));
   }
-
 }

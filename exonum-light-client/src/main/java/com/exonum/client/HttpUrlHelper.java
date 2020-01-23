@@ -25,12 +25,10 @@ import okhttp3.HttpUrl.Builder;
 
 final class HttpUrlHelper {
 
-  static HttpUrl getFullUrl(URL host, String prefix, String relativeUrl,
-      Map<String, String> encodedQueryParameters) {
+  static HttpUrl getFullUrl(
+      URL host, String prefix, String relativeUrl, Map<String, String> encodedQueryParameters) {
     checkNotNull(encodedQueryParameters);
-    Builder urlBuilder = urlHostBuilder(host)
-        .addPathSegments(prefix)
-        .addPathSegments(relativeUrl);
+    Builder urlBuilder = urlHostBuilder(host).addPathSegments(prefix).addPathSegments(relativeUrl);
     encodedQueryParameters.forEach(urlBuilder::addEncodedQueryParameter);
 
     return urlBuilder.build();
@@ -38,15 +36,12 @@ final class HttpUrlHelper {
 
   private static HttpUrl.Builder urlHostBuilder(URL host) {
     checkNotNull(host);
-    HttpUrl.Builder builder = new HttpUrl.Builder()
-        .scheme(host.getProtocol())
-        .host(host.getHost());
+    HttpUrl.Builder builder = new HttpUrl.Builder().scheme(host.getProtocol()).host(host.getHost());
     if (host.getPort() != -1) {
       builder.port(host.getPort());
     }
     return builder;
   }
 
-  private HttpUrlHelper() {
-  }
+  private HttpUrlHelper() {}
 }

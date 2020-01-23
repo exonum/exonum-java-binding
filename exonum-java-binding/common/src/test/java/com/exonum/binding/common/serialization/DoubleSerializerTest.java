@@ -32,14 +32,18 @@ class DoubleSerializerTest {
   private Serializer<Double> serializer = DoubleSerializer.INSTANCE;
 
   @ParameterizedTest
-  @ValueSource(doubles = {
-      Double.NaN,
-      Double.NEGATIVE_INFINITY,
-      Double.MIN_VALUE,
-      Double.MIN_NORMAL,
-      -1D, 0D, 1.5D,
-      Double.MAX_VALUE,
-      Double.POSITIVE_INFINITY})
+  @ValueSource(
+      doubles = {
+        Double.NaN,
+        Double.NEGATIVE_INFINITY,
+        Double.MIN_VALUE,
+        Double.MIN_NORMAL,
+        -1D,
+        0D,
+        1.5D,
+        Double.MAX_VALUE,
+        Double.POSITIVE_INFINITY
+      })
   void roundTrip(Double value) {
     roundTripTest(value, serializer);
   }
@@ -54,11 +58,9 @@ class DoubleSerializerTest {
     return ImmutableList.of(
         Bytes.bytes(),
         Bytes.bytes((byte) 0),
-        Bytes.bytes(1,2,3),
+        Bytes.bytes(1, 2, 3),
         Bytes.bytes(1, 2, 3, 4),
         Bytes.bytes(1, 2, 3, 4, 5, 6, 7),
-        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9)
-    );
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8, 9));
   }
-
 }

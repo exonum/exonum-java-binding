@@ -22,9 +22,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.time.UtcZonedDateTimeSerializer;
 import java.time.ZonedDateTime;
 
-/**
- * An adapter of a {@link TimeProvider} for native code.
- */
+/** An adapter of a {@link TimeProvider} for native code. */
 final class TimeProviderAdapter {
   private static final Serializer<ZonedDateTime> ZDT_SERIALIZER =
       UtcZonedDateTimeSerializer.INSTANCE;

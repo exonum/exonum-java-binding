@@ -47,18 +47,19 @@ class CoreSchemaIntegrationTest {
 
   @Test
   void getBlockTransactionsTest() {
-    assertSchema((schema) -> {
-      long height = 0L;
-      Exception e = assertThrows(IllegalStateException.class,
-          () -> schema.getBlockTransactions(height));
-      assertThat(e).hasMessageContaining("No genesis block created");
-    });
+    assertSchema(
+        (schema) -> {
+          long height = 0L;
+          Exception e =
+              assertThrows(IllegalStateException.class, () -> schema.getBlockTransactions(height));
+          assertThat(e).hasMessageContaining("No genesis block created");
+        });
   }
 
   @Test
   void getConsensusConfigurationBeforeGenesisBlock() {
-    assertSchema((schema) ->
-        assertThrows(IllegalStateException.class, schema::getConsensusConfiguration));
+    assertSchema(
+        (schema) -> assertThrows(IllegalStateException.class, schema::getConsensusConfiguration));
   }
 
   @Test
@@ -78,14 +79,16 @@ class CoreSchemaIntegrationTest {
 
   @Test
   void getTransactionPool() {
-    assertSchema((schema) -> {
-      Set<HashCode> set = ImmutableSet.copyOf(schema.getTransactionPool());
-      assertTrue(set.isEmpty());
-    });
+    assertSchema(
+        (schema) -> {
+          Set<HashCode> set = ImmutableSet.copyOf(schema.getTransactionPool());
+          assertTrue(set.isEmpty());
+        });
   }
 
   private static void assertSchema(Consumer<CoreSchema> assertion) {
-    try (TemporaryDb db = TemporaryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
       Snapshot snapshot = db.createSnapshot(cleaner);
       assertion.accept(CoreSchema.newInstance(snapshot));
     } catch (CloseFailuresException e) {

@@ -36,17 +36,17 @@ class DbKeyTest {
   @Test
   void throwsIfNull() {
     assertThrows(NullPointerException.class, () -> DbKey.fromBytes(null));
-
   }
 
   @Test
   void throwsIfInvalidNodeTypeCode() {
     byte[] rawDbKey = createDbKey(2, bytes("a"), 8);
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = DbKey.fromBytes(rawDbKey);
-    });
-
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = DbKey.fromBytes(rawDbKey);
+        });
   }
 
   @Test
@@ -54,64 +54,77 @@ class DbKeyTest {
     int invalidNumBits = 10;
     byte[] rawDbKey = createDbKey(Type.LEAF.code, bytes("a"), invalidNumBits);
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = DbKey.fromBytes(rawDbKey);
-    });
-
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = DbKey.fromBytes(rawDbKey);
+        });
   }
 
   @Test
   void throwsIfBranchKeySliceHasBitsAfterSignificantPart0Bits() {
     int numSignificantBits = 0;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x01), numSignificantBits);
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = DbKey.fromBytes(rawDbKey);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = DbKey.fromBytes(rawDbKey);
+        });
   }
 
   @Test
   void throwsIfBranchKeySliceHasBitsAfterSignificantPart1Bit() {
     int numSignificantBits = 1;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x03), numSignificantBits);
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = DbKey.fromBytes(rawDbKey);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = DbKey.fromBytes(rawDbKey);
+        });
   }
 
   @Test
   void throwsIfBranchKeySliceHasBitsAfterSignificantPart7Bit() {
     int numSignificantBits = 7;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0x80), numSignificantBits);
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = DbKey.fromBytes(rawDbKey);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = DbKey.fromBytes(rawDbKey);
+        });
   }
 
   @Test
   void throwsIfBranchKeySliceHasBitsAfterSignificantPart8Bit() {
     int numSignificantBits = 8;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x01), numSignificantBits);
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = DbKey.fromBytes(rawDbKey);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = DbKey.fromBytes(rawDbKey);
+        });
   }
 
   @Test
   void throwsIfBranchKeySliceHasBitsAfterSignificantPart12Bit() {
     int numSignificantBits = 12;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0x1F), numSignificantBits);
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = DbKey.fromBytes(rawDbKey);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = DbKey.fromBytes(rawDbKey);
+        });
   }
 
   @Test
   void throwsIfBranchKeySliceHasBitsAfterSignificantPart16Bit() {
     int numSignificantBits = 16;
     byte[] rawDbKey = createDbKey(Type.BRANCH.code, bytes(0xFF, 0xFF, 0x01), numSignificantBits);
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = DbKey.fromBytes(rawDbKey);
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = DbKey.fromBytes(rawDbKey);
+        });
   }
 
   @Test
@@ -214,25 +227,27 @@ class DbKeyTest {
   void numSignificantBitsLowerThanZeroShouldThrow() {
     int numSignificantBits = -1;
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = branchDbKey(bytes(0xFF, 0xFF, 0x01), numSignificantBits);
-    });
-
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = branchDbKey(bytes(0xFF, 0xFF, 0x01), numSignificantBits);
+        });
   }
 
   @Test
   void numSignificantBitsEqualToKeySizeBitsInBranchShouldThrow() {
     int numSignificantBits = DbKey.KEY_SIZE_BITS;
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      DbKey dbKey = branchDbKey(bytes(0xFF, 0xFF, 0x01), numSignificantBits);
-    });
-
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DbKey dbKey = branchDbKey(bytes(0xFF, 0xFF, 0x01), numSignificantBits);
+        });
   }
 
   /**
-   * The method intentionally doesn't check if type & numSignificantBits are valid, so that
-   * it may be used to test how DbKey handles invalid inputs.
+   * The method intentionally doesn't check if type & numSignificantBits are valid, so that it may
+   * be used to test how DbKey handles invalid inputs.
    */
   private static byte[] createDbKey(int type, byte[] keySlice, int numSignificantBits) {
     byte[] rawDbKey = new byte[DbKey.DB_KEY_SIZE];
@@ -268,8 +283,11 @@ class DbKeyTest {
 
       @Override
       public void describeTo(Description description) {
-        description.appendText("key of size ").appendText(String.valueOf(DbKey.KEY_SIZE))
-            .appendText("starting with ").appendValueList("[", ", ", "]", prefix);
+        description
+            .appendText("key of size ")
+            .appendText(String.valueOf(DbKey.KEY_SIZE))
+            .appendText("starting with ")
+            .appendValueList("[", ", ", "]", prefix);
       }
     };
   }
@@ -314,8 +332,6 @@ class DbKeyTest {
 
   @Test
   void verifyEquals() {
-    EqualsVerifier.forClass(DbKey.class)
-        .withOnlyTheseFields("rawDbKey")
-        .verify();
+    EqualsVerifier.forClass(DbKey.class).withOnlyTheseFields("rawDbKey").verify();
   }
 }

@@ -20,8 +20,8 @@ import com.exonum.binding.core.storage.database.Fork;
 
 final class TestSchemaFactories {
 
-  static <SchemaT> SchemaFactory<SchemaT> createTestSchemaFactory(Fork expectedView,
-                                                                  SchemaT schema) {
+  static <SchemaT> SchemaFactory<SchemaT> createTestSchemaFactory(
+      Fork expectedView, SchemaT schema) {
     return (actualView) -> {
       if (actualView.equals(expectedView)) {
         return schema;

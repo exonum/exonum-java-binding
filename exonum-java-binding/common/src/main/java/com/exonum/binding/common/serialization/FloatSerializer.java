@@ -27,19 +27,13 @@ enum FloatSerializer implements Serializer<Float> {
 
   @Override
   public byte[] toBytes(Float value) {
-    return ByteBuffer.allocate(Float.BYTES)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .putFloat(value)
-        .array();
+    return ByteBuffer.allocate(Float.BYTES).order(ByteOrder.LITTLE_ENDIAN).putFloat(value).array();
   }
 
   @Override
   public Float fromBytes(byte[] serializedValue) {
     checkLength(serializedValue, Float.BYTES);
 
-    return ByteBuffer.wrap(serializedValue)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .getFloat();
+    return ByteBuffer.wrap(serializedValue).order(ByteOrder.LITTLE_ENDIAN).getFloat();
   }
-
 }

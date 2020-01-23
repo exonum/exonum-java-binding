@@ -23,17 +23,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a documentation of a field, method or class needs to be improved
- * (or added if absent).
+ * Indicates that a documentation of a field, method or class needs to be improved (or added if
+ * absent).
  *
  * <p>Example usages:
+ *
  * <ul>
- *   <li>Certain aspects are under-documented or not-yet-known and need to be improved
- *       in the future.</li>
+ *   <li>Certain aspects are under-documented or not-yet-known and need to be improved in the
+ *       future.
  *   <li>You need to urgently integrate a patch, but have not upgraded the documentation properly,
- *       and will do that ASAP. Such annotation is preferred to crude, inadequate comments.</li>
- *   <li>A badly documented code got into the project, and you had to dig deeply
- *       into implementation details to understand how to use it.</li>
+ *       and will do that ASAP. Such annotation is preferred to crude, inadequate comments.
+ *   <li>A badly documented code got into the project, and you had to dig deeply into implementation
+ *       details to understand how to use it.
  * </ul>
  *
  * <p>Do not leave this task unassigned!
@@ -43,21 +44,17 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Target({
-    ElementType.ANNOTATION_TYPE,
-    ElementType.TYPE,
-    ElementType.FIELD,
-    ElementType.METHOD,
-    ElementType.CONSTRUCTOR,
-    ElementType.PARAMETER,
+  ElementType.ANNOTATION_TYPE,
+  ElementType.TYPE,
+  ElementType.FIELD,
+  ElementType.METHOD,
+  ElementType.CONSTRUCTOR,
+  ElementType.PARAMETER,
 })
 public @interface ImproveDocs {
-  /**
-   * Whom this item is assigned to.
-   */
+  /** Whom this item is assigned to. */
   String assignee();
 
-  /**
-   * A description of why this annotation was added.
-   */
+  /** A description of why this annotation was added. */
   String reason() default "";
 }

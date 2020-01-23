@@ -55,7 +55,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Dimitris Andreou
  */
-@CiOnly  // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
+@CiOnly // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 class AbstractStreamingHasherTest {
 
   @Test
@@ -63,10 +63,10 @@ class AbstractStreamingHasherTest {
     Sink sink = new Sink(4); // byte order insignificant here
     byte[] expected = {1, 2, 3, 4, 5, 6, 7, 8};
     sink.putByte((byte) 1);
-    sink.putBytes(new byte[]{2, 3, 4, 5, 6});
+    sink.putBytes(new byte[] {2, 3, 4, 5, 6});
     sink.putByte((byte) 7);
-    sink.putBytes(new byte[]{});
-    sink.putBytes(new byte[]{8});
+    sink.putBytes(new byte[] {});
+    sink.putBytes(new byte[] {8});
     HashCode unused = sink.hash();
     sink.assertInvariants(8);
     sink.assertBytes(expected);
@@ -78,7 +78,7 @@ class AbstractStreamingHasherTest {
     sink.putShort((short) 0x0201);
     HashCode unused = sink.hash();
     sink.assertInvariants(2);
-    sink.assertBytes(new byte[]{1, 2, 0, 0}); // padded with zeros
+    sink.assertBytes(new byte[] {1, 2, 0, 0}); // padded with zeros
   }
 
   @Test
@@ -87,7 +87,7 @@ class AbstractStreamingHasherTest {
     sink.putInt(0x04030201);
     HashCode unused = sink.hash();
     sink.assertInvariants(4);
-    sink.assertBytes(new byte[]{1, 2, 3, 4});
+    sink.assertBytes(new byte[] {1, 2, 3, 4});
   }
 
   @Test
@@ -96,7 +96,7 @@ class AbstractStreamingHasherTest {
     sink.putLong(0x0807060504030201L);
     HashCode unused = sink.hash();
     sink.assertInvariants(8);
-    sink.assertBytes(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+    sink.assertBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
   }
 
   @Test
@@ -105,7 +105,7 @@ class AbstractStreamingHasherTest {
     sink.putChar((char) 0x0201);
     HashCode unused = sink.hash();
     sink.assertInvariants(2);
-    sink.assertBytes(new byte[]{1, 2, 0, 0}); // padded with zeros
+    sink.assertBytes(new byte[] {1, 2, 0, 0}); // padded with zeros
   }
 
   @Test
@@ -129,7 +129,7 @@ class AbstractStreamingHasherTest {
     sink.putFloat(Float.intBitsToFloat(0x04030201));
     HashCode unused = sink.hash();
     sink.assertInvariants(4);
-    sink.assertBytes(new byte[]{1, 2, 3, 4});
+    sink.assertBytes(new byte[] {1, 2, 3, 4});
   }
 
   @Test
@@ -138,7 +138,7 @@ class AbstractStreamingHasherTest {
     sink.putDouble(Double.longBitsToDouble(0x0807060504030201L));
     HashCode unused = sink.hash();
     sink.assertInvariants(8);
-    sink.assertBytes(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+    sink.assertBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
   }
 
   @Test

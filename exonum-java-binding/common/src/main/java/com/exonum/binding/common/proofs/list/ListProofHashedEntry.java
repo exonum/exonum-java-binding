@@ -19,22 +19,17 @@ package com.exonum.binding.common.proofs.list;
 import com.exonum.binding.common.hash.HashCode;
 import com.google.auto.value.AutoValue;
 
-/**
- * A hash of a sub-tree in a Merkle proof tree.
- */
+/** A hash of a sub-tree in a Merkle proof tree. */
 @AutoValue
 abstract class ListProofHashedEntry implements ListProofEntry {
 
   /**
-   * Returns the height of the proof tree node corresponding to this entry.
-   * The height of leaf nodes is equal to 0; the height of the root, or top node:
-   * <em>ceil(log2(N))</em>.
+   * Returns the height of the proof tree node corresponding to this entry. The height of leaf nodes
+   * is equal to 0; the height of the root, or top node: <em>ceil(log2(N))</em>.
    */
   abstract int getHeight();
 
-  /**
-   * Returns the hash of the sub-tree this entry represents.
-   */
+  /** Returns the hash of the sub-tree this entry represents. */
   abstract HashCode getHash();
 
   static ListProofHashedEntry newInstance(long index, int height, HashCode nodeHash) {

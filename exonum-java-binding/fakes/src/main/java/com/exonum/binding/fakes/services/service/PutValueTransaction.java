@@ -41,8 +41,8 @@ public final class PutValueTransaction implements Transaction {
   private final String value;
   private final SchemaFactory<TestSchema> schemaFactory;
 
-  static PutValueTransaction from(RawTransaction rawTransaction,
-      SchemaFactory<TestSchema> schemaFactory) {
+  static PutValueTransaction from(
+      RawTransaction rawTransaction, SchemaFactory<TestSchema> schemaFactory) {
     checkArgument(rawTransaction.getServiceId() == TestService.ID);
     checkArgument(rawTransaction.getTransactionId() == PutValueTransaction.ID);
     String value = getValue(rawTransaction);
@@ -61,13 +61,13 @@ public final class PutValueTransaction implements Transaction {
   }
 
   private static CharsetDecoder createUtf8Decoder() {
-    return BODY_CHARSET.newDecoder()
+    return BODY_CHARSET
+        .newDecoder()
         .onMalformedInput(CodingErrorAction.REPORT)
         .onUnmappableCharacter(CodingErrorAction.REPLACE);
   }
 
-  private PutValueTransaction(String value,
-      SchemaFactory<TestSchema> schemaFactory) {
+  private PutValueTransaction(String value, SchemaFactory<TestSchema> schemaFactory) {
     this.value = value;
     this.schemaFactory = schemaFactory;
   }
@@ -80,7 +80,6 @@ public final class PutValueTransaction implements Transaction {
   }
 
   private HashCode getKey() {
-    return Hashing.defaultHashFunction()
-        .hashString(value, BODY_CHARSET);
+    return Hashing.defaultHashFunction().hashString(value, BODY_CHARSET);
   }
 }

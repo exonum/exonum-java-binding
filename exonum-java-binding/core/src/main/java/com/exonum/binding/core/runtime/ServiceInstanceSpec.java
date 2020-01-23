@@ -19,9 +19,7 @@ package com.exonum.binding.core.runtime;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.google.auto.value.AutoValue;
 
-/**
- * A specification of a service instance.
- */
+/** A specification of a service instance. */
 @AutoValue
 public abstract class ServiceInstanceSpec {
 
@@ -32,17 +30,14 @@ public abstract class ServiceInstanceSpec {
   public abstract String getName();
 
   /**
-   * Returns the numeric id of the service instance. Exonum assigns it to the service
-   * on instantiation. It is mainly used to route the transaction messages belonging
-   * to this instance.
+   * Returns the numeric id of the service instance. Exonum assigns it to the service on
+   * instantiation. It is mainly used to route the transaction messages belonging to this instance.
    *
    * @see TransactionMessage#getServiceId()
    */
   public abstract int getId();
 
-  /**
-   * Returns the service artifact id.
-   */
+  /** Returns the service artifact id. */
   public abstract ServiceArtifactId getArtifactId();
 
   public static ServiceInstanceSpec newInstance(String name, int id, ServiceArtifactId artifactId) {

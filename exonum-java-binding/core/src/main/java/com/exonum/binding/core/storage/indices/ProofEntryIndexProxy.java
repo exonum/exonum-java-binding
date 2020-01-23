@@ -37,9 +37,9 @@ import java.util.Optional;
  * An Entry is a database index that can contain no or a single value.
  *
  * <p>An Entry is analogous to {@link java.util.Optional}, but provides modifying ("destructive")
- * operations when created with a {@link Fork}.
- * Such methods are specified to throw {@link UnsupportedOperationException} if
- * the entry is created with a {@link Snapshot} — a read-only database access.
+ * operations when created with a {@link Fork}. Such methods are specified to throw {@link
+ * UnsupportedOperationException} if the entry is created with a {@link Snapshot} — a read-only
+ * database access.
  *
  * <p>All method arguments are non-null by default.
  *
@@ -49,7 +49,6 @@ import java.util.Optional;
  * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <T> the type of an element in this entry
- *
  * @see Access
  */
 public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements HashableIndex {
@@ -63,21 +62,22 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
   /**
    * Creates a new Entry.
    *
-   * @param address an index address. Must correspond to a regular index, not a group.
-   *     Use {@link ProofMapIndexProxy} instead of groups of entries.
-   * @param access a database access. Must be valid.
-   *     If an access is read-only, "destructive" operations are not permitted.
+   * @param address an index address. Must correspond to a regular index, not a group. Use {@link
+   *     ProofMapIndexProxy} instead of groups of entries.
+   * @param access a database access. Must be valid. If an access is read-only, "destructive"
+   *     operations are not permitted.
    * @param serializer an entry serializer
-   *
    * @throws IllegalArgumentException if the name is empty
    * @throws IllegalStateException if the access proxy is invalid
    * @see StandardSerializers
    */
-  public static <E> ProofEntryIndexProxy<E> newInstance(IndexAddress address,
+  public static <E> ProofEntryIndexProxy<E> newInstance(
+      IndexAddress address,
       /* todo: (here and elsewhere) or Access? That would require pulling up #getCleaner
-          in the interface as well. */ AbstractAccess access,
+      in the interface as well. */ AbstractAccess access,
       Serializer<E> serializer) {
-    checkArgument(!address.getIdInGroup().isPresent(),
+    checkArgument(
+        !address.getIdInGroup().isPresent(),
         "Groups of Entries are not supported, use a ProofMapIndex instead");
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
@@ -92,13 +92,16 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
     NativeHandle entryNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, entryNativeHandle, ProofEntryIndexProxy.class,
-        ProofEntryIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(
+        cleaner, entryNativeHandle, ProofEntryIndexProxy.class, ProofEntryIndexProxy::nativeFree);
     return entryNativeHandle;
   }
 
-  private ProofEntryIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
-                               CheckingSerializerDecorator<T> serializer) {
+  private ProofEntryIndexProxy(
+      NativeHandle nativeHandle,
+      IndexAddress address,
+      AbstractAccess access,
+      CheckingSerializerDecorator<T> serializer) {
     super(nativeHandle, address, access);
     this.serializer = serializer;
   }
@@ -126,8 +129,7 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
   }
 
   /**
-   * If value is present in the entry, returns it, otherwise,
-   * throws {@link NoSuchElementException}.
+   * If value is present in the entry, returns it, otherwise, throws {@link NoSuchElementException}.
    *
    * @return a non-null value
    * @throws NoSuchElementException if a value is not present in the Entry
@@ -143,11 +145,11 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
   }
 
   /**
-   * Returns the index hash which represents the complete state of this entry.
-   * Any modifications to this entry affect the index hash.
+   * Returns the index hash which represents the complete state of this entry. Any modifications to
+   * this entry affect the index hash.
    *
-   * <p>The entry index hash is computed as SHA-256 of the entry binary representation, or
-   * a hash of zeroes if the entry is not set.
+   * <p>The entry index hash is computed as SHA-256 of the entry binary representation, or a hash of
+   * zeroes if the entry is not set.
    *
    * @throws IllegalStateException if the proxy is invalid
    */
@@ -170,19 +172,19 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
   /**
    * Converts the entry to {@link java.util.Optional}.
    *
-   * <p>Be aware that this method represents a state of the entry at the time
-   * of calling. And the returned value won't reflect the entry changes:
-   * <pre>
-   *  {@code
-   *    entry.set("foo");
-   *    Optional<String> optionalEntry = entry.toOptional();
-   *    entry.remove();
-   *    optionalEntry.get(); // -> returns "foo"
-   *  }
-   * </pre>
+   * <p>Be aware that this method represents a state of the entry at the time of calling. And the
+   * returned value won't reflect the entry changes:
    *
-   * @return {@code Optional.of(value)} if value is present in the entry,
-   *        otherwise returns {@code Optional.empty()}
+   * <pre>{@code
+   * entry.set("foo");
+   * Optional<String> optionalEntry = entry.toOptional();
+   * entry.remove();
+   * optionalEntry.get(); // -> returns "foo"
+   *
+   * }</pre>
+   *
+   * @return {@code Optional.of(value)} if value is present in the entry, otherwise returns {@code
+   *     Optional.empty()}
    */
   public Optional<T> toOptional() {
     if (isPresent()) {

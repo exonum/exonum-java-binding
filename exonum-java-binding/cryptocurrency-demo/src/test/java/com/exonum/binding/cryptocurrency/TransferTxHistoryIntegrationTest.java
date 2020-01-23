@@ -41,11 +41,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 class TransferTxHistoryIntegrationTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-          .withArtifactsDirectory(artifactsDirectory));
+  TestKitExtension testKitExtension =
+      new TestKitExtension(
+          TestKit.builder()
+              .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+              .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+              .withArtifactsDirectory(artifactsDirectory));
 
   private static final KeyPair ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
@@ -64,15 +65,17 @@ class TransferTxHistoryIntegrationTest {
     // Create and execute 1st transaction
     long seed1 = 1L;
     long transferSum1 = 40L;
-    TransactionMessage transferTx1 = newTransferTransaction(
-        seed1, ACCOUNT_1, ACCOUNT_2.getPublicKey(), transferSum1, SERVICE_ID);
+    TransactionMessage transferTx1 =
+        newTransferTransaction(
+            seed1, ACCOUNT_1, ACCOUNT_2.getPublicKey(), transferSum1, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx1);
 
     // Create and execute 2nd transaction
     long seed2 = 2L;
     long transferSum2 = 10L;
-    TransactionMessage transferTx2 = newTransferTransaction(
-        seed2, ACCOUNT_2, ACCOUNT_1.getPublicKey(), transferSum2, SERVICE_ID);
+    TransactionMessage transferTx2 =
+        newTransferTransaction(
+            seed2, ACCOUNT_2, ACCOUNT_1.getPublicKey(), transferSum2, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx2);
 
     Snapshot snapshot = testKit.getSnapshot();
@@ -81,11 +84,9 @@ class TransferTxHistoryIntegrationTest {
     CryptocurrencySchema schema = new CryptocurrencySchema(snapshot, SERVICE_NAME);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
-    assertThat(wallets.get(ACCOUNT_1.getPublicKey()).getBalance())
-        .isEqualTo(expectedBalance1);
+    assertThat(wallets.get(ACCOUNT_1.getPublicKey()).getBalance()).isEqualTo(expectedBalance1);
     long expectedBalance2 = initialBalance + transferSum1 - transferSum2;
-    assertThat(wallets.get(ACCOUNT_2.getPublicKey()).getBalance())
-        .isEqualTo(expectedBalance2);
+    assertThat(wallets.get(ACCOUNT_2.getPublicKey()).getBalance()).isEqualTo(expectedBalance2);
 
     // Check history
     HashCode messageHash1 = transferTx1.hash();

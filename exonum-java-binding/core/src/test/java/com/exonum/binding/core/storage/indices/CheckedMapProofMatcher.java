@@ -55,15 +55,15 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
     }
     Set<MapEntry<ByteString, ByteString>> presentEntries = checkedMapProof.getEntries();
     Set<ByteString> missingKeys = checkedMapProof.getMissingKeys();
-    return presentEntriesMatcher.matches(presentEntries)
-        && missingKeysMatcher.matches(missingKeys);
+    return presentEntriesMatcher.matches(presentEntries) && missingKeysMatcher.matches(missingKeys);
   }
 
   @Override
   public void describeTo(Description description) {
-    String entriesString = entries.stream()
-        .map(CheckedMapProofMatcher::formatMapMatcherEntry)
-        .collect(Collectors.joining(", ", "[", "]"));
+    String entriesString =
+        entries.stream()
+            .map(CheckedMapProofMatcher::formatMapMatcherEntry)
+            .collect(Collectors.joining(", ", "[", "]"));
     description.appendText("valid proof, entries=").appendText(entriesString);
   }
 
@@ -74,31 +74,36 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
       // We convert entries to string manually here instead of using MapEntry#toString
       // to decode the value from UTF-8 bytes into Java String (which is passed as
       // the expected value).
-      String entries = proof.getEntries().stream()
-          .map(CheckedMapProofMatcher::formatMapEntry)
-          .collect(Collectors.joining(", ", "[", "]"));
+      String entries =
+          proof.getEntries().stream()
+              .map(CheckedMapProofMatcher::formatMapEntry)
+              .collect(Collectors.joining(", ", "[", "]"));
 
-      String missingKeys = proof.getMissingKeys().stream()
-          .map(CheckedMapProofMatcher::hexEncodeByteString)
-          .collect(Collectors.joining(", ", "[", "]"));
+      String missingKeys =
+          proof.getMissingKeys().stream()
+              .map(CheckedMapProofMatcher::hexEncodeByteString)
+              .collect(Collectors.joining(", ", "[", "]"));
 
-      description.appendText("a valid proof, entries=").appendText(entries)
-          .appendText(", missing keys=").appendText(missingKeys)
-          .appendText(", index hash=").appendValue(proof.getIndexHash());
+      description
+          .appendText("a valid proof, entries=")
+          .appendText(entries)
+          .appendText(", missing keys=")
+          .appendText(missingKeys)
+          .appendText(", index hash=")
+          .appendValue(proof.getIndexHash());
     } else {
-      description.appendText("an invalid proof, status=")
-          .appendValue(proof.getProofStatus());
+      description.appendText("an invalid proof, status=").appendValue(proof.getProofStatus());
     }
   }
 
   private Set<MapEntry<ByteString, ByteString>> getExpectedEntries() {
     return entries.stream()
         .filter(e -> e.getValue().isPresent())
-        .map(e ->
-            MapEntry.valueOf(
-                ByteString.copyFrom(e.getKey().asBytes()),
-                ByteString.copyFrom(e.getValue().get().getBytes()))
-        )
+        .map(
+            e ->
+                MapEntry.valueOf(
+                    ByteString.copyFrom(e.getKey().asBytes()),
+                    ByteString.copyFrom(e.getValue().get().getBytes())))
         .collect(toSet());
   }
 
@@ -117,9 +122,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   private static String formatMapMatcherEntry(MapTestEntry e) {
     String key = e.getKey().toString();
-    return e.getValue()
-        .map(value -> String.format("(%s -> %s)", key, value))
-        .orElse(key);
+    return e.getValue().map(value -> String.format("(%s -> %s)", key, value)).orElse(key);
   }
 
   private static String hexEncodeByteString(ByteString byteString) {

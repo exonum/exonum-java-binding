@@ -29,8 +29,8 @@ class AbstractServiceTest {
 
   private static final String NAME = "test";
   private static final int ID = 1;
-  private static final ServiceInstanceSpec INSTANCE_SPEC = ServiceInstanceSpec.newInstance(NAME, ID,
-      ServiceArtifactId.newJavaId("g/a","1"));
+  private static final ServiceInstanceSpec INSTANCE_SPEC =
+      ServiceInstanceSpec.newInstance(NAME, ID, ServiceArtifactId.newJavaId("g/a", "1"));
 
   @Test
   void getName() {
@@ -56,7 +56,6 @@ class AbstractServiceTest {
     }
 
     @Override
-    public void createPublicApiHandlers(Node node, Router router) {
-    }
+    public void createPublicApiHandlers(Node node, Router router) {}
   }
 }

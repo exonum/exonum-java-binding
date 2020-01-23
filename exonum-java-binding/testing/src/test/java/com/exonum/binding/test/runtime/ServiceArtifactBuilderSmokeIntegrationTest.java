@@ -36,9 +36,10 @@ import org.pf4j.PluginWrapper;
 class ServiceArtifactBuilderSmokeIntegrationTest {
 
   @Test
-  @DisplayName("Created plugin must be successfully loaded and unloaded by the PluginManager. "
-      + "If this test does not work, subsequent use of ServiceArtifactBuilder in other ITs makes "
-      + "no sense.")
+  @DisplayName(
+      "Created plugin must be successfully loaded and unloaded by the PluginManager. "
+          + "If this test does not work, subsequent use of ServiceArtifactBuilder in other ITs makes "
+          + "no sense.")
   void createdArtifactCanBeLoaded(@TempDir Path tmp) throws IOException {
     Path pluginPath = tmp.resolve("test-plugin.jar");
 
@@ -69,8 +70,8 @@ class ServiceArtifactBuilderSmokeIntegrationTest {
     assertThat(pluginState).isEqualTo(PluginState.STARTED);
 
     // Check the extensions
-    List<Class<? extends TestServiceExtension>> extensionClasses = pluginManager
-        .getExtensionClasses(TestServiceExtension.class, pluginId);
+    List<Class<? extends TestServiceExtension>> extensionClasses =
+        pluginManager.getExtensionClasses(TestServiceExtension.class, pluginId);
     assertThat(extensionClasses).hasSize(1);
     Class<?> extensionType = extensionClasses.get(0);
     assertNamesEqual(extensionType, TestServiceExtensionImpl.class);

@@ -21,12 +21,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
- * each key corresponds to at most one value.
+ * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys; each key
+ * corresponds to at most one value.
  *
- * <p>The "destructive" methods of the map, i.e., the one that change the map contents,
- * are specified to throw {@link UnsupportedOperationException} if
- * the map has been created with a read-only database view.
+ * <p>The "destructive" methods of the map, i.e., the one that change the map contents, are
+ * specified to throw {@link UnsupportedOperationException} if the map has been created with a
+ * read-only database view.
  *
  * <p>This interface prohibits null keys and values.
  *
@@ -43,27 +43,27 @@ public interface MapIndex<K, V> extends StorageIndex {
   boolean containsKey(K key);
 
   /**
-   * Puts a new key-value pair into the map. If this map already contains
-   * a mapping for the specified key, overwrites the old value with the specified value.
+   * Puts a new key-value pair into the map. If this map already contains a mapping for the
+   * specified key, overwrites the old value with the specified value.
    *
    * @param key a storage key
    * @param value a storage value to associate with the key
    * @throws IllegalStateException if this map is not valid
-   * @throws IllegalArgumentException if some property of the key or the value prevents it
-   *                                  from being stored in this map
+   * @throws IllegalArgumentException if some property of the key or the value prevents it from
+   *     being stored in this map
    * @throws UnsupportedOperationException if this map is read-only
    */
   void put(K key, V value);
 
   /**
-   * Puts all key-value pairs from the given map into this map. Equivalent to a sequence
-   * of individual {@link #put} operations.
+   * Puts all key-value pairs from the given map into this map. Equivalent to a sequence of
+   * individual {@link #put} operations.
    *
    * @param sourceMap a map to put into this one
    * @throws NullPointerException if the passed map is null or contains a null key or values
    * @throws IllegalStateException if this map is not valid
-   * @throws IllegalArgumentException if some property of the key or the value prevents it
-   *                                  from being stored in this map
+   * @throws IllegalArgumentException if some property of the key or the value prevents it from
+   *     being stored in this map
    * @throws UnsupportedOperationException if this map is read-only
    */
   default void putAll(Map<? extends K, ? extends V> sourceMap) {
@@ -73,26 +73,26 @@ public interface MapIndex<K, V> extends StorageIndex {
   }
 
   /**
-   * Returns the value associated with the specified key,
-   * or {@code null} if there is no mapping for the key.
+   * Returns the value associated with the specified key, or {@code null} if there is no mapping for
+   * the key.
    *
    * @param key a storage key
-   * @return the value mapped to the specified key,
-   *         or {@code null} if this map contains no mapping for the key.
+   * @return the value mapped to the specified key, or {@code null} if this map contains no mapping
+   *     for the key.
    * @throws IllegalStateException if this map is not valid
    */
   V get(K key);
 
   /**
-   * Removes the value mapped to the specified key from the map.
-   * If there is no such mapping, has no effect.
+   * Removes the value mapped to the specified key from the map. If there is no such mapping, has no
+   * effect.
    *
    * @param key a storage key
    * @throws IllegalStateException if this map is not valid
    * @throws UnsupportedOperationException if this map is read-only
    */
   void remove(K key);
-  
+
   /**
    * Returns an iterator over the map keys. The keys are ordered in lexicographical order.
    *
@@ -117,8 +117,8 @@ public interface MapIndex<K, V> extends StorageIndex {
   Iterator<MapEntry<K, V>> entries();
 
   /**
-   * Removes all of the key-value pairs from the map.
-   * The map will be empty after this method returns.
+   * Removes all of the key-value pairs from the map. The map will be empty after this method
+   * returns.
    *
    * @throws IllegalStateException if this map is not valid
    * @throws UnsupportedOperationException if this map is read-only
@@ -128,9 +128,8 @@ public interface MapIndex<K, V> extends StorageIndex {
   /**
    * Returns true if this map has no entries.
    *
-   * <p>Note: there is no {@code size()} method because
-   * implementations of MapIndex do not currently track
-   * the number of entries.
+   * <p>Note: there is no {@code size()} method because implementations of MapIndex do not currently
+   * track the number of entries.
    */
   default boolean isEmpty() {
     return !keys().hasNext();

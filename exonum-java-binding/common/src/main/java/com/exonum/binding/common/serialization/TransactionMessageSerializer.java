@@ -30,5 +30,4 @@ enum TransactionMessageSerializer implements Serializer<TransactionMessage> {
   public TransactionMessage fromBytes(byte[] serializedValue) {
     return TransactionMessage.fromBytes(serializedValue);
   }
-
 }

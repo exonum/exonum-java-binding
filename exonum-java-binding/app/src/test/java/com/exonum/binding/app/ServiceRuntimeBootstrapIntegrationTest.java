@@ -30,8 +30,8 @@ class ServiceRuntimeBootstrapIntegrationTest {
 
   @Test
   void createServiceRuntimeAdapter() {
-    ServiceRuntimeAdapter serviceRuntimeAdapter = ServiceRuntimeBootstrap
-        .createServiceRuntime("/tmp/", PORT);
+    ServiceRuntimeAdapter serviceRuntimeAdapter =
+        ServiceRuntimeBootstrap.createServiceRuntime("/tmp/", PORT);
 
     // Check the runtime is created
     assertNotNull(serviceRuntimeAdapter);

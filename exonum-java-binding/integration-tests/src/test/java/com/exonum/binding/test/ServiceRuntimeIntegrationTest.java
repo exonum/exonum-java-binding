@@ -62,11 +62,12 @@ class ServiceRuntimeIntegrationTest {
 
     // Create a testkit with this service instance
     int serviceId = 1;
-    try (TestKit testKit = TestKit.builder()
-        .withArtifactsDirectory(artifactDir)
-        .withDeployedArtifact(artifactId, artifactFilename)
-        .withService(artifactId, "s1", serviceId)
-        .build()) {
+    try (TestKit testKit =
+        TestKit.builder()
+            .withArtifactsDirectory(artifactDir)
+            .withDeployedArtifact(artifactId, artifactFilename)
+            .withService(artifactId, "s1", serviceId)
+            .build()) {
       // Create a block, to trigger 'afterTransaction'
       testKit.createBlock();
 

@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -34,25 +33,25 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 
 /**
- * A key set is an index that contains no duplicate elements (keys).
- * This implementation does not permit null elements.
+ * A key set is an index that contains no duplicate elements (keys). This implementation does not
+ * permit null elements.
  *
- * <p>The elements are stored as keys in the underlying database in the lexicographical order.
- * As each operation accepting an element needs to pass the <em>entire</em> element
- * to the underlying database as a key, it's better, in terms of performance, to use this index
- * with small elements. If you need to store large elements and can perform operations
- * by hashes of the elements, consider using a {@link ValueSetIndexProxy}.
+ * <p>The elements are stored as keys in the underlying database in the lexicographical order. As
+ * each operation accepting an element needs to pass the <em>entire</em> element to the underlying
+ * database as a key, it's better, in terms of performance, to use this index with small elements.
+ * If you need to store large elements and can perform operations by hashes of the elements,
+ * consider using a {@link ValueSetIndexProxy}.
  *
- * <p>The "destructive" methods of the set, i.e., the ones that change its contents,
- * are specified to throw {@link UnsupportedOperationException} if the set has been created with
- * a read-only database access.
+ * <p>The "destructive" methods of the set, i.e., the ones that change its contents, are specified
+ * to throw {@link UnsupportedOperationException} if the set has been created with a read-only
+ * database access.
  *
  * <p>All method arguments are non-null by default.
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>When the access goes out of scope, this set is destroyed. Subsequent use of the closed set
- * is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the access goes out of scope, this set is destroyed. Subsequent use of the closed set is
+ * prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this set
  * @see ValueSetIndexProxy
@@ -75,8 +74,8 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    * Creates a new key set proxy.
    *
    * @param address an index address
-   * @param access a database access. Must be valid. If an access is read-only,
-   *             "destructive" operations are not permitted.
+   * @param access a database access. Must be valid. If an access is read-only, "destructive"
+   *     operations are not permitted.
    * @param serializer a serializer of set keys
    * @param <E> the type of keys in this set
    * @throws IllegalStateException if the access is not valid
@@ -94,25 +93,28 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
 
   private static NativeHandle createNativeSet(IndexAddress address, AbstractAccess access) {
     long accessNativeHandle = access.getAccessNativeHandle();
-    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
-        accessNativeHandle);
+    long handle =
+        nativeCreate(address.getName(), address.getIdInGroup().orElse(null), accessNativeHandle);
     NativeHandle setNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, setNativeHandle, KeySetIndexProxy.class,
-        KeySetIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(
+        cleaner, setNativeHandle, KeySetIndexProxy.class, KeySetIndexProxy::nativeFree);
     return setNativeHandle;
   }
 
-  private KeySetIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
-                           CheckingSerializerDecorator<E> serializer) {
+  private KeySetIndexProxy(
+      NativeHandle nativeHandle,
+      IndexAddress address,
+      AbstractAccess access,
+      CheckingSerializerDecorator<E> serializer) {
     super(nativeHandle, address, access);
     this.serializer = serializer;
   }
 
   /**
-   * Adds a new element to the set. The method has no effect if
-   * the set already contains such element.
+   * Adds a new element to the set. The method has no effect if the set already contains such
+   * element.
    *
    * @param e an element to add
    * @throws IllegalStateException if this set is not valid
@@ -125,8 +127,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
   }
 
   /**
-   * Removes all of the elements from this set.
-   * The set will be empty after this method returns.
+   * Removes all of the elements from this set. The set will be empty after this method returns.
    *
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
@@ -135,7 +136,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
     notifyModified();
     nativeClear(getNativeHandle());
   }
-  
+
   /**
    * Returns true if this set contains the specified element.
    *
@@ -148,9 +149,9 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
 
   /**
    * Creates an iterator over the set elements. The elements are ordered lexicographically.
-   * 
+   *
    * @return an iterator over the elements of this set
-   * @throws IllegalStateException if this set is not valid 
+   * @throws IllegalStateException if this set is not valid
    */
   @Override
   public Iterator<E> iterator() {
@@ -170,8 +171,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
    */
   public Stream<E> stream() {
     return StreamSupport.stream(
-        Spliterators.spliteratorUnknownSize(iterator(), streamCharacteristics()),
-        false);
+        Spliterators.spliteratorUnknownSize(iterator(), streamCharacteristics()), false);
   }
 
   private int streamCharacteristics() {
@@ -184,7 +184,7 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
 
   /**
    * Removes the element from this set. If it's not in the set, does nothing.
-   * 
+   *
    * @param e an element to remove.
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
@@ -195,8 +195,8 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
     nativeRemove(getNativeHandle(), dbElement);
   }
 
-  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
-      long accessNativeHandle);
+  private static native long nativeCreate(
+      String name, @Nullable byte[] idInGroup, long accessNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 

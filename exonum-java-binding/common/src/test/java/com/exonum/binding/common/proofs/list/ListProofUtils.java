@@ -28,37 +28,35 @@ import com.google.protobuf.ByteString;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-/**
- * Various utilities for testing ListProof verification.
- */
+/** Various utilities for testing ListProof verification. */
 final class ListProofUtils {
 
-  private ListProofUtils() {
-  }
+  private ListProofUtils() {}
 
   static HashCode getLeafHashCode(ByteString value) {
     return getLeafHashCode(value.toByteArray());
   }
 
   static HashCode getLeafHashCode(byte[] value) {
-    return Hashing.defaultHashFunction().newHasher()
-        .putByte(BLOB_PREFIX)
-        .putBytes(value)
-        .hash();
+    return Hashing.defaultHashFunction().newHasher().putByte(BLOB_PREFIX).putBytes(value).hash();
   }
 
   static HashCode getBranchHashCode(HashCode leftHash, @Nullable HashCode rightHashSource) {
     Optional<HashCode> rightHash = Optional.ofNullable(rightHashSource);
-    return Hashing.defaultHashFunction().newHasher()
+    return Hashing.defaultHashFunction()
+        .newHasher()
         .putByte(LIST_BRANCH_PREFIX)
         .putObject(leftHash, hashCodeFunnel())
-        .putObject(rightHash, (Optional<HashCode> from, PrimitiveSink into) ->
-            from.ifPresent((hash) -> hashCodeFunnel().funnel(hash, into)))
+        .putObject(
+            rightHash,
+            (Optional<HashCode> from, PrimitiveSink into) ->
+                from.ifPresent((hash) -> hashCodeFunnel().funnel(hash, into)))
         .hash();
   }
 
   static HashCode getProofListHash(HashCode rootHash, long length) {
-    return Hashing.defaultHashFunction().newHasher()
+    return Hashing.defaultHashFunction()
+        .newHasher()
         .putByte(LIST_ROOT_PREFIX)
         .putLong(length)
         .putObject(rootHash, hashCodeFunnel())

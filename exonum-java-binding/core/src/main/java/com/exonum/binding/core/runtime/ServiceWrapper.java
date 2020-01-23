@@ -34,15 +34,15 @@ import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 
 /**
- * The service wrapper represents an Exonum service as a whole and allows the service runtime
- * to operate on them conveniently. It separates the <em>extension</em>,
- * user-facing, interface from the <em>runtime</em>, internal, interface.
+ * The service wrapper represents an Exonum service as a whole and allows the service runtime to
+ * operate on them conveniently. It separates the <em>extension</em>, user-facing, interface from
+ * the <em>runtime</em>, internal, interface.
  */
 final class ServiceWrapper {
 
   /**
-   * Default interface comprised of transactions defined in the service implementation
-   * (intrinsic to this service).
+   * Default interface comprised of transactions defined in the service implementation (intrinsic to
+   * this service).
    */
   static final String DEFAULT_INTERFACE_NAME = "";
   /**
@@ -73,31 +73,28 @@ final class ServiceWrapper {
    * @param node a node to inject into a service API controller
    */
   @Inject
-  ServiceWrapper(Service service, ServiceInstanceSpec instanceSpec,
-      TransactionInvoker transactionInvoker, Node node) {
+  ServiceWrapper(
+      Service service,
+      ServiceInstanceSpec instanceSpec,
+      TransactionInvoker transactionInvoker,
+      Node node) {
     this.service = service;
     this.instanceSpec = instanceSpec;
     this.invoker = transactionInvoker;
     this.node = node;
   }
 
-  /**
-   * Returns the service instance.
-   */
+  /** Returns the service instance. */
   Service getService() {
     return service;
   }
 
-  /**
-   * Returns the name of this service instance.
-   */
+  /** Returns the name of this service instance. */
   String getName() {
     return instanceSpec.getName();
   }
 
-  /**
-   * Returns id of this service instance.
-   */
+  /** Returns id of this service instance. */
   int getId() {
     return instanceSpec.getId();
   }
@@ -106,19 +103,26 @@ final class ServiceWrapper {
     callServiceMethod(() -> service.initialize(fork, configuration));
   }
 
-  void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
+  void executeTransaction(
+      String interfaceName,
+      int txId,
+      byte[] arguments,
+      int callerServiceId,
       TransactionContext context) {
     switch (interfaceName) {
-      case DEFAULT_INTERFACE_NAME: {
-        executeIntrinsicTransaction(txId, arguments, context);
-        break;
-      }
-      case CONFIGURE_INTERFACE_NAME: {
-        executeConfigurableTransaction(txId, arguments, callerServiceId, context);
-        break;
-      }
-      default: throw new IllegalArgumentException(
-          format("Unknown interface (name=%s, txId=%d)", interfaceName, txId));
+      case DEFAULT_INTERFACE_NAME:
+        {
+          executeIntrinsicTransaction(txId, arguments, context);
+          break;
+        }
+      case CONFIGURE_INTERFACE_NAME:
+        {
+          executeConfigurableTransaction(txId, arguments, callerServiceId, context);
+          break;
+        }
+      default:
+        throw new IllegalArgumentException(
+            format("Unknown interface (name=%s, txId=%d)", interfaceName, txId));
     }
   }
 
@@ -126,15 +130,18 @@ final class ServiceWrapper {
     invoker.invokeTransaction(txId, arguments, context);
   }
 
-  private void executeConfigurableTransaction(int txId, byte[] arguments, int callerServiceId,
-      TransactionContext context) {
+  private void executeConfigurableTransaction(
+      int txId, byte[] arguments, int callerServiceId, TransactionContext context) {
     // Check the service implements Configurable
-    checkArgument(service instanceof Configurable, "Service (%s) doesn't implement Configurable",
-        getName());
+    checkArgument(
+        service instanceof Configurable, "Service (%s) doesn't implement Configurable", getName());
     // Check the caller is the supervisor
-    checkArgument(callerServiceId == SUPERVISOR_SERVICE_ID, "Invalid caller service id (%s). "
-        + "Operations in Configurable interface may only be invoked by the supervisor service (%s)",
-        callerServiceId, SUPERVISOR_SERVICE_ID);
+    checkArgument(
+        callerServiceId == SUPERVISOR_SERVICE_ID,
+        "Invalid caller service id (%s). "
+            + "Operations in Configurable interface may only be invoked by the supervisor service (%s)",
+        callerServiceId,
+        SUPERVISOR_SERVICE_ID);
     // Invoke the Configurable operation
     Configurable configurable = (Configurable) service;
     Fork fork = context.getFork();
@@ -155,9 +162,8 @@ final class ServiceWrapper {
   /**
    * Calls a service method — a method that is specified to throw {@link ExecutionException}.
    *
-   * <p>Exceptions are handled as follows:
-   * - {@link ExecutionException} is propagated as-is
-   * - Any other exception is wrapped into {@link UnexpectedExecutionException}
+   * <p>Exceptions are handled as follows: - {@link ExecutionException} is propagated as-is - Any
+   * other exception is wrapped into {@link UnexpectedExecutionException}
    */
   private static void callServiceMethod(Runnable serviceMethod) {
     try {
@@ -198,21 +204,18 @@ final class ServiceWrapper {
   }
 
   /**
-   * Returns the relative path fragment on which to mount the API of this service.
-   * The path fragment is already escaped and can be combined with other URL path fragments.
+   * Returns the relative path fragment on which to mount the API of this service. The path fragment
+   * is already escaped and can be combined with other URL path fragments.
    */
   String getPublicApiRelativePath() {
     // At the moment, we treat the service name as a single path segment (i.e., our path
     // fragment consists of a single segment — all slashes will be escaped).
     // todo: [ECR-3448] make this user-configurable? If so, is it one of predefined keys
     //  in the normal service configuration, or a separate configuration?
-    return UrlEscapers.urlPathSegmentEscaper()
-        .escape(getName());
+    return UrlEscapers.urlPathSegmentEscaper().escape(getName());
   }
 
-  /**
-   * Closes an access to the node within the service.
-   */
+  /** Closes an access to the node within the service. */
   void requestToStop() {
     node.close();
   }

@@ -39,9 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-/**
- * An unchecked flat map proof, which does not include any intermediate nodes.
- */
+/** An unchecked flat map proof, which does not include any intermediate nodes. */
 public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private static final HashFunction HASH_FUNCTION = Hashing.defaultHashFunction();
@@ -52,12 +50,9 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private final List<ByteString> missingKeys;
 
-  @VisibleForTesting
-  static final byte BLOB_PREFIX = 0x00;
-  @VisibleForTesting
-  static final byte MAP_ROOT_PREFIX = 0x03;
-  @VisibleForTesting
-  static final byte MAP_NODE_PREFIX = 0x04;
+  @VisibleForTesting static final byte BLOB_PREFIX = 0x00;
+  @VisibleForTesting static final byte MAP_ROOT_PREFIX = 0x03;
+  @VisibleForTesting static final byte MAP_NODE_PREFIX = 0x04;
 
   UncheckedFlatMapProof(
       List<MapProofEntry> proof,
@@ -65,9 +60,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
       List<byte[]> missingKeys) {
     this.proof = proof;
     this.entries = entries;
-    this.missingKeys = missingKeys.stream()
-        .map(ByteString::copyFrom)
-        .collect(toList());
+    this.missingKeys = missingKeys.stream().map(ByteString::copyFrom).collect(toList());
   }
 
   @Override
@@ -94,14 +87,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   /**
    * Checks that all entries in the proof are in the valid order.
    *
-   * <p>The keys must be in ascending order as defined by
-   * the {@linkplain DbKey#compareTo(DbKey) comparator}; there must not be duplicates.
+   * <p>The keys must be in ascending order as defined by the {@linkplain DbKey#compareTo(DbKey)
+   * comparator}; there must not be duplicates.
    *
    * @return {@code MapProofStatus.CORRECT} if every following key is greater than the previous
-   *         {@code MapProofStatus.INVALID_ORDER} if any following key key is lesser than the
-   *         previous
-   *         {@code MapProofStatus.DUPLICATE_PATH} if there are two equal keys
-   *         {@code MapProofStatus.EMBEDDED_PATH} if one key is a prefix of another
+   *     {@code MapProofStatus.INVALID_ORDER} if any following key key is lesser than the previous
+   *     {@code MapProofStatus.DUPLICATE_PATH} if there are two equal keys {@code
+   *     MapProofStatus.EMBEDDED_PATH} if one key is a prefix of another
    * @see DbKey#compareTo(DbKey)
    */
   private MapProofStatus orderCheck() {
@@ -122,9 +114,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
     return MapProofStatus.CORRECT;
   }
 
-  /**
-   * Returns true if any hash in the proof has size different from 32 bytes.
-   */
+  /** Returns true if any hash in the proof has size different from 32 bytes. */
   private boolean containsInvalidHashes() {
     // TODO: [ECR-2410] Migrate to ProofHashes#checkSha256Hash.
     return proof.stream()
@@ -139,20 +129,16 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
    */
   private boolean prefixesIncluded() {
     Stream<DbKey> requestedKeys =
-        Stream.concat(
-            entries.stream()
-                .map(MapEntry::getKey),
-            missingKeys.stream())
-        .map(DbKey::newLeafKey);
+        Stream.concat(entries.stream().map(MapEntry::getKey), missingKeys.stream())
+            .map(DbKey::newLeafKey);
 
     // TODO: proof entries are checked to be sorted at this stage, so it's possible
     //   to use binary search here
-    return requestedKeys
-        .anyMatch(leafEntryKey -> proof.stream()
-            .map(MapProofEntry::getDbKey)
-            .anyMatch(proofEntryKey ->
-                proofEntryKey.isPrefixOf(leafEntryKey))
-        );
+    return requestedKeys.anyMatch(
+        leafEntryKey ->
+            proof.stream()
+                .map(MapProofEntry::getDbKey)
+                .anyMatch(proofEntryKey -> proofEntryKey.isPrefixOf(leafEntryKey)));
   }
 
   private boolean isEmptyProof() {
@@ -217,14 +203,13 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
    */
   private List<MapProofEntry> mergeLeavesWithBranches() {
     int contourSize = proof.size() + entries.size();
-    assert contourSize > 1 :
-        "This method computes the hashes correctly for trees with multiple nodes only";
+    assert contourSize > 1
+        : "This method computes the hashes correctly for trees with multiple nodes only";
 
     List<MapProofEntry> proofContour = new ArrayList<>(contourSize);
 
     proofContour.addAll(proof);
-    entries
-        .stream()
+    entries.stream()
         .map(e -> new MapProofEntry(DbKey.newLeafKey(e.getKey()), getLeafEntryHash(e.getValue())))
         .forEach(proofContour::add);
 
@@ -234,8 +219,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   /**
-   * Folds two last entries in a contour and replaces them with the folded entry.
-   * Returns an updated common prefix between two last entries in the contour.
+   * Folds two last entries in a contour and replaces them with the folded entry. Returns an updated
+   * common prefix between two last entries in the contour.
    */
   private Optional<DbKey> fold(Deque<MapProofEntry> contour, DbKey lastPrefix) {
     MapProofEntry lastEntry = contour.pop();
@@ -260,8 +245,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode getSingleEntryProofIndexHash(MapProofEntry proofEntry) {
-    HashCode merkleRoot = getSingleEntryMerkleRoot(proofEntry.getDbKey(),
-        proofEntry.getHash());
+    HashCode merkleRoot = getSingleEntryMerkleRoot(proofEntry.getDbKey(), proofEntry.getHash());
     return getIndexHash(merkleRoot);
   }
 
@@ -273,7 +257,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode getIndexHash(HashCode merkleRoot) {
-    return HASH_FUNCTION.newHasher()
+    return HASH_FUNCTION
+        .newHasher()
         .putByte(MAP_ROOT_PREFIX)
         .putObject(merkleRoot, hashCodeFunnel())
         .hash();
@@ -281,7 +266,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
 
   private static HashCode getSingleEntryMerkleRoot(DbKey key, HashCode valueHash) {
     assert key.getNodeType() == Type.LEAF;
-    return HASH_FUNCTION.newHasher()
+    return HASH_FUNCTION
+        .newHasher()
         .putByte(MAP_NODE_PREFIX)
         .putObject(key, dbKeyFunnel())
         .putObject(valueHash, hashCodeFunnel())
@@ -289,10 +275,7 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   private static HashCode getLeafEntryHash(ByteString entryValue) {
-    return HASH_FUNCTION.newHasher()
-        .putByte(BLOB_PREFIX)
-        .putBytes(entryValue.toByteArray())
-        .hash();
+    return HASH_FUNCTION.newHasher().putByte(BLOB_PREFIX).putBytes(entryValue.toByteArray()).hash();
   }
 
   private static HashCode computeBranchHash(MapProofEntry leftChild, MapProofEntry rightChild) {

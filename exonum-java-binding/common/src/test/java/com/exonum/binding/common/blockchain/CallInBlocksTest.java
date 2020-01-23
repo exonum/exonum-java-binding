@@ -33,8 +33,15 @@ class CallInBlocksTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {/* Negative: */ Integer.MIN_VALUE, -2, -1,
-      /* Too big: */ Integer.MAX_VALUE})
+  @ValueSource(
+      ints = {
+        /* Negative: */
+        Integer.MIN_VALUE,
+        -2,
+        -1,
+        /* Too big: */
+        Integer.MAX_VALUE
+      })
   void transactionInvalidPositions(int txPosition) {
     assertThrows(IndexOutOfBoundsException.class, () -> CallInBlocks.transaction(txPosition));
   }

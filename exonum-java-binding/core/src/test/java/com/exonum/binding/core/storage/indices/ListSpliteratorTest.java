@@ -46,7 +46,7 @@ import org.mockito.stubbing.Answer;
 @ExtendWith(MockitoExtension.class)
 class ListSpliteratorTest {
 
-  private static final Consumer<Integer> NULL_CONSUMER = e -> { };
+  private static final Consumer<Integer> NULL_CONSUMER = e -> {};
 
   @Test
   void trySplit_Empty() {
@@ -83,8 +83,8 @@ class ListSpliteratorTest {
 
     // Check they preserve order
     int[] combinedResult =
-        Stream.concat(StreamSupport.stream(prefixSplit, false),
-            StreamSupport.stream(suffixSplit, false))
+        Stream.concat(
+                StreamSupport.stream(prefixSplit, false), StreamSupport.stream(suffixSplit, false))
             .mapToInt(i -> i)
             .toArray();
 
@@ -103,15 +103,11 @@ class ListSpliteratorTest {
 
     // Check that the resulting array, obtained by splitting the input while it's splittable
     // and then merging pairwise together is the same as the initial array.
-    int[] combinedArray = combinedStream
-        .mapToInt(i -> i)
-        .toArray();
+    int[] combinedArray = combinedStream.mapToInt(i -> i).toArray();
     assertThat(combinedArray).isEqualTo(array);
   }
 
-  /**
-   * Splits recursively while splittable then merges the resulting streams together.
-   */
+  /** Splits recursively while splittable then merges the resulting streams together. */
   private static Stream<Integer> testTrySplitRecursively(Spliterator<Integer> spliterator) {
     // Get the total size before trySplit
     long totalSize = spliterator.estimateSize();
@@ -132,9 +128,7 @@ class ListSpliteratorTest {
 
     // Go on splitting both recursively.
     return Stream.concat(
-        testTrySplitRecursively(prefixSplit),
-        testTrySplitRecursively(suffixSplit)
-    );
+        testTrySplitRecursively(prefixSplit), testTrySplitRecursively(suffixSplit));
   }
 
   @ParameterizedTest
@@ -160,15 +154,12 @@ class ListSpliteratorTest {
   }
 
   /**
-   * Does not include {@link Spliterator#forEachRemaining(Consumer)} because it consumes
-   * the spliterator.
+   * Does not include {@link Spliterator#forEachRemaining(Consumer)} because it consumes the
+   * spliterator.
    */
   private static List<Consumer<Spliterator<Integer>>> bindingOperations() {
     return Arrays.asList(
-        s -> s.tryAdvance(NULL_CONSUMER),
-        Spliterator::estimateSize,
-        Spliterator::trySplit
-    );
+        s -> s.tryAdvance(NULL_CONSUMER), Spliterator::estimateSize, Spliterator::trySplit);
   }
 
   @Test
@@ -238,10 +229,10 @@ class ListSpliteratorTest {
   }
 
   private static void assertHasDetectedModification(Spliterator<Integer> spliterator) {
-    assertThrows(ConcurrentModificationException.class,
-        () -> spliterator.tryAdvance(NULL_CONSUMER));
-    assertThrows(ConcurrentModificationException.class,
-        () -> spliterator.forEachRemaining(NULL_CONSUMER));
+    assertThrows(
+        ConcurrentModificationException.class, () -> spliterator.tryAdvance(NULL_CONSUMER));
+    assertThrows(
+        ConcurrentModificationException.class, () -> spliterator.forEachRemaining(NULL_CONSUMER));
     assertThrows(ConcurrentModificationException.class, spliterator::trySplit);
   }
 
@@ -286,15 +277,18 @@ class ListSpliteratorTest {
 
   private static Spliterator<Integer> createSpliteratorOf(int[] source) {
     ListIndex<Integer> list = createListMock();
-    lenient().when(list.get(anyLong())).thenAnswer((Answer<Integer>) invocation -> {
-      Long index = invocation.getArgument(0);
-      return source[Math.toIntExact(index)];
-    });
+    lenient()
+        .when(list.get(anyLong()))
+        .thenAnswer(
+            (Answer<Integer>)
+                invocation -> {
+                  Long index = invocation.getArgument(0);
+                  return source[Math.toIntExact(index)];
+                });
     lenient().when(list.size()).thenReturn((long) source.length);
 
     ModificationCounter modCounter = mock(ModificationCounter.class);
-    lenient().when(modCounter.isModifiedSince(anyInt()))
-        .thenReturn(false);
+    lenient().when(modCounter.isModifiedSince(anyInt())).thenReturn(false);
 
     return new ListSpliterator<>(list, modCounter, true);
   }

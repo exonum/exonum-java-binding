@@ -48,8 +48,6 @@ class Fixed32SerializerTest {
         Bytes.bytes((byte) 0),
         Bytes.bytes(1, 2, 3),
         Bytes.bytes(1, 2, 3, 4, 5),
-        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8)
-    );
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8));
   }
-
 }

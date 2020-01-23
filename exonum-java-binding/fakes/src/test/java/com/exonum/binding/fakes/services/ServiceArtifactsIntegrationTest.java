@@ -70,7 +70,8 @@ class ServiceArtifactsIntegrationTest {
   void createUnloadableArtifact() throws IOException {
     String id = "1:com.exonum.binding:unloadable-test-service:1.0.0";
     ServiceArtifacts.createUnloadableArtifact(id, artifactLocation);
-    assertThrows(ServiceLoadingException.class,
+    assertThrows(
+        ServiceLoadingException.class,
         () -> serviceRuntime.deployArtifact(ServiceArtifactId.parseFrom(id), ARTIFACT_FILENAME));
   }
 
@@ -82,7 +83,8 @@ class ServiceArtifactsIntegrationTest {
 
     serviceRuntime.deployArtifact(id, ARTIFACT_FILENAME);
 
-    assertThrows(RuntimeException.class, () -> serviceRuntime.addService(fork, id.toString(),
-        configuration));
+    assertThrows(
+        RuntimeException.class,
+        () -> serviceRuntime.addService(fork, id.toString(), configuration));
   }
 }

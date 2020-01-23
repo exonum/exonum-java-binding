@@ -38,5 +38,4 @@ class Uint64SerializerTest {
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
   }
-
 }

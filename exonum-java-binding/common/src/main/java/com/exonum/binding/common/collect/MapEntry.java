@@ -21,9 +21,9 @@ import com.google.auto.value.AutoValue;
 /**
  * A map entry: a key-value pair. This entry does not permit null keys and values.
  *
- * <p>A map entry contains <em>a copy</em> of the data in the corresponding map index.
- * Unlike {@link java.util.Map.Entry}, it does not reflect the changes made to the map
- * since this entry had been created.
+ * <p>A map entry contains <em>a copy</em> of the data in the corresponding map index. Unlike {@link
+ * java.util.Map.Entry}, it does not reflect the changes made to the map since this entry had been
+ * created.
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -31,20 +31,14 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class MapEntry<K, V> {
 
-  /**
-   * Creates a new MapEntry from the given key and value.
-   */
+  /** Creates a new MapEntry from the given key and value. */
   public static <K, V> MapEntry<K, V> valueOf(K key, V value) {
     return new AutoValue_MapEntry<>(key, value);
   }
 
-  /**
-   * Returns the key corresponding to this entry.
-   */
+  /** Returns the key corresponding to this entry. */
   public abstract K getKey();
 
-  /**
-   * Returns the value corresponding to this entry.
-   */
+  /** Returns the value corresponding to this entry. */
   public abstract V getValue();
 }

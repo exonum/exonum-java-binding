@@ -29,9 +29,7 @@ import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.utils.LibraryLoader;
 import com.goterl.lazycode.lazysodium.utils.LibraryLoader.Mode;
 
-/**
- * A ED25519 public-key signature system crypto function.
- */
+/** A ED25519 public-key signature system crypto function. */
 final class Ed25519CryptoFunction implements CryptoFunction {
 
   static final Ed25519CryptoFunction INSTANCE = new Ed25519CryptoFunction(Mode.PREFER_SYSTEM);
@@ -45,8 +43,11 @@ final class Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public KeyPair generateKeyPair(byte[] seed) {
-    checkArgument(hasLength(seed, SEED_BYTES),
-        "Seed byte array has invalid size (%s), must be %s", seed.length, SEED_BYTES);
+    checkArgument(
+        hasLength(seed, SEED_BYTES),
+        "Seed byte array has invalid size (%s), must be %s",
+        seed.length,
+        SEED_BYTES);
 
     byte[] publicKey = new byte[PUBLIC_KEY_BYTES];
     byte[] privateKey = new byte[PRIVATE_KEY_BYTES];
@@ -72,8 +73,9 @@ final class Ed25519CryptoFunction implements CryptoFunction {
   public byte[] signMessage(byte[] message, PrivateKey privateKey) {
     checkArgument(hasLength(privateKey.toBytesNoCopy(), PRIVATE_KEY_BYTES));
     byte[] signature = new byte[SIGNATURE_BYTES];
-    boolean signed = lazySodium.cryptoSignDetached(signature, message, message.length,
-        privateKey.toBytesNoCopy());
+    boolean signed =
+        lazySodium.cryptoSignDetached(
+            signature, message, message.length, privateKey.toBytesNoCopy());
 
     if (!signed) {
       throw new RuntimeException("Could not sign the message.");
@@ -83,13 +85,15 @@ final class Ed25519CryptoFunction implements CryptoFunction {
 
   @Override
   public boolean verify(byte[] message, byte[] signature, PublicKey publicKey) {
-    checkArgument(hasLength(publicKey.toBytesNoCopy(), PUBLIC_KEY_BYTES),
-        "Public key has invalid size (%s), must be %s", publicKey.size(), PUBLIC_KEY_BYTES);
+    checkArgument(
+        hasLength(publicKey.toBytesNoCopy(), PUBLIC_KEY_BYTES),
+        "Public key has invalid size (%s), must be %s",
+        publicKey.size(),
+        PUBLIC_KEY_BYTES);
     if (!hasLength(signature, SIGNATURE_BYTES)) {
       return false;
     }
-    return lazySodium
-        .cryptoSignVerifyDetached(signature, message, message.length, publicKey.toBytesNoCopy());
+    return lazySodium.cryptoSignVerifyDetached(
+        signature, message, message.length, publicKey.toBytesNoCopy());
   }
-
 }

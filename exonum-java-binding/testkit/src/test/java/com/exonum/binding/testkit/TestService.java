@@ -43,8 +43,8 @@ import java.nio.charset.StandardCharsets;
 
 public final class TestService extends AbstractService {
 
-  static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
-      .hashString("Initial key", StandardCharsets.UTF_8);
+  static final HashCode INITIAL_ENTRY_KEY =
+      Hashing.defaultHashFunction().hashString("Initial key", StandardCharsets.UTF_8);
   static final String THROWING_VALUE = "Incorrect value";
   static final byte ANY_ERROR_CODE = 127;
   static final short TEST_TRANSACTION_ID = 94;
@@ -67,8 +67,8 @@ public final class TestService extends AbstractService {
     TestConfiguration initialConfiguration = configuration.getAsMessage(TestConfiguration.class);
     String configurationValue = initialConfiguration.getValue();
     if (configurationValue.equals(THROWING_VALUE)) {
-      throw new ExecutionException(ANY_ERROR_CODE, "Service configuration had an invalid value: "
-          + configurationValue);
+      throw new ExecutionException(
+          ANY_ERROR_CODE, "Service configuration had an invalid value: " + configurationValue);
     }
     TestSchema schema = createDataSchema(fork);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
@@ -96,14 +96,14 @@ public final class TestService extends AbstractService {
   }
 
   private static CharsetDecoder createUtf8Decoder() {
-    return BODY_CHARSET.newDecoder()
+    return BODY_CHARSET
+        .newDecoder()
         .onMalformedInput(CodingErrorAction.REPORT)
         .onUnmappableCharacter(CodingErrorAction.REPLACE);
   }
 
   private HashCode getKey(String value) {
-    return Hashing.defaultHashFunction()
-        .hashString(value, BODY_CHARSET);
+    return Hashing.defaultHashFunction().hashString(value, BODY_CHARSET);
   }
 
   @Override

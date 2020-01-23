@@ -59,26 +59,33 @@ class ExplorerApiHelperTest {
   private static long BLOCK_HEIGHT = 1L;
   private static long INDEX_IN_BLOCK = 0L;
 
-  private static String TEMPLATE_TRANSACTION_MESSAGE_JSON = "{\n"
-      + "    'type': 'committed',\n"
-      + "    'content': '" + toHex(TRANSACTION_MESSAGE) + "',\n"
-      + "    'location': {\n"
-      + "        'block_height': " + BLOCK_HEIGHT + ",\n"
-      + "        'position_in_block': " + INDEX_IN_BLOCK + "\n"
-      + "    },\n"
-      + "    'location_proof': {\n"
-      + "        'entries': [\n"
-      + "            [\n"
-      + "                0,\n"
-      + "                'd27f4ae6692fc00caf4e51ca7c072bab35487bb0d56272e08b6069ebadb52100'\n"
-      + "            ]\n"
-      + "        ],\n"
-      + "        'length': 1,\n"
-      + "        'proof': []\n"
-      + "    },\n"
-      + "    %s,\n"
-      + "    'time': '2019-12-02T21:51:36.439431Z'"
-      + "}";
+  private static String TEMPLATE_TRANSACTION_MESSAGE_JSON =
+      "{\n"
+          + "    'type': 'committed',\n"
+          + "    'content': '"
+          + toHex(TRANSACTION_MESSAGE)
+          + "',\n"
+          + "    'location': {\n"
+          + "        'block_height': "
+          + BLOCK_HEIGHT
+          + ",\n"
+          + "        'position_in_block': "
+          + INDEX_IN_BLOCK
+          + "\n"
+          + "    },\n"
+          + "    'location_proof': {\n"
+          + "        'entries': [\n"
+          + "            [\n"
+          + "                0,\n"
+          + "                'd27f4ae6692fc00caf4e51ca7c072bab35487bb0d56272e08b6069ebadb52100'\n"
+          + "            ]\n"
+          + "        ],\n"
+          + "        'length': 1,\n"
+          + "        'proof': []\n"
+          + "    },\n"
+          + "    %s,\n"
+          + "    'time': '2019-12-02T21:51:36.439431Z'"
+          + "}";
 
   @Test
   void parseSubmitTxResponse() {
@@ -91,10 +98,13 @@ class ExplorerApiHelperTest {
 
   @Test
   void parseGetTxResponseInPool() {
-    String json = "{\n"
-        + "    'type': 'in-pool',\n"
-        + "    'content': '" + toHex(TRANSACTION_MESSAGE) + "'\n"
-        + "}";
+    String json =
+        "{\n"
+            + "    'type': 'in-pool',\n"
+            + "    'content': '"
+            + toHex(TRANSACTION_MESSAGE)
+            + "'\n"
+            + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.IN_POOL));
@@ -112,7 +122,8 @@ class ExplorerApiHelperTest {
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
     assertThat(transactionResponse.getMessage(), is(TRANSACTION_MESSAGE));
     assertThat(transactionResponse.getExecutionResult(), is(executionStatus));
-    assertThat(transactionResponse.getLocation(),
+    assertThat(
+        transactionResponse.getLocation(),
         is(TransactionLocation.valueOf(BLOCK_HEIGHT, INDEX_IN_BLOCK)));
   }
 
@@ -124,48 +135,70 @@ class ExplorerApiHelperTest {
     String tx1 = "336a4acb";
     String tx2 = "12345678";
     String commitTime = "2019-10-01T17:07:45.663021Z";
-    String json = "{\n"
-        + "    \"proposer_id\": 0,\n"
-        + "    \"height\": 2,\n"
-        + "    \"tx_count\": 1,\n"
-        + "    \"prev_hash\": \"" + prevHash + "\",\n"
-        + "    \"tx_hash\": \"" + txHash + "\",\n"
-        + "    \"state_hash\": \"" + stateHash + "\",\n"
-        + "    \"precommits\": [\n"
-        + "        \"bc13da11\"\n"
-        + "    ],\n"
-        + "    \"txs\": [\n"
-        + "        {\"service_id\": 0, \"tx_hash\": \"" + tx1 + "\"},\n"
-        + "        {\"service_id\": 128, \"tx_hash\": \"" + tx2 + "\"}\n"
-        + "    ],\n"
-        + "    \"time\": \"" + commitTime + "\"\n"
-        + "}";
+    String json =
+        "{\n"
+            + "    \"proposer_id\": 0,\n"
+            + "    \"height\": 2,\n"
+            + "    \"tx_count\": 1,\n"
+            + "    \"prev_hash\": \""
+            + prevHash
+            + "\",\n"
+            + "    \"tx_hash\": \""
+            + txHash
+            + "\",\n"
+            + "    \"state_hash\": \""
+            + stateHash
+            + "\",\n"
+            + "    \"precommits\": [\n"
+            + "        \"bc13da11\"\n"
+            + "    ],\n"
+            + "    \"txs\": [\n"
+            + "        {\"service_id\": 0, \"tx_hash\": \""
+            + tx1
+            + "\"},\n"
+            + "        {\"service_id\": 128, \"tx_hash\": \""
+            + tx2
+            + "\"}\n"
+            + "    ],\n"
+            + "    \"time\": \""
+            + commitTime
+            + "\"\n"
+            + "}";
 
     BlockResponse response = ExplorerApiHelper.parseGetBlockResponse(json);
 
-    Block expectedBlock = Block.builder()
-        .proposerId(0)
-        .height(2)
-        .numTransactions(1)
-        .previousBlockHash(HashCode.fromString(prevHash))
-        .txRootHash(HashCode.fromString(txHash))
-        .stateHash(HashCode.fromString(stateHash))
-        .commitTime(ZonedDateTime.parse(commitTime))
-        .build();
+    Block expectedBlock =
+        Block.builder()
+            .proposerId(0)
+            .height(2)
+            .numTransactions(1)
+            .previousBlockHash(HashCode.fromString(prevHash))
+            .txRootHash(HashCode.fromString(txHash))
+            .stateHash(HashCode.fromString(stateHash))
+            .commitTime(ZonedDateTime.parse(commitTime))
+            .build();
     assertThat(response.getBlock(), is(expectedBlock));
-    assertThat(response.getTransactionHashes(), contains(HashCode.fromString(tx1),
-        HashCode.fromString(tx2)));
+    assertThat(
+        response.getTransactionHashes(),
+        contains(HashCode.fromString(tx1), HashCode.fromString(tx2)));
   }
 
   @Test
   void parseGetBlocksResponse() {
-    String json = "{\n"
-        + "    'range': {\n"
-        + "        'start': 6,\n"
-        + "        'end': 288\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_1_JSON + "," + BLOCK_2_JSON + "," + BLOCK_3_JSON + "]\n"
-        + "}\n";
+    String json =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': 6,\n"
+            + "        'end': 288\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_1_JSON
+            + ","
+            + BLOCK_2_JSON
+            + ","
+            + BLOCK_3_JSON
+            + "]\n"
+            + "}\n";
 
     BlocksResponse response = ExplorerApiHelper.parseGetBlocksResponse(json);
 
@@ -183,60 +216,75 @@ class ExplorerApiHelperTest {
     ServiceInstanceInfo serviceInstanceInfo1 = new ServiceInstanceInfo(serviceName1, serviceId1);
     ServiceInstanceInfo serviceInstanceInfo2 = new ServiceInstanceInfo(serviceName2, serviceId2);
     List<ServiceInstanceInfo> expected = Arrays.asList(serviceInstanceInfo1, serviceInstanceInfo2);
-    String json = "{\n"
-        + "    \"services\": [{\n"
-        + "        \"spec\": {\n"
-        + "            \"name\": \"" + serviceName1 + "\",\n"
-        + "            \"id\": " + serviceId1 + "\n"
-        + "            },\n"
-        + "            \"status\": \"Active\"\n"
-        + "        },\n"
-        + "        {\n"
-        + "        \"spec\": {\n"
-        + "            \"name\": \"" + serviceName2 + "\",\n"
-        + "            \"id\": " + serviceId2 + "\n"
-        + "            },\n"
-        + "            \"status\": \"Active\"\n"
-        + "        }\n"
-        + "    ]\n"
-        + "}";
+    String json =
+        "{\n"
+            + "    \"services\": [{\n"
+            + "        \"spec\": {\n"
+            + "            \"name\": \""
+            + serviceName1
+            + "\",\n"
+            + "            \"id\": "
+            + serviceId1
+            + "\n"
+            + "            },\n"
+            + "            \"status\": \"Active\"\n"
+            + "        },\n"
+            + "        {\n"
+            + "        \"spec\": {\n"
+            + "            \"name\": \""
+            + serviceName2
+            + "\",\n"
+            + "            \"id\": "
+            + serviceId2
+            + "\n"
+            + "            },\n"
+            + "            \"status\": \"Active\"\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
 
     List<ServiceInstanceInfo> actual = ExplorerApiHelper.parseServicesResponse(json);
     assertThat(actual, contains(expected.toArray()));
   }
 
   private static Stream<Arguments> testData() {
-    String successStatus = "'status': {\n"
-        + "    'type': 'success'\n"
-        + "}\n";
+    String successStatus = "'status': {\n" + "    'type': 'success'\n" + "}\n";
 
     int errorCode = 1;
     String errorDescription = "Some error";
-    String errorStatusTemplate = "'status': {\n"
-        + "    'type': '%s',\n"
-        + "    'code': " + errorCode + ",\n"
-        + "    'description': \"" + errorDescription + "\""
-        + "}\n";
+    String errorStatusTemplate =
+        "'status': {\n"
+            + "    'type': '%s',\n"
+            + "    'code': "
+            + errorCode
+            + ",\n"
+            + "    'description': \""
+            + errorDescription
+            + "\""
+            + "}\n";
 
     String serviceErrorStatus = String.format(errorStatusTemplate, "service_error");
     String dispatcherErrorStatus = String.format(errorStatusTemplate, "dispatcher_error");
     String runtimeErrorStatus = String.format(errorStatusTemplate, "runtime_error");
 
-    String panicStatus = "'status': {\n"
-        + "    'type': 'panic',\n"
-        + "    'description': \"" + errorDescription + "\""
-        + "}\n";
+    String panicStatus =
+        "'status': {\n"
+            + "    'type': 'panic',\n"
+            + "    'description': \""
+            + errorDescription
+            + "\""
+            + "}\n";
 
     return Stream.of(
         arguments(ExecutionStatuses.success(), successStatus),
         arguments(ExecutionStatuses.serviceError(errorCode, errorDescription), serviceErrorStatus),
-        arguments(ExplorerApiHelper.buildExecutionStatus(ErrorKind.DISPATCHER, errorCode,
-            errorDescription),
+        arguments(
+            ExplorerApiHelper.buildExecutionStatus(
+                ErrorKind.DISPATCHER, errorCode, errorDescription),
             dispatcherErrorStatus),
-        arguments(ExplorerApiHelper.buildExecutionStatus(ErrorKind.RUNTIME, errorCode,
-            errorDescription),
+        arguments(
+            ExplorerApiHelper.buildExecutionStatus(ErrorKind.RUNTIME, errorCode, errorDescription),
             runtimeErrorStatus),
-        arguments(ExplorerApiHelper.buildPanicExecutionStatus(errorDescription), panicStatus)
-    );
+        arguments(ExplorerApiHelper.buildPanicExecutionStatus(errorDescription), panicStatus));
   }
 }

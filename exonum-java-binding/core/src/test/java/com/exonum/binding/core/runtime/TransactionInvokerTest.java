@@ -38,8 +38,7 @@ class TransactionInvokerTest {
   static final int TRANSACTION_ID_2 = 2;
 
   private static final byte[] ARGUMENTS = new byte[0];
-  @Mock
-  private TransactionContext context;
+  @Mock private TransactionContext context;
 
   @Test
   void invokeValidServiceTransaction() {
@@ -56,8 +55,10 @@ class TransactionInvokerTest {
   void invokeInvalidTransactionId() {
     TransactionInvoker invoker = new TransactionInvoker(new ValidService());
     int invalidTransactionId = Integer.MAX_VALUE;
-    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> invoker.invokeTransaction(invalidTransactionId, ARGUMENTS, context));
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> invoker.invokeTransaction(invalidTransactionId, ARGUMENTS, context));
     assertThat(e.getMessage())
         .contains(String.format("No method with transaction id (%s)", invalidTransactionId));
   }
@@ -66,8 +67,10 @@ class TransactionInvokerTest {
   void invokeThrowingExecutionException() {
     ExecutionException e = new ExecutionException((byte) 0);
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
-    ExecutionException actual = assertThrows(ExecutionException.class,
-        () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
+    ExecutionException actual =
+        assertThrows(
+            ExecutionException.class,
+            () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
     assertThat(actual).isSameAs(e);
   }
 
@@ -75,8 +78,10 @@ class TransactionInvokerTest {
   void invokeThrowingRuntimeException() {
     RuntimeException e = new IllegalArgumentException("Unexpected runtime exception");
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
-    Exception actual = assertThrows(UnexpectedExecutionException.class,
-        () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
+    Exception actual =
+        assertThrows(
+            UnexpectedExecutionException.class,
+            () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
     assertThat(actual).hasCause(e);
   }
 
@@ -84,8 +89,10 @@ class TransactionInvokerTest {
   void invokeThrowingException() {
     IOException e = new IOException("Unexpected checked exception");
     TransactionInvoker invoker = new TransactionInvoker(new ThrowingAnyException(e));
-    Exception actual = assertThrows(UnexpectedExecutionException.class,
-        () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
+    Exception actual =
+        assertThrows(
+            UnexpectedExecutionException.class,
+            () -> invoker.invokeTransaction(TRANSACTION_ID, ARGUMENTS, context));
     assertThat(actual).hasCause(e);
   }
 
@@ -93,10 +100,7 @@ class TransactionInvokerTest {
   void invokeProtobufArgumentsService() {
     ProtobufArgumentsService service = spy(new ProtobufArgumentsService());
     TransactionInvoker invoker = new TransactionInvoker(service);
-    TestProtoMessages.Point point = TestProtoMessages.Point.newBuilder()
-        .setX(1)
-        .setY(1)
-        .build();
+    TestProtoMessages.Point point = TestProtoMessages.Point.newBuilder().setX(1).setY(1).build();
 
     invoker.invokeTransaction(TRANSACTION_ID, point.toByteArray(), context);
 

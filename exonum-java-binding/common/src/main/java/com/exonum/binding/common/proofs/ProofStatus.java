@@ -16,13 +16,9 @@
 
 package com.exonum.binding.common.proofs;
 
-/**
- * A status of collection proof verification.
- */
+/** A status of collection proof verification. */
 public interface ProofStatus {
 
-  /**
-   * Returns the description of the proof verification result.
-   */
+  /** Returns the description of the proof verification result. */
   String getDescription();
 }

@@ -32,10 +32,7 @@ class BlocksRangeTest {
 
   @ParameterizedTest
   @CsvSource({
-      "0, 0,",
-      "0, 1",
-      "0, 2",
-      "1, 1",
+    "0, 0,", "0, 1", "0, 2", "1, 1",
   })
   void acceptableRanges(long from, long to) {
     List<Block> blocks = ImmutableList.of();
@@ -46,13 +43,13 @@ class BlocksRangeTest {
 
   @ParameterizedTest
   @CsvSource({
-      "-1, 1, 'from negative'",
-      "0, -1, 'to negative'",
-      "-2, -1, 'negative from & to'",
-      "1, 0, 'from > to",
+    "-1, 1, 'from negative'",
+    "0, -1, 'to negative'",
+    "-2, -1, 'negative from & to'",
+    "1, 0, 'from > to",
   })
-  void constructorRejectsInvalidHeights(long from, long to,
-      @SuppressWarnings("unused") String description) {
+  void constructorRejectsInvalidHeights(
+      long from, long to, @SuppressWarnings("unused") String description) {
     List<Block> blocks = ImmutableList.of();
     assertThrows(IllegalArgumentException.class, () -> new BlocksRange(from, to, blocks));
   }
@@ -61,13 +58,11 @@ class BlocksRangeTest {
   void invalidFirstBlock() {
     long from = 5;
     long to = 10;
-    Block invalidBlock = aBlock()
-        .height(from - 1)
-        .build();
+    Block invalidBlock = aBlock().height(from - 1).build();
     List<Block> blocks = ImmutableList.of(invalidBlock);
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> new BlocksRange(from, to, blocks));
+    Exception e =
+        assertThrows(IllegalArgumentException.class, () -> new BlocksRange(from, to, blocks));
     String message = e.getMessage();
     assertThat(message, containsString(Long.toString(from)));
     assertThat(message, containsString(invalidBlock.toString()));
@@ -77,13 +72,11 @@ class BlocksRangeTest {
   void invalidLastBlock() {
     long from = 5;
     long to = 10;
-    Block invalidBlock = aBlock()
-        .height(to + 1)
-        .build();
+    Block invalidBlock = aBlock().height(to + 1).build();
     List<Block> blocks = ImmutableList.of(invalidBlock);
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> new BlocksRange(from, to, blocks));
+    Exception e =
+        assertThrows(IllegalArgumentException.class, () -> new BlocksRange(from, to, blocks));
     String message = e.getMessage();
     assertThat(message, containsString(Long.toString(to)));
     assertThat(message, containsString(invalidBlock.toString()));

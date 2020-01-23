@@ -24,8 +24,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.WrongMethodTypeException;
 
 /**
- * A proxy of a transaction method. This class implements argument resolution,
- * conversion, and invocation of a transaction method.
+ * A proxy of a transaction method. This class implements argument resolution, conversion, and
+ * invocation of a transaction method.
  */
 class TransactionMethod {
   private final MethodHandle methodHandle;

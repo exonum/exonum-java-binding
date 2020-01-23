@@ -38,9 +38,8 @@ final class TestKitTestUtils {
   static final String SERVICE_NAME = "test-service";
   static final int SERVICE_ID = 46;
   static final String CONFIGURATION_VALUE = "Initial value";
-  static final TestConfiguration SERVICE_CONFIGURATION = TestConfiguration.newBuilder()
-      .setValue(CONFIGURATION_VALUE)
-      .build();
+  static final TestConfiguration SERVICE_CONFIGURATION =
+      TestConfiguration.newBuilder().setValue(CONFIGURATION_VALUE).build();
 
   static final String ARTIFACT_FILENAME_2 = "test-service-2.jar";
   private static final String ARTIFACT_VERSION_2 = "2.8.0";
@@ -53,19 +52,25 @@ final class TestKitTestUtils {
 
   static void createTestServiceArtifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);
-    createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class,
-        TestSchema.class, TestService.class);
+    createArtifact(
+        artifactLocation,
+        ARTIFACT_ID,
+        TestServiceModule.class,
+        TestSchema.class,
+        TestService.class);
   }
 
   static void createTestService2Artifact(Path artifactsDirectory) throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME_2);
-    createArtifact(artifactLocation, ARTIFACT_ID_2, TestServiceModule2.class,
-        TestSchema.class, TestService2.class);
+    createArtifact(
+        artifactLocation,
+        ARTIFACT_ID_2,
+        TestServiceModule2.class,
+        TestSchema.class,
+        TestService2.class);
   }
 
-  /**
-   * Creates an invalid service artifact that has no required metadata.
-   */
+  /** Creates an invalid service artifact that has no required metadata. */
   static void createInvalidArtifact(Path directory, String filename) throws IOException {
     Path artifactLocation = directory.resolve(filename);
     // Create an invalid artifact with no required metadata (plugin-id) and no classes.
@@ -86,8 +91,12 @@ final class TestKitTestUtils {
     assertThat(actualServiceId).isEqualTo(serviceId);
   }
 
-  private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,
-      Class serviceModule, Class<?>... artifactClasses) throws IOException {
+  private static void createArtifact(
+      Path artifactLocation,
+      ServiceArtifactId serviceArtifactId,
+      Class serviceModule,
+      Class<?>... artifactClasses)
+      throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId(serviceArtifactId.toString())
         .setPluginVersion(serviceArtifactId.getVersion())

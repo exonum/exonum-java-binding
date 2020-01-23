@@ -19,12 +19,11 @@ package com.exonum.binding.core.storage.indices;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.Access;
 
-class ProofListIndexProxyGroupIntegrationTest
-    extends BaseListIndexProxyGroupTestable {
+class ProofListIndexProxyGroupIntegrationTest extends BaseListIndexProxyGroupTestable {
 
   @Override
   ListIndex<String> createInGroup(byte[] id, Access access) {
-    return access.getProofList(IndexAddress.valueOf("proof_list_group_IT", id),
-        StandardSerializers.string());
+    return access.getProofList(
+        IndexAddress.valueOf("proof_list_group_IT", id), StandardSerializers.string());
   }
 }

@@ -107,28 +107,26 @@ class TestKitExtensionTest {
   }
 
   private Events getTestCaseEvents(Class<?> testCaseClass) {
-    return getTestCaseEngineExecutionResults(testCaseClass)
-        .tests();
+    return getTestCaseEngineExecutionResults(testCaseClass).tests();
   }
 
   private Events getAllTestCaseEvents(Class<?> testCaseClass) {
-    return getTestCaseEngineExecutionResults(testCaseClass)
-        .all();
+    return getTestCaseEngineExecutionResults(testCaseClass).all();
   }
 
   private EngineExecutionResults getTestCaseEngineExecutionResults(Class<?> testCaseClass) {
-    return EngineTestKit.engine("junit-jupiter")
-        .selectors(selectClass(testCaseClass))
-        .execute();
+    return EngineTestKit.engine("junit-jupiter").selectors(selectClass(testCaseClass)).execute();
   }
 
   static class TestKitInstantiationTestCase {
 
     @RegisterExtension
-    TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
-        .withArtifactsDirectory(artifactsDirectory));
+    TestKitExtension testKitExtension =
+        new TestKitExtension(
+            TestKit.builder()
+                .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+                .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+                .withArtifactsDirectory(artifactsDirectory));
 
     static TestKit instantiatedTestKit;
 
@@ -158,10 +156,12 @@ class TestKitExtensionTest {
   static class BeforeEachInstantiationTestCase {
 
     @RegisterExtension
-    TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
-        .withArtifactsDirectory(artifactsDirectory));
+    TestKitExtension testKitExtension =
+        new TestKitExtension(
+            TestKit.builder()
+                .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+                .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+                .withArtifactsDirectory(artifactsDirectory));
 
     @BeforeEach
     void beforeEach(TestKit testKit) {
@@ -177,10 +177,12 @@ class TestKitExtensionTest {
   static class AfterEachInstantiationTestCase {
 
     @RegisterExtension
-    TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
-        .withArtifactsDirectory(artifactsDirectory));
+    TestKitExtension testKitExtension =
+        new TestKitExtension(
+            TestKit.builder()
+                .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+                .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+                .withArtifactsDirectory(artifactsDirectory));
 
     @AfterEach
     void afterEach(@ValidatorCount(8) TestKit testKit) {
@@ -197,10 +199,12 @@ class TestKitExtensionTest {
   static class BeforeAllInstantiationTestCase {
 
     @RegisterExtension
-    TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
-        .withArtifactsDirectory(artifactsDirectory));
+    TestKitExtension testKitExtension =
+        new TestKitExtension(
+            TestKit.builder()
+                .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+                .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+                .withArtifactsDirectory(artifactsDirectory));
 
     @BeforeAll
     void beforeAll(TestKit testKit) {
@@ -217,10 +221,12 @@ class TestKitExtensionTest {
   static class AfterAllInstantiationTestCase {
 
     @RegisterExtension
-    TestKitExtension testKitExtension = new TestKitExtension(TestKit.builder()
-        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
-        .withArtifactsDirectory(artifactsDirectory));
+    TestKitExtension testKitExtension =
+        new TestKitExtension(
+            TestKit.builder()
+                .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+                .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+                .withArtifactsDirectory(artifactsDirectory));
 
     @AfterAll
     void afterAll(TestKit testKit) {

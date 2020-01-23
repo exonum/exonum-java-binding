@@ -34,17 +34,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class MultiplexingNodeDecoratorTest {
-  private static final RawTransaction TX = RawTransaction.newBuilder()
-      .serviceId(1)
-      .transactionId(1)
-      .payload(new byte[]{})
-      .build();
+  private static final RawTransaction TX =
+      RawTransaction.newBuilder().serviceId(1).transactionId(1).payload(new byte[] {}).build();
   private static final Function<Snapshot, Void> SNAPSHOT_FUNCTION = s -> null;
 
-  @Mock
-  private Node node;
-  @InjectMocks
-  private MultiplexingNodeDecorator decorator;
+  @Mock private Node node;
+  @InjectMocks private MultiplexingNodeDecorator decorator;
 
   @Test
   void submitTransaction() {
@@ -90,5 +85,4 @@ class MultiplexingNodeDecoratorTest {
 
     assertThrows(IllegalStateException.class, () -> decorator.getPublicKey());
   }
-
 }

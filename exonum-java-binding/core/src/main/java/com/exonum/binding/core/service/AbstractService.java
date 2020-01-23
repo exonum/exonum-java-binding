@@ -21,9 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Access;
 
-/**
- * A base class for user services.
- */
+/** A base class for user services. */
 public abstract class AbstractService implements Service {
 
   private final ServiceInstanceSpec instanceSpec;
@@ -34,6 +32,7 @@ public abstract class AbstractService implements Service {
 
   /**
    * Returns the name of the service instance.
+   *
    * @see ServiceInstanceSpec#getName()
    */
   protected final String getName() {
@@ -42,15 +41,14 @@ public abstract class AbstractService implements Service {
 
   /**
    * Returns the numeric id of the service instance.
+   *
    * @see ServiceInstanceSpec#getId()
    */
   protected final int getId() {
     return instanceSpec.getId();
   }
 
-  /**
-   * Returns this service instance specification.
-   */
+  /** Returns this service instance specification. */
   protected final ServiceInstanceSpec getInstanceSpec() {
     return instanceSpec;
   }

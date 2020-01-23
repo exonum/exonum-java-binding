@@ -43,7 +43,7 @@ class ParsedTransactionMessageTest {
   class WithSignedMessage {
     final int serviceId = 1;
     final int transactionId = 2;
-    final ByteString txArguments = ByteString.copyFrom(new byte[]{1, 2, 3});
+    final ByteString txArguments = ByteString.copyFrom(new byte[] {1, 2, 3});
     final ByteString signature = ByteString.copyFrom(new byte[Ed25519.SIGNATURE_BYTES]);
     final PublicKey authorPublicKey = PublicKey.fromHexString("abcd");
 
@@ -51,26 +51,29 @@ class ParsedTransactionMessageTest {
 
     @BeforeEach
     void createSignedMessage() {
-      byte[] exonumMessage = ExonumMessage.newBuilder()
-          .setAnyTx(AnyTx.newBuilder()
-              .setCallInfo(CallInfo.newBuilder()
-                  .setInstanceId(serviceId)
-                  .setMethodId(transactionId)
-                  .build())
-              .setArguments(txArguments)
-              .build())
-          .build()
-          .toByteArray();
+      byte[] exonumMessage =
+          ExonumMessage.newBuilder()
+              .setAnyTx(
+                  AnyTx.newBuilder()
+                      .setCallInfo(
+                          CallInfo.newBuilder()
+                              .setInstanceId(serviceId)
+                              .setMethodId(transactionId)
+                              .build())
+                      .setArguments(txArguments)
+                      .build())
+              .build()
+              .toByteArray();
 
-      signedMessage = aSignedMessageProto()
-          .setAuthor(Types.PublicKey.newBuilder()
-              .setData(ByteString.copyFrom(authorPublicKey.toBytes()))
-              .build())
-          .setPayload(ByteString.copyFrom(exonumMessage))
-          .setSignature(Signature.newBuilder()
-              .setData(signature)
-              .build())
-          .build();
+      signedMessage =
+          aSignedMessageProto()
+              .setAuthor(
+                  Types.PublicKey.newBuilder()
+                      .setData(ByteString.copyFrom(authorPublicKey.toBytes()))
+                      .build())
+              .setPayload(ByteString.copyFrom(exonumMessage))
+              .setSignature(Signature.newBuilder().setData(signature).build())
+              .build();
     }
 
     @Test
@@ -109,17 +112,18 @@ class ParsedTransactionMessageTest {
   @Test
   void createMessageNotTx() {
     // Use Prevote message instead of AnyTx
-    byte[] prevoteMessage = Consensus.ExonumMessage.newBuilder()
-        .setPrevote(Prevote.getDefaultInstance())
-        .build()
-        .toByteArray();
+    byte[] prevoteMessage =
+        Consensus.ExonumMessage.newBuilder()
+            .setPrevote(Prevote.getDefaultInstance())
+            .build()
+            .toByteArray();
 
-    Consensus.SignedMessage signedMessage = aSignedMessageProto()
-        .setPayload(ByteString.copyFrom(prevoteMessage))
-        .build();
+    Consensus.SignedMessage signedMessage =
+        aSignedMessageProto().setPayload(ByteString.copyFrom(prevoteMessage)).build();
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> new ParsedTransactionMessage(signedMessage));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class, () -> new ParsedTransactionMessage(signedMessage));
 
     assertThat(e.getMessage())
         .containsIgnoringCase("does not contain a transaction")
@@ -135,15 +139,12 @@ class ParsedTransactionMessageTest {
         .suppress(Warning.NULL_FIELDS)
         // Only the source signedMessage is compared
         .withOnlyTheseFields("signedMessage")
-        .withPrefabValues(Consensus.SignedMessage.class,
+        .withPrefabValues(
+            Consensus.SignedMessage.class,
             signedConsensusMessage(red),
             signedConsensusMessage(black))
-        .withPrefabValues(SignedMessage.class,
-            signedMessage(red),
-            signedMessage(black))
-        .withPrefabValues(AnyTx.class,
-            anyTx(red),
-            anyTx(black))
+        .withPrefabValues(SignedMessage.class, signedMessage(red), signedMessage(black))
+        .withPrefabValues(AnyTx.class, anyTx(red), anyTx(black))
         .verify();
   }
 
@@ -153,24 +154,18 @@ class ParsedTransactionMessageTest {
 
   private static Consensus.SignedMessage signedConsensusMessage(String payload) {
     return aSignedMessageProto()
-        .setPayload(ExonumMessage.newBuilder()
-            .setAnyTx(anyTx(payload))
-            .build()
-            .toByteString())
+        .setPayload(ExonumMessage.newBuilder().setAnyTx(anyTx(payload)).build().toByteString())
         .build();
   }
 
   private static Consensus.SignedMessage.Builder aSignedMessageProto() {
     return Consensus.SignedMessage.newBuilder()
         // Set the author only and keep the rest as defaults as the parser requires a non-empty key
-        .setAuthor(Types.PublicKey.newBuilder()
-            .setData(ByteString.copyFrom(bytes(1, 2, 3, 4)))
-            .build());
+        .setAuthor(
+            Types.PublicKey.newBuilder().setData(ByteString.copyFrom(bytes(1, 2, 3, 4))).build());
   }
 
   private static AnyTx anyTx(String payload) {
-    return AnyTx.newBuilder()
-        .setArguments(ByteString.copyFrom(bytes(payload)))
-        .build();
+    return AnyTx.newBuilder().setArguments(ByteString.copyFrom(bytes(payload))).build();
   }
 }

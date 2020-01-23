@@ -23,8 +23,8 @@ import java.util.function.Predicate;
 final class ExonumIterables {
 
   /**
-   * Returns an index of the first element matching the predicate or {@code OptionalInt.empty()}
-   * if no such element exists.
+   * Returns an index of the first element matching the predicate or {@code OptionalInt.empty()} if
+   * no such element exists.
    *
    * @param list a list to search in
    * @param p a predicate that an element must match

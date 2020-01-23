@@ -41,77 +41,101 @@ class TransactionExtractorTest {
     assertThat(transactions).hasSize(1);
     Method transactionMethod =
         ValidService.class.getMethod("transactionMethod", byte[].class, TransactionContext.class);
-    assertThat(singletonList(transactionMethod))
-        .containsExactlyElementsOf(transactions.values());
+    assertThat(singletonList(transactionMethod)).containsExactlyElementsOf(transactions.values());
   }
 
   @Test
   void duplicateTransactionIdsServiceMethodExtraction() {
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransactionExtractor
-            .extractTransactionMethods(DuplicateTransactionIdsService.class));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                TransactionExtractor.extractTransactionMethods(
+                    DuplicateTransactionIdsService.class));
     assertThat(e.getMessage())
-        .contains(String.format("Service %s has more than one transaction with the same id (%s)",
-            DuplicateTransactionIdsService.class.getName(),
-            DuplicateTransactionIdsService.TRANSACTION_ID),
+        .contains(
+            String.format(
+                "Service %s has more than one transaction with the same id (%s)",
+                DuplicateTransactionIdsService.class.getName(),
+                DuplicateTransactionIdsService.TRANSACTION_ID),
             "transactionMethod",
             "anotherTransactionMethod");
   }
 
   @Test
   void missingTransactionMethodArgumentsServiceMethodExtraction() {
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransactionExtractor
-            .extractTransactionMethods(MissingTransactionMethodArgumentsService.class));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                TransactionExtractor.extractTransactionMethods(
+                    MissingTransactionMethodArgumentsService.class));
     String methodName = "transactionMethod";
-    String errorMessage = String.format("Method %s in a service class %s annotated with"
-            + " @Transaction should have precisely two parameters: transaction arguments of"
-            + " 'byte[]' type or a protobuf type and transaction context of"
-            + " 'com.exonum.binding.core.transaction.TransactionContext' type.",
-        methodName, MissingTransactionMethodArgumentsService.class.getName());
+    String errorMessage =
+        String.format(
+            "Method %s in a service class %s annotated with"
+                + " @Transaction should have precisely two parameters: transaction arguments of"
+                + " 'byte[]' type or a protobuf type and transaction context of"
+                + " 'com.exonum.binding.core.transaction.TransactionContext' type.",
+            methodName, MissingTransactionMethodArgumentsService.class.getName());
     assertThat(e.getMessage()).contains(errorMessage);
   }
 
   @Test
   void invalidTransactionMethodArgumentServiceMethodExtraction() {
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransactionExtractor
-            .extractTransactionMethods(InvalidTransactionMethodArgumentsService.class));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                TransactionExtractor.extractTransactionMethods(
+                    InvalidTransactionMethodArgumentsService.class));
     String methodName = "transactionMethod";
-    String errorMessage = String.format("Method %s in a service class %s annotated with"
-            + " @Transaction should have precisely two parameters: transaction arguments of"
-            + " 'byte[]' type or a protobuf type and transaction context of"
-            + " 'com.exonum.binding.core.transaction.TransactionContext' type."
-            + " But second parameter type was: " + String.class.getName(),
-        methodName, InvalidTransactionMethodArgumentsService.class.getName());
+    String errorMessage =
+        String.format(
+            "Method %s in a service class %s annotated with"
+                + " @Transaction should have precisely two parameters: transaction arguments of"
+                + " 'byte[]' type or a protobuf type and transaction context of"
+                + " 'com.exonum.binding.core.transaction.TransactionContext' type."
+                + " But second parameter type was: "
+                + String.class.getName(),
+            methodName,
+            InvalidTransactionMethodArgumentsService.class.getName());
     assertThat(e.getMessage()).contains(errorMessage);
   }
 
   @Test
   void duplicateTransactionMethodArgumentServiceMethodExtraction() {
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> TransactionExtractor
-            .extractTransactionMethods(DuplicateTransactionMethodArgumentsService.class));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                TransactionExtractor.extractTransactionMethods(
+                    DuplicateTransactionMethodArgumentsService.class));
     String methodName = "transactionMethod";
-    String errorMessage = String.format("Method %s in a service class %s annotated with"
-            + " @Transaction should have precisely two parameters: transaction arguments of"
-            + " 'byte[]' type or a protobuf type and transaction context of"
-            + " 'com.exonum.binding.core.transaction.TransactionContext' type."
-            + " But second parameter type was: " + byte[].class.getName(),
-        methodName, DuplicateTransactionMethodArgumentsService.class.getName());
+    String errorMessage =
+        String.format(
+            "Method %s in a service class %s annotated with"
+                + " @Transaction should have precisely two parameters: transaction arguments of"
+                + " 'byte[]' type or a protobuf type and transaction context of"
+                + " 'com.exonum.binding.core.transaction.TransactionContext' type."
+                + " But second parameter type was: "
+                + byte[].class.getName(),
+            methodName,
+            DuplicateTransactionMethodArgumentsService.class.getName());
     assertThat(e.getMessage()).contains(errorMessage);
   }
 
   @Test
   void findMethodsValidServiceInterfaceImplementation() throws Exception {
     Map<Integer, Method> transactions =
-        TransactionExtractor.findTransactionMethods(
-            ValidServiceInterfaceImplementation.class);
+        TransactionExtractor.findTransactionMethods(ValidServiceInterfaceImplementation.class);
     assertThat(transactions).hasSize(2);
-    Method transactionMethod = ValidServiceInterfaceImplementation.class.getMethod(
-        "transactionMethod", byte[].class, TransactionContext.class);
-    Method transactionMethod2 = ValidServiceInterfaceImplementation.class.getMethod(
-        "transactionMethod2", byte[].class, TransactionContext.class);
+    Method transactionMethod =
+        ValidServiceInterfaceImplementation.class.getMethod(
+            "transactionMethod", byte[].class, TransactionContext.class);
+    Method transactionMethod2 =
+        ValidServiceInterfaceImplementation.class.getMethod(
+            "transactionMethod2", byte[].class, TransactionContext.class);
     List<Method> actualMethods = Arrays.asList(transactionMethod, transactionMethod2);
     assertThat(actualMethods).containsExactlyInAnyOrderElementsOf(transactions.values());
   }
@@ -122,10 +146,9 @@ class TransactionExtractorTest {
         TransactionExtractor.findTransactionMethods(ValidServiceProtobufArgument.class);
     assertThat(transactions).hasSize(1);
     Method transactionMethod =
-        ValidServiceProtobufArgument.class.getMethod("transactionMethod",
-            TestProtoMessages.Point.class, TransactionContext.class);
-    assertThat(transactions.values())
-        .containsExactlyElementsOf(singletonList(transactionMethod));
+        ValidServiceProtobufArgument.class.getMethod(
+            "transactionMethod", TestProtoMessages.Point.class, TransactionContext.class);
+    assertThat(transactions.values()).containsExactlyElementsOf(singletonList(transactionMethod));
   }
 
   static class BasicService implements Service {

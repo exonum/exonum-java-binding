@@ -32,14 +32,18 @@ class FloatSerializerTest {
   private Serializer<Float> serializer = FloatSerializer.INSTANCE;
 
   @ParameterizedTest
-  @ValueSource(floats = {
-      Float.NaN,
-      Float.NEGATIVE_INFINITY,
-      Float.MIN_NORMAL,
-      Float.MIN_VALUE,
-      -1F, 0F, 1.5F,
-      Float.MAX_VALUE,
-      Float.POSITIVE_INFINITY})
+  @ValueSource(
+      floats = {
+        Float.NaN,
+        Float.NEGATIVE_INFINITY,
+        Float.MIN_NORMAL,
+        Float.MIN_VALUE,
+        -1F,
+        0F,
+        1.5F,
+        Float.MAX_VALUE,
+        Float.POSITIVE_INFINITY
+      })
   void roundTrip(Float value) {
     roundTripTest(value, serializer);
   }
@@ -56,7 +60,6 @@ class FloatSerializerTest {
         Bytes.bytes((byte) 0),
         Bytes.bytes(1, 2, 3),
         Bytes.bytes(1, 2, 3, 4, 5),
-        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8)
-    );
+        Bytes.bytes(1, 2, 3, 4, 5, 6, 7, 8));
   }
 }

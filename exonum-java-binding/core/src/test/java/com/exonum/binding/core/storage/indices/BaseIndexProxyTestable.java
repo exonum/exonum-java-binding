@@ -65,20 +65,16 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
 
   abstract StorageIndex createOfOtherType(String name, Access access);
 
-  /**
-   * Get any element from this index.
-   */
+  /** Get any element from this index. */
   abstract Object getAnyElement(IndexT index);
 
-  /**
-   * Performs a modifying operation on the index.
-   */
+  /** Performs a modifying operation on the index. */
   abstract void update(IndexT index);
 
   /**
-   * A test verifying that an index constructor adds its destructor to the cleaner.
-   * First it checks the number of actions registered before and after the constructor is executed,
-   * and then that the index becomes inaccessible after the cleaner is closed.
+   * A test verifying that an index constructor adds its destructor to the cleaner. First it checks
+   * the number of actions registered before and after the constructor is executed, and then that
+   * the index becomes inaccessible after the cleaner is closed.
    */
   @Test
   void indexConstructorRegistersItsDestructor() throws CloseFailuresException {
@@ -104,17 +100,10 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {
-      "",
-      " name",
-      "name ",
-      "name 1",
-      " name ",
-      "?name",
-      "name?",
-      "na?me",
-      "name#1",
-  })
+  @ValueSource(
+      strings = {
+        "", " name", "name ", "name 1", " name ", "?name", "name?", "na?me", "name#1",
+      })
   void indexConstructorThrowsIfInvalidName(String name) throws Exception {
     try (Cleaner cleaner = new Cleaner()) {
       Snapshot snapshot = database.createSnapshot(cleaner);
@@ -173,9 +162,9 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   }
 
   /**
-   * An integration test that ensures that:
-   * - Constructor of this type preserves the index type information and
-   * - Constructor of the other type checks it, preventing illegal access to the internals.
+   * An integration test that ensures that: - Constructor of this type preserves the index type
+   * information and - Constructor of the other type checks it, preventing illegal access to the
+   * internals.
    */
   @Test
   void indexConstructorPersistsIndexTypeInfo() throws CloseFailuresException {
@@ -194,8 +183,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       // Try to create an index of other type with the same name as the index above
       Exception e = assertThrows(RuntimeException.class, () -> createOfOtherType(name, snapshot));
 
-      Assertions.assertThat(e.getMessage())
-          .containsIgnoringCase("WrongIndexType");
+      Assertions.assertThat(e.getMessage()).containsIgnoringCase("WrongIndexType");
     }
   }
 

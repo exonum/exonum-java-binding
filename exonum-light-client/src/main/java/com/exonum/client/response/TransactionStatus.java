@@ -19,20 +19,15 @@ package com.exonum.client.response;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Status of a particular transaction.
- */
+/** Status of a particular transaction. */
 public enum TransactionStatus {
-  /**
-   * Shows that transaction is in unconfirmed transaction pool currently.
-   */
+  /** Shows that transaction is in unconfirmed transaction pool currently. */
   @SerializedName("in-pool")
   IN_POOL,
   /**
-   * Shows that transaction is committed to the blockchain.
-   * Please note that a committed transaction has not necessarily completed
-   * successfully — use the {@linkplain ExecutionStatus execution result}
-   * to check that.
+   * Shows that transaction is committed to the blockchain. Please note that a committed transaction
+   * has not necessarily completed successfully — use the {@linkplain ExecutionStatus execution
+   * result} to check that.
    */
   @SerializedName("committed")
   COMMITTED

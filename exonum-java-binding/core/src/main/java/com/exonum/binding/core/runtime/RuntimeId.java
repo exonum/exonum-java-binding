@@ -16,9 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
-/**
- * Represents well-known runtime ids, as assigned by the Exonum core.
- */
+/** Represents well-known runtime ids, as assigned by the Exonum core. */
 public enum RuntimeId {
   RUST(0),
   JAVA(1);
@@ -29,9 +27,7 @@ public enum RuntimeId {
     this.id = id;
   }
 
-  /**
-   * Returns the numeric id assigned to this runtime by the Exonum core.
-   */
+  /** Returns the numeric id assigned to this runtime by the Exonum core. */
   public int getId() {
     return id;
   }

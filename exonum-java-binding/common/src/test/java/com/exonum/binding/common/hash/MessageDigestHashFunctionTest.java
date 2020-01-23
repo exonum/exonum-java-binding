@@ -79,7 +79,8 @@ class MessageDigestHashFunctionTest {
 
     assertEquals(
         "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592",
-        sha256.putString("The quick brown fox jumps over the lazy dog", Charsets.UTF_8)
+        sha256
+            .putString("The quick brown fox jumps over the lazy dog", Charsets.UTF_8)
             .hash()
             .toString());
     assertThrows(IllegalStateException.class, () -> sha256.putInt(42));
@@ -91,7 +92,8 @@ class MessageDigestHashFunctionTest {
 
     assertEquals(
         "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592",
-        sha256.putString("The quick brown fox jumps over the lazy dog", Charsets.UTF_8)
+        sha256
+            .putString("The quick brown fox jumps over the lazy dog", Charsets.UTF_8)
             .hash()
             .toString());
     assertThrows(IllegalStateException.class, () -> sha256.hash());
@@ -113,10 +115,12 @@ class MessageDigestHashFunctionTest {
             HashCode.fromBytes(Arrays.copyOf(digest.digest(input), bytes)),
             new MessageDigestHashFunction(algorithmName, bytes, algorithmName).hashBytes(input));
       }
-      assertThrows(IllegalArgumentException.class, () -> {
-        int maxSize = digest.getDigestLength();
-        new MessageDigestHashFunction(algorithmName, maxSize + 1, algorithmName);
-      });
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> {
+            int maxSize = digest.getDigestLength();
+            new MessageDigestHashFunction(algorithmName, maxSize + 1, algorithmName);
+          });
     } catch (NoSuchAlgorithmException nsae) {
       throw new AssertionError(nsae);
     }

@@ -63,8 +63,9 @@ class ServiceRuntimeConfigurationIntegrationTest {
   void runtimeConfigurationTest(@TempDir Path tmpArtifactDir) throws Exception {
     int port = 0; // any port
     // Use 'production' stage as it involves up-front error checking of the configured bindings
-    Injector injector = Guice.createInjector(Stage.PRODUCTION,
-        new FrameworkModule(tmpArtifactDir, port, emptyMap()));
+    Injector injector =
+        Guice.createInjector(
+            Stage.PRODUCTION, new FrameworkModule(tmpArtifactDir, port, emptyMap()));
 
     // Create the runtime
     ServiceRuntime runtime = injector.getInstance(ServiceRuntime.class);

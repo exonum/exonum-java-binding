@@ -27,7 +27,7 @@ import java.nio.file.Paths;
 /**
  * Provides methods to create mocks and test fakes of Service and Transaction adapters.
  *
- * <p>This class is a one stop place to </p>
+ * <p>This class is a one stop place to
  */
 @SuppressWarnings({"unused", "WeakerAccess"}) // Used in native code
 public final class NativeFacade {
@@ -38,9 +38,9 @@ public final class NativeFacade {
   }
 
   /**
-   * Writes a valid service artifact to the specified location. A valid service artifact
-   * can be loaded by the {@link ServiceRuntime} and
-   * the service can be instantiated.
+   * Writes a valid service artifact to the specified location. A valid service artifact can be
+   * loaded by the {@link ServiceRuntime} and the service can be instantiated.
+   *
    * @param artifactId the id of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
@@ -50,9 +50,9 @@ public final class NativeFacade {
   }
 
   /**
-   * Writes a service artifact that cannot be loaded. Such artifact will cause an exception
-   * during an attempt
-   * to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, String) load} it.
+   * Writes a service artifact that cannot be loaded. Such artifact will cause an exception during
+   * an attempt to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, String) load} it.
+   *
    * @param artifactId the id of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
@@ -63,16 +63,18 @@ public final class NativeFacade {
   }
 
   /**
-   * Writes a service artifact that can be loaded, but with a service that cannot be
-   * {@linkplain ServiceRuntime#addService(com.exonum.binding.core.storage.database.Fork, ServiceInstanceSpec, byte[]) instantiated}.
+   * Writes a service artifact that can be loaded, but with a service that cannot be {@linkplain
+   * ServiceRuntime#addService(com.exonum.binding.core.storage.database.Fork, ServiceInstanceSpec,
+   * byte[]) instantiated}.
+   *
    * @param artifactId the id of the artifact
    * @param path a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
   public static void createServiceArtifactWithNonInstantiableService(String artifactId, String path)
       throws IOException {
-    ServiceArtifacts.createWithUninstantiableService(ServiceArtifactId.parseFrom(artifactId),
-        Paths.get(path));
+    ServiceArtifacts.createWithUninstantiableService(
+        ServiceArtifactId.parseFrom(artifactId), Paths.get(path));
   }
 
   private NativeFacade() {}

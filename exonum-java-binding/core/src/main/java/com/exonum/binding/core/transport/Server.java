@@ -44,13 +44,13 @@ public interface Server {
   Router createRouter();
 
   /**
-   * Mounts the sub router on the root router of this server. You can do that before
-   * or after the server has started.
+   * Mounts the sub router on the root router of this server. You can do that before or after the
+   * server has started.
    *
-   * <p>Please note that the prefix is stripped from the path when request is forwarded to
-   * the sub-router. For example, to handle requests to '/cryptocurrency/send-money'
-   * and '/cryptocurrency/balance', use prefix '/cryptocurrency' and a router forwarding
-   * requests to '/send-money' and '/balance' to the appropriate handlers.
+   * <p>Please note that the prefix is stripped from the path when request is forwarded to the
+   * sub-router. For example, to handle requests to '/cryptocurrency/send-money' and
+   * '/cryptocurrency/balance', use prefix '/cryptocurrency' and a router forwarding requests to
+   * '/send-money' and '/balance' to the appropriate handlers.
    *
    * @param mountPoint a mount point (a path prefix) to mount it on
    * @param subRouter a router responsible for handling requests that have the given path prefix
@@ -58,8 +58,9 @@ public interface Server {
   void mountSubRouter(String mountPoint, Router subRouter);
 
   /**
-   * Removes the sub router from the root router of this server registered by the given path.
-   * In case missing path nothing would happen.
+   * Removes the sub router from the root router of this server registered by the given path. In
+   * case missing path nothing would happen.
+   *
    * @param mountPoint a mount point i.e. a mounted router path
    */
   void removeSubRouter(String mountPoint);
@@ -68,8 +69,8 @@ public interface Server {
    * Requests the server to start listening on the given TCP port.
    *
    * @param port a port to listen on
-   * @return a future that is completed when the server is started or failed to do so;
-   *     on success, will have the actual TCP port on which this server is currently listening
+   * @return a future that is completed when the server is started or failed to do so; on success,
+   *     will have the actual TCP port on which this server is currently listening
    */
   CompletableFuture<Integer> start(int port);
 
@@ -83,8 +84,8 @@ public interface Server {
    * Requests the server to stop listening to incoming requests and release any resources.
    * <em>Blocking</em> handlers processing requests will be interrupted.
    *
-   * <p>Subsequent invocations have no effect.
-   * Once stopped, the server cannot be restarted. Please create a new server.
+   * <p>Subsequent invocations have no effect. Once stopped, the server cannot be restarted. Please
+   * create a new server.
    *
    * @return a future that is completed when the server is stopped
    */

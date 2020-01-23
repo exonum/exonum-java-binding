@@ -62,9 +62,7 @@ class ExonumHttpClientIntegrationTest {
     server = new MockWebServer();
     server.start();
 
-    exonumClient = ExonumClient.newBuilder()
-        .setExonumHost(server.url("/").url())
-        .build();
+    exonumClient = ExonumClient.newBuilder().setExonumHost(server.url("/").url()).build();
   }
 
   @AfterEach
@@ -76,11 +74,12 @@ class ExonumHttpClientIntegrationTest {
   void submitTransactionTest() throws InterruptedException {
     // Create request
     KeyPair keys = ed25519().generateKeyPair();
-    TransactionMessage txMessage = TransactionMessage.builder()
-        .serviceId(1)
-        .transactionId(2)
-        .payload(new byte[]{0x00, 0x01, 0x02})
-        .sign(keys);
+    TransactionMessage txMessage =
+        TransactionMessage.builder()
+            .serviceId(1)
+            .transactionId(2)
+            .payload(new byte[] {0x00, 0x01, 0x02})
+            .sign(keys);
     // Mock response
     String hash = "f128c720e04b8243";
     String mockResponse = "{\"tx_hash\":\"" + hash + "\"}";
@@ -165,10 +164,13 @@ class ExonumHttpClientIntegrationTest {
   void getTransaction() throws InterruptedException {
     // Mock response
     TransactionMessage expectedMessage = createTransactionMessage();
-    String mockResponse = "{\n"
-        + "    'type': 'in-pool',\n"
-        + "    'content': '" + toHex(expectedMessage) + "'\n"
-        + "}";
+    String mockResponse =
+        "{\n"
+            + "    'type': 'in-pool',\n"
+            + "    'content': '"
+            + toHex(expectedMessage)
+            + "'\n"
+            + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
@@ -211,16 +213,21 @@ class ExonumHttpClientIntegrationTest {
   void findServiceInfo() throws InterruptedException {
     ServiceInstanceInfo serviceInstanceInfo = new ServiceInstanceInfo(SERVICE_NAME, SERVICE_ID);
     // Mock response
-    String mockResponse = "{\n"
-        + "    \"services\": [{\n"
-        + "        \"spec\": {\n"
-        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
-        + "            \"id\": " + SERVICE_ID + "\n"
-        + "            },\n"
-        + "            \"status\": \"Active\"\n"
-        + "        }\n"
-        + "    ]\n"
-        + "}";
+    String mockResponse =
+        "{\n"
+            + "    \"services\": [{\n"
+            + "        \"spec\": {\n"
+            + "            \"name\": \""
+            + SERVICE_NAME
+            + "\",\n"
+            + "            \"id\": "
+            + SERVICE_ID
+            + "\n"
+            + "            },\n"
+            + "            \"status\": \"Active\"\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
@@ -240,16 +247,21 @@ class ExonumHttpClientIntegrationTest {
   @Test
   void findServiceInfoNotFound() throws InterruptedException {
     // Mock response
-    String mockResponse = "{\n"
-        + "    \"services\": [{\n"
-        + "        \"spec\": {\n"
-        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
-        + "            \"id\": " + SERVICE_ID + "\n"
-        + "            },\n"
-        + "            \"status\": \"Active\"\n"
-        + "        }\n"
-        + "    ]\n"
-        + "}";
+    String mockResponse =
+        "{\n"
+            + "    \"services\": [{\n"
+            + "        \"spec\": {\n"
+            + "            \"name\": \""
+            + SERVICE_NAME
+            + "\",\n"
+            + "            \"id\": "
+            + SERVICE_ID
+            + "\n"
+            + "            },\n"
+            + "            \"status\": \"Active\"\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call
@@ -271,23 +283,32 @@ class ExonumHttpClientIntegrationTest {
     ServiceInstanceInfo serviceInstanceInfo1 = new ServiceInstanceInfo(SERVICE_NAME, SERVICE_ID);
     ServiceInstanceInfo serviceInstanceInfo2 = new ServiceInstanceInfo(serviceName2, serviceId2);
     // Mock response
-    String mockResponse = "{\n"
-        + "    \"services\": [{\n"
-        + "        \"spec\": {\n"
-        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
-        + "            \"id\": " + SERVICE_ID + "\n"
-        + "            },\n"
-        + "            \"status\": \"Active\"\n"
-        + "        },\n"
-        + "        {\n"
-        + "        \"spec\": {\n"
-        + "            \"name\": \"" + serviceName2 + "\",\n"
-        + "            \"id\": " + serviceId2 + "\n"
-        + "            },\n"
-        + "            \"status\": \"Active\"\n"
-        + "        }\n"
-        + "    ]\n"
-        + "}";
+    String mockResponse =
+        "{\n"
+            + "    \"services\": [{\n"
+            + "        \"spec\": {\n"
+            + "            \"name\": \""
+            + SERVICE_NAME
+            + "\",\n"
+            + "            \"id\": "
+            + SERVICE_ID
+            + "\n"
+            + "            },\n"
+            + "            \"status\": \"Active\"\n"
+            + "        },\n"
+            + "        {\n"
+            + "        \"spec\": {\n"
+            + "            \"name\": \""
+            + serviceName2
+            + "\",\n"
+            + "            \"id\": "
+            + serviceId2
+            + "\n"
+            + "            },\n"
+            + "            \"status\": \"Active\"\n"
+            + "        }\n"
+            + "    ]\n"
+            + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
     // Call

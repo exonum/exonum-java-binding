@@ -18,9 +18,7 @@ package com.exonum.binding.common.crypto;
 
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
 
-/**
- * A collection of public-key signature system crypto functions.
- */
+/** A collection of public-key signature system crypto functions. */
 public final class CryptoFunctions {
 
   private CryptoFunctions() {}
@@ -29,9 +27,9 @@ public final class CryptoFunctions {
    * Returns a ED25519 public-key signature system crypto function.
    *
    * <p>It is recommended to install libsodium in the system through a package manager and configure
-   * automatic updates to receive security fixes and performance improvements of libsodium
-   * in a timely manner. This implementation will attempt to use the installed libsodium;
-   * if it is not available, it will use the bundled one.
+   * automatic updates to receive security fixes and performance improvements of libsodium in a
+   * timely manner. This implementation will attempt to use the installed libsodium; if it is not
+   * available, it will use the bundled one.
    */
   public static CryptoFunction ed25519() {
     return Ed25519CryptoFunction.INSTANCE;
@@ -43,5 +41,4 @@ public final class CryptoFunctions {
     public static final int PRIVATE_KEY_BYTES = Sign.SECRETKEYBYTES;
     public static final int PUBLIC_KEY_BYTES = Sign.PUBLICKEYBYTES;
   }
-
 }

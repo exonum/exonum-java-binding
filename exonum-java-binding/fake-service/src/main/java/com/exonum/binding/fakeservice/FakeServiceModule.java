@@ -21,15 +21,12 @@ import com.exonum.binding.core.service.Service;
 import com.google.inject.Singleton;
 import org.pf4j.Extension;
 
-/**
- * A module configuring {@link FakeService}.
- */
+/** A module configuring {@link FakeService}. */
 @Extension
 public final class FakeServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {
-    bind(Service.class).to(FakeService.class)
-        .in(Singleton.class);
+    bind(Service.class).to(FakeService.class).in(Singleton.class);
   }
 }

@@ -26,11 +26,12 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  * A snapshot is a read-only, immutable database access.
  *
  * <p>A snapshot represents database state at the time it was created. Immutability implies that:
+ *
  * <ul>
- *   <li>Write operations are prohibited; an attempt to perform a modifying operation
- *       will result in an {@link UnsupportedOperationException}.
+ *   <li>Write operations are prohibited; an attempt to perform a modifying operation will result in
+ *       an {@link UnsupportedOperationException}.
  *   <li>Database state <em>represented by this snapshot</em> does not change. Newly created
- *   snapshots, however, might correspond to a new database state.
+ *       snapshots, however, might correspond to a new database state.
  * </ul>
  *
  * @see Fork
@@ -54,20 +55,25 @@ public final class Snapshot extends AbstractAccess {
 
   /**
    * Creates a new Snapshot proxy.
+   *
    * @param nativeHandle a handle of the native Snapshot object
-   * @param owningHandle whether a proxy owns the corresponding native object and is responsible
-   *                     to clean it up
+   * @param owningHandle whether a proxy owns the corresponding native object and is responsible to
+   *     clean it up
    * @param cleaner a cleaner to destroy the native object
    */
   public static Snapshot newInstance(long nativeHandle, boolean owningHandle, Cleaner cleaner) {
     checkNotNull(cleaner, "cleaner");
 
     NativeHandle h = new NativeHandle(nativeHandle);
-    ProxyDestructor.newRegistered(cleaner, h, Snapshot.class, nh -> {
-      if (owningHandle) {
-        Accesses.nativeFree(nh);
-      }
-    });
+    ProxyDestructor.newRegistered(
+        cleaner,
+        h,
+        Snapshot.class,
+        nh -> {
+          if (owningHandle) {
+            Accesses.nativeFree(nh);
+          }
+        });
 
     return new Snapshot(h, cleaner);
   }

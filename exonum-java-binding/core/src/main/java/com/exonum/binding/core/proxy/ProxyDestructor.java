@@ -26,9 +26,9 @@ import java.util.function.LongConsumer;
 /**
  * ProxyDestructor is a clean action that destroys a native proxy and closes its native handle.
  *
- * <p>Most native proxies do not implement any interface (e.g., {@link CloseableNativeProxy})
- * and use this class so that there is no public #close method available in the interface
- * of the proxy, making the risk of misuse smaller.
+ * <p>Most native proxies do not implement any interface (e.g., {@link CloseableNativeProxy}) and
+ * use this class so that there is no public #close method available in the interface of the proxy,
+ * making the risk of misuse smaller.
  *
  * <p>All method parameters are non-null by default.
  *
@@ -51,10 +51,11 @@ public final class ProxyDestructor implements CancellableCleanAction<Class<?>> {
    * @param destructorFunction a clean function to perform
    */
   @CanIgnoreReturnValue
-  public static ProxyDestructor newRegistered(Cleaner cleaner,
-                                              NativeHandle nativeHandle,
-                                              Class<?> proxyClass,
-                                              LongConsumer destructorFunction) {
+  public static ProxyDestructor newRegistered(
+      Cleaner cleaner,
+      NativeHandle nativeHandle,
+      Class<?> proxyClass,
+      LongConsumer destructorFunction) {
     ProxyDestructor d = new ProxyDestructor(nativeHandle, proxyClass, destructorFunction);
     cleaner.add(d);
     return d;
@@ -67,8 +68,8 @@ public final class ProxyDestructor implements CancellableCleanAction<Class<?>> {
    * @param proxyClass a class of the proxy
    * @param destructorFunction a clean function to perform
    */
-  public ProxyDestructor(NativeHandle nativeHandle, Class<?> proxyClass,
-                         LongConsumer destructorFunction) {
+  public ProxyDestructor(
+      NativeHandle nativeHandle, Class<?> proxyClass, LongConsumer destructorFunction) {
     this.nativeHandle = checkNotNull(nativeHandle);
     this.cleanFunction = checkNotNull(destructorFunction);
     this.proxyClass = checkNotNull(proxyClass);

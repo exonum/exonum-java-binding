@@ -54,8 +54,8 @@ final class HashCodeJsonSerializer implements JsonSerializer<HashCode>, JsonDese
    * @throws NullPointerException in case of json element is null
    */
   @Override
-  public HashCode deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+  public HashCode deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
     checkNotNull(json, "HashCode json input is null");
 
     return HashCode.fromString(json.getAsString());

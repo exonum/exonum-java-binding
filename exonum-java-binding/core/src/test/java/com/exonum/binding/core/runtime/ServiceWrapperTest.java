@@ -57,17 +57,14 @@ class ServiceWrapperTest {
   private static final String TEST_SERVICE_NAME = "test-service";
   private static final int TEST_SERVICE_ID = 1;
 
-  final ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_SERVICE_NAME,
-      TEST_SERVICE_ID, TEST_ARTIFACT_ID);
+  final ServiceInstanceSpec instanceSpec =
+      ServiceInstanceSpec.newInstance(TEST_SERVICE_NAME, TEST_SERVICE_ID, TEST_ARTIFACT_ID);
 
-  @Mock
-  ConfigurableService service;
+  @Mock ConfigurableService service;
 
-  @Mock
-  TransactionInvoker txInvoker;
+  @Mock TransactionInvoker txInvoker;
 
-  @Mock
-  Node node;
+  @Mock Node node;
 
   ServiceWrapper serviceWrapper;
 
@@ -91,8 +88,8 @@ class ServiceWrapperTest {
     Configuration config = new ServiceConfiguration(new byte[0]);
     doThrow(e).when(service).initialize(fork, config);
 
-    ExecutionException actual = assertThrows(ExecutionException.class,
-        () -> serviceWrapper.initialize(fork, config));
+    ExecutionException actual =
+        assertThrows(ExecutionException.class, () -> serviceWrapper.initialize(fork, config));
     assertThat(actual).isSameAs(e);
   }
 
@@ -103,8 +100,9 @@ class ServiceWrapperTest {
     Configuration config = new ServiceConfiguration(new byte[0]);
     doThrow(e).when(service).initialize(fork, config);
 
-    Exception actual = assertThrows(UnexpectedExecutionException.class,
-        () -> serviceWrapper.initialize(fork, config));
+    Exception actual =
+        assertThrows(
+            UnexpectedExecutionException.class, () -> serviceWrapper.initialize(fork, config));
     assertThat(actual).hasCause(e);
   }
 
@@ -125,13 +123,12 @@ class ServiceWrapperTest {
     byte[] arguments = bytes(1, 2, 3);
 
     TransactionContext context = anyContext().build();
-    doThrow(ExecutionException.class)
-        .when(txInvoker)
-        .invokeTransaction(txId, arguments, context);
+    doThrow(ExecutionException.class).when(txInvoker).invokeTransaction(txId, arguments, context);
 
-    assertThrows(ExecutionException.class,
-        () -> serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0,
-            context));
+    assertThrows(
+        ExecutionException.class,
+        () ->
+            serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0, context));
   }
 
   @Test
@@ -141,12 +138,10 @@ class ServiceWrapperTest {
     byte[] arguments = bytes(1, 2, 3);
 
     Fork fork = mock(Fork.class);
-    TransactionContext context = anyContext()
-        .fork(fork)
-        .build();
+    TransactionContext context = anyContext().fork(fork).build();
 
-    serviceWrapper.executeTransaction(interfaceName, txId, arguments,
-        SUPERVISOR_SERVICE_ID, context);
+    serviceWrapper.executeTransaction(
+        interfaceName, txId, arguments, SUPERVISOR_SERVICE_ID, context);
 
     Configuration expected = new ServiceConfiguration(arguments);
     verify(service).verifyConfiguration(fork, expected);
@@ -159,17 +154,18 @@ class ServiceWrapperTest {
     byte[] arguments = bytes(1, 2, 3);
 
     Fork fork = mock(Fork.class);
-    TransactionContext context = anyContext()
-        .fork(fork)
-        .build();
+    TransactionContext context = anyContext().fork(fork).build();
 
     ExecutionException e = new ExecutionException((byte) 0);
     Configuration config = new ServiceConfiguration(arguments);
     doThrow(e).when(service).verifyConfiguration(fork, config);
 
-    ExecutionException actual = assertThrows(ExecutionException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
-            SUPERVISOR_SERVICE_ID, context));
+    ExecutionException actual =
+        assertThrows(
+            ExecutionException.class,
+            () ->
+                serviceWrapper.executeTransaction(
+                    interfaceName, txId, arguments, SUPERVISOR_SERVICE_ID, context));
     assertThat(actual).isSameAs(e);
   }
 
@@ -180,17 +176,18 @@ class ServiceWrapperTest {
     byte[] arguments = bytes(1, 2, 3);
 
     Fork fork = mock(Fork.class);
-    TransactionContext context = anyContext()
-        .fork(fork)
-        .build();
+    TransactionContext context = anyContext().fork(fork).build();
 
     RuntimeException e = new RuntimeException("unexpected");
     Configuration config = new ServiceConfiguration(arguments);
     doThrow(e).when(service).verifyConfiguration(fork, config);
 
-    Exception actual = assertThrows(UnexpectedExecutionException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
-            SUPERVISOR_SERVICE_ID, context));
+    Exception actual =
+        assertThrows(
+            UnexpectedExecutionException.class,
+            () ->
+                serviceWrapper.executeTransaction(
+                    interfaceName, txId, arguments, SUPERVISOR_SERVICE_ID, context));
     assertThat(actual).hasCause(e);
   }
 
@@ -201,12 +198,10 @@ class ServiceWrapperTest {
     byte[] arguments = bytes(1, 2, 3);
 
     Fork fork = mock(Fork.class);
-    TransactionContext context = anyContext()
-        .fork(fork)
-        .build();
+    TransactionContext context = anyContext().fork(fork).build();
 
-    serviceWrapper.executeTransaction(interfaceName, txId, arguments,
-        SUPERVISOR_SERVICE_ID, context);
+    serviceWrapper.executeTransaction(
+        interfaceName, txId, arguments, SUPERVISOR_SERVICE_ID, context);
 
     Configuration expected = new ServiceConfiguration(arguments);
     verify(service).applyConfiguration(fork, expected);
@@ -220,15 +215,17 @@ class ServiceWrapperTest {
     byte[] arguments = bytes(1, 2, 3);
 
     Fork fork = mock(Fork.class);
-    TransactionContext context = anyContext()
-        .fork(fork)
-        .build();
+    TransactionContext context = anyContext().fork(fork).build();
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, callerServiceId,
-            context));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                serviceWrapper.executeTransaction(
+                    interfaceName, txId, arguments, callerServiceId, context));
 
-    assertThat(e.getMessage()).containsIgnoringCase("Invalid caller service id")
+    assertThat(e.getMessage())
+        .containsIgnoringCase("Invalid caller service id")
         .contains(Integer.toString(callerServiceId))
         .contains(Integer.toString(SUPERVISOR_SERVICE_ID));
   }
@@ -241,10 +238,14 @@ class ServiceWrapperTest {
 
     TransactionContext context = anyContext().build();
 
-    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
-            SUPERVISOR_SERVICE_ID, context));
-    assertThat(e.getMessage()).containsIgnoringCase("Unknown txId")
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                serviceWrapper.executeTransaction(
+                    interfaceName, txId, arguments, SUPERVISOR_SERVICE_ID, context));
+    assertThat(e.getMessage())
+        .containsIgnoringCase("Unknown txId")
         .contains(Integer.toString(txId));
   }
 
@@ -258,30 +259,31 @@ class ServiceWrapperTest {
     byte[] arguments = bytes(1, 2, 3);
     TransactionContext context = anyContext().build();
 
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
-            SUPERVISOR_SERVICE_ID, context));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                serviceWrapper.executeTransaction(
+                    interfaceName, txId, arguments, SUPERVISOR_SERVICE_ID, context));
 
-    assertThat(e.getMessage()).containsIgnoringCase("Doesn't implement Configurable")
+    assertThat(e.getMessage())
+        .containsIgnoringCase("Doesn't implement Configurable")
         .contains(TEST_SERVICE_NAME);
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {
-      " ",
-      "exonum.Erc20",
-      "TimeOracle"
-  })
+  @ValueSource(strings = {" ", "exonum.Erc20", "TimeOracle"})
   void executeInvalidTransactionUnknownInterface(String interfaceName) {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
     TransactionContext context = anyContext().build();
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, 0, context));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, 0, context));
 
-    assertThat(e.getMessage()).containsIgnoringCase("Unknown interface")
-        .contains(interfaceName);
+    assertThat(e.getMessage()).containsIgnoringCase("Unknown interface").contains(interfaceName);
   }
 
   @Test
@@ -290,8 +292,8 @@ class ServiceWrapperTest {
     doThrow(e).when(service).afterTransactions(any(Fork.class));
 
     Fork fork = mock(Fork.class);
-    ExecutionException actual = assertThrows(ExecutionException.class,
-        () -> serviceWrapper.afterTransactions(fork));
+    ExecutionException actual =
+        assertThrows(ExecutionException.class, () -> serviceWrapper.afterTransactions(fork));
     assertThat(actual).isSameAs(e);
   }
 
@@ -301,18 +303,19 @@ class ServiceWrapperTest {
     doThrow(e).when(service).afterTransactions(any(Fork.class));
 
     Fork fork = mock(Fork.class);
-    Exception actual = assertThrows(UnexpectedExecutionException.class,
-        () -> serviceWrapper.afterTransactions(fork));
+    Exception actual =
+        assertThrows(
+            UnexpectedExecutionException.class, () -> serviceWrapper.afterTransactions(fork));
     assertThat(actual).hasCause(e);
   }
 
   @ParameterizedTest
   @CsvSource({
-      "foo, foo",
-      "foo-1, foo-1",
-      "'foo 1', 'foo%201'",
-      "foo/bar, foo%2Fbar",
-      "foo/a/b, foo%2Fa%2Fb",
+    "foo, foo",
+    "foo-1, foo-1",
+    "'foo 1', 'foo%201'",
+    "foo/bar, foo%2Fbar",
+    "foo/a/b, foo%2Fa%2Fb",
   })
   void serviceApiPath(String serviceName, String expectedPathFragment) {
     ServiceInstanceSpec spec = ServiceInstanceSpec.newInstance(serviceName, 1, TEST_ARTIFACT_ID);

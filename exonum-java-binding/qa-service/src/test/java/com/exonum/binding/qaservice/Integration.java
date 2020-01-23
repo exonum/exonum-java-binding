@@ -23,14 +23,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.junit.jupiter.api.Tag;
 
-/**
- * Indicates that a test is an integration test. Tags the annotated test with "integration"
- * tag.
- */
-@Target({ ElementType.TYPE, ElementType.METHOD })
+/** Indicates that a test is an integration test. Tags the annotated test with "integration" tag. */
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Tag("integration")
-public @interface Integration {
-
-}
+public @interface Integration {}

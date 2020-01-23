@@ -25,8 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public final class Bytes {
 
-  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16()
-      .lowerCase();
+  private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
 
   /**
    * Converts a sequence of bytes into an array.
@@ -40,12 +39,12 @@ public final class Bytes {
   }
 
   /**
-   * Converts a sequence of bytes into an array. Accepts integers so that clients do not have
-   * to make redundant casts like {@code bytes((byte) 0x0F, (byte) 0xF1)}.
+   * Converts a sequence of bytes into an array. Accepts integers so that clients do not have to
+   * make redundant casts like {@code bytes((byte) 0x0F, (byte) 0xF1)}.
    *
    * @param bytes 0 or more integer values in range [0, 255]
-   * @return an array of bytes, each of which has the same binary value
-   *         as the least significant byte of the corresponding int in the specified sequence
+   * @return an array of bytes, each of which has the same binary value as the least significant
+   *     byte of the corresponding int in the specified sequence
    * @throws IllegalArgumentException if the bytes contain integers that are not in range [0, 255]
    */
   public static byte[] bytes(int... bytes) {
@@ -86,8 +85,8 @@ public final class Bytes {
   }
 
   /**
-   * Creates a byte array of the given size with the specified prefix.
-   * Bytes after the prefix are set to zero.
+   * Creates a byte array of the given size with the specified prefix. Bytes after the prefix are
+   * set to zero.
    *
    * @param prefixBytes a prefix of the new array
    * @param size a size of the new array
@@ -95,8 +94,11 @@ public final class Bytes {
    */
   public static byte[] createPrefixed(byte[] prefixBytes, int size) {
     checkArgument(0 <= size, "Size is negative: %s", size);
-    checkArgument(prefixBytes.length <= size,
-        "Prefix size (%s) is greater than the specified size (%s)", prefixBytes.length, size);
+    checkArgument(
+        prefixBytes.length <= size,
+        "Prefix size (%s) is greater than the specified size (%s)",
+        prefixBytes.length,
+        size);
 
     byte[] key = new byte[size];
     System.arraycopy(prefixBytes, 0, key, 0, prefixBytes.length);

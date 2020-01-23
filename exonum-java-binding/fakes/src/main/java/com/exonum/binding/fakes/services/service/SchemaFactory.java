@@ -18,9 +18,7 @@ package com.exonum.binding.fakes.services.service;
 
 import com.exonum.binding.core.storage.database.AbstractAccess;
 
-/**
- * A factory of service schemas. Might be promoted to an ejb-core interface in future versions.
- */
+/** A factory of service schemas. Might be promoted to an ejb-core interface in future versions. */
 @FunctionalInterface
 public interface SchemaFactory<SchemaT> {
 

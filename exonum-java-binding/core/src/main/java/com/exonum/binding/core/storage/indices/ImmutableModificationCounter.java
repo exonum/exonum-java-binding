@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 enum ImmutableModificationCounter implements ModificationCounter {
-
   INSTANCE;
 
   private static final int INITIAL_VALUE = 0;

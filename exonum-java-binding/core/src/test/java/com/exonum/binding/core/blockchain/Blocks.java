@@ -23,15 +23,14 @@ import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 public final class Blocks {
 
   /**
-   * Returns a new block that has its hash set up to the proper value — SHA-256 hash
-   * of its binary representation.
+   * Returns a new block that has its hash set up to the proper value — SHA-256 hash of its binary
+   * representation.
    *
    * @param block a block to process
    */
   public static Block withProperHash(Block block) {
     byte[] blockBytes = BlockSerializer.INSTANCE.toBytes(block);
-    HashCode actualBlockHash = Hashing.sha256()
-        .hashBytes(blockBytes);
+    HashCode actualBlockHash = Hashing.sha256().hashBytes(blockBytes);
     return Block.builder()
         .proposerId(block.getProposerId())
         .height(block.getHeight())

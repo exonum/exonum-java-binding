@@ -37,9 +37,6 @@ enum DoubleSerializer implements Serializer<Double> {
   public Double fromBytes(byte[] serializedValue) {
     checkLength(serializedValue, Double.BYTES);
 
-    return ByteBuffer.wrap(serializedValue)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .getDouble();
+    return ByteBuffer.wrap(serializedValue).order(ByteOrder.LITTLE_ENDIAN).getDouble();
   }
-
 }

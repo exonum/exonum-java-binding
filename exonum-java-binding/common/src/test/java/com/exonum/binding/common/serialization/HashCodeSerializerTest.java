@@ -48,17 +48,13 @@ class HashCodeSerializerTest {
 
   private static Stream<HashCode> testHashes() {
     // Hash codes of zeros of various length
-    Stream<HashCode> zeroHashCodes = IntStream.of(1, 2, 16, 32)
-        .mapToObj(byte[]::new)
-        .map(HashCode::fromBytes);
+    Stream<HashCode> zeroHashCodes =
+        IntStream.of(1, 2, 16, 32).mapToObj(byte[]::new).map(HashCode::fromBytes);
 
     // Non-zero 32-byte SHA-256 hash codes
-    Stream<HashCode> sha256HashCodes = Stream.of(
-        "",
-        "a",
-        "hello"
-    ).map(s -> Hashing.sha256().hashString(s, StandardCharsets.UTF_8));
+    Stream<HashCode> sha256HashCodes =
+        Stream.of("", "a", "hello")
+            .map(s -> Hashing.sha256().hashString(s, StandardCharsets.UTF_8));
     return Streams.concat(zeroHashCodes, sha256HashCodes);
   }
-
 }

@@ -20,8 +20,8 @@ import com.google.gson.TypeAdapterFactory;
 import com.ryanharter.auto.value.gson.GsonTypeAdapterFactory;
 
 /**
- * Class used to automatically create Gson type adapters for all AutoValue classes
- * located in this module.
+ * Class used to automatically create Gson type adapters for all AutoValue classes located in this
+ * module.
  *
  * <p>Note that you need to provide an accessible static factory method in your AutoValue class.
  *
@@ -31,8 +31,7 @@ import com.ryanharter.auto.value.gson.GsonTypeAdapterFactory;
  *   }
  * </code></pre>
  *
- * @see <a href="https://github.com/rharter/auto-value-gson/#factory">
- *   Using TypeAdapterFactory</a>
+ * @see <a href="https://github.com/rharter/auto-value-gson/#factory">Using TypeAdapterFactory</a>
  */
 @GsonTypeAdapterFactory
 public abstract class CoreTypeAdapterFactory implements TypeAdapterFactory {

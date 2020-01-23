@@ -24,8 +24,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 /**
  * Proof of authenticity for a single index in the database.
  *
- * <p>It is comprised of a {@link BlockProof} and a {@link MapProof} from the collection
- * aggregating the index hashes of proof indexes for an index with a certain full name.
+ * <p>It is comprised of a {@link BlockProof} and a {@link MapProof} from the collection aggregating
+ * the index hashes of proof indexes for an index with a certain full name.
  *
  * <p>If an index does not exist in the database, then the MapProof will prove its absence.
  *
@@ -35,25 +35,21 @@ import com.google.protobuf.InvalidProtocolBufferException;
 @AutoValue
 public abstract class IndexProof {
 
-  /**
-   * Returns the proof as a protobuf message.
-   */
+  /** Returns the proof as a protobuf message. */
   public abstract Proofs.IndexProof getAsMessage();
 
   /**
    * Parses a serialized index proof message.
-   * @throws InvalidProtocolBufferException if the message is not
-   *     {@link com.exonum.core.messages.Proofs.IndexProof}
+   *
+   * @throws InvalidProtocolBufferException if the message is not {@link
+   *     com.exonum.core.messages.Proofs.IndexProof}
    */
-  public static IndexProof parseFrom(byte[] indexProof)
-      throws InvalidProtocolBufferException {
+  public static IndexProof parseFrom(byte[] indexProof) throws InvalidProtocolBufferException {
     Proofs.IndexProof parsed = Proofs.IndexProof.parseFrom(indexProof);
     return newInstance(parsed);
   }
 
-  /**
-   * Creates a new IndexProof given the index proof message.
-   */
+  /** Creates a new IndexProof given the index proof message. */
   public static IndexProof newInstance(Proofs.IndexProof proofMessage) {
     return new AutoValue_IndexProof(proofMessage);
   }

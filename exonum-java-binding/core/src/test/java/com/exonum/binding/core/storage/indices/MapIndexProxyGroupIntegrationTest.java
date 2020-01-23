@@ -82,14 +82,12 @@ class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String
       String expectedValue = mapEntry.getValue();
 
       assertThat(map.containsKey(key)).isTrue();
-      assertThat(map.get(key))
-          .as("id='%s', map=%s", mapId, map)
-          .isEqualTo(expectedValue);
+      assertThat(map.get(key)).as("id='%s', map=%s", mapId, map).isEqualTo(expectedValue);
     }
   }
 
-  private static MapEntry<String, MapEntry<String, String>> idAndKeyValue(String idKeyPrototype,
-      int prefixSize) {
+  private static MapEntry<String, MapEntry<String, String>> idAndKeyValue(
+      String idKeyPrototype, int prefixSize) {
     // A map id (= prefix in the current implementation)
     String mapId = idKeyPrototype.substring(0, prefixSize);
     String userKey = idKeyPrototype.substring(prefixSize);
@@ -112,7 +110,9 @@ class MapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<String
 
   @Override
   MapIndex<String, String> createInGroup(byte[] mapId, Access access) {
-    return access.getMap(IndexAddress.valueOf(GROUP_NAME, mapId),
-        StandardSerializers.string(), StandardSerializers.string());
+    return access.getMap(
+        IndexAddress.valueOf(GROUP_NAME, mapId),
+        StandardSerializers.string(),
+        StandardSerializers.string());
   }
 }

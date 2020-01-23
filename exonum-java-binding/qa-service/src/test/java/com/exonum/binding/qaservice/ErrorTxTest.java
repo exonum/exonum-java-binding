@@ -54,8 +54,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class ErrorTxTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      createQaServiceTestkit());
+  TestKitExtension testKitExtension = new TestKitExtension(createQaServiceTestkit());
 
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -2, -1, 128, Integer.MAX_VALUE})
@@ -68,17 +67,15 @@ class ErrorTxTest {
     ExecutionStatus txResult = blockchain.getTxResult(errorTx.hash()).get();
     assertTrue(txResult.hasError());
     ExecutionError error = txResult.getError();
-    assertThat(error.getKind())
-        .as("actual=%s", error)
-        .isEqualTo(ErrorKind.UNEXPECTED);
+    assertThat(error.getKind()).as("actual=%s", error).isEqualTo(ErrorKind.UNEXPECTED);
     assertThat(error.getDescription()).contains(Integer.toString(errorCode));
   }
 
   @ParameterizedTest
   @CsvSource({
-      "0, ''",
-      "1, 'Non-empty description'",
-      "127, 'Max error code: 127'",
+    "0, ''",
+    "1, 'Non-empty description'",
+    "127, 'Max error code: 127'",
   })
   void executeErrorTx(byte errorCode, String errorDescription, TestKit testKit) {
     TransactionMessage errorTx = createErrorTransaction(errorCode, errorDescription);
@@ -87,16 +84,18 @@ class ErrorTxTest {
     Snapshot snapshot = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(snapshot);
     Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(errorTx.hash());
-    assertThat(txResultOpt).hasValueSatisfying(status -> {
-      assertTrue(status.hasError());
+    assertThat(txResultOpt)
+        .hasValueSatisfying(
+            status -> {
+              assertTrue(status.hasError());
 
-      ExecutionError error = status.getError();
-      // Verify only the properties EJB is responsible for
-      assertThat(error.getKind()).isEqualTo(ErrorKind.SERVICE);
-      assertThat(error.getCode()).isEqualTo(errorCode);
-      assertThat(error.getDescription()).isEqualTo(errorDescription);
-      assertThat(error.getRuntimeId()).isEqualTo(JAVA.getId());
-    });
+              ExecutionError error = status.getError();
+              // Verify only the properties EJB is responsible for
+              assertThat(error.getKind()).isEqualTo(ErrorKind.SERVICE);
+              assertThat(error.getCode()).isEqualTo(errorCode);
+              assertThat(error.getDescription()).isEqualTo(errorDescription);
+              assertThat(error.getRuntimeId()).isEqualTo(JAVA.getId());
+            });
   }
 
   @Test
@@ -111,17 +110,14 @@ class ErrorTxTest {
       long value = 10L;
       createCounter(schema, name, value);
 
-      QaServiceImpl qaService = new QaServiceImpl(
-          ServiceInstanceSpec.newInstance(QA_SERVICE_NAME, QA_SERVICE_ID, ARTIFACT_ID));
+      QaServiceImpl qaService =
+          new QaServiceImpl(
+              ServiceInstanceSpec.newInstance(QA_SERVICE_NAME, QA_SERVICE_ID, ARTIFACT_ID));
       // Create the transaction arguments
-      ErrorTxBody arguments = ErrorTxBody.newBuilder()
-          .setErrorCode(1)
-          .setErrorDescription("Foo")
-          .build();
-      TransactionContext context = newContext(fork)
-          .serviceName(QA_SERVICE_NAME)
-          .serviceId(QA_SERVICE_ID)
-          .build();
+      ErrorTxBody arguments =
+          ErrorTxBody.newBuilder().setErrorCode(1).setErrorDescription("Foo").build();
+      TransactionContext context =
+          newContext(fork).serviceName(QA_SERVICE_NAME).serviceId(QA_SERVICE_ID).build();
       // Invoke the transaction
       assertThrows(ExecutionException.class, () -> qaService.error(arguments, context));
 
@@ -131,8 +127,7 @@ class ErrorTxTest {
     }
   }
 
-  private static TransactionMessage createErrorTransaction(int errorCode,
-      String errorDescription) {
+  private static TransactionMessage createErrorTransaction(int errorCode, String errorDescription) {
     return TransactionMessages.createErrorTx(errorCode, errorDescription, QA_SERVICE_ID);
   }
 }

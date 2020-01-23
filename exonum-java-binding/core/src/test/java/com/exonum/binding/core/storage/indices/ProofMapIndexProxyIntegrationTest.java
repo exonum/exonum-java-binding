@@ -25,27 +25,26 @@ import com.exonum.binding.test.Bytes;
 import java.util.List;
 import java.util.stream.Stream;
 
-class ProofMapIndexProxyIntegrationTest
-    extends BaseProofMapIndexProxyIntegrationTestable {
+class ProofMapIndexProxyIntegrationTest extends BaseProofMapIndexProxyIntegrationTestable {
 
-  private static final List<HashCode> TEST_KEYS = Stream.of(
-      Bytes.bytes(0x00),
-      Bytes.bytes(0x01),
-      Bytes.bytes(0x02),
-      Bytes.bytes(0x08),
-      Bytes.bytes(0x0f),
-      Bytes.bytes(0x10),
-      Bytes.bytes(0x20),
-      Bytes.bytes(0x80),
-      Bytes.bytes(0xf0),
-      Bytes.bytes(0xff),
-      Bytes.bytes(0x01, 0x01),
-      Bytes.bytes(0x01, 0x10),
-      Bytes.bytes(0x10, 0x01),
-      Bytes.bytes(0x10, 0x10)
-  )
-      .map(HashCode::fromBytes)
-      .collect(toImmutableList());
+  private static final List<HashCode> TEST_KEYS =
+      Stream.of(
+              Bytes.bytes(0x00),
+              Bytes.bytes(0x01),
+              Bytes.bytes(0x02),
+              Bytes.bytes(0x08),
+              Bytes.bytes(0x0f),
+              Bytes.bytes(0x10),
+              Bytes.bytes(0x20),
+              Bytes.bytes(0x80),
+              Bytes.bytes(0xf0),
+              Bytes.bytes(0xff),
+              Bytes.bytes(0x01, 0x01),
+              Bytes.bytes(0x01, 0x10),
+              Bytes.bytes(0x10, 0x01),
+              Bytes.bytes(0x10, 0x10))
+          .map(HashCode::fromBytes)
+          .collect(toImmutableList());
 
   @Override
   List<HashCode> getTestKeys() {
@@ -54,14 +53,16 @@ class ProofMapIndexProxyIntegrationTest
 
   @Override
   ProofMapIndexProxy<HashCode, String> create(String name, Access access) {
-    return access.getProofMap(IndexAddress.valueOf(name), StandardSerializers.hash(),
-        StandardSerializers.string());
+    return access.getProofMap(
+        IndexAddress.valueOf(name), StandardSerializers.hash(), StandardSerializers.string());
   }
 
   @Override
-  ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
-      Access access) {
-    return access.getProofMap(IndexAddress.valueOf(groupName, idInGroup),
-        StandardSerializers.hash(), StandardSerializers.string());
+  ProofMapIndexProxy<HashCode, String> createInGroup(
+      String groupName, byte[] idInGroup, Access access) {
+    return access.getProofMap(
+        IndexAddress.valueOf(groupName, idInGroup),
+        StandardSerializers.hash(),
+        StandardSerializers.string());
   }
 }

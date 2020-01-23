@@ -81,9 +81,7 @@ abstract class BaseListIndexProxyGroupTestable extends BaseIndexGroupTestable {
     return elementsById;
   }
 
-  /**
-   * Creates a list-under-test in some group with the given id.
-   */
+  /** Creates a list-under-test in some group with the given id. */
   abstract ListIndex<String> createInGroup(byte[] id, Access access);
 
   private static <E> List<E> getAllValuesFrom(ListIndex<E> list) {

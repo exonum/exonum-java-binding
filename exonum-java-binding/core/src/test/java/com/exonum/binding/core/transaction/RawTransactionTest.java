@@ -29,15 +29,15 @@ class RawTransactionTest {
     int transactionId = 0x0B;
     byte[] payload = Bytes.bytes(0x00, 0x01, 0x02);
 
-    RawTransaction transaction = RawTransaction.newBuilder()
-        .serviceId(serviceId)
-        .transactionId(transactionId)
-        .payload(payload)
-        .build();
+    RawTransaction transaction =
+        RawTransaction.newBuilder()
+            .serviceId(serviceId)
+            .transactionId(transactionId)
+            .payload(payload)
+            .build();
 
     assertThat(transaction.getTransactionId()).isEqualTo(transactionId);
     assertThat(transaction.getServiceId()).isEqualTo(serviceId);
     assertThat(transaction.getPayload()).isEqualTo(payload);
   }
-
 }

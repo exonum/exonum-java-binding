@@ -21,15 +21,12 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Fork;
 import com.google.auto.value.AutoValue;
 
-/**
- * Default implementation of the transaction context.
- */
+/** Default implementation of the transaction context. */
 @AutoValue
 abstract class InternalTransactionContext implements TransactionContext {
 
-  public static InternalTransactionContext newInstance(Fork fork, HashCode hash,
-                                                       PublicKey authorPk, String serviceName,
-                                                       int serviceId) {
+  public static InternalTransactionContext newInstance(
+      Fork fork, HashCode hash, PublicKey authorPk, String serviceName, int serviceId) {
     return new AutoValue_InternalTransactionContext(fork, hash, authorPk, serviceName, serviceId);
   }
 }

@@ -80,8 +80,7 @@ class KeySetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
   }
 
   private KeySetIndexProxy<String> createInGroup(byte[] id1, Access access) {
-    return access.getKeySet(IndexAddress.valueOf(GROUP_NAME, id1),
-        StandardSerializers.string());
+    return access.getKeySet(IndexAddress.valueOf(GROUP_NAME, id1), StandardSerializers.string());
   }
 
   private static <E> Set<E> getAllValuesFrom(KeySetIndexProxy<E> set) {

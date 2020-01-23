@@ -41,13 +41,13 @@ class TemporaryDbIntegrationTest {
   @Test
   void databaseMustClosePromptly() {
     TemporaryDb database = TemporaryDb.newInstance();
-    database.close();  // No exceptions.
+    database.close(); // No exceptions.
   }
 
   @Test
   void getSnapshotShallCreateNonNullSnapshot() throws Exception {
     try (TemporaryDb database = TemporaryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Snapshot snapshot = database.createSnapshot(cleaner);
       assertNotNull(snapshot);
     }
@@ -56,7 +56,7 @@ class TemporaryDbIntegrationTest {
   @Test
   void getForkShallCreateNonNullFork() throws Exception {
     try (TemporaryDb database = TemporaryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork fork = database.createFork(cleaner);
       assertNotNull(fork);
     }
@@ -65,7 +65,7 @@ class TemporaryDbIntegrationTest {
   @Test
   void merge_singleList() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       String listName = "list";
 
       // Make changes to the list in the database.
@@ -87,7 +87,7 @@ class TemporaryDbIntegrationTest {
   @Test
   void merge_twoIndices() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       String listName = "list";
       String mapName = "map";
 
@@ -119,7 +119,7 @@ class TemporaryDbIntegrationTest {
   @Test
   void merge_multipleForks() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       String listName = "list";
 
       List<String> values = TestStorageItems.values.subList(0, 3);

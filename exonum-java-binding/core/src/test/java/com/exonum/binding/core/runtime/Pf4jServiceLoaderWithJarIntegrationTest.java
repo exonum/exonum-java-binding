@@ -19,8 +19,8 @@ package com.exonum.binding.core.runtime;
 import org.pf4j.PluginManager;
 
 /**
- * Verifies that {@link Pf4jServiceLoader} works correctly with the {@link JarPluginManager},
- * our default implementation.
+ * Verifies that {@link Pf4jServiceLoader} works correctly with the {@link JarPluginManager}, our
+ * default implementation.
  */
 class Pf4jServiceLoaderWithJarIntegrationTest extends Pf4jServiceLoaderIntegrationTestable {
 

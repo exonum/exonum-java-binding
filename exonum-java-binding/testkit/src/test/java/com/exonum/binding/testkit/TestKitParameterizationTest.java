@@ -45,13 +45,14 @@ class TestKitParameterizationTest {
   static Path artifactsDirectory;
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withNodeType(TEMPLATE_NODE_TYPE)
-          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
-          .withValidators(TEMPLATE_VALIDATOR_COUNT)
-          .withArtifactsDirectory(artifactsDirectory));
+  TestKitExtension testKitExtension =
+      new TestKitExtension(
+          TestKit.builder()
+              .withNodeType(TEMPLATE_NODE_TYPE)
+              .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+              .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+              .withValidators(TEMPLATE_VALIDATOR_COUNT)
+              .withArtifactsDirectory(artifactsDirectory));
 
   @BeforeAll
   static void setUp() throws IOException {

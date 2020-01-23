@@ -33,13 +33,18 @@ class FakeServiceModuleTest {
   @Test
   void configure() {
     // todo: Do we need this wonderful test?
-    Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(ServiceInstanceSpec.class).toInstance(ServiceInstanceSpec.newInstance("test", 1,
-            ServiceArtifactId.newJavaId("a/b", "1")));
-      }
-    }, new FakeServiceModule());
+    Injector injector =
+        Guice.createInjector(
+            new AbstractModule() {
+              @Override
+              protected void configure() {
+                bind(ServiceInstanceSpec.class)
+                    .toInstance(
+                        ServiceInstanceSpec.newInstance(
+                            "test", 1, ServiceArtifactId.newJavaId("a/b", "1")));
+              }
+            },
+            new FakeServiceModule());
 
     Service instance = injector.getInstance(Service.class);
 

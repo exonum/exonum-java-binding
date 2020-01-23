@@ -23,7 +23,6 @@ public class TestServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {
-    bind(Service.class)
-        .to(TestService.class);
+    bind(Service.class).to(TestService.class);
   }
 }

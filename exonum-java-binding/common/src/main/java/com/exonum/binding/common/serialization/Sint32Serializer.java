@@ -58,5 +58,4 @@ enum Sint32Serializer implements Serializer<Integer> {
   private static int decodeZigZag32(int n) {
     return (n >>> 1) ^ -(n & 1);
   }
-
 }

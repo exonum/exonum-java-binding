@@ -44,11 +44,13 @@ class StoragePreconditionsTest {
 
   @Test
   void checkIndexNameDoesNotAcceptEmpty() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      String name = "";
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          String name = "";
 
-      StoragePreconditions.checkIndexName(name);
-    });
+          StoragePreconditions.checkIndexName(name);
+        });
   }
 
   @Test
@@ -67,13 +69,13 @@ class StoragePreconditionsTest {
   void checkIdInGroupEmpty() {
     byte[] emptyId = new byte[0];
 
-    assertThrows(IllegalArgumentException.class,
-        () -> StoragePreconditions.checkIdInGroup(emptyId));
+    assertThrows(
+        IllegalArgumentException.class, () -> StoragePreconditions.checkIdInGroup(emptyId));
   }
 
   @Test
   void checkStorageKeyAcceptsEmpty() {
-    byte[] key = new byte[]{};
+    byte[] key = new byte[] {};
 
     assertThat(key, sameInstance(StoragePreconditions.checkStorageKey(key)));
   }
@@ -106,8 +108,8 @@ class StoragePreconditionsTest {
 
   @Test
   void checkProofKeyDoesNotAcceptNull() {
-    NullPointerException thrown = assertThrows(NullPointerException.class,
-        () -> StoragePreconditions.checkProofKey(null));
+    NullPointerException thrown =
+        assertThrows(NullPointerException.class, () -> StoragePreconditions.checkProofKey(null));
     assertThat(thrown.getLocalizedMessage(), containsString("Proof map key is null"));
   }
 
@@ -115,8 +117,8 @@ class StoragePreconditionsTest {
   void checkProofKeyDoesNotAcceptSmallerKeys() {
     byte[] key = new byte[1];
 
-    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-        () -> StoragePreconditions.checkProofKey(key));
+    IllegalArgumentException thrown =
+        assertThrows(IllegalArgumentException.class, () -> StoragePreconditions.checkProofKey(key));
     assertThat(thrown.getLocalizedMessage(), containsString("Proof map key has invalid size (1)"));
   }
 
@@ -124,14 +126,14 @@ class StoragePreconditionsTest {
   void checkProofKeyDoesNotAcceptBiggerKeys() {
     byte[] key = new byte[64];
 
-    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-        () -> StoragePreconditions.checkProofKey(key));
+    IllegalArgumentException thrown =
+        assertThrows(IllegalArgumentException.class, () -> StoragePreconditions.checkProofKey(key));
     assertThat(thrown.getLocalizedMessage(), containsString("Proof map key has invalid size (64)"));
   }
 
   @Test
   void checkStorageValueAcceptsEmpty() {
-    byte[] value = new byte[]{};
+    byte[] value = new byte[] {};
 
     assertThat(value, sameInstance(StoragePreconditions.checkStorageValue(value)));
   }
@@ -150,41 +152,48 @@ class StoragePreconditionsTest {
 
   @Test
   void checkNoNulls() {
-    assertThrows(NullPointerException.class, () -> {
-      Collection<String> c = Arrays.asList("hello", null);
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          Collection<String> c = Arrays.asList("hello", null);
 
-      StoragePreconditions.checkNoNulls(c);
-    });
+          StoragePreconditions.checkNoNulls(c);
+        });
   }
 
   @Test
   void checkElementIndexNegative() {
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> StoragePreconditions.checkElementIndex(-1, 2));
-    assertThat(thrown.getLocalizedMessage(),
-        containsString("Index must be in range [0, 2), but: -1"));
+    IndexOutOfBoundsException thrown =
+        assertThrows(
+            IndexOutOfBoundsException.class, () -> StoragePreconditions.checkElementIndex(-1, 2));
+    assertThat(
+        thrown.getLocalizedMessage(), containsString("Index must be in range [0, 2), but: -1"));
   }
 
   @Test
   void checkElementIndexEqualToSize() {
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> StoragePreconditions.checkElementIndex(2, 2));
-    assertThat(thrown.getLocalizedMessage(),
-        containsString("Index must be in range [0, 2), but: 2"));
+    IndexOutOfBoundsException thrown =
+        assertThrows(
+            IndexOutOfBoundsException.class, () -> StoragePreconditions.checkElementIndex(2, 2));
+    assertThat(
+        thrown.getLocalizedMessage(), containsString("Index must be in range [0, 2), but: 2"));
   }
 
   @Test
   void checkElementIndexGreaterThanSize() {
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> StoragePreconditions.checkElementIndex(3, 2));
-    assertThat(thrown.getLocalizedMessage(),
-        containsString("Index must be in range [0, 2), but: 3"));
+    IndexOutOfBoundsException thrown =
+        assertThrows(
+            IndexOutOfBoundsException.class, () -> StoragePreconditions.checkElementIndex(3, 2));
+    assertThat(
+        thrown.getLocalizedMessage(), containsString("Index must be in range [0, 2), but: 3"));
   }
 
   @Test
   void checkElementIndexMaxLong() {
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> StoragePreconditions.checkElementIndex(Long.MAX_VALUE, 2));
+    IndexOutOfBoundsException thrown =
+        assertThrows(
+            IndexOutOfBoundsException.class,
+            () -> StoragePreconditions.checkElementIndex(Long.MAX_VALUE, 2));
     assertThat(thrown.getLocalizedMessage(), containsString("Index must be in range [0, 2), but:"));
   }
 
@@ -225,8 +234,10 @@ class StoragePreconditionsTest {
     long index = 1;
     long size = 0;
 
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> StoragePreconditions.checkPositionIndex(index, size));
+    IndexOutOfBoundsException thrown =
+        assertThrows(
+            IndexOutOfBoundsException.class,
+            () -> StoragePreconditions.checkPositionIndex(index, size));
     assertThat(thrown.getLocalizedMessage(), containsString("index (1) is greater than size (0)"));
   }
 
@@ -235,8 +246,10 @@ class StoragePreconditionsTest {
     long index = -1;
     long size = 0;
 
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> StoragePreconditions.checkPositionIndex(index, size));
+    IndexOutOfBoundsException thrown =
+        assertThrows(
+            IndexOutOfBoundsException.class,
+            () -> StoragePreconditions.checkPositionIndex(index, size));
     assertThat(thrown.getLocalizedMessage(), containsString("index (-1) is negative"));
   }
 
@@ -255,8 +268,10 @@ class StoragePreconditionsTest {
     long index = 4;
     long size = 3;
 
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> StoragePreconditions.checkPositionIndex(index, size));
+    IndexOutOfBoundsException thrown =
+        assertThrows(
+            IndexOutOfBoundsException.class,
+            () -> StoragePreconditions.checkPositionIndex(index, size));
     assertThat(thrown.getLocalizedMessage(), containsString("index (4) is greater than size (3)"));
   }
 
@@ -265,42 +280,48 @@ class StoragePreconditionsTest {
     long index = 0;
     long size = -1;
 
-    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-        () -> StoragePreconditions.checkPositionIndex(index, size));
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> StoragePreconditions.checkPositionIndex(index, size));
     assertThat(thrown.getLocalizedMessage(), containsString("size (-1) is negative"));
   }
 
   @Test
   void checkRangeFromNegative() {
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> checkRange(-1, 2));
-    assertThat(thrown.getLocalizedMessage(),
+    IndexOutOfBoundsException thrown =
+        assertThrows(IndexOutOfBoundsException.class, () -> checkRange(-1, 2));
+    assertThat(
+        thrown.getLocalizedMessage(),
         containsString("Proof range first element index -1 must be in range [0, 2)"));
   }
 
   @Test
   void checkRangeFromEqualToTo() {
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> checkRange(2, 2));
-    assertThat(thrown.getLocalizedMessage(),
+    IndexOutOfBoundsException thrown =
+        assertThrows(IndexOutOfBoundsException.class, () -> checkRange(2, 2));
+    assertThat(
+        thrown.getLocalizedMessage(),
         containsString("Proof range first element index 2 must be in range [0, 2)"));
   }
 
   @Test
   void checkRangeFromGreaterThanTo() {
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> checkRange(3, 2));
-    assertThat(thrown.getLocalizedMessage(),
+    IndexOutOfBoundsException thrown =
+        assertThrows(IndexOutOfBoundsException.class, () -> checkRange(3, 2));
+    assertThat(
+        thrown.getLocalizedMessage(),
         containsString("Proof range first element index 3 must be in range [0, 2)"));
   }
 
   @Test
   void checkRangeFromMaxLong() {
-    IndexOutOfBoundsException thrown = assertThrows(IndexOutOfBoundsException.class,
-        () -> checkRange(Long.MAX_VALUE, 2));
-    assertThat(thrown.getLocalizedMessage(),
-        containsString("Proof range first element index "
-            + Long.MAX_VALUE + " must be in range [0, 2)"));
+    IndexOutOfBoundsException thrown =
+        assertThrows(IndexOutOfBoundsException.class, () -> checkRange(Long.MAX_VALUE, 2));
+    assertThat(
+        thrown.getLocalizedMessage(),
+        containsString(
+            "Proof range first element index " + Long.MAX_VALUE + " must be in range [0, 2)"));
   }
 
   @Test

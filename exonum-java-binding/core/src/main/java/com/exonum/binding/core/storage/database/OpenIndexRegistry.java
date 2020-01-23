@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * A registry of open {@linkplain com.exonum.binding.core.storage.indices indexes}. Allows
- * to de-duplicate the indexes created with the same (Access, name, prefix) tuple, which is
- * required to overcome the MerkleDB limitation which prevents creating several indexes
- * with the same address (name + prefix) using the same Fork.
+ * A registry of open {@linkplain com.exonum.binding.core.storage.indices indexes}. Allows to
+ * de-duplicate the indexes created with the same (Access, name, prefix) tuple, which is required to
+ * overcome the MerkleDB limitation which prevents creating several indexes with the same address
+ * (name + prefix) using the same Fork.
  */
 class OpenIndexRegistry {
 
@@ -37,8 +37,12 @@ class OpenIndexRegistry {
   void registerIndex(StorageIndex index) {
     IndexAddress address = index.getAddress();
     Object present = indexes.putIfAbsent(address, index);
-    checkArgument(present == null, "Cannot register index (%s): the address (%s) is already "
-        + "associated with index (%s): ", index, address, present);
+    checkArgument(
+        present == null,
+        "Cannot register index (%s): the address (%s) is already " + "associated with index (%s): ",
+        index,
+        address,
+        present);
   }
 
   Optional<StorageIndex> findIndex(IndexAddress address) {

@@ -37,13 +37,14 @@ public enum UtcZonedDateTimeSerializer implements Serializer<ZonedDateTime> {
 
   @Override
   public byte[] toBytes(ZonedDateTime value) {
-    checkArgument(value.getZone() == ZoneOffset.UTC,
+    checkArgument(
+        value.getZone() == ZoneOffset.UTC,
         "ZonedDateTime value should be in UTC, but was %s",
         value.getZone());
     long seconds = value.toEpochSecond();
     int nanos = value.getNano();
-    ByteBuffer buffer = ByteBuffer.allocate(SERIALIZED_DATE_TIME_SIZE)
-        .order(ByteOrder.LITTLE_ENDIAN);
+    ByteBuffer buffer =
+        ByteBuffer.allocate(SERIALIZED_DATE_TIME_SIZE).order(ByteOrder.LITTLE_ENDIAN);
     buffer.putLong(seconds);
     buffer.putInt(nanos);
     return buffer.array();
@@ -51,12 +52,13 @@ public enum UtcZonedDateTimeSerializer implements Serializer<ZonedDateTime> {
 
   @Override
   public ZonedDateTime fromBytes(byte[] serializedValue) {
-    checkArgument(serializedValue.length == SERIALIZED_DATE_TIME_SIZE,
-        "Expected an array of size %s, but was %s", SERIALIZED_DATE_TIME_SIZE,
+    checkArgument(
+        serializedValue.length == SERIALIZED_DATE_TIME_SIZE,
+        "Expected an array of size %s, but was %s",
+        SERIALIZED_DATE_TIME_SIZE,
         serializedValue.length);
 
-    ByteBuffer buffer = ByteBuffer.wrap(serializedValue)
-        .order(ByteOrder.LITTLE_ENDIAN);
+    ByteBuffer buffer = ByteBuffer.wrap(serializedValue).order(ByteOrder.LITTLE_ENDIAN);
     return retrieveZdtFromBuffer(buffer);
   }
 

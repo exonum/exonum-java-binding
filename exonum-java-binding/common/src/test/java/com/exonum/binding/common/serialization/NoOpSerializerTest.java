@@ -41,8 +41,6 @@ class NoOpSerializerTest {
         Bytes.bytes(0),
         Bytes.bytes(0, 1),
         Bytes.bytes(Byte.MIN_VALUE, Byte.MAX_VALUE),
-        Bytes.bytes("some string")
-    );
+        Bytes.bytes("some string"));
   }
-
 }

@@ -35,9 +35,7 @@ class BlockTest {
 
   @Test
   void isEmpty() {
-    Block emptyBlock = aBlock()
-        .numTransactions(0)
-        .build();
+    Block emptyBlock = aBlock().numTransactions(0).build();
 
     assertTrue(emptyBlock.isEmpty());
   }
@@ -45,9 +43,7 @@ class BlockTest {
   @ParameterizedTest
   @ValueSource(ints = {1, 2, Integer.MAX_VALUE})
   void nonEmptyBlock(int numTransactions) {
-    Block nonEmptyBlock = aBlock()
-        .numTransactions(numTransactions)
-        .build();
+    Block nonEmptyBlock = aBlock().numTransactions(numTransactions).build();
 
     assertFalse(nonEmptyBlock.isEmpty());
   }

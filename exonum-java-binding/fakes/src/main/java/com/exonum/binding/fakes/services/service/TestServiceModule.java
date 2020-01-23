@@ -24,7 +24,6 @@ public class TestServiceModule extends AbstractServiceModule {
 
   @Override
   protected void configure() {
-    bind(Service.class).to(TestService.class)
-        .in(Singleton.class);
+    bind(Service.class).to(TestService.class).in(Singleton.class);
   }
 }

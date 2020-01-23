@@ -40,8 +40,7 @@ final class TransactionMessages {
    * Returns a CreateCounterTx transaction message with the given name and signed with the test key
    * pair.
    */
-  static TransactionMessage createCreateCounterTx(String counterName,
-      int qaServiceId) {
+  static TransactionMessage createCreateCounterTx(String counterName, int qaServiceId) {
     return createCreateCounterTx(counterName, qaServiceId, TEST_KEY_PAIR);
   }
 
@@ -49,14 +48,12 @@ final class TransactionMessages {
    * Returns a CreateCounterTx transaction message with the given name and signed with the given key
    * pair.
    */
-  static TransactionMessage createCreateCounterTx(String counterName,
-      int qaServiceId, KeyPair keyPair) {
+  static TransactionMessage createCreateCounterTx(
+      String counterName, int qaServiceId, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(qaServiceId)
         .transactionId(CREATE_COUNTER_TX_ID)
-        .payload(CreateCounterTxBody.newBuilder()
-            .setName(counterName)
-            .build())
+        .payload(CreateCounterTxBody.newBuilder().setName(counterName).build())
         .sign(keyPair);
   }
 
@@ -68,37 +65,39 @@ final class TransactionMessages {
     return testMessage()
         .serviceId(qaServiceId)
         .transactionId(VALID_ERROR_TX_ID)
-        .payload(ErrorTxBody.newBuilder()
-            .setSeed(0)
-            .setErrorCode(errorCode)
-            .setErrorDescription(errorDescription)
-            .build())
+        .payload(
+            ErrorTxBody.newBuilder()
+                .setSeed(0)
+                .setErrorCode(errorCode)
+                .setErrorDescription(errorDescription)
+                .build())
         .build();
   }
 
   /**
-   * Returns an increment counter transaction message with the given arguments and signed
-   * with the test key pair.
+   * Returns an increment counter transaction message with the given arguments and signed with the
+   * test key pair.
    */
-  static TransactionMessage createIncrementCounterTx(long seed,
-      HashCode counterId, int qaServiceId) {
+  static TransactionMessage createIncrementCounterTx(
+      long seed, HashCode counterId, int qaServiceId) {
     return createIncrementCounterTx(seed, counterId, qaServiceId, TEST_KEY_PAIR);
   }
 
   /**
-   * Returns an increment counter transaction message with the given arguments and signed
-   * with the given key pair.
+   * Returns an increment counter transaction message with the given arguments and signed with the
+   * given key pair.
    */
-  static TransactionMessage createIncrementCounterTx(long seed, HashCode counterId,
-      int qaServiceId, KeyPair keys) {
+  static TransactionMessage createIncrementCounterTx(
+      long seed, HashCode counterId, int qaServiceId, KeyPair keys) {
     return TransactionMessage.builder()
-      .serviceId(qaServiceId)
-      .transactionId(INCREMENT_COUNTER_TX_ID)
-      .payload(IncrementCounterTxBody.newBuilder()
-          .setSeed(seed)
-          .setCounterId(ByteString.copyFrom(counterId.asBytes()))
-          .build())
-      .sign(keys);
+        .serviceId(qaServiceId)
+        .transactionId(INCREMENT_COUNTER_TX_ID)
+        .payload(
+            IncrementCounterTxBody.newBuilder()
+                .setSeed(seed)
+                .setCounterId(ByteString.copyFrom(counterId.asBytes()))
+                .build())
+        .sign(keys);
   }
 
   /**
@@ -108,15 +107,11 @@ final class TransactionMessages {
     return testMessage()
         .serviceId(qaServiceId)
         .transactionId(VALID_THROWING_TX_ID)
-        .payload(ThrowingTxBody.newBuilder()
-            .setSeed(seed)
-            .build())
+        .payload(ThrowingTxBody.newBuilder().setSeed(seed).build())
         .build();
   }
 
-  /**
-   * Creates an 'unknown' to this service transaction.
-   */
+  /** Creates an 'unknown' to this service transaction. */
   static TransactionMessage createUnknownTx(int qaServiceId, KeyPair keys) {
     return TransactionMessage.builder()
         .serviceId(qaServiceId)

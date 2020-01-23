@@ -26,14 +26,13 @@ import java.nio.file.Paths;
 final class TestArtifactInfo {
 
   static final Path ARTIFACT_DIR = Paths.get(getRequiredProperty("it.artifactsDir"));
-  static final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom(
-      getRequiredProperty("it.exonumArtifactId"));
+  static final ServiceArtifactId ARTIFACT_ID =
+      ServiceArtifactId.parseFrom(getRequiredProperty("it.exonumArtifactId"));
   static final String ARTIFACT_FILENAME = getRequiredProperty("it.artifactFilename");
 
   private static String getRequiredProperty(String key) {
     String property = System.getProperty(key);
-    checkState(!Strings.isNullOrEmpty(property),
-        "Absent property: %s=%s", key, property);
+    checkState(!Strings.isNullOrEmpty(property), "Absent property: %s=%s", key, property);
     return property;
   }
 

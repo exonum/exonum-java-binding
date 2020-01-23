@@ -59,11 +59,10 @@ abstract class Ed25519CryptoFunctionTestable {
     // Try to use a two-byte seed, must be 32 byte long
     byte[] seed = bytes(0x01, 0x02);
 
-
-    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-        () -> cryptoFunction.generateKeyPair(seed));
-    assertEquals("Seed byte array has invalid size (2), must be "
-        + SEED_BYTES, thrown.getMessage());
+    IllegalArgumentException thrown =
+        assertThrows(IllegalArgumentException.class, () -> cryptoFunction.generateKeyPair(seed));
+    assertEquals(
+        "Seed byte array has invalid size (2), must be " + SEED_BYTES, thrown.getMessage());
   }
 
   @Test
@@ -135,10 +134,12 @@ abstract class Ed25519CryptoFunctionTestable {
     // Try to use a public key of incorrect length.
     PublicKey publicKey = PublicKey.fromHexString("abcd");
 
-    IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-        () -> cryptoFunction.verify(message, signature, publicKey));
-    assertEquals("Public key has invalid size (2), must be "
-        + PUBLIC_KEY_BYTES, thrown.getMessage());
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> cryptoFunction.verify(message, signature, publicKey));
+    assertEquals(
+        "Public key has invalid size (2), must be " + PUBLIC_KEY_BYTES, thrown.getMessage());
   }
 
   @Test

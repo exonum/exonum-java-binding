@@ -17,8 +17,8 @@
 package com.exonum.binding.common.crypto;
 
 /**
- * A crypto function that provides several signature system crypto methods.
- * All method arguments can't be null otherwise {@link NullPointerException} will be thrown.
+ * A crypto function that provides several signature system crypto methods. All method arguments
+ * can't be null otherwise {@link NullPointerException} will be thrown.
  */
 public interface CryptoFunction {
 
@@ -29,9 +29,7 @@ public interface CryptoFunction {
    */
   KeyPair generateKeyPair(byte[] seed);
 
-  /**
-   * Generates a private key and a corresponding public key using a random seed.
-   */
+  /** Generates a private key and a corresponding public key using a random seed. */
   KeyPair generateKeyPair();
 
   /**

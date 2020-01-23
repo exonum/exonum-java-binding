@@ -26,27 +26,21 @@ import java.util.stream.Collectors;
 final class MapEntries {
 
   static <K, V> List<K> extractKeys(Collection<? extends MapEntry<K, V>> entries) {
-    return entries.stream()
-        .map(MapEntry::getKey)
-        .collect(Collectors.toList());
+    return entries.stream().map(MapEntry::getKey).collect(Collectors.toList());
   }
 
   static <K, V> List<V> extractValues(Collection<? extends MapEntry<K, V>> entries) {
-    return entries.stream()
-        .map(MapEntry::getValue)
-        .collect(Collectors.toList());
+    return entries.stream().map(MapEntry::getValue).collect(Collectors.toList());
   }
 
   static <K, V> Map<K, V> extractEntries(MapIndex<K, V> map) {
     Map<K, V> result = new LinkedHashMap<>();
-    map.entries().forEachRemaining(
-        e -> result.put(e.getKey(), e.getValue())
-    );
+    map.entries().forEachRemaining(e -> result.put(e.getKey(), e.getValue()));
     return result;
   }
 
-  static <K, V> void putAll(MapIndex<K, V> map,
-                            Collection<? extends MapEntry<? extends K, ? extends V>> entries) {
+  static <K, V> void putAll(
+      MapIndex<K, V> map, Collection<? extends MapEntry<? extends K, ? extends V>> entries) {
     for (MapEntry<? extends K, ? extends V> e : entries) {
       map.put(e.getKey(), e.getValue());
     }

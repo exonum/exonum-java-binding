@@ -26,18 +26,15 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class ServiceArtifactIdTest {
   private static final ArtifactId ARTIFACT_ID =
-      ArtifactId.newBuilder()
-          .setRuntimeId(1)
-          .setName("com.acme/foo")
-          .setVersion("1.2.3")
-          .build();
+      ArtifactId.newBuilder().setRuntimeId(1).setName("com.acme/foo").setVersion("1.2.3").build();
 
   @ParameterizedTest
-  @ValueSource(strings = {
-      "0:land-registry:v1",
-      "1:com.acme/foo-service:1.1.1-beta1",
-      "100500:foo:bar",
-  })
+  @ValueSource(
+      strings = {
+        "0:land-registry:v1",
+        "1:com.acme/foo-service:1.1.1-beta1",
+        "100500:foo:bar",
+      })
   void parseFromRoundtrip(String serviceId) {
     ServiceArtifactId parsedId = ServiceArtifactId.parseFrom(serviceId);
     String parsedAsString = parsedId.toString();
@@ -86,30 +83,29 @@ class ServiceArtifactIdTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {
-      "",
-      /* Too few components */
-      "too-few-components",
-      "1:too-few-components",
-      /* Extra component */
-      "1:foo-service:0.1.0:extra-component",
-      /* All blanks */
-      " : : ",
-      /* Non-integral runtime id */
-      "a:com.acme/foo:1.0",
-      /* Spaces in runtime id */
-      "1 :com.acme/foo:1.0",
-      /* Spaces in name */
-      "1:com.acme foo:1.0",
-      "1:com.acme/fo o:1.0",
-      /* Spaces in version */
-      "1:com.acme:foo: 1.0",
-      "1:com.acme/foo:1.0 ",
-      "1:com.acme:foo:1 0",
-  })
+  @ValueSource(
+      strings = {
+        "",
+        /* Too few components */
+        "too-few-components",
+        "1:too-few-components",
+        /* Extra component */
+        "1:foo-service:0.1.0:extra-component",
+        /* All blanks */
+        " : : ",
+        /* Non-integral runtime id */
+        "a:com.acme/foo:1.0",
+        /* Spaces in runtime id */
+        "1 :com.acme/foo:1.0",
+        /* Spaces in name */
+        "1:com.acme foo:1.0",
+        "1:com.acme/fo o:1.0",
+        /* Spaces in version */
+        "1:com.acme:foo: 1.0",
+        "1:com.acme/foo:1.0 ",
+        "1:com.acme:foo:1 0",
+      })
   void checkInvalidName(String artifactId) {
-    assertThrows(IllegalArgumentException.class,
-        () -> ServiceArtifactId.parseFrom(artifactId));
+    assertThrows(IllegalArgumentException.class, () -> ServiceArtifactId.parseFrom(artifactId));
   }
-
 }

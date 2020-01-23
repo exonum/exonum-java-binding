@@ -53,11 +53,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 class TransferTxIntegrationTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-          .withArtifactsDirectory(artifactsDirectory));
+  TestKitExtension testKitExtension =
+      new TestKitExtension(
+          TestKit.builder()
+              .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+              .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+              .withArtifactsDirectory(artifactsDirectory));
 
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
@@ -76,8 +77,9 @@ class TransferTxIntegrationTest {
     // Create and execute the transaction
     long seed = 1L;
     long transferSum = 40L;
-    TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    TransactionMessage transferTx =
+        newTransferTransaction(
+            seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -86,18 +88,15 @@ class TransferTxIntegrationTest {
     CryptocurrencySchema schema = new CryptocurrencySchema(view, SERVICE_NAME);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     long expectedFromValue = initialBalance - transferSum;
-    assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance())
-        .isEqualTo(expectedFromValue);
+    assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance()).isEqualTo(expectedFromValue);
     long expectedToValue = initialBalance + transferSum;
-    assertThat(wallets.get(TO_KEY_PAIR.getPublicKey()).getBalance())
-        .isEqualTo(expectedToValue);
+    assertThat(wallets.get(TO_KEY_PAIR.getPublicKey()).getBalance()).isEqualTo(expectedToValue);
 
     // Check history
     HashCode messageHash = transferTx.hash();
     assertThat(schema.transactionsHistory(FROM_KEY_PAIR.getPublicKey()))
         .containsExactly(messageHash);
-    assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey()))
-        .containsExactly(messageHash);
+    assertThat(schema.transactionsHistory(TO_KEY_PAIR.getPublicKey())).containsExactly(messageHash);
   }
 
   @ParameterizedTest
@@ -106,22 +105,26 @@ class TransferTxIntegrationTest {
   void executeTransfer_NonPositiveBalance(long transferSum, TestKit testKit) {
     // Create and execute the transaction
     long seed = 1L;
-    TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    TransactionMessage transferTx =
+        newTransferTransaction(
+            seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     // Check the Exception
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
     Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(transferTx.hash());
-    assertThat(txResultOpt).hasValueSatisfying(status -> {
-      assertTrue(status.hasError());
-      ExecutionError error = status.getError();
-      assertThat(error.getKind()).isEqualTo(SERVICE);
-      assertThat(error.getCode()).isEqualTo(NON_POSITIVE_TRANSFER_AMOUNT.errorCode);
-      assertThat(error.getDescription()).containsIgnoringCase("Non-positive transfer amount")
-          .contains(String.valueOf(transferSum));
-    });
+    assertThat(txResultOpt)
+        .hasValueSatisfying(
+            status -> {
+              assertTrue(status.hasError());
+              ExecutionError error = status.getError();
+              assertThat(error.getKind()).isEqualTo(SERVICE);
+              assertThat(error.getCode()).isEqualTo(NON_POSITIVE_TRANSFER_AMOUNT.errorCode);
+              assertThat(error.getDescription())
+                  .containsIgnoringCase("Non-positive transfer amount")
+                  .contains(String.valueOf(transferSum));
+            });
   }
 
   @Test
@@ -135,8 +138,9 @@ class TransferTxIntegrationTest {
 
     long seed = 1L;
     long transferSum = 50L;
-    TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    TransactionMessage transferTx =
+        newTransferTransaction(
+            seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -156,8 +160,9 @@ class TransferTxIntegrationTest {
 
     long seed = 1L;
     long transferSum = 50L;
-    TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    TransactionMessage transferTx =
+        newTransferTransaction(
+            seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -171,8 +176,9 @@ class TransferTxIntegrationTest {
   void executeTransfer_RejectsSameSenderAndReceiver(TestKit testKit) {
     long seed = 1L;
     long transferSum = 50L;
-    TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    TransactionMessage transferTx =
+        newTransferTransaction(
+            seed, FROM_KEY_PAIR, FROM_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -196,8 +202,9 @@ class TransferTxIntegrationTest {
     // balance
     long seed = 1L;
     long transferSum = initialBalance + 50L;
-    TransactionMessage transferTx = newTransferTransaction(
-        seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
+    TransactionMessage transferTx =
+        newTransferTransaction(
+            seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
     Snapshot view = testKit.getSnapshot();
@@ -209,11 +216,13 @@ class TransferTxIntegrationTest {
   static void checkServiceError(
       @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<ExecutionStatus> txResultOpt,
       TransactionError expectedError) {
-    assertThat(txResultOpt).hasValueSatisfying(status -> {
-      assertTrue(status.hasError());
-      ExecutionError error = status.getError();
-      assertThat(error.getKind()).isEqualTo(SERVICE);
-      assertThat(error.getCode()).isEqualTo(expectedError.errorCode);
-    });
+    assertThat(txResultOpt)
+        .hasValueSatisfying(
+            status -> {
+              assertTrue(status.hasError());
+              ExecutionError error = status.getError();
+              assertThat(error.getKind()).isEqualTo(SERVICE);
+              assertThat(error.getCode()).isEqualTo(expectedError.errorCode);
+            });
   }
 }

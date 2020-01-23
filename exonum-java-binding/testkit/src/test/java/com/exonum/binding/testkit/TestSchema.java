@@ -35,8 +35,9 @@ final class TestSchema implements Schema {
   }
 
   ProofMapIndexProxy<HashCode, String> testMap() {
-    return access
-        .getProofMap(IndexAddress.valueOf(testMapName),
-            StandardSerializers.hash(), StandardSerializers.string());
+    return access.getProofMap(
+        IndexAddress.valueOf(testMapName),
+        StandardSerializers.hash(),
+        StandardSerializers.string());
   }
 }

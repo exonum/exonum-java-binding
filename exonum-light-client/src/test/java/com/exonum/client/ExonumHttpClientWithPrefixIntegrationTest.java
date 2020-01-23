@@ -38,10 +38,8 @@ class ExonumHttpClientWithPrefixIntegrationTest {
     server = new MockWebServer();
     server.start();
 
-    exonumClient = ExonumClient.newBuilder()
-        .setExonumHost(server.url("/").url())
-        .setPrefix(prefixUrl)
-        .build();
+    exonumClient =
+        ExonumClient.newBuilder().setExonumHost(server.url("/").url()).setPrefix(prefixUrl).build();
   }
 
   @AfterEach
@@ -62,5 +60,4 @@ class ExonumHttpClientWithPrefixIntegrationTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest, hasPathStartingWith(prefixUrl));
   }
-
 }

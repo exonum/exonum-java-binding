@@ -40,8 +40,8 @@ public interface CryptocurrencyService extends Service {
   /**
    * Transfers tokens between two wallets.
    *
-   * @throws ExecutionException if the sender or receiver are unknown; the sender
-   *     has insufficient funds; or the sender attempts a transfer to itself
+   * @throws ExecutionException if the sender or receiver are unknown; the sender has insufficient
+   *     funds; or the sender attempts a transfer to itself
    */
   void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context);
 }

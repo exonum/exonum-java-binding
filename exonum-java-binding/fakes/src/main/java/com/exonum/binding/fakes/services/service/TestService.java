@@ -40,8 +40,8 @@ public final class TestService extends AbstractService {
   public static final short ID = 0x110B;
   public static final String NAME = "experimentalTestService";
 
-  static final HashCode INITIAL_ENTRY_KEY = Hashing.defaultHashFunction()
-      .hashString("initial key", StandardCharsets.UTF_8);
+  static final HashCode INITIAL_ENTRY_KEY =
+      Hashing.defaultHashFunction().hashString("initial key", StandardCharsets.UTF_8);
   static final String INITIAL_ENTRY_VALUE = "initial value";
 
   private static final SchemaFactory<TestSchema> SCHEMA_FACTORY = TestSchema::new;
@@ -56,9 +56,7 @@ public final class TestService extends AbstractService {
     return SCHEMA_FACTORY.from(access);
   }
 
-  /**
-   * Always puts the same value identified by the same key.
-   */
+  /** Always puts the same value identified by the same key. */
   @Override
   public void initialize(Fork fork, Configuration configuration) {
     TestSchema schema = createDataSchema(fork);

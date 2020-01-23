@@ -51,7 +51,9 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  *   // Test logic
  * }
  * </code></pre>
+ *
  * instead of:
+ *
  * <pre><code>
  * private TestKit testKit;
  *
@@ -77,12 +79,15 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  *
  * <p>As different tests might need slightly different TestKit configuration, following
  * parameterization annotations are available:
+ *
  * <ul>
- *   <li>{@link Validator} sets main TestKit node type to validator</li>
- *   <li>{@link Auditor} sets main TestKit node type to auditor</li>
- *   <li>{@link ValidatorCount} sets number of validator nodes in the TestKit network</li>
+ *   <li>{@link Validator} sets main TestKit node type to validator
+ *   <li>{@link Auditor} sets main TestKit node type to auditor
+ *   <li>{@link ValidatorCount} sets number of validator nodes in the TestKit network
  * </ul>
+ *
  * These annotations should be applied on TestKit parameter:
+ *
  * <pre><code>
  * &#64;RegisterExtension
  * TestKitExtension testKitExtension = new TestKitExtension(
@@ -117,8 +122,8 @@ public class TestKitExtension implements ParameterResolver {
   }
 
   @Override
-  public boolean supportsParameter(ParameterContext parameterContext,
-                                   ExtensionContext extensionContext) {
+  public boolean supportsParameter(
+      ParameterContext parameterContext, ExtensionContext extensionContext) {
     return parameterContext.getParameter().getType() == TestKit.class;
   }
 
@@ -137,55 +142,58 @@ public class TestKitExtension implements ParameterResolver {
       // Throw an exception if TestKit was already instantiated in this context, but user tries to
       // reconfigure it
       if (annotationsUsed(parameterContext)) {
-        throw new ParameterResolutionException("TestKit was parameterized with annotations after"
-            + " being instantiated in " + extensionContext.getDisplayName());
+        throw new ParameterResolutionException(
+            "TestKit was parameterized with annotations after"
+                + " being instantiated in "
+                + extensionContext.getDisplayName());
       }
       testKit = closeableTestKit.getTestKit();
     }
     return testKit;
   }
 
-  /**
-   * Check the extension context and throw if TestKit is injected in @BeforeAll or @AfterAll.
-   */
+  /** Check the extension context and throw if TestKit is injected in @BeforeAll or @AfterAll. */
   private void checkExtensionContext(ExtensionContext extensionContext) {
     Optional<Method> testMethod = extensionContext.getTestMethod();
-    testMethod.orElseThrow(() ->
-        new ParameterResolutionException("TestKit can't be injected in @BeforeAll or @AfterAll"
-            + " because it is a stateful, mutable object and sharing it between all tests is"
-            + " error-prone. Consider injecting it in @BeforeEach instead.\n"
-            + " If you do need the same instance for all tests — just use `TestKit#builder`"
-            + " directly. Don't forget to destroy it in @AfterEach."));
+    testMethod.orElseThrow(
+        () ->
+            new ParameterResolutionException(
+                "TestKit can't be injected in @BeforeAll or @AfterAll"
+                    + " because it is a stateful, mutable object and sharing it between all tests is"
+                    + " error-prone. Consider injecting it in @BeforeEach instead.\n"
+                    + " If you do need the same instance for all tests — just use `TestKit#builder`"
+                    + " directly. Don't forget to destroy it in @AfterEach."));
   }
 
-  private TestKit buildTestKit(ParameterContext parameterContext,
-                               ExtensionContext extensionContext) {
+  private TestKit buildTestKit(
+      ParameterContext parameterContext, ExtensionContext extensionContext) {
     TestKit.Builder testKitBuilder = createTestKitBuilder(parameterContext, extensionContext);
     return testKitBuilder.build();
   }
 
   private boolean annotationsUsed(ParameterContext parameterContext) {
-    return testKitModificationAnnotations.stream()
-        .anyMatch(parameterContext::isAnnotated);
+    return testKitModificationAnnotations.stream().anyMatch(parameterContext::isAnnotated);
   }
 
-  private TestKit.Builder createTestKitBuilder(ParameterContext parameterContext,
-                                               ExtensionContext extensionContext) {
+  private TestKit.Builder createTestKitBuilder(
+      ParameterContext parameterContext, ExtensionContext extensionContext) {
     TestKit.Builder testKitBuilder = templateTestKitBuilder.shallowCopy();
     Optional<Auditor> auditorAnnotation = parameterContext.findAnnotation(Auditor.class);
     Optional<Validator> validatorAnnotation = parameterContext.findAnnotation(Validator.class);
     if (auditorAnnotation.isPresent() && validatorAnnotation.isPresent()) {
-      throw new ParameterResolutionException("Both @Validator and @Auditor annotations were used"
-          + " in " + extensionContext.getDisplayName());
+      throw new ParameterResolutionException(
+          "Both @Validator and @Auditor annotations were used"
+              + " in "
+              + extensionContext.getDisplayName());
     }
     auditorAnnotation.ifPresent(auditor -> testKitBuilder.withNodeType(EmulatedNodeType.AUDITOR));
-    validatorAnnotation.ifPresent(validator ->
-        testKitBuilder.withNodeType(EmulatedNodeType.VALIDATOR));
+    validatorAnnotation.ifPresent(
+        validator -> testKitBuilder.withNodeType(EmulatedNodeType.VALIDATOR));
 
     Optional<ValidatorCount> validatorCountAnnotation =
         parameterContext.findAnnotation(ValidatorCount.class);
-    validatorCountAnnotation.ifPresent(validatorCount ->
-        testKitBuilder.withValidators(validatorCount.value()));
+    validatorCountAnnotation.ifPresent(
+        validatorCount -> testKitBuilder.withValidators(validatorCount.value()));
     return testKitBuilder;
   }
 

@@ -53,10 +53,10 @@ class AbstractByteHasherTest {
     TestHasher hasher = new TestHasher(); // byte order insignificant here
     byte[] expected = {1, 2, 3, 4, 5, 6, 7, 8};
     hasher.putByte((byte) 1);
-    hasher.putBytes(new byte[]{2, 3, 4, 5, 6});
+    hasher.putBytes(new byte[] {2, 3, 4, 5, 6});
     hasher.putByte((byte) 7);
-    hasher.putBytes(new byte[]{});
-    hasher.putBytes(new byte[]{8});
+    hasher.putBytes(new byte[] {});
+    hasher.putBytes(new byte[] {8});
     hasher.assertBytes(expected);
   }
 
@@ -64,28 +64,28 @@ class AbstractByteHasherTest {
   void testShort() {
     TestHasher hasher = new TestHasher();
     hasher.putShort((short) 0x0201);
-    hasher.assertBytes(new byte[]{1, 2});
+    hasher.assertBytes(new byte[] {1, 2});
   }
 
   @Test
   void testInt() {
     TestHasher hasher = new TestHasher();
     hasher.putInt(0x04030201);
-    hasher.assertBytes(new byte[]{1, 2, 3, 4});
+    hasher.assertBytes(new byte[] {1, 2, 3, 4});
   }
 
   @Test
   void testLong() {
     TestHasher hasher = new TestHasher();
     hasher.putLong(0x0807060504030201L);
-    hasher.assertBytes(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+    hasher.assertBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
   }
 
   @Test
   void testChar() {
     TestHasher hasher = new TestHasher();
     hasher.putChar((char) 0x0201);
-    hasher.assertBytes(new byte[]{1, 2});
+    hasher.assertBytes(new byte[] {1, 2});
   }
 
   @Test
@@ -108,14 +108,14 @@ class AbstractByteHasherTest {
   void testFloat() {
     TestHasher hasher = new TestHasher();
     hasher.putFloat(Float.intBitsToFloat(0x04030201));
-    hasher.assertBytes(new byte[]{1, 2, 3, 4});
+    hasher.assertBytes(new byte[] {1, 2, 3, 4});
   }
 
   @Test
   void testDouble() {
     TestHasher hasher = new TestHasher();
     hasher.putDouble(Double.longBitsToDouble(0x0807060504030201L));
-    hasher.assertBytes(new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
+    hasher.assertBytes(new byte[] {1, 2, 3, 4, 5, 6, 7, 8});
   }
 
   @Test

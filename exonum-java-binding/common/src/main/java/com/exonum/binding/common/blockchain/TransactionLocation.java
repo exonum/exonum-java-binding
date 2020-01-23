@@ -21,9 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Transaction position in the blockchain. Enumeration begins from 0.
- */
+/** Transaction position in the blockchain. Enumeration begins from 0. */
 @AutoValue
 public abstract class TransactionLocation {
 
@@ -31,9 +29,7 @@ public abstract class TransactionLocation {
     return new AutoValue_TransactionLocation(height, indexInBlock);
   }
 
-  /**
-   * Height of the block where the transaction was committed.
-   */
+  /** Height of the block where the transaction was committed. */
   @SerializedName("block_height")
   public abstract long getHeight();
 
@@ -52,5 +48,4 @@ public abstract class TransactionLocation {
   public static TypeAdapter<TransactionLocation> typeAdapter(Gson gson) {
     return new AutoValue_TransactionLocation.GsonTypeAdapter(gson);
   }
-
 }

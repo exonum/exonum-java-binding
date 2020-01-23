@@ -19,9 +19,7 @@ package com.exonum.binding.core.storage.database;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseableNativeProxy;
 
-/**
- * Represents an underlying Exonum Storage database.
- */
+/** Represents an underlying Exonum Storage database. */
 public interface Database extends CloseableNativeProxy {
 
   /**
@@ -35,8 +33,8 @@ public interface Database extends CloseableNativeProxy {
   /**
    * Creates a new database fork.
    *
-   * <p>A fork allows to perform a transaction: a number of independent writes to a database,
-   * which then may be <em>atomically</em> applied to the database.
+   * <p>A fork allows to perform a transaction: a number of independent writes to a database, which
+   * then may be <em>atomically</em> applied to the database.
    *
    * @param cleaner a cleaner to register the fork
    * @return a new database fork

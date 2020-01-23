@@ -18,6 +18,4 @@ package com.exonum.binding.test.runtime.testplugin;
 
 import org.pf4j.ExtensionPoint;
 
-public interface TestServiceExtension extends ExtensionPoint {
-
-}
+public interface TestServiceExtension extends ExtensionPoint {}

@@ -69,8 +69,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Implementation of the {@linkplain ExonumClient} which works over HTTP REST API.
- * It uses {@linkplain OkHttpClient} internally for REST API communication with Exonum node.
+ * Implementation of the {@linkplain ExonumClient} which works over HTTP REST API. It uses
+ * {@linkplain OkHttpClient} internally for REST API communication with Exonum node.
  */
 class ExonumHttpClient implements ExonumClient {
   private static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
@@ -88,8 +88,8 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public HashCode submitTransaction(TransactionMessage transactionMessage) {
-    Request request = post(url(TRANSACTIONS),
-        ExplorerApiHelper.createSubmitTxBody(transactionMessage));
+    Request request =
+        post(url(TRANSACTIONS), ExplorerApiHelper.createSubmitTxBody(transactionMessage));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
   }
@@ -126,18 +126,20 @@ class ExonumHttpClient implements ExonumClient {
     Map<String, String> query = ImmutableMap.of("hash", hash.toString());
     Request request = get(url(TRANSACTIONS, query));
 
-    return blockingExecute(request, response -> {
-      if (response.code() == HTTP_NOT_FOUND) {
-        return Optional.empty();
-      } else if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't successful: " + response.toString());
-      } else {
-        TransactionResponse txResponse = ExplorerApiHelper
-            .parseGetTxResponse(readBody(response));
+    return blockingExecute(
+        request,
+        response -> {
+          if (response.code() == HTTP_NOT_FOUND) {
+            return Optional.empty();
+          } else if (!response.isSuccessful()) {
+            throw new RuntimeException("Execution wasn't successful: " + response.toString());
+          } else {
+            TransactionResponse txResponse =
+                ExplorerApiHelper.parseGetTxResponse(readBody(response));
 
-        return Optional.of(txResponse);
-      }
-    });
+            return Optional.of(txResponse);
+          }
+        });
   }
 
   @Override
@@ -153,25 +155,32 @@ class ExonumHttpClient implements ExonumClient {
     Map<String, String> query = ImmutableMap.of("height", String.valueOf(height));
     Request request = get(url(BLOCK, query));
 
-    return blockingExecute(request, response -> {
-      if (response.code() == HTTP_NOT_FOUND) {
-        String message = readBody(response);
-        throw new IllegalArgumentException(message);
-      } else if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't successful: " + response.toString());
-      } else {
-        return ExplorerApiHelper.parseGetBlockResponse(readBody(response));
-      }
-    });
+    return blockingExecute(
+        request,
+        response -> {
+          if (response.code() == HTTP_NOT_FOUND) {
+            String message = readBody(response);
+            throw new IllegalArgumentException(message);
+          } else if (!response.isSuccessful()) {
+            throw new RuntimeException("Execution wasn't successful: " + response.toString());
+          } else {
+            return ExplorerApiHelper.parseGetBlockResponse(readBody(response));
+          }
+        });
   }
 
   @Override
-  public List<Block> getBlocks(long fromHeight, long toHeight, BlockFilteringOption blockFilter,
+  public List<Block> getBlocks(
+      long fromHeight,
+      long toHeight,
+      BlockFilteringOption blockFilter,
       BlockTimeOption timeOption) {
     checkArgument(0 <= fromHeight, "First block height (%s) must be non-negative", fromHeight);
-    checkArgument(fromHeight <= toHeight,
+    checkArgument(
+        fromHeight <= toHeight,
         "First block height (%s) should be less than or equal to the last block height (%s)",
-        fromHeight, toHeight);
+        fromHeight,
+        toHeight);
 
     // 'maximum' as when skipping empty the actual might be way smaller
     int maxSize = Math.toIntExact(toHeight - fromHeight + 1);
@@ -186,23 +195,20 @@ class ExonumHttpClient implements ExonumClient {
       rangeLast = blocksResponse.getBlocksRangeStart() - 1;
     }
 
-    return postProcessResponseBlocks(fromHeight, toHeight, blocks)
-        .getBlocks();
+    return postProcessResponseBlocks(fromHeight, toHeight, blocks).getBlocks();
   }
 
   @Override
-  public BlocksRange getLastBlocks(int size, BlockFilteringOption blockFilter,
-      BlockTimeOption timeOption) {
-    checkArgument(0 < size,
-        "Requested blocks range size should be positive but was %s", size);
+  public BlocksRange getLastBlocks(
+      int size, BlockFilteringOption blockFilter, BlockTimeOption timeOption) {
+    checkArgument(0 < size, "Requested blocks range size should be positive but was %s", size);
 
     List<Block> blocks = new ArrayList<>(size);
     // The first request does not specify the maximum height to get the top blocks
     long blockchainHeight = Long.MIN_VALUE;
     Long nextHeight = null;
     int remainingBlocks = size;
-    while (remainingBlocks > 0
-        && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
+    while (remainingBlocks > 0 && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
       int numBlocks = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
       BlocksResponse blocksResponse = doGetBlocks(numBlocks, blockFilter, nextHeight, timeOption);
 
@@ -219,20 +225,18 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   /**
-   * Post-processes the blocks, coming from
-   * {@link #doGetBlocks(int, BlockFilteringOption, Long, BlockTimeOption)}:
-   * 1. Turns them in ascending order by height.
-   * 2. Keeps only blocks that fall in range [fromHeight; toHeight].
+   * Post-processes the blocks, coming from {@link #doGetBlocks(int, BlockFilteringOption, Long,
+   * BlockTimeOption)}: 1. Turns them in ascending order by height. 2. Keeps only blocks that fall
+   * in range [fromHeight; toHeight].
    */
-  private static BlocksRange postProcessResponseBlocks(long fromHeight, long toHeight,
-      List<Block> blocks) {
+  private static BlocksRange postProcessResponseBlocks(
+      long fromHeight, long toHeight, List<Block> blocks) {
     // Turn the blocks in ascending order
     blocks = Lists.reverse(blocks);
 
     // Filter the possible blocks that are out of the requested range
     // No Stream#dropWhile in Java 8 :(
-    int firstInRange = indexOf(blocks, b -> b.getHeight() >= fromHeight)
-        .orElse(blocks.size());
+    int firstInRange = indexOf(blocks, b -> b.getHeight() >= fromHeight).orElse(blocks.size());
     blocks = blocks.subList(firstInRange, blocks.size());
 
     // Do not bother trimming — BlocksRange copies the list
@@ -241,14 +245,13 @@ class ExonumHttpClient implements ExonumClient {
 
   @Override
   public List<Block> findNonEmptyBlocks(int numBlocks, BlockTimeOption timeOption) {
-    checkArgument(0 < numBlocks,
-        "Requested number of blocks should be positive but was %s", numBlocks);
+    checkArgument(
+        0 < numBlocks, "Requested number of blocks should be positive but was %s", numBlocks);
 
     List<Block> blocks = new ArrayList<>(numBlocks);
     Long nextHeight = null;
     int remainingBlocks = numBlocks;
-    while (remainingBlocks > 0
-        && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
+    while (remainingBlocks > 0 && (nextHeight == null || nextHeight >= GENESIS_BLOCK_HEIGHT)) {
       int numRequested = min(remainingBlocks, MAX_BLOCKS_PER_REQUEST);
       BlocksResponse blocksResponse = doGetBlocks(numRequested, SKIP_EMPTY, nextHeight, timeOption);
 
@@ -266,8 +269,7 @@ class ExonumHttpClient implements ExonumClient {
   public Block getLastBlock() {
     BlocksResponse response = doGetBlocks(1, INCLUDE_EMPTY, null, INCLUDE_COMMIT_TIME);
 
-    return response.getBlocks()
-        .stream()
+    return response.getBlocks().stream()
         .findFirst()
         .orElseThrow(() -> new AssertionError("Should never happen, response: " + response));
   }
@@ -276,16 +278,12 @@ class ExonumHttpClient implements ExonumClient {
   public Optional<Block> getLastNonEmptyBlock() {
     BlocksResponse response = doGetBlocks(1, SKIP_EMPTY, null, INCLUDE_COMMIT_TIME);
 
-    return response.getBlocks()
-        .stream()
-        .findFirst();
+    return response.getBlocks().stream().findFirst();
   }
 
   @Override
   public Optional<ServiceInstanceInfo> findServiceInfo(String serviceName) {
-    return getServiceInfoList().stream()
-        .filter(s -> s.getName().equals(serviceName))
-        .findFirst();
+    return getServiceInfoList().stream().filter(s -> s.getName().equals(serviceName)).findFirst();
   }
 
   @Override
@@ -295,13 +293,17 @@ class ExonumHttpClient implements ExonumClient {
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseServicesResponse);
   }
 
-  private BlocksResponse doGetBlocks(int count, BlockFilteringOption blockFilter, Long heightMax,
-      BlockTimeOption timeOption) {
-    checkArgument(count <= MAX_BLOCKS_PER_REQUEST,
+  private BlocksResponse doGetBlocks(
+      int count, BlockFilteringOption blockFilter, Long heightMax, BlockTimeOption timeOption) {
+    checkArgument(
+        count <= MAX_BLOCKS_PER_REQUEST,
         "Requested number of blocks was %s but maximum allowed is %s",
-        count, MAX_BLOCKS_PER_REQUEST);
-    checkArgument(heightMax == null || 0 <= heightMax,
-        "Blockchain height can't be negative but was %s", heightMax);
+        count,
+        MAX_BLOCKS_PER_REQUEST);
+    checkArgument(
+        heightMax == null || 0 <= heightMax,
+        "Blockchain height can't be negative but was %s",
+        heightMax);
 
     boolean skipEmpty = blockFilter == SKIP_EMPTY;
     boolean withTime = timeOption == INCLUDE_COMMIT_TIME;
@@ -314,23 +316,22 @@ class ExonumHttpClient implements ExonumClient {
     }
     Request request = get(url(BLOCKS, query));
 
-    return blockingExecute(request, response -> {
-      if (response.code() == HTTP_NOT_FOUND) {
-        String message = readBody(response);
-        throw new IllegalArgumentException(message);
-      } else if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't successful: " + response);
-      } else {
-        return ExplorerApiHelper.parseGetBlocksResponse(readBody(response));
-      }
-    });
+    return blockingExecute(
+        request,
+        response -> {
+          if (response.code() == HTTP_NOT_FOUND) {
+            String message = readBody(response);
+            throw new IllegalArgumentException(message);
+          } else if (!response.isSuccessful()) {
+            throw new RuntimeException("Execution wasn't successful: " + response);
+          } else {
+            return ExplorerApiHelper.parseGetBlocksResponse(readBody(response));
+          }
+        });
   }
 
   private static Request get(HttpUrl url) {
-    return new Request.Builder()
-        .url(url)
-        .get()
-        .build();
+    return new Request.Builder().url(url).get().build();
   }
 
   private static Request post(HttpUrl url, String jsonBody) {
@@ -357,12 +358,14 @@ class ExonumHttpClient implements ExonumClient {
   }
 
   private String blockingExecutePlainText(Request request) {
-    return blockingExecute(request, response -> {
-      if (!response.isSuccessful()) {
-        throw new RuntimeException("Execution wasn't successful: " + response.toString());
-      }
-      return readBody(response);
-    });
+    return blockingExecute(
+        request,
+        response -> {
+          if (!response.isSuccessful()) {
+            throw new RuntimeException("Execution wasn't successful: " + response.toString());
+          }
+          return readBody(response);
+        });
   }
 
   private <T> T blockingExecuteAndParse(Request request, Function<String, T> parser) {
@@ -377,5 +380,4 @@ class ExonumHttpClient implements ExonumClient {
       throw new RuntimeException(e);
     }
   }
-
 }

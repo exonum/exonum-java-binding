@@ -95,13 +95,13 @@ final class RelationshipTester<T> {
         }
         // check unrelated items in all other groups
         for (int unrelatedGroupNumber = 0;
-             unrelatedGroupNumber < groups.size();
-             unrelatedGroupNumber++) {
+            unrelatedGroupNumber < groups.size();
+            unrelatedGroupNumber++) {
           if (groupNumber != unrelatedGroupNumber) {
             ImmutableList<T> unrelatedGroup = groups.get(unrelatedGroupNumber);
             for (int unrelatedItemNumber = 0;
-                 unrelatedItemNumber < unrelatedGroup.size();
-                 unrelatedItemNumber++) {
+                unrelatedItemNumber < unrelatedGroup.size();
+                unrelatedItemNumber++) {
               assertUnrelated(groupNumber, itemNumber, unrelatedGroupNumber, unrelatedItemNumber);
             }
           }

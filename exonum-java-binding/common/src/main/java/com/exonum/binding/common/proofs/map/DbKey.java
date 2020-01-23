@@ -27,15 +27,16 @@ import java.util.BitSet;
  * A map proof database key.
  *
  * <p>It includes:
+ *
  * <ul>
- *   <li>Node type: a branch or a leaf</li>
- *   <li>The key to which the value is mapped for leaf nodes;
- *       the common prefix of keys in the left and right sub-trees for branch (= intermediate)
- *       nodes</li>
- *   <li>The size of the common prefix in branch nodes.</li>
+ *   <li>Node type: a branch or a leaf
+ *   <li>The key to which the value is mapped for leaf nodes; the common prefix of keys in the left
+ *       and right sub-trees for branch (= intermediate) nodes
+ *   <li>The size of the common prefix in branch nodes.
  * </ul>
  *
  * <p>The binary layout of the database key is the following:
+ *
  * <pre>
  *       Offset:   0           1 …                 32  33                   34
  * Database key: | node type | 32-byte long user key | common prefix size |
@@ -43,16 +44,12 @@ import java.util.BitSet;
  */
 public final class DbKey implements Comparable<DbKey> {
 
-  /**
-   * Type of the node in a Merkle-Patricia tree.
-   */
+  /** Type of the node in a Merkle-Patricia tree. */
   public enum Type {
     BRANCH(0),
     LEAF(1);
 
-    /**
-     * Branch type code, used as the first byte in a raw database key.
-     */
+    /** Branch type code, used as the first byte in a raw database key. */
     public final byte code;
 
     Type(int code) {
@@ -70,24 +67,16 @@ public final class DbKey implements Comparable<DbKey> {
     }
   }
 
-  /**
-   * Size of the user key in bytes.
-   */
+  /** Size of the user key in bytes. */
   public static final int KEY_SIZE = 32;
 
-  /**
-   * Size of the user key in bits.
-   */
+  /** Size of the user key in bits. */
   public static final int KEY_SIZE_BITS = KEY_SIZE * Byte.SIZE;
 
-  /**
-   * Size of the database key in bytes.
-   */
+  /** Size of the database key in bytes. */
   public static final int DB_KEY_SIZE = KEY_SIZE + 2;
 
-  /**
-   * Position of the user key in a database key.
-   */
+  /** Position of the user key in a database key. */
   private static final int KEY_START_POSITION = 1;
 
   private final byte[] rawDbKey;
@@ -110,22 +99,24 @@ public final class DbKey implements Comparable<DbKey> {
   }
 
   private DbKey(byte[] rawDbKey) {
-    checkArgument(rawDbKey.length == DB_KEY_SIZE,
-        "Database key has illegal size: %s", rawDbKey.length);
+    checkArgument(
+        rawDbKey.length == DB_KEY_SIZE, "Database key has illegal size: %s", rawDbKey.length);
     this.rawDbKey = rawDbKey.clone();
     nodeType = Type.from(rawDbKey[0]);
     keySlice = Arrays.copyOfRange(rawDbKey, KEY_START_POSITION, KEY_START_POSITION + KEY_SIZE);
     int numSignificantBits = Byte.toUnsignedInt(rawDbKey[DB_KEY_SIZE - 1]);
     switch (nodeType) {
       case BRANCH:
-        checkArgument(0 <= numSignificantBits && numSignificantBits < KEY_SIZE_BITS,
-            "Invalid end index: %s", numSignificantBits);
+        checkArgument(
+            0 <= numSignificantBits && numSignificantBits < KEY_SIZE_BITS,
+            "Invalid end index: %s",
+            numSignificantBits);
         checkBranchKeySlice(keySlice, numSignificantBits);
         this.numSignificantBits = numSignificantBits;
         break;
       case LEAF:
-        checkArgument(numSignificantBits == 0,
-            "Invalid last byte: %s, must be zero" + numSignificantBits);
+        checkArgument(
+            numSignificantBits == 0, "Invalid last byte: %s, must be zero" + numSignificantBits);
         this.numSignificantBits = KEY_SIZE_BITS;
         break;
       default:
@@ -140,20 +131,16 @@ public final class DbKey implements Comparable<DbKey> {
     this.rawDbKey = new byte[DB_KEY_SIZE];
     rawDbKey[0] = nodeType.code;
     System.arraycopy(keySlice, 0, rawDbKey, KEY_START_POSITION, KEY_SIZE);
-    rawDbKey[DB_KEY_SIZE - 1] = (numSignificantBits == KEY_SIZE_BITS) ? 0
-        : UnsignedBytes.checkedCast(numSignificantBits);
+    rawDbKey[DB_KEY_SIZE - 1] =
+        (numSignificantBits == KEY_SIZE_BITS) ? 0 : UnsignedBytes.checkedCast(numSignificantBits);
   }
 
-  /**
-   * Given key as a ByteString, returns new leaf DbKey.
-   */
+  /** Given key as a ByteString, returns new leaf DbKey. */
   public static DbKey newLeafKey(ByteString key) {
     return newLeafKey(key.toByteArray());
   }
 
-  /**
-   * Given key as a byte array, returns new leaf DbKey.
-   */
+  /** Given key as a byte array, returns new leaf DbKey. */
   public static DbKey newLeafKey(byte[] keySlice) {
     checkArgument(keySlice.length == KEY_SIZE);
     return new DbKey(Type.LEAF, keySlice, KEY_SIZE_BITS);
@@ -161,10 +148,11 @@ public final class DbKey implements Comparable<DbKey> {
 
   /**
    * Creates a new branch database key.
+   *
    * @param keySlice key as a byte array, must be 32-byte long
    * @param numSignificantBits the number of significant bits in the key (= the prefix size)
-   * @throws IllegalArgumentException if key has invalid length or contains set bits
-   *     after the prefix; if numSignificantBits is not in range [0, 255]
+   * @throws IllegalArgumentException if key has invalid length or contains set bits after the
+   *     prefix; if numSignificantBits is not in range [0, 255]
    */
   public static DbKey newBranchKey(byte[] keySlice, int numSignificantBits) {
     checkArgument(keySlice.length == KEY_SIZE);
@@ -175,14 +163,16 @@ public final class DbKey implements Comparable<DbKey> {
 
   private static void checkBranchKeySlice(byte[] keySlice, int numSignificantBits) {
     BitSet keyBits = BitSet.valueOf(keySlice);
-    checkArgument(keyBits.length() <= numSignificantBits,
+    checkArgument(
+        keyBits.length() <= numSignificantBits,
         "Branch key slice contains set bits after its numSignificantBits (%s): "
-            + "length=%s, keyBits=%s", numSignificantBits, keyBits.length(), keyBits);
+            + "length=%s, keyBits=%s",
+        numSignificantBits,
+        keyBits.length(),
+        keyBits);
   }
 
-  /**
-   * Returns the type of the Merkle-Patricia tree node corresponding to this database key.
-   */
+  /** Returns the type of the Merkle-Patricia tree node corresponding to this database key. */
   public Type getNodeType() {
     return nodeType;
   }
@@ -195,9 +185,7 @@ public final class DbKey implements Comparable<DbKey> {
     return keySlice;
   }
 
-  /**
-   * Returns the number of significant bits in the key slice.
-   */
+  /** Returns the number of significant bits in the key slice. */
   public int getNumSignificantBits() {
     return numSignificantBits;
   }
@@ -206,16 +194,14 @@ public final class DbKey implements Comparable<DbKey> {
     return rawDbKey;
   }
 
-  /**
-   * Returns a key as a bit set.
-   */
+  /** Returns a key as a bit set. */
   public KeyBitSet keyBits() {
     return new KeyBitSet(keySlice, numSignificantBits);
   }
 
   /**
-   * Returns new branch DbKey (unless common prefix of two equals DbKeys is requested, in which
-   * case this DbKey itself is returned), which is a common prefix of this and another DbKey.
+   * Returns new branch DbKey (unless common prefix of two equals DbKeys is requested, in which case
+   * this DbKey itself is returned), which is a common prefix of this and another DbKey.
    */
   public DbKey commonPrefix(DbKey other) {
     if (other.equals(this)) {
@@ -238,9 +224,7 @@ public final class DbKey implements Comparable<DbKey> {
     return newBranchKey(newKeySlice, commonPrefixSize);
   }
 
-  /**
-   * Returns true if this {@code DbKey} is a prefix of that {@code DbKey}.
-   */
+  /** Returns true if this {@code DbKey} is a prefix of that {@code DbKey}. */
   public boolean isPrefixOf(DbKey other) {
     return this.keyBits().isPrefixOf(other.keyBits());
   }
@@ -263,12 +247,11 @@ public final class DbKey implements Comparable<DbKey> {
   }
 
   /**
-   * The following algorithm is used for comparison:
-   * Try to find a first bit index at which this key is greater than the other key (i.e., a bit of
-   * this key is 1 and the corresponding bit of the other key is 0), and vice versa. The smaller of
-   * these indexes indicates the greater key.
-   * If there is no such bit, then lengths of these keys are compared and the key with greater
-   * length is considered a greater key.
+   * The following algorithm is used for comparison: Try to find a first bit index at which this key
+   * is greater than the other key (i.e., a bit of this key is 1 and the corresponding bit of the
+   * other key is 0), and vice versa. The smaller of these indexes indicates the greater key. If
+   * there is no such bit, then lengths of these keys are compared and the key with greater length
+   * is considered a greater key.
    */
   @Override
   public int compareTo(DbKey other) {

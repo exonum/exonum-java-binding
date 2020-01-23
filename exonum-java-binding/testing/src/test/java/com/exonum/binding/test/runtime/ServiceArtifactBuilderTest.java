@@ -59,9 +59,7 @@ class ServiceArtifactBuilderTest {
   @Test
   void createArtifactSingleClass() throws IOException {
     Class<TestService> testClass = TestService.class;
-    new ServiceArtifactBuilder()
-        .addClass(testClass)
-        .writeTo(jarPath);
+    new ServiceArtifactBuilder().addClass(testClass).writeTo(jarPath);
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
@@ -71,14 +69,11 @@ class ServiceArtifactBuilderTest {
   @Test
   void createArtifactSingleInnerClass() throws IOException {
     Class<Inner> testClass = Inner.class;
-    new ServiceArtifactBuilder()
-        .addClass(testClass)
-        .writeTo(jarPath);
+    new ServiceArtifactBuilder().addClass(testClass).writeTo(jarPath);
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
-    assertThat(allJarEntries)
-        .containsEntry(getPath(testClass), readClass(testClass));
+    assertThat(allJarEntries).containsEntry(getPath(testClass), readClass(testClass));
   }
 
   @Test
@@ -90,18 +85,20 @@ class ServiceArtifactBuilderTest {
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
-    assertThat(allJarEntries).containsAllEntriesOf(ImmutableMap.of(
-            getPath(TestService.class), readClass(TestService.class),
-            getPath(Bytes.class), readClass(Bytes.class),
-            getPath(ImmutableList.class), readClass(ImmutableList.class)));
+    assertThat(allJarEntries)
+        .containsAllEntriesOf(
+            ImmutableMap.of(
+                getPath(TestService.class), readClass(TestService.class),
+                getPath(Bytes.class), readClass(Bytes.class),
+                getPath(ImmutableList.class), readClass(ImmutableList.class)));
   }
 
   @Test
   void createArtifactIllegalClass() {
     ServiceArtifactBuilder builder = new ServiceArtifactBuilder();
     assertThrows(IllegalArgumentException.class, () -> builder.addClass(int.class));
-    assertThrows(IllegalArgumentException.class, () -> builder.addClasses(TestService.class,
-        int.class));
+    assertThrows(
+        IllegalArgumentException.class, () -> builder.addClasses(TestService.class, int.class));
     assertThrows(IllegalArgumentException.class, () -> builder.addClasses(TestService[].class));
   }
 
@@ -114,35 +111,33 @@ class ServiceArtifactBuilderTest {
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
-    assertThat(allJarEntries).containsAllEntriesOf(ImmutableMap.of(
-        getPath(TestService.class), readClass(TestService.class),
-        getPath(ImmutableList.class), readClass(ImmutableList.class)));
+    assertThat(allJarEntries)
+        .containsAllEntriesOf(
+            ImmutableMap.of(
+                getPath(TestService.class), readClass(TestService.class),
+                getPath(ImmutableList.class), readClass(ImmutableList.class)));
 
     assertThat(allJarEntries).containsKey(EXTENSIONS_INDEX_NAME);
     String allExtensions = getExtensionsIndex(allJarEntries);
 
-    String expectedExtensions = TestService.class.getName() + "\n"
-        + ImmutableList.class.getName() + "\n";
+    String expectedExtensions =
+        TestService.class.getName() + "\n" + ImmutableList.class.getName() + "\n";
     assertThat(allExtensions).isEqualTo(expectedExtensions);
   }
 
   @Test
   void createArtifactEmptyExtensions() throws IOException {
-    new ServiceArtifactBuilder()
-        .writeTo(jarPath);
+    new ServiceArtifactBuilder().writeTo(jarPath);
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
-    assertThat(allJarEntries).containsAllEntriesOf(ImmutableMap.of(
-        EXTENSIONS_INDEX_NAME, new byte[0]));
+    assertThat(allJarEntries)
+        .containsAllEntriesOf(ImmutableMap.of(EXTENSIONS_INDEX_NAME, new byte[0]));
   }
 
   @Test
   void createArtifactSeveralExtensions() throws IOException {
-    new ServiceArtifactBuilder()
-        .addExtensionEntry("e1")
-        .addExtensionEntry("e2")
-        .writeTo(jarPath);
+    new ServiceArtifactBuilder().addExtensionEntry("e1").addExtensionEntry("e2").writeTo(jarPath);
 
     Map<String, byte[]> allJarEntries = readJarEntries(jarPath);
 
@@ -224,14 +219,13 @@ class ServiceArtifactBuilderTest {
   }
 
   private static Manifest readJarManifest(Path jarPath) throws IOException {
-    try (JarInputStream in = new JarInputStream(new BufferedInputStream(
-        new FileInputStream(jarPath.toFile())))) {
+    try (JarInputStream in =
+        new JarInputStream(new BufferedInputStream(new FileInputStream(jarPath.toFile())))) {
       return in.getManifest();
     }
   }
 
   private String getExtensionsIndex(Map<String, byte[]> allJarEntries) {
-    return new String(allJarEntries.get(EXTENSIONS_INDEX_NAME),
-        StandardCharsets.UTF_8);
+    return new String(allJarEntries.get(EXTENSIONS_INDEX_NAME), StandardCharsets.UTF_8);
   }
 }

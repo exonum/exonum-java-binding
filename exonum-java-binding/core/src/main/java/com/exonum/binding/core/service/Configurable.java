@@ -19,19 +19,18 @@ package com.exonum.binding.core.service;
 import com.exonum.binding.core.storage.database.Fork;
 
 /**
- * A configurable Exonum service. Allows services to update their configuration through
- * the supervisor service during their operation.
+ * A configurable Exonum service. Allows services to update their configuration through the
+ * supervisor service during their operation.
  *
- * <p>The configuration update process includes the following steps: a proposal
- * of a new configuration; verification of its correctness; approval of the proposal;
- * and application of the new configuration. The protocol of the proposal and approval steps
- * is determined by the installed supervisor service. The verification and application
- * of the parameters are implemented by the service with
- * {@link #verifyConfiguration(Fork, Configuration)}
- * and {@link #applyConfiguration(Fork, Configuration)} methods.
+ * <p>The configuration update process includes the following steps: a proposal of a new
+ * configuration; verification of its correctness; approval of the proposal; and application of the
+ * new configuration. The protocol of the proposal and approval steps is determined by the installed
+ * supervisor service. The verification and application of the parameters are implemented by the
+ * service with {@link #verifyConfiguration(Fork, Configuration)} and {@link
+ * #applyConfiguration(Fork, Configuration)} methods.
  *
- * <p>Services may use the same configuration parameters as
- * in {@link Service#initialize(Fork, Configuration)}, or different.
+ * <p>Services may use the same configuration parameters as in {@link Service#initialize(Fork,
+ * Configuration)}, or different.
  * <!--
  * TODO: Link the appropriate documentation section on updating the service configuration
  *   through the supervisor when it becomes available (ideally, on the site; or in published
@@ -43,23 +42,23 @@ public interface Configurable {
   /**
    * Verifies the correctness of the proposed configuration.
    *
-   * <p>This method is called when a new configuration is proposed. If the proposed
-   * configuration is correct, this method shall return with no changes to the service data.
-   * If it is not valid, this method shall throw an exception.
+   * <p>This method is called when a new configuration is proposed. If the proposed configuration is
+   * correct, this method shall return with no changes to the service data. If it is not valid, this
+   * method shall throw an exception.
    *
    * @param fork an access object representing the current database state
    * @param configuration a proposed configuration
-   * @throws com.exonum.binding.core.transaction.ExecutionException if the proposed configuration
-   *     is not valid to prevent the configuration application
+   * @throws com.exonum.binding.core.transaction.ExecutionException if the proposed configuration is
+   *     not valid to prevent the configuration application
    */
   void verifyConfiguration(Fork fork, Configuration configuration);
 
   /**
-   * Applies the given configuration to this service. The configuration is guaranteed to be
-   * valid according to {@link #verifyConfiguration(Fork, Configuration)}.
+   * Applies the given configuration to this service. The configuration is guaranteed to be valid
+   * according to {@link #verifyConfiguration(Fork, Configuration)}.
    *
-   * <p>The implementation shall make any changes to the service persistent state to apply
-   * the new configuration, because the supervisor does <em>not</em> store them for later retrieval.
+   * <p>The implementation shall make any changes to the service persistent state to apply the new
+   * configuration, because the supervisor does <em>not</em> store them for later retrieval.
    *
    * @param fork a fork to which to apply changes
    * @param configuration a new valid configuration

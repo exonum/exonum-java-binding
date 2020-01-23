@@ -27,9 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 @RequiresNativeLibrary
 abstract class BaseIndexGroupTestable {
 
-  /**
-   * A default cleaner for a test case.
-   */
+  /** A default cleaner for a test case. */
   Cleaner cleaner;
 
   TemporaryDb db;
@@ -42,9 +40,7 @@ abstract class BaseIndexGroupTestable {
 
   @AfterEach
   public void tearDown() {
-    Stream.of(cleaner, db)
-        .filter(Objects::nonNull)
-        .forEach(BaseIndexGroupTestable::close);
+    Stream.of(cleaner, db).filter(Objects::nonNull).forEach(BaseIndexGroupTestable::close);
   }
 
   private static void close(AutoCloseable o) {

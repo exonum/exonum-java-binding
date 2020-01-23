@@ -36,9 +36,7 @@ import com.google.protobuf.ByteString;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-/** 
- * Skeleton implementation of {@link HashFunction} in terms of {@link #newHasher()}.
- */
+/** Skeleton implementation of {@link HashFunction} in terms of {@link #newHasher()}. */
 abstract class AbstractHashFunction implements HashFunction {
   @Override
   public <T> HashCode hashObject(T instance, Funnel<? super T> funnel) {

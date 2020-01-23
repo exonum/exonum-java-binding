@@ -21,9 +21,7 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.OptionalInt;
 
-/**
- * Context of the TestKit emulated node, i.e., on which it instantiates and executes services.
- */
+/** Context of the TestKit emulated node, i.e., on which it instantiates and executes services. */
 public class EmulatedNode {
 
   private final OptionalInt validatorId;
@@ -37,31 +35,29 @@ public class EmulatedNode {
    * @param serviceKeyPair service key pair of the node
    */
   public EmulatedNode(int validatorId, KeyPair serviceKeyPair) {
-    this.validatorId = validatorId >= 0
-        ? OptionalInt.of(validatorId)
-        : OptionalInt.empty();
+    this.validatorId = validatorId >= 0 ? OptionalInt.of(validatorId) : OptionalInt.empty();
     this.serviceKeyPair = serviceKeyPair;
   }
 
   /**
-   * Returns a node type - either {@link EmulatedNodeType#VALIDATOR} or
-   * {@link EmulatedNodeType#AUDITOR}.
+   * Returns a node type - either {@link EmulatedNodeType#VALIDATOR} or {@link
+   * EmulatedNodeType#AUDITOR}.
    */
   public EmulatedNodeType getNodeType() {
     return validatorId.isPresent() ? EmulatedNodeType.VALIDATOR : EmulatedNodeType.AUDITOR;
   }
 
   /**
-   * Returns a validator id if this node is a validator or {@link OptionalInt#empty()} if this is
-   * an auditor node.
+   * Returns a validator id if this node is a validator or {@link OptionalInt#empty()} if this is an
+   * auditor node.
    */
   public OptionalInt getValidatorId() {
     return validatorId;
   }
 
   /**
-   * Returns a service key pair of this node. This key pair is used to sign transactions
-   * {@linkplain Node#submitTransaction(RawTransaction)} produced} by the service itself.
+   * Returns a service key pair of this node. This key pair is used to sign transactions {@linkplain
+   * Node#submitTransaction(RawTransaction)} produced} by the service itself.
    */
   public KeyPair getServiceKeyPair() {
     return serviceKeyPair;

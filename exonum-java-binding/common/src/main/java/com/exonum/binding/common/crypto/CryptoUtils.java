@@ -18,9 +18,7 @@ package com.exonum.binding.common.crypto;
 
 import com.google.common.io.BaseEncoding;
 
-/**
- * Utils for crypto system.
- */
+/** Utils for crypto system. */
 class CryptoUtils {
 
   private static final BaseEncoding HEX_ENCODING = BaseEncoding.base16().lowerCase();
@@ -54,6 +52,5 @@ class CryptoUtils {
     return HEX_ENCODING.encode(bytes);
   }
 
-  private CryptoUtils() {
-  }
+  private CryptoUtils() {}
 }

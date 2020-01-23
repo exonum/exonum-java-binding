@@ -31,5 +31,4 @@ enum PublicKeySerializer implements Serializer<PublicKey> {
   public PublicKey fromBytes(byte[] serializedValue) {
     return PublicKey.fromBytes(serializedValue);
   }
-
 }

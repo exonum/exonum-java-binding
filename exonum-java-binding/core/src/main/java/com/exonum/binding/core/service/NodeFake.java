@@ -32,8 +32,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * An implementation of a Node interface for testing purposes.
- * Use it in tests of your handlers that need some data in the database:
+ * An implementation of a Node interface for testing purposes. Use it in tests of your handlers that
+ * need some data in the database:
  *
  * <pre><code>
  * try (TemporaryDb db = TemporaryDb.newInstance();
@@ -111,9 +111,7 @@ public final class NodeFake implements Node {
     return publicKey;
   }
 
-  /**
-   * Returns the underlying database.
-   */
+  /** Returns the underlying database. */
   public TemporaryDb getDatabase() {
     return database;
   }
@@ -122,5 +120,4 @@ public final class NodeFake implements Node {
   public void close() {
     // do nothing
   }
-
 }

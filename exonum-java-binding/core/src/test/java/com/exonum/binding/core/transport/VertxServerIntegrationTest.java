@@ -149,9 +149,11 @@ class VertxServerIntegrationTest {
       // Define a request handler.
       Router r = server.createRouter();
       String body = "/s1/foo handler";
-      r.get("/foo").handler((rc) -> {
-        rc.response().end(body);
-      });
+      r.get("/foo")
+          .handler(
+              (rc) -> {
+                rc.response().end(body);
+              });
       server.mountSubRouter("/s1", r);
 
       // Create a web client.
@@ -163,8 +165,7 @@ class VertxServerIntegrationTest {
           new CompletableFuture<>();
 
       // Send an asynchronous GET request, that will put the response into the future.
-      client.get(port, "localhost", "/s1/foo")
-          .send(futureResponse::complete);
+      client.get(port, "localhost", "/s1/foo").send(futureResponse::complete);
 
       AsyncResult<HttpResponse<Buffer>> ar = futureResponse.get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
       if (ar.succeeded()) {
@@ -210,8 +211,7 @@ class VertxServerIntegrationTest {
 
       String routePath1 = "/foo";
       Router router1 = server.createRouter();
-      router1.get("/bar").handler(h -> {
-      });
+      router1.get("/bar").handler(h -> {});
       server.mountSubRouter(routePath1, router1);
 
       String routePath2 = "/foo/bar";
@@ -237,21 +237,16 @@ class VertxServerIntegrationTest {
     return route.getPath().equals(path);
   }
 
-  /**
-   * A blocking server stop, so that asynchronous exceptions are not hidden.
-   */
+  /** A blocking server stop, so that asynchronous exceptions are not hidden. */
   private void blockingStop() throws InterruptedException, ExecutionException, TimeoutException {
     Future<Void> f = server.stop();
     f.get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
   }
 
-  /**
-   * Returns random available local port.
-   */
+  /** Returns random available local port. */
   private int findFreePort() throws IOException {
     try (ServerSocket socket = new ServerSocket(ANY_PORT)) {
       return socket.getLocalPort();
     }
   }
-
 }

@@ -29,8 +29,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Objects;
 
 /**
- * A parsed transaction message. On instantiation, it decodes the signed message payload
- * as an Exonum transaction.
+ * A parsed transaction message. On instantiation, it decodes the signed message payload as an
+ * Exonum transaction.
  */
 final class ParsedTransactionMessage implements TransactionMessage {
 
@@ -42,6 +42,7 @@ final class ParsedTransactionMessage implements TransactionMessage {
 
   /**
    * Creates a transaction message from the signed message.
+   *
    * @param signedMessage a signed exonum transaction message
    * @throws IllegalArgumentException if the signed message does not contain an Exonum transaction
    *     message
@@ -57,8 +58,10 @@ final class ParsedTransactionMessage implements TransactionMessage {
 
     // Decode the transaction
     ExonumMessage payload = parsedMessage.getPayload();
-    checkArgument(payload.hasAnyTx(), "SignedMessage does not contain a transaction "
-        + "in its payload but %s", payload.getKindCase());
+    checkArgument(
+        payload.hasAnyTx(),
+        "SignedMessage does not contain a transaction " + "in its payload but %s",
+        payload.getKindCase());
 
     this.tx = payload.getAnyTx();
   }
@@ -129,4 +132,3 @@ final class ParsedTransactionMessage implements TransactionMessage {
     return Objects.hash(signedMessage);
   }
 }
-

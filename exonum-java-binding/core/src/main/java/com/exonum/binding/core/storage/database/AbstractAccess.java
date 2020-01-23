@@ -38,9 +38,10 @@ import java.util.function.Supplier;
  * Represents an access to the database.
  *
  * <p>There are two sub-types:
+ *
  * <ul>
- *   <li>A snapshot, which is a <em>read-only</em> and immutable access.</li>
- *   <li>A fork, which is a <em>read-write</em> access.</li>
+ *   <li>A snapshot, which is a <em>read-only</em> and immutable access.
+ *   <li>A fork, which is a <em>read-write</em> access.
  * </ul>
  *
  * @see Snapshot
@@ -65,68 +66,81 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
   public <E> ProofListIndexProxy<E> getProofList(IndexAddress address, Serializer<E> serializer) {
-    return findOrCreate(address, ProofListIndexProxy.class,
+    return findOrCreate(
+        address,
+        ProofListIndexProxy.class,
         () -> ProofListIndexProxy.newInstance(address, this, serializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
   public <E> ListIndexProxy<E> getList(IndexAddress address, Serializer<E> serializer) {
-    return findOrCreate(address, ListIndexProxy.class,
-        () -> ListIndexProxy.newInstance(address, this, serializer));
+    return findOrCreate(
+        address, ListIndexProxy.class, () -> ListIndexProxy.newInstance(address, this, serializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
-  public <K, V> ProofMapIndexProxy<K, V> getProofMap(IndexAddress address,
-      Serializer<K> keySerializer, Serializer<V> valueSerializer) {
-    return findOrCreate(address, ProofMapIndexProxy.class,
-        () -> ProofMapIndexProxy.newInstance(address, this, keySerializer,
-            valueSerializer));
+  public <K, V> ProofMapIndexProxy<K, V> getProofMap(
+      IndexAddress address, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return findOrCreate(
+        address,
+        ProofMapIndexProxy.class,
+        () -> ProofMapIndexProxy.newInstance(address, this, keySerializer, valueSerializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
-  public <K, V> ProofMapIndexProxy<K, V> getRawProofMap(IndexAddress address,
-      Serializer<K> keySerializer, Serializer<V> valueSerializer) {
-    return findOrCreate(address, ProofMapIndexProxy.class,
-        () -> ProofMapIndexProxy.newInstanceNoKeyHashing(address, this, keySerializer,
-            valueSerializer));
+  public <K, V> ProofMapIndexProxy<K, V> getRawProofMap(
+      IndexAddress address, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return findOrCreate(
+        address,
+        ProofMapIndexProxy.class,
+        () ->
+            ProofMapIndexProxy.newInstanceNoKeyHashing(
+                address, this, keySerializer, valueSerializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
-  public <K, V> MapIndexProxy<K, V> getMap(IndexAddress address, Serializer<K> keySerializer,
-      Serializer<V> valueSerializer) {
-    return findOrCreate(address, MapIndexProxy.class,
+  public <K, V> MapIndexProxy<K, V> getMap(
+      IndexAddress address, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return findOrCreate(
+        address,
+        MapIndexProxy.class,
         () -> MapIndexProxy.newInstance(address, this, keySerializer, valueSerializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
   public <E> KeySetIndexProxy<E> getKeySet(IndexAddress address, Serializer<E> serializer) {
-    return findOrCreate(address, KeySetIndexProxy.class,
+    return findOrCreate(
+        address,
+        KeySetIndexProxy.class,
         () -> KeySetIndexProxy.newInstance(address, this, serializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
   public <E> ValueSetIndexProxy<E> getValueSet(IndexAddress address, Serializer<E> serializer) {
-    return findOrCreate(address, ValueSetIndexProxy.class,
+    return findOrCreate(
+        address,
+        ValueSetIndexProxy.class,
         () -> ValueSetIndexProxy.newInstance(address, this, serializer));
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
   public <E> ProofEntryIndexProxy<E> getProofEntry(IndexAddress address, Serializer<E> serializer) {
-    return findOrCreate(address, ProofEntryIndexProxy.class,
+    return findOrCreate(
+        address,
+        ProofEntryIndexProxy.class,
         () -> ProofEntryIndexProxy.newInstance(address, this, serializer));
   }
 
-  private <T extends StorageIndex> T findOrCreate(IndexAddress address, Class<T> indexType,
-      Supplier<T> indexSupplier) {
-    return findOpenIndex(address, indexType)
-        .orElseGet(() -> createIndex(indexSupplier));
+  private <T extends StorageIndex> T findOrCreate(
+      IndexAddress address, Class<T> indexType, Supplier<T> indexSupplier) {
+    return findOpenIndex(address, indexType).orElseGet(() -> createIndex(indexSupplier));
   }
 
   /**
@@ -134,14 +148,13 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    *
    * @param address the index address
    * @param indexType the requested index type
-   * @return an index with the given address; or {@code Optional.empty()} if no index
-   *     with such address was open in this access
+   * @return an index with the given address; or {@code Optional.empty()} if no index with such
+   *     address was open in this access
    * @throws IllegalArgumentException if the open index has a different type from the requested
    */
-  private <T extends StorageIndex> Optional<T> findOpenIndex(IndexAddress address,
-      Class<T> indexType) {
-    return indexRegistry.findIndex(address)
-        .map(index -> checkedCast(index, indexType));
+  private <T extends StorageIndex> Optional<T> findOpenIndex(
+      IndexAddress address, Class<T> indexType) {
+    return indexRegistry.findIndex(address).map(index -> checkedCast(index, indexType));
   }
 
   /**
@@ -149,14 +162,18 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    *
    * @param cachedIndex a cached index
    * @param requestedIndexType a index type requested for the index address
-   * @throws IllegalArgumentException if the type of the cached index does not match the
-   *     requested index type
+   * @throws IllegalArgumentException if the type of the cached index does not match the requested
+   *     index type
    */
-  private static <IndexT extends StorageIndex> IndexT checkedCast(StorageIndex cachedIndex,
-      Class<IndexT> requestedIndexType) {
-    checkArgument(requestedIndexType.isInstance(cachedIndex),
+  private static <IndexT extends StorageIndex> IndexT checkedCast(
+      StorageIndex cachedIndex, Class<IndexT> requestedIndexType) {
+    checkArgument(
+        requestedIndexType.isInstance(cachedIndex),
         "Cannot create index of type %s: the index with such address (%s) was already created"
-            + "of another type (%s)", requestedIndexType, cachedIndex.getAddress(), cachedIndex);
+            + "of another type (%s)",
+        requestedIndexType,
+        cachedIndex.getAddress(),
+        cachedIndex);
     return requestedIndexType.cast(cachedIndex);
   }
 
@@ -166,9 +183,7 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
     return newIndex;
   }
 
-  /**
-   * Registers a new index created with this access.
-   */
+  /** Registers a new index created with this access. */
   private void registerIndex(StorageIndex index) {
     indexRegistry.registerIndex(index);
   }
@@ -176,8 +191,8 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
   /**
    * Clears the registry of open indexes.
    *
-   * <p>This operation does not destroy the indexes in the registry, therefore,
-   * if it might be needed to access them again, they must be destroyed separately.
+   * <p>This operation does not destroy the indexes in the registry, therefore, if it might be
+   * needed to access them again, they must be destroyed separately.
    */
   void clearOpenIndexes() {
     indexRegistry.clear();
@@ -194,8 +209,8 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
   }
 
   /**
-   * Returns the cleaner of this access. It is supposed to be used with collections
-   * and other objects depending on this access.
+   * Returns the cleaner of this access. It is supposed to be used with collections and other
+   * objects depending on this access.
    */
   public abstract Cleaner getCleaner();
 }

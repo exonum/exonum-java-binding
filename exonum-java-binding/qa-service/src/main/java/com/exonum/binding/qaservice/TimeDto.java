@@ -20,9 +20,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import java.time.ZonedDateTime;
 
-/**
- * DTO class for JSON view.
- */
+/** DTO class for JSON view. */
 final class TimeDto {
   private final ZonedDateTime time;
 
@@ -53,8 +51,6 @@ final class TimeDto {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("time", time)
-        .toString();
+    return MoreObjects.toStringHelper(this).add("time", time).toString();
   }
 }

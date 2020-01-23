@@ -31,9 +31,7 @@ import com.exonum.binding.time.TimeSchema;
 /**
  * A schema of the QA service.
  *
- * <p>Has two collections:
- * (a) values of the counters (Merkelized),
- * (b) names of the counters.
+ * <p>Has two collections: (a) values of the counters (Merkelized), (b) names of the counters.
  */
 public final class QaSchema implements Schema {
 
@@ -46,17 +44,15 @@ public final class QaSchema implements Schema {
     namespace = serviceName;
   }
 
-  /**
-   * Returns the index containing the name of the time oracle to use.
-   */
+  /** Returns the index containing the name of the time oracle to use. */
   public ProofEntryIndexProxy<String> timeOracleName() {
     IndexAddress address = fullIndexAddress("time_oracle_name");
     return access.getProofEntry(address, StandardSerializers.string());
   }
 
   /**
-   * Returns the time schema of the time oracle this qa service uses.
-   * {@link #timeOracleName()} must be non-empty.
+   * Returns the time schema of the time oracle this qa service uses. {@link #timeOracleName()} must
+   * be non-empty.
    */
   public TimeSchema timeSchema() {
     return TimeSchema.newInstance(access, timeOracleName().get());
@@ -70,9 +66,7 @@ public final class QaSchema implements Schema {
     return access.getRawProofMap(address, StandardSerializers.hash(), StandardSerializers.uint64());
   }
 
-  /**
-   * Returns a map of counter names.
-   */
+  /** Returns a map of counter names. */
   public MapIndex<HashCode, String> counterNames() {
     IndexAddress address = fullIndexAddress("counterNames");
     return access.getMap(address, StandardSerializers.hash(), StandardSerializers.string());
