@@ -61,8 +61,8 @@ public interface Service {
    * parameters, deprecate old entries etc.
    *
    * <p>Also, note that performing any bulk operations or data migration
-   * <em>is not recommended</em> here. This method is supposed to make thin data changes i.e.
-   * ad-hoc migrations, single row updates etc.
+   * <em>is not recommended</em> here, because this method is invoked synchronously
+   * when the block is committed.
    * <!--TODO: Add a link to the migration procedure -->
    *
    * @param fork a database fork to apply changes to. Not valid after this method returns
