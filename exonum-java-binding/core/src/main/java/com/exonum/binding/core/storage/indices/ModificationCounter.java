@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 
 /**
  * A counter of modification events of some objects (e.g., a collection, or a database access).
@@ -58,7 +58,7 @@ interface ModificationCounter {
    * @param access a database access on which the collection needing the modification counter
    *     is based
    */
-  static ModificationCounter forView(AbstractAccess access) {
+  static ModificationCounter forAccess(Access access) {
     if (access.canModify()) {
       return new IncrementalModificationCounter();
     } else {

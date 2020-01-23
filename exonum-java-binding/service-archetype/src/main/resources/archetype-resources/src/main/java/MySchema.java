@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * {@code MySchema} provides access to the tables of {@link MyService},
- * given a database state: an {@link Access}.
+ * given a database state {@linkplain Access access object}.
  *
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/storage/#table-types">Exonum table types.</a>
  */

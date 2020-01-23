@@ -18,7 +18,6 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
-import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesAbsence;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
@@ -34,7 +33,6 @@ import static org.hamcrest.core.IsNot.not;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.core.messages.ListProofOuterClass;
@@ -62,18 +60,17 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Override
   ProofListIndexProxy<String> create(String name, Access access) {
-    return access.getProofList(valueOf(name), string());
+    return access.getProofList(IndexAddress.valueOf(name), string());
   }
 
   @Override
   ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
-    return access.getProofList(IndexAddress.valueOf(groupName, idInGroup),
-        StandardSerializers.string());
+    return access.getProofList(IndexAddress.valueOf(groupName, idInGroup), string());
   }
 
   @Override
   StorageIndex createOfOtherType(String name, Access access) {
-    return access.getList(valueOf(name), string());
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   @Override
@@ -165,7 +162,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   private static ListProofEntry listProofEntry(long index, String element) {
-    Serializer<String> serializer = StandardSerializers.string();
+    Serializer<String> serializer = string();
     return ListProofEntry.newBuilder()
         .setIndex(index)
         .setValue(ByteString.copyFrom(serializer.toBytes(element)))

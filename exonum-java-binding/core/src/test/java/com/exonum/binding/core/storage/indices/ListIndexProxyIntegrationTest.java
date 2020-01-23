@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
-import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -31,7 +30,7 @@ class ListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
   @Override
   ListIndexProxy<String> create(String name, Access access) {
-    return access.getList(valueOf(name), string());
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   @Override

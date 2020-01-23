@@ -25,7 +25,7 @@ import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 
 /**
- * A fork is a database access, allowing both read and write operations.
+ * A fork is a database access object, allowing both read and write operations.
  *
  * <p>A fork represents the database state at the time it was created <em>plus</em> any changes
  * to the database made using this fork.

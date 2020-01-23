@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.database;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
-import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
@@ -28,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.TestStorageItems;
@@ -159,12 +159,10 @@ class TemporaryDbIntegrationTest {
   }
 
   private static ListIndex<String> newList(String name, Access access) {
-    return access.getList(valueOf(name),
-        string());
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   private static MapIndex<String, String> newMap(String name, Access access) {
-    return access.getMap(valueOf(name),
-        string(), string());
+    return access.getMap(IndexAddress.valueOf(name), string(), string());
   }
 }

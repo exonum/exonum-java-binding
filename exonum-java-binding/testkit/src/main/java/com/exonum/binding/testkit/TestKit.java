@@ -239,8 +239,8 @@ public final class TestKit extends AbstractCloseableNativeProxy {
    * Returns a list of in-pool transactions that match the given predicate.
    */
   public List<TransactionMessage> findTransactionsInPool(Predicate<TransactionMessage> predicate) {
-    return applySnapshot((access) -> {
-      Blockchain blockchain = Blockchain.newInstance(access);
+    return applySnapshot((snapshot) -> {
+      Blockchain blockchain = Blockchain.newInstance(snapshot);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
       KeySetIndexProxy<HashCode> poolTxsHashes = blockchain.getTransactionPool();
       return poolTxsHashes.stream()

@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.database;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
-import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Iterator;
@@ -277,7 +277,6 @@ class ForkIntegrationTest {
   }
 
   private static ListIndex<String> newList(String name, Access access) {
-    return access.getList(valueOf(name),
-        string());
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 }

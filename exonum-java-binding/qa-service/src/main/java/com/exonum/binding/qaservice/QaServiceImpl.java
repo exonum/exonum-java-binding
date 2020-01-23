@@ -191,8 +191,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Optional<Counter> getValue(HashCode counterId) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((access) -> {
-      QaSchema schema = createDataSchema(access);
+    return node.withSnapshot((snapshot) -> {
+      QaSchema schema = createDataSchema(snapshot);
       MapIndex<HashCode, Long> counters = schema.counters();
       if (!counters.containsKey(counterId)) {
         return Optional.empty();
@@ -209,8 +209,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((access) -> {
-      Blockchain blockchain = Blockchain.newInstance(access);
+    return node.withSnapshot((snapshot) -> {
+      Blockchain blockchain = Blockchain.newInstance(snapshot);
 
       return blockchain.getConsensusConfiguration();
     });

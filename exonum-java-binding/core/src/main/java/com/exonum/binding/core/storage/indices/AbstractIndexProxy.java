@@ -26,8 +26,8 @@ import com.exonum.binding.core.storage.database.Fork;
 /**
  * An abstract super class for proxies of all indices.
  *
- * <p>Each index is created with a database access, either an immutable Snapshot or a read-write Fork.
- * An index has a modification counter to detect when it is modified.
+ * <p>Each index is created with a database access, either an immutable Snapshot or
+ * a read-write Fork. An index has a modification counter to detect when it is modified.
  */
 abstract class AbstractIndexProxy extends AbstractNativeProxy implements StorageIndex {
 
@@ -54,7 +54,7 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
     super(nativeHandle);
     this.address = checkNotNull(address);
     this.dbAccess = access;
-    this.modCounter = ModificationCounter.forView(access);
+    this.modCounter = ModificationCounter.forAccess(access);
   }
 
   @Override

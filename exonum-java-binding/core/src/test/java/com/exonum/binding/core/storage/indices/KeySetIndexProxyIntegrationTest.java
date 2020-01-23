@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
-import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K9;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
@@ -192,7 +191,7 @@ class KeySetIndexProxyIntegrationTest
 
   @Override
   KeySetIndexProxy<String> create(String name, Access access) {
-    return access.getKeySet(valueOf(name), string());
+    return access.getKeySet(IndexAddress.valueOf(name), string());
   }
 
   @Override
@@ -203,7 +202,7 @@ class KeySetIndexProxyIntegrationTest
 
   @Override
   StorageIndex createOfOtherType(String name, Access access) {
-    return access.getList(valueOf(name), string());
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   @Override

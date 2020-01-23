@@ -64,7 +64,7 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
    * Creates a new Entry.
    *
    * @param address an index address. Must correspond to a regular index, not a group.
-   *     Use MapIndex instead of groups of entries.
+   *     Use {@link ProofMapIndexProxy} instead of groups of entries.
    * @param access a database access. Must be valid.
    *     If an access is read-only, "destructive" operations are not permitted.
    * @param serializer an entry serializer
@@ -88,7 +88,8 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
 
   private static NativeHandle createNativeEntry(String name, AbstractAccess access) {
     long accessNativeHandle = access.getAccessNativeHandle();
-    NativeHandle entryNativeHandle = new NativeHandle(nativeCreate(name, accessNativeHandle));
+    long handle = nativeCreate(name, accessNativeHandle);
+    NativeHandle entryNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
     ProxyDestructor.newRegistered(cleaner, entryNativeHandle, ProofEntryIndexProxy.class,

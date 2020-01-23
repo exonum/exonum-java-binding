@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
-import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V9;
@@ -30,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.ImmutableList;
@@ -287,25 +285,24 @@ class ValueSetIndexProxyIntegrationTest
   }
 
   private static HashCode getHashOf(String value) {
-    byte[] stringBytes = StandardSerializers.string().toBytes(value);
+    byte[] stringBytes = string().toBytes(value);
     return Hashing.defaultHashFunction()
         .hashBytes(stringBytes);
   }
 
   @Override
   ValueSetIndexProxy<String> create(String name, Access access) {
-    return access.getValueSet(valueOf(name), string());
+    return access.getValueSet(IndexAddress.valueOf(name), string());
   }
 
   @Override
   ValueSetIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
-    return access.getValueSet(IndexAddress.valueOf(groupName, idInGroup),
-        StandardSerializers.string());
+    return access.getValueSet(IndexAddress.valueOf(groupName, idInGroup), string());
   }
 
   @Override
   StorageIndex createOfOtherType(String name, Access access) {
-    return access.getList(valueOf(name), string());
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   @Override

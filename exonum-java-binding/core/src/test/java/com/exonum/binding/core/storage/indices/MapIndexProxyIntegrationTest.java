@@ -17,7 +17,6 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
-import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K2;
@@ -458,7 +457,7 @@ class MapIndexProxyIntegrationTest
 
   @Override
   StorageIndex createOfOtherType(String name, Access access) {
-    return access.getList(valueOf(name), string());
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   @Override
@@ -472,8 +471,7 @@ class MapIndexProxyIntegrationTest
   }
 
   private static MapIndexProxy<String, String> createMap(String name, Access access) {
-    return access.getMap(valueOf(name), string(),
-        string());
+    return access.getMap(IndexAddress.valueOf(name), string(), string());
   }
 
   private static String prefix(String source, int prefixSize) {
