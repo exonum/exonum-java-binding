@@ -106,7 +106,7 @@ final class ServiceWrapper {
     callServiceMethod(() -> service.initialize(view, configuration));
   }
 
-  void resume(Fork view, Configuration arguments) {
+  void resume(Fork view, byte[] arguments) {
     callServiceMethod(() -> service.resume(view, arguments));
   }
 

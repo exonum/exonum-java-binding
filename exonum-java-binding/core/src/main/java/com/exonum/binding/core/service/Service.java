@@ -70,7 +70,7 @@ public interface Service {
    * @throws ExecutionException if the arguments are not valid (e.g.,
    *     malformed, or do not meet the preconditions)
    */
-  default void resume(Fork fork, Configuration arguments) {
+  default void resume(Fork fork, byte[] arguments) {
     // No actions by default
   }
 

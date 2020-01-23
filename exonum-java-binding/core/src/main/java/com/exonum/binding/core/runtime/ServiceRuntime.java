@@ -228,7 +228,7 @@ public final class ServiceRuntime implements AutoCloseable {
       synchronized (lock) {
         checkStoppedService(instanceSpec.getId());
         ServiceWrapper service = createServiceInstance(instanceSpec);
-        service.resume(fork, new ServiceConfiguration(arguments));
+        service.resume(fork, arguments);
       }
       logger.info("Resumed service: {}", instanceSpec);
     } catch (Exception e) {

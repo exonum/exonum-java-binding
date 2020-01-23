@@ -394,8 +394,7 @@ class ServiceRuntimeIntegrationTest {
         any(MultiplexingNodeDecorator.class));
 
     // and the service was resumed
-    Configuration expectedAgruments = new ServiceConfiguration(arguments);
-    verify(serviceWrapper).resume(fork, expectedAgruments);
+    verify(serviceWrapper).resume(fork, arguments);
 
     // but not registered in the runtime yet:
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
