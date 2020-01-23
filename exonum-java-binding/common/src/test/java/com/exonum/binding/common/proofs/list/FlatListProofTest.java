@@ -97,20 +97,18 @@ class FlatListProofTest {
         arguments(maxSize / 2, maxHeight - 1),
         arguments(maxSize / 2 + 1, maxHeight),
         arguments(maxSize - 1, maxHeight),
-        arguments(maxSize, maxHeight)
-    );
+        arguments(maxSize, maxHeight));
   }
 
   @ParameterizedTest
-  @ValueSource(longs = {Long.MIN_VALUE,-1L, /* Max size + 1: */ 0x100_0000_0000_0001L,
-      Long.MAX_VALUE})
+  @ValueSource(
+      longs = {Long.MIN_VALUE, -1L, /* Max size + 1: */ 0x100_0000_0000_0001L, Long.MAX_VALUE})
   void invalidSizeListInvalidProof(long size) {
     FlatListProof proof = new FlatListProof(emptyList(), emptyList(), size);
 
     InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e.getMessage()).containsIgnoringCase("Invalid size")
-        .contains(Long.toString(size));
+    assertThat(e.getMessage()).containsIgnoringCase("Invalid size").contains(Long.toString(size));
   }
 
   @Test
@@ -131,7 +129,8 @@ class FlatListProofTest {
 
     InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e).hasMessageContaining("must not have elements")
+    assertThat(e)
+        .hasMessageContaining("must not have elements")
         .hasMessageContaining(unexpectedElement.toString());
   }
 
@@ -142,7 +141,8 @@ class FlatListProofTest {
 
     InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e).hasMessageContaining("Proof for empty list must not have proof entries")
+    assertThat(e)
+        .hasMessageContaining("Proof for empty list must not have proof entries")
         .hasMessageContaining(unexpectedEntry.toString());
   }
 
@@ -166,24 +166,21 @@ class FlatListProofTest {
 
   @ParameterizedTest
   @CsvSource({
-      // size of the list, height of the tree (and the root node)
-      "1, 0",
-      "2, 1",
-      "3, 2",
-      "4, 2",
-      "5, 3",
-      "8, 3"
+    // size of the list, height of the tree (and the root node)
+    "1, 0",
+    "2, 1",
+    "3, 2",
+    "4, 2",
+    "5, 3",
+    "8, 3"
   })
   void emptyRangeValidProof(long size, int height) {
     /*
-     H
-     height        h — a single hash entry for the root, no elements
-     */
+    H
+    height        h — a single hash entry for the root, no elements
+    */
     ListProofHashedEntry h1 = hashedEntry(0L, height);
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(size)
-        .addProofEntry(h1)
-        .build();
+    FlatListProof proof = new FlatListProofBuilder().size(size).addProofEntry(h1).build();
 
     CheckedListProof<byte[]> checked = proof.verify();
 
@@ -199,28 +196,25 @@ class FlatListProofTest {
   @ParameterizedTest
   @ValueSource(longs = {1, 2, 3, 4})
   void emptyRangeInvalidProofNoHash(long size) {
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(size)
-        .build();
+    FlatListProof proof = new FlatListProofBuilder().size(size).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
     assertThat(e).hasMessageContaining("Proof for an empty range must have a single proof node");
   }
 
   @ParameterizedTest
   @CsvSource({
-      // index | height. The only correct pair is 0, 2 for a 4-element list.
-      // Invalid indices
-      "1, 2",
-      "2, 2",
-      // Invalid heights
-      //   Below
-      "0, 0",
-      "0, 1",
-      //   Above
-      "0, 3",
-      "0, 4"
+    // index | height. The only correct pair is 0, 2 for a 4-element list.
+    // Invalid indices
+    "1, 2",
+    "2, 2",
+    // Invalid heights
+    //   Below
+    "0, 0",
+    "0, 1",
+    //   Above
+    "0, 3",
+    "0, 4"
   })
   void emptyRangeInvalidProofBadRootHashEntry(long index, int height) {
     /*
@@ -232,13 +226,9 @@ class FlatListProofTest {
     0
      */
     ListProofHashedEntry h1 = hashedEntry(index, height);
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(4L)
-        .addProofEntry(h1)
-        .build();
+    FlatListProof proof = new FlatListProofBuilder().size(4L).addProofEntry(h1).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
     assertThat(e).hasMessageContaining(h1.toString());
   }
 
@@ -255,14 +245,15 @@ class FlatListProofTest {
     0
      */
     ListProofHashedEntry rootHashEntry = hashedEntry(0L, 2);
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(4L)
-        .addProofEntry(rootHashEntry)
-        .addProofEntries(redundantEntries)
-        .build();
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
-    assertThat(e).hasMessageContaining("Proof for an empty range must have a single proof node")
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(4L)
+            .addProofEntry(rootHashEntry)
+            .addProofEntries(redundantEntries)
+            .build();
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
+    assertThat(e)
+        .hasMessageContaining("Proof for an empty range must have a single proof node")
         .hasMessageContaining(String.valueOf(redundantEntries.size() + 1));
   }
 
@@ -275,26 +266,26 @@ class FlatListProofTest {
         // Invalid heights
         singletonList(hashedEntry(0L, 3)),
         // Invalid indices
-        singletonList(hashedEntry(2L, 1))
-    );
+        singletonList(hashedEntry(2L, 1)));
   }
 
   @Test
   void twoElementListValidProofE0() {
     /*
-     H
-     1        o
-            /   \
-     0    e       h
-     */
+    H
+    1        o
+           /   \
+    0    e       h
+    */
     int index = 0;
     long size = 2L;
     ListProofHashedEntry h1 = hashedEntry(1, 0);
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(size)
-        .addElement(ELEMENT_ENTRIES.get(index))
-        .addProofEntry(h1)
-        .build();
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(size)
+            .addElement(ELEMENT_ENTRIES.get(index))
+            .addProofEntry(h1)
+            .build();
 
     CheckedListProof<byte[]> checked = proof.verify();
 
@@ -313,19 +304,20 @@ class FlatListProofTest {
   @Test
   void twoElementListValidProofE1() {
     /*
-     H
-     1        o
-            /   \
-     0    h       e
-     */
+    H
+    1        o
+           /   \
+    0    h       e
+    */
     int index = 1;
     long size = 2L;
     ListProofHashedEntry h0 = hashedEntry(0, 0);
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(size)
-        .addElement(ELEMENT_ENTRIES.get(index))
-        .addProofEntry(h0)
-        .build();
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(size)
+            .addElement(ELEMENT_ENTRIES.get(index))
+            .addProofEntry(h0)
+            .build();
 
     CheckedListProof<byte[]> checked = proof.verify();
 
@@ -344,24 +336,24 @@ class FlatListProofTest {
   @Test
   void twoElementListValidProofFullProof() {
     /*
-     H
-     1        o
-            /   \
-     0    e       e
-     */
+    H
+    1        o
+           /   \
+    0    e       e
+    */
     long size = 2L;
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(size)
-        .addElements(ELEMENT_ENTRIES.subList(0, (int) size))
-        .build();
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(size)
+            .addElements(ELEMENT_ENTRIES.subList(0, (int) size))
+            .build();
 
     CheckedListProof<byte[]> checked = proof.verify();
 
     assertTrue(checked.isValid());
     assertThat(checked.size()).isEqualTo(size);
-    assertThat(checked.getElements()).containsExactly(
-        entry(0L, ELEMENTS.get(0)),
-        entry(1L, ELEMENTS.get(1)));
+    assertThat(checked.getElements())
+        .containsExactly(entry(0L, ELEMENTS.get(0)), entry(1L, ELEMENTS.get(1)));
 
     HashCode node0Hash = getLeafHashCode(ELEMENTS.get(0));
     HashCode node1Hash = getLeafHashCode(ELEMENTS.get(1));
@@ -374,46 +366,41 @@ class FlatListProofTest {
   @ValueSource(ints = {1, 31, 33})
   void twoElementListInvalidProofHashOfInvalidSize(int hashSize) {
     /*
-     H
-     1        o
-            /   \
-     0    e       h
-     */
+    H
+    1        o
+           /   \
+    0    e       h
+    */
     int index = 0;
     ListProofElementEntry element = ELEMENT_ENTRIES.get(index);
     long size = 2L;
-    ListProofHashedEntry hashed = ListProofHashedEntry.newInstance(1L, 0,
-        HashCode.fromBytes(new byte[hashSize]));
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(size)
-        .addElement(element)
-        .addProofEntry(hashed)
-        .build();
+    ListProofHashedEntry hashed =
+        ListProofHashedEntry.newInstance(1L, 0, HashCode.fromBytes(new byte[hashSize]));
+    FlatListProof proof =
+        new FlatListProofBuilder().size(size).addElement(element).addProofEntry(hashed).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     int hashSizeBits = hashSize * Byte.SIZE;
-    assertThat(e.getMessage()).containsIgnoringCase("Invalid hash size")
+    assertThat(e.getMessage())
+        .containsIgnoringCase("Invalid hash size")
         .contains(String.valueOf(hashSizeBits));
   }
-
 
   @Test
   void twoElementListInvalidProofMissingHashNodeAt1() {
     /*
-     H
-     1        o
-            /   \
-     0    e       ?
-     */
+    H
+    1        o
+           /   \
+    0    e       ?
+    */
     int index = 0;
     ListProofElementEntry element = ELEMENT_ENTRIES.get(index);
     long size = 2L;
     FlatListProof proof = new FlatListProof(singletonList(element), emptyList(), size);
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     assertThat(e).hasMessageContaining("Missing proof entry at index (1)");
   }
@@ -421,18 +408,17 @@ class FlatListProofTest {
   @Test
   void twoElementListInvalidProofMissingHashNodeAt0() {
     /*
-     H
-     1        o
-            /   \
-     0    ?       e
-     */
+    H
+    1        o
+           /   \
+    0    ?       e
+    */
     int index = 1;
     ListProofElementEntry element = ELEMENT_ENTRIES.get(index);
     long size = 2L;
     FlatListProof proof = new FlatListProof(singletonList(element), emptyList(), size);
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     assertThat(e).hasMessageContaining("Missing proof entry at index (0)");
   }
@@ -441,21 +427,19 @@ class FlatListProofTest {
   @MethodSource("twoElementListInvalidProofNodesAboveMaxHeightSource")
   void twoElementListInvalidProofNodesAboveMaxHeight(List<ListProofHashedEntry> invalidEntries) {
     /*
-     H
-     k       {x} <— invalid nodes at various heights k > 1
+    H
+    k       {x} <— invalid nodes at various heights k > 1
 
-     1        o
-            /   \
-     0    e       h
-     */
-    FlatListProof proof = twoElementListAt0()
-        .addProofEntries(invalidEntries)
-        .build();
+    1        o
+           /   \
+    0    e       h
+    */
+    FlatListProof proof = twoElementListAt0().addProofEntries(invalidEntries).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e).hasMessageContaining("Proof entry at invalid height")
+    assertThat(e)
+        .hasMessageContaining("Proof entry at invalid height")
         .hasMessageContaining("must be in range [0; 1)");
   }
 
@@ -467,8 +451,7 @@ class FlatListProofTest {
         singletonList(hashedEntry(1, 2)),
         singletonList(hashedEntry(0, 3)),
         singletonList(hashedEntry(0, MAX_HEIGHT)),
-        asList(hashedEntry(0, 2), hashedEntry(1, 2))
-    );
+        asList(hashedEntry(0, 2), hashedEntry(1, 2)));
   }
 
   @ParameterizedTest
@@ -476,17 +459,14 @@ class FlatListProofTest {
   void twoElementListInvalidProofExtraNodesAtInvalidIndexes(
       List<ListProofEntry> invalidProofEntries) {
     /*
-     H
-     1        o       {x} <- invalid nodes at various indexes exceeding max
-            /   \
-     0    e       h   {x} <—
-     */
-    FlatListProof proof = twoElementListAt0()
-        .addAnyEntries(invalidProofEntries)
-        .build();
+    H
+    1        o       {x} <- invalid nodes at various indexes exceeding max
+           /   \
+    0    e       h   {x} <—
+    */
+    FlatListProof proof = twoElementListAt0().addAnyEntries(invalidProofEntries).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     String message = e.getMessage();
     assertThat(message)
@@ -512,27 +492,24 @@ class FlatListProofTest {
         singletonList(elementEntry(3, value)),
         singletonList(elementEntry(MAX_INDEX, value)),
         singletonList(hashedEntry(ListProofEntry.MAX_INDEX, 0)),
-        asList(hashedEntry(2, 0), hashedEntry(3, 0))
-    );
+        asList(hashedEntry(2, 0), hashedEntry(3, 0)));
   }
 
   @Test
   void twoElementListInvalidProofExtraNodesRedundantCalculated() {
     /*
-     H
-     1        o
-           / /  \
-     0    e x    h
-     */
+    H
+    1        o
+          / /  \
+    0    e x    h
+    */
     ListProofHashedEntry redundantNode = hashedEntry(0L, 0);
-    FlatListProof proof = twoElementListAt0()
-        .addProofEntry(redundantNode)
-        .build();
+    FlatListProof proof = twoElementListAt0().addProofEntry(redundantNode).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e).hasMessageContaining("Redundant proof entry")
+    assertThat(e)
+        .hasMessageContaining("Redundant proof entry")
         .hasMessageContaining(redundantNode.toString())
         .hasMessageFindingMatch("with the same index .+ as the calculated node");
   }
@@ -540,38 +517,33 @@ class FlatListProofTest {
   @Test
   void twoElementListInvalidProofExtraNodesDuplicateHashed() {
     /*
-     H
-     1        o
-           /    \ \
-     0    e      h h
-     */
+    H
+    1        o
+          /    \ \
+    0    e      h h
+    */
     ListProofHashedEntry duplicateNode = hashedEntry(1, 0);
-    FlatListProof proof = twoElementListAt0()
-        .addProofEntry(duplicateNode)
-        .build();
+    FlatListProof proof = twoElementListAt0().addProofEntry(duplicateNode).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e).hasMessageContaining("Multiple proof entries at the same position")
+    assertThat(e)
+        .hasMessageContaining("Multiple proof entries at the same position")
         .hasMessageContaining(duplicateNode.toString());
   }
 
   @Test
   void twoElementListInvalidProofExtraNodesDuplicateElementSameValue() {
     /*
-     H
-     1        o
-           / /  \
-     0    e e    h
-     */
+    H
+    1        o
+          / /  \
+    0    e e    h
+    */
     ListProofElementEntry duplicateEntry = ELEMENT_ENTRIES.get(0);
-    FlatListProof proof = twoElementListAt0()
-        .addElement(duplicateEntry)
-        .build();
+    FlatListProof proof = twoElementListAt0().addElement(duplicateEntry).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     assertThat(e.getMessage())
         .containsIgnoringCase("multiple element entries at the same index (0)")
@@ -581,19 +553,16 @@ class FlatListProofTest {
   @Test
   void twoElementListInvalidProofExtraNodesDuplicateElementDiffValue() {
     /*
-     H
-     1        o
-           / /  \
-     0    e e    h
-     */
+    H
+    1        o
+          / /  \
+    0    e e    h
+    */
     ListProofElementEntry entry = ELEMENT_ENTRIES.get(0);
     ListProofElementEntry conflictingEntry = elementEntry(0, bytes(1, 2, 3, 4));
-    FlatListProof proof = twoElementListAt0()
-        .addElement(conflictingEntry)
-        .build();
+    FlatListProof proof = twoElementListAt0().addElement(conflictingEntry).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     assertThat(e.getMessage())
         .containsIgnoringCase("multiple element entries at the same index (0)")
@@ -610,50 +579,43 @@ class FlatListProofTest {
   }
 
   /**
-   * Returns a builder with a structurally valid flat proof for a tree of size 2
-   * and an element at index 0.
+   * Returns a builder with a structurally valid flat proof for a tree of size 2 and an element at
+   * index 0.
    */
   private FlatListProofBuilder twoElementListAt0() {
     /*
-     H
-     1        o
-            /   \
-     0    e       h
-     */
+    H
+    1        o
+           /   \
+    0    e       h
+    */
     long size = 2L;
     ListProofElementEntry e0 = ELEMENT_ENTRIES.get(0);
     ListProofHashedEntry h1 = hashedEntry(1, 0);
-    return new FlatListProofBuilder()
-        .size(size)
-        .addElement(e0)
-        .addProofEntry(h1);
+    return new FlatListProofBuilder().size(size).addElement(e0).addProofEntry(h1);
   }
 
   @Test
   void threeElementListValidProofE2() {
     /*
-     H — height of nodes at each level
-     2        o
-            /   \
-     1    h       o
-                 /
-     0          e
-     */
+    H — height of nodes at each level
+    2        o
+           /   \
+    1    h       o
+                /
+    0          e
+    */
     int index = 2;
     ListProofElementEntry elementEntry = ELEMENT_ENTRIES.get(index);
     long size = 3;
     ListProofHashedEntry h0 = hashedEntry(0, 1);
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(size)
-        .addElement(elementEntry)
-        .addProofEntry(h0)
-        .build();
+    FlatListProof proof =
+        new FlatListProofBuilder().size(size).addElement(elementEntry).addProofEntry(h0).build();
 
     CheckedListProof<byte[]> checked = proof.verify();
 
     assertThat(checked.size()).isEqualTo(size);
-    assertThat(checked.getElements())
-        .containsExactly(entry((long) index, ELEMENTS.get(index)));
+    assertThat(checked.getElements()).containsExactly(entry((long) index, ELEMENTS.get(index)));
 
     // Check the hash code
     HashCode leafHash = getLeafHashCode(ELEMENTS.get(index));
@@ -667,21 +629,21 @@ class FlatListProofTest {
   @Test
   void fourElementListInvalidProofMissingHashNode1() {
     /*
-     H
-     2        o
-            /   \
-     1    o       ?
-         / \
-     0  e   h
-     */
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(4)
-        .addElement(ELEMENT_ENTRIES.get(0))
-        .addProofEntry(hashedEntry(1, 0))
-        .build();
+    H
+    2        o
+           /   \
+    1    o       ?
+        / \
+    0  e   h
+    */
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(4)
+            .addElement(ELEMENT_ENTRIES.get(0))
+            .addProofEntry(hashedEntry(1, 0))
+            .build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     assertThat(e).hasMessageContaining("Missing proof entry at index (1)");
   }
@@ -689,21 +651,21 @@ class FlatListProofTest {
   @Test
   void fourElementListInvalidProofMissingHashNode2() {
     /*
-     H — height of nodes at each level
-     2        o
-            /   \
-     1    ?       o
-                 / \
-     0          e   h
-     */
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(4)
-        .addElement(ELEMENT_ENTRIES.get(2))
-        .addProofEntry(hashedEntry(3, 0))
-        .build();
+    H — height of nodes at each level
+    2        o
+           /   \
+    1    ?       o
+                / \
+    0          e   h
+    */
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(4)
+            .addElement(ELEMENT_ENTRIES.get(2))
+            .addProofEntry(hashedEntry(3, 0))
+            .build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     assertThat(e).hasMessageContaining("Missing proof entry at index (0)");
   }
@@ -711,46 +673,47 @@ class FlatListProofTest {
   @Test
   void fourElementListInvalidProofExtraNodesRedundantTotally() {
     /*
-     H
-     2        o
-            /   \
-     1    o       h
-         / \     / \
-     0  e   h   x   x — the last two hashes are totally redundant as their parent must be
-                        and is present in the proof tree
-     */
+    H
+    2        o
+           /   \
+    1    o       h
+        / \     / \
+    0  e   h   x   x — the last two hashes are totally redundant as their parent must be
+                       and is present in the proof tree
+    */
     ListProofHashedEntry r1 = hashedEntry(2, 0);
     ListProofHashedEntry r2 = hashedEntry(3, 0);
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(4)
-        .addElement(ELEMENT_ENTRIES.get(0))
-        .addProofEntries(hashedEntry(1, 0), hashedEntry(1, 1))
-        // Totally redundant hashed entries at height 0
-        .addProofEntries(r1, r2)
-        .build();
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(4)
+            .addElement(ELEMENT_ENTRIES.get(0))
+            .addProofEntries(hashedEntry(1, 0), hashedEntry(1, 1))
+            // Totally redundant hashed entries at height 0
+            .addProofEntries(r1, r2)
+            .build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e).hasMessageContaining("Redundant proof entry")
+    assertThat(e)
+        .hasMessageContaining("Redundant proof entry")
         .hasMessageContaining("not needed for verification");
-    assertThat(e).satisfiesAnyOf(
-        e1 -> assertThat(e1).hasMessageContaining(r1.toString()),
-        e1 -> assertThat(e1).hasMessageContaining(r2.toString())
-    );
+    assertThat(e)
+        .satisfiesAnyOf(
+            e1 -> assertThat(e1).hasMessageContaining(r1.toString()),
+            e1 -> assertThat(e1).hasMessageContaining(r2.toString()));
   }
 
   @ParameterizedTest
   @CsvSource({
-      // Overriding the calculated hashes of element entries (h=0)
-      "0, 0",
-      "1, 0",
-      "4, 0",
-      // Overriding the calculated hashes at intermediate levels
-      "0, 1",
-      "2, 1",
-      "0, 2",
-      "1, 2",
+    // Overriding the calculated hashes of element entries (h=0)
+    "0, 0",
+    "1, 0",
+    "4, 0",
+    // Overriding the calculated hashes at intermediate levels
+    "0, 1",
+    "2, 1",
+    "0, 2",
+    "1, 2",
   })
   void fiveElementListInvalidProofExtraNodesRedundantCalculated(long index, int height) {
     /*
@@ -765,17 +728,18 @@ class FlatListProofTest {
      0  e e     e
      */
     ListProofHashedEntry redundantNode = hashedEntry(index, height);
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(5L)
-        .addElements(ELEMENT_ENTRIES.get(0), ELEMENT_ENTRIES.get(1), ELEMENT_ENTRIES.get(4))
-        .addProofEntry(hashedEntry(1L, 1))
-        .addProofEntry(redundantNode)
-        .build();
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(5L)
+            .addElements(ELEMENT_ENTRIES.get(0), ELEMENT_ENTRIES.get(1), ELEMENT_ENTRIES.get(4))
+            .addProofEntry(hashedEntry(1L, 1))
+            .addProofEntry(redundantNode)
+            .build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e.getMessage()).containsIgnoringCase("Redundant proof entry")
+    assertThat(e.getMessage())
+        .containsIgnoringCase("Redundant proof entry")
         .contains(redundantNode.toString())
         .contains(String.format("with the same index (%d) as the calculated node", index));
   }
@@ -785,21 +749,18 @@ class FlatListProofTest {
   void fiveElementListInvalidProofExtraNodesAtInvalidIndexes(
       List<ListProofEntry> invalidProofEntries) {
     /*
-     H
-     3          o
-              /   \
-     2      h       o
-                   /
-     1            o  {x} <- invalid nodes at various heights with indexes exceeding max
-                 /
-     0          e    {x} <—
-     */
-    FlatListProof proof = fiveElementListAt4()
-        .addAnyEntries(invalidProofEntries)
-        .build();
+    H
+    3          o
+             /   \
+    2      h       o
+                  /
+    1            o  {x} <- invalid nodes at various heights with indexes exceeding max
+                /
+    0          e    {x} <—
+    */
+    FlatListProof proof = fiveElementListAt4().addAnyEntries(invalidProofEntries).build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
     assertThat(e.getMessage()).containsIgnoringCase("entry at invalid index");
   }
@@ -830,8 +791,7 @@ class FlatListProofTest {
         asList(hashedEntry(5, 0), hashedEntry(7, 0)),
         // At height 1
         singletonList(hashedEntry(3, 1)),
-        singletonList(hashedEntry(4, 1))
-    );
+        singletonList(hashedEntry(4, 1)));
   }
 
   @Test
@@ -845,15 +805,15 @@ class FlatListProofTest {
 
   private FlatListProofBuilder fiveElementListAt4() {
     /*
-     H
-     3          o
-              /   \
-     2      h       o
-                   /
-     1            o
-                 /
-     0          e
-     */
+    H
+    3          o
+             /   \
+    2      h       o
+                  /
+    1            o
+                /
+    0          e
+    */
     return new FlatListProofBuilder()
         .size(5)
         .addElement(ELEMENT_ENTRIES.get(4))
@@ -863,79 +823,75 @@ class FlatListProofTest {
   @ParameterizedTest
   @MethodSource("eightElementListInvalidProofExtraNodesRedundantTotallySource")
   void eightElementListInvalidProofExtraNodesRedundantTotally(
-      List<ListProofHashedEntry> invalidEntries
-  ) {
+      List<ListProofHashedEntry> invalidEntries) {
     /*
-     H
-     3          o
-              /   \
-     2      o       h
-           / \
-     1    o   h
-         /\
-     0   e h
-     */
-    FlatListProof proof = new FlatListProofBuilder()
-        .size(8)
-        .addElement(ELEMENT_ENTRIES.get(0))
-        .addProofEntries(hashedEntry(1, 0), hashedEntry(1, 1), hashedEntry(1, 2))
-        // Totally redundant hashed entries at height 0
-        .addProofEntries(invalidEntries)
-        .build();
+    H
+    3          o
+             /   \
+    2      o       h
+          / \
+    1    o   h
+        /\
+    0   e h
+    */
+    FlatListProof proof =
+        new FlatListProofBuilder()
+            .size(8)
+            .addElement(ELEMENT_ENTRIES.get(0))
+            .addProofEntries(hashedEntry(1, 0), hashedEntry(1, 1), hashedEntry(1, 2))
+            // Totally redundant hashed entries at height 0
+            .addProofEntries(invalidEntries)
+            .build();
 
-    InvalidProofException e = assertThrows(InvalidProofException.class,
-        proof::verify);
+    InvalidProofException e = assertThrows(InvalidProofException.class, proof::verify);
 
-    assertThat(e).hasMessageContaining("Redundant proof entry")
-      .hasMessageContaining("not needed for verification");
+    assertThat(e)
+        .hasMessageContaining("Redundant proof entry")
+        .hasMessageContaining("not needed for verification");
   }
 
   static Collection<List<ListProofHashedEntry>>
       eightElementListInvalidProofExtraNodesRedundantTotallySource() {
     /*
-     H
-     2          o
-              /   \
-     1      o       h
-           / \
-     0    o   h   1   2
-         /\
-     0   e h 2 3 4 5 6 7
+    H
+    2          o
+             /   \
+    1      o       h
+          / \
+    0    o   h   1   2
+        /\
+    0   e h 2 3 4 5 6 7
 
-     index is used instead of 'x' to show all possible redundant hashed entries
-     */
+    index is used instead of 'x' to show all possible redundant hashed entries
+    */
     return asList(
         // At height 0
         singletonList(hashedEntry(2, 0)),
         singletonList(hashedEntry(3, 0)),
         singletonList(hashedEntry(7, 0)),
-        asList(hashedEntry(6,0), hashedEntry(7, 0)),
+        asList(hashedEntry(6, 0), hashedEntry(7, 0)),
         // At height 1
         singletonList(hashedEntry(2, 1)),
         singletonList(hashedEntry(3, 1)),
-        asList(hashedEntry(2, 1), hashedEntry(3, 1))
-    );
+        asList(hashedEntry(2, 1), hashedEntry(3, 1)));
   }
 
   /**
-   * Creates a given number of single-byte elements, with their first and only byte
-   * equal to the index they are stored at.
+   * Creates a given number of single-byte elements, with their first and only byte equal to the
+   * index they are stored at.
    */
   private static List<byte[]> createElements(int size) {
-    return IntStream.range(0, size)
-        .mapToObj(Bytes::bytes)
-        .collect(toList());
+    return IntStream.range(0, size).mapToObj(Bytes::bytes).collect(toList());
   }
 
   /**
    * Creates list proof entries for each element of the given list.
+   *
    * @param list a list of elements
    */
   private static List<ListProofElementEntry> createElementEntries(List<byte[]> list) {
     int size = list.size();
-    return IntStream.range(0, size)
-        .mapToObj(i -> elementEntry(i, list.get(i)))
-        .collect(toList());
+    return IntStream.range(0, size).mapToObj(i -> elementEntry(i, list.get(i))).collect(toList());
   }
 
   private static ListProofElementEntry elementEntry(long index, byte[] element) {
@@ -943,10 +899,7 @@ class FlatListProofTest {
   }
 
   private static ListProofHashedEntry hashedEntry(long index, int height) {
-    HashCode nodeHash = Hashing.sha256().newHasher()
-        .putLong(index)
-        .putInt(height)
-        .hash();
+    HashCode nodeHash = Hashing.sha256().newHasher().putLong(index).putInt(height).hash();
     return ListProofHashedEntry.newInstance(index, height, nodeHash);
   }
 
@@ -988,8 +941,11 @@ class FlatListProofTest {
       return this;
     }
 
-    FlatListProofBuilder addAnyEntries(List</* intentionally no wildcards to limit its use */
-        ListProofEntry> entries) {
+    FlatListProofBuilder addAnyEntries(
+        List<
+                /* intentionally no wildcards to limit its use */
+                ListProofEntry>
+            entries) {
       for (ListProofEntry e : entries) {
         if (e instanceof ListProofHashedEntry) {
           addProofEntry((ListProofHashedEntry) e);

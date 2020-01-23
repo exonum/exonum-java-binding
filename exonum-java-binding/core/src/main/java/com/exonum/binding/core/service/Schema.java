@@ -21,22 +21,19 @@ import com.exonum.binding.core.blockchain.Block;
 /**
  * A schema of the collections (a.k.a. indices) of a service.
  *
- * <p>To verify the integrity of the database state on each node in the network,
- * Exonum automatically tracks every Merkelized collection used by the user
- * services. It aggregates state hashes of these collections into a single
- * Merkelized meta-map. The hash of this meta-map is considered the hash of the
- * entire blockchain state and is recorded as such in {@linkplain Block#getStateHash() blocks}
- * and Precommit messages.
+ * <p>To verify the integrity of the database state on each node in the network, Exonum
+ * automatically tracks every Merkelized collection used by the user services. It aggregates state
+ * hashes of these collections into a single Merkelized meta-map. The hash of this meta-map is
+ * considered the hash of the entire blockchain state and is recorded as such in {@linkplain
+ * Block#getStateHash() blocks} and Precommit messages.
  *
  * <p>Exonum starts aggregating a service collection state hash once it is <em>initialized</em>:
  * created for the first time with a {@link com.exonum.binding.core.storage.database.Fork}.
  *
- * <p>Please note that if the service does not use any Merkelized collections,
- * the framework will not be able to verify that its transactions cause the same
- * results on different nodes.
+ * <p>Please note that if the service does not use any Merkelized collections, the framework will
+ * not be able to verify that its transactions cause the same results on different nodes.
  *
  * @see com.exonum.binding.core.storage.indices.HashableIndex
  * @see com.exonum.binding.core.blockchain.Blockchain
  */
-public interface Schema {
-}
+public interface Schema {}

@@ -17,11 +17,10 @@
 package com.exonum.binding.common.proofs.map;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.proofs.map.DbKey;
 
 /**
- * A flat map proof entry corresponding to either a branch node or a leaf node with computed hash
- * in a map tree.
+ * A flat map proof entry corresponding to either a branch node or a leaf node with computed hash in
+ * a map tree.
  */
 public class MapProofEntry {
 
@@ -31,6 +30,7 @@ public class MapProofEntry {
 
   /**
    * Creates a new entry in a flat map proof corresponding to a branch or a leaf node.
+   *
    * @param dbKey a 34-byte database key of the corresponding branch node
    * @param nodeHash a hash of the corresponding node
    */
@@ -44,16 +44,12 @@ public class MapProofEntry {
     this.hash = nodeHash;
   }
 
-  /**
-   * Returns a database key of this node.
-   */
+  /** Returns a database key of this node. */
   public DbKey getDbKey() {
     return dbKey;
   }
 
-  /**
-   * Returns a hash of the corresponding proof map tree node.
-   */
+  /** Returns a hash of the corresponding proof map tree node. */
   public HashCode getHash() {
     return hash;
   }

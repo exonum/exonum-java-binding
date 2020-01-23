@@ -34,11 +34,10 @@ class ProxyDestructorTest {
   void newRegistered() {
     Cleaner cleaner = mock(Cleaner.class);
     NativeHandle handle = new NativeHandle(1L);
-    LongConsumer destructor = (nh) -> {
-    };
+    LongConsumer destructor = (nh) -> {};
 
-    ProxyDestructor d = ProxyDestructor.newRegistered(cleaner, handle, CloseableNativeProxy.class,
-        destructor);
+    ProxyDestructor d =
+        ProxyDestructor.newRegistered(cleaner, handle, CloseableNativeProxy.class, destructor);
 
     // Check the destructor is not null.
     assertNotNull(d);

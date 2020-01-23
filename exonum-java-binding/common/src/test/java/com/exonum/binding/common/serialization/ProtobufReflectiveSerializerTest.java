@@ -43,11 +43,12 @@ class ProtobufReflectiveSerializerTest {
   @Test
   void constructorRejectsInvalidMessages() {
     MessageLite m = mock(MessageLite.class); // Does not have a public static parseFrom method.
-    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-        () -> new ProtobufReflectiveSerializer<>(m.getClass()));
+    IllegalArgumentException e =
+        assertThrows(
+            IllegalArgumentException.class, () -> new ProtobufReflectiveSerializer<>(m.getClass()));
 
-    assertThat(e.getMessage(),
-        containsString("Invalid message: cannot find public static parseFrom"));
+    assertThat(
+        e.getMessage(), containsString("Invalid message: cannot find public static parseFrom"));
 
     assertThat(e.getCause(), instanceOf(NoSuchMethodException.class));
   }
@@ -71,8 +72,10 @@ class ProtobufReflectiveSerializerTest {
     ProtobufReflectiveSerializer<Targets> serializer =
         new ProtobufReflectiveSerializer<>(Targets.class);
 
-    assertThat("The protobuf serializer is not deterministic:",
-        serializer.toBytes(t1), equalTo(serializer.toBytes(t2)));
+    assertThat(
+        "The protobuf serializer is not deterministic:",
+        serializer.toBytes(t1),
+        equalTo(serializer.toBytes(t2)));
   }
 
   @Test
@@ -103,15 +106,11 @@ class ProtobufReflectiveSerializerTest {
         createPoint(0, 0),
         createPoint(1, 1),
         createPoint(-1, -1),
-        createPoint(Integer.MIN_VALUE, Integer.MAX_VALUE)
-    );
+        createPoint(Integer.MIN_VALUE, Integer.MAX_VALUE));
   }
 
   private static Point createPoint(int x, int y) {
-    return Point.newBuilder()
-        .setX(x)
-        .setY(y)
-        .build();
+    return Point.newBuilder().setX(x).setY(y).build();
   }
 
   private static Targets pointsAsTargetsInOrder(Point... points) {
@@ -121,8 +120,6 @@ class ProtobufReflectiveSerializerTest {
       orderedPoints.put(p.toString(), p);
     }
 
-    return Targets.newBuilder()
-        .putAllTargets(orderedPoints)
-        .build();
+    return Targets.newBuilder().putAllTargets(orderedPoints).build();
   }
 }

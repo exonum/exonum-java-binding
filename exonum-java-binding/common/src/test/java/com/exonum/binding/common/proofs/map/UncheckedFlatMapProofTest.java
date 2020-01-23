@@ -57,10 +57,8 @@ class UncheckedFlatMapProofTest {
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("1011111");
 
     MapEntry<ByteString, ByteString> leaf = createMapEntry(valueKey, FIRST_VALUE);
-    List<MapProofEntry> branches = Arrays.asList(
-        createMapProofEntry(firstDbKey),
-        createMapProofEntry(thirdDbKey)
-    );
+    List<MapProofEntry> branches =
+        Arrays.asList(createMapProofEntry(firstDbKey), createMapProofEntry(thirdDbKey));
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(branches, singletonList(leaf), emptyList());
 
@@ -79,17 +77,15 @@ class UncheckedFlatMapProofTest {
     DbKey thirdDbKey = DbKeyTestUtils.branchKeyFromPrefix("0100_0000");
     ByteString fourthKey = DbKeyTestUtils.keyByteStringFromString("1000_1101");
 
-    List<MapEntry<ByteString, ByteString>> leaves = Arrays.asList(
-        createMapEntry(firstKey, FIRST_VALUE),
-        createMapEntry(secondKey, SECOND_VALUE),
-        createMapEntry(fourthKey, THIRD_VALUE)
-    );
+    List<MapEntry<ByteString, ByteString>> leaves =
+        Arrays.asList(
+            createMapEntry(firstKey, FIRST_VALUE),
+            createMapEntry(secondKey, SECOND_VALUE),
+            createMapEntry(fourthKey, THIRD_VALUE));
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            singletonList(createMapProofEntry(thirdDbKey)),
-            leaves,
-            emptyList());
+            singletonList(createMapProofEntry(thirdDbKey)), leaves, emptyList());
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
@@ -104,7 +100,8 @@ class UncheckedFlatMapProofTest {
 
     // If a user checks for key that wasn't required, an IllegalArgumentException is thrown
 
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> checkedMapProof.containsKey(ByteString.copyFromUtf8("not required key")));
   }
 
@@ -114,27 +111,26 @@ class UncheckedFlatMapProofTest {
     ByteString value = FIRST_VALUE;
     MapEntry<ByteString, ByteString> mapEntry = createMapEntry(key, value);
 
-    HashCode valueHash = HASH_FUNCTION.newHasher()
-        .putByte(BLOB_PREFIX)
-        .putBytes(value.toByteArray())
-        .hash();
+    HashCode valueHash =
+        HASH_FUNCTION.newHasher().putByte(BLOB_PREFIX).putBytes(value.toByteArray()).hash();
 
-    HashCode singleEntryHash = HASH_FUNCTION.newHasher()
-        .putByte(MAP_NODE_PREFIX)
-        .putObject(DbKey.newLeafKey(key), dbKeyFunnel())
-        .putObject(valueHash, hashCodeFunnel())
-        .hash();
+    HashCode singleEntryHash =
+        HASH_FUNCTION
+            .newHasher()
+            .putByte(MAP_NODE_PREFIX)
+            .putObject(DbKey.newLeafKey(key), dbKeyFunnel())
+            .putObject(valueHash, hashCodeFunnel())
+            .hash();
 
-    HashCode expectedRootHash = HASH_FUNCTION.newHasher()
-        .putByte(MAP_ROOT_PREFIX)
-        .putObject(singleEntryHash, hashCodeFunnel())
-        .hash();
+    HashCode expectedRootHash =
+        HASH_FUNCTION
+            .newHasher()
+            .putByte(MAP_ROOT_PREFIX)
+            .putObject(singleEntryHash, hashCodeFunnel())
+            .hash();
 
     UncheckedMapProof uncheckedFlatMapProof =
-        new UncheckedFlatMapProof(
-            emptyList(),
-            singletonList(mapEntry),
-            emptyList());
+        new UncheckedFlatMapProof(emptyList(), singletonList(mapEntry), emptyList());
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
 
     assertThat(checkedMapProof.getIndexHash(), equalTo(expectedRootHash));
@@ -148,10 +144,8 @@ class UncheckedFlatMapProofTest {
   void mapProofWithEqualEntriesOrderShouldBeInvalid() {
     DbKey firstDbKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
     DbKey secondKey = DbKeyTestUtils.branchKeyFromPrefix("101100");
-    List<MapProofEntry> entries = Arrays.asList(
-        createMapProofEntry(firstDbKey),
-        createMapProofEntry(secondKey)
-    );
+    List<MapProofEntry> entries =
+        Arrays.asList(createMapProofEntry(firstDbKey), createMapProofEntry(secondKey));
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(entries, emptyList(), emptyList());
 
@@ -164,10 +158,12 @@ class UncheckedFlatMapProofTest {
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(emptyList(), emptyList(), emptyList());
 
-    HashCode expectedRootHash = HASH_FUNCTION.newHasher()
-        .putByte(MAP_ROOT_PREFIX)
-        .putBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES])
-        .hash();
+    HashCode expectedRootHash =
+        HASH_FUNCTION
+            .newHasher()
+            .putByte(MAP_ROOT_PREFIX)
+            .putBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES])
+            .hash();
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.CORRECT));
@@ -225,9 +221,7 @@ class UncheckedFlatMapProofTest {
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            singletonList(createMapProofEntry(firstDbKey)),
-            emptyList(),
-            singletonList(absentKey));
+            singletonList(createMapProofEntry(firstDbKey)), emptyList(), singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.NON_TERMINAL_NODE));
@@ -240,9 +234,7 @@ class UncheckedFlatMapProofTest {
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            singletonList(createMapProofEntry(firstDbKey)),
-            emptyList(),
-            singletonList(absentKey));
+            singletonList(createMapProofEntry(firstDbKey)), emptyList(), singletonList(absentKey));
 
     CheckedMapProof checkedMapProof = uncheckedFlatMapProof.check();
     assertThat(checkedMapProof.getProofStatus(), equalTo(MapProofStatus.CORRECT));
@@ -256,9 +248,7 @@ class UncheckedFlatMapProofTest {
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            Arrays.asList(
-                createMapProofEntry(firstDbKey),
-                createMapProofEntry(secondDbKey)),
+            Arrays.asList(createMapProofEntry(firstDbKey), createMapProofEntry(secondDbKey)),
             emptyList(),
             singletonList(absentKey));
 
@@ -274,9 +264,7 @@ class UncheckedFlatMapProofTest {
 
     UncheckedMapProof uncheckedFlatMapProof =
         new UncheckedFlatMapProof(
-            Arrays.asList(
-                createMapProofEntry(firstDbKey),
-                createMapProofEntry(secondDbKey)),
+            Arrays.asList(createMapProofEntry(firstDbKey), createMapProofEntry(secondDbKey)),
             emptyList(),
             singletonList(absentKey));
 
@@ -285,8 +273,7 @@ class UncheckedFlatMapProofTest {
   }
 
   private static MapProofEntry createMapProofEntry(DbKey dbKey) {
-    HashCode hash = Hashing.sha256()
-        .hashObject(dbKey, dbKeyFunnel());
+    HashCode hash = Hashing.sha256().hashObject(dbKey, dbKeyFunnel());
     return new MapProofEntry(dbKey, hash);
   }
 

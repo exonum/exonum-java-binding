@@ -49,18 +49,17 @@ import org.apache.logging.log4j.Logger;
  * {@link Server}; allows the native code to load and unload artifacts (JAR archives with Exonum
  * services), create and stop services defined in the loaded artifacts.
  *
- * <p>This class is thread-safe and does not support client-side locking.
- * The thread-safety is provided because the class is a singleton and may be provided to
- * other objects. Currently, however, there is a single injection point where ServiceRuntime
- * is instantiated (during bootstrap) and it is used by the native runtime only in a single-threaded
- * context, hence thread-safety isn't <em>strictly</em> required, but rather provided to avoid
- * possible errors if it is ever accessed by other objects.
+ * <p>This class is thread-safe and does not support client-side locking. The thread-safety is
+ * provided because the class is a singleton and may be provided to other objects. Currently,
+ * however, there is a single injection point where ServiceRuntime is instantiated (during
+ * bootstrap) and it is used by the native runtime only in a single-threaded context, hence
+ * thread-safety isn't <em>strictly</em> required, but rather provided to avoid possible errors if
+ * it is ever accessed by other objects.
  */
 @Singleton
 public final class ServiceRuntime implements AutoCloseable {
 
-  @VisibleForTesting
-  static final String API_ROOT_PATH = "/api/services";
+  @VisibleForTesting static final String API_ROOT_PATH = "/api/services";
   private static final Logger logger = LogManager.getLogger(ServiceRuntime.class);
 
   private final ServiceLoader serviceLoader;
@@ -68,16 +67,17 @@ public final class ServiceRuntime implements AutoCloseable {
   private final RuntimeTransport runtimeTransport;
   private final Path artifactsDir;
   /**
-   * The active services indexed by their name. It is stored in a sorted map that offers
-   * the same iteration order on all nodes with the same services, which is useful
-   * for logging purposes.
+   * The active services indexed by their name. It is stored in a sorted map that offers the same
+   * iteration order on all nodes with the same services, which is useful for logging purposes.
    */
   private final SortedMap<String, ServiceWrapper> services = new TreeMap<>();
   /**
    * Same active services, indexed by their numeric identifier.
+   *
    * @see ServiceInstanceSpec#getId()
    */
   private final Map<Integer, ServiceWrapper> servicesById = new HashMap<>();
+
   private final Object lock = new Object();
 
   private Node node;
@@ -88,11 +88,13 @@ public final class ServiceRuntime implements AutoCloseable {
    * @param serviceLoader a loader of service artifacts
    * @param servicesFactory the factory of services
    * @param runtimeTransport a web server providing transport to Java services
-   * @param artifactsDir the directory in which administrators place and from which
-   *     the service runtime loads service artifacts; may not exist at instantiation time
+   * @param artifactsDir the directory in which administrators place and from which the service
+   *     runtime loads service artifacts; may not exist at instantiation time
    */
   @Inject
-  public ServiceRuntime(ServiceLoader serviceLoader, ServicesFactory servicesFactory,
+  public ServiceRuntime(
+      ServiceLoader serviceLoader,
+      ServicesFactory servicesFactory,
       RuntimeTransport runtimeTransport,
       @Named(FrameworkModule.SERVICE_RUNTIME_ARTIFACTS_DIRECTORY) Path artifactsDir) {
     this.serviceLoader = checkNotNull(serviceLoader);
@@ -101,13 +103,14 @@ public final class ServiceRuntime implements AutoCloseable {
     this.artifactsDir = checkNotNull(artifactsDir);
   }
 
-  /**
-   * Initializes the runtime with the given node. Starts the transport for Java services.
-   */
+  /** Initializes the runtime with the given node. Starts the transport for Java services. */
   public void initialize(Node node) {
     synchronized (lock) {
-      checkState(this.node == null, "Invalid attempt to replace already set node (%s) with %s",
-          this.node, node);
+      checkState(
+          this.node == null,
+          "Invalid attempt to replace already set node (%s) with %s",
+          this.node,
+          node);
       this.node = checkNotNull(node);
 
       // Start the server
@@ -116,26 +119,28 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
-   * Loads a Java service artifact from the specified file. The loading involves verification
-   * of the artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
+   * Loads a Java service artifact from the specified file. The loading involves verification of the
+   * artifact (i.e., that it is a valid Exonum service; includes a valid service factory).
    *
    * @param id a service artifact identifier; artifacts with non-equal ids will be rejected
    * @param filename a filename of the service artifact in the directory for artifacts
    * @throws ServiceLoadingException if it failed to load an artifact; or if the given artifact is
    *     already loaded
    */
-  public void deployArtifact(ServiceArtifactId id, String filename)
-      throws ServiceLoadingException {
+  public void deployArtifact(ServiceArtifactId id, String filename) throws ServiceLoadingException {
     try {
       synchronized (lock) {
         // Check the artifacts dir exists
-        checkState(Files.isDirectory(artifactsDir), "Artifacts dir (%s) does not exist or is not "
-            + "a directory: check the runtime configuration", artifactsDir);
+        checkState(
+            Files.isDirectory(artifactsDir),
+            "Artifacts dir (%s) does not exist or is not "
+                + "a directory: check the runtime configuration",
+            artifactsDir);
         Path artifactLocation = artifactsDir.resolve(filename);
 
         // Load the service artifact
-        LoadedServiceDefinition loadedServiceDefinition = serviceLoader
-            .loadService(artifactLocation);
+        LoadedServiceDefinition loadedServiceDefinition =
+            serviceLoader.loadService(artifactLocation);
 
         // Check the artifact has the correct identifier in its metadata
         ServiceArtifactId actualId = loadedServiceDefinition.getId();
@@ -143,8 +148,10 @@ public final class ServiceRuntime implements AutoCloseable {
           // Unload the artifact
           serviceLoader.unloadService(actualId);
           throw new ServiceLoadingException(
-              String.format("The artifact loaded from (%s) has wrong id (%s) in "
-                  + "metadata. Expected id: %s", filename, actualId, id));
+              String.format(
+                  "The artifact loaded from (%s) has wrong id (%s) in "
+                      + "metadata. Expected id: %s",
+                  filename, actualId, id));
         }
       }
 
@@ -157,37 +164,35 @@ public final class ServiceRuntime implements AutoCloseable {
 
   /**
    * Returns true if an artifact with the given id is currently deployed in this runtime.
+   *
    * @param id a service artifact identifier
    */
   public boolean isArtifactDeployed(ServiceArtifactId id) {
     synchronized (lock) {
-      return serviceLoader.findService(id)
-          .isPresent();
+      return serviceLoader.findService(id).isPresent();
     }
   }
 
   /**
-   * Starts registration of a new service instance with the given specification.
-   * It involves the initial configuration of the service instance with the given parameters.
-   * The instance is not registered until
-   * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)}
-   * is invoked with the {@code Status=Active}.
+   * Starts registration of a new service instance with the given specification. It involves the
+   * initial configuration of the service instance with the given parameters. The instance is not
+   * registered until {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceState.Status)} is
+   * invoked with the {@code Status=Active}.
    *
    * @param fork a database access to apply configuration
    * @param instanceSpec a service instance specification; must reference a deployed artifact
-   * @param configuration service instance configuration parameters as a serialized protobuf
-   *     message
-   * @throws IllegalArgumentException if the service is already started; or its artifact
-   *     is not deployed
-   * @throws ExecutionException if such exception occurred in the service constructor;
-   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
-   * @throws UnexpectedExecutionException if any other exception occurred in
-   *     the  the service constructor; it is included as cause. The cause must be translated
-   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @param configuration service instance configuration parameters as a serialized protobuf message
+   * @throws IllegalArgumentException if the service is already started; or its artifact is not
+   *     deployed
+   * @throws ExecutionException if such exception occurred in the service constructor; must be
+   *     translated into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedExecutionException if any other exception occurred in the the service
+   *     constructor; it is included as cause. The cause must be translated into an error of kind
+   *     {@link ErrorKind#UNEXPECTED}
    * @throws RuntimeException if the runtime failed to instantiate the service for other reason
    */
-  public void initiateAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
-      byte[] configuration) {
+  public void initiateAddingService(
+      Fork fork, ServiceInstanceSpec instanceSpec, byte[] configuration) {
     try {
       synchronized (lock) {
         // Create a new service
@@ -200,28 +205,30 @@ public final class ServiceRuntime implements AutoCloseable {
       // Log the initialization event
       logger.info("Initialized a new service: {}", instanceSpec);
     } catch (Exception e) {
-      logger.error("Failed to initialize a service {} instance with parameters {}",
-          instanceSpec, configuration, e);
+      logger.error(
+          "Failed to initialize a service {} instance with parameters {}",
+          instanceSpec,
+          configuration,
+          e);
       throw e;
     }
   }
 
   /**
    * Modifies the state of the given service instance at the runtime either by activation it or
-   * stopping. The service instance should be successfully initialized
-   * by {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])} in advance.
-   * Activation leads to the service instance registration, allowing subsequent operations on it:
-   * transactions, API requests.
-   * Stopping leads to the service disabling i.e. stopped service does not execute transactions,
-   * process events, provide APIs, etc. But the service data still exists.
+   * stopping. The service instance should be successfully initialized by {@link
+   * #initiateAddingService(Fork, ServiceInstanceSpec, byte[])} in advance. Activation leads to the
+   * service instance registration, allowing subsequent operations on it: transactions, API
+   * requests. Stopping leads to the service disabling i.e. stopped service does not execute
+   * transactions, process events, provide APIs, etc. But the service data still exists.
    *
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param instanceStatus a new status of the service instance
-   * @throws IllegalArgumentException if activating already active service; or its artifact
-   *     is not deployed; or unrecognized service status received
+   * @throws IllegalArgumentException if activating already active service; or its artifact is not
+   *     deployed; or unrecognized service status received
    */
-  public void updateInstanceStatus(ServiceInstanceSpec instanceSpec,
-      InstanceState.Status instanceStatus) {
+  public void updateInstanceStatus(
+      ServiceInstanceSpec instanceSpec, InstanceState.Status instanceStatus) {
     synchronized (lock) {
       switch (instanceStatus) {
         case ACTIVE:
@@ -231,8 +238,10 @@ public final class ServiceRuntime implements AutoCloseable {
           stopService(instanceSpec);
           break;
         default:
-          String msg = String.format("Unexpected status %s received for the service %s",
-              instanceStatus.name(), instanceSpec.getName());
+          String msg =
+              String.format(
+                  "Unexpected status %s received for the service %s",
+                  instanceStatus.name(), instanceSpec.getName());
           logger.error(msg);
           throw new IllegalArgumentException(msg);
       }
@@ -264,25 +273,32 @@ public final class ServiceRuntime implements AutoCloseable {
       unRegisterService(service);
       logger.info("Stopped a service: {}", instanceSpec);
     } else {
-      logger.warn("There is no active service with the given name {}. "
-          + "Possibly restoring services state after reboot?", name);
+      logger.warn(
+          "There is no active service with the given name {}. "
+              + "Possibly restoring services state after reboot?",
+          name);
     }
   }
 
   private ServiceWrapper createServiceInstance(ServiceInstanceSpec instanceSpec) {
     // Check no such service in the runtime
     String name = instanceSpec.getName();
-    checkArgument(!findService(name).isPresent(),
-        "Service with name '%s' already created: %s", name, services.get(name));
+    checkArgument(
+        !findService(name).isPresent(),
+        "Service with name '%s' already created: %s",
+        name,
+        services.get(name));
 
     // Find the service definition
     ServiceArtifactId artifactId = instanceSpec.getArtifactId();
-    LoadedServiceDefinition serviceDefinition = serviceLoader.findService(artifactId)
-        .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
+    LoadedServiceDefinition serviceDefinition =
+        serviceLoader
+            .findService(artifactId)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
     // Instantiate the service
-    return servicesFactory.createService(serviceDefinition, instanceSpec,
-        new MultiplexingNodeDecorator(node));
+    return servicesFactory.createService(
+        serviceDefinition, instanceSpec, new MultiplexingNodeDecorator(node));
   }
 
   private void registerService(ServiceWrapper service) {
@@ -301,9 +317,7 @@ public final class ServiceRuntime implements AutoCloseable {
     servicesById.remove(id);
   }
 
-  /**
-   * Connects the API of a started service to the web-server.
-   */
+  /** Connects the API of a started service to the web-server. */
   private void connectServiceApi(ServiceWrapper service) {
     try {
       runtimeTransport.connectServiceApi(service);
@@ -312,8 +326,11 @@ public final class ServiceRuntime implements AutoCloseable {
       // in the runtime. Such behaviour is user-hostile as we hide the error in logs instead
       // of communicating it immediately and prominently (by stopping the service).
       // It is to be reconsidered when service termination is implemented.
-      logger.error("Failed to connect service {} public API. "
-          + "Its HTTP handlers will likely be inaccessible", service.getName(), e);
+      logger.error(
+          "Failed to connect service {} public API. "
+              + "Its HTTP handlers will likely be inaccessible",
+          service.getName(),
+          e);
     }
   }
 
@@ -322,41 +339,52 @@ public final class ServiceRuntime implements AutoCloseable {
    *
    * @param serviceId the numeric identifier of the service instance to which the transaction
    *     belongs
-   * @param interfaceName a fully-qualified name of the interface in which the transaction
-   *     is defined, or empty string if it is defined in the service directly (implicit interface)
+   * @param interfaceName a fully-qualified name of the interface in which the transaction is
+   *     defined, or empty string if it is defined in the service directly (implicit interface)
    * @param txId the transaction type identifier
    * @param arguments the serialized transaction arguments
    * @param fork a native fork object
-   * @param callerServiceId the id of the caller service if transaction is invoked by other
-   *     service. Currently only applicable to invocations of Configure interface methods
+   * @param callerServiceId the id of the caller service if transaction is invoked by other service.
+   *     Currently only applicable to invocations of Configure interface methods
    * @param txMessageHash the hash of the transaction message
    * @param authorPublicKey the public key of the transaction author
-   * @throws ExecutionException if such exception occurred in the transaction;
-   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
-   * @throws UnexpectedExecutionException if any other exception occurred in
-   *     the transaction; it is included as cause. The cause must be translated
-   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @throws ExecutionException if such exception occurred in the transaction; must be translated
+   *     into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedExecutionException if any other exception occurred in the transaction; it is
+   *     included as cause. The cause must be translated into an error of kind {@link
+   *     ErrorKind#UNEXPECTED}
    * @throws IllegalArgumentException if any argument is not valid (e.g., unknown service)
    * @see com.exonum.binding.core.transaction.Transaction
    */
-  public void executeTransaction(int serviceId, String interfaceName, int txId,
-      byte[] arguments, Fork fork, int callerServiceId, HashCode txMessageHash,
+  public void executeTransaction(
+      int serviceId,
+      String interfaceName,
+      int txId,
+      byte[] arguments,
+      Fork fork,
+      int callerServiceId,
+      HashCode txMessageHash,
       PublicKey authorPublicKey) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       String serviceName = service.getName();
-      TransactionContext context = TransactionContext.builder()
-          .fork(fork)
-          .txMessageHash(txMessageHash)
-          .authorPk(authorPublicKey)
-          .serviceName(serviceName)
-          .serviceId(serviceId)
-          .build();
+      TransactionContext context =
+          TransactionContext.builder()
+              .fork(fork)
+              .txMessageHash(txMessageHash)
+              .authorPk(authorPublicKey)
+              .serviceName(serviceName)
+              .serviceId(serviceId)
+              .build();
       try {
         service.executeTransaction(interfaceName, txId, arguments, callerServiceId, context);
       } catch (Exception e) {
-        logger.info("Transaction execution failed (service={}, txId={}, txMessageHash={})",
-            service.getName(), txId, context.getTransactionMessageHash(), e);
+        logger.info(
+            "Transaction execution failed (service={}, txId={}, txMessageHash={})",
+            service.getName(),
+            txId,
+            context.getTransactionMessageHash(),
+            e);
         throw e;
       }
     }
@@ -367,11 +395,11 @@ public final class ServiceRuntime implements AutoCloseable {
    *
    * @param serviceId the id of the service on which to perform the operation
    * @param fork a fork allowing the runtime and the service to modify the database state.
-   * @throws ExecutionException if such exception occurred in the transaction;
-   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
-   * @throws UnexpectedExecutionException if any other exception occurred in
-   *     the transaction; it is included as cause. The cause must be translated
-   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @throws ExecutionException if such exception occurred in the transaction; must be translated
+   *     into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedExecutionException if any other exception occurred in the transaction; it is
+   *     included as cause. The cause must be translated into an error of kind {@link
+   *     ErrorKind#UNEXPECTED}
    * @throws IllegalArgumentException if any argument is not valid (e.g., unknown service)
    */
   public void afterTransactions(int serviceId, Fork fork) {
@@ -380,16 +408,16 @@ public final class ServiceRuntime implements AutoCloseable {
       try {
         service.afterTransactions(fork);
       } catch (Exception e) {
-        logger.error("Service {} threw exception in afterTransactions."
-            + " Any changes will be rolled-back", service.getName(), e);
+        logger.error(
+            "Service {} threw exception in afterTransactions." + " Any changes will be rolled-back",
+            service.getName(),
+            e);
         throw e;
       }
     }
   }
 
-  /**
-   * Notifies the services in the runtime of the block commit event.
-   */
+  /** Notifies the services in the runtime of the block commit event. */
   public void afterCommit(BlockCommittedEvent event) {
     synchronized (lock) {
       for (ServiceWrapper service : services.values()) {
@@ -409,17 +437,20 @@ public final class ServiceRuntime implements AutoCloseable {
           service.afterCommit(event);
         } catch (Exception e) {
           // Log, but do not re-throw either immediately or later
-          logger.error("Service {} threw an exception in its afterCommit handler of {}",
-              service.getName(), event, e);
+          logger.error(
+              "Service {} threw an exception in its afterCommit handler of {}",
+              service.getName(),
+              event,
+              e);
         }
       }
     }
   }
 
   /**
-   * Stops this runtime. It will stop the server providing transport to services,
-   * remove all services and unload their artifacts. The operation is irreversible;
-   * the runtime may not be used after this operation completes.
+   * Stops this runtime. It will stop the server providing transport to services, remove all
+   * services and unload their artifacts. The operation is irreversible; the runtime may not be used
+   * after this operation completes.
    *
    * @throws InterruptedException if an interrupt was requested
    */
@@ -492,8 +523,10 @@ public final class ServiceRuntime implements AutoCloseable {
 
   /** Checks that the service with the given id is started in this runtime. */
   private void checkService(Integer serviceId) {
-    checkArgument(servicesById.containsKey(serviceId),
-        "No service with id=%s in the Java runtime", serviceId);
+    checkArgument(
+        servicesById.containsKey(serviceId),
+        "No service with id=%s in the Java runtime",
+        serviceId);
   }
 
   @VisibleForTesting

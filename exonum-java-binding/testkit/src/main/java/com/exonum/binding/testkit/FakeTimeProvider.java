@@ -23,9 +23,9 @@ import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 
 /**
- * Fake time provider for service testing. Allows to manually manipulate time that is returned
- * by TestKit time service. If you need to set results of different consecutive calls on
- * {@link #getTime()}, consider using a mock of TimeProvider instead.
+ * Fake time provider for service testing. Allows to manually manipulate time that is returned by
+ * TestKit time service. If you need to set results of different consecutive calls on {@link
+ * #getTime()}, consider using a mock of TimeProvider instead.
  */
 public class FakeTimeProvider implements TimeProvider {
 
@@ -58,14 +58,13 @@ public class FakeTimeProvider implements TimeProvider {
   }
 
   private static void checkTimeZone(ZonedDateTime value) {
-    checkArgument(value.getZone() == ZoneOffset.UTC,
+    checkArgument(
+        value.getZone() == ZoneOffset.UTC,
         "ZonedDateTime value should be in UTC, but was %s",
         value.getZone());
   }
 
-  /**
-   * Increases stored time by given amount.
-   */
+  /** Increases stored time by given amount. */
   public void addTime(TemporalAmount toAdd) {
     time = time.plus(toAdd);
   }

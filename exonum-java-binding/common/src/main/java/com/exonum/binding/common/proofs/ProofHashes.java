@@ -23,6 +23,7 @@ public final class ProofHashes {
 
   /**
    * Checks that the given hash is a SHA-256 hash.
+   *
    * @throws IllegalArgumentException if the hash size is not equal to 256 bits
    */
   public static void checkSha256Hash(HashCode hash) {

@@ -30,7 +30,7 @@ enum BoolSerializer implements Serializer<Boolean> {
   @Override
   public byte[] toBytes(Boolean value) {
     byte b = value ? BOOLEAN_TRUE : BOOLEAN_FALSE;
-    return new byte[]{b};
+    return new byte[] {b};
   }
 
   @Override
@@ -45,5 +45,4 @@ enum BoolSerializer implements Serializer<Boolean> {
   private static boolean isValidBoolean(byte value) {
     return value == BOOLEAN_FALSE || value == BOOLEAN_TRUE;
   }
-
 }

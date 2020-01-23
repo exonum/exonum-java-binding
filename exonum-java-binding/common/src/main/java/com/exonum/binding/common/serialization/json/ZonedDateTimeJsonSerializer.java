@@ -33,27 +33,28 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * {@link ZonedDateTime} string serializer. Used to serialize/deserialize ZonedDateTime values
- * from/to strings in the {@link DateTimeFormatter#ISO_ZONED_DATE_TIME} date-time format with
- * offset and zone, such as '2011-12-03T10:15:30+01:00[Europe/Paris]'.
+ * from/to strings in the {@link DateTimeFormatter#ISO_ZONED_DATE_TIME} date-time format with offset
+ * and zone, such as '2011-12-03T10:15:30+01:00[Europe/Paris]'.
  *
  * <p>All method arguments are non-null by default.
  */
-final class ZonedDateTimeJsonSerializer implements JsonSerializer<ZonedDateTime>,
-    JsonDeserializer<ZonedDateTime> {
+final class ZonedDateTimeJsonSerializer
+    implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {
 
   private static final DateTimeFormatter DATE_TIME_FORMATTER = ISO_ZONED_DATE_TIME;
 
   @Override
-  public JsonElement serialize(ZonedDateTime src, Type typeOfSrc,
-      JsonSerializationContext context) {
+  public JsonElement serialize(
+      ZonedDateTime src, Type typeOfSrc, JsonSerializationContext context) {
     checkNotNull(src, "ZonedDateTime value is null");
 
     return new JsonPrimitive(DATE_TIME_FORMATTER.format(src));
   }
 
   @Override
-  public ZonedDateTime deserialize(JsonElement json, Type typeOfT,
-      JsonDeserializationContext context) throws JsonParseException {
+  public ZonedDateTime deserialize(
+      JsonElement json, Type typeOfT, JsonDeserializationContext context)
+      throws JsonParseException {
     checkNotNull(json, "ZonedDateTime json input is null");
 
     return ZonedDateTime.parse(json.getAsString(), DATE_TIME_FORMATTER);

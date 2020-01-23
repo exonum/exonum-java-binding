@@ -22,14 +22,13 @@ import com.google.protobuf.MessageLite;
 /**
  * Configuration parameters of Exonum service.
  *
- * <p>Network administrators agree on and pass
- * the configuration parameters as a service-specific protobuf message when adding
- * that service instance to the network. After Exonum starts the service, it
- * {@linkplain Service#initialize(Fork, Configuration) passes the configuration parameters}
- * to the newly created service instance.
+ * <p>Network administrators agree on and pass the configuration parameters as a service-specific
+ * protobuf message when adding that service instance to the network. After Exonum starts the
+ * service, it {@linkplain Service#initialize(Fork, Configuration) passes the configuration
+ * parameters} to the newly created service instance.
  *
- * <p>Reconfiguration of a started service may be implemented with a supervisor service
- * and {@link Configurable} interface.
+ * <p>Reconfiguration of a started service may be implemented with a supervisor service and {@link
+ * Configurable} interface.
  *
  * @see Service#initialize(Fork, Configuration)
  * @see Configurable
@@ -47,5 +46,4 @@ public interface Configuration {
    * @see com.exonum.binding.common.serialization.StandardSerializers#protobuf(Class)
    */
   <MessageT extends MessageLite> MessageT getAsMessage(Class<MessageT> parametersType);
-
 }

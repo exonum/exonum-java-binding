@@ -20,10 +20,11 @@ import com.google.inject.Module;
 import org.pf4j.ExtensionPoint;
 
 /**
- * A service module configures the service bindings so that the framework can resolve
- * the service implementation and all its dependencies.
+ * A service module configures the service bindings so that the framework can resolve the service
+ * implementation and all its dependencies.
  *
  * <p>An implementation must at least configure the following bindings:
+ *
  * <ul>
  *   <li>{@link Service}.
  * </ul>
@@ -35,5 +36,4 @@ import org.pf4j.ExtensionPoint;
  * <p>Currently, only a single module per service is supported; if you service needs several&nbsp;—
  * please let us know.
  */
-public interface ServiceModule extends Module, ExtensionPoint {
-}
+public interface ServiceModule extends Module, ExtensionPoint {}

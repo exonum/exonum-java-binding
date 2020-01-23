@@ -36,8 +36,8 @@ class HttpUrlHelperTest {
 
   @ParameterizedTest
   @MethodSource("source")
-  void getFullUrl(String expectedUrl,
-      String host, String prefix, String path, Map<String, String> query)
+  void getFullUrl(
+      String expectedUrl, String host, String prefix, String path, Map<String, String> query)
       throws MalformedURLException {
     HttpUrl url = HttpUrlHelper.getFullUrl(new URL(host), prefix, path, query);
 
@@ -45,27 +45,40 @@ class HttpUrlHelperTest {
   }
 
   /**
-   * Provides a combination of parameters by the following rules:
-   * - port is optional
-   * - prefix is optional
-   * - paths can start either with or without heading slash
-   * - query params are optional.
+   * Provides a combination of parameters by the following rules: - port is optional - prefix is
+   * optional - paths can start either with or without heading slash - query params are optional.
    */
   private static List<Arguments> source() {
     Map<String, String> noQuery = emptyMap();
     return ImmutableList.of(
-        arguments("http://localhost//path/to/source",
-            "http://localhost", "", "/path/to/source", noQuery),
-        arguments("http://localhost/prefix/path/to/source",
-            "http://localhost", "prefix", "path/to/source", noQuery),
-        arguments("http://localhost/pre%20fix/path/to/source",
+        arguments(
+            "http://localhost//path/to/source", "http://localhost", "", "/path/to/source", noQuery),
+        arguments(
+            "http://localhost/prefix/path/to/source",
+            "http://localhost",
+            "prefix",
+            "path/to/source",
+            noQuery),
+        arguments(
+            "http://localhost/pre%20fix/path/to/source",
             "http://localhost", "pre fix", "path/to/source", noQuery),
-        arguments("http://localhost:8080//prefix//path/to/source",
-            "http://localhost:8080", "/prefix", "/path/to/source", noQuery),
-        arguments("http://localhost:8080//pre/fix//path/to/source",
-            "http://localhost:8080", "/pre/fix", "/path/to/source", noQuery),
-        arguments("http://localhost:8080//pre/fix//path/to/source?key=value",
-            "http://localhost:8080", "/pre/fix", "/path/to/source", ImmutableMap.of("key", "value"))
-    );
+        arguments(
+            "http://localhost:8080//prefix//path/to/source",
+            "http://localhost:8080",
+            "/prefix",
+            "/path/to/source",
+            noQuery),
+        arguments(
+            "http://localhost:8080//pre/fix//path/to/source",
+            "http://localhost:8080",
+            "/pre/fix",
+            "/path/to/source",
+            noQuery),
+        arguments(
+            "http://localhost:8080//pre/fix//path/to/source?key=value",
+            "http://localhost:8080",
+            "/pre/fix",
+            "/path/to/source",
+            ImmutableMap.of("key", "value")));
   }
 }

@@ -23,7 +23,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.junit.jupiter.api.Tag;
 
-
 /**
  * Indicates that a test class must be run in a forked individual VM.
  *
@@ -34,6 +33,4 @@ import org.junit.jupiter.api.Tag;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Tag("forked")
-public @interface Forked {
-
-}
+public @interface Forked {}

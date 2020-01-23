@@ -18,9 +18,7 @@ package com.exonum.binding.common.proofs.list;
 
 import com.exonum.binding.common.proofs.ProofStatus;
 
-/**
- * Possible statuses of a checked list proof.
- */
+/** Possible statuses of a checked list proof. */
 public enum ListProofStatus implements ProofStatus {
   VALID("Proof has a valid structure"),
   INVALID_ELEMENT_NODE_DEPTH("Element node appears below the maximum allowed depth"),
@@ -43,8 +41,6 @@ public enum ListProofStatus implements ProofStatus {
 
   @Override
   public String toString() {
-    return "ListProofStatus{"
-        + "description='" + description + '\''
-        + '}';
+    return "ListProofStatus{" + "description='" + description + '\'' + '}';
   }
 }

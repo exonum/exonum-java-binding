@@ -27,42 +27,38 @@ import com.google.common.base.Strings;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * Properties about the qa service artifact.
- */
+/** Properties about the qa service artifact. */
 public final class QaArtifactInfo {
 
   public static final Path ARTIFACT_DIR = Paths.get(getRequiredProperty("it.artifactsDir"));
-  public static final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId.parseFrom(
-      getRequiredProperty("it.exonumArtifactId"));
+  public static final ServiceArtifactId ARTIFACT_ID =
+      ServiceArtifactId.parseFrom(getRequiredProperty("it.exonumArtifactId"));
   public static final String ARTIFACT_FILENAME = getRequiredProperty("it.artifactFilename");
   public static final String TIME_SERVICE_NAME = "time";
   public static final int TIME_SERVICE_ID = 100;
   public static final String QA_SERVICE_NAME = "qa";
   public static final int QA_SERVICE_ID = 101;
   public static final QaConfiguration QA_SERVICE_INITIAL_CONFIG =
-      QaConfiguration.newBuilder()
-          .setTimeOracleName(TIME_SERVICE_NAME)
-          .build();
+      QaConfiguration.newBuilder().setTimeOracleName(TIME_SERVICE_NAME).build();
 
   private static String getRequiredProperty(String key) {
     String property = System.getProperty(key);
-    checkState(!Strings.isNullOrEmpty(property),
-        "Absent property: %s=%s", key, property);
+    checkState(!Strings.isNullOrEmpty(property), "Absent property: %s=%s", key, property);
     return property;
   }
 
   /**
-   * Creates a testkit builder with QA service and time service with the instance parameters
-   * as specified in the constants. Time service will use the system clock.
+   * Creates a testkit builder with QA service and time service with the instance parameters as
+   * specified in the constants. Time service will use the system clock.
    */
   public static Builder createQaServiceTestkit() {
     return createQaServiceTestkit(TimeProvider.systemTime());
   }
 
   /**
-   * Creates a testkit builder with QA service and time service with the instance parameters
-   * as specified in the constants.
+   * Creates a testkit builder with QA service and time service with the instance parameters as
+   * specified in the constants.
+   *
    * @param timeProvider the time provider to use in the time service
    */
   public static Builder createQaServiceTestkit(TimeProvider timeProvider) {

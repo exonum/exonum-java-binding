@@ -38,13 +38,14 @@ class ReflectiveModuleSupplierTest {
 
   @Test
   void newFailsIfNoConstuctor() {
-    assertThrows(NoSuchMethodException.class,
-        () -> new ReflectiveModuleSupplier(BadNoNoArgCtor.class));
+    assertThrows(
+        NoSuchMethodException.class, () -> new ReflectiveModuleSupplier(BadNoNoArgCtor.class));
   }
 
   @Test
   void newFailsIfInaccessibleConstuctor() {
-    assertThrows(IllegalAccessException.class,
+    assertThrows(
+        IllegalAccessException.class,
         () -> new ReflectiveModuleSupplier(BadInaccessibleCtor.class));
   }
 
@@ -71,8 +72,7 @@ class ReflectiveModuleSupplierTest {
   void getPropagatesExceptions() throws NoSuchMethodException, IllegalAccessException {
     supplier = new ReflectiveModuleSupplier(BadThrowsInCtor.class);
 
-    IllegalStateException e = assertThrows(IllegalStateException.class,
-        () -> supplier.get());
+    IllegalStateException e = assertThrows(IllegalStateException.class, () -> supplier.get());
 
     Throwable cause = e.getCause();
     assertThat(cause, instanceOf(RuntimeException.class));
@@ -81,13 +81,11 @@ class ReflectiveModuleSupplierTest {
 
   static class Modules {
     static class BadNoNoArgCtor extends AbstractServiceModule {
-      BadNoNoArgCtor(String s1) {
-      }
+      BadNoNoArgCtor(String s1) {}
     }
 
     static class BadInaccessibleCtor extends AbstractServiceModule {
-      private BadInaccessibleCtor() {
-      }
+      private BadInaccessibleCtor() {}
     }
 
     static class BadThrowsInCtor extends AbstractServiceModule {
@@ -96,7 +94,6 @@ class ReflectiveModuleSupplierTest {
       }
     }
 
-    static class Good extends AbstractServiceModule {
-    }
+    static class Good extends AbstractServiceModule {}
   }
 }

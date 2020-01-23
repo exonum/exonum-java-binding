@@ -19,9 +19,9 @@ package com.exonum.binding.core.storage.indices;
 import java.util.Optional;
 
 /**
- * An interface corresponding to
- * <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">std::iter::Iterator</a>
- * from the Rust standard library.
+ * An interface corresponding to <a
+ * href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">std::iter::Iterator</a> from the
+ * Rust standard library.
  *
  * @param <E> type of elements returned by this iterator
  */

@@ -93,5 +93,4 @@ class JsonSerializerTest {
       this.value = value;
     }
   }
-
 }

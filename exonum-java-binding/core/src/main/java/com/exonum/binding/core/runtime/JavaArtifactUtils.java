@@ -24,17 +24,18 @@ final class JavaArtifactUtils {
 
   /**
    * Validates the string representation of the artifact id for forbidden characters.
+   *
    * @throws IllegalArgumentException if any forbidden characters found
    */
   static void checkNoForbiddenChars(String artifactId) {
     Matcher matcher = FORBIDDEN_CHARS_PATTERN.matcher(artifactId);
     if (matcher.find()) {
-      throw new IllegalArgumentException(String.format("'%s' must not have any forbidden "
-              + "characters, but there is '%s' at index %d",
-          artifactId, matcher.group(), matcher.start()));
+      throw new IllegalArgumentException(
+          String.format(
+              "'%s' must not have any forbidden " + "characters, but there is '%s' at index %d",
+              artifactId, matcher.group(), matcher.start()));
     }
   }
 
-  private JavaArtifactUtils() {
-  }
+  private JavaArtifactUtils() {}
 }

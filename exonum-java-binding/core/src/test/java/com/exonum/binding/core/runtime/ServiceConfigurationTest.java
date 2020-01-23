@@ -48,21 +48,19 @@ class ServiceConfigurationTest {
     ServiceConfiguration serviceConfiguration = new ServiceConfiguration(serializedConfig);
 
     // Try to decode the config
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceConfiguration.getAsMessage(Id.class));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class, () -> serviceConfiguration.getAsMessage(Id.class));
 
     assertThat(e).hasCauseInstanceOf(InvalidProtocolBufferException.class);
   }
 
   @Test
   void verifyEquals() {
-    EqualsVerifier.forClass(ServiceConfiguration.class)
-        .verify();
+    EqualsVerifier.forClass(ServiceConfiguration.class).verify();
   }
 
   private static Id anyId() {
-    return Id.newBuilder()
-        .setId("12ab")
-        .build();
+    return Id.newBuilder().setId("12ab").build();
   }
 }

@@ -33,8 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ThrowingTransactionsTest {
 
-  @Mock
-  private TransactionContext context;
+  @Mock private TransactionContext context;
 
   @Test
   void createThrowingIllegalArgumentInInfo() {
@@ -55,14 +54,16 @@ class ThrowingTransactionsTest {
 
   @Test
   void createThrowingFailsIfUninstantiableThrowable() {
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> ThrowingTransactions.createThrowing(UninstantiableException.class));
   }
 
   @Test
   @Disabled("Unfortunately, we do not perform such checks at the moment: ECR-1988")
   void createThrowingFailsIfInvalidThrowable() {
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> ThrowingTransactions.createThrowing(IOException.class));
   }
 
@@ -70,11 +71,10 @@ class ThrowingTransactionsTest {
   void createThrowingExecutionException() {
     byte errorCode = 1;
     String description = "Foo";
-    Transaction tx = ThrowingTransactions.createThrowingExecutionException(false,
-        errorCode, description);
+    Transaction tx =
+        ThrowingTransactions.createThrowingExecutionException(false, errorCode, description);
 
-    ExecutionException actual = assertThrows(ExecutionException.class,
-        () -> tx.execute(context));
+    ExecutionException actual = assertThrows(ExecutionException.class, () -> tx.execute(context));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));
   }
@@ -83,11 +83,10 @@ class ThrowingTransactionsTest {
   void createThrowingExecutionExceptionSubclass() {
     byte errorCode = 1;
     String description = "Foo";
-    Transaction tx = ThrowingTransactions.createThrowingExecutionException(true,
-        errorCode, description);
+    Transaction tx =
+        ThrowingTransactions.createThrowingExecutionException(true, errorCode, description);
 
-    ExecutionException actual = assertThrows(TestTxExecException.class,
-        () -> tx.execute(context));
+    ExecutionException actual = assertThrows(TestTxExecException.class, () -> tx.execute(context));
     assertThat(actual.getErrorCode(), equalTo(errorCode));
     assertThat(actual.getMessage(), equalTo(description));
   }

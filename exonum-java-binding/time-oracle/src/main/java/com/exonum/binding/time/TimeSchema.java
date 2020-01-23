@@ -23,10 +23,11 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
 
 /**
- * Exonum time service database schema. It provides read-only access to the state
- * of a time oracle service instance.
+ * Exonum time service database schema. It provides read-only access to the state of a time oracle
+ * service instance.
  *
- * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/time/">Time oracle documentation</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/time/">Time oracle
+ *     documentation</a>
  */
 public interface TimeSchema {
 
@@ -35,9 +36,8 @@ public interface TimeSchema {
    *
    * @param dbAccess the database access
    * @param name the name of the time oracle service instance to use
-   *
-   * @throws IllegalArgumentException if there is no service with the given name or it is not
-   *     an Exonum time oracle
+   * @throws IllegalArgumentException if there is no service with the given name or it is not an
+   *     Exonum time oracle
    */
   static TimeSchema newInstance(Access dbAccess, String name) {
     return new TimeSchemaProxy(dbAccess, name);
@@ -46,15 +46,15 @@ public interface TimeSchema {
   /**
    * Returns consolidated time output by the service in UTC.
    *
-   * <p>When this time oracle instance is started, the consolidated time remains unknown until
-   * the transactions with time updates from at least two thirds of validator nodes are processed.
-   * After that the time will be always present.
+   * <p>When this time oracle instance is started, the consolidated time remains unknown until the
+   * transactions with time updates from at least two thirds of validator nodes are processed. After
+   * that the time will be always present.
    */
   ProofEntryIndexProxy<ZonedDateTime> getTime();
 
   /**
-   * Returns the table that stores time for every validator. Note that this is a proof map that
-   * uses non-hashed keys.
+   * Returns the table that stores time for every validator. Note that this is a proof map that uses
+   * non-hashed keys.
    */
   ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes();
 }

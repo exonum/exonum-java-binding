@@ -26,8 +26,7 @@ import com.exonum.core.messages.Blockchain.TxLocation;
 public enum TransactionLocationSerializer implements Serializer<TransactionLocation> {
   INSTANCE;
 
-  private static final Serializer<TxLocation> PROTO_SERIALIZER =
-      protobuf(TxLocation.class);
+  private static final Serializer<TxLocation> PROTO_SERIALIZER = protobuf(TxLocation.class);
 
   @Override
   public byte[] toBytes(TransactionLocation value) {
@@ -42,8 +41,7 @@ public enum TransactionLocationSerializer implements Serializer<TransactionLocat
   public TransactionLocation fromBytes(byte[] binaryTransactionLocation) {
     Blockchain.TxLocation copiedtxLocationProtos =
         PROTO_SERIALIZER.fromBytes(binaryTransactionLocation);
-    return TransactionLocation.valueOf(copiedtxLocationProtos.getBlockHeight(),
-        copiedtxLocationProtos.getPositionInBlock());
+    return TransactionLocation.valueOf(
+        copiedtxLocationProtos.getBlockHeight(), copiedtxLocationProtos.getPositionInBlock());
   }
-
 }

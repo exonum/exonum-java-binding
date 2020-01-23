@@ -23,8 +23,6 @@ class IndexAddressTest {
 
   @Test
   void verifyEquals() {
-    EqualsVerifier.forClass(IndexAddress.class)
-        .withNonnullFields("name")
-        .verify();
+    EqualsVerifier.forClass(IndexAddress.class).withNonnullFields("name").verify();
   }
 }

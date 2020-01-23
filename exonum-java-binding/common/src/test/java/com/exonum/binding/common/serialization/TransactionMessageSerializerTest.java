@@ -42,14 +42,14 @@ class TransactionMessageSerializerTest {
     CryptoFunction cryptoFunction = Mockito.mock(CryptoFunction.class);
     when(cryptoFunction.signMessage(any(), eq(keys.getPrivateKey()))).thenReturn(signature);
 
-    TransactionMessage message = TransactionMessage.builder()
-        .serviceId((short) 1)
-        .transactionId((short) 2)
-        .payload(payload)
-        .signedWith(keys, cryptoFunction)
-        .build();
+    TransactionMessage message =
+        TransactionMessage.builder()
+            .serviceId((short) 1)
+            .transactionId((short) 2)
+            .payload(payload)
+            .signedWith(keys, cryptoFunction)
+            .build();
 
     roundTripTest(message, serializer);
   }
-
 }

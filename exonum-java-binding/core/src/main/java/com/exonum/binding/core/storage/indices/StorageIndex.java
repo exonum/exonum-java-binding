@@ -29,8 +29,8 @@ public interface StorageIndex {
   }
 
   /**
-   * Returns the <em>index address</em>: its unique identifier in the database. It consists
-   * of the name and, in case this index belongs to an index family, a family identifier.
+   * Returns the <em>index address</em>: its unique identifier in the database. It consists of the
+   * name and, in case this index belongs to an index family, a family identifier.
    */
   IndexAddress getAddress();
 }

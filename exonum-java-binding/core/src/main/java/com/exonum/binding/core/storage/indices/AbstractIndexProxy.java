@@ -26,16 +26,14 @@ import com.exonum.binding.core.storage.database.Fork;
 /**
  * An abstract super class for proxies of all indices.
  *
- * <p>Each index is created with a database access, either an immutable Snapshot or
- * a read-write Fork. An index has a modification counter to detect when it is modified.
+ * <p>Each index is created with a database access, either an immutable Snapshot or a read-write
+ * Fork. An index has a modification counter to detect when it is modified.
  */
 abstract class AbstractIndexProxy extends AbstractNativeProxy implements StorageIndex {
 
   final AbstractAccess dbAccess;
 
-  /**
-   * Needed to detect modifications of this index during iteration over this index.
-   */
+  /** Needed to detect modifications of this index during iteration over this index. */
   final ModificationCounter modCounter;
 
   private final IndexAddress address;
@@ -79,8 +77,8 @@ abstract class AbstractIndexProxy extends AbstractNativeProxy implements Storage
    */
   private void checkCanModify() {
     if (!(dbAccess.canModify())) {
-      throw new UnsupportedOperationException("Cannot modify the access: " + dbAccess
-          + "\nUse a Fork to modify any collection.");
+      throw new UnsupportedOperationException(
+          "Cannot modify the access: " + dbAccess + "\nUse a Fork to modify any collection.");
     }
   }
 

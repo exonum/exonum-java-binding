@@ -40,17 +40,15 @@ class CheckedMapProofMatcherTest {
   private static final HashCode TEST_KEY1 = HashCode.fromString("ab");
   private static final HashCode TEST_KEY2 = HashCode.fromString("cd");
   private static final String TEST_VALUE = "hello";
-  private static final List<MapTestEntry> TEST_ENTRY_LIST = Arrays
-      .asList(presentEntry(TEST_KEY1, TEST_VALUE), absentEntry(TEST_KEY2));
+  private static final List<MapTestEntry> TEST_ENTRY_LIST =
+      Arrays.asList(presentEntry(TEST_KEY1, TEST_VALUE), absentEntry(TEST_KEY2));
   private static final HashCode INDEX_HASH = HashCode.fromString("123456ef");
 
   @Test
   void matchesInvalidProof() {
-    CheckedMapProofMatcher matcher =
-        CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
+    CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
-    CheckedMapProof proof = CheckedFlatMapProof.invalid(
-        MapProofStatus.DUPLICATE_PATH);
+    CheckedMapProof proof = CheckedFlatMapProof.invalid(MapProofStatus.DUPLICATE_PATH);
 
     assertFalse(matcher.matchesSafely(proof));
   }
@@ -62,10 +60,11 @@ class CheckedMapProofMatcherTest {
     MapEntry<ByteString, ByteString> entry =
         MapEntry.valueOf(toByteString(TEST_KEY1), ByteString.copyFromUtf8(TEST_VALUE));
 
-    CheckedMapProof proof = CheckedFlatMapProof.correct(
-        INDEX_HASH,
-        Collections.singleton(entry),
-        Collections.singleton(toByteString(TEST_KEY2)));
+    CheckedMapProof proof =
+        CheckedFlatMapProof.correct(
+            INDEX_HASH,
+            Collections.singleton(entry),
+            Collections.singleton(toByteString(TEST_KEY2)));
 
     assertThat(proof, matcher);
   }
@@ -80,32 +79,36 @@ class CheckedMapProofMatcherTest {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(expectedEntryList);
 
     ByteString actualValue = ByteString.copyFromUtf8("hello");
-    MapEntry<ByteString, ByteString> entry = MapEntry.valueOf(toByteString(presentKey),
-        actualValue);
+    MapEntry<ByteString, ByteString> entry =
+        MapEntry.valueOf(toByteString(presentKey), actualValue);
     HashCode indexHash = HashCode.fromString("123456ef");
-    CheckedMapProof proof = CheckedFlatMapProof.correct(
-        indexHash,
-        Collections.singleton(entry),
-        Collections.singleton(toByteString(absentKey)));
+    CheckedMapProof proof =
+        CheckedFlatMapProof.correct(
+            indexHash,
+            Collections.singleton(entry),
+            Collections.singleton(toByteString(absentKey)));
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
 
-    assertThat(d.toString(), equalTo("was a valid proof, entries=[(ab -> hello)], "
-        + "missing keys=[cd], index hash=<123456ef>"));
+    assertThat(
+        d.toString(),
+        equalTo(
+            "was a valid proof, entries=[(ab -> hello)], "
+                + "missing keys=[cd], index hash=<123456ef>"));
   }
 
   @Test
   void describeMismatchSafelyInvalidProof() {
     CheckedMapProofMatcher matcher = CheckedMapProofMatcher.isValid(TEST_ENTRY_LIST);
 
-    CheckedMapProof proof = CheckedFlatMapProof.invalid(
-        MapProofStatus.DUPLICATE_PATH);
+    CheckedMapProof proof = CheckedFlatMapProof.invalid(MapProofStatus.DUPLICATE_PATH);
 
     Description d = new StringDescription();
     matcher.describeMismatchSafely(proof, d);
-    assertThat(d.toString(), equalTo("was an invalid proof, status=<"
-        + MapProofStatus.DUPLICATE_PATH + ">"));
+    assertThat(
+        d.toString(),
+        equalTo("was an invalid proof, status=<" + MapProofStatus.DUPLICATE_PATH + ">"));
   }
 
   private static ByteString toByteString(HashCode hashCode) {

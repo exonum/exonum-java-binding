@@ -29,18 +29,19 @@ interface ServiceLoader {
    * Loads the service artifact. The loading also involves verification of the artifact, e.g.,
    * checking that it has correct metadata. The actual verifications are implementation-specific.
    *
-   * <p>Upon successful completion of this method, the service is considered as loaded
-   * and instances of this service can be created.
+   * <p>Upon successful completion of this method, the service is considered as loaded and instances
+   * of this service can be created.
    *
    * @param artifactPath the location of the service artifact file
    * @return a complete definition of a service from the artifact
-   * @throws ServiceLoadingException in case the artifact cannot be loaded: not found or
-   *     does not pass verification
+   * @throws ServiceLoadingException in case the artifact cannot be loaded: not found or does not
+   *     pass verification
    */
   LoadedServiceDefinition loadService(Path artifactPath) throws ServiceLoadingException;
 
   /**
    * Returns a loaded service with the given id; or {@link Optional#empty()} if there is no such.
+   *
    * @param artifactId the identifier of the service artifact
    */
   Optional<LoadedServiceDefinition> findService(ServiceArtifactId artifactId);
@@ -58,14 +59,13 @@ interface ServiceLoader {
   void unloadService(ServiceArtifactId artifactId);
 
   /**
-   * Unloads all previously loaded services. The clients <b>must not</b> unload the services
-   * while any of them are in use (there are active instances of them).
+   * Unloads all previously loaded services. The clients <b>must not</b> unload the services while
+   * any of them are in use (there are active instances of them).
    *
-   * <p>This method will attempt to unload each service, and communicate any exceptions
-   * afterwards.
+   * <p>This method will attempt to unload each service, and communicate any exceptions afterwards.
    *
-   * @throws IllegalStateException if any service failed to unload, the exceptions they
-   *     had thrown will be in the list of suppressed exceptions
+   * @throws IllegalStateException if any service failed to unload, the exceptions they had thrown
+   *     will be in the list of suppressed exceptions
    */
   void unloadAll();
 }

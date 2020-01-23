@@ -20,9 +20,7 @@ import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.proofs.map.DbKey;
 
-/**
- * A funnel for a database key. Puts the raw database key (34 bytes) into the sink.
- */
+/** A funnel for a database key. Puts the raw database key (34 bytes) into the sink. */
 public enum DbKeyFunnel implements Funnel<DbKey> {
   INSTANCE;
 

@@ -18,17 +18,10 @@ package com.exonum.client.request;
 
 import com.exonum.client.response.Block;
 
-/**
- * Request option for block commit time.
- * See {@link Block#getCommitTime()}.
- */
+/** Request option for block commit time. See {@link Block#getCommitTime()}. */
 public enum BlockTimeOption {
-  /**
-   * Do not include block commit times in a response.
-   */
+  /** Do not include block commit times in a response. */
   NO_COMMIT_TIME,
-  /**
-   * Include block commit times in a response.
-   */
+  /** Include block commit times in a response. */
   INCLUDE_COMMIT_TIME
 }

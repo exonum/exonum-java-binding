@@ -29,31 +29,28 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.storage.indices.ValueSetIndexProxy;
 
 /**
- * Provides <em>access</em> to Exonum MerkleDB indexes. An access object corresponds to
- * a certain database state.
+ * Provides <em>access</em> to Exonum MerkleDB indexes. An access object corresponds to a certain
+ * database state.
  *
- * <p>An access can be read-only or read-write. Read-only accesses produce indexes that
- * <a href="../indices/package-summary.html#modifications">
- * forbid modifying operations.
- * </a>
+ * <p>An access can be read-only or read-write. Read-only accesses produce indexes that <a
+ * href="../indices/package-summary.html#modifications">forbid modifying operations. </a>
  *
  * <p>The changes made to read-write accesses are not usually applied immediately to the database
- * state, but are performed separately. For example, Exonum will apply the changes
- * made by all transactions when a block is confirmed.
+ * state, but are performed separately. For example, Exonum will apply the changes made by all
+ * transactions when a block is confirmed.
  *
- * <p>Accesses may perform index address resolution: they may modify the passed index address
- * before fetching it from the database. That implies that addresses passed to index factory
- * methods are <em>relative</em> to an access object. The address resolution rules
- * must be documented in interface implementations.
+ * <p>Accesses may perform index address resolution: they may modify the passed index address before
+ * fetching it from the database. That implies that addresses passed to index factory methods are
+ * <em>relative</em> to an access object. The address resolution rules must be documented in
+ * interface implementations.
  *
- * <p>As each Access object requires some MerkleDB resources to function, they work
- * in a {@linkplain Cleaner scope} that is usually managed by the framework.
- * When an Access is closed, all indexes created with it are destroyed and become inaccessible;
- * and no new indexes can be created.
+ * <p>As each Access object requires some MerkleDB resources to function, they work in a {@linkplain
+ * Cleaner scope} that is usually managed by the framework. When an Access is closed, all indexes
+ * created with it are destroyed and become inaccessible; and no new indexes can be created.
  *
  * <p>All method arguments are non-null by default.
  *
- * <hr/>
+ * <p><hr/>
  *
  * <p>This Java interface is similar to a combination of Rust {@code Access} and {@code AccessExt}
  * traits.
@@ -97,16 +94,16 @@ public interface Access {
    * @throws IllegalStateException if this access is not valid
    * @see StandardSerializers
    */
-  <K, V> ProofMapIndexProxy<K, V> getProofMap(IndexAddress address, Serializer<K> keySerializer,
-      Serializer<V> valueSerializer);
+  <K, V> ProofMapIndexProxy<K, V> getProofMap(
+      IndexAddress address, Serializer<K> keySerializer, Serializer<V> valueSerializer);
 
   /**
    * Creates a new <a href="../indices/ProofMapIndexProxy.html#key-hashing">"raw" ProofMapIndex</a>.
    * A raw ProofMapIndex does not hash keys, hence imposes some requirements on them.
    *
    * @param address an index address in the MerkleDB
-   * @param keySerializer a serializer of keys, must always produce 32-byte long values
-   *     that suit the requirements
+   * @param keySerializer a serializer of keys, must always produce 32-byte long values that suit
+   *     the requirements
    * @param valueSerializer a serializer of values
    * @param <K> the type of keys in the map
    * @param <V> the type of values in the map
@@ -114,8 +111,8 @@ public interface Access {
    * @see #getProofMap(IndexAddress, Serializer, Serializer)
    * @see StandardSerializers
    */
-  <K, V> ProofMapIndexProxy<K, V> getRawProofMap(IndexAddress address, Serializer<K> keySerializer,
-      Serializer<V> valueSerializer);
+  <K, V> ProofMapIndexProxy<K, V> getRawProofMap(
+      IndexAddress address, Serializer<K> keySerializer, Serializer<V> valueSerializer);
 
   /**
    * Creates a new MapIndex.
@@ -129,8 +126,8 @@ public interface Access {
    * @see #getProofMap(IndexAddress, Serializer, Serializer)
    * @see StandardSerializers
    */
-  <K, V> MapIndexProxy<K, V> getMap(IndexAddress address, Serializer<K> keySerializer,
-      Serializer<V> valueSerializer);
+  <K, V> MapIndexProxy<K, V> getMap(
+      IndexAddress address, Serializer<K> keySerializer, Serializer<V> valueSerializer);
 
   /**
    * Creates a new KeySet.
@@ -174,9 +171,9 @@ public interface Access {
   boolean canModify();
 
   /**
-   *  Returns a native handle of this access.
+   * Returns a native handle of this access.
    *
-   *  @throws IllegalStateException if the access is invalid (closed or nullptr)
+   * @throws IllegalStateException if the access is invalid (closed or nullptr)
    */
   long getAccessNativeHandle();
 }

@@ -41,8 +41,7 @@ class FakeTimeProviderTest {
 
   @Test
   void createFakeTimeProviderRejectsInvalidTimeZone() {
-    assertThrows(IllegalArgumentException.class,
-        () -> FakeTimeProvider.create(NOT_UTC_TIME));
+    assertThrows(IllegalArgumentException.class, () -> FakeTimeProvider.create(NOT_UTC_TIME));
   }
 
   @Test
@@ -56,8 +55,7 @@ class FakeTimeProviderTest {
   @Test
   void setTimeRejectsInvalidTimeZone() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
-    assertThrows(IllegalArgumentException.class,
-        () -> timeProvider.setTime(NOT_UTC_TIME));
+    assertThrows(IllegalArgumentException.class, () -> timeProvider.setTime(NOT_UTC_TIME));
   }
 
   @Test

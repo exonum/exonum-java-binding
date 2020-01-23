@@ -21,10 +21,10 @@ import com.exonum.binding.common.hash.PrimitiveSink;
 import com.exonum.binding.common.proofs.map.DbKey;
 
 /**
- * A funnel for a database key. Encodes the key in the following format:
- * the number of significant bits in the key in unsigned LEB128 format; then the key bytes
- * including significant bits (e.g., if there are 12 significant bits, <em>ceil(12/8) = 2 bytes</em>
- * of the key will be written to the sink).
+ * A funnel for a database key. Encodes the key in the following format: the number of significant
+ * bits in the key in unsigned LEB128 format; then the key bytes including significant bits (e.g.,
+ * if there are 12 significant bits, <em>ceil(12/8) = 2 bytes</em> of the key will be written to the
+ * sink).
  */
 public enum DbKeyCompressedFunnel implements Funnel<DbKey> {
   INSTANCE;

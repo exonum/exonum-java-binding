@@ -26,22 +26,22 @@ import java.util.function.Function;
 class IndicesTests {
 
   /**
-   * Creates an access, an index and runs a test against the access and the index.
-   * Automatically closes the access and the index. Uses String as the element type.
+   * Creates an access, an index and runs a test against the access and the index. Automatically
+   * closes the access and the index. Uses String as the element type.
    *
    * @param <IndexT> type of the index
    * @param accessFactory a function creating a database access
    * @param indexName an index name
    * @param indexSupplier an index factory
    * @param indexTest a test to run. Receives the created access and the index as arguments.
-   * @throws RuntimeException if the native proxies (an access or an index) failed to destroy
-   *     the corresponding native objects
+   * @throws RuntimeException if the native proxies (an access or an index) failed to destroy the
+   *     corresponding native objects
    */
-  static <IndexT extends StorageIndex>
-      void runTestWithView(Function<Cleaner, Access> accessFactory,
-                           String indexName,
-                           IndexConstructorOne<IndexT, String> indexSupplier,
-                           BiConsumer<Access, IndexT> indexTest) {
+  static <IndexT extends StorageIndex> void runTestWithView(
+      Function<Cleaner, Access> accessFactory,
+      String indexName,
+      IndexConstructorOne<IndexT, String> indexSupplier,
+      BiConsumer<Access, IndexT> indexTest) {
     try (Cleaner cleaner = new Cleaner()) {
       // Create an access and an index.
       Access access = accessFactory.apply(cleaner);

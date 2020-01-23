@@ -27,8 +27,7 @@ enum Fixed64Serializer implements Serializer<Long> {
 
   @Override
   public byte[] toBytes(Long value) {
-    ByteBuffer buf = ByteBuffer.allocate(Long.BYTES)
-        .order(ByteOrder.LITTLE_ENDIAN);
+    ByteBuffer buf = ByteBuffer.allocate(Long.BYTES).order(ByteOrder.LITTLE_ENDIAN);
     buf.putLong(value);
     return buf.array();
   }
@@ -37,9 +36,6 @@ enum Fixed64Serializer implements Serializer<Long> {
   public Long fromBytes(byte[] serializedValue) {
     checkLength(serializedValue, Long.BYTES);
 
-    return ByteBuffer.wrap(serializedValue)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .getLong();
+    return ByteBuffer.wrap(serializedValue).order(ByteOrder.LITTLE_ENDIAN).getLong();
   }
-
 }

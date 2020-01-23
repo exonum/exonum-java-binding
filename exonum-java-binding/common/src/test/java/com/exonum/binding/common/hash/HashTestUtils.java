@@ -55,12 +55,9 @@ import org.junit.jupiter.api.Assertions;
  * @author Kurt Alfred Kluever
  */
 final class HashTestUtils {
-  private HashTestUtils() {
-  }
+  private HashTestUtils() {}
 
-  /**
-   * Converts a string, which should contain only ascii-representable characters, to a byte[].
-   */
+  /** Converts a string, which should contain only ascii-representable characters, to a byte[]. */
   static byte[] ascii(String string) {
     byte[] bytes = new byte[string.length()];
     for (int i = 0; i < string.length(); i++) {
@@ -238,7 +235,7 @@ final class HashTestUtils {
     PUT_STRING_LOW_SURROGATE() {
       @Override
       void performAction(Random random, Iterable<? extends PrimitiveSink> sinks) {
-        String s = new String(new char[]{randomLowSurrogate(random)});
+        String s = new String(new char[] {randomLowSurrogate(random)});
         for (PrimitiveSink sink : sinks) {
           sink.putUnencodedChars(s);
         }
@@ -247,7 +244,7 @@ final class HashTestUtils {
     PUT_STRING_HIGH_SURROGATE() {
       @Override
       void performAction(Random random, Iterable<? extends PrimitiveSink> sinks) {
-        String s = new String(new char[]{randomHighSurrogate(random)});
+        String s = new String(new char[] {randomHighSurrogate(random)});
         for (PrimitiveSink sink : sinks) {
           sink.putUnencodedChars(s);
         }
@@ -256,7 +253,7 @@ final class HashTestUtils {
     PUT_STRING_LOW_HIGH_SURROGATE() {
       @Override
       void performAction(Random random, Iterable<? extends PrimitiveSink> sinks) {
-        String s = new String(new char[]{randomLowSurrogate(random), randomHighSurrogate(random)});
+        String s = new String(new char[] {randomLowSurrogate(random), randomHighSurrogate(random)});
         for (PrimitiveSink sink : sinks) {
           sink.putUnencodedChars(s);
         }
@@ -265,7 +262,7 @@ final class HashTestUtils {
     PUT_STRING_HIGH_LOW_SURROGATE() {
       @Override
       void performAction(Random random, Iterable<? extends PrimitiveSink> sinks) {
-        String s = new String(new char[]{randomHighSurrogate(random), randomLowSurrogate(random)});
+        String s = new String(new char[] {randomHighSurrogate(random), randomLowSurrogate(random)});
         for (PrimitiveSink sink : sinks) {
           sink.putUnencodedChars(s);
         }
@@ -555,12 +552,13 @@ final class HashTestUtils {
       HashCode unused = hashFunction.hashBytes(new byte[64], 0, 0);
     }
 
-    assertThrows(IndexOutOfBoundsException.class,
-        () -> hashFunction.hashBytes(new byte[128], -1, 128));
-    assertThrows(IndexOutOfBoundsException.class,
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> hashFunction.hashBytes(new byte[128], -1, 128));
+    assertThrows(
+        IndexOutOfBoundsException.class,
         () -> hashFunction.hashBytes(new byte[128], 64, 256 /* too long len */));
-    assertThrows(IndexOutOfBoundsException.class,
-        () -> hashFunction.hashBytes(new byte[64], 0, -1));
+    assertThrows(
+        IndexOutOfBoundsException.class, () -> hashFunction.hashBytes(new byte[64], 0, -1));
   }
 
   static void assertIndependentHashers(HashFunction hashFunction) {

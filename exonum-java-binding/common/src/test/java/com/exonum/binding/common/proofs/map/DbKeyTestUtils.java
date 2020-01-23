@@ -24,13 +24,12 @@ import java.util.BitSet;
 public class DbKeyTestUtils {
 
   /**
-   * Returns a new branch db key with the given prefix. The number of significant bits
-   * is equal to the number of bits in the string (excluding whitespaces and delimiters).
+   * Returns a new branch db key with the given prefix. The number of significant bits is equal to
+   * the number of bits in the string (excluding whitespaces and delimiters).
    *
-   * @param prefix a key prefix — from the least significant bit to the most significant,
-   *               i.e., "00 01" is 8, "10 00" is 1.
-   *               May contain spaces, underscores or bars (e.g., "00 01|01 11" and "11_10"
-   *               are valid strings).
+   * @param prefix a key prefix — from the least significant bit to the most significant, i.e., "00
+   *     01" is 8, "10 00" is 1. May contain spaces, underscores or bars (e.g., "00 01|01 11" and
+   *     "11_10" are valid strings).
    */
   public static DbKey branchKeyFromPrefix(String prefix) {
     prefix = filterBitPrefix(prefix);
@@ -41,10 +40,9 @@ public class DbKeyTestUtils {
   /**
    * Returns a new leaf db key with the given prefix.
    *
-   * @param prefix a key prefix — from the least significant bit to the most significant,
-   *               i.e., "00 01" is 8, "10 00" is 1.
-   *               May contain spaces, underscores or bars (e.g., "00 01|01 11" and "11_10"
-   *               are valid strings).
+   * @param prefix a key prefix — from the least significant bit to the most significant, i.e., "00
+   *     01" is 8, "10 00" is 1. May contain spaces, underscores or bars (e.g., "00 01|01 11" and
+   *     "11_10" are valid strings).
    */
   public static DbKey leafKeyFromPrefix(String prefix) {
     prefix = filterBitPrefix(prefix);

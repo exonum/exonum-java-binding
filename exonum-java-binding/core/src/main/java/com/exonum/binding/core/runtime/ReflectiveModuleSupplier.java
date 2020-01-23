@@ -27,9 +27,7 @@ import java.util.function.Supplier;
 //   does not allow package-private modules until Java 9 with MethodHandles#privateLookupIn
 //   [ECR-3008, ECR-521]
 
-/**
- * A reflective supplier of service modules that instantiates them with a no-arg constructor.
- */
+/** A reflective supplier of service modules that instantiates them with a no-arg constructor. */
 public final class ReflectiveModuleSupplier implements Supplier<ServiceModule> {
 
   private final Class<? extends ServiceModule> moduleClass;
@@ -58,8 +56,9 @@ public final class ReflectiveModuleSupplier implements Supplier<ServiceModule> {
     try {
       return (ServiceModule) moduleConstructor.invoke();
     } catch (Throwable throwable) {
-      String message = String
-          .format("Cannot instantiate a service module of class %s using constructor %s",
+      String message =
+          String.format(
+              "Cannot instantiate a service module of class %s using constructor %s",
               moduleClass, moduleConstructor);
       throw new IllegalStateException(message, throwable);
     }

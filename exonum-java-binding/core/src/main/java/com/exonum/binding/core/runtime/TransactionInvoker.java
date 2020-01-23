@@ -24,9 +24,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import java.util.Map;
 
-/**
- * Stores ids of transaction methods and their method handles of a corresponding service.
- */
+/** Stores ids of transaction methods and their method handles of a corresponding service. */
 final class TransactionInvoker {
   private final Service service;
   private final Map<Integer, TransactionMethod> transactionMethods;
@@ -34,8 +32,7 @@ final class TransactionInvoker {
   @Inject
   TransactionInvoker(Service service) {
     this.service = service;
-    this.transactionMethods =
-        TransactionExtractor.extractTransactionMethods(service.getClass());
+    this.transactionMethods = TransactionExtractor.extractTransactionMethods(service.getClass());
   }
 
   /**
@@ -44,17 +41,18 @@ final class TransactionInvoker {
    * @param transactionId a transaction method identifier
    * @param context a transaction execution context
    * @param arguments the serialized transaction arguments
-   *
    * @throws IllegalArgumentException if there is no transaction method with given id in a
    *     corresponding service
-   * @throws ExecutionException if {@link ExecutionException} was thrown by
-   *     the transaction method, it is propagated
-   * @throws UnexpectedExecutionException if any other exception is thrown by
-   *     the transaction method, it is wrapped as cause
+   * @throws ExecutionException if {@link ExecutionException} was thrown by the transaction method,
+   *     it is propagated
+   * @throws UnexpectedExecutionException if any other exception is thrown by the transaction
+   *     method, it is wrapped as cause
    */
   void invokeTransaction(int transactionId, byte[] arguments, TransactionContext context) {
-    checkArgument(transactionMethods.containsKey(transactionId),
-        "No method with transaction id (%s)", transactionId);
+    checkArgument(
+        transactionMethods.containsKey(transactionId),
+        "No method with transaction id (%s)",
+        transactionId);
     TransactionMethod transactionMethod = transactionMethods.get(transactionId);
     transactionMethod.invoke(service, arguments, context);
   }

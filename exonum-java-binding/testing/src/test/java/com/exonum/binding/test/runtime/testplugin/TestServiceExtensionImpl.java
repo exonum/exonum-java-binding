@@ -16,6 +16,4 @@
 
 package com.exonum.binding.test.runtime.testplugin;
 
-public class TestServiceExtensionImpl implements TestServiceExtension {
-
-}
+public class TestServiceExtensionImpl implements TestServiceExtension {}

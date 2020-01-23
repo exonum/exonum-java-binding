@@ -37,25 +37,29 @@ class PutValueTransactionTest {
 
   @Test
   void from_WrongTransactionId() {
-    RawTransaction transaction = RawTransaction.newBuilder()
-        .serviceId(TestService.ID)
-        .transactionId((short) -1)
-        .payload(encode("any value"))
-        .build();
+    RawTransaction transaction =
+        RawTransaction.newBuilder()
+            .serviceId(TestService.ID)
+            .transactionId((short) -1)
+            .payload(encode("any value"))
+            .build();
 
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> PutValueTransaction.from(transaction, TestSchema::new));
   }
 
   @Test
   void from_WrongService() {
-    RawTransaction transaction = RawTransaction.newBuilder()
-        .serviceId((short) -1)
-        .transactionId(PutValueTransaction.ID)
-        .payload(encode("any value"))
-        .build();
+    RawTransaction transaction =
+        RawTransaction.newBuilder()
+            .serviceId((short) -1)
+            .transactionId(PutValueTransaction.ID)
+            .payload(encode("any value"))
+            .build();
 
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> PutValueTransaction.from(transaction, TestSchema::new));
   }
 
@@ -64,22 +68,22 @@ class PutValueTransactionTest {
   // No type parameters for clarity
   void execute() {
     String value = "A value to put";
-    HashCode hash = Hashing.defaultHashFunction()
-        .hashString(value, BODY_CHARSET);
+    HashCode hash = Hashing.defaultHashFunction().hashString(value, BODY_CHARSET);
 
-    RawTransaction transaction = RawTransaction.newBuilder()
-        .serviceId(TestService.ID)
-        .transactionId(PutValueTransaction.ID)
-        .payload(encode(value))
-        .build();
+    RawTransaction transaction =
+        RawTransaction.newBuilder()
+            .serviceId(TestService.ID)
+            .transactionId(PutValueTransaction.ID)
+            .payload(encode(value))
+            .build();
 
     Fork fork = mock(Fork.class);
     TestSchema schema = mock(TestSchema.class);
     ProofMapIndexProxy testMap = mock(ProofMapIndexProxy.class);
     when(schema.testMap()).thenReturn(testMap);
 
-    PutValueTransaction tx = PutValueTransaction.from(transaction,
-        createTestSchemaFactory(fork, schema));
+    PutValueTransaction tx =
+        PutValueTransaction.from(transaction, createTestSchemaFactory(fork, schema));
 
     // Execute the transaction
     // TODO: use service name and service id when creating TransactionContext

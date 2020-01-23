@@ -23,9 +23,7 @@ import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import java.util.Arrays;
 
-/**
- * Represent either a private or public key in a digital signature system.
- */
+/** Represent either a private or public key in a digital signature system. */
 public abstract class AbstractKey {
 
   private final byte[] rawKey;
@@ -35,23 +33,17 @@ public abstract class AbstractKey {
     this.rawKey = rawKey;
   }
 
-  /**
-   * Returns the value of this key as a byte array.
-   */
+  /** Returns the value of this key as a byte array. */
   public byte[] toBytes() {
     return rawKey.clone();
   }
 
-  /**
-   * Returns a mutable view of the underlying bytes for the given key.
-   */
+  /** Returns a mutable view of the underlying bytes for the given key. */
   byte[] toBytesNoCopy() {
     return rawKey;
   }
 
-  /**
-   * Returns the length of this key in bytes.
-   */
+  /** Returns the length of this key in bytes. */
   public int size() {
     return rawKey.length;
   }
@@ -81,9 +73,7 @@ public abstract class AbstractKey {
     return byteArrayToHex(rawKey);
   }
 
-  /**
-   * Returns a funnel for any key.
-   */
+  /** Returns a funnel for any key. */
   public static Funnel<AbstractKey> keyFunnel() {
     return KeyFunnel.INSTANCE;
   }

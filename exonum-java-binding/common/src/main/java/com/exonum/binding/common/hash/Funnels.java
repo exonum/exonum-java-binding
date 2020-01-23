@@ -43,9 +43,7 @@ import javax.annotation.Nullable;
  */
 public final class Funnels {
 
-  /**
-   * Returns a funnel that extracts the bytes from a {@code byte} array.
-   */
+  /** Returns a funnel that extracts the bytes from a {@code byte} array. */
   public static Funnel<byte[]> byteArrayFunnel() {
     return ByteArrayFunnel.INSTANCE;
   }
@@ -66,8 +64,8 @@ public final class Funnels {
 
   /**
    * Returns a funnel that extracts the characters from a {@code CharSequence}, a character at a
-   * time, without performing any encoding. If you need to use a specific encoding, use
-   * {@link Funnels#stringFunnel(Charset)} instead.
+   * time, without performing any encoding. If you need to use a specific encoding, use {@link
+   * Funnels#stringFunnel(Charset)} instead.
    *
    * @since 15.0 (since 11.0 as {@code Funnels.stringFunnel()}.
    */
@@ -281,16 +279,12 @@ public final class Funnels {
     }
   }
 
-  /**
-   * Returns a funnel for hashcode.
-   */
+  /** Returns a funnel for hashcode. */
   public static Funnel<HashCode> hashCodeFunnel() {
     return HashCodeFunnel.INSTANCE;
   }
 
-  /**
-   * HashCode funnel. Puts the hash code bytes into the sink without copying.
-   */
+  /** HashCode funnel. Puts the hash code bytes into the sink without copying. */
   public enum HashCodeFunnel implements Funnel<HashCode> {
     INSTANCE;
 

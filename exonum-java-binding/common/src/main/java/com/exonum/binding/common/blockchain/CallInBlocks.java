@@ -21,8 +21,8 @@ import static com.google.common.base.Preconditions.checkElementIndex;
 import com.exonum.core.messages.Blockchain.CallInBlock;
 
 /**
- * Provides factory methods to concisely create
- * {@link com.exonum.core.messages.Blockchain.CallInBlock}s.
+ * Provides factory methods to concisely create {@link
+ * com.exonum.core.messages.Blockchain.CallInBlock}s.
  */
 public final class CallInBlocks {
 
@@ -30,14 +30,12 @@ public final class CallInBlocks {
    * Creates a call id corresponding to a transaction method call.
    *
    * @param txPosition a zero-based position of the transaction in the block
-   * @throws IndexOutOfBoundsException if position is negative or greater than
-   *     {@value Integer#MAX_VALUE}
+   * @throws IndexOutOfBoundsException if position is negative or greater than {@value
+   *     Integer#MAX_VALUE}
    */
   public static CallInBlock transaction(int txPosition) {
     checkElementIndex(txPosition, Integer.MAX_VALUE, "txPosition");
-    return CallInBlock.newBuilder()
-        .setTransaction(txPosition)
-        .build();
+    return CallInBlock.newBuilder().setTransaction(txPosition).build();
   }
 
   /**
@@ -46,9 +44,7 @@ public final class CallInBlocks {
    * @param serviceId a numeric identifier of the service which executed 'beforeTransactions'
    */
   public static CallInBlock beforeTransactions(int serviceId) {
-    return CallInBlock.newBuilder()
-        .setBeforeTransactions(serviceId)
-        .build();
+    return CallInBlock.newBuilder().setBeforeTransactions(serviceId).build();
   }
 
   /**
@@ -57,9 +53,7 @@ public final class CallInBlocks {
    * @param serviceId a numeric identifier of the service which executed 'afterTransactions'
    */
   public static CallInBlock afterTransactions(int serviceId) {
-    return CallInBlock.newBuilder()
-        .setAfterTransactions(serviceId)
-        .build();
+    return CallInBlock.newBuilder().setAfterTransactions(serviceId).build();
   }
 
   private CallInBlocks() {}

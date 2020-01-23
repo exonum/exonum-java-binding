@@ -20,28 +20,27 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import java.util.OptionalInt;
 
 /**
- * The blockchain state just after the corresponding block is committed.
- * This structure is passed to the {@link Service#afterCommit(BlockCommittedEvent)} method
- * and is used for the interaction between service business logic and the blockchain state.
+ * The blockchain state just after the corresponding block is committed. This structure is passed to
+ * the {@link Service#afterCommit(BlockCommittedEvent)} method and is used for the interaction
+ * between service business logic and the blockchain state.
  */
 public interface BlockCommittedEvent {
 
   /**
-   * If this node is a <a href="https://exonum.com/doc/version/0.13-rc.2/glossary/#validator">validator</a>,
-   * returns its identifier.
-   * If this node is an <a href="https://exonum.com/doc/version/0.13-rc.2/glossary/#auditor">auditor</a>,
-   * it will return {@code OptionalInt.empty()}.
+   * If this node is a <a
+   * href="https://exonum.com/doc/version/0.13-rc.2/glossary/#validator">validator</a>, returns its
+   * identifier. If this node is an <a
+   * href="https://exonum.com/doc/version/0.13-rc.2/glossary/#auditor">auditor</a>, it will return
+   * {@code OptionalInt.empty()}.
    */
   OptionalInt getValidatorId();
 
-  /**
-   * Returns the current blockchain height, which is the height of the last committed block.
-   */
+  /** Returns the current blockchain height, which is the height of the last committed block. */
   long getHeight();
 
   /**
-   * Returns the current database snapshot. It is immutable and represents the database state
-   * as of the block at the current {@linkplain #getHeight() height}.
+   * Returns the current database snapshot. It is immutable and represents the database state as of
+   * the block at the current {@linkplain #getHeight() height}.
    */
   Snapshot getSnapshot();
 }

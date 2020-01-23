@@ -20,14 +20,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A serializer decorator, that performs some extra checks to ensure that a user-supplied
- * serializer adheres to {@link Serializer} contract. These are required in Java code
- * that interacts with native code and accepts user-implemented serializers.
+ * A serializer decorator, that performs some extra checks to ensure that a user-supplied serializer
+ * adheres to {@link Serializer} contract. These are required in Java code that interacts with
+ * native code and accepts user-implemented serializers.
  *
- * @implNote This class slightly breaks LSP for it throws IllegalStateException
- *     when the user-supplied serializer returns nulls (i.e., it breaks LSP iff the delegate
- *     breaks LSP).
- *
+ * @implNote This class slightly breaks LSP for it throws IllegalStateException when the
+ *     user-supplied serializer returns nulls (i.e., it breaks LSP iff the delegate breaks LSP).
  * @param <T> a type of serializable object
  */
 public final class CheckingSerializerDecorator<T> implements Serializer<T> {
@@ -53,17 +51,22 @@ public final class CheckingSerializerDecorator<T> implements Serializer<T> {
   @Override
   public byte[] toBytes(T value) {
     byte[] valueBytes = delegate.toBytes(checkNotNull(value, "value is null"));
-    checkState(valueBytes != null,
-        "Broken serializer (%s): produces null byte array for a non-null value", delegate);
+    checkState(
+        valueBytes != null,
+        "Broken serializer (%s): produces null byte array for a non-null value",
+        delegate);
     return valueBytes;
   }
 
   @Override
   public T fromBytes(byte[] serializedValue) {
     T value = delegate.fromBytes(checkNotNull(serializedValue, "serializedValue is null"));
-    checkState(value != null, "Broken serializer (%s): produces a null value for a non-null array."
-        + " You must throw an exception if a serialized value cannot be converted "
-        + "to an instance of the given type.", delegate);
+    checkState(
+        value != null,
+        "Broken serializer (%s): produces a null value for a non-null array."
+            + " You must throw an exception if a serialized value cannot be converted "
+            + "to an instance of the given type.",
+        delegate);
     return value;
   }
 }

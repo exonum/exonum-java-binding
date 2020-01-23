@@ -44,8 +44,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 class IncrementCounterTxTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      QaArtifactInfo.createQaServiceTestkit());
+  TestKitExtension testKitExtension = new TestKitExtension(QaArtifactInfo.createQaServiceTestkit());
 
   @Test
   void executeIncrementsCounter(TestKit testKit) {
@@ -73,8 +72,7 @@ class IncrementCounterTxTest {
   void executeNoSuchCounter(TestKit testKit) {
     String counterName = "unknown-counter";
     HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);
-    TransactionMessage incrementCounterTx = createIncrementCounterTx(0L, counterId,
-        QA_SERVICE_ID);
+    TransactionMessage incrementCounterTx = createIncrementCounterTx(0L, counterId, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(incrementCounterTx);
 
     Snapshot view = testKit.getSnapshot();

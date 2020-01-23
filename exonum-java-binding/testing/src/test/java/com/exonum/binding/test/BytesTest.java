@@ -31,8 +31,10 @@ class BytesTest {
 
   @Test
   void fromHex() {
-    assertThat(Bytes.fromHex("abcd01"), equalTo(new byte[]{UnsignedBytes.checkedCast(0xAB),
-        UnsignedBytes.checkedCast(0xCD), 0x01}));
+    assertThat(
+        Bytes.fromHex("abcd01"),
+        equalTo(
+            new byte[] {UnsignedBytes.checkedCast(0xAB), UnsignedBytes.checkedCast(0xCD), 0x01}));
   }
 
   @Test
@@ -64,5 +66,4 @@ class BytesTest {
   void randomBytesInvalidSizeTest(int size) {
     assertThrows(IllegalArgumentException.class, () -> randomBytes(size));
   }
-
 }

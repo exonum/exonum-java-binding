@@ -35,32 +35,32 @@ import java.lang.annotation.Target;
  * <h3>Parameters</h3>
  *
  * <p>The annotated method shall have the following parameters (in this particular order):
+ *
  * <ol>
- *   <li>transaction arguments either as {@code byte[]} or as a protobuf message.
- *       Protobuf messages are deserialized using a {@code #parseFrom(byte[])} method
- *   <li>transaction execution context as {@link TransactionContext}. It allows to access
- *       the information about this transaction and modify the blockchain state
- *       through the included database fork.
+ *   <li>transaction arguments either as {@code byte[]} or as a protobuf message. Protobuf messages
+ *       are deserialized using a {@code #parseFrom(byte[])} method
+ *   <li>transaction execution context as {@link TransactionContext}. It allows to access the
+ *       information about this transaction and modify the blockchain state through the included
+ *       database fork.
  * </ol>
  *
  * <h3>Exceptions</h3>
  *
- * <p>The annotated method might throw {@linkplain ExecutionException} if the
- * transaction cannot be executed normally and has to be rolled back. The transaction will be
- * committed as failed (error kind {@linkplain ErrorKind#SERVICE SERVICE}).
- * The {@linkplain ExecutionError#getCode() error code} with the optional description will be saved
- * in the storage.
+ * <p>The annotated method might throw {@linkplain ExecutionException} if the transaction cannot be
+ * executed normally and has to be rolled back. The transaction will be committed as failed (error
+ * kind {@linkplain ErrorKind#SERVICE SERVICE}). The {@linkplain ExecutionError#getCode() error
+ * code} with the optional description will be saved in the storage.
  *
- * <p>If the annotated method throws any other exception, it is considered an unexpected error.
- * The transaction will be committed as failed (error kind
- * {@linkplain ErrorKind#UNEXPECTED UNEXPECTED}).
+ * <p>If the annotated method throws any other exception, it is considered an unexpected error. The
+ * transaction will be committed as failed (error kind {@linkplain ErrorKind#UNEXPECTED
+ * UNEXPECTED}).
  *
- * <p>Exonum rolls back any changes made by a transaction that threw an exception.
- * It also saves any error into
- * {@linkplain Blockchain#getCallErrors(long) the registry of call errors}.
- * The transaction clients can request the error information to know the reason of the failure.
+ * <p>Exonum rolls back any changes made by a transaction that threw an exception. It also saves any
+ * error into {@linkplain Blockchain#getCallErrors(long) the registry of call errors}. The
+ * transaction clients can request the error information to know the reason of the failure.
  *
- * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/transactions">Exonum Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/transactions">Exonum
+ *     Transactions</a>
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/services">Exonum Services</a>
  */
 @Target(ElementType.METHOD)
@@ -71,8 +71,8 @@ public @interface Transaction {
    * The transaction type identifier. Must be unique within the service.
    * <!-- TODO: update to 'Exonum interface' or sth when they are supported: ECR-3783 -->
    *
-   * <p>The transaction id is specified in the
-   * {@linkplain TransactionMessage#getTransactionId() transaction messages}.
+   * <p>The transaction id is specified in the {@linkplain TransactionMessage#getTransactionId()
+   * transaction messages}.
    */
   int value();
 }

@@ -27,28 +27,25 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Fork;
 
 /**
- * Transaction context class. Contains required information for the transaction execution.
- * The context is provided by the framework and users shouldn't create context instances manually
- * except tests.
+ * Transaction context class. Contains required information for the transaction execution. The
+ * context is provided by the framework and users shouldn't create context instances manually except
+ * tests.
  */
 public interface TransactionContext {
-  /**
-   * Returns database access allowing R/W operations.
-   */
+  /** Returns database access allowing R/W operations. */
   Fork getFork();
 
   /**
-   * Returns SHA-256 hash of the {@linkplain TransactionMessage transaction message} that
-   * carried the payload of the transaction.
-   * Each transaction message is uniquely identified by its hash; the messages are persisted
-   * in the {@linkplain Blockchain#getTxMessages() blockchain} and can be fetched by this hash.
+   * Returns SHA-256 hash of the {@linkplain TransactionMessage transaction message} that carried
+   * the payload of the transaction. Each transaction message is uniquely identified by its hash;
+   * the messages are persisted in the {@linkplain Blockchain#getTxMessages() blockchain} and can be
+   * fetched by this hash.
    */
   HashCode getTransactionMessageHash();
 
   /**
-   * Returns public key of the transaction author. The corresponding transaction message
-   * is guaranteed to have a correct {@link CryptoFunctions#ed25519()} signature
-   * with this public key.
+   * Returns public key of the transaction author. The corresponding transaction message is
+   * guaranteed to have a correct {@link CryptoFunctions#ed25519()} signature with this public key.
    */
   PublicKey getAuthorPk();
 
@@ -66,16 +63,12 @@ public interface TransactionContext {
    */
   int getServiceId();
 
-  /**
-   * Returns the builder of the transaction context.
-   */
+  /** Returns the builder of the transaction context. */
   static Builder builder() {
     return new Builder();
   }
 
-  /**
-   * Transaction context builder.
-   */
+  /** Transaction context builder. */
   final class Builder {
     private Fork fork;
     private HashCode hash;
@@ -83,52 +76,40 @@ public interface TransactionContext {
     private String serviceName;
     private Integer serviceId;
 
-    /**
-     * Sets database fork for the context.
-     */
+    /** Sets database fork for the context. */
     public Builder fork(Fork fork) {
       this.fork = fork;
       return this;
     }
 
-    /**
-     * Sets transaction message hash for the context.
-     */
+    /** Sets transaction message hash for the context. */
     public Builder txMessageHash(HashCode hash) {
       this.hash = hash;
       return this;
     }
 
-    /**
-     * Sets transaction author public key for the context.
-     */
+    /** Sets transaction author public key for the context. */
     public Builder authorPk(PublicKey authorPk) {
       this.authorPk = authorPk;
       return this;
     }
 
-    /**
-     * Sets service name for the context.
-     */
+    /** Sets service name for the context. */
     public Builder serviceName(String serviceName) {
       this.serviceName = serviceName;
       return this;
     }
 
-    /**
-     * Sets service id for the context.
-     */
+    /** Sets service id for the context. */
     public Builder serviceId(int serviceId) {
       this.serviceId = serviceId;
       return this;
     }
 
-    /**
-     * Creates the transaction context instance.
-     */
+    /** Creates the transaction context instance. */
     public TransactionContext build() {
-      return InternalTransactionContext.newInstance(fork, hash, authorPk, serviceName,
-          checkNotNull(serviceId));
+      return InternalTransactionContext.newInstance(
+          fork, hash, authorPk, serviceName, checkNotNull(serviceId));
     }
 
     private Builder() {}

@@ -30,22 +30,20 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * A simple service for QA purposes.
- */
+/** A simple service for QA purposes. */
 public interface QaService extends Service, Configurable {
 
   /**
-   * Creates a new self-signed 'increment counter' transaction and submits
-   * it through the {@link com.exonum.binding.core.service.Node}.
-   * Enables testing of {@link Node#submitTransaction(RawTransaction)}.
+   * Creates a new self-signed 'increment counter' transaction and submits it through the {@link
+   * com.exonum.binding.core.service.Node}. Enables testing of {@link
+   * Node#submitTransaction(RawTransaction)}.
    */
   HashCode submitIncrementCounter(long requestSeed, HashCode counterId);
 
   /**
-   * Creates a new self-signed 'unknown' transaction and submits
-   * it through the {@link com.exonum.binding.core.service.Node}.
-   * Enables testing of {@link Node#submitTransaction(RawTransaction)}.
+   * Creates a new self-signed 'unknown' transaction and submits it through the {@link
+   * com.exonum.binding.core.service.Node}. Enables testing of {@link
+   * Node#submitTransaction(RawTransaction)}.
    */
   HashCode submitUnknownTx();
 
@@ -60,8 +58,7 @@ public interface QaService extends Service, Configurable {
   /**
    * Creates a new named counter.
    *
-   * <p>Parameters:
-   *  - name counter name, must not be blank
+   * <p>Parameters: - name counter name, must not be blank
    *
    * @throws ExecutionException if the counter already exists
    * @throws IllegalArgumentException if the counter name is empty
@@ -71,27 +68,24 @@ public interface QaService extends Service, Configurable {
   /**
    * Increments an existing counter.
    *
-   * <p>Parameters:
-   *  - seed transaction seed
-   *  - counterId counter id, a hash of the counter name
+   * <p>Parameters: - seed transaction seed - counterId counter id, a hash of the counter name
+   *
    * @throws ExecutionException if a counter with the given id does not exist
    */
-  void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
-      TransactionContext context);
+  void incrementCounter(
+      TxMessageProtos.IncrementCounterTxBody arguments, TransactionContext context);
 
   /**
    * Clears all collections of this service and throws an exception with the given arguments.
    *
-   * <p>This transaction will always throw an {@link ExecutionException},
-   * therefore, have "error" status in the blockchain.
+   * <p>This transaction will always throw an {@link ExecutionException}, therefore, have "error"
+   * status in the blockchain.
    *
-   * <p>Parameters:
-   * - a seed to distinguish transaction with the same parameters;
-   * - an error code to include in the exception, must be in range [0; 127];
-   * - an optional description to include in the exception. May be empty.
+   * <p>Parameters: - a seed to distinguish transaction with the same parameters; - an error code to
+   * include in the exception, must be in range [0; 127]; - an optional description to include in
+   * the exception. May be empty.
    *
-   * @throws ExecutionException always; includes the given
-   *     error code and error message
+   * @throws ExecutionException always; includes the given error code and error message
    * @throws IllegalArgumentException if the error code is not in range [0; 127]
    */
   void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context);
@@ -99,8 +93,8 @@ public interface QaService extends Service, Configurable {
   /**
    * Clears all collections of this service and throws a runtime exception.
    *
-   * <p>This transaction will always throw an {@link IllegalStateException},
-   * therefore, have "unexpected error" status in the blockchain.
+   * <p>This transaction will always throw an {@link IllegalStateException}, therefore, have
+   * "unexpected error" status in the blockchain.
    *
    * @throws IllegalStateException always
    */

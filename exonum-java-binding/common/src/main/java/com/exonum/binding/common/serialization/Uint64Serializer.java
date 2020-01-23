@@ -53,9 +53,11 @@ enum Uint64Serializer implements Serializer<Long> {
   @Override
   public Long fromBytes(byte[] serializedValue) {
     checkArgument(serializedValue.length > 0, "Expected not empty array");
-    checkArgument(serializedValue.length <= VARINT64_MAX_BYTES,
+    checkArgument(
+        serializedValue.length <= VARINT64_MAX_BYTES,
         "Expected an array of size less than %s, but was %s",
-        VARINT64_MAX_BYTES, serializedValue.length);
+        VARINT64_MAX_BYTES,
+        serializedValue.length);
 
     try {
       int pos = 0;
@@ -78,23 +80,25 @@ enum Uint64Serializer implements Serializer<Long> {
       } else if ((x ^= ((long) serializedValue[pos++] << 42)) >= 0L) {
         x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35) ^ (~0L << 42);
       } else if ((x ^= ((long) serializedValue[pos++] << 49)) < 0L) {
-        x ^= (~0L << 7)
-            ^ (~0L << 14)
-            ^ (~0L << 21)
-            ^ (~0L << 28)
-            ^ (~0L << 35)
-            ^ (~0L << 42)
-            ^ (~0L << 49);
+        x ^=
+            (~0L << 7)
+                ^ (~0L << 14)
+                ^ (~0L << 21)
+                ^ (~0L << 28)
+                ^ (~0L << 35)
+                ^ (~0L << 42)
+                ^ (~0L << 49);
       } else {
         x ^= ((long) serializedValue[pos++] << 56);
-        x ^= (~0L << 7)
-            ^ (~0L << 14)
-            ^ (~0L << 21)
-            ^ (~0L << 28)
-            ^ (~0L << 35)
-            ^ (~0L << 42)
-            ^ (~0L << 49)
-            ^ (~0L << 56);
+        x ^=
+            (~0L << 7)
+                ^ (~0L << 14)
+                ^ (~0L << 21)
+                ^ (~0L << 28)
+                ^ (~0L << 35)
+                ^ (~0L << 42)
+                ^ (~0L << 49)
+                ^ (~0L << 56);
         if (x < 0L && serializedValue[pos++] < 0L) {
           throw new IllegalArgumentException(
               "Serialized value has wrong format " + Arrays.toString(serializedValue));
@@ -107,5 +111,4 @@ enum Uint64Serializer implements Serializer<Long> {
           "Serialized value has wrong format " + Arrays.toString(serializedValue), e);
     }
   }
-
 }

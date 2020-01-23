@@ -21,8 +21,8 @@ import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * A block with a proof. A proof contains signed precommit messages from the network validators
- * that agreed to commit this block.
+ * A block with a proof. A proof contains signed precommit messages from the network validators that
+ * agreed to commit this block.
  *
  * <p>A block proof can be used independently or as a part of {@linkplain IndexProof index proof};
  * or transaction proof.
@@ -33,25 +33,21 @@ import com.google.protobuf.InvalidProtocolBufferException;
 @AutoValue
 public abstract class BlockProof {
 
-  /**
-   * Returns the proof as a protobuf message.
-   */
+  /** Returns the proof as a protobuf message. */
   public abstract Proofs.BlockProof getAsMessage();
 
   /**
    * Parses a serialized block proof message.
-   * @throws InvalidProtocolBufferException if the message is not
-   *     {@link com.exonum.core.messages.Proofs.BlockProof}
+   *
+   * @throws InvalidProtocolBufferException if the message is not {@link
+   *     com.exonum.core.messages.Proofs.BlockProof}
    */
-  public static BlockProof parseFrom(byte[] blockProof)
-      throws InvalidProtocolBufferException {
+  public static BlockProof parseFrom(byte[] blockProof) throws InvalidProtocolBufferException {
     Proofs.BlockProof parsed = Proofs.BlockProof.parseFrom(blockProof);
     return newInstance(parsed);
   }
 
-  /**
-   * Creates a new BlockProof given the block proof message.
-   */
+  /** Creates a new BlockProof given the block proof message. */
   public static BlockProof newInstance(Proofs.BlockProof proofMessage) {
     return new AutoValue_BlockProof(proofMessage);
   }

@@ -48,8 +48,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Inherits base tests of ListIndex interface methods and also contains tests
- * of ProofListIndexProxy methods that are not present in {@link ListIndex} interface.
+ * Inherits base tests of ListIndex interface methods and also contains tests of ProofListIndexProxy
+ * methods that are not present in {@link ListIndex} interface.
  */
 class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestable {
 
@@ -85,80 +85,93 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
 
   @Test
   void getIndexHashEmptyList() {
-    runTestWithView(database::createSnapshot, (list) -> {
-      assertThat(list.getIndexHash(), equalTo(EMPTY_LIST_INDEX_HASH));
-    });
+    runTestWithView(
+        database::createSnapshot,
+        (list) -> {
+          assertThat(list.getIndexHash(), equalTo(EMPTY_LIST_INDEX_HASH));
+        });
   }
 
   @Test
   void getIndexHashSingletonList() {
-    runTestWithView(database::createFork, (list) -> {
-      list.add(V1);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          list.add(V1);
 
-      HashCode indexHash = list.getIndexHash();
-      assertThat(indexHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
-      assertThat(indexHash, not(equalTo(EMPTY_LIST_INDEX_HASH)));
-    });
+          HashCode indexHash = list.getIndexHash();
+          assertThat(indexHash.bits(), equalTo(DEFAULT_HASH_SIZE_BITS));
+          assertThat(indexHash, not(equalTo(EMPTY_LIST_INDEX_HASH)));
+        });
   }
 
   @ParameterizedTest
   @ValueSource(ints = {0, 1, 2})
   void getProofThreeElementList(int index) {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> elements = asList(V1, V2, V3);
-      list.addAll(elements);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> elements = asList(V1, V2, V3);
+          list.addAll(elements);
 
-      ListProof proof = list.getProof(index);
+          ListProof proof = list.getProof(index);
 
-      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
-      assertThat(asMessage.getLength()).isEqualTo(3L);
-      ListProofEntry expectedEntry = listProofEntry(index, elements.get(index));
-      assertThat(asMessage.getEntriesList()).containsExactly(expectedEntry);
-    });
+          ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+          assertThat(asMessage.getLength()).isEqualTo(3L);
+          ListProofEntry expectedEntry = listProofEntry(index, elements.get(index));
+          assertThat(asMessage.getEntriesList()).containsExactly(expectedEntry);
+        });
   }
 
   @ParameterizedTest
   @ValueSource(longs = {3, 4, Long.MAX_VALUE})
   void getProofThreeElementListOutOfRange(long index) {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> elements = asList(V1, V2, V3);
-      list.addAll(elements);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> elements = asList(V1, V2, V3);
+          list.addAll(elements);
 
-      ListProof proof = list.getProof(index);
+          ListProof proof = list.getProof(index);
 
-      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
-      assertThat(asMessage.getLength()).isEqualTo(3L);
-      assertThat(asMessage.getEntriesList()).isEmpty();
-    });
+          ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+          assertThat(asMessage.getLength()).isEqualTo(3L);
+          assertThat(asMessage.getEntriesList()).isEmpty();
+        });
   }
 
   @Test
   void getRangeProofThreeElementListFullRange() {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> elements = asList(V1, V2, V3);
-      list.addAll(elements);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> elements = asList(V1, V2, V3);
+          list.addAll(elements);
 
-      ListProof proof = list.getRangeProof(0, 3);
+          ListProof proof = list.getRangeProof(0, 3);
 
-      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
-      assertThat(asMessage.getLength()).isEqualTo(3L);
-      assertThat(asMessage.getEntriesList()).containsExactlyInAnyOrder(
-          listProofEntry(0, V1), listProofEntry(1, V2), listProofEntry(2, V3));
-    });
+          ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+          assertThat(asMessage.getLength()).isEqualTo(3L);
+          assertThat(asMessage.getEntriesList())
+              .containsExactlyInAnyOrder(
+                  listProofEntry(0, V1), listProofEntry(1, V2), listProofEntry(2, V3));
+        });
   }
 
   @Test
   void getRangeProofThreeElementListHalfInRange() {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> elements = asList(V1, V2, V3);
-      list.addAll(elements);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> elements = asList(V1, V2, V3);
+          list.addAll(elements);
 
-      ListProof proof = list.getRangeProof(2, 4);
+          ListProof proof = list.getRangeProof(2, 4);
 
-      ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
-      assertThat(asMessage.getLength()).isEqualTo(3L);
-      assertThat(asMessage.getEntriesList()).containsExactly(listProofEntry(2, V3));
-    });
+          ListProofOuterClass.ListProof asMessage = proof.getAsMessage();
+          assertThat(asMessage.getLength()).isEqualTo(3L);
+          assertThat(asMessage.getEntriesList()).containsExactly(listProofEntry(2, V3));
+        });
   }
 
   private static ListProofEntry listProofEntry(long index, String element) {
@@ -172,138 +185,160 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   @Test
   @DisabledProofTest
   void verifyProofSingletonList() {
-    runTestWithView(database::createFork, (list) -> {
-      list.add(V1);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          list.add(V1);
 
-      assertThat(list, provesThatContains(0, V1));
-    });
+          assertThat(list, provesThatContains(0, V1));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyProofOfAbsenceEmptyList() {
-    runTestWithView(database::createFork, (list) -> {
-      assertThat(list, provesAbsence(0));
-    });
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          assertThat(list, provesAbsence(0));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyProofOfAbsenceSingletonList() {
-    runTestWithView(database::createFork, (list) -> {
-      list.add(V1);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          list.add(V1);
 
-      assertThat(list, provesAbsence(1));
-    });
+          assertThat(list, provesAbsence(1));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyRangeProofOfAbsenceEmptyList() {
-    runTestWithView(database::createFork, (list) -> {
-      assertThat(list, provesAbsence(0, 1));
-    });
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          assertThat(list, provesAbsence(0, 1));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyRangeProofOfAbsenceSingletonList() {
-    runTestWithView(database::createFork, (list) -> {
-      list.add(V1);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          list.add(V1);
 
-      assertThat(list, provesAbsence(0, 2));
-    });
+          assertThat(list, provesAbsence(0, 2));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyRangeProofSingletonList() {
-    runTestWithView(database::createFork, (list) -> {
-      list.add(V1);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          list.add(V1);
 
-      assertThat(list, provesThatContains(0, singletonList(V1)));
-    });
+          assertThat(list, provesThatContains(0, singletonList(V1)));
+        });
   }
 
   @ParameterizedTest
   @DisabledProofTest
   @ValueSource(ints = {2, 3, 4, 5, 7, 8, 9})
   void verifyProofMultipleItemList(int size) {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> values = TestStorageItems.values.subList(0, size);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> values = TestStorageItems.values.subList(0, size);
 
-      list.addAll(values);
+          list.addAll(values);
 
-      for (int i = 0; i < values.size(); i++) {
-        assertThat(list, provesThatContains(i, values.get(i)));
-      }
-    });
+          for (int i = 0; i < values.size(); i++) {
+            assertThat(list, provesThatContains(i, values.get(i)));
+          }
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyRangeProofMultipleItemList_FullRange() {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> values = TestStorageItems.values;
-      list.addAll(values);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> values = TestStorageItems.values;
+          list.addAll(values);
 
-      assertThat(list, provesThatContains(0, values));
-    });
+          assertThat(list, provesThatContains(0, values));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyRangeProofMultipleItemList_1stHalf() {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> values = TestStorageItems.values;
-      list.addAll(values);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> values = TestStorageItems.values;
+          list.addAll(values);
 
-      int from = 0;
-      int to = values.size() / 2;
-      assertThat(list, provesThatContains(from, values.subList(from, to)));
-    });
+          int from = 0;
+          int to = values.size() / 2;
+          assertThat(list, provesThatContains(from, values.subList(from, to)));
+        });
   }
 
   @Test
   @DisabledProofTest
   void verifyRangeProofMultipleItemList_2ndHalf() {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> values = TestStorageItems.values;
-      list.addAll(values);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> values = TestStorageItems.values;
+          list.addAll(values);
 
-      int from = values.size() / 2;
-      int to = values.size();
-      assertThat(list, provesThatContains(from, values.subList(from, to)));
-    });
+          int from = values.size() / 2;
+          int to = values.size();
+          assertThat(list, provesThatContains(from, values.subList(from, to)));
+        });
   }
 
   @ParameterizedTest
   @ValueSource(ints = {1, 2, 3, 4})
   @DisabledProofTest
-  @Disabled("ECR-3673: empty ranges are not supported with the current tree format; "
-      + "need a flat one")
+  @Disabled(
+      "ECR-3673: empty ranges are not supported with the current tree format; " + "need a flat one")
   void verifyRangeProofMultipleItemList_EmptyRange(int size) {
-    runTestWithView(database::createFork, (list) -> {
-      List<String> values = TestStorageItems.values.subList(0, size);
+    runTestWithView(
+        database::createFork,
+        (list) -> {
+          List<String> values = TestStorageItems.values.subList(0, size);
 
-      list.addAll(values);
+          list.addAll(values);
 
-      assertThat(list, provesThatContains(0, emptyList()));
-    });
+          assertThat(list, provesThatContains(0, emptyList()));
+        });
   }
 
-  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
-                                      Consumer<ProofListIndexProxy<String>> listTest) {
+  private static void runTestWithView(
+      Function<Cleaner, Access> viewFactory, Consumer<ProofListIndexProxy<String>> listTest) {
     runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
-                                      BiConsumer<Access, ProofListIndexProxy<String>> listTest) {
+  private static void runTestWithView(
+      Function<Cleaner, Access> viewFactory,
+      BiConsumer<Access, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         LIST_NAME,
         ((address, access, serializer) -> access.getProofList(address, serializer)),
-        listTest
-    );
+        listTest);
   }
 }

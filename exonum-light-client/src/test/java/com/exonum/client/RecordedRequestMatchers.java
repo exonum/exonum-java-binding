@@ -61,14 +61,16 @@ class RecordedRequestMatchers {
   }
 
   private static void checkPathPrefix(String expectedPath) {
-    checkArgument(!expectedPath.startsWith("/"), "expectedPath (%s) must not have leading slash",
+    checkArgument(
+        !expectedPath.startsWith("/"),
+        "expectedPath (%s) must not have leading slash",
         expectedPath);
   }
 
   private static Matcher<RecordedRequest> createRequestPathMatcher(
       Matcher<? super String> pathMatcher) {
-    return new FeatureMatcher<RecordedRequest, String>(pathMatcher, "full request path",
-        "request path") {
+    return new FeatureMatcher<RecordedRequest, String>(
+        pathMatcher, "full request path", "request path") {
 
       @Override
       protected String featureValueOf(RecordedRequest actual) {
@@ -79,8 +81,8 @@ class RecordedRequestMatchers {
 
   private static Matcher<RecordedRequest> createRequestQueryKeysMatcher(
       Matcher<Iterable<? extends String>> keysMatcher) {
-    return new FeatureMatcher<RecordedRequest, Set<String>>(keysMatcher, "query keys",
-        "query keys") {
+    return new FeatureMatcher<RecordedRequest, Set<String>>(
+        keysMatcher, "query keys", "query keys") {
 
       @Override
       protected Set<String> featureValueOf(RecordedRequest actual) {
@@ -89,8 +91,8 @@ class RecordedRequestMatchers {
     };
   }
 
-  private static Matcher<RecordedRequest> createRequestQueryMatcher(String key,
-      Matcher<? super String> valueMatcher) {
+  private static Matcher<RecordedRequest> createRequestQueryMatcher(
+      String key, Matcher<? super String> valueMatcher) {
     return new RequestQueryParamMatcher(key, valueMatcher);
   }
 
@@ -98,8 +100,7 @@ class RecordedRequestMatchers {
     private final String key;
     private final Matcher<? super String> valueMatcher;
 
-    RequestQueryParamMatcher(String key,
-        Matcher<? super String> valueMatcher) {
+    RequestQueryParamMatcher(String key, Matcher<? super String> valueMatcher) {
       this.key = key;
       this.valueMatcher = valueMatcher;
     }
@@ -111,7 +112,8 @@ class RecordedRequestMatchers {
 
     @Override
     public void describeTo(Description description) {
-      description.appendText("query containing [")
+      description
+          .appendText("query containing [")
           .appendText(key)
           .appendText("->")
           .appendDescriptionOf(valueMatcher)
@@ -119,6 +121,5 @@ class RecordedRequestMatchers {
     }
   }
 
-  private RecordedRequestMatchers() {
-  }
+  private RecordedRequestMatchers() {}
 }

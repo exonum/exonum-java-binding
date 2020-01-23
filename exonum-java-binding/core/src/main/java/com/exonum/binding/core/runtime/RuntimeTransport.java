@@ -30,9 +30,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Runtime transport connects service APIs to the web-server.
- */
+/** Runtime transport connects service APIs to the web-server. */
 public final class RuntimeTransport implements AutoCloseable {
 
   private static Logger logger = LogManager.getLogger(RuntimeTransport.class);
@@ -52,9 +50,7 @@ public final class RuntimeTransport implements AutoCloseable {
     this.port = port;
   }
 
-  /**
-   * Starts the web server.
-   */
+  /** Starts the web server. */
   void start() {
     try {
       server.start(port).get();
@@ -63,9 +59,7 @@ public final class RuntimeTransport implements AutoCloseable {
     }
   }
 
-  /**
-   * Connects the API of a started service to the web-server.
-   */
+  /** Connects the API of a started service to the web-server. */
   void connectServiceApi(ServiceWrapper service) {
     // Create the service API handlers
     Router router = server.createRouter();
@@ -79,9 +73,7 @@ public final class RuntimeTransport implements AutoCloseable {
     logApiMountEvent(service, serviceApiPath, router);
   }
 
-  /**
-   * Removes service API routes from the web-server serving.
-   */
+  /** Removes service API routes from the web-server serving. */
   void disconnectServiceApi(ServiceWrapper service) {
     String serviceApiPath = createServiceApiPath(service);
     server.removeSubRouter(serviceApiPath);
@@ -110,14 +102,12 @@ public final class RuntimeTransport implements AutoCloseable {
         .map(Route::getPath)
         .filter(Objects::nonNull) // null routes are possible in failure handlers, for instance
         .findAny()
-        .ifPresent(someRoute ->
-            logger.info("    E.g.: http://127.0.0.1:{}{}", port, serviceApiPath + someRoute)
-        );
+        .ifPresent(
+            someRoute ->
+                logger.info("    E.g.: http://127.0.0.1:{}{}", port, serviceApiPath + someRoute));
   }
 
-  /**
-   * Stops the web-server.
-   */
+  /** Stops the web-server. */
   @Override
   public void close() throws InterruptedException {
     try {

@@ -36,9 +36,7 @@ class BlockTest {
 
   @Test
   void isEmpty() {
-    Block block = aBlock()
-        .numTransactions(0)
-        .build();
+    Block block = aBlock().numTransactions(0).build();
 
     assertTrue(block.isEmpty());
   }
@@ -46,9 +44,7 @@ class BlockTest {
   @ParameterizedTest
   @ValueSource(ints = {1, 2, Integer.MAX_VALUE})
   void nonEmptyBlock(int numTransactions) {
-    Block nonEmptyBlock = aBlock()
-        .numTransactions(numTransactions)
-        .build();
+    Block nonEmptyBlock = aBlock().numTransactions(numTransactions).build();
 
     assertFalse(nonEmptyBlock.isEmpty());
   }
@@ -56,9 +52,7 @@ class BlockTest {
   @ParameterizedTest
   @EnumSource
   void jsonRepresentationIndependentOfNamingPolicy(FieldNamingPolicy policy) {
-    Gson gson = JsonSerializer.builder()
-        .setFieldNamingPolicy(policy)
-        .create();
+    Gson gson = JsonSerializer.builder().setFieldNamingPolicy(policy).create();
 
     Block block = gson.fromJson(BLOCK_1_JSON, Block.class);
     assertThat(block, equalTo(BLOCK_1));

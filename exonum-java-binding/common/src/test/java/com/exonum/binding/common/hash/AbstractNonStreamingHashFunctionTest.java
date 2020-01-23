@@ -43,9 +43,7 @@ import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests for AbstractNonStreamingHashFunction.
- */
+/** Tests for AbstractNonStreamingHashFunction. */
 @CiOnly // The SUT and tests are imported and rarely, if ever, change (see 4725ab9e)
 class AbstractNonStreamingHashFunctionTest {
   /**
@@ -77,31 +75,31 @@ class AbstractNonStreamingHashFunctionTest {
   void testPutStringWithLowSurrogate() {
     // we pad because the dummy hash function we use to test this, merely copies the input into
     // the output, so the input must be at least 32 bits, since the output has to be that long
-    assertPutString(new char[]{'p', HashTestUtils.randomLowSurrogate(new Random())});
+    assertPutString(new char[] {'p', HashTestUtils.randomLowSurrogate(new Random())});
   }
 
   @Test
   void testPutStringWithHighSurrogate() {
     // we pad because the dummy hash function we use to test this, merely copies the input into
     // the output, so the input must be at least 32 bits, since the output has to be that long
-    assertPutString(new char[]{'p', HashTestUtils.randomHighSurrogate(new Random())});
+    assertPutString(new char[] {'p', HashTestUtils.randomHighSurrogate(new Random())});
   }
 
   @Test
   void testPutStringWithLowHighSurrogate() {
     assertPutString(
-        new char[]{
-            HashTestUtils.randomLowSurrogate(new Random()),
-            HashTestUtils.randomHighSurrogate(new Random())
+        new char[] {
+          HashTestUtils.randomLowSurrogate(new Random()),
+          HashTestUtils.randomHighSurrogate(new Random())
         });
   }
 
   @Test
   void testPutStringWithHighLowSurrogate() {
     assertPutString(
-        new char[]{
-            HashTestUtils.randomHighSurrogate(new Random()),
-            HashTestUtils.randomLowSurrogate(new Random())
+        new char[] {
+          HashTestUtils.randomHighSurrogate(new Random()),
+          HashTestUtils.randomLowSurrogate(new Random())
         });
   }
 

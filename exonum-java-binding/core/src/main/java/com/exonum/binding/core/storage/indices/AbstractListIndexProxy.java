@@ -38,8 +38,11 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
 
   final CheckingSerializerDecorator<T> serializer;
 
-  AbstractListIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
-                         CheckingSerializerDecorator<T> userSerializer) {
+  AbstractListIndexProxy(
+      NativeHandle nativeHandle,
+      IndexAddress address,
+      AbstractAccess access,
+      CheckingSerializerDecorator<T> userSerializer) {
     super(nativeHandle, address, access);
     this.serializer = userSerializer;
   }
@@ -62,9 +65,7 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
     // Cache the nativeHandle to avoid repeated 'isValid' checks.
     // It's OK to do that during this call, as this class is not thread-safe.
     long nativeHandle = getNativeHandle();
-    elements.stream()
-        .map(serializer::toBytes)
-        .forEach((e) -> nativeAdd(nativeHandle, e));
+    elements.stream().map(serializer::toBytes).forEach((e) -> nativeAdd(nativeHandle, e));
   }
 
   @Override

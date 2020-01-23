@@ -35,8 +35,8 @@ class DbKeyComparisonParameterizedTest {
 
   @ParameterizedTest(name = "[{index}] => {3}")
   @MethodSource("testData")
-  void dbKeyCompareTest(DbKey firstKey, DbKey secondKey, ComparisonResult expectedResult,
-      String description) {
+  void dbKeyCompareTest(
+      DbKey firstKey, DbKey secondKey, ComparisonResult expectedResult, String description) {
     int comparisonResult = firstKey.compareTo(secondKey);
 
     assertThat(ComparisonResult.fromInt(comparisonResult), equalTo(expectedResult));
@@ -44,8 +44,8 @@ class DbKeyComparisonParameterizedTest {
 
   @ParameterizedTest
   @MethodSource("testData")
-  void dbKeyComparatorSymmetric(DbKey firstKey, DbKey secondKey, ComparisonResult firstToSecond,
-      String description) {
+  void dbKeyComparatorSymmetric(
+      DbKey firstKey, DbKey secondKey, ComparisonResult firstToSecond, String description) {
     int comparisonResult = secondKey.compareTo(firstKey);
 
     ComparisonResult expectedResult = firstToSecond.opposite();
@@ -55,11 +55,7 @@ class DbKeyComparisonParameterizedTest {
   private static List<Arguments> testData() {
     return Arrays.asList(
         // "A > B" reads "Key A is bigger than key B"
-        arguments(
-            branchKeyFromPrefix("1100"),
-            branchKeyFromPrefix("0"),
-            GREATER,
-            "[1100] > [0]"),
+        arguments(branchKeyFromPrefix("1100"), branchKeyFromPrefix("0"), GREATER, "[1100] > [0]"),
         arguments(
             branchKeyFromPrefix("1100"),
             branchKeyFromPrefix("001101"),
@@ -70,22 +66,10 @@ class DbKeyComparisonParameterizedTest {
             branchKeyFromPrefix("00110101"),
             LESS,
             "[001101] < [00110101]"),
+        arguments(branchKeyFromPrefix("101"), branchKeyFromPrefix("110"), LESS, "[101] < [110]"),
         arguments(
-            branchKeyFromPrefix("101"),
-            branchKeyFromPrefix("110"),
-            LESS,
-            "[101] < [110]"),
-        arguments(
-            branchKeyFromPrefix("1"),
-            branchKeyFromPrefix("1"),
-            EQUAL,
-            "[1] = [1] (branches)"),
-        arguments(
-            leafKeyFromPrefix("0"),
-            leafKeyFromPrefix("0"),
-            EQUAL,
-            "[0] = [0] (leaves)")
-    );
+            branchKeyFromPrefix("1"), branchKeyFromPrefix("1"), EQUAL, "[1] = [1] (branches)"),
+        arguments(leafKeyFromPrefix("0"), leafKeyFromPrefix("0"), EQUAL, "[0] = [0] (leaves)"));
   }
 
   enum ComparisonResult {
@@ -104,15 +88,19 @@ class DbKeyComparisonParameterizedTest {
     }
 
     /**
-     * Returns the opposite comparison result — the one you would obtain if you swap
-     * the arguments positions.
+     * Returns the opposite comparison result — the one you would obtain if you swap the arguments
+     * positions.
      */
     ComparisonResult opposite() {
       switch (this) {
-        case GREATER: return LESS;
-        case LESS: return GREATER;
-        case EQUAL: return EQUAL;
-        default: throw new AssertionError("unreachable");
+        case GREATER:
+          return LESS;
+        case LESS:
+          return GREATER;
+        case EQUAL:
+          return EQUAL;
+        default:
+          throw new AssertionError("unreachable");
       }
     }
   }

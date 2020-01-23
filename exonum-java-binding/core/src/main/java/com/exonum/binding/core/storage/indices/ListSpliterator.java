@@ -29,8 +29,8 @@ import java.util.function.Consumer;
  *
  * <p>This spliterator is late-binding and fail-fast.
  *
- * <p>This spliterator does not support specializations (e.g., {@link Spliterator.OfInt}).
- * If they are ever needed, see the Spliterator in an archived "exonum-serialization" project.
+ * <p>This spliterator does not support specializations (e.g., {@link Spliterator.OfInt}). If they
+ * are ever needed, see the Spliterator in an archived "exonum-serialization" project.
  *
  * @param <ElementT> the type of elements in the corresponding list this spliterator provides
  */
@@ -39,8 +39,7 @@ class ListSpliterator<ElementT> implements Spliterator<ElementT> {
   /** Characteristics of any list spliterator. */
   private static final int ANY_CHARACTERISTICS = NONNULL | ORDERED | SIZED | SUBSIZED;
 
-  @VisibleForTesting
-  static final int MIN_SPLITTABLE_SIZE = 2;
+  @VisibleForTesting static final int MIN_SPLITTABLE_SIZE = 2;
 
   private final ListIndex<ElementT> list;
 
@@ -54,25 +53,27 @@ class ListSpliterator<ElementT> implements Spliterator<ElementT> {
 
   private final int characteristics;
 
-  /**
-   * The value of the modification counter at the bind time — the start of iteration.
-   */
+  /** The value of the modification counter at the bind time — the start of iteration. */
   private Integer initialCounterValue;
 
   ListSpliterator(ListIndex<ElementT> list, ModificationCounter counter, boolean immutable) {
     this(list, counter, immutable, 0, 0, null);
   }
 
-  private ListSpliterator(ListIndex<ElementT> list, ModificationCounter counter, boolean immutable,
-      long nextIndex, long fence, Integer initialCounterValue) {
+  private ListSpliterator(
+      ListIndex<ElementT> list,
+      ModificationCounter counter,
+      boolean immutable,
+      long nextIndex,
+      long fence,
+      Integer initialCounterValue) {
     this.list = list;
     checkArgument(0 <= fence, "fence (%s) must be non-negative");
     checkPositionIndex(nextIndex, fence);
     this.nextIndex = nextIndex;
     this.fence = fence;
     this.counter = counter;
-    characteristics = immutable ? ANY_CHARACTERISTICS | IMMUTABLE
-        : ANY_CHARACTERISTICS;
+    characteristics = immutable ? ANY_CHARACTERISTICS | IMMUTABLE : ANY_CHARACTERISTICS;
     this.initialCounterValue = initialCounterValue;
   }
 
@@ -103,8 +104,9 @@ class ListSpliterator<ElementT> implements Spliterator<ElementT> {
     }
     // Create a spliterator covering the prefix of the original subsequence of the list.
     long mid = nextIndex + (fence - nextIndex) / 2;
-    Spliterator<ElementT> prefix = new ListSpliterator<>(list, counter,
-        hasCharacteristics(IMMUTABLE), nextIndex, mid, initialCounterValue);
+    Spliterator<ElementT> prefix =
+        new ListSpliterator<>(
+            list, counter, hasCharacteristics(IMMUTABLE), nextIndex, mid, initialCounterValue);
     // Make this spliterator cover the suffix of the original subsequence of the list.
     this.nextIndex = mid;
 
@@ -123,8 +125,8 @@ class ListSpliterator<ElementT> implements Spliterator<ElementT> {
   }
 
   /**
-   * Binds this spliterator to the source, initializing the indices to cover the whole list,
-   * and setting the modification counter value at bind-time.
+   * Binds this spliterator to the source, initializing the indices to cover the whole list, and
+   * setting the modification counter value at bind-time.
    */
   private void bindOrCheckModifications() {
     if (initialCounterValue == null) {

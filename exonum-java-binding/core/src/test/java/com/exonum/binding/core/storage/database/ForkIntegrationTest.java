@@ -57,8 +57,7 @@ class ForkIntegrationTest {
           () -> assertThrows(IllegalStateException.class, fork::getAccessNativeHandle),
           () -> assertThrows(IllegalStateException.class, list1::size),
           () -> assertThrows(IllegalStateException.class, list2::size),
-          () -> assertThrows(IllegalStateException.class, it::next)
-      );
+          () -> assertThrows(IllegalStateException.class, it::next));
     }
   }
 
@@ -71,9 +70,10 @@ class ForkIntegrationTest {
       ListIndex<String> list1 = newList("list_1", fork);
       // Register a clean action with the *fork* that completes exceptionally
       Cleaner forkCleaner = fork.getCleaner();
-      forkCleaner.add(() -> {
-        throw new IllegalStateException("Evil clean action");
-      });
+      forkCleaner.add(
+          () -> {
+            throw new IllegalStateException("Evil clean action");
+          });
 
       // Attempt to merge the fork (involves converting into patch, which must be aborted)
       Exception e = assertThrows(IllegalStateException.class, () -> db.merge(fork));
@@ -115,8 +115,7 @@ class ForkIntegrationTest {
         () -> assertThrows(IllegalStateException.class, fork::getAccessNativeHandle),
         () -> assertThrows(IllegalStateException.class, list1::size),
         () -> assertThrows(IllegalStateException.class, list2::size),
-        () -> assertThrows(IllegalStateException.class, it::next)
-    );
+        () -> assertThrows(IllegalStateException.class, it::next));
   }
 
   @Test
@@ -149,8 +148,9 @@ class ForkIntegrationTest {
   }
 
   @Test
-  @DisplayName("rollback shall work when multiple checkpoints are created, reverting to the"
-      + "state as of the last checkpoint")
+  @DisplayName(
+      "rollback shall work when multiple checkpoints are created, reverting to the"
+          + "state as of the last checkpoint")
   void rollbacksToTheLastCheckpointWhenMultipleAreCreated() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner("parent")) {
@@ -201,7 +201,7 @@ class ForkIntegrationTest {
   @Test
   void rollbackDoesNotAffectDatabase() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
-         Cleaner cleaner = new Cleaner("cleaner")) {
+        Cleaner cleaner = new Cleaner("cleaner")) {
       String indexName = "list";
 
       Fork fork1 = db.createFork(cleaner);
@@ -231,7 +231,7 @@ class ForkIntegrationTest {
   @Test
   void rollbacksAllChangesIfNoCheckpointWasCreated() throws Exception {
     try (TemporaryDb db = TemporaryDb.newInstance();
-         Cleaner cleaner = new Cleaner("parent")) {
+        Cleaner cleaner = new Cleaner("parent")) {
       Fork fork = db.createFork(cleaner);
 
       ListIndex<String> list = newList("list", fork);

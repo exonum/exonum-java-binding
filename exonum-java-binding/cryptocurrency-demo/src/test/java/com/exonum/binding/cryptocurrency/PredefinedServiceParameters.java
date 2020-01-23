@@ -23,9 +23,7 @@ import com.google.common.base.Strings;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * Predefined service parameters used by TestKit in integration tests.
- */
+/** Predefined service parameters used by TestKit in integration tests. */
 public final class PredefinedServiceParameters {
   public static final String ARTIFACT_FILENAME = getRequiredProperty("it.artifactFilename");
   public static final ServiceArtifactId ARTIFACT_ID =
@@ -36,8 +34,7 @@ public final class PredefinedServiceParameters {
 
   private static String getRequiredProperty(String key) {
     String property = System.getProperty(key);
-    checkState(!Strings.isNullOrEmpty(property),
-        "Absent property: %s=%s", key, property);
+    checkState(!Strings.isNullOrEmpty(property), "Absent property: %s=%s", key, property);
     return property;
   }
 

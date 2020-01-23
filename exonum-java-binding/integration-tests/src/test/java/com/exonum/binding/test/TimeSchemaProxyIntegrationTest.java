@@ -49,20 +49,21 @@ import org.junit.jupiter.params.provider.ValueSource;
 @RequiresNativeLibrary
 class TimeSchemaProxyIntegrationTest {
 
-  private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime
-      .of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
+  private static final ZonedDateTime EXPECTED_TIME =
+      ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
   @Test
   void newInstanceFailsIfNoSuchService(@TempDir Path tmp) {
-    try (TestKit testkit = TestKit.builder()
-        .withArtifactsDirectory(tmp)
-        .build()) {
+    try (TestKit testkit = TestKit.builder().withArtifactsDirectory(tmp).build()) {
       Snapshot snapshot = testkit.getSnapshot();
       String timeServiceName = "inactive-service";
-      Exception e = assertThrows(IllegalArgumentException.class,
-          () -> TimeSchema.newInstance(snapshot, timeServiceName));
+      Exception e =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> TimeSchema.newInstance(snapshot, timeServiceName));
 
-      assertThat(e.getMessage()).containsIgnoringCase("No time service instance")
+      assertThat(e.getMessage())
+          .containsIgnoringCase("No time service instance")
           .contains(timeServiceName);
     }
   }
@@ -70,32 +71,33 @@ class TimeSchemaProxyIntegrationTest {
   @Test
   void newInstanceFailsIfServiceOfOtherType() {
     String serviceName = "inactive-service";
-    try (TestKit testkit = TestKit.builder()
-        .withArtifactsDirectory(ARTIFACT_DIR)
-        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, serviceName, 10)
-        .build()) {
+    try (TestKit testkit =
+        TestKit.builder()
+            .withArtifactsDirectory(ARTIFACT_DIR)
+            .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+            .withService(ARTIFACT_ID, serviceName, 10)
+            .build()) {
       Snapshot snapshot = testkit.getSnapshot();
-      Exception e = assertThrows(IllegalArgumentException.class,
-          () -> TimeSchema.newInstance(snapshot, serviceName));
+      Exception e =
+          assertThrows(
+              IllegalArgumentException.class, () -> TimeSchema.newInstance(snapshot, serviceName));
 
-      assertThat(e.getMessage()).containsIgnoringCase("Not an Exonum time oracle")
+      assertThat(e.getMessage())
+          .containsIgnoringCase("Not an Exonum time oracle")
           .contains(serviceName)
           .contains(ARTIFACT_ID.getName());
     }
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {
-      "default-time",
-      "mars-time"
-  })
+  @ValueSource(strings = {"default-time", "mars-time"})
   void getTimeAccessibleFromAnyInstance(String timeServiceName, @TempDir Path tmp) {
     TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
-    try (TestKit testkit = TestKit.builder()
-        .withArtifactsDirectory(tmp)
-        .withTimeService(timeServiceName, 10, timeProvider)
-        .build()) {
+    try (TestKit testkit =
+        TestKit.builder()
+            .withArtifactsDirectory(tmp)
+            .withTimeService(timeServiceName, 10, timeProvider)
+            .build()) {
       setUpConsolidatedTime(testkit);
       Snapshot snapshot = testkit.getSnapshot();
       TimeSchema timeSchema = TimeSchema.newInstance(snapshot, timeServiceName);
@@ -112,10 +114,11 @@ class TimeSchemaProxyIntegrationTest {
     @BeforeEach
     void createTestKit(@TempDir Path tmp) {
       TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
-      testKit = TestKit.builder()
-          .withArtifactsDirectory(tmp)
-          .withTimeService(SERVICE_NAME, 10, timeProvider)
-          .build();
+      testKit =
+          TestKit.builder()
+              .withArtifactsDirectory(tmp)
+              .withTimeService(SERVICE_NAME, 10, timeProvider)
+              .build();
     }
 
     @AfterEach
@@ -126,30 +129,33 @@ class TimeSchemaProxyIntegrationTest {
     @Test
     void getTime() {
       setUpConsolidatedTime();
-      testKitTest((timeSchema) -> {
-        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-        assertThat(consolidatedTime).hasValue(EXPECTED_TIME);
-      });
+      testKitTest(
+          (timeSchema) -> {
+            Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
+            assertThat(consolidatedTime).hasValue(EXPECTED_TIME);
+          });
     }
 
     @Test
     void getTimeBeforeConsolidated() {
-      testKitTest((timeSchema) -> {
-        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-        assertThat(consolidatedTime).isEmpty();
-      });
+      testKitTest(
+          (timeSchema) -> {
+            Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
+            assertThat(consolidatedTime).isEmpty();
+          });
     }
 
     @Test
     void getValidatorsTime() {
       setUpConsolidatedTime();
-      testKitTest((timeSchema) -> {
-        Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
-        EmulatedNode emulatedNode = testKit.getEmulatedNode();
-        PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
-        Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, EXPECTED_TIME);
-        assertThat(validatorsTimes).isEqualTo(expected);
-      });
+      testKitTest(
+          (timeSchema) -> {
+            Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
+            EmulatedNode emulatedNode = testKit.getEmulatedNode();
+            PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
+            Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, EXPECTED_TIME);
+            assertThat(validatorsTimes).isEqualTo(expected);
+          });
     }
 
     private void setUpConsolidatedTime() {

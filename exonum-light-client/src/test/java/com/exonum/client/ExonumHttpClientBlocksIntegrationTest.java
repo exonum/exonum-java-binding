@@ -97,9 +97,7 @@ class ExonumHttpClientBlocksIntegrationTest {
     server = new MockWebServer();
     server.start();
 
-    exonumClient = ExonumClient.newBuilder()
-        .setExonumHost(server.url("/").url())
-        .build();
+    exonumClient = ExonumClient.newBuilder().setExonumHost(server.url("/").url()).build();
   }
 
   @AfterEach
@@ -111,8 +109,8 @@ class ExonumHttpClientBlocksIntegrationTest {
   void getBlockByHeight() throws InterruptedException {
     // Mock response
     HashCode tx1 = HashCode.fromString("336a4acb");
-    String mockResponse = JSON.toJson(new GetBlockResponse(BLOCK_1,
-        singletonList(new IndexedTxHash(0, tx1))));
+    String mockResponse =
+        JSON.toJson(new GetBlockResponse(BLOCK_1, singletonList(new IndexedTxHash(0, tx1))));
     enqueueResponse(mockResponse);
 
     // Call
@@ -135,13 +133,11 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Mock response
     long height = 100;
     String message = "Requested block height (100) exceeds the blockchain height (2)";
-    server.enqueue(new MockResponse()
-        .setResponseCode(HTTP_NOT_FOUND)
-        .setBody(message));
+    server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND).setBody(message));
 
     // Call
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> exonumClient.getBlockByHeight(height));
+    Exception e =
+        assertThrows(IllegalArgumentException.class, () -> exonumClient.getBlockByHeight(height));
     assertThat(e.getMessage(), containsString(message));
   }
 
@@ -155,13 +151,25 @@ class ExonumHttpClientBlocksIntegrationTest {
   void getBlocksSinglePageSkippingEmpty() throws InterruptedException {
     long fromHeight = BLOCK_1.getHeight();
     long toHeight = BLOCK_3.getHeight();
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': " + fromHeight + ",\n"
-        + "        'end': " + toHeight + 1 + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': "
+            + fromHeight
+            + ",\n"
+            + "        'end': "
+            + toHeight
+            + 1
+            + "\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_3_JSON
+            + ","
+            + BLOCK_2_JSON
+            + ","
+            + BLOCK_1_JSON
+            + "]\n"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -192,12 +200,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     // A single block in the range
     // NB: The response below is not 100% accurate, as Exonum would return the 'count' blocks
     // (or the total number of empty blocks in the blockchain at or below the 'fromHeight')
-    List<Block> inRangeBlocks = ImmutableList.of(aBlock()
-        .height(1050)
-        .build());
-    List<Block> outOfRangeBlocks = ImmutableList.of(aBlock()
-        .height(850)
-        .build());
+    List<Block> inRangeBlocks = ImmutableList.of(aBlock().height(1050).build());
+    List<Block> outOfRangeBlocks = ImmutableList.of(aBlock().height(850).build());
     List<Block> responseBlocks = concatLists(outOfRangeBlocks, inRangeBlocks);
     String mockResponse = createGetBlocksResponse(start, toHeight + 1, responseBlocks);
     enqueueResponse(mockResponse);
@@ -222,14 +226,25 @@ class ExonumHttpClientBlocksIntegrationTest {
   void getBlocksSinglePageNoTime() throws InterruptedException {
     long fromHeight = BLOCK_1.getHeight();
     long toHeight = BLOCK_3.getHeight();
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': " + fromHeight + ",\n"
-        + "        'end': " + toHeight + 1 + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON_NO_TIME + "," + BLOCK_2_JSON_NO_TIME + ","
-        + BLOCK_1_JSON_NO_TIME + "]"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': "
+            + fromHeight
+            + ",\n"
+            + "        'end': "
+            + toHeight
+            + 1
+            + "\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_3_JSON_NO_TIME
+            + ","
+            + BLOCK_2_JSON_NO_TIME
+            + ","
+            + BLOCK_1_JSON_NO_TIME
+            + "]"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -257,20 +272,16 @@ class ExonumHttpClientBlocksIntegrationTest {
     // NB: These responses are not realistic because they include only blocks in the given
     //   range, whilst the request asks for MAX_BLOCKS_PER_REQUEST non-empty blocks, and
     //   Exonum will return these two blocks in a single request.
-    Block firstPageBlock = aBlock()
-        .height(1100)
-        .build();
+    Block firstPageBlock = aBlock().height(1100).build();
     long startP1 = toHeight - MAX_BLOCKS_PER_REQUEST + 1;
     long endP1 = toHeight + 1;
-    String firstResponse = createGetBlocksResponse(startP1, endP1,
-        ImmutableList.of(firstPageBlock));
+    String firstResponse =
+        createGetBlocksResponse(startP1, endP1, ImmutableList.of(firstPageBlock));
     enqueueResponse(firstResponse);
 
-    Block secondPageBlock = aBlock()
-        .height(102)
-        .build();
-    String secondResponse = createGetBlocksResponse(fromHeight, startP1,
-        ImmutableList.of(secondPageBlock));
+    Block secondPageBlock = aBlock().height(102).build();
+    String secondResponse =
+        createGetBlocksResponse(fromHeight, startP1, ImmutableList.of(secondPageBlock));
     enqueueResponse(secondResponse);
 
     // Call
@@ -284,12 +295,11 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Check the requests made
     RecordedRequest firstRequest = server.takeRequest();
-    assertBlockRequestParams(firstRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toHeight,
-        timeOption);
+    assertBlockRequestParams(
+        firstRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toHeight, timeOption);
 
     RecordedRequest secondRequest = server.takeRequest();
-    assertBlockRequestParams(secondRequest, 101, blockFilter, (startP1 - 1),
-        timeOption);
+    assertBlockRequestParams(secondRequest, 101, blockFilter, (startP1 - 1), timeOption);
   }
 
   @ParameterizedTest(name = "[{index}] 2nd page range: [{0}, 1999]")
@@ -315,8 +325,8 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Check the requests made
     RecordedRequest firstRequest = server.takeRequest();
-    assertBlockRequestParams(firstRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toHeight,
-        timeOption);
+    assertBlockRequestParams(
+        firstRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toHeight, timeOption);
 
     RecordedRequest secondRequest = server.takeRequest();
     int numBlocksP2 = Math.toIntExact(toP2 - fromHeight + 1);
@@ -339,8 +349,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     // In-range must be included in the response
     List<Block> page2InRangeBlocks = createBlocks(fromHeight, toP2 - numEmptyOnSecondPage);
     // Out-of-range must be discarded
-    List<Block> page2OutOfRangeBlocks = createBlocks(fromHeight - numEmptyOnSecondPage,
-        fromHeight - 1);
+    List<Block> page2OutOfRangeBlocks =
+        createBlocks(fromHeight - numEmptyOnSecondPage, fromHeight - 1);
     List<Block> page2Blocks = concatLists(page2OutOfRangeBlocks, page2InRangeBlocks);
     // Self-check
     assertThat(page2Blocks, hasSize(MAX_BLOCKS_PER_REQUEST));
@@ -360,8 +370,8 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     // Check the requests made
     RecordedRequest firstRequest = server.takeRequest();
-    assertBlockRequestParams(firstRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toHeight,
-        timeOption);
+    assertBlockRequestParams(
+        firstRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toHeight, timeOption);
 
     RecordedRequest secondRequest = server.takeRequest();
     assertBlockRequestParams(secondRequest, MAX_BLOCKS_PER_REQUEST, blockFilter, toP2, timeOption);
@@ -369,17 +379,17 @@ class ExonumHttpClientBlocksIntegrationTest {
 
   @Test
   void getBlocksExceedingBlockchainHeight() {
-    String errorMessage = "Requested latest height 10 is greater than the current "
-        + "blockchain height 2";
-    server.enqueue(new MockResponse()
-        .setResponseCode(HTTP_NOT_FOUND)
-        .setBody(errorMessage));
+    String errorMessage =
+        "Requested latest height 10 is greater than the current " + "blockchain height 2";
+    server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND).setBody(errorMessage));
 
     // Call
     long fromHeight = 1;
     long toHeight = 10;
-    Exception e = assertThrows(IllegalArgumentException.class,
-        () -> exonumClient.getBlocks(fromHeight, toHeight, INCLUDE_EMPTY, INCLUDE_COMMIT_TIME));
+    Exception e =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> exonumClient.getBlocks(fromHeight, toHeight, INCLUDE_EMPTY, INCLUDE_COMMIT_TIME));
 
     // Assert response
     assertThat(e.getMessage(), containsString(errorMessage));
@@ -387,20 +397,22 @@ class ExonumHttpClientBlocksIntegrationTest {
 
   @ParameterizedTest
   @CsvSource({
-      "-1, 1, 'negative from'",
-      "1, -1, 'negative to'",
-      "-2, -1, 'negative from & to'",
-      "2, 1, 'from > to'",
+    "-1, 1, 'negative from'",
+    "1, -1, 'negative to'",
+    "-2, -1, 'negative from & to'",
+    "2, 1, 'from > to'",
   })
   void getBlocksWrongRange(long fromHeight, long toHeight) {
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> exonumClient.getBlocks(fromHeight, toHeight, INCLUDE_EMPTY, NO_COMMIT_TIME));
   }
 
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -1, 0})
   void getLastBlocksWrongBlocksCount(int blocksCount) {
-    assertThrows(IllegalArgumentException.class,
+    assertThrows(
+        IllegalArgumentException.class,
         () -> exonumClient.getLastBlocks(blocksCount, INCLUDE_EMPTY, NO_COMMIT_TIME));
   }
 
@@ -411,13 +423,24 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     long end = blockchainHeight + 1;
     long start = end - numBlocks;
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': " + start + ",\n"
-        + "        'end': " + end + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': "
+            + start
+            + ",\n"
+            + "        'end': "
+            + end
+            + "\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_3_JSON
+            + ","
+            + BLOCK_2_JSON
+            + ","
+            + BLOCK_1_JSON
+            + "]\n"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -426,8 +449,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlocksRange response = exonumClient.getLastBlocks(numBlocks, blockFilter, timeOption);
 
     // Assert response
-    BlocksRange expected = new BlocksRange(start, blockchainHeight,
-        ImmutableList.of(BLOCK_1, BLOCK_2, BLOCK_3));
+    BlocksRange expected =
+        new BlocksRange(start, blockchainHeight, ImmutableList.of(BLOCK_1, BLOCK_2, BLOCK_3));
     assertThat(response, equalTo(expected));
 
     // Assert request params
@@ -440,17 +463,25 @@ class ExonumHttpClientBlocksIntegrationTest {
   @ParameterizedTest(name = "[{index}] {0} more than in the blockchain")
   @DisplayName("getLastBlocks requests more blocks than has been committed")
   @ValueSource(ints = {0, 1, 2, MAX_BLOCKS_PER_REQUEST - 1, MAX_BLOCKS_PER_REQUEST})
-  void getLastBlocksSkippingEmptyMoreThanCommitted(int overflow)
-      throws InterruptedException {
+  void getLastBlocksSkippingEmptyMoreThanCommitted(int overflow) throws InterruptedException {
     int blockchainHeight = 100;
     int end = blockchainHeight + 1;
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': 0,\n"
-        + "        'end': " + end + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': 0,\n"
+            + "        'end': "
+            + end
+            + "\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_3_JSON
+            + ","
+            + BLOCK_2_JSON
+            + ","
+            + BLOCK_1_JSON
+            + "]\n"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -462,8 +493,8 @@ class ExonumHttpClientBlocksIntegrationTest {
     BlocksRange response = exonumClient.getLastBlocks(blocksCount, blockFilter, timeOption);
 
     // Assert response
-    BlocksRange expected = new BlocksRange(0, blockchainHeight,
-        ImmutableList.of(BLOCK_1, BLOCK_2, BLOCK_3));
+    BlocksRange expected =
+        new BlocksRange(0, blockchainHeight, ImmutableList.of(BLOCK_1, BLOCK_2, BLOCK_3));
     assertThat(response, equalTo(expected));
 
     // Assert request params
@@ -471,21 +502,21 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertThat(recordedRequest.getMethod(), is("GET"));
     assertThat(recordedRequest, hasPath(expectedBlocksPath));
     int expectedFirstRequestSize = min(blocksCount, MAX_BLOCKS_PER_REQUEST);
-    assertBlockRequestParams(recordedRequest, expectedFirstRequestSize, blockFilter, null,
-        timeOption);
+    assertBlockRequestParams(
+        recordedRequest, expectedFirstRequestSize, blockFilter, null, timeOption);
   }
 
   @ParameterizedTest(name = "[{index}] {0} height, {1} blocks on the 2nd page. {2}")
   @CsvSource({
-      "5000, 1, '1001 blocks requested'",
-      "5000, 999, '1999 blocks requested'",
-      "5000, 1000, '2K blocks requested'",
-      "1000, 1, '1001 blocks requested = 1001 in the blockchain'",
-      "1999, 1000, '2K blocks requested = 2K in the blockchain'",
-      "1998, 1000, '2K blocks requested > 1999 in the blockchain'",
+    "5000, 1, '1001 blocks requested'",
+    "5000, 999, '1999 blocks requested'",
+    "5000, 1000, '2K blocks requested'",
+    "1000, 1, '1001 blocks requested = 1001 in the blockchain'",
+    "1999, 1000, '2K blocks requested = 2K in the blockchain'",
+    "1998, 1000, '2K blocks requested > 1999 in the blockchain'",
   })
-  void getLastBlocksMultiplePagesWithEmpty(int blockchainHeight, int secondPageSize,
-      @SuppressWarnings("unused") String description)
+  void getLastBlocksMultiplePagesWithEmpty(
+      int blockchainHeight, int secondPageSize, @SuppressWarnings("unused") String description)
       throws Exception {
     int numBlocks = MAX_BLOCKS_PER_REQUEST + secondPageSize;
     long startP1 = blockchainHeight - MAX_BLOCKS_PER_REQUEST + 1;
@@ -526,13 +557,24 @@ class ExonumHttpClientBlocksIntegrationTest {
 
     long end = blockchainHeight + 1;
     long start = BLOCK_1.getHeight();
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': " + start + ",\n"
-        + "        'end': " + end + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': "
+            + start
+            + ",\n"
+            + "        'end': "
+            + end
+            + "\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_3_JSON
+            + ","
+            + BLOCK_2_JSON
+            + ","
+            + BLOCK_1_JSON
+            + "]\n"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -549,23 +591,31 @@ class ExonumHttpClientBlocksIntegrationTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {
-      10,
-      1010
-  })
+  @ValueSource(ints = {10, 1010})
   void findNonEmptyBlocksSinglePageMoreThanInBlockchain(int numBlocks) throws InterruptedException {
     int numNonEmptyBlocks = 3;
     long blockchainHeight = 99;
 
     long end = blockchainHeight + 1;
     long start = 0;
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': " + start + ",\n"
-        + "        'end': " + end + "\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_3_JSON + "," + BLOCK_2_JSON + "," + BLOCK_1_JSON + "]\n"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': "
+            + start
+            + ",\n"
+            + "        'end': "
+            + end
+            + "\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_3_JSON
+            + ","
+            + BLOCK_2_JSON
+            + ","
+            + BLOCK_1_JSON
+            + "]\n"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -585,12 +635,12 @@ class ExonumHttpClientBlocksIntegrationTest {
 
   @ParameterizedTest(name = "[{index}] {0} height, {1} blocks on the 2nd page. {2}")
   @CsvSource({
-      "5000, 10, '1100 blocks requested'",
-      "5000, 1000, '2000 blocks requested'",
-      "1000, 1, '1001 blocks requested = 1001 in blockchain'",
+    "5000, 10, '1100 blocks requested'",
+    "5000, 1000, '2000 blocks requested'",
+    "1000, 1, '1001 blocks requested = 1001 in blockchain'",
   })
-  void findNonEmptyBlocksMultiplePages(long blockchainHeight, int secondPageSize,
-      @SuppressWarnings("unused") String description)
+  void findNonEmptyBlocksMultiplePages(
+      long blockchainHeight, int secondPageSize, @SuppressWarnings("unused") String description)
       throws InterruptedException {
 
     long toP1 = blockchainHeight;
@@ -623,8 +673,8 @@ class ExonumHttpClientBlocksIntegrationTest {
   }
 
   /**
-   * Returns a response to 'get_blocks' request **possibly with** empty blocks (i.e., 'start'
-   * and 'end' will be inferred from the passed blocks).
+   * Returns a response to 'get_blocks' request **possibly with** empty blocks (i.e., 'start' and
+   * 'end' will be inferred from the passed blocks).
    *
    * @param blocks a list of blocks in ascending order
    */
@@ -647,22 +697,31 @@ class ExonumHttpClientBlocksIntegrationTest {
     String blocksResponse = JSON.toJson(Lists.reverse(blocks));
     return "{\n"
         + "    'range': {\n"
-        + "        'start': " + start + ",\n"
-        + "        'end': " + end + "\n"
+        + "        'start': "
+        + start
+        + ",\n"
+        + "        'end': "
+        + end
+        + "\n"
         + "    },\n"
-        + "    'blocks': " + blocksResponse + "\n"
+        + "    'blocks': "
+        + blocksResponse
+        + "\n"
         + "}\n";
   }
 
   @Test
   void getLastBlock() throws InterruptedException {
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': 6,\n"
-        + "        'end': 7\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_1_JSON_NO_TIME + "]\n"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': 6,\n"
+            + "        'end': 7\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_1_JSON_NO_TIME
+            + "]\n"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -680,13 +739,16 @@ class ExonumHttpClientBlocksIntegrationTest {
 
   @Test
   void getLastNotEmptyBlock() throws InterruptedException {
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': 6,\n"
-        + "        'end': 7\n"
-        + "    },\n"
-        + "    'blocks': [ " + BLOCK_1_JSON_NO_TIME + "]\n"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': 6,\n"
+            + "        'end': 7\n"
+            + "    },\n"
+            + "    'blocks': [ "
+            + BLOCK_1_JSON_NO_TIME
+            + "]\n"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -705,13 +767,14 @@ class ExonumHttpClientBlocksIntegrationTest {
 
   @Test
   void getLastNotEmptyBlockNoBlock() throws InterruptedException {
-    String mockResponse = "{\n"
-        + "    'range': {\n"
-        + "        'start': 6,\n"
-        + "        'end': 7\n"
-        + "    },\n"
-        + "    'blocks': []\n"
-        + "}\n";
+    String mockResponse =
+        "{\n"
+            + "    'range': {\n"
+            + "        'start': 6,\n"
+            + "        'end': 7\n"
+            + "    },\n"
+            + "    'blocks': []\n"
+            + "}\n";
     enqueueResponse(mockResponse);
 
     // Call
@@ -732,13 +795,16 @@ class ExonumHttpClientBlocksIntegrationTest {
     // Mock response
     long height = 1600;
     long heightExclusive = height + 1;
-    String json = "{\n"
-        + "  'range': {\n"
-        + "    'start': 0,\n"
-        + "    'end': " + heightExclusive + "\n"
-        + "  },\n"
-        + "  'blocks': []\n"
-        + "}\n";
+    String json =
+        "{\n"
+            + "  'range': {\n"
+            + "    'start': 0,\n"
+            + "    'end': "
+            + heightExclusive
+            + "\n"
+            + "  },\n"
+            + "  'blocks': []\n"
+            + "}\n";
     enqueueResponse(json);
 
     // Call
@@ -754,20 +820,25 @@ class ExonumHttpClientBlocksIntegrationTest {
     assertBlockRequestParams(recordedRequest, 0, INCLUDE_EMPTY, null, NO_COMMIT_TIME);
   }
 
-  private static void assertBlockRequestParams(RecordedRequest request, int count,
-      BlockFilteringOption blockFilter, Long heightMax, BlockTimeOption timeOption) {
+  private static void assertBlockRequestParams(
+      RecordedRequest request,
+      int count,
+      BlockFilteringOption blockFilter,
+      Long heightMax,
+      BlockTimeOption timeOption) {
     boolean skipEmpty = blockFilter == SKIP_EMPTY;
     boolean withTime = timeOption == INCLUDE_COMMIT_TIME;
 
     Matcher<RecordedRequest> heightMatcher =
         heightMax == null ? hasNoQueryParam("latest") : hasQueryParam("latest", heightMax);
 
-    assertThat(request, allOf(
-        hasQueryParam("count", count),
-        hasQueryParam("skip_empty_blocks", skipEmpty),
-        hasQueryParam("add_blocks_time", withTime),
-        heightMatcher
-    ));
+    assertThat(
+        request,
+        allOf(
+            hasQueryParam("count", count),
+            hasQueryParam("skip_empty_blocks", skipEmpty),
+            hasQueryParam("add_blocks_time", withTime),
+            heightMatcher));
   }
 
   /** Enqueues JSON responses with the given body, in the order they are passed. */
@@ -779,21 +850,14 @@ class ExonumHttpClientBlocksIntegrationTest {
 
   /** Enqueues a JSON response with the given body. */
   private void enqueueResponse(String jsonResponse) {
-    server.enqueue(new MockResponse()
-        .setHeader(CONTENT_TYPE, "application/json")
-        .setBody(jsonResponse));
+    server.enqueue(
+        new MockResponse().setHeader(CONTENT_TYPE, "application/json").setBody(jsonResponse));
   }
 
-  /**
-   * Creates a list of blocks in the closed range [from; to].
-   */
+  /** Creates a list of blocks in the closed range [from; to]. */
   private static List<Block> createBlocks(long from, long to) {
     return LongStream.rangeClosed(from, to)
-        .mapToObj(h -> aBlock()
-            .height(h)
-            .proposerId((int) (h % 5))
-            .build()
-        )
+        .mapToObj(h -> aBlock().height(h).proposerId((int) (h % 5)).build())
         .collect(toList());
   }
 

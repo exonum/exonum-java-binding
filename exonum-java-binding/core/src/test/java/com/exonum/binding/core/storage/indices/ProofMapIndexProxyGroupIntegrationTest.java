@@ -41,7 +41,9 @@ class ProofMapIndexProxyGroupIntegrationTest extends BaseMapIndexGroupTestable<S
 
   @Override
   ProofMapIndexProxy<String, String> createInGroup(byte[] mapId, Access access) {
-    return access.getProofMap(IndexAddress.valueOf(GROUP_NAME, mapId),
-        StandardSerializers.string(), StandardSerializers.string());
+    return access.getProofMap(
+        IndexAddress.valueOf(GROUP_NAME, mapId),
+        StandardSerializers.string(),
+        StandardSerializers.string());
   }
 }

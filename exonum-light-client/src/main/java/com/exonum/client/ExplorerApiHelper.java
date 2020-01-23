@@ -48,9 +48,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 
-/**
- * Utility class for Exonum Explorer API.
- */
+/** Utility class for Exonum Explorer API. */
 final class ExplorerApiHelper {
 
   static String createSubmitTxBody(TransactionMessage message) {
@@ -68,19 +66,13 @@ final class ExplorerApiHelper {
     ExecutionStatus executionResult = getExecutionStatus(response.getStatus());
 
     return new TransactionResponse(
-        response.getType(),
-        response.getContent(),
-        executionResult,
-        response.getLocation()
-    );
+        response.getType(), response.getContent(), executionResult, response.getLocation());
   }
 
   static BlockResponse parseGetBlockResponse(String json) {
     GetBlockResponse response = JSON.fromJson(json, GetBlockResponse.class);
 
-    List<HashCode> txs = response.getTxs().stream()
-        .map(IndexedTxHash::getTxHash)
-        .collect(toList());
+    List<HashCode> txs = response.getTxs().stream().map(IndexedTxHash::getTxHash).collect(toList());
     return new BlockResponse(response.getAsBlock(), txs);
   }
 
@@ -88,10 +80,7 @@ final class ExplorerApiHelper {
     GetBlocksResponse response = JSON.fromJson(json, GetBlocksResponse.class);
 
     return new BlocksResponse(
-        response.getBlocks(),
-        response.getRange().getStart(),
-        response.getRange().getEnd()
-    );
+        response.getBlocks(), response.getRange().getStart(), response.getRange().getEnd());
   }
 
   static List<ServiceInstanceInfo> parseServicesResponse(String json) {
@@ -101,8 +90,7 @@ final class ExplorerApiHelper {
         .collect(toList());
   }
 
-  private static ExecutionStatus getExecutionStatus(
-      GetTxResponseExecutionResult executionStatus) {
+  private static ExecutionStatus getExecutionStatus(GetTxResponseExecutionResult executionStatus) {
     if (executionStatus == null) {
       return null;
     }
@@ -112,17 +100,17 @@ final class ExplorerApiHelper {
       case PANIC:
         return buildPanicExecutionStatus(executionStatus.getDescription());
       case DISPATCHER_ERROR:
-        return buildExecutionStatus(ErrorKind.DISPATCHER, executionStatus.getCode(),
-            executionStatus.getDescription());
+        return buildExecutionStatus(
+            ErrorKind.DISPATCHER, executionStatus.getCode(), executionStatus.getDescription());
       case RUNTIME_ERROR:
-        return buildExecutionStatus(ErrorKind.RUNTIME, executionStatus.getCode(),
-            executionStatus.getDescription());
+        return buildExecutionStatus(
+            ErrorKind.RUNTIME, executionStatus.getCode(), executionStatus.getDescription());
       case SERVICE_ERROR:
-        return ExecutionStatuses.serviceError(executionStatus.getCode(),
-            executionStatus.getDescription());
+        return ExecutionStatuses.serviceError(
+            executionStatus.getCode(), executionStatus.getDescription());
       default:
-        throw new IllegalStateException("Unexpected transaction execution status: "
-            + executionStatus.getType());
+        throw new IllegalStateException(
+            "Unexpected transaction execution status: " + executionStatus.getType());
     }
   }
 
@@ -132,51 +120,40 @@ final class ExplorerApiHelper {
   }
 
   @VisibleForTesting
-  static ExecutionStatus buildExecutionStatus(ErrorKind errorKind, int code,
-      String description) {
+  static ExecutionStatus buildExecutionStatus(ErrorKind errorKind, int code, String description) {
     checkArgument(0 <= code, "Error code (%s) must be non-negative", code);
     return ExecutionStatus.newBuilder()
-        .setError(ExecutionError.newBuilder()
-            .setKind(errorKind)
-            .setCode(code)
-            .setDescription(description))
+        .setError(
+            ExecutionError.newBuilder()
+                .setKind(errorKind)
+                .setCode(code)
+                .setDescription(description))
         .build();
   }
 
-  /**
-   * Json object wrapper for submit transaction request.
-   */
+  /** Json object wrapper for submit transaction request. */
   @Value
   static class SubmitTxRequest {
     TransactionMessage txBody;
   }
 
-  /**
-   * Json object wrapper for submit transaction response.
-   */
+  /** Json object wrapper for submit transaction response. */
   @Value
   private static class SubmitTxResponse {
     HashCode txHash;
   }
 
-  /**
-   * Json object wrapper for get transaction response.
-   */
+  /** Json object wrapper for get transaction response. */
   @Value
   private static class GetTxResponse {
-    @NonNull
-    TransactionStatus type;
-    @NonNull
-    TransactionMessage content;
+    @NonNull TransactionStatus type;
+    @NonNull TransactionMessage content;
     TransactionLocation location;
-    JsonObject locationProof; //TODO: in scope of LC P3
+    JsonObject locationProof; // TODO: in scope of LC P3
     GetTxResponseExecutionResult status;
   }
 
-  /**
-   * Json object wrapper for transaction execution result, i.e.,
-   * {@code "$.status"}.
-   */
+  /** Json object wrapper for transaction execution result, i.e., {@code "$.status"}. */
   @Value
   private static class GetTxResponseExecutionResult {
     GetTxResponseExecutionStatus type;
@@ -184,10 +161,7 @@ final class ExplorerApiHelper {
     String description;
   }
 
-  /**
-   * Json object wrapper for transaction execution status, i.e.,
-   * {@code "$.status.type"}.
-   */
+  /** Json object wrapper for transaction execution status, i.e., {@code "$.status.type"}. */
   private enum GetTxResponseExecutionStatus {
     @SerializedName("success")
     SUCCESS,
@@ -211,14 +185,20 @@ final class ExplorerApiHelper {
     HashCode prevHash;
     HashCode txHash;
     HashCode stateHash;
-    JsonElement precommits; //TODO: in scope of LC P3
+    JsonElement precommits; // TODO: in scope of LC P3
     List<IndexedTxHash> txs;
     ZonedDateTime time;
 
     GetBlockResponse(Block block, List<IndexedTxHash> txs) {
-      this(block.getProposerId(), block.getHeight(),
-          block.getNumTransactions(), block.getPreviousBlockHash(), block.getTxRootHash(),
-          block.getStateHash(), new JsonArray(), ImmutableList.copyOf(txs),
+      this(
+          block.getProposerId(),
+          block.getHeight(),
+          block.getNumTransactions(),
+          block.getPreviousBlockHash(),
+          block.getTxRootHash(),
+          block.getStateHash(),
+          new JsonArray(),
+          ImmutableList.copyOf(txs),
           block.getCommitTime().orElse(null));
     }
 

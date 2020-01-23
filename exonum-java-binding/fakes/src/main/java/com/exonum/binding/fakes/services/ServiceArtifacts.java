@@ -31,15 +31,13 @@ import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import java.io.IOException;
 import java.nio.file.Path;
 
-/**
- * A utility class creating various service artifacts.
- */
+/** A utility class creating various service artifacts. */
 public final class ServiceArtifacts {
 
   /**
-   * Writes a valid service artifact to the specified location. A valid service artifact
-   * can be loaded by the {@link ServiceRuntime} and
-   * the service can be instantiated.
+   * Writes a valid service artifact to the specified location. A valid service artifact can be
+   * loaded by the {@link ServiceRuntime} and the service can be instantiated.
+   *
    * @param artifactId the artifact id
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
@@ -49,16 +47,16 @@ public final class ServiceArtifacts {
     new ServiceArtifactBuilder()
         .setPluginId(artifactId.toString())
         .setPluginVersion(artifactId.getVersion())
-        .addClasses(PutValueTransaction.class, SchemaFactory.class, TestSchema.class,
-            TestService.class)
+        .addClasses(
+            PutValueTransaction.class, SchemaFactory.class, TestSchema.class, TestService.class)
         .addExtensionClass(TestServiceModule.class)
         .writeTo(artifactLocation);
   }
 
   /**
-   * Writes a service artifact that cannot be loaded. Such artifact will cause an exception
-   * during an attempt
-   * to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, String) load} it.
+   * Writes a service artifact that cannot be loaded. Such artifact will cause an exception during
+   * an attempt to {@linkplain ServiceRuntime#deployArtifact(ServiceArtifactId, String) load} it.
+   *
    * @param artifactId the artifact id
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
@@ -73,14 +71,15 @@ public final class ServiceArtifacts {
   }
 
   /**
-   * Writes a service artifact that can be loaded, but with a service that cannot be
-   * {@linkplain ServiceRuntime#addService(Fork, ServiceInstanceSpec, byte[])}  instantiated}.
+   * Writes a service artifact that can be loaded, but with a service that cannot be {@linkplain
+   * ServiceRuntime#addService(Fork, ServiceInstanceSpec, byte[])} instantiated}.
+   *
    * @param artifactId the artifact id
    * @param artifactLocation a path to write the artifact to
    * @throws IOException if it is unable to write the JAR to the given location
    */
-  public static void createWithUninstantiableService(ServiceArtifactId artifactId,
-      Path artifactLocation) throws IOException {
+  public static void createWithUninstantiableService(
+      ServiceArtifactId artifactId, Path artifactLocation) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId(artifactId.toString())
         .setPluginVersion(artifactId.getVersion())

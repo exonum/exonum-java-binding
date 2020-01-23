@@ -44,5 +44,4 @@ class TransactionLocationSerializerTest {
         TransactionLocation.valueOf(1, 1),
         TransactionLocation.valueOf(Long.MAX_VALUE, Integer.MAX_VALUE));
   }
-
 }

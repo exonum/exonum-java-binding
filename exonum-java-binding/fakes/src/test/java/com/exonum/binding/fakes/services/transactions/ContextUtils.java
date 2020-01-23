@@ -22,16 +22,12 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.transaction.TransactionContext;
 
-/**
- * Helper class to provide preconfigured context with default values.
- */
+/** Helper class to provide preconfigured context with default values. */
 public final class ContextUtils {
   private static final HashCode DEFAULT_HASH = HashCode.fromString("a0b0c0d0");
   private static final PublicKey DEFAULT_AUTHOR_KEY = PublicKey.fromHexString("abcd");
 
-  /**
-   * Returns new context with default values for a given fork.
-   */
+  /** Returns new context with default values for a given fork. */
   public static TransactionContext newContext(Fork fork) {
     return TransactionContext.builder()
         .fork(fork)
@@ -39,5 +35,4 @@ public final class ContextUtils {
         .authorPk(DEFAULT_AUTHOR_KEY)
         .build();
   }
-
 }

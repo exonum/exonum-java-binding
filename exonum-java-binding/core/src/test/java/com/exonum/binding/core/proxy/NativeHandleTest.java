@@ -29,8 +29,7 @@ class NativeHandleTest {
 
   private static long HANDLE = 0x11L;
 
-  private static final String HANDLE_STRING_REPRESENTATION =
-      Long.toHexString(HANDLE).toUpperCase();
+  private static final String HANDLE_STRING_REPRESENTATION = Long.toHexString(HANDLE).toUpperCase();
 
   @Test
   void getIfValid() {

@@ -46,8 +46,7 @@ class ConfigurableRustIterTest {
   @BeforeEach
   void setUp() {
     modCounter = mock(ModificationCounter.class);
-    when(modCounter.getCurrentValue())
-        .thenReturn(INITIAL_MOD_COUNT);
+    when(modCounter.getCurrentValue()).thenReturn(INITIAL_MOD_COUNT);
   }
 
   @Test
@@ -73,7 +72,7 @@ class ConfigurableRustIterTest {
   void nextFailsIfModifiedAfterFirstNext() {
     createFromIterable(asList(1, 2));
 
-    iter.next();  // 1st must succeed
+    iter.next(); // 1st must succeed
 
     notifyModified();
 
@@ -109,14 +108,12 @@ class ConfigurableRustIterTest {
 
   private void createFromIterable(NativeHandle nativeHandle, Iterable<Integer> it) {
     Iterator<Integer> iterator = it.iterator();
-    iter = new ConfigurableRustIter<>(nativeHandle,
-        (h) -> iterator.hasNext() ? iterator.next() : null,
-        modCounter);
+    iter =
+        new ConfigurableRustIter<>(
+            nativeHandle, (h) -> iterator.hasNext() ? iterator.next() : null, modCounter);
   }
 
   private void notifyModified() {
-    when(modCounter.isModifiedSince(eq(INITIAL_MOD_COUNT)))
-        .thenReturn(true);
+    when(modCounter.isModifiedSince(eq(INITIAL_MOD_COUNT))).thenReturn(true);
   }
-
 }

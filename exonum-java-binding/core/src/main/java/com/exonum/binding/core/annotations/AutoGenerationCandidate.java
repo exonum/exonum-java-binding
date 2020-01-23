@@ -21,18 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * An annotation intended to mark APIs that are good candidates to be generated auto-magically.
- */
+/** An annotation intended to mark APIs that are good candidates to be generated auto-magically. */
 @Retention(RetentionPolicy.SOURCE)
-@Target({
-    ElementType.ANNOTATION_TYPE,
-    ElementType.TYPE,
-    ElementType.METHOD
-})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.METHOD})
 public @interface AutoGenerationCandidate {
-  /**
-   * Why or how an element can be auto-generated.
-   */
-  String reason() default  "";
+  /** Why or how an element can be auto-generated. */
+  String reason() default "";
 }

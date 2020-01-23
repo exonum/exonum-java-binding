@@ -36,7 +36,9 @@ public final class TestSchema implements Schema {
   }
 
   public ProofMapIndexProxy<HashCode, String> testMap() {
-    return access.getRawProofMap(IndexAddress.valueOf(TEST_MAP_NAME), StandardSerializers.hash(),
+    return access.getRawProofMap(
+        IndexAddress.valueOf(TEST_MAP_NAME),
+        StandardSerializers.hash(),
         StandardSerializers.string());
   }
 

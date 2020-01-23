@@ -32,9 +32,7 @@ public final class TestStorageItems {
   public static final String K8 = "k8";
   public static final String K9 = "k9";
 
-  /**
-   * Lexicographically ordered storage keys.
-   */
+  /** Lexicographically ordered storage keys. */
   public static final List<String> keys = ImmutableList.of(K1, K2, K3, K4, K5, K6, K7, K8, K9);
 
   public static final String V1 = "v1";
@@ -47,9 +45,7 @@ public final class TestStorageItems {
   public static final String V8 = "v8";
   public static final String V9 = "v9";
 
-  /**
-   * Storage values.
-   */
+  /** Storage values. */
   public static final List<String> values = ImmutableList.of(V1, V2, V3, V4, V5, V6, V7, V8, V9);
 
   private TestStorageItems() {}

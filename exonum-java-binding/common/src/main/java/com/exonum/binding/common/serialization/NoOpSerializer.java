@@ -29,5 +29,4 @@ enum NoOpSerializer implements Serializer<byte[]> {
   public byte[] fromBytes(byte[] serializedValue) {
     return serializedValue;
   }
-
 }

@@ -22,9 +22,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.core.transaction.ExecutionException;
 
 /**
- * An "unexpected" service execution exception indicates that any exception
- * but {@link ExecutionException} occurred
- * in a service method. The original exception is stored as <em>cause</em>.
+ * An "unexpected" service execution exception indicates that any exception but {@link
+ * ExecutionException} occurred in a service method. The original exception is stored as
+ * <em>cause</em>.
  *
  * @see ExecutionException
  * @see com.exonum.core.messages.Runtime.ErrorKind#UNEXPECTED
@@ -33,6 +33,7 @@ public class UnexpectedExecutionException extends RuntimeException {
 
   /**
    * Creates a new unexpected execution exception.
+   *
    * @param cause an exception that occurred in a transaction; must not be null or an instance of
    *     {@link ExecutionException}
    */

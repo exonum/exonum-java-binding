@@ -40,13 +40,14 @@ enum StringSerializer implements Serializer<String> {
       // it is not suitable for our use-case: we must reject malformed input.
 
       // Create a new decoder
-      CharsetDecoder decoder = StandardCharsets.UTF_8
-          .newDecoder()
-          // Reject (= report as exception) malformed input.
-          .onMalformedInput(CodingErrorAction.REPORT)
-          // In case some valid UTF-8 characters are not encodable in UTF-16,
-          // we replace them with the default replacement character.
-          .onUnmappableCharacter(CodingErrorAction.REPLACE);
+      CharsetDecoder decoder =
+          StandardCharsets.UTF_8
+              .newDecoder()
+              // Reject (= report as exception) malformed input.
+              .onMalformedInput(CodingErrorAction.REPORT)
+              // In case some valid UTF-8 characters are not encodable in UTF-16,
+              // we replace them with the default replacement character.
+              .onUnmappableCharacter(CodingErrorAction.REPLACE);
 
       // Decode the buffer in a character buffer
       CharBuffer strBuffer = decoder.decode(ByteBuffer.wrap(serializedValue));
@@ -55,5 +56,4 @@ enum StringSerializer implements Serializer<String> {
       throw new IllegalArgumentException("Cannot decode the input", e);
     }
   }
-
 }

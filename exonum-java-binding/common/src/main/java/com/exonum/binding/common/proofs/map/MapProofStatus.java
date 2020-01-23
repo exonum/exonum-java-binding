@@ -18,9 +18,7 @@ package com.exonum.binding.common.proofs.map;
 
 import com.exonum.binding.common.proofs.ProofStatus;
 
-/**
- * Possible statuses of a checked map proof.
- */
+/** Possible statuses of a checked map proof. */
 public enum MapProofStatus implements ProofStatus {
   CORRECT("Proof has a valid structure"),
   NON_TERMINAL_NODE("Proof entry in a singleton proof is of branch type (must be a leaf)"),
@@ -42,8 +40,6 @@ public enum MapProofStatus implements ProofStatus {
 
   @Override
   public String toString() {
-    return "MapProofStatus{"
-        + "description='" + description + '\''
-        + '}';
+    return "MapProofStatus{" + "description='" + description + '\'' + '}';
   }
 }

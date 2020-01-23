@@ -53,9 +53,11 @@ enum Uint32Serializer implements Serializer<Integer> {
   @Override
   public Integer fromBytes(byte[] serializedValue) {
     checkArgument(serializedValue.length > 0, "Expected not empty array");
-    checkArgument(serializedValue.length <= VARINT32_MAX_BYTES,
+    checkArgument(
+        serializedValue.length <= VARINT32_MAX_BYTES,
         "Expected an array of size less than %s, but was %s",
-        VARINT32_MAX_BYTES, serializedValue.length);
+        VARINT32_MAX_BYTES,
+        serializedValue.length);
 
     try {
       int pos = 0;
@@ -87,5 +89,4 @@ enum Uint32Serializer implements Serializer<Integer> {
           "Serialized value has wrong format " + Arrays.toString(serializedValue), e);
     }
   }
-
 }

@@ -61,13 +61,12 @@ import javax.annotation.Nullable;
 /**
  * A simple QA service.
  *
- * @implNote This service is meant to be used to test integration of Exonum Java Binding with
- *     Exonum Core. It contains very little business-logic so the QA team can focus
- *     on testing the integration <em>through</em> this service, not the service itself.
- *
- *     <p>Such service is not meant to be illustrative, it breaks multiple recommendations
- *     on implementing Exonum Services, therefore, it shall NOT be used as an example
- *     of a user service.
+ * @implNote This service is meant to be used to test integration of Exonum Java Binding with Exonum
+ *     Core. It contains very little business-logic so the QA team can focus on testing the
+ *     integration <em>through</em> this service, not the service itself.
+ *     <p>Such service is not meant to be illustrative, it breaks multiple recommendations on
+ *     implementing Exonum Services, therefore, it shall NOT be used as an example of a user
+ *     service.
  */
 public final class QaServiceImpl extends AbstractService implements QaService {
 
@@ -76,17 +75,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   static final int VALID_THROWING_TX_ID = 12;
   static final int VALID_ERROR_TX_ID = 13;
 
-  @VisibleForTesting
-  static final short UNKNOWN_TX_ID = 9999;
+  @VisibleForTesting static final short UNKNOWN_TX_ID = 9999;
 
-  @VisibleForTesting
-  static final String DEFAULT_COUNTER_NAME = "default";
+  @VisibleForTesting static final String DEFAULT_COUNTER_NAME = "default";
 
-  @VisibleForTesting
-  static final String AFTER_COMMIT_COUNTER_NAME = "after_commit_counter";
+  @VisibleForTesting static final String AFTER_COMMIT_COUNTER_NAME = "after_commit_counter";
 
-  @Nullable
-  private Node node;
+  @Nullable private Node node;
 
   @Inject
   public QaServiceImpl(ServiceInstanceSpec instanceSpec) {
@@ -119,14 +114,14 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   /**
-   * Increments the afterCommit counter so the number of times this method was invoked is stored
-   * in it.
+   * Increments the afterCommit counter so the number of times this method was invoked is stored in
+   * it.
    */
   @Override
   public void afterCommit(BlockCommittedEvent event) {
     long seed = event.getHeight();
-    HashCode counterId = Hashing.sha256()
-        .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
+    HashCode counterId =
+        Hashing.sha256().hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
     submitIncrementCounter(seed, counterId);
   }
 
@@ -144,13 +139,14 @@ public final class QaServiceImpl extends AbstractService implements QaService {
    * @param counterId counter id, a hash of the counter name
    * @param serviceId the id of QA service
    */
-  private static RawTransaction newRawIncrementCounterTransaction(long requestSeed,
-      HashCode counterId, int serviceId) {
-    byte[] payload = TxMessageProtos.IncrementCounterTxBody
-        .newBuilder()
-        .setSeed(requestSeed)
-        .setCounterId(ByteString.copyFrom(counterId.asBytes()))
-        .build().toByteArray();
+  private static RawTransaction newRawIncrementCounterTransaction(
+      long requestSeed, HashCode counterId, int serviceId) {
+    byte[] payload =
+        TxMessageProtos.IncrementCounterTxBody.newBuilder()
+            .setSeed(requestSeed)
+            .setCounterId(ByteString.copyFrom(counterId.asBytes()))
+            .build()
+            .toByteArray();
 
     return RawTransaction.newBuilder()
         .serviceId(serviceId)
@@ -160,24 +156,21 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   /**
-   * Submit a transaction that has QA service identifier, but an unknown transaction id.
-   * Such transaction must be rejected when received by other nodes.
+   * Submit a transaction that has QA service identifier, but an unknown transaction id. Such
+   * transaction must be rejected when received by other nodes.
    *
-   * <p>Only a single unknown transaction may be submitted to each node,
-   * as they have empty body (= the same binary representation),
-   * and once it is added to the local pool of a certain node,
-   * it will remain there. Other nodes must reject the message of this transaction
-   * once they receive it as a message from this node. If multiple unknown transaction messages
-   * need to be submitted, a seed might be added.
+   * <p>Only a single unknown transaction may be submitted to each node, as they have empty body (=
+   * the same binary representation), and once it is added to the local pool of a certain node, it
+   * will remain there. Other nodes must reject the message of this transaction once they receive it
+   * as a message from this node. If multiple unknown transaction messages need to be submitted, a
+   * seed might be added.
    */
   @Override
   public HashCode submitUnknownTx() {
     return submitTransaction(newRawUnknownTransaction(getId()));
   }
 
-  /**
-   * Returns raw transaction.
-   */
+  /** Returns raw transaction. */
   private static RawTransaction newRawUnknownTransaction(int serviceId) {
     return RawTransaction.newBuilder()
         .serviceId(serviceId)
@@ -187,53 +180,57 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  @SuppressWarnings("ConstantConditions")  // Node is not null.
+  @SuppressWarnings("ConstantConditions") // Node is not null.
   public Optional<Counter> getValue(HashCode counterId) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((snapshot) -> {
-      QaSchema schema = createDataSchema(snapshot);
-      MapIndex<HashCode, Long> counters = schema.counters();
-      if (!counters.containsKey(counterId)) {
-        return Optional.empty();
-      }
+    return node.withSnapshot(
+        (snapshot) -> {
+          QaSchema schema = createDataSchema(snapshot);
+          MapIndex<HashCode, Long> counters = schema.counters();
+          if (!counters.containsKey(counterId)) {
+            return Optional.empty();
+          }
 
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
-      String name = counterNames.get(counterId);
-      Long value = counters.get(counterId);
-      return Optional.of(new Counter(name, value));
-    });
+          MapIndex<HashCode, String> counterNames = schema.counterNames();
+          String name = counterNames.get(counterId);
+          Long value = counters.get(counterId);
+          return Optional.of(new Counter(name, value));
+        });
   }
 
   @Override
   public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((snapshot) -> {
-      Blockchain blockchain = Blockchain.newInstance(snapshot);
+    return node.withSnapshot(
+        (snapshot) -> {
+          Blockchain blockchain = Blockchain.newInstance(snapshot);
 
-      return blockchain.getConsensusConfiguration();
-    });
+          return blockchain.getConsensusConfiguration();
+        });
   }
 
   @Override
-  @SuppressWarnings("ConstantConditions")  // Node is not null.
+  @SuppressWarnings("ConstantConditions") // Node is not null.
   public Optional<ZonedDateTime> getTime() {
-    return node.withSnapshot(s -> {
-      TimeSchema timeOracle = createDataSchema(s).timeSchema();
-      ProofEntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
-      return currentTime.toOptional();
-    });
+    return node.withSnapshot(
+        s -> {
+          TimeSchema timeOracle = createDataSchema(s).timeSchema();
+          ProofEntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
+          return currentTime.toOptional();
+        });
   }
 
   @Override
-  @SuppressWarnings("ConstantConditions")  // Node is not null.
+  @SuppressWarnings("ConstantConditions") // Node is not null.
   public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
-    return node.withSnapshot(s -> {
-      TimeSchema timeOracle = createDataSchema(s).timeSchema();
-      MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
-      return toMap(validatorsTimes);
-    });
+    return node.withSnapshot(
+        s -> {
+          TimeSchema timeOracle = createDataSchema(s).timeSchema();
+          MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
+          return toMap(validatorsTimes);
+        });
   }
 
   private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
@@ -252,6 +249,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   /**
    * Verifies the QA service configuration.
+   *
    * @throws ExecutionException if time oracle name is empty
    */
   @Override
@@ -267,8 +265,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @Transaction(CREATE_COUNTER_TX_ID)
-  public void createCounter(TxMessageProtos.CreateCounterTxBody arguments,
-      TransactionContext context) {
+  public void createCounter(
+      TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context) {
     String name = arguments.getName();
     checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
 
@@ -280,11 +278,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
 
-    HashCode counterId = Hashing.defaultHashFunction()
-        .hashString(counterName, UTF_8);
+    HashCode counterId = Hashing.defaultHashFunction().hashString(counterName, UTF_8);
     if (counters.containsKey(counterId)) {
-      throw new ExecutionException(COUNTER_ALREADY_EXISTS.code,
-          format("Counter %s already exists", counterName));
+      throw new ExecutionException(
+          COUNTER_ALREADY_EXISTS.code, format("Counter %s already exists", counterName));
     }
     assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
 
@@ -294,8 +291,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @Transaction(INCREMENT_COUNTER_TX_ID)
-  public void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
-      TransactionContext context) {
+  public void incrementCounter(
+      TxMessageProtos.IncrementCounterTxBody arguments, TransactionContext context) {
     byte[] rawCounterId = arguments.getCounterId().toByteArray();
     HashCode counterId = HashCode.fromBytes(rawCounterId);
 
@@ -318,16 +315,18 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // Attempt to clear all service indices.
     schema.clearAll();
 
-    throw new IllegalStateException(format("#execute of this transaction always throws "
-            + "(seed=%d, txHash=%s)", arguments.getSeed(), context.getTransactionMessageHash()));
+    throw new IllegalStateException(
+        format(
+            "#execute of this transaction always throws " + "(seed=%d, txHash=%s)",
+            arguments.getSeed(), context.getTransactionMessageHash()));
   }
 
   @Override
   @Transaction(VALID_ERROR_TX_ID)
   public void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context) {
     int errorCode = arguments.getErrorCode();
-    checkArgument(0 <= errorCode && errorCode <= 127,
-        "error code (%s) must be in range [0; 127]", errorCode);
+    checkArgument(
+        0 <= errorCode && errorCode <= 127, "error code (%s) must be in range [0; 127]", errorCode);
     QaSchema schema = createDataSchema(context.getFork());
 
     // Attempt to clear all service indices.
@@ -345,8 +344,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // reduced read functionality without time oracle; (b) testing time schema when it is not
     // active.
     if (Strings.isNullOrEmpty(timeOracleName)) {
-      throw new ExecutionException(EMPTY_TIME_ORACLE_NAME.code,
-          format("Empty time oracle name: %s", timeOracleName));
+      throw new ExecutionException(
+          EMPTY_TIME_ORACLE_NAME.code, format("Empty time oracle name: %s", timeOracleName));
     }
   }
 

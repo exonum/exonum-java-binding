@@ -21,9 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.BitSet;
 import java.util.Objects;
 
-/**
- * A key bit set.
- */
+/** A key bit set. */
 public final class KeyBitSet {
 
   private final BitSet keyBits;
@@ -31,7 +29,7 @@ public final class KeyBitSet {
   /**
    * A length of this key in bits, i.e., the number of significant bits.
    *
-   * <p>NOT the same as {@code keyBits.length()}, which is the most significant set bit.</p>
+   * <p>NOT the same as {@code keyBits.length()}, which is the most significant set bit.
    */
   private final int length;
 
@@ -57,6 +55,7 @@ public final class KeyBitSet {
 
   /**
    * Checks if this key bit set is equal to the specified object.
+   *
    * @param o an object to compare against
    * @return true if this key bit set is equal to the specified object
    */
@@ -69,8 +68,7 @@ public final class KeyBitSet {
       return false;
     }
     KeyBitSet keyBitSet = (KeyBitSet) o;
-    return length == keyBitSet.length
-        && Objects.equals(keyBits, keyBitSet.keyBits);
+    return length == keyBitSet.length && Objects.equals(keyBits, keyBitSet.keyBits);
   }
 
   @Override
@@ -94,9 +92,6 @@ public final class KeyBitSet {
 
   @Override
   public String toString() {
-    return "KeyBitSet{"
-        + "keyBits=" + keyBits
-        + ", length=" + length
-        + '}';
+    return "KeyBitSet{" + "keyBits=" + keyBits + ", length=" + length + '}';
   }
 }

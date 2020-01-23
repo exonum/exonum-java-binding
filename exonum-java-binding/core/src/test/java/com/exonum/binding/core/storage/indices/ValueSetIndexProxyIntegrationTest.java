@@ -40,22 +40,24 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
-class ValueSetIndexProxyIntegrationTest
-    extends BaseIndexProxyTestable<ValueSetIndexProxy<String>> {
+class ValueSetIndexProxyIntegrationTest extends BaseIndexProxyTestable<ValueSetIndexProxy<String>> {
 
   private static final String VALUE_SET_NAME = "test_value_set";
 
   @Test
   void addSingleElement() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
-      assertTrue(set.contains(V1));
-    });
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(V1);
+          assertTrue(set.contains(V1));
+        });
   }
 
   @Test
   void addFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot,
+    runTestWithView(
+        database::createSnapshot,
         (set) -> assertThrows(UnsupportedOperationException.class, () -> set.add(V1)));
   }
 
@@ -66,22 +68,23 @@ class ValueSetIndexProxyIntegrationTest
 
   @Test
   void clearNonEmptyRemovesAllElements() {
-    runTestWithView(database::createFork, (set) -> {
-      List<String> elements = TestStorageItems.values.subList(0, 3);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          List<String> elements = TestStorageItems.values.subList(0, 3);
 
-      elements.forEach(set::add);
+          elements.forEach(set::add);
 
-      set.clear();
+          set.clear();
 
-      elements.forEach(
-          (k) -> assertFalse(set.contains(k))
-      );
-    });
+          elements.forEach((k) -> assertFalse(set.contains(k)));
+        });
   }
 
   @Test
   void clearFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot,
+    runTestWithView(
+        database::createSnapshot,
         (set) -> assertThrows(UnsupportedOperationException.class, () -> set.clear()));
   }
 
@@ -92,86 +95,99 @@ class ValueSetIndexProxyIntegrationTest
 
   @Test
   void doesNotContainAbsentElement() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(V1);
 
-      assertFalse(set.contains(V2));
-    });
+          assertFalse(set.contains(V2));
+        });
   }
 
   @Test
   void doesNotContainElementsByHashWhenEmpty() {
-    runTestWithView(database::createSnapshot, (set) -> {
-      HashCode valueHash = getHashOf(V2);
-      assertFalse(set.containsByHash(valueHash));
-    });
+    runTestWithView(
+        database::createSnapshot,
+        (set) -> {
+          HashCode valueHash = getHashOf(V2);
+          assertFalse(set.containsByHash(valueHash));
+        });
   }
 
   @Test
   void containsByHash() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(V1);
 
-      HashCode valueHash = getHashOf(V1);
-      assertTrue(set.containsByHash(valueHash));
-    });
+          HashCode valueHash = getHashOf(V1);
+          assertTrue(set.containsByHash(valueHash));
+        });
   }
 
   @Test
   void doesNotContainAbsentElementsByHash() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(V1);
 
-      HashCode otherValueHash = getHashOf(V2);
-      assertFalse(set.containsByHash(otherValueHash));
-    });
+          HashCode otherValueHash = getHashOf(V2);
+          assertFalse(set.containsByHash(otherValueHash));
+        });
   }
 
   @Test
   void testHashesIter() {
-    runTestWithView(database::createFork, (set) -> {
-      List<String> elements = TestStorageItems.values;
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          List<String> elements = TestStorageItems.values;
 
-      elements.forEach(set::add);
+          elements.forEach(set::add);
 
-      Iterator<HashCode> iter = set.hashes();
-      List<HashCode> iterHashes = ImmutableList.copyOf(iter);
-      List<HashCode> expectedHashes = getOrderedHashes(elements);
+          Iterator<HashCode> iter = set.hashes();
+          List<HashCode> iterHashes = ImmutableList.copyOf(iter);
+          List<HashCode> expectedHashes = getOrderedHashes(elements);
 
-      // Check that the hashes appear in lexicographical order,
-      // and are equal to the expected.
-      assertThat(iterHashes, equalTo(expectedHashes));
-    });
+          // Check that the hashes appear in lexicographical order,
+          // and are equal to the expected.
+          assertThat(iterHashes, equalTo(expectedHashes));
+        });
   }
 
   @Test
   void testIterator() {
-    runTestWithView(database::createFork, (set) -> {
-      List<String> elements = TestStorageItems.values;
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          List<String> elements = TestStorageItems.values;
 
-      elements.forEach(set::add);
+          elements.forEach(set::add);
 
-      Iterator<ValueSetIndexProxy.Entry<String>> iterator = set.iterator();
-      List<ValueSetIndexProxy.Entry<String>> entriesFromIter = ImmutableList.copyOf(iterator);
-      List<ValueSetIndexProxy.Entry<String>> entriesExpected = getOrderedEntries(elements);
+          Iterator<ValueSetIndexProxy.Entry<String>> iterator = set.iterator();
+          List<ValueSetIndexProxy.Entry<String>> entriesFromIter = ImmutableList.copyOf(iterator);
+          List<ValueSetIndexProxy.Entry<String>> entriesExpected = getOrderedEntries(elements);
 
-      assertThat(entriesFromIter, equalTo(entriesExpected));
-    });
+          assertThat(entriesFromIter, equalTo(entriesExpected));
+        });
   }
 
   @Test
   void testStream() {
-    runTestWithView(database::createFork, (set) -> {
-      List<String> elements = TestStorageItems.values;
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          List<String> elements = TestStorageItems.values;
 
-      elements.forEach(set::add);
+          elements.forEach(set::add);
 
-      List<ValueSetIndexProxy.Entry<String>> entriesFromStream = set.stream()
-          .collect(toList());
-      List<ValueSetIndexProxy.Entry<String>> entriesExpected = getOrderedEntries(elements);
+          List<ValueSetIndexProxy.Entry<String>> entriesFromStream = set.stream().collect(toList());
+          List<ValueSetIndexProxy.Entry<String>> entriesExpected = getOrderedEntries(elements);
 
-      assertThat(entriesFromStream, equalTo(entriesExpected));
-    });
+          assertThat(entriesFromStream, equalTo(entriesExpected));
+        });
   }
 
   private static List<HashCode> getOrderedHashes(List<String> elements) {
@@ -183,74 +199,88 @@ class ValueSetIndexProxyIntegrationTest
   private static List<ValueSetIndexProxy.Entry<String>> getOrderedEntries(List<String> elements) {
     return elements.stream()
         .map(value -> ValueSetIndexProxy.Entry.from(getHashOf(value), value))
-        .sorted((e1, e2) -> UnsignedBytes.lexicographicalComparator()
-            .compare(e1.getHash().asBytes(), e2.getHash().asBytes()))
+        .sorted(
+            (e1, e2) ->
+                UnsignedBytes.lexicographicalComparator()
+                    .compare(e1.getHash().asBytes(), e2.getHash().asBytes()))
         .collect(toList());
   }
 
   @Test
   void removesAddedElement() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(V1);
 
-      set.remove(V1);
+          set.remove(V1);
 
-      assertFalse(set.contains(V1));
-    });
+          assertFalse(set.contains(V1));
+        });
   }
 
   @Test
   void removeAbsentElementDoesNothing() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(V1);
 
-      set.remove(V9);
+          set.remove(V9);
 
-      assertFalse(set.contains(V9));
-      assertTrue(set.contains(V1));
-    });
+          assertFalse(set.contains(V9));
+          assertTrue(set.contains(V1));
+        });
   }
 
   @Test
   void removeFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot, (set) -> {
-      assertThrows(UnsupportedOperationException.class, () -> set.remove(V1));
-    });
+    runTestWithView(
+        database::createSnapshot,
+        (set) -> {
+          assertThrows(UnsupportedOperationException.class, () -> set.remove(V1));
+        });
   }
 
   @Test
   void removesAddedElementByHash() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(V1);
 
-      HashCode valueHash = getHashOf(V1);
+          HashCode valueHash = getHashOf(V1);
 
-      set.removeByHash(valueHash);
+          set.removeByHash(valueHash);
 
-      assertFalse(set.contains(V1));
-      assertFalse(set.containsByHash(valueHash));
-    });
+          assertFalse(set.contains(V1));
+          assertFalse(set.containsByHash(valueHash));
+        });
   }
 
   @Test
   void removeAbsentElementByHashDoesNothing() {
-    runTestWithView(database::createFork, (set) -> {
-      set.add(V1);
+    runTestWithView(
+        database::createFork,
+        (set) -> {
+          set.add(V1);
 
-      HashCode valueHash = getHashOf(V9);
-      set.removeByHash(valueHash);
+          HashCode valueHash = getHashOf(V9);
+          set.removeByHash(valueHash);
 
-      assertFalse(set.contains(V9));
-      assertFalse(set.containsByHash(valueHash));
-      assertTrue(set.contains(V1));
-    });
+          assertFalse(set.contains(V9));
+          assertFalse(set.containsByHash(valueHash));
+          assertTrue(set.contains(V1));
+        });
   }
 
   @Test
   void removeByHashFailsIfSnapshot() {
-    runTestWithView(database::createSnapshot, (set) -> {
-      assertThrows(UnsupportedOperationException.class, () -> set.removeByHash(getHashOf(V1)));
-    });
+    runTestWithView(
+        database::createSnapshot,
+        (set) -> {
+          assertThrows(UnsupportedOperationException.class, () -> set.removeByHash(getHashOf(V1)));
+        });
   }
 
   /**
@@ -260,11 +290,10 @@ class ValueSetIndexProxyIntegrationTest
    * @param accessFactory a function creating a database access
    * @param valueSetTest a test to run. Receives the created set as an argument.
    */
-  private static void runTestWithView(Function<Cleaner, Access> accessFactory,
-      Consumer<ValueSetIndexProxy<String>> valueSetTest) {
-    runTestWithView(accessFactory,
-        (access, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest)
-    );
+  private static void runTestWithView(
+      Function<Cleaner, Access> accessFactory, Consumer<ValueSetIndexProxy<String>> valueSetTest) {
+    runTestWithView(
+        accessFactory, (access, valueSetUnderTest) -> valueSetTest.accept(valueSetUnderTest));
   }
 
   /**
@@ -274,20 +303,19 @@ class ValueSetIndexProxyIntegrationTest
    * @param accessFactory a function creating a database access
    * @param valueSetTest a test to run. Receives the created access and the set as arguments.
    */
-  private static void runTestWithView(Function<Cleaner, Access> accessFactory,
+  private static void runTestWithView(
+      Function<Cleaner, Access> accessFactory,
       BiConsumer<Access, ValueSetIndexProxy<String>> valueSetTest) {
     IndicesTests.runTestWithView(
         accessFactory,
         VALUE_SET_NAME,
         ((address, access, serializer) -> access.getValueSet(address, serializer)),
-        valueSetTest
-    );
+        valueSetTest);
   }
 
   private static HashCode getHashOf(String value) {
     byte[] stringBytes = string().toBytes(value);
-    return Hashing.defaultHashFunction()
-        .hashBytes(stringBytes);
+    return Hashing.defaultHashFunction().hashBytes(stringBytes);
   }
 
   @Override

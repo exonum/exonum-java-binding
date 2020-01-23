@@ -47,17 +47,11 @@ class PublicKeySerializerTest {
 
   private static Stream<PublicKey> testSource() {
     Stream<PublicKey> keysFromBytes =
-        Stream.of(
-            Bytes.bytes("key string"),
-            Bytes.bytes(1, 2, 3, 4, 6))
-            .map(PublicKey::fromBytes);
+        Stream.of(Bytes.bytes("key string"), Bytes.bytes(1, 2, 3, 4, 6)).map(PublicKey::fromBytes);
 
     Stream<PublicKey> ed25519Keys =
-        Stream.of(
-            ed25519().generateKeyPair())
-            .map(KeyPair::getPublicKey);
+        Stream.of(ed25519().generateKeyPair()).map(KeyPair::getPublicKey);
 
     return Stream.concat(keysFromBytes, ed25519Keys);
   }
-
 }

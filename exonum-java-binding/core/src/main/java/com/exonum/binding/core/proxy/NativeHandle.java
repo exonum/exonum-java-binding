@@ -25,9 +25,7 @@ import com.google.common.base.MoreObjects;
  */
 public final class NativeHandle implements AutoCloseable {
 
-  /**
-   * A reserved value for an invalid native handle, equal to <code>nullptr</code> in C++.
-   */
+  /** A reserved value for an invalid native handle, equal to <code>nullptr</code> in C++. */
   public static final long INVALID_NATIVE_HANDLE = 0L;
 
   private final long nativeHandle;
@@ -47,8 +45,8 @@ public final class NativeHandle implements AutoCloseable {
   }
 
   /**
-   * Returns a native implementation-specific handle if it may be safely used
-   * to access the native object.
+   * Returns a native implementation-specific handle if it may be safely used to access the native
+   * object.
    *
    * <p>The returned value shall only be passed as an argument to native methods.
    *

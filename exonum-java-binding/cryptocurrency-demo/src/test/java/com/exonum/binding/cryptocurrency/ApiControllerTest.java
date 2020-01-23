@@ -67,8 +67,7 @@ class ApiControllerTest {
   private static final PublicKey FROM_KEY = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
   private static final PublicKey TO_KEY = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR.getPublicKey();
 
-  @Mock
-  private CryptocurrencyService service;
+  @Mock private CryptocurrencyService service;
 
   private HttpServer httpServer;
 
@@ -85,13 +84,17 @@ class ApiControllerTest {
     ApiController controller = new ApiController(service);
     controller.mountApi(router);
 
-    httpServer.requestHandler(router)
-        .listen(0, context.succeeding(result -> {
-          // Set the actual server port.
-          port = result.actualPort();
-          // Notify that the HTTP Server is accepting connections.
-          context.completeNow();
-        }));
+    httpServer
+        .requestHandler(router)
+        .listen(
+            0,
+            context.succeeding(
+                result -> {
+                  // Set the actual server port.
+                  port = result.actualPort();
+                  // Notify that the HTTP Server is accepting connections.
+                  context.completeNow();
+                }));
   }
 
   @AfterEach
@@ -104,36 +107,40 @@ class ApiControllerTest {
   void getWallet(VertxTestContext context) {
     long balance = 200L;
     Wallet wallet = new Wallet(balance);
-    when(service.getWallet(eq(FROM_KEY)))
-        .thenReturn(Optional.of(wallet));
+    when(service.getWallet(eq(FROM_KEY))).thenReturn(Optional.of(wallet));
 
     String getWalletUri = getWalletUri(FROM_KEY);
     get(getWalletUri)
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertThat(response.statusCode())
-              .isEqualTo(HTTP_OK);
+        .send(
+            context.succeeding(
+                response ->
+                    context.verify(
+                        () -> {
+                          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
 
-          String body = response.bodyAsString();
-          Wallet actualWallet = json()
-              .fromJson(body, Wallet.class);
-          assertThat(actualWallet.getBalance()).isEqualTo(wallet.getBalance());
+                          String body = response.bodyAsString();
+                          Wallet actualWallet = json().fromJson(body, Wallet.class);
+                          assertThat(actualWallet.getBalance()).isEqualTo(wallet.getBalance());
 
-          context.completeNow();
-        })));
+                          context.completeNow();
+                        })));
   }
 
   @Test
   void getNonexistentWallet(VertxTestContext context) {
-    when(service.getWallet(FROM_KEY))
-        .thenReturn(Optional.empty());
+    when(service.getWallet(FROM_KEY)).thenReturn(Optional.empty());
 
     String getWalletUri = getWalletUri(FROM_KEY);
     get(getWalletUri)
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+        .send(
+            context.succeeding(
+                response ->
+                    context.verify(
+                        () -> {
+                          assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
 
-          context.completeNow();
-        })));
+                          context.completeNow();
+                        })));
   }
 
   @Test
@@ -142,40 +149,48 @@ class ApiControllerTest {
     String getWalletUri = getWalletUri(publicKeyString);
 
     get(getWalletUri)
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
-          assertThat(response.bodyAsString())
-              .startsWith("Failed to convert parameter (walletId):");
+        .send(
+            context.succeeding(
+                response ->
+                    context.verify(
+                        () -> {
+                          assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST);
+                          assertThat(response.bodyAsString())
+                              .startsWith("Failed to convert parameter (walletId):");
 
-          context.completeNow();
-        })));
+                          context.completeNow();
+                        })));
   }
 
   @Test
   void getWalletHistory(VertxTestContext context) {
-    List<HistoryEntity> history = singletonList(
-        HistoryEntity.newBuilder()
-            .setSeed(1L)
-            .setWalletFrom(FROM_KEY)
-            .setWalletTo(TO_KEY)
-            .setAmount(10L)
-            .setTxMessageHash(HashCode.fromString("a0a0a0"))
-            .build()
-    );
+    List<HistoryEntity> history =
+        singletonList(
+            HistoryEntity.newBuilder()
+                .setSeed(1L)
+                .setWalletFrom(FROM_KEY)
+                .setWalletTo(TO_KEY)
+                .setAmount(10L)
+                .setTxMessageHash(HashCode.fromString("a0a0a0"))
+                .build());
     when(service.getWalletHistory(FROM_KEY)).thenReturn(history);
 
     String uri = getWalletUri(FROM_KEY) + "/history";
 
     get(uri)
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+        .send(
+            context.succeeding(
+                response ->
+                    context.verify(
+                        () -> {
+                          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
 
-          List<HistoryEntity> actualHistory = parseWalletHistory(response);
+                          List<HistoryEntity> actualHistory = parseWalletHistory(response);
 
-          assertThat(actualHistory).isEqualTo(history);
+                          assertThat(actualHistory).isEqualTo(history);
 
-          context.completeNow();
-        })));
+                          context.completeNow();
+                        })));
   }
 
   @Test
@@ -185,18 +200,20 @@ class ApiControllerTest {
     String uri = getWalletUri(FROM_KEY) + "/history";
 
     get(uri)
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
-          assertThat(parseWalletHistory(response)).isEmpty();
-          context.completeNow();
-        })));
+        .send(
+            context.succeeding(
+                response ->
+                    context.verify(
+                        () -> {
+                          assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+                          assertThat(parseWalletHistory(response)).isEmpty();
+                          context.completeNow();
+                        })));
   }
 
   private List<HistoryEntity> parseWalletHistory(HttpResponse<Buffer> response) {
-    Type listType = new TypeToken<List<HistoryEntity>>() {
-    }.getType();
-    return json()
-        .fromJson(response.bodyAsString(), listType);
+    Type listType = new TypeToken<List<HistoryEntity>>() {}.getType();
+    return json().fromJson(response.bodyAsString(), listType);
   }
 
   private String getWalletUri(PublicKey publicKey) {
@@ -214,5 +231,4 @@ class ApiControllerTest {
   private HttpRequest<Buffer> get(String requestPath) {
     return webClient.get(port, HOST, requestPath);
   }
-
 }

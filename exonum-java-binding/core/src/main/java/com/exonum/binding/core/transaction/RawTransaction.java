@@ -21,10 +21,10 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.google.auto.value.AutoValue;
 
 /**
- * An Exonum raw transaction. The raw transaction is different from {@link TransactionMessage}
- * as it only includes the serialized transaction parameters and transaction identifiers.
- * Author’s public key is <em>not</em> included but is accessible from
- * the {@linkplain TransactionContext#getAuthorPk() execution context}.
+ * An Exonum raw transaction. The raw transaction is different from {@link TransactionMessage} as it
+ * only includes the serialized transaction parameters and transaction identifiers. Author’s public
+ * key is <em>not</em> included but is accessible from the {@linkplain
+ * TransactionContext#getAuthorPk() execution context}.
  */
 // todo: [ECR-3438] Reconsider (split into CallInfo and the payload)? It is currently used
 //  in Node#submitTransaction. Will it make #submitTransaction easier or harder to use?
@@ -33,33 +33,33 @@ public abstract class RawTransaction {
 
   /**
    * Returns a service identifier which the transaction belongs to.
+   *
    * @see ServiceInstanceSpec#getId()
    */
   public abstract int getServiceId();
 
   /**
    * Returns the type of this transaction within a service. Unique within the service.
+   *
    * @see TransactionMessage#getTransactionId
    */
   public abstract int getTransactionId();
 
   /**
    * Returns the transaction payload which contains actual transaction data.
+   *
    * @see TransactionMessage#getPayload()
    */
   public abstract byte[] getPayload();
 
-  /**
-   * Returns the new builder for the transaction.
-   */
+  /** Returns the new builder for the transaction. */
   public static RawTransaction.Builder newBuilder() {
     return new AutoValue_RawTransaction.Builder();
   }
 
   /**
-   * Creates a raw transaction from the given transaction message.
-   * The returned transaction will have the same service id, transaction id, and payload
-   * as the given message.
+   * Creates a raw transaction from the given transaction message. The returned transaction will
+   * have the same service id, transaction id, and payload as the given message.
    */
   public static RawTransaction fromMessage(TransactionMessage txMessage) {
     return newBuilder()
@@ -72,25 +72,16 @@ public abstract class RawTransaction {
   @AutoValue.Builder
   public abstract static class Builder {
 
-    /**
-     * Sets the identifier of the service this transaction belongs to.
-     */
+    /** Sets the identifier of the service this transaction belongs to. */
     public abstract Builder serviceId(int serviceId);
 
-    /**
-     * Sets the identifier of the transaction within a service.
-     */
+    /** Sets the identifier of the transaction within a service. */
     public abstract Builder transactionId(int transactionId);
 
-    /**
-     * Sets the payload of the transaction.
-     */
+    /** Sets the payload of the transaction. */
     public abstract Builder payload(byte[] payload);
 
-    /**
-     * Creates the RawTransaction instance with specified parameters.
-     */
+    /** Creates the RawTransaction instance with specified parameters. */
     public abstract RawTransaction build();
   }
-
 }

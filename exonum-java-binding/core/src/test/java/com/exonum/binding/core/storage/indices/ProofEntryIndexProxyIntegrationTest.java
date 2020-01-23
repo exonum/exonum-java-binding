@@ -56,38 +56,46 @@ class ProofEntryIndexProxyIntegrationTest
     try (Cleaner c = new Cleaner()) {
       Snapshot snapshot = database.createSnapshot(c);
       IndexAddress addressInGroup = IndexAddress.valueOf("test", bytes("id"));
-      Exception e = assertThrows(IllegalArgumentException.class,
-          () -> snapshot.getProofEntry(addressInGroup, SERIALIZER));
+      Exception e =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> snapshot.getProofEntry(addressInGroup, SERIALIZER));
       assertThat(e.getMessage(), containsString("Groups of Entries are not supported"));
     }
   }
 
   @Test
   void setValue() {
-    runTestWithView(database::createFork, (e) -> {
-      e.set(V1);
+    runTestWithView(
+        database::createFork,
+        (e) -> {
+          e.set(V1);
 
-      assertTrue(e.isPresent());
-      assertThat(e.get(), equalTo(V1));
-    });
+          assertTrue(e.isPresent());
+          assertThat(e.get(), equalTo(V1));
+        });
   }
 
   @Test
   void setOverwritesPreviousValue() {
-    runTestWithView(database::createFork, (e) -> {
-      e.set(V1);
-      e.set(V2);
+    runTestWithView(
+        database::createFork,
+        (e) -> {
+          e.set(V1);
+          e.set(V2);
 
-      assertTrue(e.isPresent());
-      assertThat(e.get(), equalTo(V2));
-    });
+          assertTrue(e.isPresent());
+          assertThat(e.get(), equalTo(V2));
+        });
   }
 
   @Test
   void setFailsWithSnapshot() {
-    runTestWithView(database::createSnapshot, (e) -> {
-      assertThrows(UnsupportedOperationException.class, () -> e.set(V1));
-    });
+    runTestWithView(
+        database::createSnapshot,
+        (e) -> {
+          assertThrows(UnsupportedOperationException.class, () -> e.set(V1));
+        });
   }
 
   @Test
@@ -97,91 +105,103 @@ class ProofEntryIndexProxyIntegrationTest
 
   @Test
   void getFailsIfNotPresent() {
-    runTestWithView(database::createSnapshot,
-        (e) -> assertThrows(NoSuchElementException.class, e::get));
+    runTestWithView(
+        database::createSnapshot, (e) -> assertThrows(NoSuchElementException.class, e::get));
   }
 
   @Test
   void getIndexHashEmptyEntry() {
-    runTestWithView(database::createSnapshot, e -> {
-      HashCode indexHash = e.getIndexHash();
-      // Expected hash of an empty Entry: all zeroes
-      HashCode expectedHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
-      assertThat(indexHash, equalTo(expectedHash));
-    });
+    runTestWithView(
+        database::createSnapshot,
+        e -> {
+          HashCode indexHash = e.getIndexHash();
+          // Expected hash of an empty Entry: all zeroes
+          HashCode expectedHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
+          assertThat(indexHash, equalTo(expectedHash));
+        });
   }
 
   @Test
   void getIndexHashNonEmptyEntry() {
-    runTestWithView(database::createFork, e -> {
-      String value = V1;
-      e.set(value);
+    runTestWithView(
+        database::createFork,
+        e -> {
+          String value = V1;
+          e.set(value);
 
-      HashCode indexHash = e.getIndexHash();
-      // Expected hash of a set Entry: SHA-256(value)
-      byte[] valueAsBytes = SERIALIZER.toBytes(value);
-      HashCode expectedHash = Hashing.sha256()
-          .hashBytes(valueAsBytes);
-      assertThat(indexHash, equalTo(expectedHash));
-    });
+          HashCode indexHash = e.getIndexHash();
+          // Expected hash of a set Entry: SHA-256(value)
+          byte[] valueAsBytes = SERIALIZER.toBytes(value);
+          HashCode expectedHash = Hashing.sha256().hashBytes(valueAsBytes);
+          assertThat(indexHash, equalTo(expectedHash));
+        });
   }
 
   @Test
   void removeIfNoValue() {
-    runTestWithView(database::createFork, (e) -> {
-      assertFalse(e.isPresent());
-      e.remove();
-      assertFalse(e.isPresent());
-    });
+    runTestWithView(
+        database::createFork,
+        (e) -> {
+          assertFalse(e.isPresent());
+          e.remove();
+          assertFalse(e.isPresent());
+        });
   }
 
   @Test
   void removeValue() {
-    runTestWithView(database::createFork, (e) -> {
-      e.set(V1);
-      e.remove();
-      assertFalse(e.isPresent());
-    });
+    runTestWithView(
+        database::createFork,
+        (e) -> {
+          e.set(V1);
+          e.remove();
+          assertFalse(e.isPresent());
+        });
   }
 
   @Test
   void removeFailsWithSnapshot() {
-    runTestWithView(database::createSnapshot,
+    runTestWithView(
+        database::createSnapshot,
         (e) -> assertThrows(UnsupportedOperationException.class, e::remove));
   }
 
   @Test
   void toOptional() {
-    runTestWithView(database::createFork, (e) -> {
-      e.set(V1);
-      Optional<String> optional = e.toOptional();
-      assertTrue(optional.isPresent());
-      assertThat(optional.get(), is(V1));
-    });
+    runTestWithView(
+        database::createFork,
+        (e) -> {
+          e.set(V1);
+          Optional<String> optional = e.toOptional();
+          assertTrue(optional.isPresent());
+          assertThat(optional.get(), is(V1));
+        });
   }
 
   @Test
   void optionalEmptyIfNoValue() {
-    runTestWithView(database::createFork, (e) -> {
-      assertFalse(e.isPresent());
-      Optional<String> optional = e.toOptional();
-      assertFalse(optional.isPresent());
-    });
+    runTestWithView(
+        database::createFork,
+        (e) -> {
+          assertFalse(e.isPresent());
+          Optional<String> optional = e.toOptional();
+          assertFalse(optional.isPresent());
+        });
   }
 
-  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
-      Consumer<ProofEntryIndexProxy<String>> entryTest) {
+  private static void runTestWithView(
+      Function<Cleaner, Access> viewFactory, Consumer<ProofEntryIndexProxy<String>> entryTest) {
     runTestWithView(viewFactory, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
-  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+  private static void runTestWithView(
+      Function<Cleaner, Access> viewFactory,
       BiConsumer<Access, ProofEntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         ENTRY_NAME,
         (address, access, serializer) -> access.getProofEntry(address, serializer),
-        entryTest
-    );
+        entryTest);
   }
 
   @Override

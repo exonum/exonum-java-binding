@@ -15,18 +15,18 @@
  */
 
 /**
- * The Exonum light client.
- * Can be used to submit transactions to the Exonum blockchain.
- * The following example shows how to instantiate the client and submit transaction:
- * <pre>
- *   {@code
- *       ExonumClient exonumClient = ExonumClient.newBuilder()
- *         .setExonumHost("http://<host>:<port>")
- *         .build();
- *       exonumClient.submitTransaction(tx);
- *   }
- * </pre>
+ * The Exonum light client. Can be used to submit transactions to the Exonum blockchain. The
+ * following example shows how to instantiate the client and submit transaction:
  *
- * <p>See more examples in the project <a href="https://github.com/exonum/exonum-java-binding/blob/master/exonum-light-client/README.md#examples">readme</a>.
+ * <pre>{@code
+ * ExonumClient exonumClient = ExonumClient.newBuilder()
+ *   .setExonumHost("http://<host>:<port>")
+ *   .build();
+ * exonumClient.submitTransaction(tx);
+ *
+ * }</pre>
+ *
+ * <p>See more examples in the project <a
+ * href="https://github.com/exonum/exonum-java-binding/blob/master/exonum-light-client/README.md#examples">readme</a>.
  */
 package com.exonum.client;

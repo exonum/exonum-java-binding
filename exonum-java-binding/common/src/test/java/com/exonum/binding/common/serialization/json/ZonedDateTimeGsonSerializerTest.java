@@ -45,8 +45,6 @@ class ZonedDateTimeGsonSerializerTest {
         ZonedDateTime.now(ZoneOffset.UTC),
         ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC),
         ZonedDateTime.of(2019, 7, 21, 6, 8, 21, 1000, ZoneId.of("Europe/Kiev")),
-        ZonedDateTime.of(2019, 7, 21, 6, 8, 21, 1000, ZoneId.of("Europe/Athens"))
-    );
+        ZonedDateTime.of(2019, 7, 21, 6, 8, 21, 1000, ZoneId.of("Europe/Athens")));
   }
-
 }

@@ -20,8 +20,7 @@ import com.exonum.binding.core.service.Node;
 import com.google.inject.AbstractModule;
 
 /**
- * A framework module providing per-service bindings. These bindings are supplied
- * by the framework.
+ * A framework module providing per-service bindings. These bindings are supplied by the framework.
  */
 class ServiceFrameworkModule extends AbstractModule {
 

@@ -29,9 +29,7 @@ import com.google.protobuf.ByteString;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * A checked flat map proof, which does not include any intermediate nodes.
- */
+/** A checked flat map proof, which does not include any intermediate nodes. */
 public class CheckedFlatMapProof implements CheckedMapProof {
 
   private final Map<ByteString, ByteString> entries;
@@ -49,8 +47,7 @@ public class CheckedFlatMapProof implements CheckedMapProof {
       Set<ByteString> missingKeys) {
     this.status = checkNotNull(status);
     this.indexHash = checkNotNull(indexHash);
-    this.entries = entries.stream()
-        .collect(toMap(MapEntry::getKey, MapEntry::getValue));
+    this.entries = entries.stream().collect(toMap(MapEntry::getKey, MapEntry::getValue));
     this.missingKeys = checkNotNull(missingKeys);
   }
 
@@ -72,21 +69,19 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   /**
    * Creates an invalid map proof.
    *
-   * @param status the status explaining why the proof is not valid;
-   *     must not be {@link MapProofStatus#CORRECT}
+   * @param status the status explaining why the proof is not valid; must not be {@link
+   *     MapProofStatus#CORRECT}
    * @return a new checked proof
    */
   public static CheckedFlatMapProof invalid(MapProofStatus status) {
     checkArgument(status != MapProofStatus.CORRECT);
-    return new CheckedFlatMapProof(
-        status, HashCode.fromInt(1), emptySet(), emptySet());
+    return new CheckedFlatMapProof(status, HashCode.fromInt(1), emptySet(), emptySet());
   }
 
   @Override
   public Set<MapEntry<ByteString, ByteString>> getEntries() {
     checkValid();
-    return entries.entrySet()
-        .stream()
+    return entries.entrySet().stream()
         .map(e -> MapEntry.valueOf(e.getKey(), e.getValue()))
         .collect(toSet());
   }
@@ -132,7 +127,9 @@ public class CheckedFlatMapProof implements CheckedMapProof {
   }
 
   private void checkThatKeyIsRequested(ByteString key) {
-    checkArgument(entries.containsKey(key) || missingKeys.contains(key),
-        "Key (%s) that wasn't among requested keys was checked", key);
+    checkArgument(
+        entries.containsKey(key) || missingKeys.contains(key),
+        "Key (%s) that wasn't among requested keys was checked",
+        key);
   }
 }

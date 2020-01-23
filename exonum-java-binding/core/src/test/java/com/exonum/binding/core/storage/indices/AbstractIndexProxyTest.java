@@ -57,11 +57,14 @@ class AbstractIndexProxyTest {
 
     proxy = new IndexProxyImpl(dbView);
 
-    UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
-        () -> proxy.notifyModified());
+    UnsupportedOperationException thrown =
+        assertThrows(UnsupportedOperationException.class, () -> proxy.notifyModified());
 
-    Pattern pattern = Pattern.compile("Cannot modify the access: .*[Ss]napshot.*"
-        + "\\nUse a Fork to modify any collection\\.", Pattern.MULTILINE);
+    Pattern pattern =
+        Pattern.compile(
+            "Cannot modify the access: .*[Ss]napshot.*"
+                + "\\nUse a Fork to modify any collection\\.",
+            Pattern.MULTILINE);
     assertThat(thrown, hasMessage(matchesPattern(pattern)));
   }
 
@@ -82,16 +85,12 @@ class AbstractIndexProxyTest {
     assertThat(proxy.getName(), equalTo(INDEX_NAME));
   }
 
-  /**
-   * Create a non-owning fork.
-   */
+  /** Create a non-owning fork. */
   private Fork createFork() {
     return Fork.newInstance(0x01, false, new Cleaner());
   }
 
-  /**
-   * Create a non-owning snapshot.
-   */
+  /** Create a non-owning snapshot. */
   private Snapshot createSnapshot() {
     return Snapshot.newInstance(0x02, false, new Cleaner());
   }
@@ -104,5 +103,4 @@ class AbstractIndexProxyTest {
       super(new NativeHandle(NATIVE_HANDLE), IndexAddress.valueOf(INDEX_NAME), access);
     }
   }
-
 }

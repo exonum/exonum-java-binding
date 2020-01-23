@@ -49,8 +49,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 class ThrowingTxTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      QaArtifactInfo.createQaServiceTestkit());
+  TestKitExtension testKitExtension = new TestKitExtension(QaArtifactInfo.createQaServiceTestkit());
 
   @Test
   void throwingTxMustHaveUnexpectedErrorCode(TestKit testKit) {
@@ -75,7 +74,7 @@ class ThrowingTxTest {
   @Test
   void executeClearsQaServiceData() throws CloseFailuresException {
     try (TemporaryDb db = TemporaryDb.newInstance();
-         Cleaner cleaner = new Cleaner()) {
+        Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
       QaSchema schema = new QaSchema(fork, QA_SERVICE_NAME);
 
@@ -84,20 +83,16 @@ class ThrowingTxTest {
       long value = 10L;
       createCounter(schema, name, value);
 
-      QaServiceImpl qaService = new QaServiceImpl(
-          ServiceInstanceSpec.newInstance(QA_SERVICE_NAME, QA_SERVICE_ID, ARTIFACT_ID));
+      QaServiceImpl qaService =
+          new QaServiceImpl(
+              ServiceInstanceSpec.newInstance(QA_SERVICE_NAME, QA_SERVICE_ID, ARTIFACT_ID));
 
       // Create the transaction arguments
-      ThrowingTxBody arguments = ThrowingTxBody.newBuilder()
-          .setSeed(17L)
-          .build();
-      TransactionContext context = newContext(fork)
-          .serviceName(QA_SERVICE_NAME)
-          .serviceId(QA_SERVICE_ID)
-          .build();
+      ThrowingTxBody arguments = ThrowingTxBody.newBuilder().setSeed(17L).build();
+      TransactionContext context =
+          newContext(fork).serviceName(QA_SERVICE_NAME).serviceId(QA_SERVICE_ID).build();
       // Invoke the transaction
-      assertThrows(IllegalStateException.class,
-          () -> qaService.throwing(arguments, context));
+      assertThrows(IllegalStateException.class, () -> qaService.throwing(arguments, context));
 
       // Check that it has cleared the maps
       assertThat(schema.counters().isEmpty()).isTrue();

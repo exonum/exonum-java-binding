@@ -58,13 +58,13 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
 
   private static final String PLUGIN_ID = "1:com.acme/foo-service:1.0.1";
   private static final String PLUGIN_ID_2 = "1:org.acme/bar-service:3.2.1";
-  private static final Map<String, Class<?>> TEST_DEPENDENCY_REFERENCE_CLASSES = ImmutableMap.of(
-      "exonum-java-binding", Service.class,
-      "vertx", Vertx.class,
-      "guice", Guice.class,
-      "pf4j", PluginManager.class,
-      "gson", Gson.class
-  );
+  private static final Map<String, Class<?>> TEST_DEPENDENCY_REFERENCE_CLASSES =
+      ImmutableMap.of(
+          "exonum-java-binding", Service.class,
+          "vertx", Vertx.class,
+          "guice", Guice.class,
+          "pf4j", PluginManager.class,
+          "gson", Gson.class);
 
   private PluginManager pluginManager;
   private Pf4jServiceLoader serviceLoader;
@@ -73,8 +73,9 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   @BeforeEach
   void setUp(@TempDir Path tmp) {
     pluginManager = spy(createPluginManager());
-    serviceLoader = new Pf4jServiceLoader(pluginManager,
-        new ClassLoadingScopeChecker(TEST_DEPENDENCY_REFERENCE_CLASSES));
+    serviceLoader =
+        new Pf4jServiceLoader(
+            pluginManager, new ClassLoadingScopeChecker(TEST_DEPENDENCY_REFERENCE_CLASSES));
     artifactLocation = tmp.resolve("service.jar");
   }
 
@@ -85,10 +86,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     String pluginId = PLUGIN_ID;
     Class<?> moduleType = TestServiceModule1.class;
 
-    anArtifact()
-        .setPluginId(pluginId)
-        .addExtensionClass(moduleType)
-        .writeTo(artifactLocation);
+    anArtifact().setPluginId(pluginId).addExtensionClass(moduleType).writeTo(artifactLocation);
 
     // Try to load the service
     LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
@@ -108,8 +106,9 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   }
 
   @Test
-  @DisplayName("Cannot load a plugin if the plugin manager returns `null` "
-      + "(e.g., in case of an attempt to load a duplicate plugin or other errors)")
+  @DisplayName(
+      "Cannot load a plugin if the plugin manager returns `null` "
+          + "(e.g., in case of an attempt to load a duplicate plugin or other errors)")
   void cannotLoadIfPluginManagerFailsToLoad() throws IOException {
     anArtifact()
         .setPluginId(PLUGIN_ID)
@@ -118,8 +117,9 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
         .writeTo(artifactLocation);
 
     // Try to load the service
-    Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+    Exception e =
+        assertThrows(
+            ServiceLoadingException.class, () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Failed to load the service from");
 
     // Check the definition is inaccessible
@@ -130,12 +130,12 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   @Test
   void cannotLoadIfNoArtifact() {
     // Try to load the service
-    Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+    Exception e =
+        assertThrows(
+            ServiceLoadingException.class, () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Failed to load");
     assertThat(e).hasMessageContaining(artifactLocation.toString());
   }
-
 
   @Test
   void cannotLoadIfPluginFailedToStart() throws IOException {
@@ -148,8 +148,9 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
         .writeTo(artifactLocation);
 
     // Try to load the service
-    Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+    Exception e =
+        assertThrows(
+            ServiceLoadingException.class, () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Failed to start the plugin");
 
     // Check the definition is inaccessible
@@ -161,18 +162,18 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {
-      "foo-service",
-      "1:com.acme/foo-service:1.0:extra-coordinate",
-  })
+  @ValueSource(
+      strings = {
+        "foo-service",
+        "1:com.acme/foo-service:1.0:extra-coordinate",
+      })
   void cannotLoadIfInvalidPluginIdInMetadata(String invalidPluginId) throws IOException {
-    anArtifact()
-        .setPluginId(invalidPluginId)
-        .writeTo(artifactLocation);
+    anArtifact().setPluginId(invalidPluginId).writeTo(artifactLocation);
 
     // Try to load the service
-    Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+    Exception e =
+        assertThrows(
+            ServiceLoadingException.class, () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Invalid plugin id");
     assertThat(e).hasMessageContaining(invalidPluginId);
     assertThat(e.getCause()).hasMessageContaining("Invalid artifact id");
@@ -185,17 +186,18 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   void cannotLoadPluginIdForNonJavaRuntime() throws IOException {
     int nonJavaRuntimeId = 55;
     String invalidPluginId = nonJavaRuntimeId + ":com.acme/foo-service:1.0";
-    anArtifact()
-        .setPluginId(invalidPluginId)
-        .writeTo(artifactLocation);
+    anArtifact().setPluginId(invalidPluginId).writeTo(artifactLocation);
 
     // Try to load the service
-    Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+    Exception e =
+        assertThrows(
+            ServiceLoadingException.class, () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining("Invalid plugin id");
     assertThat(e).hasMessageContaining(invalidPluginId);
-    assertThat(e).hasRootCauseMessage("Required Java (%s) runtime id, but actually was %s",
-        RuntimeId.JAVA.getId(), nonJavaRuntimeId);
+    assertThat(e)
+        .hasRootCauseMessage(
+            "Required Java (%s) runtime id, but actually was %s",
+            RuntimeId.JAVA.getId(), nonJavaRuntimeId);
 
     // Check it is unloaded if failed to start
     verify(pluginManager).unloadPlugin(invalidPluginId);
@@ -214,8 +216,9 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
         .writeTo(artifactLocation);
 
     // Try to load the service
-    Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+    Exception e =
+        assertThrows(
+            ServiceLoadingException.class, () -> serviceLoader.loadService(artifactLocation));
     assertThat(e).hasMessageContaining(pluginId);
     assertThat(e).hasMessageFindingMatch(expectedErrorPattern);
 
@@ -226,11 +229,12 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   private static Collection<Arguments> invalidServiceModuleExtensions() {
     return ImmutableList.of(
         arguments(emptyList(), "must provide exactly one service module as an extension"),
-        arguments(asList(TestServiceModule1.class, TestServiceModule2.class),
+        arguments(
+            asList(TestServiceModule1.class, TestServiceModule2.class),
             "must provide exactly one service module as an extension.+2 modules found:"),
-        arguments(singletonList(TestServiceModuleInaccessibleCtor.class),
-            "Cannot load a plugin.+module.+not valid")
-    );
+        arguments(
+            singletonList(TestServiceModuleInaccessibleCtor.class),
+            "Cannot load a plugin.+module.+not valid"));
   }
 
   @Test
@@ -242,8 +246,9 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
         .addClasses(TEST_DEPENDENCY_REFERENCE_CLASSES.values())
         .writeTo(artifactLocation);
 
-    Exception e = assertThrows(ServiceLoadingException.class,
-        () -> serviceLoader.loadService(artifactLocation));
+    Exception e =
+        assertThrows(
+            ServiceLoadingException.class, () -> serviceLoader.loadService(artifactLocation));
     Throwable cause = e.getCause();
     for (String dependencyName : TEST_DEPENDENCY_REFERENCE_CLASSES.keySet()) {
       assertThat(cause).hasMessageContaining(dependencyName);
@@ -257,9 +262,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   void canLoadUnloadService() throws Exception {
     String pluginId = PLUGIN_ID;
 
-    anArtifact()
-        .setPluginId(pluginId)
-        .writeTo(artifactLocation);
+    anArtifact().setPluginId(pluginId).writeTo(artifactLocation);
 
     // Try to load the service
     LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
@@ -275,8 +278,8 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
   @Test
   void unloadServiceNonLoaded() {
     ServiceArtifactId unknownPluginId = ServiceArtifactId.parseFrom(PLUGIN_ID);
-    assertThrows(IllegalArgumentException.class,
-        () -> serviceLoader.unloadService(unknownPluginId));
+    assertThrows(
+        IllegalArgumentException.class, () -> serviceLoader.unloadService(unknownPluginId));
   }
 
   @Test
@@ -288,14 +291,12 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
 
   @Test
   void loadsUnloadsAll(@TempDir Path tmp) throws Exception {
-    Map<String, Path> pluginLocationsById = ImmutableMap.of(PLUGIN_ID, tmp.resolve("p1.jar"),
-        PLUGIN_ID_2, tmp.resolve("p2.jar"));
+    Map<String, Path> pluginLocationsById =
+        ImmutableMap.of(PLUGIN_ID, tmp.resolve("p1.jar"), PLUGIN_ID_2, tmp.resolve("p2.jar"));
 
     // Prepare the artifact files
     for (Entry<String, Path> e : pluginLocationsById.entrySet()) {
-      anArtifact()
-          .setPluginId(e.getKey())
-          .writeTo(e.getValue());
+      anArtifact().setPluginId(e.getKey()).writeTo(e.getValue());
     }
 
     // Load the plugins
@@ -311,9 +312,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     pluginIds.forEach(this::verifyUnloaded);
   }
 
-  /**
-   * Creates a builder producing a valid artifact with some default values.
-   */
+  /** Creates a builder producing a valid artifact with some default values. */
   private static ServiceArtifactBuilder anArtifact() {
     Class<?> serviceModule = TestServiceModule1.class;
     return new ServiceArtifactBuilder()

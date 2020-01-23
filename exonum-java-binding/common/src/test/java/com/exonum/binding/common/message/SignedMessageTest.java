@@ -50,18 +50,16 @@ class SignedMessageTest {
     @BeforeEach
     void createProtoMessage() {
       payload = ExonumMessage.getDefaultInstance();
-      Types.PublicKey authorPk = aPublicKey()
-          .setData(ByteString.copyFrom(TEST_PUBLIC_KEY.toBytes()))
-          .build();
+      Types.PublicKey authorPk =
+          aPublicKey().setData(ByteString.copyFrom(TEST_PUBLIC_KEY.toBytes())).build();
       testSignature = new byte[Ed25519.SIGNATURE_BYTES];
-      Types.Signature signature = aSignature()
-          .setData(ByteString.copyFrom(testSignature))
-          .build();
-      message = Consensus.SignedMessage.newBuilder()
-          .setPayload(payload.toByteString())
-          .setAuthor(authorPk)
-          .setSignature(signature)
-          .build();
+      Types.Signature signature = aSignature().setData(ByteString.copyFrom(testSignature)).build();
+      message =
+          Consensus.SignedMessage.newBuilder()
+              .setPayload(payload.toByteString())
+              .setAuthor(authorPk)
+              .setSignature(signature)
+              .build();
     }
 
     @Test
@@ -98,29 +96,27 @@ class SignedMessageTest {
 
   @Test
   void parseFromPayloadNotExonumMessage() {
-    ByteString invalidPayload = ByteString.copyFrom(
-        bytes("Invalid payload: not an ExonumMessage"));
+    ByteString invalidPayload = ByteString.copyFrom(bytes("Invalid payload: not an ExonumMessage"));
     Types.PublicKey authorPk = aPublicKey().build();
     Types.Signature signature = aSignature().build();
-    byte[] message = Consensus.SignedMessage.newBuilder()
-        .setPayload(invalidPayload)
-        .setAuthor(authorPk)
-        .setSignature(signature)
-        .build()
-        .toByteArray();
+    byte[] message =
+        Consensus.SignedMessage.newBuilder()
+            .setPayload(invalidPayload)
+            .setAuthor(authorPk)
+            .setSignature(signature)
+            .build()
+            .toByteArray();
 
     // Check it cannot be parsed
     assertThrows(InvalidProtocolBufferException.class, () -> SignedMessage.parseFrom(message));
   }
 
   private static Types.PublicKey.Builder aPublicKey() {
-    return Types.PublicKey.newBuilder()
-        .setData(ByteString.copyFrom(TEST_PUBLIC_KEY.toBytes()));
+    return Types.PublicKey.newBuilder().setData(ByteString.copyFrom(TEST_PUBLIC_KEY.toBytes()));
   }
 
   private static Types.Signature.Builder aSignature() {
     byte[] testSignature = new byte[Ed25519.SIGNATURE_BYTES];
-    return Signature.newBuilder()
-        .setData(ByteString.copyFrom(testSignature));
+    return Signature.newBuilder().setData(ByteString.copyFrom(testSignature));
   }
 }

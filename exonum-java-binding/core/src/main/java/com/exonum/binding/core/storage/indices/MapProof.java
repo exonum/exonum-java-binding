@@ -21,11 +21,10 @@ import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
- * A view of a {@link ProofMapIndexProxy}, i.e., a subset of its entries coupled
- * with a <em>proof</em>, which jointly allow restoring the
- * {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of the map.
- * Apart from proving the existing entries in the map, MapProof can assert absence of certain keys
- * in the underlying index.
+ * A view of a {@link ProofMapIndexProxy}, i.e., a subset of its entries coupled with a
+ * <em>proof</em>, which jointly allow restoring the {@linkplain ProofMapIndexProxy#getIndexHash()
+ * index hash} of the map. Apart from proving the existing entries in the map, MapProof can assert
+ * absence of certain keys in the underlying index.
  * <!--
  * TODO: Improve docs: When verification arrives, explain how it is done.
  * -->
@@ -36,23 +35,20 @@ import com.google.protobuf.InvalidProtocolBufferException;
 @AutoValue
 public abstract class MapProof {
 
-  /**
-   * Returns the proof as a protobuf message.
-   */
+  /** Returns the proof as a protobuf message. */
   public abstract MapProofOuterClass.MapProof getAsMessage();
 
   /**
    * Creates a new MapProof given the serialized map proof message.
-   * @throws InvalidProtocolBufferException if the message is not
-   *     {@link com.exonum.core.messages.MapProofOuterClass.MapProof}
+   *
+   * @throws InvalidProtocolBufferException if the message is not {@link
+   *     com.exonum.core.messages.MapProofOuterClass.MapProof}
    */
   public static MapProof parseFrom(byte[] mapProofMessage) throws InvalidProtocolBufferException {
     return newInstance(MapProofOuterClass.MapProof.parseFrom(mapProofMessage));
   }
 
-  /**
-   * Creates a new MapProof given the map proof message.
-   */
+  /** Creates a new MapProof given the map proof message. */
   public static MapProof newInstance(MapProofOuterClass.MapProof mapProofMessage) {
     return new AutoValue_MapProof(mapProofMessage);
   }

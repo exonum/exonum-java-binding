@@ -28,9 +28,7 @@ import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 
-/**
- * A schema of the cryptocurrency service.
- */
+/** A schema of the cryptocurrency service. */
 public final class CryptocurrencySchema implements Schema {
 
   /** A namespace of cryptocurrency service collections. */
@@ -43,19 +41,16 @@ public final class CryptocurrencySchema implements Schema {
     this.namespace = serviceName + ".";
   }
 
-  /**
-   * Returns a proof map of wallets. Note that this is a proof map that uses non-hashed keys.
-   */
+  /** Returns a proof map of wallets. Note that this is a proof map that uses non-hashed keys. */
   public ProofMapIndexProxy<PublicKey, Wallet> wallets() {
     String name = fullIndexName("wallets");
-    return access.getRawProofMap(IndexAddress.valueOf(name), StandardSerializers.publicKey(),
-        WalletSerializer.INSTANCE);
+    return access.getRawProofMap(
+        IndexAddress.valueOf(name), StandardSerializers.publicKey(), WalletSerializer.INSTANCE);
   }
 
   /**
-   * Returns transactions history of the wallet. It contains hashes of
-   * {@link TxMessageProtos.TransferTx} transaction messages that changed the balance of the given
-   * wallet.
+   * Returns transactions history of the wallet. It contains hashes of {@link
+   * TxMessageProtos.TransferTx} transaction messages that changed the balance of the given wallet.
    *
    * @param walletId wallet address
    */

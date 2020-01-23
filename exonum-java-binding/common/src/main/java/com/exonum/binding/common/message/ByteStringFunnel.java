@@ -20,11 +20,8 @@ import com.exonum.binding.common.hash.Funnel;
 import com.exonum.binding.common.hash.PrimitiveSink;
 import com.google.protobuf.ByteString;
 
-/**
- * A funnel for ByteStrings which puts their bytes to the sink without copying.
- */
+/** A funnel for ByteStrings which puts their bytes to the sink without copying. */
 enum ByteStringFunnel implements Funnel<ByteString> {
-
   INSTANCE;
 
   static Funnel<ByteString> byteStringFunnel() {

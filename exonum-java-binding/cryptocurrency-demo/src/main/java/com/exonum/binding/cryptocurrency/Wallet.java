@@ -33,9 +33,7 @@ public final class Wallet {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("balance", balance)
-        .toString();
+    return MoreObjects.toStringHelper(this).add("balance", balance).toString();
   }
 
   @Override
@@ -54,5 +52,4 @@ public final class Wallet {
   public int hashCode() {
     return Objects.hashCode(balance);
   }
-
 }

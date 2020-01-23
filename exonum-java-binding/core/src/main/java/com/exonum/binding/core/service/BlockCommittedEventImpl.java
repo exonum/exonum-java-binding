@@ -43,5 +43,4 @@ public abstract class BlockCommittedEventImpl implements BlockCommittedEvent {
 
   @Override
   public abstract long getHeight();
-
 }

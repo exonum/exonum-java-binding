@@ -20,7 +20,6 @@ import com.exonum.binding.core.service.ServiceModule;
 import com.google.auto.value.AutoValue;
 import java.util.function.Supplier;
 
-
 /**
  * A complete definition of a loaded service that allows the framework to identify and instantiate
  * service instances.
@@ -28,9 +27,7 @@ import java.util.function.Supplier;
 @AutoValue
 abstract class LoadedServiceDefinition {
 
-  /**
-   * Returns the unique identifier of the service artifact.
-   */
+  /** Returns the unique identifier of the service artifact. */
   public abstract ServiceArtifactId getId();
 
   /**
@@ -40,8 +37,8 @@ abstract class LoadedServiceDefinition {
    */
   public abstract Supplier<ServiceModule> getModuleSupplier();
 
-  static LoadedServiceDefinition newInstance(ServiceArtifactId artifactId,
-      Supplier<ServiceModule> serviceModuleSupplier) {
+  static LoadedServiceDefinition newInstance(
+      ServiceArtifactId artifactId, Supplier<ServiceModule> serviceModuleSupplier) {
     return new AutoValue_LoadedServiceDefinition(artifactId, serviceModuleSupplier);
   }
 }

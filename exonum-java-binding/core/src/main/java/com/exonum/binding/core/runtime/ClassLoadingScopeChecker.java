@@ -26,14 +26,13 @@ import java.util.Map.Entry;
 
 /**
  * Allows to check if a <em>copy</em> of a particular class can be loaded via the given classloader.
- * It uses the classes loaded by the <em>application classloader</em> as a reference; and
- * tries to load same classes with the <em>plugin classloader</em>. If they are same instances,
- * then there is no copy of class A on the classpath of plugin classloader; otherwise,
- * there is a copy of class A on the classpath of the plugin classloader (of same or distinct
- * version).
+ * It uses the classes loaded by the <em>application classloader</em> as a reference; and tries to
+ * load same classes with the <em>plugin classloader</em>. If they are same instances, then there is
+ * no copy of class A on the classpath of plugin classloader; otherwise, there is a copy of class A
+ * on the classpath of the plugin classloader (of same or distinct version).
  *
- * <p><b>This class assumes that the plugin classloaders are parent-last, which is
- * {@linkplain org.pf4j.PluginClassLoader the case with PF4J}.</b>
+ * <p><b>This class assumes that the plugin classloaders are parent-last, which is {@linkplain
+ * org.pf4j.PluginClassLoader the case with PF4J}.</b>
  */
 class ClassLoadingScopeChecker {
 
@@ -44,8 +43,8 @@ class ClassLoadingScopeChecker {
   /**
    * Creates a new classloading scope checker.
    *
-   * @param dependencyReferenceClasses a reference class for each application dependency
-   *     (e.g., {@code {"guava": ImmutableList.class}})
+   * @param dependencyReferenceClasses a reference class for each application dependency (e.g.,
+   *     {@code {"guava": ImmutableList.class}})
    */
   @Inject
   ClassLoadingScopeChecker(
@@ -55,37 +54,40 @@ class ClassLoadingScopeChecker {
 
   /**
    * Checks if there are copies of application classes on the classpath of the given classloader.
+   *
    * @param pluginClassloader a plugin parent-last classloader
    * @throws IllegalArgumentException if a copy of an application class is available on the
    *     classpath of the given classloader
-   * @throws IllegalStateException if the given classloader fails to delegate
-   *     to the application classloader (i.e., a reference class is inaccessible
-   *     through it)
+   * @throws IllegalStateException if the given classloader fails to delegate to the application
+   *     classloader (i.e., a reference class is inaccessible through it)
    */
   void checkNoCopiesOfAppClasses(ClassLoader pluginClassloader) {
-    List<String> libraryCopies = dependencyReferenceClasses.entrySet().stream()
-        .filter(e -> loadsCopyOf(pluginClassloader, e))
-        .map(Entry::getKey)
-        .collect(toList());
+    List<String> libraryCopies =
+        dependencyReferenceClasses.entrySet().stream()
+            .filter(e -> loadsCopyOf(pluginClassloader, e))
+            .map(Entry::getKey)
+            .collect(toList());
 
     if (libraryCopies.isEmpty()) {
       return;
     }
 
-    String message = String.format("Classloader (%s) loads copies of the following "
-            + "libraries: %s.%n"
-            + "Please ensure in your service build definition that each of these libraries:%n"
-            + "  1. Has 'provided' scope%n"
-            + "  2. Does not specify its version (i.e., inherits it "
-            + "from exonum-java-binding-bom)%n"
-            + "See also: "
-            + "https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#using-libraries",
-        pluginClassloader, libraryCopies);
+    String message =
+        String.format(
+            "Classloader (%s) loads copies of the following "
+                + "libraries: %s.%n"
+                + "Please ensure in your service build definition that each of these libraries:%n"
+                + "  1. Has 'provided' scope%n"
+                + "  2. Does not specify its version (i.e., inherits it "
+                + "from exonum-java-binding-bom)%n"
+                + "See also: "
+                + "https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#using-libraries",
+            pluginClassloader, libraryCopies);
     throw new IllegalArgumentException(message);
   }
 
-  private boolean loadsCopyOf(ClassLoader pluginClassloader,
-      Entry<String, Class<?>> referenceEntry) {
+  private boolean loadsCopyOf(
+      ClassLoader pluginClassloader, Entry<String, Class<?>> referenceEntry) {
     String libraryName = referenceEntry.getKey();
     Class<?> referenceClass = referenceEntry.getValue();
     String referenceClassName = referenceClass.getName();
@@ -93,9 +95,11 @@ class ClassLoadingScopeChecker {
       Class<?> loadedThruPlugin = pluginClassloader.loadClass(referenceClassName);
       return referenceClass != loadedThruPlugin;
     } catch (ClassNotFoundException e) {
-      String message = String.format("Classloader (%s) failed to load the reference "
-              + "application class (%s) from %s library", pluginClassloader, referenceClass,
-          libraryName);
+      String message =
+          String.format(
+              "Classloader (%s) failed to load the reference "
+                  + "application class (%s) from %s library",
+              pluginClassloader, referenceClass, libraryName);
       throw new IllegalStateException(message, e);
     }
   }

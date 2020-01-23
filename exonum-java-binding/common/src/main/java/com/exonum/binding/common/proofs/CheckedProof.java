@@ -21,28 +21,27 @@ import com.exonum.binding.common.proofs.list.CheckedListProof;
 import com.exonum.binding.common.proofs.map.CheckedMapProof;
 
 /**
- * A checked proof is a result of proof verification operation.
- * If it is valid, the proof contents may be accessed. See {@link CheckedListProof}
- * and {@link CheckedMapProof} for available contents description.
+ * A checked proof is a result of proof verification operation. If it is valid, the proof contents
+ * may be accessed. See {@link CheckedListProof} and {@link CheckedMapProof} for available contents
+ * description.
  */
 // todo: [ECR-2410] Why do we need to represent invalid proofs with checked proof?
 public interface CheckedProof {
 
-  /**
-   * Returns a status of proof verification.
-   */
+  /** Returns a status of proof verification. */
   ProofStatus getProofStatus();
 
   /**
-   * Returns the calculated index hash of the proof.
-   * Must be equal to the index hash of the collection, providing this proof.
+   * Returns the calculated index hash of the proof. Must be equal to the index hash of the
+   * collection, providing this proof.
+   *
    * @throws IllegalStateException if the proof is not valid
    */
   HashCode getIndexHash();
 
   /**
-   * Returns true if proof status is valid, false otherwise.
-   * Details about the proof verification status could be obtained via {@link #getProofStatus()}.
+   * Returns true if proof status is valid, false otherwise. Details about the proof verification
+   * status could be obtained via {@link #getProofStatus()}.
    */
   boolean isValid();
 }

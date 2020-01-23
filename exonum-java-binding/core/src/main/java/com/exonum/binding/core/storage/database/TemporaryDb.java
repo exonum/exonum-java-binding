@@ -25,12 +25,12 @@ import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * A MerkleDB which stores its data in the temporary directory for testing purposes.
- * It can create both read-only snapshots and read-write forks. The changes made to
- * database forks can be {@linkplain TemporaryDb#merge(Fork) applied} to the database state.
+ * A MerkleDB which stores its data in the temporary directory for testing purposes. It can create
+ * both read-only snapshots and read-write forks. The changes made to database forks can be
+ * {@linkplain TemporaryDb#merge(Fork) applied} to the database state.
  *
- * <p>The corresponding database is deleted when TemporaryDb is
- * {@linkplain TemporaryDb#close() closed}.
+ * <p>The corresponding database is deleted when TemporaryDb is {@linkplain TemporaryDb#close()
+ * closed}.
  *
  * @see com.exonum.binding.core.service.NodeFake
  */
@@ -40,9 +40,7 @@ public final class TemporaryDb extends AbstractCloseableNativeProxy implements D
     LibraryLoader.load();
   }
 
-  /**
-   * Creates a new empty TemporaryDb.
-   */
+  /** Creates a new empty TemporaryDb. */
   public static TemporaryDb newInstance() {
     long nativeHandle = INVALID_NATIVE_HANDLE;
     try {
@@ -56,7 +54,7 @@ public final class TemporaryDb extends AbstractCloseableNativeProxy implements D
     }
   }
 
-  @VisibleForTesting  // Used in native resource manager tests, must not be exported.
+  @VisibleForTesting // Used in native resource manager tests, must not be exported.
   TemporaryDb(long nativeHandle) {
     super(nativeHandle, true);
   }
@@ -74,17 +72,16 @@ public final class TemporaryDb extends AbstractCloseableNativeProxy implements D
   }
 
   /**
-   * Applies the changes from the given fork to the database state. TemporaryDb can only
-   * merge forks that {@linkplain #createFork(Cleaner) it created itself}.
+   * Applies the changes from the given fork to the database state. TemporaryDb can only merge forks
+   * that {@linkplain #createFork(Cleaner) it created itself}.
    *
-   * <p>Once this method completes, any indexes created with the fork and the fork itself
-   * are closed and cannot be used anymore. Any subsequent operations on these objects will result
-   * in {@link IllegalStateException}.
+   * <p>Once this method completes, any indexes created with the fork and the fork itself are closed
+   * and cannot be used anymore. Any subsequent operations on these objects will result in {@link
+   * IllegalStateException}.
    *
    * @param fork a fork to get changes from
-   *
-   * @throws RuntimeException if the fork cannot be applied to the database state.
-   *     The provided fork will be closed
+   * @throws RuntimeException if the fork cannot be applied to the database state. The provided fork
+   *     will be closed
    */
   public void merge(Fork fork) {
     NativeHandle patchHandle = fork.intoPatch();

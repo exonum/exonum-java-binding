@@ -53,14 +53,14 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
 
   @Override
   public void describeTo(Description description) {
-    description.appendText("proof map providing ")
-        .appendDescriptionOf(mapProofMatcher);
+    description.appendText("proof map providing ").appendDescriptionOf(mapProofMatcher);
   }
 
   @Override
-  protected void describeMismatchSafely(ProofMapIndexProxy<HashCode, String> map,
-      Description mismatchDescription) {
-    mismatchDescription.appendText("was a proof map with index root=")
+  protected void describeMismatchSafely(
+      ProofMapIndexProxy<HashCode, String> map, Description mismatchDescription) {
+    mismatchDescription
+        .appendText("was a proof map with index root=")
         .appendValue(map.getIndexHash())
         .appendText(" providing a proof that ");
     CheckedMapProof checkedProof = checkProof(map);
@@ -68,9 +68,7 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
   }
 
   private CheckedMapProof checkProof(ProofMapIndexProxy<HashCode, String> map) {
-    Collection<HashCode> keys = entries.stream()
-        .map(MapTestEntry::getKey)
-        .collect(toList());
+    Collection<HashCode> keys = entries.stream().map(MapTestEntry::getKey).collect(toList());
 
     MapProof proof = map.getProof(keys);
     assert proof != null : "The proof must not be null";
@@ -81,20 +79,20 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
   }
 
   /**
-   * Creates a matcher for a proof map that matches iff the map provides a valid proof that
-   * present entries are in the map and absent keys are missing from the map.
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that present
+   * entries are in the map and absent keys are missing from the map.
+   *
    * @param entry expected present or absent map entry
    * @param entries other expected present or absent map entries
    */
-  static ProofMapContainsMatcher provesThatCorrect(
-      MapTestEntry entry, MapTestEntry... entries) {
+  static ProofMapContainsMatcher provesThatCorrect(MapTestEntry entry, MapTestEntry... entries) {
     List<MapTestEntry> expectedEntries = asList(entry, entries);
     return new ProofMapContainsMatcher(expectedEntries);
   }
 
   /**
-   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all
-   * the entries that are expected to be present are contained in the map.
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all the
+   * entries that are expected to be present are contained in the map.
    *
    * @param expectedPresentEntries expected collection of present map entries
    */
@@ -102,9 +100,10 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
       Collection<MapEntry<HashCode, String>> expectedPresentEntries) {
     checkArgument(
         !expectedPresentEntries.isEmpty(), "Expected entries collection shouldn't be empty");
-    List<MapTestEntry> expectedEntries = expectedPresentEntries.stream()
-        .map(e -> presentEntry(e.getKey(), e.getValue()))
-        .collect(toList());
+    List<MapTestEntry> expectedEntries =
+        expectedPresentEntries.stream()
+            .map(e -> presentEntry(e.getKey(), e.getValue()))
+            .collect(toList());
     return new ProofMapContainsMatcher(expectedEntries);
   }
 
@@ -122,17 +121,16 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
   }
 
   /**
-   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all
-   * the entries that are expected to be absent are not contained in the map.
+   * Creates a matcher for a proof map that matches iff the map provides a valid proof that all the
+   * entries that are expected to be absent are not contained in the map.
    *
    * @param expectedAbsentEntries expected collection of absent map entries
    */
   static ProofMapContainsMatcher provesThatAbsent(Collection<HashCode> expectedAbsentEntries) {
     checkArgument(
         !expectedAbsentEntries.isEmpty(), "Expected entries collection shouldn't be empty");
-    List<MapTestEntry> expectedEntries = expectedAbsentEntries.stream()
-        .map(MapTestEntry::absentEntry)
-        .collect(toList());
+    List<MapTestEntry> expectedEntries =
+        expectedAbsentEntries.stream().map(MapTestEntry::absentEntry).collect(toList());
     return new ProofMapContainsMatcher(expectedEntries);
   }
 
@@ -145,9 +143,8 @@ class ProofMapContainsMatcher extends TypeSafeMatcher<ProofMapIndexProxy<HashCod
    */
   static ProofMapContainsMatcher provesThatAbsent(HashCode absentEntry, HashCode... absentEntries) {
     List<HashCode> entries = asList(absentEntry, absentEntries);
-    List<MapTestEntry> expectedEntries = entries.stream()
-        .map(MapTestEntry::absentEntry)
-        .collect(toList());
+    List<MapTestEntry> expectedEntries =
+        entries.stream().map(MapTestEntry::absentEntry).collect(toList());
     return new ProofMapContainsMatcher(expectedEntries);
   }
 }

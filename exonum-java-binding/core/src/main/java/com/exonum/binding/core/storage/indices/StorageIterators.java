@@ -31,8 +31,8 @@ final class StorageIterators {
   /**
    * Creates a new iterator over an index.
    *
-   * <p>The returned iterator is a {@link ConfigurableRustIter}
-   * wrapped in a {@link RustIterAdapter}.
+   * <p>The returned iterator is a {@link ConfigurableRustIter} wrapped in a {@link
+   * RustIterAdapter}.
    *
    * @param nativeHandle nativeHandle of this iterator
    * @param nextFunction a function to call to get the next item
@@ -40,7 +40,7 @@ final class StorageIterators {
    * @param collectionAccess a database access of the collection over which to iterate
    * @param modificationCounter a modification counter of the collection
    * @param transformingFunction a function to apply to elements returned by native iterator
-   *                             (usually, to an array of bytes)
+   *     (usually, to an array of bytes)
    */
   static <ElementT, NativeT> Iterator<ElementT> createIterator(
       long nativeHandle,
@@ -55,13 +55,9 @@ final class StorageIterators {
     Cleaner cleaner = collectionAccess.getCleaner();
     cleaner.add(new ProxyDestructor(handle, RustIter.class, disposeOperation));
 
-    Iterator<NativeT> iterator = new RustIterAdapter<>(
-        new ConfigurableRustIter<>(
-            handle,
-            nextFunction,
-            modificationCounter
-        )
-    );
+    Iterator<NativeT> iterator =
+        new RustIterAdapter<>(
+            new ConfigurableRustIter<>(handle, nextFunction, modificationCounter));
 
     return Iterators.transform(iterator, transformingFunction::apply);
   }

@@ -25,9 +25,7 @@ class OsInfo {
     onWindows = osName.contains("windows");
   }
 
-  /**
-   * Returns true if the OS is Windows.
-   */
+  /** Returns true if the OS is Windows. */
   static boolean isWindows() {
     return onWindows;
   }

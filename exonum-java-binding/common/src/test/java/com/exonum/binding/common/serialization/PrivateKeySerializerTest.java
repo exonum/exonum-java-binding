@@ -47,17 +47,11 @@ class PrivateKeySerializerTest {
 
   private static Stream<PrivateKey> testSource() {
     Stream<PrivateKey> keysFromBytes =
-        Stream.of(
-            Bytes.bytes("key string"),
-            Bytes.bytes(1, 2, 3, 4, 6))
-            .map(PrivateKey::fromBytes);
+        Stream.of(Bytes.bytes("key string"), Bytes.bytes(1, 2, 3, 4, 6)).map(PrivateKey::fromBytes);
 
     Stream<PrivateKey> ed25519Keys =
-        Stream.of(
-            ed25519().generateKeyPair())
-            .map(KeyPair::getPrivateKey);
+        Stream.of(ed25519().generateKeyPair()).map(KeyPair::getPrivateKey);
 
     return Stream.concat(keysFromBytes, ed25519Keys);
   }
-
 }

@@ -26,6 +26,7 @@ import java.util.NavigableMap;
  * A checked list proof includes list proof verification results.
  *
  * <p>If it is {@linkplain #isValid() correct} you may access:
+ *
  * <ul>
  *   <li>a calculated index hash of corresponding collection
  *   <li>proof elements
@@ -33,9 +34,8 @@ import java.util.NavigableMap;
  *
  * <p>If the proof is the proof of absence, then empty collection of elements is returned.
  *
- * <p>If the proof is not valid, you may get the verification status using
- * {@link #getProofStatus()} with description of why the proof is not
- * valid.
+ * <p>If the proof is not valid, you may get the verification status using {@link #getProofStatus()}
+ * with description of why the proof is not valid.
  */
 public class CheckedListProofImpl<E> implements CheckedListProof<E> {
 
@@ -46,12 +46,16 @@ public class CheckedListProofImpl<E> implements CheckedListProof<E> {
 
   /**
    * Creates checked list proof.
+   *
    * @param calculatedIndexHash calculated index hash of the proof
    * @param elements proof elements collection (empty in case of a proof of absence)
    * @param proofStatus a status of proof verification
    */
-  public CheckedListProofImpl(long size, HashCode calculatedIndexHash,
-      NavigableMap<Long, E> elements, ListProofStatus proofStatus) {
+  public CheckedListProofImpl(
+      long size,
+      HashCode calculatedIndexHash,
+      NavigableMap<Long, E> elements,
+      ListProofStatus proofStatus) {
     this.size = size;
     this.calculatedIndexHash = checkNotNull(calculatedIndexHash);
     this.elements = checkNotNull(elements);
@@ -64,7 +68,7 @@ public class CheckedListProofImpl<E> implements CheckedListProof<E> {
   }
 
   @Override
-  public NavigableMap<Long, E>  getElements() {
+  public NavigableMap<Long, E> getElements() {
     checkValid();
     return elements;
   }

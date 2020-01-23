@@ -20,6 +20,5 @@ import com.exonum.binding.core.service.AbstractServiceModule;
 
 final class TestServiceModuleInaccessibleCtor extends AbstractServiceModule {
 
-  private TestServiceModuleInaccessibleCtor() {
-  }
+  private TestServiceModuleInaccessibleCtor() {}
 }

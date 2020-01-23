@@ -31,5 +31,4 @@ enum HashCodeSerializer implements Serializer<HashCode> {
   public HashCode fromBytes(byte[] serializedValue) {
     return HashCode.fromBytes(serializedValue);
   }
-
 }

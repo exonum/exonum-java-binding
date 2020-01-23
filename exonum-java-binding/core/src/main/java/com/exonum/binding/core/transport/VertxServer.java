@@ -67,8 +67,7 @@ final class VertxServer implements Server {
   VertxServer() {
     vertx = Vertx.vertx();
     rootRouter = Router.router(vertx);
-    server = vertx.createHttpServer()
-        .requestHandler(rootRouter);
+    server = vertx.createHttpServer().requestHandler(rootRouter);
     state = IDLE;
   }
 
@@ -92,8 +91,7 @@ final class VertxServer implements Server {
   public void removeSubRouter(String mountPoint) {
     synchronized (lock) {
       checkNotStopped();
-      rootRouter.getRoutes()
-          .stream()
+      rootRouter.getRoutes().stream()
           .filter(r -> r.getPath().equals(mountPoint))
           .forEach(Route::remove);
     }
@@ -125,8 +123,10 @@ final class VertxServer implements Server {
     }
   }
 
-  private static void handleStartResult(AsyncResult<HttpServer> startResult,
-      CompletableFuture<Integer> startFuture, int requestedPort) {
+  private static void handleStartResult(
+      AsyncResult<HttpServer> startResult,
+      CompletableFuture<Integer> startFuture,
+      int requestedPort) {
     // Complete the future
     completeFuture(startResult.map(HttpServer::actualPort), startFuture);
 
@@ -136,8 +136,7 @@ final class VertxServer implements Server {
       logger.info("Java server is listening at port {}", server.actualPort());
     } else {
       Throwable failureCause = startResult.cause();
-      logger.error("Java server failed to start listening at port {}", requestedPort,
-          failureCause);
+      logger.error("Java server failed to start listening at port {}", requestedPort, failureCause);
     }
   }
 
@@ -182,8 +181,8 @@ final class VertxServer implements Server {
     }
   }
 
-  private static <R> void completeFuture(AsyncResult<? extends R> result,
-      CompletableFuture<? super R> future) {
+  private static <R> void completeFuture(
+      AsyncResult<? extends R> result, CompletableFuture<? super R> future) {
     if (result.succeeded()) {
       future.complete(result.result());
     } else {
@@ -195,40 +194,45 @@ final class VertxServer implements Server {
   public String toString() {
     synchronized (lock) {
       return "Server{"
-          + "port=" + server.actualPort()
-          + ", state=" + state
-          + ", stopFuture=" + stopFuture
+          + "port="
+          + server.actualPort()
+          + ", state="
+          + state
+          + ", stopFuture="
+          + stopFuture
           + '}';
     }
   }
 
-  /**
-   * A runnable usage sample/playground.
-   */
+  /** A runnable usage sample/playground. */
   @SuppressWarnings("FutureReturnValueIgnored")
   public static void main(String[] args) {
     Server server = new VertxServer();
     // Create a router of a service
     Router router = server.createRouter();
-    router.get("/foo")
-        .handler((rc) -> {
-          rc.response().end("Hi from /s1/foo");
-        });
-    router.get("/slow-handler")
+    router
+        .get("/foo")
+        .handler(
+            (rc) -> {
+              rc.response().end("Hi from /s1/foo");
+            });
+    router
+        .get("/slow-handler")
         // A terrible idea to sleep in a supposedly non-blocking handler :-) Don't do that.
         // It is NOT interrupted!
-        .handler((rc) -> {
-          try {
-            Thread.sleep(8000);
-            rc.response().end("Hi from a terribly slow handler.");
-          } catch (InterruptedException e) {
-            // Will not happen: Vert.x doesn't interrupt non-blocking handlers.
-            System.err.printf("The thread (%s) has been interrupted:%n",
-                Thread.currentThread().toString());
-            e.printStackTrace();
-            Thread.currentThread().interrupt();
-          }
-        });
+        .handler(
+            (rc) -> {
+              try {
+                Thread.sleep(8000);
+                rc.response().end("Hi from a terribly slow handler.");
+              } catch (InterruptedException e) {
+                // Will not happen: Vert.x doesn't interrupt non-blocking handlers.
+                System.err.printf(
+                    "The thread (%s) has been interrupted:%n", Thread.currentThread().toString());
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+              }
+            });
 
     // Mount the service router to a certain path
     server.mountSubRouter("/s1", router);
@@ -238,17 +242,21 @@ final class VertxServer implements Server {
 
     // Schedule stopping of the server
     ScheduledExecutorService service = new ScheduledThreadPoolExecutor(1);
-    service.schedule(() -> {
-      System.out.println("Requesting to stop");
+    service.schedule(
+        () -> {
+          System.out.println("Requesting to stop");
 
-      CompletableFuture<Void> sf = server.stop();
+          CompletableFuture<Void> sf = server.stop();
 
-      sf.whenComplete((result, throwable) -> {
-        System.out.println("Stopped, stopping the executor");
-        service.shutdown();
-      });
+          sf.whenComplete(
+              (result, throwable) -> {
+                System.out.println("Stopped, stopping the executor");
+                service.shutdown();
+              });
 
-      System.out.println("…");
-    }, 5, TimeUnit.SECONDS);
+          System.out.println("…");
+        },
+        5,
+        TimeUnit.SECONDS);
   }
 }

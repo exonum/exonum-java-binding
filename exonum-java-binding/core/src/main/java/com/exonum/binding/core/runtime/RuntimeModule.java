@@ -26,9 +26,7 @@ import com.google.inject.TypeLiteral;
 import java.util.Map;
 import org.pf4j.PluginManager;
 
-/**
- * A module for the runtime package. Exposes {@link ServiceRuntime} only.
- */
+/** A module for the runtime package. Exposes {@link ServiceRuntime} only. */
 final class RuntimeModule extends PrivateModule {
 
   private final Map<String, Class<?>> dependencyReferenceClasses;

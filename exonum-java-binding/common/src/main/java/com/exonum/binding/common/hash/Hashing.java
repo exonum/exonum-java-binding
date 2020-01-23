@@ -33,8 +33,8 @@ package com.exonum.binding.common.hash;
  * Static methods to obtain {@link HashFunction} instances, and other static hashing-related
  * utilities.
  *
- * <p>A comparison of the various hash functions can be found
- * <a href="http://goo.gl/jS7HH">here</a>.
+ * <p>A comparison of the various hash functions can be found <a
+ * href="http://goo.gl/jS7HH">here</a>.
  *
  * @author Kevin Bourrillion
  * @author Dimitris Andreou
@@ -43,13 +43,9 @@ package com.exonum.binding.common.hash;
  */
 public final class Hashing {
 
-  /**
-   * Size of a hash code in the default Exonum algorithm.
-   */
+  /** Size of a hash code in the default Exonum algorithm. */
   public static final int DEFAULT_HASH_SIZE_BYTES = 32;
-  /**
-   * Size of a hash code in the default Exonum algorithm, in bits.
-   */
+  /** Size of a hash code in the default Exonum algorithm, in bits. */
   public static final int DEFAULT_HASH_SIZE_BITS = DEFAULT_HASH_SIZE_BYTES * Byte.SIZE;
 
   /** Returns a hash function implementing the SHA-256 algorithm (256 hash bits). */

@@ -41,8 +41,8 @@ class DbKeyCommonPrefixParameterizedTest {
 
   @ParameterizedTest(name = "{index} => description={3}")
   @MethodSource("testData")
-  void commonPrefixCommutative(DbKey firstKey, DbKey secondKey, DbKey expectedResultKey,
-      String description) {
+  void commonPrefixCommutative(
+      DbKey firstKey, DbKey secondKey, DbKey expectedResultKey, String description) {
     DbKey actualCommonPrefixKey = secondKey.commonPrefix(firstKey);
     assertThat(actualCommonPrefixKey, equalTo(expectedResultKey));
   }
@@ -145,14 +145,12 @@ class DbKeyCommonPrefixParameterizedTest {
             leafKeyFromPrefix("1111 1111 | 10_11"),
             leafKeyFromPrefix("1111 1111 | 10"),
             branchKeyFromPrefix("1111 1111 | 10"),
-            "[1111 1111 | 10_11] | [1111 1111 | 10] -> [1111 1111 | 10]")
-    );
+            "[1111 1111 | 10_11] | [1111 1111 | 10] -> [1111 1111 | 10]"));
   }
 
   private static Stream<DbKey> uniqueTestKeys() {
     return testData().stream()
-        .flatMap(args ->
-            Stream.of(args.get()[0], args.get()[1]))
+        .flatMap(args -> Stream.of(args.get()[0], args.get()[1]))
         .map(o -> (DbKey) o)
         .distinct();
   }

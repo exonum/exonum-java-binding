@@ -47,22 +47,16 @@ public final class FakeService extends AbstractService {
     // No handlers
   }
 
-  /**
-   * Puts an entry (a key-value pair) into the test proof map.
-   */
+  /** Puts an entry (a key-value pair) into the test proof map. */
   @Transaction(PUT_TX_ID)
-  public void putEntry(Transactions.PutTransactionArgs arguments,
-      TransactionContext context) {
+  public void putEntry(Transactions.PutTransactionArgs arguments, TransactionContext context) {
     FakeSchema schema = new FakeSchema(context.getServiceName(), context.getFork());
     String key = arguments.getKey();
     String value = arguments.getValue();
-    schema.testMap()
-        .put(key, value);
+    schema.testMap().put(key, value);
   }
 
-  /**
-   * Throws an exception with the given error code and description.
-   */
+  /** Throws an exception with the given error code and description. */
   @Transaction(RAISE_ERROR_TX_ID)
   public void raiseError(Transactions.RaiseErrorArgs arguments, TransactionContext context) {
     throw new ExecutionException((byte) arguments.getCode());

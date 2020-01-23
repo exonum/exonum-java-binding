@@ -25,9 +25,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
-/**
- * Provides constructors of block and index proofs.
- */
+/** Provides constructors of block and index proofs. */
 final class BlockchainProofs {
 
   static {
@@ -36,13 +34,13 @@ final class BlockchainProofs {
 
   /**
    * Creates a block proof for the block at the given height.
+   *
    * @param access a database access
    * @param height the height of the block
    */
   static BlockProof createBlockProof(
       /* todo: here snapshot is not strictly required — but shall we allow Forks (see the ticket) */
-      Access access,
-      long height) {
+      Access access, long height) {
     byte[] blockProof = nativeCreateBlockProof(access.getAccessNativeHandle(), height);
     try {
       return BlockProof.parseFrom(blockProof);
@@ -53,6 +51,7 @@ final class BlockchainProofs {
 
   /**
    * Creates an index proof for the index with the given full name, as of the given snapshot.
+   *
    * @param snapshot a database snapshot
    * @param fullIndexName the full name of a proof index for which to create a proof
    */
@@ -60,21 +59,22 @@ final class BlockchainProofs {
     // IndexProof for non-existent index is not supported because it doesn't make sense
     // to combine a proof from an uninitialized index (which is not aggregated) with
     // a proof of absence in the aggregating collection.
-    return Optional
-        .ofNullable(nativeCreateIndexProof(snapshot.getAccessNativeHandle(), fullIndexName))
-        .map(proof -> {
-          try {
-            return IndexProof.parseFrom(proof);
-          } catch (InvalidProtocolBufferException e) {
-            throw new AssertionError("Invalid index proof from native", e);
-          }
-        });
+    return Optional.ofNullable(
+            nativeCreateIndexProof(snapshot.getAccessNativeHandle(), fullIndexName))
+        .map(
+            proof -> {
+              try {
+                return IndexProof.parseFrom(proof);
+              } catch (InvalidProtocolBufferException e) {
+                throw new AssertionError("Invalid index proof from native", e);
+              }
+            });
   }
 
   static native byte[] nativeCreateBlockProof(long accessNativeHandle, long blockHeight);
 
-  @Nullable static native byte[] nativeCreateIndexProof(long snapshotNativeHandle,
-      String fullIndexName);
+  @Nullable
+  static native byte[] nativeCreateIndexProof(long snapshotNativeHandle, String fullIndexName);
 
   private BlockchainProofs() {}
 }

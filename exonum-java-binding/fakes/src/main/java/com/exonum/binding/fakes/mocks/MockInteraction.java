@@ -47,9 +47,7 @@ public class MockInteraction {
     this.argumentNames = argumentNames;
   }
 
-  /**
-   * Custom Answer that is used to track interactions with a particular method of mocked object.
-   */
+  /** Custom Answer that is used to track interactions with a particular method of mocked object. */
   private class InteractionAnswer implements Answer {
 
     @Override
@@ -72,10 +70,10 @@ public class MockInteraction {
   }
 
   /**
-   * Returns list of all interactions (arguments values) with particular method of mocked object
-   * in form of JSON string.
+   * Returns list of all interactions (arguments values) with particular method of mocked object in
+   * form of JSON string.
    *
-   * <p>Example: "[{"handle":4635874800,"height":1},{"handle":4635875424,"height":2}]"</p>
+   * <p>Example: "[{"handle":4635874800,"height":1},{"handle":4635875424,"height":2}]"
    *
    * @return Result of interactions with mocked object
    */

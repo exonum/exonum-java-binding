@@ -27,15 +27,14 @@ final class MapEntryInternal {
   final byte[] key;
   final byte[] value;
 
-  @SuppressWarnings("unused")  // native API
+  @SuppressWarnings("unused") // native API
   MapEntryInternal(byte[] key, byte[] value) {
     this.key = checkStorageKey(key);
     this.value = checkStorageValue(value);
   }
 
-  <V, K> MapEntry<K, V> toMapEntry(MapEntryInternal entry,
-      Serializer<K> keySerializer,
-      Serializer<V> valueSerializer) {
+  <V, K> MapEntry<K, V> toMapEntry(
+      MapEntryInternal entry, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
     K key = keySerializer.fromBytes(entry.key);
     V value = valueSerializer.fromBytes(entry.value);
     return valueOf(key, value);

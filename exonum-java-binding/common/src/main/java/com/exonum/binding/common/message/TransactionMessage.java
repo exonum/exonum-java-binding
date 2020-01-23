@@ -36,29 +36,19 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
 import java.nio.ByteBuffer;
 
-/**
- * An Exonum transaction message.
- */
+/** An Exonum transaction message. */
 public interface TransactionMessage {
 
-  /**
-   * Returns a public key of the author of the transaction message.
-   */
+  /** Returns a public key of the author of the transaction message. */
   PublicKey getAuthor();
 
-  /**
-   * Returns the numeric identifier of the service instance this message belongs to.
-   */
+  /** Returns the numeric identifier of the service instance this message belongs to. */
   int getServiceId();
 
-  /**
-   * Returns the transaction type identifier which is unique within the service.
-   */
+  /** Returns the transaction type identifier which is unique within the service. */
   int getTransactionId();
 
-  /**
-   * Returns the payload containing the serialized transaction parameters.
-   */
+  /** Returns the payload containing the serialized transaction parameters. */
   // We use ByteString instead of byte[] as most often the payload contains a protobuf message,
   // which can be parsed from a ByteString directly, with no intermediate copying to byte[].
   ByteString getPayload();
@@ -66,15 +56,14 @@ public interface TransactionMessage {
   /**
    * Returns the SHA-256 hash of this message.
    *
-   * <p>Please note that the hash is <em>not</em> necessarily calculated over the
-   * {@linkplain #toBytes() whole message binary representation}; the algorithm is defined
-   * in the signed message.
+   * <p>Please note that the hash is <em>not</em> necessarily calculated over the {@linkplain
+   * #toBytes() whole message binary representation}; the algorithm is defined in the signed
+   * message.
    */
   HashCode hash();
 
   /**
-   * Returns the <a href="https://ed25519.cr.yp.to/">Ed25519</a> signature
-   * over this binary message.
+   * Returns the <a href="https://ed25519.cr.yp.to/">Ed25519</a> signature over this binary message.
    *
    * <p>The signature is <strong>not</strong> guaranteed to be valid and must be verified against
    * the {@linkplain #getAuthor() signer’s public key}.
@@ -83,21 +72,15 @@ public interface TransactionMessage {
    */
   byte[] getSignature();
 
-  /**
-   * Returns the transaction message in binary format.
-   */
+  /** Returns the transaction message in binary format. */
   byte[] toBytes();
 
-  /**
-   * Creates a new builder for the transaction message.
-   */
+  /** Creates a new builder for the transaction message. */
   static Builder builder() {
     return new Builder();
   }
 
-  /**
-   * Creates the transaction message from the given bytes array.
-   */
+  /** Creates the transaction message from the given bytes array. */
   static TransactionMessage fromBytes(byte[] bytes) {
     try {
       Consensus.SignedMessage signedMessage = Consensus.SignedMessage.parseFrom(bytes);
@@ -107,9 +90,7 @@ public interface TransactionMessage {
     }
   }
 
-  /**
-   * Builder for the binary transaction message.
-   */
+  /** Builder for the binary transaction message. */
   class Builder {
     private static CryptoFunction DEFAULT_CRYPTO_FUNCTION = CryptoFunctions.ed25519();
     private Integer serviceId;
@@ -118,46 +99,34 @@ public interface TransactionMessage {
     private KeyPair keys;
     private CryptoFunction cryptoFunction;
 
-    /**
-     * Sets service identifier to the transaction message.
-     */
+    /** Sets service identifier to the transaction message. */
     public Builder serviceId(int serviceId) {
       this.serviceId = serviceId;
       return this;
     }
 
-    /**
-     * Sets transaction identifier to the transaction message.
-     */
+    /** Sets transaction identifier to the transaction message. */
     public Builder transactionId(int transactionId) {
       this.transactionId = transactionId;
       return this;
     }
 
-    /**
-     * Sets a payload of the transaction message.
-     */
+    /** Sets a payload of the transaction message. */
     public Builder payload(byte[] payload) {
       return payload(ByteString.copyFrom(payload));
     }
 
-    /**
-     * Sets a payload of the transaction message.
-     */
+    /** Sets a payload of the transaction message. */
     public Builder payload(ByteBuffer payload) {
       return payload(ByteString.copyFrom(payload));
     }
 
-    /**
-     * Sets a payload of the transaction message.
-     */
+    /** Sets a payload of the transaction message. */
     public Builder payload(MessageLite payload) {
       return payload(payload.toByteString());
     }
 
-    /**
-     * Sets a payload of the transaction message.
-     */
+    /** Sets a payload of the transaction message. */
     public Builder payload(ByteString payload) {
       this.payload = payload;
       return this;
@@ -166,9 +135,9 @@ public interface TransactionMessage {
     /**
      * Sets the Ed25519 key pair to use to sign the message.
      *
-     * @param keys a key pair with a private and public keys. The public key is included
-     *     in the message as an author key of the message. The private key is used for signing
-     *     the message, but not included in it
+     * @param keys a key pair with a private and public keys. The public key is included in the
+     *     message as an author key of the message. The private key is used for signing the message,
+     *     but not included in it
      */
     public Builder signedWith(KeyPair keys) {
       return signedWith(keys, DEFAULT_CRYPTO_FUNCTION);
@@ -177,9 +146,9 @@ public interface TransactionMessage {
     /**
      * Sets the key pair and the crypto function to use to sign the message.
      *
-     * @param keys a key pair with a private and public keys. The public key is included
-     *     in the message as an author key of the message. The private key is used for signing
-     *     the message, but not included in it
+     * @param keys a key pair with a private and public keys. The public key is included in the
+     *     message as an author key of the message. The private key is used for signing the message,
+     *     but not included in it
      * @param crypto a cryptographic function to use
      */
     public Builder signedWith(KeyPair keys, CryptoFunction crypto) {
@@ -189,8 +158,8 @@ public interface TransactionMessage {
     }
 
     /**
-     * Signs the message with the given Ed25519 keys, creating a new signed binary
-     * transaction message. A shorthand for {@code signedWith(keys).build()}.
+     * Signs the message with the given Ed25519 keys, creating a new signed binary transaction
+     * message. A shorthand for {@code signedWith(keys).build()}.
      *
      * @param keys a key pair to {@linkplain #signedWith(KeyPair) sign} the message
      * @return a new signed binary transaction message
@@ -211,32 +180,39 @@ public interface TransactionMessage {
     public TransactionMessage build() {
       checkRequiredFieldsSet();
       PublicKey authorPublicKey = keys.getPublicKey();
-      checkArgument(authorPublicKey.size() == Ed25519.PUBLIC_KEY_BYTES,
+      checkArgument(
+          authorPublicKey.size() == Ed25519.PUBLIC_KEY_BYTES,
           "PublicKey has invalid size (%s), expected: %s. Key: %s",
-          authorPublicKey.size(), Ed25519.PUBLIC_KEY_BYTES, authorPublicKey);
+          authorPublicKey.size(),
+          Ed25519.PUBLIC_KEY_BYTES,
+          authorPublicKey);
 
-      byte[] exonumMessage = ExonumMessage.newBuilder()
-          .setAnyTx(AnyTx.newBuilder()
-              .setCallInfo(CallInfo.newBuilder()
-                  .setInstanceId(serviceId)
-                  .setMethodId(transactionId)
-                  .build())
-              .setArguments(payload)
-              .build())
-          .build()
-          .toByteArray();
+      byte[] exonumMessage =
+          ExonumMessage.newBuilder()
+              .setAnyTx(
+                  AnyTx.newBuilder()
+                      .setCallInfo(
+                          CallInfo.newBuilder()
+                              .setInstanceId(serviceId)
+                              .setMethodId(transactionId)
+                              .build())
+                      .setArguments(payload)
+                      .build())
+              .build()
+              .toByteArray();
 
       byte[] signature = cryptoFunction.signMessage(exonumMessage, keys.getPrivateKey());
 
-      Consensus.SignedMessage signedMessage = Consensus.SignedMessage.newBuilder()
-          .setAuthor(Types.PublicKey.newBuilder()
-              .setData(ByteString.copyFrom(authorPublicKey.toBytes()))
-              .build())
-          .setPayload(ByteString.copyFrom(exonumMessage))
-          .setSignature(Types.Signature.newBuilder()
-              .setData(ByteString.copyFrom(signature))
-              .build())
-          .build();
+      Consensus.SignedMessage signedMessage =
+          Consensus.SignedMessage.newBuilder()
+              .setAuthor(
+                  Types.PublicKey.newBuilder()
+                      .setData(ByteString.copyFrom(authorPublicKey.toBytes()))
+                      .build())
+              .setPayload(ByteString.copyFrom(exonumMessage))
+              .setSignature(
+                  Types.Signature.newBuilder().setData(ByteString.copyFrom(signature)).build())
+              .build();
 
       // todo [ECR-3575]: What isn't quite good in using ParsedTransactionMessage here is that
       //    we create a transaction to send it, but still unnecessarily parse it in Parsed...
@@ -265,8 +241,6 @@ public interface TransactionMessage {
       }
     }
 
-    private Builder() {
-    }
+    private Builder() {}
   }
-
 }

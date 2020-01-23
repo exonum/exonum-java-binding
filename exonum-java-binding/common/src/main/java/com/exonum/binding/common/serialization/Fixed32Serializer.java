@@ -27,19 +27,13 @@ enum Fixed32Serializer implements Serializer<Integer> {
 
   @Override
   public byte[] toBytes(Integer value) {
-    return ByteBuffer.allocate(Integer.BYTES)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .putInt(value)
-        .array();
+    return ByteBuffer.allocate(Integer.BYTES).order(ByteOrder.LITTLE_ENDIAN).putInt(value).array();
   }
 
   @Override
   public Integer fromBytes(byte[] serializedValue) {
     checkLength(serializedValue, Integer.BYTES);
 
-    return ByteBuffer.wrap(serializedValue)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .getInt();
+    return ByteBuffer.wrap(serializedValue).order(ByteOrder.LITTLE_ENDIAN).getInt();
   }
-
 }

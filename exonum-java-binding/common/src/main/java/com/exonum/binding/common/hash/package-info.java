@@ -30,15 +30,15 @@
 /**
  * Hash functions and related structures.
  *
- * <p>See the Guava User Guide article on
- * <a href="https://github.com/google/guava/wiki/HashingExplained">hashing</a>.
+ * <p>See the Guava User Guide article on <a
+ * href="https://github.com/google/guava/wiki/HashingExplained">hashing</a>.
  *
- * <p>This package is a repackaged copy of com.google.common.hash from Guava, as of 23.4-jre,
- * since the hashing APIs we re-export are in {@link com.google.common.annotations.Beta}
- * and may change at any time.
+ * <p>This package is a repackaged copy of com.google.common.hash from Guava, as of 23.4-jre, since
+ * the hashing APIs we re-export are in {@link com.google.common.annotations.Beta} and may change at
+ * any time.
  *
- * <p>It includes only the classes, needed for SHA-256 hash function.
- * The other supported hash functions and bloom-filters are removed.
+ * <p>It includes only the classes, needed for SHA-256 hash function. The other supported hash
+ * functions and bloom-filters are removed.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault

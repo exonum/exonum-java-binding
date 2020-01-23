@@ -21,9 +21,9 @@ import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
 
 /**
- * Verifies that {@link Pf4jServiceLoader} works correctly with the {@link DefaultPluginManager}
- * so that we are able to understand if our {@linkplain JarPluginManager custom plugin manager}
- * has any impact in case of any problems.
+ * Verifies that {@link Pf4jServiceLoader} works correctly with the {@link DefaultPluginManager} so
+ * that we are able to understand if our {@linkplain JarPluginManager custom plugin manager} has any
+ * impact in case of any problems.
  */
 @CiOnly // We don't use DefaultPluginManager in prod, hence run this on CI-server only
 class Pf4jServiceLoaderWithDefaultIntegrationTest extends Pf4jServiceLoaderIntegrationTestable {

@@ -28,14 +28,11 @@ import javax.annotation.Nullable;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-/**
- * A factory of throwing transaction mocks.
- */
+/** A factory of throwing transaction mocks. */
 public final class ThrowingTransactions {
 
   /**
-   * Creates a mock of Transaction that throws an exception of the given type
-   * in all of its methods.
+   * Creates a mock of Transaction that throws an exception of the given type in all of its methods.
    *
    * @param exceptionType a type of exception to throw
    * @throws IllegalArgumentException if exception type is un-instantiable (e.g, abstract)
@@ -71,8 +68,7 @@ public final class ThrowingTransactions {
   }
 
   /**
-   * Creates a transaction mock that will throw {@link ExecutionException} in its
-   * execute method.
+   * Creates a transaction mock that will throw {@link ExecutionException} in its execute method.
    *
    * @param isSubclass whether method should produce a subclass of ExecutionException
    * @param errorCode an error code that will be included in the exception
@@ -80,12 +76,11 @@ public final class ThrowingTransactions {
    * @return a transaction mock throwing in execute
    */
   public static Transaction createThrowingExecutionException(
-          boolean isSubclass,
-          byte errorCode,
-          @Nullable String description) {
+      boolean isSubclass, byte errorCode, @Nullable String description) {
     Transaction tx = mock(Transaction.class);
     try {
-      ExecutionException e = isSubclass
+      ExecutionException e =
+          isSubclass
               ? new TestTxExecException(errorCode, description)
               : new ExecutionException(errorCode, description);
       doThrow(e).when(tx).execute(any(TransactionContext.class));

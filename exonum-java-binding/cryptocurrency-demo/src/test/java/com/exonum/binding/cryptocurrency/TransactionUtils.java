@@ -25,16 +25,14 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.protobuf.ByteString;
 
-/**
- * Helper class to create transaction messages from raw transactions.
- */
+/** Helper class to create transaction messages from raw transactions. */
 final class TransactionUtils {
 
   static final long DEFAULT_INITIAL_BALANCE = 100L;
 
   /**
-   * Returns a CreateWalletTx transaction message with a given default initial balance and
-   * service id and signed with given owner key pair.
+   * Returns a CreateWalletTx transaction message with a given default initial balance and service
+   * id and signed with given owner key pair.
    */
   static TransactionMessage newCreateWalletTransaction(
       long initialBalance, KeyPair ownerKeyPair, int serviceId) {
@@ -45,9 +43,7 @@ final class TransactionUtils {
         .sign(ownerKeyPair);
   }
 
-  /**
-   * Creates a CreateWalletTx transaction payload with a given initial balance.
-   */
+  /** Creates a CreateWalletTx transaction payload with a given initial balance. */
   private static byte[] newCreateWalletTxPayload(long initialBalance) {
     return TxMessageProtos.CreateWalletTx.newBuilder()
         .setInitialBalance(initialBalance)
@@ -68,9 +64,7 @@ final class TransactionUtils {
         .sign(ownerKeyPair);
   }
 
-  /**
-   * Creates a TransferTx transaction payload with a given seed, receiver key and sum.
-   */
+  /** Creates a TransferTx transaction payload with a given seed, receiver key and sum. */
   private static byte[] newTransferTxPayload(long seed, PublicKey receiverKey, long sum) {
     return TxMessageProtos.TransferTx.newBuilder()
         .setSeed(seed)
@@ -80,9 +74,7 @@ final class TransactionUtils {
         .toByteArray();
   }
 
-  /**
-   * Returns key byte string.
-   */
+  /** Returns key byte string. */
   private static ByteString fromPublicKey(PublicKey k) {
     return ByteString.copyFrom(k.toBytes());
   }

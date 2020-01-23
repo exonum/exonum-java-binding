@@ -84,22 +84,24 @@ class QaServiceImplTest {
   private final FakeTimeProvider timeProvider = FakeTimeProvider.create(INITIAL_TIME);
 
   @RegisterExtension
-  final TestKitExtension testKitExtension = new TestKitExtension(
-      QaArtifactInfo.createQaServiceTestkit(timeProvider));
+  final TestKitExtension testKitExtension =
+      new TestKitExtension(QaArtifactInfo.createQaServiceTestkit(timeProvider));
 
   @Test
   void initialize() {
     String serviceName = "qa";
     String timeServiceName = "time";
-    try (TestKit testKit = TestKit.builder()
-        .withArtifactsDirectory(QaArtifactInfo.ARTIFACT_DIR)
-        .withDeployedArtifact(QaArtifactInfo.ARTIFACT_ID, QaArtifactInfo.ARTIFACT_FILENAME)
-        .withService(QaArtifactInfo.ARTIFACT_ID, serviceName, 1,
-            QaConfiguration.newBuilder()
-                .setTimeOracleName(timeServiceName)
-                .build())
-        .withTimeService(timeServiceName, 2, TimeProvider.systemTime())
-        .build()) {
+    try (TestKit testKit =
+        TestKit.builder()
+            .withArtifactsDirectory(QaArtifactInfo.ARTIFACT_DIR)
+            .withDeployedArtifact(QaArtifactInfo.ARTIFACT_ID, QaArtifactInfo.ARTIFACT_FILENAME)
+            .withService(
+                QaArtifactInfo.ARTIFACT_ID,
+                serviceName,
+                1,
+                QaConfiguration.newBuilder().setTimeOracleName(timeServiceName).build())
+            .withTimeService(timeServiceName, 2, TimeProvider.systemTime())
+            .build()) {
       Snapshot snapshot = testKit.getSnapshot();
       QaSchema schema = new QaSchema(snapshot, serviceName);
       // Check the time dependency is saved
@@ -125,13 +127,15 @@ class QaServiceImplTest {
     String serviceName = "qa";
     // Empty name is not allowed
     String timeServiceName = "";
-    TestKit.Builder testKitBuilder = TestKit.builder()
-        .withArtifactsDirectory(QaArtifactInfo.ARTIFACT_DIR)
-        .withDeployedArtifact(QaArtifactInfo.ARTIFACT_ID, QaArtifactInfo.ARTIFACT_FILENAME)
-        .withService(QaArtifactInfo.ARTIFACT_ID, serviceName, 1,
-            QaConfiguration.newBuilder()
-                .setTimeOracleName(timeServiceName)
-                .build());
+    TestKit.Builder testKitBuilder =
+        TestKit.builder()
+            .withArtifactsDirectory(QaArtifactInfo.ARTIFACT_DIR)
+            .withDeployedArtifact(QaArtifactInfo.ARTIFACT_ID, QaArtifactInfo.ARTIFACT_FILENAME)
+            .withService(
+                QaArtifactInfo.ARTIFACT_ID,
+                serviceName,
+                1,
+                QaConfiguration.newBuilder().setTimeOracleName(timeServiceName).build());
 
     assertThrows(RuntimeException.class, testKitBuilder::build);
   }
@@ -183,44 +187,54 @@ class QaServiceImplTest {
       String counterName = "test counter";
       HashCode counterId = sha256().hashString(counterName, UTF_8);
       long seed = 17L;
-      MultiMap params = multiMap("counterId", counterId.toString(),
-          "seed", Long.toString(seed));
+      MultiMap params = multiMap("counterId", counterId.toString(), "seed", Long.toString(seed));
 
       post(SUBMIT_INCREMENT_COUNTER_TX_PATH)
-          .sendForm(params, context.succeeding(response -> context.verify(() -> {
-            // Check response
-            assertThat(response.statusCode()).isEqualTo(HTTP_CREATED);
+          .sendForm(
+              params,
+              context.succeeding(
+                  response ->
+                      context.verify(
+                          () -> {
+                            // Check response
+                            assertThat(response.statusCode()).isEqualTo(HTTP_CREATED);
 
-            // Verify the service submitted a transaction
-            List<TransactionMessage> transactionPool = testKit.getTransactionPool();
+                            // Verify the service submitted a transaction
+                            List<TransactionMessage> transactionPool = testKit.getTransactionPool();
 
-            KeyPair expectedAuthor = testKit.getEmulatedNode().getServiceKeyPair();
-            TransactionMessage expectedMessage = createIncrementCounterTx(seed, counterId,
-                QA_SERVICE_ID, expectedAuthor);
+                            KeyPair expectedAuthor = testKit.getEmulatedNode().getServiceKeyPair();
+                            TransactionMessage expectedMessage =
+                                createIncrementCounterTx(
+                                    seed, counterId, QA_SERVICE_ID, expectedAuthor);
 
-            assertThat(transactionPool).contains(expectedMessage);
+                            assertThat(transactionPool).contains(expectedMessage);
 
-            context.completeNow();
-          })));
+                            context.completeNow();
+                          })));
     }
 
     @Test
     void submitUnknownTx(TestKit testKit, VertxTestContext context) {
       // Submit the unknown tx
       post(SUBMIT_UNKNOWN_TX_PATH)
-          .send(context.succeeding(response -> context.verify(() -> {
-            // Check response
-            assertThat(response.statusCode()).isEqualTo(HTTP_CREATED);
+          .send(
+              context.succeeding(
+                  response ->
+                      context.verify(
+                          () -> {
+                            // Check response
+                            assertThat(response.statusCode()).isEqualTo(HTTP_CREATED);
 
-            // Verify the service submitted a transaction
-            List<TransactionMessage> transactionPool = testKit.getTransactionPool();
+                            // Verify the service submitted a transaction
+                            List<TransactionMessage> transactionPool = testKit.getTransactionPool();
 
-            KeyPair expectedAuthor = testKit.getEmulatedNode().getServiceKeyPair();
-            TransactionMessage expectedMessage = createUnknownTx(QA_SERVICE_ID, expectedAuthor);
-            assertThat(transactionPool).contains(expectedMessage);
+                            KeyPair expectedAuthor = testKit.getEmulatedNode().getServiceKeyPair();
+                            TransactionMessage expectedMessage =
+                                createUnknownTx(QA_SERVICE_ID, expectedAuthor);
+                            assertThat(transactionPool).contains(expectedMessage);
 
-            context.completeNow();
-          })));
+                            context.completeNow();
+                          })));
     }
 
     @Test
@@ -234,15 +248,20 @@ class QaServiceImplTest {
       // Request its value
       HashCode counterId = sha256().hashString(counterName, UTF_8);
       get("counter/" + counterId)
-          .send(context.succeeding(response -> context.verify(() -> {
-            // Verify the response
-            assertThat(response.statusCode()).isEqualTo(HTTP_OK);
-            Counter counter = json().fromJson(response.bodyAsString(), Counter.class);
-            Counter expected = new Counter(counterName, 0L);
-            assertThat(counter).isEqualTo(expected);
+          .send(
+              context.succeeding(
+                  response ->
+                      context.verify(
+                          () -> {
+                            // Verify the response
+                            assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+                            Counter counter =
+                                json().fromJson(response.bodyAsString(), Counter.class);
+                            Counter expected = new Counter(counterName, 0L);
+                            assertThat(counter).isEqualTo(expected);
 
-            context.completeNow();
-          })));
+                            context.completeNow();
+                          })));
     }
 
     @Test
@@ -250,39 +269,51 @@ class QaServiceImplTest {
       HashCode counterId = sha256().hashString("Unknown counter", UTF_8);
       // Check there is no such counter
       get("counter/" + counterId)
-          .send(context.succeeding(response -> context.verify(() -> {
-            // Verify the response
-            assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
-            context.completeNow();
-          })));
+          .send(
+              context.succeeding(
+                  response ->
+                      context.verify(
+                          () -> {
+                            // Verify the response
+                            assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+                            context.completeNow();
+                          })));
     }
 
     @Test
     void getConsensusConfiguration(TestKit testKit, VertxTestContext context) {
       get(GET_CONSENSUS_CONFIGURATION_PATH)
-          .send(context.succeeding(response -> context.verify(() -> {
-            // Verify the response
-            assertThat(response.statusCode()).isEqualTo(HTTP_OK);
-            byte[] body = response.bodyAsBuffer().getBytes();
-            Config config = Config.parseFrom(body);
+          .send(
+              context.succeeding(
+                  response ->
+                      context.verify(
+                          () -> {
+                            // Verify the response
+                            assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+                            byte[] body = response.bodyAsBuffer().getBytes();
+                            Config config = Config.parseFrom(body);
 
-            Blockchain blockchain = Blockchain.newInstance(testKit.getSnapshot());
-            Config expectedConfig = blockchain.getConsensusConfiguration();
+                            Blockchain blockchain = Blockchain.newInstance(testKit.getSnapshot());
+                            Config expectedConfig = blockchain.getConsensusConfiguration();
 
-            assertThat(config).isEqualTo(expectedConfig);
+                            assertThat(config).isEqualTo(expectedConfig);
 
-            context.completeNow();
-          })));
+                            context.completeNow();
+                          })));
     }
 
     @Test
     void getTimeNotYetAvailable(VertxTestContext context) {
       get(TIME_PATH)
-          .send(context.succeeding(response -> context.verify(() -> {
-            // Verify the response
-            assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
-            context.completeNow();
-          })));
+          .send(
+              context.succeeding(
+                  response ->
+                      context.verify(
+                          () -> {
+                            // Verify the response
+                            assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
+                            context.completeNow();
+                          })));
     }
 
     @Nested
@@ -300,34 +331,48 @@ class QaServiceImplTest {
       @Test
       void getTime(VertxTestContext context) {
         get(TIME_PATH)
-            .send(context.succeeding(response -> context.verify(() -> {
-              // Verify the response
-              assertThat(response.statusCode()).isEqualTo(HTTP_OK);
-              TimeDto time = json().fromJson(response.bodyAsString(), TimeDto.class);
+            .send(
+                context.succeeding(
+                    response ->
+                        context.verify(
+                            () -> {
+                              // Verify the response
+                              assertThat(response.statusCode()).isEqualTo(HTTP_OK);
+                              TimeDto time =
+                                  json().fromJson(response.bodyAsString(), TimeDto.class);
 
-              TimeDto expected = new TimeDto(INITIAL_TIME);
-              assertThat(time).isEqualTo(expected);
+                              TimeDto expected = new TimeDto(INITIAL_TIME);
+                              assertThat(time).isEqualTo(expected);
 
-              context.completeNow();
-            })));
+                              context.completeNow();
+                            })));
       }
 
       @Test
       void getValidatorsTime(TestKit testKit, VertxTestContext context) {
         get(VALIDATORS_TIMES_PATH)
-            .send(context.succeeding(response -> context.verify(() -> {
-              Map<PublicKey, ZonedDateTime> actual = json().fromJson(response.bodyAsString(),
-                  new TypeToken<Map<PublicKey, ZonedDateTime>>() {
-                  }.getType());
+            .send(
+                context.succeeding(
+                    response ->
+                        context.verify(
+                            () -> {
+                              Map<PublicKey, ZonedDateTime> actual =
+                                  json()
+                                      .fromJson(
+                                          response.bodyAsString(),
+                                          new TypeToken<
+                                              Map<PublicKey, ZonedDateTime>>() {}.getType());
 
-              EmulatedNode emulatedNode = testKit.getEmulatedNode();
-              PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
-              Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, INITIAL_TIME);
+                              EmulatedNode emulatedNode = testKit.getEmulatedNode();
+                              PublicKey nodePublicKey =
+                                  emulatedNode.getServiceKeyPair().getPublicKey();
+                              Map<PublicKey, ZonedDateTime> expected =
+                                  ImmutableMap.of(nodePublicKey, INITIAL_TIME);
 
-              assertThat(actual).isEqualTo(expected);
+                              assertThat(actual).isEqualTo(expected);
 
-              context.completeNow();
-            })));
+                              context.completeNow();
+                            })));
       }
     }
 

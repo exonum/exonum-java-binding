@@ -24,12 +24,12 @@ import java.util.stream.Stream;
 /**
  * A list index proxy is a contiguous list of elements.
  *
- * <p>The "destructive" methods of the list, i.e., those that change its contents,
- * are specified to throw {@link UnsupportedOperationException} if
- * this list has been created with a read-only database view.
+ * <p>The "destructive" methods of the list, i.e., those that change its contents, are specified to
+ * throw {@link UnsupportedOperationException} if this list has been created with a read-only
+ * database view.
  *
- * <p>When the corresponding view goes out of scope, this list is destroyed. Subsequent use
- * of the closed list is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the corresponding view goes out of scope, this list is destroyed. Subsequent use of the
+ * closed list is prohibited and will result in {@link IllegalStateException}.
  *
  * <p>This interface prohibits null elements. All method arguments are non-null by default.
  *
@@ -52,8 +52,8 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
    * <p>If the collection contains an invalid element, this list is not modified.
    *
    * @param elements elements to add to this list
-   * @throws NullPointerException if the source collection is null or it contains null elements.
-   *                              In this case this list is not modified.
+   * @throws NullPointerException if the source collection is null or it contains null elements. In
+   *     this case this list is not modified.
    * @throws IllegalStateException if this list is not valid
    * @throws UnsupportedOperationException if this list is read-only
    */
@@ -102,8 +102,8 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
   /**
    * Truncates the list, reducing its size to {@code newSize}.
    *
-   * <p>If {@code newSize < size()}, keeps the first {@code newSize} elements, removing the rest.
-   * If {@code newSize >= size()}, has no effect.
+   * <p>If {@code newSize < size()}, keeps the first {@code newSize} elements, removing the rest. If
+   * {@code newSize >= size()}, has no effect.
    *
    * @param newSize the maximum number of elements to keep
    * @throws IllegalArgumentException if the new size is negative
@@ -143,9 +143,8 @@ public interface ListIndex<T> extends StorageIndex, Iterable<T> {
   Iterator<T> iterator();
 
   /**
-   * Returns a stream of elements in this list.
-   * The returned stream is <em>fail-fast</em> and <em>late-binding</em>.
-   * The stream can be used as long as the source list is valid.
+   * Returns a stream of elements in this list. The returned stream is <em>fail-fast</em> and
+   * <em>late-binding</em>. The stream can be used as long as the source list is valid.
    *
    * @throws IllegalStateException if this list is not valid
    */

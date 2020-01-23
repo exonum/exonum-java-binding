@@ -20,8 +20,8 @@ import com.exonum.binding.common.proofs.CheckedProof;
 import java.util.NavigableMap;
 
 /**
- * A proof that some elements exist in a proof list.
- * Example usage:
+ * A proof that some elements exist in a proof list. Example usage:
+ *
  * <pre>{@code
  * HashCode expectedIndexHash = // get a known index hash from block proof //
  * UncheckedListProof proof = new UncheckedListProofAdapter(rootProofNode, serializer);
@@ -36,9 +36,7 @@ import java.util.NavigableMap;
  */
 public interface CheckedListProof<E> extends CheckedProof {
 
-  /**
-   * Returns the size of the list: the total number of elements in it.
-   */
+  /** Returns the size of the list: the total number of elements in it. */
   long size();
 
   /**
@@ -49,9 +47,7 @@ public interface CheckedListProof<E> extends CheckedProof {
    */
   NavigableMap<Long, E> getElements();
 
-  /**
-   * Returns the status of this proof: whether it is structurally valid.
-   */
+  /** Returns the status of this proof: whether it is structurally valid. */
   @Override
   ListProofStatus getProofStatus();
 }

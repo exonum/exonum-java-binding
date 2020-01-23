@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Objects;
 
-
 final class Counter {
 
   private final String name;
@@ -40,8 +39,7 @@ final class Counter {
       return false;
     }
     Counter counter = (Counter) o;
-    return value == counter.value
-        && Objects.equals(name, counter.name);
+    return value == counter.value && Objects.equals(name, counter.name);
   }
 
   @Override

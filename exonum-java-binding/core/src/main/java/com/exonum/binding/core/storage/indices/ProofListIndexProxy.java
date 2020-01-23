@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkRange;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -33,15 +32,15 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import javax.annotation.Nullable;
 
 /**
- * A proof list index proxy is a contiguous list of elements, capable of providing
- * cryptographic proofs that it contains a certain element at a particular position.
- * Non-null elements may be added to the end of the list only.
+ * A proof list index proxy is a contiguous list of elements, capable of providing cryptographic
+ * proofs that it contains a certain element at a particular position. Non-null elements may be
+ * added to the end of the list only.
  *
  * <p>The proof list is implemented as a hash tree (Merkle tree).
  *
- * <p>The "destructive" methods of the list, i.e., those that change its contents,
- * are specified to throw {@link UnsupportedOperationException} if
- * this list has been created with a read-only database access.
+ * <p>The "destructive" methods of the list, i.e., those that change its contents, are specified to
+ * throw {@link UnsupportedOperationException} if this list has been created with a read-only
+ * database access.
  *
  * <p>All method arguments are non-null by default.
  *
@@ -64,8 +63,8 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
    * Creates a new ProofListIndexProxy.
    *
    * @param address an index address
-   * @param access a database access. Must be valid.
-   *             If an access is read-only, "destructive" operations are not permitted.
+   * @param access a database access. Must be valid. If an access is read-only, "destructive"
+   *     operations are not permitted.
    * @param serializer a serializer of elements
    * @param <E> the type of elements in this list
    * @throws IllegalStateException if the access is not valid
@@ -78,33 +77,35 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
 
     NativeHandle listNativeHandle = createNativeList(address, access);
 
-    return new ProofListIndexProxy<>(listNativeHandle, address,
-        access, s);
+    return new ProofListIndexProxy<>(listNativeHandle, address, access, s);
   }
 
   private static NativeHandle createNativeList(IndexAddress address, AbstractAccess access) {
     long accessNativeHandle = access.getAccessNativeHandle();
-    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
-        accessNativeHandle);
+    long handle =
+        nativeCreate(address.getName(), address.getIdInGroup().orElse(null), accessNativeHandle);
     NativeHandle listNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, listNativeHandle, ProofListIndexProxy.class,
-        ProofListIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(
+        cleaner, listNativeHandle, ProofListIndexProxy.class, ProofListIndexProxy::nativeFree);
     return listNativeHandle;
   }
 
-  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
-      long accessNativeHandle);
+  private static native long nativeCreate(
+      String name, @Nullable byte[] idInGroup, long accessNativeHandle);
 
-  private ProofListIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
-                              CheckingSerializerDecorator<E> serializer) {
+  private ProofListIndexProxy(
+      NativeHandle nativeHandle,
+      IndexAddress address,
+      AbstractAccess access,
+      CheckingSerializerDecorator<E> serializer) {
     super(nativeHandle, address, access, serializer);
   }
 
   /**
-   * Returns a proof of either existence or absence of an element at the specified index
-   * in this list.
+   * Returns a proof of either existence or absence of an element at the specified index in this
+   * list.
    *
    * @param index the element index
    * @throws IndexOutOfBoundsException if the index is invalid
@@ -119,9 +120,9 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   private native byte[] nativeGetProof(long nativeHandle, long index);
 
   /**
-   * Returns a proof of either existence or absence of some elements in the specified range
-   * in this list. If some elements are present in the list, but some — are not (i.e., the
-   * requested range exceeds its size), a proof of absence is returned.
+   * Returns a proof of either existence or absence of some elements in the specified range in this
+   * list. If some elements are present in the list, but some — are not (i.e., the requested range
+   * exceeds its size), a proof of absence is returned.
    *
    * @param from the index of the first element
    * @param to the index after the last element

@@ -26,12 +26,9 @@ import com.google.protobuf.Empty;
  */
 public final class ExecutionStatuses {
 
-  /**
-   * A successful execution status.
-   */
-  public static final ExecutionStatus SUCCESS = ExecutionStatus.newBuilder()
-      .setOk(Empty.getDefaultInstance())
-      .build();
+  /** A successful execution status. */
+  public static final ExecutionStatus SUCCESS =
+      ExecutionStatus.newBuilder().setOk(Empty.getDefaultInstance()).build();
 
   private ExecutionStatuses() {}
 }

@@ -32,9 +32,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Finds and validates transaction methods in a service.
- */
+/** Finds and validates transaction methods in a service. */
 final class TransactionExtractor {
 
   /**
@@ -44,12 +42,10 @@ final class TransactionExtractor {
    */
   static Map<Integer, TransactionMethod> extractTransactionMethods(Class<?> serviceClass) {
     Map<Integer, Method> transactionMethods = findTransactionMethods(serviceClass);
-    Lookup lookup = MethodHandles.publicLookup()
-        .in(serviceClass);
+    Lookup lookup = MethodHandles.publicLookup().in(serviceClass);
     return transactionMethods.entrySet().stream()
         .peek(tx -> validateTransactionMethod(tx.getValue(), serviceClass))
-        .collect(toMap(Map.Entry::getKey,
-            (e) -> toTransactionMethod(e.getValue(), lookup)));
+        .collect(toMap(Map.Entry::getKey, (e) -> toTransactionMethod(e.getValue(), lookup)));
   }
 
   @VisibleForTesting
@@ -70,35 +66,42 @@ final class TransactionExtractor {
     return transactionMethods;
   }
 
-  private static void checkDuplicates(Map<Integer, Method> transactionMethods, int transactionId,
-      Class<?> serviceClass, Method method) {
+  private static void checkDuplicates(
+      Map<Integer, Method> transactionMethods,
+      int transactionId,
+      Class<?> serviceClass,
+      Method method) {
     if (transactionMethods.containsKey(transactionId)) {
       String firstMethodName = transactionMethods.get(transactionId).getName();
-      String errorMessage = String.format("Service %s has more than one transaction with the same"
-              + " id (%s): first: %s; second: %s",
-          serviceClass.getName(), transactionId, firstMethodName, method.getName());
+      String errorMessage =
+          String.format(
+              "Service %s has more than one transaction with the same"
+                  + " id (%s): first: %s; second: %s",
+              serviceClass.getName(), transactionId, firstMethodName, method.getName());
       throw new IllegalArgumentException(errorMessage);
     }
   }
 
-  /**
-   * Checks that the given transaction method signature is correct.
-   */
+  /** Checks that the given transaction method signature is correct. */
   private static void validateTransactionMethod(Method transaction, Class<?> serviceClass) {
-    String errorMessage = String.format("Method %s in a service class %s annotated with"
-        + " @Transaction should have precisely two parameters: transaction arguments of"
-        + " 'byte[]' type or a protobuf type and transaction context of"
-        + " 'com.exonum.binding.core.transaction.TransactionContext' type.",
-        transaction.getName(), serviceClass.getName());
+    String errorMessage =
+        String.format(
+            "Method %s in a service class %s annotated with"
+                + " @Transaction should have precisely two parameters: transaction arguments of"
+                + " 'byte[]' type or a protobuf type and transaction context of"
+                + " 'com.exonum.binding.core.transaction.TransactionContext' type.",
+            transaction.getName(), serviceClass.getName());
     checkArgument(transaction.getParameterCount() == 2, errorMessage);
     Class<?> firstParameter = transaction.getParameterTypes()[0];
     Class<?> secondParameter = transaction.getParameterTypes()[1];
-    checkArgument(firstParameter == byte[].class || isProtobufArgument(firstParameter),
-        String.format(errorMessage
-            + " But first parameter type was: %s", firstParameter.getName()));
-    checkArgument(TransactionContext.class.isAssignableFrom(secondParameter),
-        String.format(errorMessage
-            + " But second parameter type was: %s", secondParameter.getName()));
+    checkArgument(
+        firstParameter == byte[].class || isProtobufArgument(firstParameter),
+        String.format(
+            errorMessage + " But first parameter type was: %s", firstParameter.getName()));
+    checkArgument(
+        TransactionContext.class.isAssignableFrom(secondParameter),
+        String.format(
+            errorMessage + " But second parameter type was: %s", secondParameter.getName()));
   }
 
   private static TransactionMethod toTransactionMethod(Method method, Lookup lookup) {
@@ -117,9 +120,7 @@ final class TransactionExtractor {
     return new TransactionMethod(methodHandle, argumentsSerializer);
   }
 
-  /**
-   * Returns true if given class is a protobuf type; false otherwise.
-   */
+  /** Returns true if given class is a protobuf type; false otherwise. */
   private static boolean isProtobufArgument(Class type) {
     return MessageLite.class.isAssignableFrom(type);
   }

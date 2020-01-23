@@ -29,8 +29,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * An Exonum node context. Allows to add transactions to Exonum network
- * and get a snapshot of the database state.
+ * An Exonum node context. Allows to add transactions to Exonum network and get a snapshot of the
+ * database state.
  */
 public final class NodeProxy extends AbstractCloseableNativeProxy implements Node {
 
@@ -68,8 +68,8 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
    * @param transactionId an identifier of the transaction
    */
   // todo: fix the native impl to work with int ids
-  private static native byte[] nativeSubmit(long nodeHandle, byte[] payload, int serviceId,
-      int transactionId);
+  private static native byte[] nativeSubmit(
+      long nodeHandle, byte[] payload, int serviceId, int transactionId);
 
   @Override
   public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {

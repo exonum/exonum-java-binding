@@ -54,363 +54,404 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-class MapIndexProxyIntegrationTest
-    extends BaseIndexProxyTestable<MapIndexProxy<String, String>> {
+class MapIndexProxyIntegrationTest extends BaseIndexProxyTestable<MapIndexProxy<String, String>> {
 
   private static final String MAP_NAME = "test_map";
 
   @Test
   void containsKeyShouldReturnFalseIfNoSuchKey() {
-    runTestWithView(database::createSnapshot,
-        (map) -> assertFalse(map.containsKey(K1))
-    );
+    runTestWithView(database::createSnapshot, (map) -> assertFalse(map.containsKey(K1)));
   }
 
   @Test
   void containsKeyShouldThrowIfNullKey() {
-    assertThrows(NullPointerException.class, () -> runTestWithView(database::createSnapshot,
-        (map) -> map.containsKey(null)
-    ));
+    assertThrows(
+        NullPointerException.class,
+        () -> runTestWithView(database::createSnapshot, (map) -> map.containsKey(null)));
   }
 
   @Test
   void containsKeyShouldReturnTrueIfHasMappingForKey() {
-    runTestWithView(database::createFork, (map) -> {
-      map.put(K1, V1);
-      assertTrue(map.containsKey(K1));
-      assertFalse(map.containsKey(K2));
-    });
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          map.put(K1, V1);
+          assertTrue(map.containsKey(K1));
+          assertFalse(map.containsKey(K2));
+        });
   }
 
   @Test
   void getShouldReturnSuccessfullyPutValueSingleByteKey() {
-    runTestWithView(database::createFork, (map) -> {
-      String key = "k";
-      String value = V1;
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String key = "k";
+          String value = V1;
 
-      map.put(key, value);
+          map.put(key, value);
 
-      String storedValue = map.get(key);
+          String storedValue = map.get(key);
 
-      assertThat(storedValue, equalTo(value));
-    });
+          assertThat(storedValue, equalTo(value));
+        });
   }
 
   @Test
   void getShouldReturnSuccessfullyPutValueThreeByteKey() {
-    runTestWithView(database::createFork, (map) -> {
-      String key = "key";
-      String value = V1;
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String key = "key";
+          String value = V1;
 
-      map.put(key, value);
+          map.put(key, value);
 
-      String storedValue = map.get(key);
+          String storedValue = map.get(key);
 
-      assertThat(storedValue, equalTo(value));
-    });
+          assertThat(storedValue, equalTo(value));
+        });
   }
 
   @Test
   void putShouldOverwritePreviousValue() {
-    runTestWithView(database::createFork, (map) -> {
-      String key = "key";
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String key = "key";
 
-      map.put(key, V1);
-      map.put(key, V2);
+          map.put(key, V1);
+          map.put(key, V2);
 
-      String storedValue = map.get(key);
+          String storedValue = map.get(key);
 
-      assertThat(storedValue, equalTo(V2));
-    });
+          assertThat(storedValue, equalTo(V2));
+        });
   }
 
   @Test
   void putAllInEmptyMap() {
-    runTestWithView(database::createFork, (map) -> {
-      ImmutableMap<String, String> source = ImmutableMap.of(
-          "k1", V1,
-          "k2", V2,
-          "k3", V3
-      );
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          ImmutableMap<String, String> source =
+              ImmutableMap.of(
+                  "k1", V1,
+                  "k2", V2,
+                  "k3", V3);
 
-      map.putAll(source);
+          map.putAll(source);
 
-      // Check that the map contains all items
-      for (Map.Entry<String, String> entry : source.entrySet()) {
-        String key = entry.getKey();
-        assertTrue(map.containsKey(key));
-        assertThat(map.get(key), equalTo(entry.getValue()));
-      }
-    });
+          // Check that the map contains all items
+          for (Map.Entry<String, String> entry : source.entrySet()) {
+            String key = entry.getKey();
+            assertTrue(map.containsKey(key));
+            assertThat(map.get(key), equalTo(entry.getValue()));
+          }
+        });
   }
 
   @Test
   void putAllOverwritesExistingMappings() {
-    runTestWithView(database::createFork, (map) -> {
-      // Initialize the map with some entries.
-      map.putAll(ImmutableMap.of(
-          K1, V1,
-          K2, V2
-      ));
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          // Initialize the map with some entries.
+          map.putAll(
+              ImmutableMap.of(
+                  K1, V1,
+                  K2, V2));
 
+          ImmutableMap<String, String> replacementEntries =
+              ImmutableMap.of(
+                  K1, V3,
+                  K2, V4);
 
-      ImmutableMap<String, String> replacementEntries = ImmutableMap.of(
-          K1, V3,
-          K2, V4
-      );
+          map.putAll(replacementEntries);
 
-      map.putAll(replacementEntries);
-
-      // Check that the map contains new items, not the initial.
-      for (Map.Entry<String, String> entry : replacementEntries.entrySet()) {
-        String key = entry.getKey();
-        assertTrue(map.containsKey(key));
-        assertThat(map.get(key), equalTo(entry.getValue()));
-      }
-    });
+          // Check that the map contains new items, not the initial.
+          for (Map.Entry<String, String> entry : replacementEntries.entrySet()) {
+            String key = entry.getKey();
+            assertTrue(map.containsKey(key));
+            assertThat(map.get(key), equalTo(entry.getValue()));
+          }
+        });
   }
 
   @Test
   void getShouldReturnSuccessfullyPutEmptyValue() {
-    runTestWithView(database::createFork, (map) -> {
-      String key = K1;
-      String value = "";
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String key = K1;
+          String value = "";
 
-      map.put(key, value);
+          map.put(key, value);
 
-      String storedValue = map.get(key);
+          String storedValue = map.get(key);
 
-      assertThat(storedValue, equalTo(value));
-    });
+          assertThat(storedValue, equalTo(value));
+        });
   }
 
   @Test
   void getShouldReturnSuccessfullyPutValueByEmptyKey() {
-    runTestWithView(database::createFork, (map) -> {
-      String key = "";
-      String value = V1;
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String key = "";
+          String value = V1;
 
-      map.put(key, value);
+          map.put(key, value);
 
-      String storedValue = map.get(key);
+          String storedValue = map.get(key);
 
-      assertThat(storedValue, equalTo(value));
-    });
+          assertThat(storedValue, equalTo(value));
+        });
   }
 
   @Test
   void putShouldFailWithSnapshot() {
-    runTestWithView(database::createSnapshot, (map) -> {
-      assertThrows(UnsupportedOperationException.class,
-          () -> map.put(K1, V1));
-    });
+    runTestWithView(
+        database::createSnapshot,
+        (map) -> {
+          assertThrows(UnsupportedOperationException.class, () -> map.put(K1, V1));
+        });
   }
 
   @Test
   void getShouldReturnNullIfNoSuchValueInFork() {
-    runTestWithView(database::createFork, (map) -> {
-      String value = map.get(K1);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String value = map.get(K1);
 
-      assertNull(value);
-    });
+          assertNull(value);
+        });
   }
 
   @Test
   void getShouldReturnNullIfNoSuchValueInEmptySnapshot() {
-    runTestWithView(database::createSnapshot, (map) -> {
-      String value = map.get(K1);
+    runTestWithView(
+        database::createSnapshot,
+        (map) -> {
+          String value = map.get(K1);
 
-      assertNull(value);
-    });
+          assertNull(value);
+        });
   }
 
   @Test
   void putPrefixKeys() {
-    runTestWithView(database::createFork, (map) -> {
-      String fullKey = "A long key to take prefixes of";
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String fullKey = "A long key to take prefixes of";
 
-      // Generate a stream of key-value pairs, where each key is a prefix of the longest key:
-      // 'A' -> V1
-      // 'A ' -> V2
-      // 'A l' -> V3
-      // …
-      Stream<String> keys = IntStream.range(1, fullKey.length())
-          .boxed()
-          .map(size -> prefix(fullKey, size));
-      Stream<String> values = TestStorageItems.values.stream();
-      List<MapEntry<String, String>> entries = Streams.zip(keys, values, MapEntry::valueOf)
-          .collect(Collectors.toList());
+          // Generate a stream of key-value pairs, where each key is a prefix of the longest key:
+          // 'A' -> V1
+          // 'A ' -> V2
+          // 'A l' -> V3
+          // …
+          Stream<String> keys =
+              IntStream.range(1, fullKey.length()).boxed().map(size -> prefix(fullKey, size));
+          Stream<String> values = TestStorageItems.values.stream();
+          List<MapEntry<String, String>> entries =
+              Streams.zip(keys, values, MapEntry::valueOf).collect(Collectors.toList());
 
-      // Shuffle so that we don't add in a certain order.
-      Collections.shuffle(entries);
+          // Shuffle so that we don't add in a certain order.
+          Collections.shuffle(entries);
 
-      // Add them to the map
-      putAll(map, entries);
+          // Add them to the map
+          putAll(map, entries);
 
-      // Check that each key maps to the correct value.
-      for (MapEntry<String, String> e : entries) {
-        String key = e.getKey();
-        assertTrue(map.containsKey(key));
+          // Check that each key maps to the correct value.
+          for (MapEntry<String, String> e : entries) {
+            String key = e.getKey();
+            assertTrue(map.containsKey(key));
 
-        String value = map.get(key);
-        String expectedValue = e.getValue();
-        assertThat(value, equalTo(expectedValue));
-      }
-    });
+            String value = map.get(key);
+            String expectedValue = e.getValue();
+            assertThat(value, equalTo(expectedValue));
+          }
+        });
   }
 
   @Test
   void removeSuccessfullyPutValue() {
-    runTestWithView(database::createFork, (map) -> {
-      String key = K1;
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String key = K1;
 
-      map.put(key, V1);
-      map.remove(key);
+          map.put(key, V1);
+          map.remove(key);
 
-      String storedValue = map.get(key);
-      assertNull(storedValue);
-    });
+          String storedValue = map.get(key);
+          assertNull(storedValue);
+        });
   }
 
   @Test
   void keysShouldReturnEmptyIterIfNoEntries() {
-    runTestWithView(database::createSnapshot, (map) -> {
-      Iterator<String> iterator = map.keys();
+    runTestWithView(
+        database::createSnapshot,
+        (map) -> {
+          Iterator<String> iterator = map.keys();
 
-      assertFalse(iterator.hasNext());
-    });
+          assertFalse(iterator.hasNext());
+        });
   }
 
   @Test
   void keysShouldReturnIterWithAllKeys() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<String, String>> entries = createSortedMapEntries(3);
-      putAll(map, entries);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          List<MapEntry<String, String>> entries = createSortedMapEntries(3);
+          putAll(map, entries);
 
-      Iterator<String> iterator = map.keys();
-      List<String> keysFromIter = ImmutableList.copyOf(iterator);
-      List<String> keysInMap = MapEntries.extractKeys(entries);
+          Iterator<String> iterator = map.keys();
+          List<String> keysFromIter = ImmutableList.copyOf(iterator);
+          List<String> keysInMap = MapEntries.extractKeys(entries);
 
-      assertThat(keysFromIter, equalTo(keysInMap));
-    });
+          assertThat(keysFromIter, equalTo(keysInMap));
+        });
   }
 
   @Test
   void keysIterNextShouldFailIfThisMapModifiedAfterNext() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<String, String>> entries = createMapEntries(3);
-      putAll(map, entries);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          List<MapEntry<String, String>> entries = createMapEntries(3);
+          putAll(map, entries);
 
-      Iterator<String> iterator = map.keys();
-      iterator.next();
-      map.put("new key", "new value");
+          Iterator<String> iterator = map.keys();
+          iterator.next();
+          map.put("new key", "new value");
 
-      assertThrows(ConcurrentModificationException.class, iterator::next);
-    });
+          assertThrows(ConcurrentModificationException.class, iterator::next);
+        });
   }
 
   @Test
   void keysIterNextShouldFailIfThisMapModifiedBeforeNext() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<String, String>> entries = createMapEntries(3);
-      putAll(map, entries);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          List<MapEntry<String, String>> entries = createMapEntries(3);
+          putAll(map, entries);
 
-      Iterator<String> iterator = map.keys();
-      map.put("new key", "new value");
-      assertThrows(ConcurrentModificationException.class, iterator::next);
-    });
+          Iterator<String> iterator = map.keys();
+          map.put("new key", "new value");
+          assertThrows(ConcurrentModificationException.class, iterator::next);
+        });
   }
 
   @Test
   void valuesShouldReturnEmptyIterIfNoEntries() {
-    runTestWithView(database::createSnapshot, (map) -> {
-      Iterator<String> iterator = map.values();
-      assertFalse(iterator.hasNext());
-    });
+    runTestWithView(
+        database::createSnapshot,
+        (map) -> {
+          Iterator<String> iterator = map.values();
+          assertFalse(iterator.hasNext());
+        });
   }
 
   @Test
   void valuesShouldReturnIterWithAllValues() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<String, String>> entries = createSortedMapEntries(3);
-      putAll(map, entries);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          List<MapEntry<String, String>> entries = createSortedMapEntries(3);
+          putAll(map, entries);
 
-      Iterator<String> iterator = map.values();
-      List<String> valuesFromIter = ImmutableList.copyOf(iterator);
-      List<String> valuesInMap = MapEntries.extractValues(entries);
+          Iterator<String> iterator = map.values();
+          List<String> valuesFromIter = ImmutableList.copyOf(iterator);
+          List<String> valuesInMap = MapEntries.extractValues(entries);
 
-      assertThat(valuesFromIter, equalTo(valuesInMap));
-    });
+          assertThat(valuesFromIter, equalTo(valuesInMap));
+        });
   }
 
   @Test
   void entriesShouldReturnIterWithAllValues() {
-    runTestWithView(database::createFork, (map) -> {
-      List<MapEntry<String, String>> entries = createSortedMapEntries(3);
-      putAll(map, entries);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          List<MapEntry<String, String>> entries = createSortedMapEntries(3);
+          putAll(map, entries);
 
-      Iterator<MapEntry<String, String>> iterator = map.entries();
-      List<MapEntry<String, String>> iterEntries = ImmutableList.copyOf(iterator);
+          Iterator<MapEntry<String, String>> iterator = map.entries();
+          List<MapEntry<String, String>> iterEntries = ImmutableList.copyOf(iterator);
 
-      assertThat(iterEntries, equalTo(entries));
-    });
+          assertThat(iterEntries, equalTo(entries));
+        });
   }
 
   @Test
   void clearEmptyFork() {
-    runTestWithView(database::createFork, MapIndexProxy::clear);  // no-op
+    runTestWithView(database::createFork, MapIndexProxy::clear); // no-op
   }
 
   @Test
   void clearSnapshotMustFail() {
-    runTestWithView(database::createSnapshot, (m) -> {
-      assertThrows(UnsupportedOperationException.class,
-          m::clear);
-    });
+    runTestWithView(
+        database::createSnapshot,
+        (m) -> {
+          assertThrows(UnsupportedOperationException.class, m::clear);
+        });
   }
 
   @Test
   void clearSingleItemFork() {
-    runTestWithView(database::createFork, (map) -> {
-      String key = K1;
-      map.put(key, V1);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String key = K1;
+          map.put(key, V1);
 
-      map.clear();
+          map.clear();
 
-      String storedValue = map.get(key);
-      assertNull(storedValue);
-    });
+          String storedValue = map.get(key);
+          assertNull(storedValue);
+        });
   }
 
   @Test
   void clearSingleItemByEmptyKey() {
-    runTestWithView(database::createFork, (map) -> {
-      String key = "";
-      map.put(key, V1);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          String key = "";
+          map.put(key, V1);
 
-      map.clear();
+          map.clear();
 
-      String storedValue = map.get(key);
-      assertNull(storedValue);
-    });
+          String storedValue = map.get(key);
+          assertNull(storedValue);
+        });
   }
 
   @Test
   void clearMultipleItemFork() {
-    runTestWithView(database::createFork, (map) -> {
-      byte numOfEntries = 5;
-      List<MapEntry<String, String>> entries = createMapEntries(numOfEntries);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          byte numOfEntries = 5;
+          List<MapEntry<String, String>> entries = createMapEntries(numOfEntries);
 
-      putAll(map, entries);
+          putAll(map, entries);
 
-      map.clear();
+          map.clear();
 
-      // Check there are no entries left.
-      for (MapEntry<String, String> e : entries) {
-        String storedValue = map.get(e.getKey());
-        assertNull(storedValue);
-      }
-    });
+          // Check there are no entries left.
+          for (MapEntry<String, String> e : entries) {
+            String storedValue = map.get(e.getKey());
+            assertNull(storedValue);
+          }
+        });
   }
 
   @Test
@@ -420,19 +461,22 @@ class MapIndexProxyIntegrationTest
 
   @Test
   void isEmptyShouldReturnFalseForNonEmptyMap() {
-    runTestWithView(database::createFork, (map) -> {
-      map.put(K1, V1);
+    runTestWithView(
+        database::createFork,
+        (map) -> {
+          map.put(K1, V1);
 
-      assertFalse(map.isEmpty());
-    });
+          assertFalse(map.isEmpty());
+        });
   }
 
-  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
-      Consumer<MapIndexProxy<String, String>> mapTest) {
+  private static void runTestWithView(
+      Function<Cleaner, Access> viewFactory, Consumer<MapIndexProxy<String, String>> mapTest) {
     runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+  private static void runTestWithView(
+      Function<Cleaner, Access> viewFactory,
       BiConsumer<Access, MapIndexProxy<String, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
       Access access = viewFactory.apply(cleaner);
@@ -451,7 +495,9 @@ class MapIndexProxyIntegrationTest
 
   @Override
   MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, Access access) {
-    return access.getMap(IndexAddress.valueOf(groupName, idInGroup), StandardSerializers.string(),
+    return access.getMap(
+        IndexAddress.valueOf(groupName, idInGroup),
+        StandardSerializers.string(),
         StandardSerializers.string());
   }
 
@@ -479,16 +525,13 @@ class MapIndexProxyIntegrationTest
     return source.substring(0, prefixSize);
   }
 
-  /**
-   * Creates `numOfEntries` map entries: [('a', 'v1'), ('b', 'v2'), … ('z', 'vN+1')].
-   */
+  /** Creates `numOfEntries` map entries: [('a', 'v1'), ('b', 'v2'), … ('z', 'vN+1')]. */
   private static List<MapEntry<String, String>> createMapEntries(int numOfEntries) {
     return createSortedMapEntries(numOfEntries);
   }
 
   /**
-   * Creates `numOfEntries` map entries, sorted by key:
-   * [('a', 'v1'), ('b', 'v2'), … ('z', 'vN+1')].
+   * Creates `numOfEntries` map entries, sorted by key: [('a', 'v1'), ('b', 'v2'), … ('z', 'vN+1')].
    */
   private static List<MapEntry<String, String>> createSortedMapEntries(int numOfEntries) {
     assert (numOfEntries < 'z' - 'a');

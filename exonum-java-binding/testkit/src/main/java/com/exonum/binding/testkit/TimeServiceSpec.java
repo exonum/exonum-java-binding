@@ -16,9 +16,7 @@
 
 package com.exonum.binding.testkit;
 
-/**
- * A specification of a time service instance used by TestKit for service creation.
- */
+/** A specification of a time service instance used by TestKit for service creation. */
 @SuppressWarnings({"unused", "WeakerAccess"}) // Native API
 class TimeServiceSpec {
 

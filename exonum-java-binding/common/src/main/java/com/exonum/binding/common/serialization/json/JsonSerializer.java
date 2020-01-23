@@ -26,24 +26,24 @@ import com.google.gson.LongSerializationPolicy;
 import java.time.ZonedDateTime;
 
 /**
- * Provides {@link Gson} serializer for converting Java objects to Json and vice versa.
- * It is configured to serialize Exonum objects in a format, compatible with the core framework
- * and light clients (e.g., {@link HashCode} as a hex string). If needed, a new serializer
- * with adapters for service-specific types can be {@linkplain #builder() created}, with
- * Exonum types support already included.
+ * Provides {@link Gson} serializer for converting Java objects to Json and vice versa. It is
+ * configured to serialize Exonum objects in a format, compatible with the core framework and light
+ * clients (e.g., {@link HashCode} as a hex string). If needed, a new serializer with adapters for
+ * service-specific types can be {@linkplain #builder() created}, with Exonum types support already
+ * included.
  */
 public final class JsonSerializer {
 
   private static final Gson INSTANCE = builder().create();
 
   /**
-   * Returns preconfigured {@link Gson} builder instance. Can be useful in cases when
-   * some customization is required. For example, type adapters should be extended or replaced.
+   * Returns preconfigured {@link Gson} builder instance. Can be useful in cases when some
+   * customization is required. For example, type adapters should be extended or replaced.
    */
   public static GsonBuilder builder() {
     return new GsonBuilder()
-        .registerTypeHierarchyAdapter(TransactionMessage.class,
-            new TransactionMessageJsonSerializer())
+        .registerTypeHierarchyAdapter(
+            TransactionMessage.class, new TransactionMessageJsonSerializer())
         .registerTypeHierarchyAdapter(HashCode.class, new HashCodeJsonSerializer())
         .registerTypeAdapter(PublicKey.class, new PublicKeyJsonSerializer())
         .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeJsonSerializer())
@@ -52,13 +52,12 @@ public final class JsonSerializer {
   }
 
   /**
-   * Returns preconfigured {@link Gson} instance. Helpful in cases when no additional
-   * {@linkplain #builder() configuration} of the Json serializer is required.
+   * Returns preconfigured {@link Gson} instance. Helpful in cases when no additional {@linkplain
+   * #builder() configuration} of the Json serializer is required.
    */
   public static Gson json() {
     return INSTANCE;
   }
 
-  private JsonSerializer() {
-  }
+  private JsonSerializer() {}
 }

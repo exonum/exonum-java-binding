@@ -57,11 +57,12 @@ class OpenIndexRegistryTest {
       StorageIndex otherIndex = mock(StorageIndex.class, "other index");
       when(otherIndex.getAddress()).thenReturn(address);
 
-      Exception e = assertThrows(IllegalArgumentException.class,
-          () -> registry.registerIndex(otherIndex));
+      Exception e =
+          assertThrows(IllegalArgumentException.class, () -> registry.registerIndex(otherIndex));
 
       String message = e.getMessage();
-      assertThat(message).contains(String.valueOf(address))
+      assertThat(message)
+          .contains(String.valueOf(address))
           .contains(String.valueOf(index))
           .contains(String.valueOf(otherIndex));
     }

@@ -25,9 +25,7 @@ import com.google.inject.Singleton;
 import java.nio.file.Path;
 import java.util.Map;
 
-/**
- * A framework module which configures the system-wide bindings.
- */
+/** A framework module which configures the system-wide bindings. */
 public final class FrameworkModule extends AbstractModule {
 
   static final String SERVICE_RUNTIME_ARTIFACTS_DIRECTORY = "ServiceRuntime artifacts dir";
@@ -40,13 +38,15 @@ public final class FrameworkModule extends AbstractModule {
   /**
    * Creates a framework module with the given configuration.
    *
-   * @param serviceArtifactsDir the directory in which administrators place and from which
-   *     the service runtime loads service artifacts
+   * @param serviceArtifactsDir the directory in which administrators place and from which the
+   *     service runtime loads service artifacts
    * @param serviceWebServerPort the port for the web server on which endpoints of Exonum services
    *     will be mounted
    * @param dependencyReferenceClasses the reference classes from framework-provided dependencies
    */
-  public FrameworkModule(Path serviceArtifactsDir, int serviceWebServerPort,
+  public FrameworkModule(
+      Path serviceArtifactsDir,
+      int serviceWebServerPort,
       Map<String, Class<?>> dependencyReferenceClasses) {
     this.serviceArtifactsDir = serviceArtifactsDir;
     this.serviceWebServerPort = serviceWebServerPort;
@@ -59,11 +59,12 @@ public final class FrameworkModule extends AbstractModule {
     install(new RuntimeModule(dependencyReferenceClasses));
 
     // Specify framework-wide bindings
-    bind(Server.class).toProvider(Server::create)
-        .in(Singleton.class);
-    bind(Path.class).annotatedWith(named(SERVICE_RUNTIME_ARTIFACTS_DIRECTORY))
+    bind(Server.class).toProvider(Server::create).in(Singleton.class);
+    bind(Path.class)
+        .annotatedWith(named(SERVICE_RUNTIME_ARTIFACTS_DIRECTORY))
         .toInstance(serviceArtifactsDir);
-    bind(Integer.class).annotatedWith(named(SERVICE_WEB_SERVER_PORT))
+    bind(Integer.class)
+        .annotatedWith(named(SERVICE_WEB_SERVER_PORT))
         .toInstance(serviceWebServerPort);
 
     bind(AccessFactory.class).toInstance(AccessProxyFactory.getInstance());

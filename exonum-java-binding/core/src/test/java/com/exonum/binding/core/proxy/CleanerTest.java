@@ -34,7 +34,7 @@ class CleanerTest {
   @Test
   @SuppressWarnings("UnstableApiUsage") // OK in an internal test
   void testRejectsNull() {
-    //TODO Consider rewriting this test to get rid of JUnit4 dependency through Guava Testing.
+    // TODO Consider rewriting this test to get rid of JUnit4 dependency through Guava Testing.
     NullPointerTester tester = new NullPointerTester();
     tester.testAllPublicInstanceMethods(context);
   }
@@ -157,15 +157,13 @@ class CleanerTest {
     int numActions = 3;
 
     for (int numAdded = 0; numAdded < numActions; numAdded++) {
-      assertThat(context.getNumRegisteredActions())
-          .isEqualTo(numAdded);
+      assertThat(context.getNumRegisteredActions()).isEqualTo(numAdded);
 
       CleanAction a = mock(CleanAction.class);
       context.add(a);
     }
 
-    assertThat(context.getNumRegisteredActions())
-        .isEqualTo(numActions);
+    assertThat(context.getNumRegisteredActions()).isEqualTo(numActions);
   }
 
   @Test
@@ -175,7 +173,6 @@ class CleanerTest {
 
     context.close();
 
-    assertThat(context.getNumRegisteredActions())
-        .isZero();
+    assertThat(context.getNumRegisteredActions()).isZero();
   }
 }

@@ -82,29 +82,31 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public Optional<Wallet> getWallet(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((access) -> {
-      CryptocurrencySchema schema = createDataSchema(access);
-      MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+    return node.withSnapshot(
+        (access) -> {
+          CryptocurrencySchema schema = createDataSchema(access);
+          MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
-      return Optional.ofNullable(wallets.get(ownerKey));
-    });
+          return Optional.ofNullable(wallets.get(ownerKey));
+        });
   }
 
   @Override
   public List<HistoryEntity> getWalletHistory(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot(access -> {
-      CryptocurrencySchema schema = createDataSchema(access);
-      ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
-      Blockchain blockchain = Blockchain.newInstance(access);
-      MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
+    return node.withSnapshot(
+        access -> {
+          CryptocurrencySchema schema = createDataSchema(access);
+          ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
+          Blockchain blockchain = Blockchain.newInstance(access);
+          MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
 
-      return walletHistory.stream()
-          .map(txMessages::get)
-          .map(this::createTransferHistoryEntry)
-          .collect(toList());
-    });
+          return walletHistory.stream()
+              .map(txMessages::get)
+              .map(this::createTransferHistoryEntry)
+              .collect(toList());
+        });
   }
 
   @Override
@@ -119,8 +121,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkExecution(!wallets.containsKey(ownerPublicKey), WALLET_ALREADY_EXISTS.errorCode);
 
     long initialBalance = arguments.getInitialBalance();
-    checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
-        initialBalance);
+    checkArgument(
+        initialBalance >= 0, "The initial balance (%s) must not be negative.", initialBalance);
     Wallet wallet = new Wallet(initialBalance);
 
     wallets.put(ownerPublicKey, wallet);
@@ -130,8 +132,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   @Transaction(TRANSFER_TX_ID)
   public void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context) {
     long sum = arguments.getSum();
-    checkExecution(0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode,
-        "Non-positive transfer amount: " + sum);
+    checkExecution(
+        0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode, "Non-positive transfer amount: " + sum);
 
     PublicKey fromWallet = context.getAuthorPk();
     PublicKey toWallet = toPublicKey(arguments.getToWallet());
@@ -168,8 +170,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkExecution(precondition, errorCode, null);
   }
 
-  private static void checkExecution(boolean precondition, byte errorCode,
-      @Nullable String message) {
+  private static void checkExecution(
+      boolean precondition, byte errorCode, @Nullable String message) {
     if (!precondition) {
       throw new ExecutionException(errorCode, message);
     }
@@ -177,8 +179,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   private HistoryEntity createTransferHistoryEntry(TransactionMessage txMessage) {
     try {
-      TxMessageProtos.TransferTx txBody = TxMessageProtos.TransferTx
-          .parseFrom(txMessage.getPayload());
+      TxMessageProtos.TransferTx txBody =
+          TxMessageProtos.TransferTx.parseFrom(txMessage.getPayload());
 
       return HistoryEntity.newBuilder()
           .setSeed(txBody.getSeed())

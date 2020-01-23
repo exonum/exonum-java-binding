@@ -21,9 +21,7 @@ import com.exonum.binding.core.service.Service;
 import com.google.inject.Singleton;
 import org.pf4j.Extension;
 
-/**
- * A module of the QA service.
- */
+/** A module of the QA service. */
 @Extension
 public final class QaServiceModule extends AbstractServiceModule {
 

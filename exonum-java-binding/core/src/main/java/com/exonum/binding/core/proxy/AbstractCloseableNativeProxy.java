@@ -29,29 +29,28 @@ import java.util.stream.Stream;
 /**
  * A proxy of a native object.
  *
- * <p>A native proxy references the corresponding native object by its
- * implementation-specific handle. If handle is zero, the proxy is considered invalid
- * and will not permit referencing any native object. It is perfectly possible to get
- * an invalid proxy (e.g., if a native method fails to allocate a native object).
+ * <p>A native proxy references the corresponding native object by its implementation-specific
+ * handle. If handle is zero, the proxy is considered invalid and will not permit referencing any
+ * native object. It is perfectly possible to get an invalid proxy (e.g., if a native method fails
+ * to allocate a native object).
  *
- * <p>You must close a native proxy when it is no longer needed
- * to release any resources it holds (e.g., destroy a native object).
- * You may use a <a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>
- * statement to do that in orderly fashion.
- * When a proxy is closed, it becomes invalid.
+ * <p>You must close a native proxy when it is no longer needed to release any resources it holds
+ * (e.g., destroy a native object). You may use a <a
+ * href="https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html">try-with-resources</a>
+ * statement to do that in orderly fashion. When a proxy is closed, it becomes invalid.
  */
 public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
     implements CloseableNativeProxy {
 
   /**
-   * Whether this proxy shall dispose any resources when closed
-   * (e.g., if it owns the corresponding native object and is responsible to clean it up).
+   * Whether this proxy shall dispose any resources when closed (e.g., if it owns the corresponding
+   * native object and is responsible to clean it up).
    */
   private final boolean dispose;
 
   /**
-   * Proxies that this one references, including transitive references.
-   * Each of these must be valid at each native call.
+   * Proxies that this one references, including transitive references. Each of these must be valid
+   * at each native call.
    */
   private final Set<AbstractCloseableNativeProxy> referenced;
 
@@ -59,8 +58,8 @@ public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
    * Creates a native proxy.
    *
    * @param nativeHandle an implementation-specific reference to a native object
-   * @param dispose true if this proxy is responsible to release any resources
-   *                by calling {@link #disposeInternal}; false — otherwise
+   * @param dispose true if this proxy is responsible to release any resources by calling {@link
+   *     #disposeInternal}; false — otherwise
    */
   protected AbstractCloseableNativeProxy(long nativeHandle, boolean dispose) {
     this(nativeHandle, dispose, Collections.emptySet());
@@ -70,13 +69,13 @@ public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
    * Creates a native proxy.
    *
    * @param nativeHandle an implementation-specific reference to a native object
-   * @param dispose true if this proxy is responsible to release any resources
-   *                by calling {@link #disposeInternal}; false — otherwise
-   * @param referenced a referenced native object, that must be alive
-   *                   during the operation of this native proxy
+   * @param dispose true if this proxy is responsible to release any resources by calling {@link
+   *     #disposeInternal}; false — otherwise
+   * @param referenced a referenced native object, that must be alive during the operation of this
+   *     native proxy
    */
-  protected AbstractCloseableNativeProxy(long nativeHandle, boolean dispose,
-                                         AbstractCloseableNativeProxy referenced) {
+  protected AbstractCloseableNativeProxy(
+      long nativeHandle, boolean dispose, AbstractCloseableNativeProxy referenced) {
     this(nativeHandle, dispose, singleton(checkNotNull(referenced)));
   }
 
@@ -84,13 +83,13 @@ public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
    * Creates a native proxy.
    *
    * @param nativeHandle an implementation-specific reference to a native object
-   * @param dispose true if this proxy is responsible to release any resources
-   *                by calling {@link #disposeInternal}; false — otherwise
-   * @param referenced a collection of referenced native objects, that must be alive
-   *                   during the operation of this native proxy
+   * @param dispose true if this proxy is responsible to release any resources by calling {@link
+   *     #disposeInternal}; false — otherwise
+   * @param referenced a collection of referenced native objects, that must be alive during the
+   *     operation of this native proxy
    */
-  protected AbstractCloseableNativeProxy(long nativeHandle, boolean dispose,
-                                         Collection<AbstractCloseableNativeProxy> referenced) {
+  protected AbstractCloseableNativeProxy(
+      long nativeHandle, boolean dispose, Collection<AbstractCloseableNativeProxy> referenced) {
     super(new NativeHandle(nativeHandle));
     this.dispose = dispose;
     this.referenced = getTransitivelyReferenced(referenced);
@@ -106,8 +105,8 @@ public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
   }
 
   /**
-   * Returns a native implementation-specific handle if it may be safely used
-   * to access the native object.
+   * Returns a native implementation-specific handle if it may be safely used to access the native
+   * object.
    *
    * <p>The returned value shall only be passed as an argument to native methods.
    *
@@ -143,8 +142,8 @@ public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
   }
 
   private boolean allRefsValid() {
-    return isValidHandle() && referenced.stream()
-        .allMatch(AbstractCloseableNativeProxy::isValidHandle);
+    return isValidHandle()
+        && referenced.stream().allMatch(AbstractCloseableNativeProxy::isValidHandle);
   }
 
   private String getInvalidProxyErrMessage() {
@@ -152,22 +151,20 @@ public abstract class AbstractCloseableNativeProxy extends AbstractNativeProxy
       return String.format("This proxy (%s) is not valid", this);
     }
     Set<AbstractCloseableNativeProxy> invalidReferenced = getInvalidReferences();
-    return String.format("This proxy (%s) references some invalid proxies: %s",
-        this, invalidReferenced);
+    return String.format(
+        "This proxy (%s) references some invalid proxies: %s", this, invalidReferenced);
   }
 
   @VisibleForTesting
   Set<AbstractCloseableNativeProxy> getInvalidReferences() {
-    return referenced.stream()
-        .filter(p -> !p.isValidHandle())
-        .collect(Collectors.toSet());
+    return referenced.stream().filter(p -> !p.isValidHandle()).collect(Collectors.toSet());
   }
 
   /**
    * Releases any resources owned by this proxy (e.g., the corresponding native object).
    *
-   * <p>This method is only called once from {@link #close()} for a <strong>valid</strong>
-   * proxy and shall not be called directly.
+   * <p>This method is only called once from {@link #close()} for a <strong>valid</strong> proxy and
+   * shall not be called directly.
    */
   protected abstract void disposeInternal();
 

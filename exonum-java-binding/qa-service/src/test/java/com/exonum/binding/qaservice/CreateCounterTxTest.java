@@ -48,10 +48,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class CreateCounterTxTest {
 
   @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      QaArtifactInfo.createQaServiceTestkit()
-  );
-
+  TestKitExtension testKitExtension = new TestKitExtension(QaArtifactInfo.createQaServiceTestkit());
 
   @ParameterizedTest
   @ValueSource(strings = {"", " ", "  ", "\n", "\t"})
@@ -93,8 +90,8 @@ class CreateCounterTxTest {
     KeyPair key1 = ed25519().generateKeyPair();
     KeyPair key2 = ed25519().generateKeyPair();
     TransactionMessage transactionMessage = createCreateCounterTx(counterName, QA_SERVICE_ID, key1);
-    TransactionMessage transactionMessage2 = createCreateCounterTx(counterName, QA_SERVICE_ID,
-        key2);
+    TransactionMessage transactionMessage2 =
+        createCreateCounterTx(counterName, QA_SERVICE_ID, key2);
     testKit.createBlockWithTransactions(transactionMessage);
     testKit.createBlockWithTransactions(transactionMessage2);
 
@@ -105,5 +102,4 @@ class CreateCounterTxTest {
     assertThat(error.getKind()).isEqualTo(SERVICE);
     assertThat(error.getCode()).isEqualTo(COUNTER_ALREADY_EXISTS.code);
   }
-
 }

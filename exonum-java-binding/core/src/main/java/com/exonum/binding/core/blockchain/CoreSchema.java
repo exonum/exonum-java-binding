@@ -48,8 +48,8 @@ import java.nio.ByteOrder;
  * <p>Indices defined by this schema are present in the blockchain regardless of the deployed
  * services and store general-purpose information, such as committed transactions.
  *
- * @see <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">
- * Definition in Exonum</a>
+ * @see <a href="https://docs.rs/exonum/latest/exonum/blockchain/struct.Schema.html">Definition in
+ *     Exonum</a>
  */
 final class CoreSchema {
 
@@ -70,9 +70,7 @@ final class CoreSchema {
     this.dbAccess = dbAccess;
   }
 
-  /**
-   * Constructs a schema for a given dbView.
-   */
+  /** Constructs a schema for a given dbView. */
   static CoreSchema newInstance(Access dbAccess) {
     return new CoreSchema(dbAccess);
   }
@@ -85,14 +83,13 @@ final class CoreSchema {
   long getHeight() {
     // The blockchain height is equal to the number of blocks (incl. genesis) minus one
     ListIndex<HashCode> blockHashes = getBlockHashes();
-    checkState(!blockHashes.isEmpty(),
-        "No genesis block created yet (block hashes list is empty)");
+    checkState(!blockHashes.isEmpty(), "No genesis block created yet (block hashes list is empty)");
     return blockHashes.size() - 1;
   }
 
   /**
-   * Returns an list index containing a block hash for every block height
-   * (represented by list index id).
+   * Returns an list index containing a block hash for every block height (represented by list index
+   * id).
    */
   ListIndex<HashCode> getBlockHashes() {
     return dbAccess.getList(CoreIndex.ALL_BLOCK_HASHES, hash());
@@ -110,22 +107,19 @@ final class CoreSchema {
     return dbAccess.getProofList(address, hash());
   }
 
-  /**
-   * Returns a map that stores a block object for every block hash.
-   */
+  /** Returns a map that stores a block object for every block hash. */
   MapIndex<HashCode, Block> getBlocks() {
     return dbAccess.getMap(CoreIndex.BLOCKS, hash(), BLOCK_SERIALIZER);
   }
 
-  /**
-   * Returns a map of transaction messages identified by their SHA-256 hashes.
-   */
+  /** Returns a map of transaction messages identified by their SHA-256 hashes. */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {
     return dbAccess.getMap(CoreIndex.TRANSACTIONS, hash(), TRANSACTION_MESSAGE_SERIALIZER);
   }
 
   /**
    * Returns execution errors that occurred in the given block indexed by calls in that block.
+   *
    * @param blockHeight the height of the block
    */
   ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
@@ -140,8 +134,8 @@ final class CoreSchema {
    * transaction hash.
    */
   MapIndex<HashCode, TransactionLocation> getTxLocations() {
-    return dbAccess.getMap(CoreIndex.TRANSACTIONS_LOCATIONS, hash(),
-        TRANSACTION_LOCATION_SERIALIZER);
+    return dbAccess.getMap(
+        CoreIndex.TRANSACTIONS_LOCATIONS, hash(), TRANSACTION_LOCATION_SERIALIZER);
   }
 
   /**
@@ -149,7 +143,9 @@ final class CoreSchema {
    * Note that this pool represents the state as of the current snapshot, and its state is volatile
    * even between block commits.
    *
-   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+   * @see <a
+   *     href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool
+   *     of Unconfirmed Transactions</a>
    */
   KeySetIndexProxy<HashCode> getTransactionPool() {
     return dbAccess.getKeySet(CoreIndex.TRANSACTIONS_POOL, hash());
@@ -163,14 +159,16 @@ final class CoreSchema {
   Config getConsensusConfiguration() {
     ProofEntryIndexProxy<Config> configEntry =
         dbAccess.getProofEntry(CoreIndex.CONSENSUS_CONFIG, CONSENSUS_CONFIG_SERIALIZER);
-    checkState(configEntry.isPresent(), "No consensus configuration: requesting the configuration "
-        + "before the genesis block was created");
+    checkState(
+        configEntry.isPresent(),
+        "No consensus configuration: requesting the configuration "
+            + "before the genesis block was created");
     return configEntry.get();
   }
 
   /**
-   * Checks that a given block height corresponds to an existing block in the blockchain
-   * (i.e., {@code 0 <= blockHeight <= blockchainHeight}).
+   * Checks that a given block height corresponds to an existing block in the blockchain (i.e.,
+   * {@code 0 <= blockHeight <= blockchainHeight}).
    */
   private void checkBlockHeight(long blockHeight) {
     checkArgument(blockHeight >= 0, "Height shouldn't be negative, but was %s", blockHeight);
@@ -183,29 +181,24 @@ final class CoreSchema {
   }
 
   private byte[] toCoreStorageKey(long value) {
-    return ByteBuffer.allocate(Long.BYTES)
-        .order(ByteOrder.BIG_ENDIAN)
-        .putLong(value)
-        .array();
+    return ByteBuffer.allocate(Long.BYTES).order(ByteOrder.BIG_ENDIAN).putLong(value).array();
   }
 
-  /**
-   * Mapping for Exonum core indexes by name.
-   */
+  /** Mapping for Exonum core indexes by name. */
   private static final class CoreIndex {
 
     private static final String PREFIX = "core.";
     private static final String BLOCK_TRANSACTIONS = PREFIX + "block_transactions";
-    private static final IndexAddress ALL_BLOCK_HASHES = IndexAddress
-        .valueOf(PREFIX + "block_hashes_by_height");
+    private static final IndexAddress ALL_BLOCK_HASHES =
+        IndexAddress.valueOf(PREFIX + "block_hashes_by_height");
     private static final IndexAddress TRANSACTIONS = IndexAddress.valueOf(PREFIX + "transactions");
     private static final IndexAddress BLOCKS = IndexAddress.valueOf(PREFIX + "blocks");
     private static final String CALL_ERRORS = PREFIX + "call_errors";
-    private static final IndexAddress TRANSACTIONS_LOCATIONS = IndexAddress
-        .valueOf(PREFIX + "transactions_locations");
-    private static final IndexAddress TRANSACTIONS_POOL = IndexAddress
-        .valueOf(PREFIX + "transactions_pool");
-    private static final IndexAddress CONSENSUS_CONFIG = IndexAddress
-        .valueOf(PREFIX + "consensus_config");
+    private static final IndexAddress TRANSACTIONS_LOCATIONS =
+        IndexAddress.valueOf(PREFIX + "transactions_locations");
+    private static final IndexAddress TRANSACTIONS_POOL =
+        IndexAddress.valueOf(PREFIX + "transactions_pool");
+    private static final IndexAddress CONSENSUS_CONFIG =
+        IndexAddress.valueOf(PREFIX + "consensus_config");
   }
 }

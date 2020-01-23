@@ -24,8 +24,8 @@ import com.google.inject.Module;
 import java.util.function.Supplier;
 
 /**
- * The default service factory. Although the naming choice might imply non-Guice factories
- * are possible, it is not true — see the {@link ServicesFactory} javadoc.
+ * The default service factory. Although the naming choice might imply non-Guice factories are
+ * possible, it is not true — see the {@link ServicesFactory} javadoc.
  */
 final class GuiceServicesFactory implements ServicesFactory {
 
@@ -42,8 +42,8 @@ final class GuiceServicesFactory implements ServicesFactory {
   }
 
   @Override
-  public ServiceWrapper createService(LoadedServiceDefinition definition,
-      ServiceInstanceSpec instanceSpec, Node node) {
+  public ServiceWrapper createService(
+      LoadedServiceDefinition definition, ServiceInstanceSpec instanceSpec, Node node) {
     // Take the user-supplied module configuring service bindings
     Supplier<ServiceModule> serviceModuleSupplier = definition.getModuleSupplier();
     Module serviceModule = serviceModuleSupplier.get();
@@ -53,8 +53,8 @@ final class GuiceServicesFactory implements ServicesFactory {
     // todo: [ECR-3433] Reconsider the relationships between the framework injector and the child.
     //   Currently the child injector sees everything from the parent, but it does not
     //   seem to need that, the service needs only a well-defined subset of dependencies.
-    Injector serviceInjector = frameworkInjector.createChildInjector(serviceModule,
-        serviceFrameworkModule);
+    Injector serviceInjector =
+        frameworkInjector.createChildInjector(serviceModule, serviceFrameworkModule);
     return serviceInjector.getInstance(ServiceWrapper.class);
   }
 }

@@ -29,10 +29,9 @@ final class SerializationUtils {
    * @throws IllegalArgumentException thrown if length is incorrect
    */
   static void checkLength(byte[] array, int length) {
-    checkArgument(array.length == length,
-        "Expected an array of size %s, but was %s", length, array.length);
+    checkArgument(
+        array.length == length, "Expected an array of size %s, but was %s", length, array.length);
   }
 
-  private SerializationUtils() {
-  }
+  private SerializationUtils() {}
 }

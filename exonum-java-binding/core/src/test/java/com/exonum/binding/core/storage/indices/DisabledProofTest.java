@@ -23,8 +23,8 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.Disabled;
 
 /**
- * Indicates that a test is an integration test of proof <em>verification</em>.
- * Such tests are temporarily disabled till the proof verification is fully implemented.
+ * Indicates that a test is an integration test of proof <em>verification</em>. Such tests are
+ * temporarily disabled till the proof verification is fully implemented.
  *
  * <p>When it is implemented — reconsider both the ITs of proof <em>creation</em> and
  * <em>verification</em>.
@@ -34,5 +34,4 @@ import org.junit.jupiter.api.Disabled;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 @Disabled
-public @interface DisabledProofTest {
-}
+public @interface DisabledProofTest {}

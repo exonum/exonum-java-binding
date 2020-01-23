@@ -17,9 +17,7 @@
 
 package com.exonum.client;
 
-/**
- * Contains Exonum API URLs.
- */
+/** Contains Exonum API URLs. */
 final class ExonumUrls {
   private static final String EXPLORER_PATHS_PREFIX = "api/explorer/v1";
   private static final String SYS_PATHS_PREFIX = "api/system/v1";
@@ -30,5 +28,4 @@ final class ExonumUrls {
   static final String HEALTH_CHECK = SYS_PATHS_PREFIX + "/healthcheck";
   static final String USER_AGENT = SYS_PATHS_PREFIX + "/user_agent";
   static final String SERVICES = SYS_PATHS_PREFIX + "/services";
-
 }

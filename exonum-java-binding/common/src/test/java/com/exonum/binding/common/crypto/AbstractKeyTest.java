@@ -23,15 +23,11 @@ class AbstractKeyTest {
 
   @Test
   void verifyEqualsPublicKey() {
-    EqualsVerifier.forClass(PublicKey.class)
-        .usingGetClass()
-        .verify();
+    EqualsVerifier.forClass(PublicKey.class).usingGetClass().verify();
   }
 
   @Test
   void verifyEqualsPrivateKey() {
-    EqualsVerifier.forClass(PrivateKey.class)
-        .usingGetClass()
-        .verify();
+    EqualsVerifier.forClass(PrivateKey.class).usingGetClass().verify();
   }
 }

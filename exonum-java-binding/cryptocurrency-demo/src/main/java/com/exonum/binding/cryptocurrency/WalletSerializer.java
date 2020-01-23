@@ -28,9 +28,8 @@ public enum WalletSerializer implements Serializer<Wallet> {
 
   @Override
   public byte[] toBytes(Wallet value) {
-    WalletProtos.Wallet wallet = WalletProtos.Wallet.newBuilder()
-        .setBalance(value.getBalance())
-        .build();
+    WalletProtos.Wallet wallet =
+        WalletProtos.Wallet.newBuilder().setBalance(value.getBalance()).build();
     return wallet.toByteArray();
   }
 

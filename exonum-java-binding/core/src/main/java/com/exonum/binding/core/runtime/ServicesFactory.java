@@ -19,15 +19,14 @@ package com.exonum.binding.core.runtime;
 import com.exonum.binding.core.service.Node;
 
 /**
- * A factory of Exonum services. It takes the service definition, the instance parameters,
- * and produces a service.
+ * A factory of Exonum services. It takes the service definition, the instance parameters, and
+ * produces a service.
  *
- * <p>This factory primarily exists to make the runtime testing easier. It does not,
- * in its present form, abstract the instantiation mechanism (Guice), as it requires the service
- * definition with a Guice module providing service bindings. It is a deliberate design decision
- * to not over-abstract the interaction between the service loader producing
- * the service definition; the factory consuming it to make a service instance;
- * and their client — the runtime.
+ * <p>This factory primarily exists to make the runtime testing easier. It does not, in its present
+ * form, abstract the instantiation mechanism (Guice), as it requires the service definition with a
+ * Guice module providing service bindings. It is a deliberate design decision to not over-abstract
+ * the interaction between the service loader producing the service definition; the factory
+ * consuming it to make a service instance; and their client — the runtime.
  */
 @FunctionalInterface
 interface ServicesFactory {
@@ -39,6 +38,6 @@ interface ServicesFactory {
    * @param instanceSpec the service instance specification, including its parameters
    * @param node a node for the service to use
    */
-  ServiceWrapper createService(LoadedServiceDefinition definition,
-      ServiceInstanceSpec instanceSpec, Node node);
+  ServiceWrapper createService(
+      LoadedServiceDefinition definition, ServiceInstanceSpec instanceSpec, Node node);
 }

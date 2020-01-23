@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkStorageValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,25 +39,24 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 
 /**
- * A value set is an index that contains no duplicate elements (values).
- * This implementation does not permit null elements.
+ * A value set is an index that contains no duplicate elements (values). This implementation does
+ * not permit null elements.
  *
- * <p>The elements are stored in the underlying database as values,
- * whereas their cryptographic hashes are used as keys, making this set implementation
- * more suitable for storing large elements. If your application has <em>small</em> elements and
- * does not need to perform set operations by hashes of the elements,
- * consider using a {@link KeySetIndexProxy}.
+ * <p>The elements are stored in the underlying database as values, whereas their cryptographic
+ * hashes are used as keys, making this set implementation more suitable for storing large elements.
+ * If your application has <em>small</em> elements and does not need to perform set operations by
+ * hashes of the elements, consider using a {@link KeySetIndexProxy}.
  *
- * <p>The "destructive" methods of the set, i.e., the ones that change its contents,
- * are specified to throw {@link UnsupportedOperationException} if the set has been created with
- * a read-only database access.
+ * <p>The "destructive" methods of the set, i.e., the ones that change its contents, are specified
+ * to throw {@link UnsupportedOperationException} if the set has been created with a read-only
+ * database access.
  *
  * <p>All method arguments are non-null by default.
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>When the access goes out of scope, this set is destroyed. Subsequent use of the closed set
- * is prohibited and will result in {@link IllegalStateException}.
+ * <p>When the access goes out of scope, this set is destroyed. Subsequent use of the closed set is
+ * prohibited and will result in {@link IllegalStateException}.
  *
  * @param <E> the type of elements in this set
  * @see KeySetIndexProxy
@@ -82,16 +80,16 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
    * Creates a new value set.
    *
    * @param address an index address
-   * @param access a database access. Must be valid. If an access is read-only,
-   *             "destructive" operations are not permitted.
+   * @param access a database access. Must be valid. If an access is read-only, "destructive"
+   *     operations are not permitted.
    * @param serializer a serializer of values
    * @param <E> the type of values in this set
    * @throws IllegalStateException if the access is not valid
    * @throws IllegalArgumentException if the name is empty
    * @see StandardSerializers
    */
-  public static <E> ValueSetIndexProxy<E> newInstance(IndexAddress address, AbstractAccess access,
-                                                      Serializer<E> serializer) {
+  public static <E> ValueSetIndexProxy<E> newInstance(
+      IndexAddress address, AbstractAccess access, Serializer<E> serializer) {
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
     NativeHandle setNativeHandle = createNativeSet(address, access);
@@ -99,28 +97,30 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     return new ValueSetIndexProxy<>(setNativeHandle, address, access, s);
   }
 
-  private static NativeHandle createNativeSet(
-      IndexAddress address, AbstractAccess access) {
+  private static NativeHandle createNativeSet(IndexAddress address, AbstractAccess access) {
     long accessNativeHandle = access.getAccessNativeHandle();
-    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
-        accessNativeHandle);
+    long handle =
+        nativeCreate(address.getName(), address.getIdInGroup().orElse(null), accessNativeHandle);
     NativeHandle setNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, setNativeHandle, ValueSetIndexProxy.class,
-        ValueSetIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(
+        cleaner, setNativeHandle, ValueSetIndexProxy.class, ValueSetIndexProxy::nativeFree);
     return setNativeHandle;
   }
 
-  private ValueSetIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
-                             CheckingSerializerDecorator<E> serializer) {
+  private ValueSetIndexProxy(
+      NativeHandle nativeHandle,
+      IndexAddress address,
+      AbstractAccess access,
+      CheckingSerializerDecorator<E> serializer) {
     super(nativeHandle, address, access);
     this.serializer = serializer;
   }
 
   /**
-   * Adds a new element to the set. The method has no effect if
-   * the set already contains such element.
+   * Adds a new element to the set. The method has no effect if the set already contains such
+   * element.
    *
    * @param e an element to add
    * @throws IllegalStateException if this set is not valid
@@ -133,8 +133,7 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   }
 
   /**
-   * Removes all of the elements from this set.
-   * The set will be empty after this method returns.
+   * Removes all of the elements from this set. The set will be empty after this method returns.
    *
    * @throws IllegalStateException if this set is not valid
    * @throws UnsupportedOperationException if this set is read-only
@@ -166,8 +165,8 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   }
 
   /**
-   * Creates an iterator over the hashes of the elements in this set.
-   * The hashes are ordered lexicographically.
+   * Creates an iterator over the hashes of the elements in this set. The hashes are ordered
+   * lexicographically.
    *
    * @return an iterator over the hashes of the elements in this set
    * @throws IllegalStateException if this set is not valid
@@ -183,8 +182,8 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   }
 
   /**
-   * Returns an iterator over the entries of this set. An entry is a hash-value pair.
-   * The entries are ordered by hashes lexicographically.
+   * Returns an iterator over the entries of this set. An entry is a hash-value pair. The entries
+   * are ordered by hashes lexicographically.
    *
    * @return an iterator over the entries of this set
    * @throws IllegalStateException if this set is not valid
@@ -207,16 +206,14 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   private native void nativeIteratorFree(long iterNativeHandle);
 
   /**
-   * Returns a stream of the entries in this set. An entry is a hash-value pair.
-   * The entries are ordered by hashes lexicographically.
+   * Returns a stream of the entries in this set. An entry is a hash-value pair. The entries are
+   * ordered by hashes lexicographically.
    *
    * @throws IllegalStateException if this set is not valid
    */
   public Stream<Entry<E>> stream() {
     return StreamSupport.stream(
-        Spliterators.spliteratorUnknownSize(iterator(), streamCharacteristics()),
-        false
-    );
+        Spliterators.spliteratorUnknownSize(iterator(), streamCharacteristics()), false);
   }
 
   private int streamCharacteristics() {
@@ -230,20 +227,16 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   /**
    * An entry of a value set index: a hash-value pair.
    *
-   * <p>An entry contains <em>a copy</em> of the data in the value set index.
-   * It does not reflect the changes made to the index since this entry had been created.
+   * <p>An entry contains <em>a copy</em> of the data in the value set index. It does not reflect
+   * the changes made to the index since this entry had been created.
    */
   @AutoValue
   public abstract static class Entry<E> {
 
-    /**
-     * Returns a hash of the element of the set.
-     */
+    /** Returns a hash of the element of the set. */
     public abstract HashCode getHash();
 
-    /**
-     * Returns an element of the set.
-     */
+    /** Returns an element of the set. */
     public abstract E getValue();
 
     // Do not include (potentially) large value in the hash code: we already have a SHA-256 hash.
@@ -267,14 +260,12 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     }
   }
 
-  /**
-   * An internal entry: native API.
-   */
+  /** An internal entry: native API. */
   private static class EntryInternal {
     final byte[] hash;
     final byte[] value;
 
-    @SuppressWarnings("unused")  // native API
+    @SuppressWarnings("unused") // native API
     private EntryInternal(byte[] hash, byte[] value) {
       this.hash = checkNotNull(hash);
       this.value = checkStorageValue(value);
@@ -295,8 +286,8 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   }
 
   /**
-   * Removes an element from this set by its hash. If there is no such element in the set,
-   * does nothing.
+   * Removes an element from this set by its hash. If there is no such element in the set, does
+   * nothing.
    *
    * @param elementHash the hash of an element to remove.
    * @throws IllegalStateException if this set is not valid
@@ -307,8 +298,8 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
     nativeRemoveByHash(getNativeHandle(), elementHash.asBytes());
   }
 
-  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
-      long accessNativeHandle);
+  private static native long nativeCreate(
+      String name, @Nullable byte[] idInGroup, long accessNativeHandle);
 
   private native void nativeAdd(long nativeHandle, byte[] e);
 

@@ -80,12 +80,11 @@ class ValueSetIndexProxyGroupIntegrationTest extends BaseIndexGroupTestable {
   }
 
   private ValueSetIndexProxy<String> createInGroup(byte[] id1, Access access) {
-    return access.getValueSet(IndexAddress.valueOf(GROUP_NAME, id1),
-        StandardSerializers.string());
+    return access.getValueSet(IndexAddress.valueOf(GROUP_NAME, id1), StandardSerializers.string());
   }
 
   private static <E> Set<E> getAllValuesFrom(ValueSetIndexProxy<E> set) {
-    return ImmutableSet.copyOf(Iterators.transform(set.iterator(),
-        ValueSetIndexProxy.Entry::getValue));
+    return ImmutableSet.copyOf(
+        Iterators.transform(set.iterator(), ValueSetIndexProxy.Entry::getValue));
   }
 }

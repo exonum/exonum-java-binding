@@ -37,5 +37,4 @@ class WalletSerializerTest {
   private static Wallet testWallet() {
     return new Wallet(100L);
   }
-
 }

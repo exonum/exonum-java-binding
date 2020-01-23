@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest({
-    Accesses.class,
+  Accesses.class,
 })
 class SnapshotTest {
 

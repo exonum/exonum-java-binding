@@ -37,9 +37,7 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Controller for submitting transactions.
- */
+/** Controller for submitting transactions. */
 final class ApiController {
 
   private static final Logger logger = LogManager.getLogger(ApiController.class);
@@ -57,13 +55,12 @@ final class ApiController {
   void mountApi(Router router) {
     router.route().failureHandler(this::failureHandler);
 
-    ImmutableMap<String, Handler<RoutingContext>> handlers = ImmutableMap.of(
-        GET_WALLET_PATH, this::getWallet,
-        GET_WALLET_HISTORY_PATH, this::getWalletHistory);
+    ImmutableMap<String, Handler<RoutingContext>> handlers =
+        ImmutableMap.of(
+            GET_WALLET_PATH, this::getWallet,
+            GET_WALLET_HISTORY_PATH, this::getWalletHistory);
 
-    handlers.forEach((path, handler) ->
-        router.route(path).handler(handler)
-    );
+    handlers.forEach((path, handler) -> router.route(path).handler(handler));
   }
 
   private void getWallet(RoutingContext rc) {
@@ -73,13 +70,9 @@ final class ApiController {
     Optional<Wallet> wallet = service.getWallet(walletId);
 
     if (wallet.isPresent()) {
-      rc.response()
-          .putHeader(CONTENT_TYPE, "application/json")
-          .end(json().toJson(wallet.get()));
+      rc.response().putHeader(CONTENT_TYPE, "application/json").end(json().toJson(wallet.get()));
     } else {
-      rc.response()
-          .setStatusCode(HTTP_NOT_FOUND)
-          .end();
+      rc.response().setStatusCode(HTTP_NOT_FOUND).end();
     }
   }
 
@@ -88,20 +81,21 @@ final class ApiController {
         getRequiredParameter(rc.request(), WALLET_ID_PARAM, PublicKey::fromHexString);
     List<HistoryEntity> walletHistory = service.getWalletHistory(walletId);
 
-    rc.response()
-        .putHeader(CONTENT_TYPE, "application/json")
-        .end(json().toJson(walletHistory));
+    rc.response().putHeader(CONTENT_TYPE, "application/json").end(json().toJson(walletHistory));
   }
 
-  private static <T> T getRequiredParameter(HttpServerRequest request, String key,
-      Function<String, T> converter) {
+  private static <T> T getRequiredParameter(
+      HttpServerRequest request, String key, Function<String, T> converter) {
     return getRequiredParameter(request.params(), key, converter);
   }
 
-  private static <T> T getRequiredParameter(MultiMap parameters, String key,
-      Function<String, T> converter) {
-    checkArgument(parameters.contains(key), "No required key (%s) in request parameters: %s",
-        key, parameters);
+  private static <T> T getRequiredParameter(
+      MultiMap parameters, String key, Function<String, T> converter) {
+    checkArgument(
+        parameters.contains(key),
+        "No required key (%s) in request parameters: %s",
+        key,
+        parameters);
     String parameter = parameters.get(key);
     try {
       return converter.apply(parameter);
@@ -118,26 +112,20 @@ final class ApiController {
     if (requestFailure != null) {
       Optional<String> badRequest = badRequestDescription(requestFailure);
       if (badRequest.isPresent()) {
-        rc.response()
-            .setStatusCode(HTTP_BAD_REQUEST)
-            .end(badRequest.get());
+        rc.response().setStatusCode(HTTP_BAD_REQUEST).end(badRequest.get());
       } else {
         logger.error("Request error:", requestFailure);
-        rc.response()
-            .setStatusCode(HTTP_INTERNAL_ERROR)
-            .end();
+        rc.response().setStatusCode(HTTP_INTERNAL_ERROR).end();
       }
     } else {
       int failureStatusCode = rc.statusCode();
-      rc.response()
-          .setStatusCode(failureStatusCode)
-          .end();
+      rc.response().setStatusCode(failureStatusCode).end();
     }
   }
 
   /**
-   * If the passed throwable corresponds to a bad request — returns an error message,
-   * or {@code Optional.empty()} otherwise.
+   * If the passed throwable corresponds to a bad request — returns an error message, or {@code
+   * Optional.empty()} otherwise.
    */
   private Optional<String> badRequestDescription(Throwable requestFailure) {
     // All IllegalArgumentExceptions are considered to be caused by a bad request.

@@ -42,6 +42,7 @@ final class StoragePreconditions {
 
   /**
    * Checks that the passed byte array is a valid identifier in a collection group.
+   *
    * @param indexId an index identifier within a group
    * @return an unmodified index id if it is valid
    * @throws NullPointerException if the indexId is null
@@ -77,8 +78,10 @@ final class StoragePreconditions {
   @CanIgnoreReturnValue
   static byte[] checkProofKey(byte[] key) {
     checkNotNull(key, "Proof map key is null");
-    checkArgument(key.length == PROOF_MAP_KEY_SIZE,
-        "Proof map key has invalid size (%s), must be 32 bytes", key.length);
+    checkArgument(
+        key.length == PROOF_MAP_KEY_SIZE,
+        "Proof map key has invalid size (%s), must be 32 bytes",
+        key.length);
     return key;
   }
 
@@ -115,8 +118,8 @@ final class StoragePreconditions {
   @CanIgnoreReturnValue
   static long checkElementIndex(long index, long size) {
     if (index < 0L || size <= index) {
-      throw new IndexOutOfBoundsException("Index must be in range [0, " + size + "),"
-          + " but: " + index);
+      throw new IndexOutOfBoundsException(
+          "Index must be in range [0, " + size + ")," + " but: " + index);
     }
     return index;
   }
@@ -139,16 +142,15 @@ final class StoragePreconditions {
   }
 
   /**
-   * Checks that the first element index of the range is less than the index after
-   * the last element.
+   * Checks that the first element index of the range is less than the index after the last element.
    *
    * @param from the index of the first element
    * @param to the index after the last element
    */
   static void checkRange(long from, long to) {
     if (from < 0 || from >= to) {
-      throw new IndexOutOfBoundsException("Proof range first element index " + from
-          + " must be in range [0, " + to + ")");
+      throw new IndexOutOfBoundsException(
+          "Proof range first element index " + from + " must be in range [0, " + to + ")");
     }
   }
 

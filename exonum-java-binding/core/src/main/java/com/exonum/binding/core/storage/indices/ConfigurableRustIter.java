@@ -40,9 +40,10 @@ final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustI
    * @param nextFunction a function to call to get the next item
    * @param modificationCounter a collection modification counter
    */
-  ConfigurableRustIter(NativeHandle nativeHandle,
-                       LongFunction<E> nextFunction,
-                       ModificationCounter modificationCounter) {
+  ConfigurableRustIter(
+      NativeHandle nativeHandle,
+      LongFunction<E> nextFunction,
+      ModificationCounter modificationCounter) {
     super(nativeHandle);
     this.nextFunction = nextFunction;
     this.modificationCounter = modificationCounter;
@@ -57,8 +58,8 @@ final class ConfigurableRustIter<E> extends AbstractNativeProxy implements RustI
 
   private void checkNotModified() {
     if (modificationCounter.isModifiedSince(initialModCount)) {
-      throw new ConcurrentModificationException("The source collection "
-          + "has been modified during iteration");
+      throw new ConcurrentModificationException(
+          "The source collection " + "has been modified during iteration");
     }
   }
 }

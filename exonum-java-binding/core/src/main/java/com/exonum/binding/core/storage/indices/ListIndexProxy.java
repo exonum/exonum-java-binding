@@ -28,14 +28,14 @@ import com.exonum.binding.core.util.LibraryLoader;
 import javax.annotation.Nullable;
 
 /**
- * A list index proxy is a contiguous list of elements.
- * Elements may be added to or removed from the end of the list only.
+ * A list index proxy is a contiguous list of elements. Elements may be added to or removed from the
+ * end of the list only.
  *
  * <p>This list implementation does not permit null elements.
  *
- * <p>The "destructive" methods of the list, i.e., those that change its contents,
- * are specified to throw {@link UnsupportedOperationException} if
- * this list has been created with a read-only database access.
+ * <p>The "destructive" methods of the list, i.e., those that change its contents, are specified to
+ * throw {@link UnsupportedOperationException} if this list has been created with a read-only
+ * database access.
  *
  * <p>All method arguments are non-null by default.
  *
@@ -57,8 +57,8 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
    * Creates a new ListIndexProxy.
    *
    * @param address an index address
-   * @param access a database access. Must be valid.
-   *             If an access is read-only, "destructive" operations are not permitted.
+   * @param access a database access. Must be valid. If an access is read-only, "destructive"
+   *     operations are not permitted.
    * @param serializer a serializer of elements
    * @param <E> the type of elements in this list
    * @throws IllegalStateException if the access is not valid
@@ -76,23 +76,26 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
 
   private static NativeHandle createNativeList(IndexAddress address, AbstractAccess access) {
     long accessNativeHandle = access.getAccessNativeHandle();
-    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
-        accessNativeHandle);
+    long handle =
+        nativeCreate(address.getName(), address.getIdInGroup().orElse(null), accessNativeHandle);
     NativeHandle listNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, listNativeHandle, ListIndexProxy.class,
-        ListIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(
+        cleaner, listNativeHandle, ListIndexProxy.class, ListIndexProxy::nativeFree);
     return listNativeHandle;
   }
 
-  private ListIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
-                         CheckingSerializerDecorator<E> serializer) {
+  private ListIndexProxy(
+      NativeHandle nativeHandle,
+      IndexAddress address,
+      AbstractAccess access,
+      CheckingSerializerDecorator<E> serializer) {
     super(nativeHandle, address, access, serializer);
   }
 
-  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
-      long accessNativeHandle);
+  private static native long nativeCreate(
+      String name, @Nullable byte[] idInGroup, long accessNativeHandle);
 
   private static native void nativeFree(long nativeHandle);
 

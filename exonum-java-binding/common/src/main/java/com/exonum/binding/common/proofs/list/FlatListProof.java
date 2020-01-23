@@ -44,8 +44,7 @@ import java.util.function.BinaryOperator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * A flat list proof. It proves that certain elements are present in a proof list
- * of a certain size.
+ * A flat list proof. It proves that certain elements are present in a proof list of a certain size.
  */
 class FlatListProof {
   /*
@@ -83,22 +82,18 @@ class FlatListProof {
 
   private static final long MAX_SIZE = ListProofEntry.MAX_INDEX + 1;
 
-  private static final HashCode EMPTY_LIST_INDEX_HASH = hashListIndex(0L,
-      HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]));
+  private static final HashCode EMPTY_LIST_INDEX_HASH =
+      hashListIndex(0L, HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]));
 
-  @VisibleForTesting
-  static final byte BLOB_PREFIX = 0x00;
-  @VisibleForTesting
-  static final byte LIST_BRANCH_PREFIX = 0x01;
-  @VisibleForTesting
-  static final byte LIST_ROOT_PREFIX = 0x02;
+  @VisibleForTesting static final byte BLOB_PREFIX = 0x00;
+  @VisibleForTesting static final byte LIST_BRANCH_PREFIX = 0x01;
+  @VisibleForTesting static final byte LIST_ROOT_PREFIX = 0x02;
 
   private final List<ListProofElementEntry> elements;
   private final List<ListProofHashedEntry> proof;
   private final long size;
 
-  FlatListProof(List<ListProofElementEntry> elements,
-      List<ListProofHashedEntry> proof, long size) {
+  FlatListProof(List<ListProofElementEntry> elements, List<ListProofHashedEntry> proof, long size) {
     this.elements = checkNotNull(elements);
     this.proof = checkNotNull(proof);
     this.size = size;
@@ -107,8 +102,8 @@ class FlatListProof {
   CheckedListProof<byte[]> verify() {
     // Check the size
     if (size < 0 || MAX_SIZE < size) {
-      throw new InvalidProofException(String.format("Invalid size (%s), must be in range [0; 2^56]",
-          size));
+      throw new InvalidProofException(
+          String.format("Invalid size (%s), must be in range [0; 2^56]", size));
     }
 
     // Check proof hashes
@@ -127,9 +122,7 @@ class FlatListProof {
     }
   }
 
-  /**
-   * Checks that each proof entry has a valid SHA-256 hash.
-   */
+  /** Checks that each proof entry has a valid SHA-256 hash. */
   private void checkProofHashes() {
     for (ListProofHashedEntry e : proof) {
       checkSha256Hash(e.getHash());
@@ -139,8 +132,8 @@ class FlatListProof {
   private CheckedListProof<byte[]> verifyEmptyListProof() {
     // Check there are no elements or proof entries
     if (!elements.isEmpty()) {
-      throw new InvalidProofException("Proof for empty list must not have elements, but has: "
-          + elements);
+      throw new InvalidProofException(
+          "Proof for empty list must not have elements, but has: " + elements);
     }
     if (!proof.isEmpty()) {
       throw new InvalidProofException(
@@ -152,24 +145,28 @@ class FlatListProof {
   private CheckedListProof<byte[]> verifyEmptyRangeProof() {
     // Empty range: must have a single root hash node
     if (proof.size() != 1) {
-      throw new InvalidProofException(String.format(
-          "Proof for an empty range must have a single proof node, but has %d: %s",
-          proof.size(), proof));
+      throw new InvalidProofException(
+          String.format(
+              "Proof for an empty range must have a single proof node, but has %d: %s",
+              proof.size(), proof));
     }
     ListProofHashedEntry rootHashEntry = proof.get(0);
     int treeHeight = calcTreeHeight(size);
     // Check height
     if (rootHashEntry.getHeight() != treeHeight) {
       throw new InvalidProofException(
-          String.format("Proof node for an empty range at invalid height (%d),"
-              + "must be at height (%d) for a list of size %d: %s", rootHashEntry.getHeight(),
-              treeHeight, size, rootHashEntry));
+          String.format(
+              "Proof node for an empty range at invalid height (%d),"
+                  + "must be at height (%d) for a list of size %d: %s",
+              rootHashEntry.getHeight(), treeHeight, size, rootHashEntry));
     }
     // Check index
     if (rootHashEntry.getIndex() != 0L) {
       throw new InvalidProofException(
-          String.format("Proof node for an empty range at invalid index (%d),"
-              + "must be always at index 0: %s", rootHashEntry.getIndex(), rootHashEntry));
+          String.format(
+              "Proof node for an empty range at invalid index (%d),"
+                  + "must be always at index 0: %s",
+              rootHashEntry.getIndex(), rootHashEntry));
     }
     HashCode rootHash = rootHashEntry.getHash();
     HashCode listHash = hashListIndex(rootHash);
@@ -197,17 +194,16 @@ class FlatListProof {
 
   @VisibleForTesting
   static int calcTreeHeight(long size) {
-    return (size == 0L) ? 0
-        : log2(BigInteger.valueOf(size), RoundingMode.CEILING);
+    return (size == 0L) ? 0 : log2(BigInteger.valueOf(size), RoundingMode.CEILING);
   }
 
   /**
-   * Indexes proof entries by their height, also verifying their local correctness:
-   * no out-of-range nodes; no duplicates.
+   * Indexes proof entries by their height, also verifying their local correctness: no out-of-range
+   * nodes; no duplicates.
    *
    * @param treeHeight the height of the proof list tree
-   * @return a list of proof entries at each height from 0 to treeHeight;
-   *     entries at each level are indexed by their index
+   * @return a list of proof entries at each height from 0 to treeHeight; entries at each level are
+   *     indexed by their index
    */
   private List<Map<Long, ListProofHashedEntry>> indexHashedEntriesByHeight(int treeHeight) {
     List<Map<Long, ListProofHashedEntry>> proofByHeight = new ArrayList<>(treeHeight);
@@ -226,15 +222,16 @@ class FlatListProof {
       int height = hashedEntry.getHeight();
       if (height < 0 || treeHeight <= height) {
         throw new InvalidProofException(
-            String.format("Proof entry at invalid height (%d), must be in range [0; %d): %s",
+            String.format(
+                "Proof entry at invalid height (%d), must be in range [0; %d): %s",
                 height, treeHeight, hashedEntry));
       }
       // Check index
       long levelSize = levelSizeAt(height);
       long index = hashedEntry.getIndex();
       if (index < 0L || levelSize <= index) {
-        throw new InvalidProofException(String
-            .format(
+        throw new InvalidProofException(
+            String.format(
                 "Proof entry at invalid index (%d); it must be in range [0; %d) at height %d: %s",
                 index, levelSize, height, hashedEntry));
       }
@@ -243,43 +240,41 @@ class FlatListProof {
       ListProofHashedEntry present = proofsAtHeight.putIfAbsent(index, hashedEntry);
       if (present != null) {
         throw new InvalidProofException(
-            String.format("Multiple proof entries at the same position: %s and %s",
-                present, hashedEntry));
+            String.format(
+                "Multiple proof entries at the same position: %s and %s", present, hashedEntry));
       }
     }
     return proofByHeight;
   }
 
-  /**
-   * Checks the element entries: no out-of-range elements; no duplicate indexes.
-   */
+  /** Checks the element entries: no out-of-range elements; no duplicate indexes. */
   private void checkElementEntries() {
     Map<Long, ListProofElementEntry> elementsByIndex = newHashMapWithExpectedSize(elements.size());
     for (ListProofElementEntry e : elements) {
       long index = e.getIndex();
       if (index < 0L || size <= index) {
         throw new InvalidProofException(
-            String.format("Entry at invalid index (%d), must be in range [0; %d): %s",
-                index, size, e));
+            String.format(
+                "Entry at invalid index (%d), must be in range [0; %d): %s", index, size, e));
       }
       ListProofElementEntry present = elementsByIndex.putIfAbsent(index, e);
       if (present != null) {
         throw new InvalidProofException(
-            String.format("Multiple element entries at the same index (%d): %s and %s", index,
-                present, e));
+            String.format(
+                "Multiple element entries at the same index (%d): %s and %s", index, present, e));
       }
     }
   }
 
   /**
-   * Computes the root hash of the proof list tree, also verifying the correctness of
-   * proof entries with regard to the calculated ones.
+   * Computes the root hash of the proof list tree, also verifying the correctness of proof entries
+   * with regard to the calculated ones.
    *
    * @param proofByHeight proof entries indexed by their height
    * @param treeHeight the height of the tree
    */
-  private HashCode computeRootHash(List<Map<Long, ListProofHashedEntry>> proofByHeight,
-      int treeHeight) {
+  private HashCode computeRootHash(
+      List<Map<Long, ListProofHashedEntry>> proofByHeight, int treeHeight) {
     // Hash the element entries, and obtain the first level of calculated hashes
     Map<Long, ListProofHashedEntry> calculated = hashElements();
 
@@ -308,8 +303,8 @@ class FlatListProof {
    * @param proofAtLevel the proof nodes at height h
    * @return the calculated nodes at height h + 1
    */
-  private Map<Long, ListProofHashedEntry> reduce(Map<Long, ListProofHashedEntry> calculated,
-      Map<Long, ListProofHashedEntry> proofAtLevel) {
+  private Map<Long, ListProofHashedEntry> reduce(
+      Map<Long, ListProofHashedEntry> calculated, Map<Long, ListProofHashedEntry> proofAtLevel) {
     // Verify nodes:
     //  - For an inferred node n there is a sibling either in the inferred
     //  nodes or in hash nodes; or it is the last node in an odd-sized level.
@@ -322,7 +317,8 @@ class FlatListProof {
       long siblingIndex = getSiblingIndex(index);
       if (!(calculated.containsKey(siblingIndex) || proofAtLevel.containsKey(siblingIndex))) {
         throw new InvalidProofException(
-            String.format("Missing proof entry at index (%d) for the calculated one: %s",
+            String.format(
+                "Missing proof entry at index (%d) for the calculated one: %s",
                 siblingIndex, inferredNode));
       }
     }
@@ -332,8 +328,10 @@ class FlatListProof {
       // No hash nodes overriding the inferred nodes (i.e., have same index)
       if (calculated.containsKey(index)) {
         throw new InvalidProofException(
-            String.format("Redundant proof entry (%s) with the same index (%d) as "
-                + "the calculated node (%s)", proofNode, index, calculated.get(index)));
+            String.format(
+                "Redundant proof entry (%s) with the same index (%d) as "
+                    + "the calculated node (%s)",
+                proofNode, index, calculated.get(index)));
       }
       // No redundant hash nodes that have no siblings in the inferred nodes.
       long siblingIndex = getSiblingIndex(index);
@@ -398,20 +396,16 @@ class FlatListProof {
 
   private static ListProofHashedEntry hashLeafNode(ListProofElementEntry elementEntry) {
     long index = elementEntry.getIndex();
-    HashCode hash = newHasher()
-        .putByte(BLOB_PREFIX)
-        .putBytes(elementEntry.getElement())
-        .hash();
+    HashCode hash = newHasher().putByte(BLOB_PREFIX).putBytes(elementEntry.getElement()).hash();
     return ListProofHashedEntry.newInstance(index, 0, hash);
   }
 
-  private static ListProofHashedEntry hashBranchNode(ListProofHashedEntry leftChild,
-      @Nullable ListProofHashedEntry rightChild) {
+  private static ListProofHashedEntry hashBranchNode(
+      ListProofHashedEntry leftChild, @Nullable ListProofHashedEntry rightChild) {
     long index = leftChild.getIndex() / 2;
     int height = leftChild.getHeight() + 1;
-    Hasher hasher = newHasher()
-        .putByte(LIST_BRANCH_PREFIX)
-        .putObject(leftChild.getHash(), hashCodeFunnel());
+    Hasher hasher =
+        newHasher().putByte(LIST_BRANCH_PREFIX).putObject(leftChild.getHash(), hashCodeFunnel());
     if (rightChild != null) {
       hasher.putObject(rightChild.getHash(), hashCodeFunnel());
     }
@@ -441,8 +435,12 @@ class FlatListProof {
 
   private NavigableMap<Long, byte[]> indexElements() {
     return elements.stream()
-        .collect(toMap(ListProofEntry::getIndex, ListProofElementEntry::getElement,
-            throwingMerger(), TreeMap::new));
+        .collect(
+            toMap(
+                ListProofEntry::getIndex,
+                ListProofElementEntry::getElement,
+                throwingMerger(),
+                TreeMap::new));
   }
 
   private static <U> BinaryOperator<U> throwingMerger() {

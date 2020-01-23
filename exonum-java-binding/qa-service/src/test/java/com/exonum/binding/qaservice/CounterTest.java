@@ -23,7 +23,6 @@ class CounterTest {
 
   @Test
   void verifyEquals() {
-    EqualsVerifier.forClass(Counter.class)
-        .verify();
+    EqualsVerifier.forClass(Counter.class).verify();
   }
 }
