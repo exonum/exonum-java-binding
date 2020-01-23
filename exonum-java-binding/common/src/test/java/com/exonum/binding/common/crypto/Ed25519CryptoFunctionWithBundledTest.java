@@ -23,7 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 @Forked
 @CiOnly
 @DisplayName(
-    "Test that the Ed25519 crypto function works with the libsodium, " + "bundled in lazysodium")
+    "Test that the Ed25519 crypto function works with the libsodium, bundled in lazysodium")
 class Ed25519CryptoFunctionWithBundledTest extends Ed25519CryptoFunctionTestable {
 
   @Override
