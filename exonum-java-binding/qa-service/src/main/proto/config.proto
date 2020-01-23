@@ -9,3 +9,9 @@ message QaConfiguration {
   // The name of a time oracle service instance to use.
   string time_oracle_name = 1;
 }
+
+// Parameters to use in the QA service resume.
+message QaResumeArguments {
+  // Identifies either to throw execution exception or not.
+  bool should_throw_exception = 1;
+}

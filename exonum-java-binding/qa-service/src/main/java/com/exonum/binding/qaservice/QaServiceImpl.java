@@ -18,6 +18,7 @@ package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.QaExecutionError.EMPTY_TIME_ORACLE_NAME;
+import static com.exonum.binding.qaservice.QaExecutionError.RESUME_SERVICE_ERROR;
 import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -27,6 +28,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
@@ -43,6 +46,7 @@ import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
+import com.exonum.binding.qaservice.Config.QaResumeArguments;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.binding.time.TimeSchema;
 import com.exonum.core.messages.Blockchain.Config;
@@ -89,6 +93,9 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @VisibleForTesting
   static final String AFTER_COMMIT_COUNTER_NAME = "after_commit_counter";
 
+  @VisibleForTesting
+  static final String RESUME_COUNTER_NAME = "resume_counter";
+
   @Nullable
   private Node node;
 
@@ -112,6 +119,16 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     // Add an afterCommit counter that will be incremented after each block committed event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
+  }
+
+  public void resume(Fork fork, byte[] arguments) {
+    QaResumeArguments resumeArguments = parseResumeArguments(arguments);
+
+    if (resumeArguments.getShouldThrowException()) {
+      throw new ExecutionException(RESUME_SERVICE_ERROR.code);
+    }
+
+    createCounter(RESUME_COUNTER_NAME, fork);
   }
 
   @Override
@@ -365,4 +382,11 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     String timeOracleName = config.getTimeOracleName();
     schema.timeOracleName().set(timeOracleName);
   }
+
+  private QaResumeArguments parseResumeArguments(byte[] arguments) {
+    Serializer<QaResumeArguments> serializer = StandardSerializers
+        .protobuf(QaResumeArguments.class);
+    return serializer.fromBytes(arguments);
+  }
+
 }
