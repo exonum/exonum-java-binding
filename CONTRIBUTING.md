@@ -197,13 +197,20 @@ It’s more convenient to use the corresponding `./run_XXX_tests.sh` script.
 ## The Code Style
 ### Java
 Java code must follow the [Google code style](https://google.github.io/styleguide/javaguide.html).
-[Checkstyle](http://checkstyle.sourceforge.net/index.html) checks the project 
-during `validate` phase (i.e., _before_ compilation) of the build. You can also run it manually:
+[The format plugin](https://github.com/coveooss/fmt-maven-plugin) checks the project 
+during the `validate` phase of the _CI_ build (i.e., _before_ compilation).
+Development builds do not check the code style.
+
+To check the code style, run:
 ```$sh
-$ mvn validate
+$ mvn validate -P ci-build
 ```
 
-Development builds only report violations, pass `-P ci-build` to fail the build in case of violations.
+To reformat the project, run:
+```
+mvn com.coveo:fmt-maven-plugin:format
+```
+
 
 ### Rust
 Rust code follows the [Rust style guide](https://github.com/rust-lang-nursery/fmt-rfcs/blob/master/guide/guide.md).

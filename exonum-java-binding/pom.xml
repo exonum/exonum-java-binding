@@ -356,6 +356,13 @@
           </dependencies>
         </plugin>
 
+        <!-- Google Java Format plugin. No executions in dev builds; 'check' during CI build. -->
+        <plugin>
+          <groupId>com.coveo</groupId>
+          <artifactId>fmt-maven-plugin</artifactId>
+          <version>2.9</version>
+        </plugin>
+
         <!-- Use newer version of the standard plugins by default. -->
         <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
@@ -603,6 +610,20 @@
                 <configuration>
                   <dataFile>${jacoco.reports-path}/jacoco-it.exec</dataFile>
                 </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>com.coveo</groupId>
+            <artifactId>fmt-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>check-java-code-style</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
               </execution>
             </executions>
           </plugin>
