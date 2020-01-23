@@ -15,12 +15,12 @@
 use std::{panic, ptr};
 
 use exonum::merkledb::{
-    access::FromAccess, Fork, indexes::proof_list::Iter, ObjectHash, ProofListIndex, Snapshot,
+    access::FromAccess, indexes::proof_list::Iter, Fork, ObjectHash, ProofListIndex, Snapshot,
 };
 use jni::{
-    JNIEnv,
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray, jint, jlong},
+    JNIEnv,
 };
 
 use handle::{self, Handle};

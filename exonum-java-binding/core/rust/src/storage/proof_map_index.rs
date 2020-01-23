@@ -16,17 +16,17 @@ use std::{panic, ptr};
 
 use exonum_merkledb::{
     access::{FromAccess, RawAccess},
-    Fork,
-    indexes::proof_map::{Hashed, Iter as IndexIter, Keys, PROOF_MAP_KEY_SIZE, Values}, ObjectHash, ProofMapIndex, RawProofMapIndex, Snapshot,
+    indexes::proof_map::{Hashed, Iter as IndexIter, Keys, Values, PROOF_MAP_KEY_SIZE},
+    Fork, ObjectHash, ProofMapIndex, RawProofMapIndex, Snapshot,
 };
 use exonum_proto::ProtobufConvert;
 use jni::{
-    JNIEnv,
     objects::{GlobalRef, JClass, JMethodID, JObject, JString},
-    sys::{jboolean, jbyteArray, JNI_TRUE, jobject, jobjectArray},
+    sys::{jboolean, jbyteArray, jobject, jobjectArray, JNI_TRUE},
+    JNIEnv,
 };
-use JniResult;
 use protobuf::Message;
+use JniResult;
 
 use handle::{self, Handle};
 use storage::{

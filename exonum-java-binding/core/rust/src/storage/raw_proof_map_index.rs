@@ -16,13 +16,13 @@ use std::{panic, ptr};
 
 use exonum::merkledb::{
     access::FromAccess,
-    Fork,
-    indexes::proof_map::{Iter as IndexIter, Keys, PROOF_MAP_KEY_SIZE, Values}, ObjectHash, RawProofMapIndex, Snapshot,
+    indexes::proof_map::{Iter as IndexIter, Keys, Values, PROOF_MAP_KEY_SIZE},
+    Fork, ObjectHash, RawProofMapIndex, Snapshot,
 };
 use jni::{
-    JNIEnv,
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray, jobject, jobjectArray},
+    JNIEnv,
 };
 use JniResult;
 

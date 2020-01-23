@@ -15,11 +15,11 @@
 use exonum::crypto::Hash;
 use exonum_merkledb::IndexAddress;
 use exonum_proto::ProtobufConvert;
-use jni::JNIEnv;
 use jni::objects::JString;
 use jni::sys::{jbyteArray, jobjectArray};
-use JniResult;
+use jni::JNIEnv;
 use protobuf::Message;
+use JniResult;
 
 /// Converts Java byte array to `Hash`. Panics if array has the wrong length.
 pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> JniResult<Hash> {

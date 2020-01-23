@@ -14,11 +14,11 @@
 
 use std::{panic, ptr};
 
-use exonum_merkledb::{access::FromAccess, Fork, indexes::list::Iter, ListIndex, Snapshot};
+use exonum_merkledb::{access::FromAccess, indexes::list::Iter, Fork, ListIndex, Snapshot};
 use jni::{
-    JNIEnv,
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray, jlong},
+    JNIEnv,
 };
 
 use handle::{self, Handle};

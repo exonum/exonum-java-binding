@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use exonum_merkledb::{Fork, Snapshot};
-use jni::{JNIEnv, objects::JClass};
+use jni::{objects::JClass, JNIEnv};
 
 use handle::{self, Handle};
 
