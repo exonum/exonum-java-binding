@@ -386,16 +386,16 @@ class ServiceRuntimeIntegrationTest {
 
     // Create the service from the artifact
     Fork fork = mock(Fork.class);
-    byte[] configuration = anyConfiguration();
-    serviceRuntime.initializeResumingService(fork, instanceSpec, configuration);
+    byte[] arguments = anyConfiguration();
+    serviceRuntime.initializeResumingService(fork, instanceSpec, arguments);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
         any(MultiplexingNodeDecorator.class));
 
-    // and the service was configured
-    Configuration expectedConfig = new ServiceConfiguration(configuration);
-    verify(serviceWrapper).resume(fork, expectedConfig);
+    // and the service was resumed
+    Configuration expectedAgruments = new ServiceConfiguration(arguments);
+    verify(serviceWrapper).resume(fork, expectedAgruments);
 
     // but not registered in the runtime yet:
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
@@ -423,10 +423,10 @@ class ServiceRuntimeIntegrationTest {
     // Activate the service from the artifact
     serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
 
-    byte[] configuration = anyConfiguration();
+    byte[] arguments = anyConfiguration();
     Fork fork = mock(Fork.class);
     assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.initializeResumingService(fork, instanceSpec, configuration));
+        () -> serviceRuntime.initializeResumingService(fork, instanceSpec, arguments));
   }
 
   @Test

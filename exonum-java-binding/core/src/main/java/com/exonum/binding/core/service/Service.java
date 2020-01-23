@@ -61,16 +61,17 @@ public interface Service {
    * parameters, deprecate old entries etc.
    *
    * <p>Also, note that performing any bulk operations or data migration
-   * <em>is not recommended</em> here.
+   * <em>is not recommended</em> here. This method is supposed to make thin data changes i.e.
+   * ad-hoc migrations, single row updates etc.
    * <!--TODO: Add a link to the migration procedure -->
    *
    * @param fork a database fork to apply changes to. Not valid after this method returns
-   * @param configuration the service configuration parameters
-   * @throws ExecutionException if the configuration parameters are not valid (e.g.,
+   * @param arguments the service arguments
+   * @throws ExecutionException if the arguments are not valid (e.g.,
    *     malformed, or do not meet the preconditions)
    */
-  default void resume(Fork fork, Configuration configuration) {
-    // No configuration
+  default void resume(Fork fork, Configuration arguments) {
+    // No actions by default
   }
 
   /**

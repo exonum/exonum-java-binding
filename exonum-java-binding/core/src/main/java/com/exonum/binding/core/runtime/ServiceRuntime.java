@@ -210,10 +210,9 @@ public final class ServiceRuntime implements AutoCloseable {
    * Initiates resuming of previously stopped service instance. Service instance artifact could
    * be upgraded in advance to bring some new functionality.
    *
-   * @param fork a database view to apply configuration
+   * @param fork a database view to apply arguments
    * @param instanceSpec a service instance specification; must reference a deployed artifact
-   * @param configuration a service instance configuration parameters as a serialized protobuf
-   *     message
+   * @param arguments a service instance arguments as a serialized protobuf message
    * @throws IllegalArgumentException if the given service instance is active; or its artifact
    *     is not deployed
    * @throws ExecutionException if such exception occurred in the service method;
@@ -224,17 +223,17 @@ public final class ServiceRuntime implements AutoCloseable {
    * @throws RuntimeException if the runtime failed to resume the service for other reason
    */
   public void initializeResumingService(Fork fork, ServiceInstanceSpec instanceSpec,
-      byte[] configuration) {
+      byte[] arguments) {
     try {
       synchronized (lock) {
         checkStoppedService(instanceSpec.getId());
         ServiceWrapper service = createServiceInstance(instanceSpec);
-        service.resume(fork, new ServiceConfiguration(configuration));
+        service.resume(fork, new ServiceConfiguration(arguments));
       }
       logger.info("Resumed service: {}", instanceSpec);
     } catch (Exception e) {
       logger.error("Failed to resume a service {} instance with parameters {}",
-          instanceSpec, configuration, e);
+          instanceSpec, arguments, e);
       throw e;
     }
   }

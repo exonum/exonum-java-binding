@@ -153,14 +153,14 @@ class ServiceRuntimeAdapterTest {
         .setArtifact(artifact)
         .build()
         .toByteArray();
-    byte[] configuration = bytes(1, 2);
+    byte[] arguments = bytes(1, 2);
 
-    serviceRuntimeAdapter.initializeResumingService(forkHandle, instanceSpec, configuration);
+    serviceRuntimeAdapter.initializeResumingService(forkHandle, instanceSpec, arguments);
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
         ServiceArtifactId.fromProto(artifact));
-    verify(serviceRuntime).initializeResumingService(fork, expected, configuration);
+    verify(serviceRuntime).initializeResumingService(fork, expected, arguments);
   }
 
   @Test
