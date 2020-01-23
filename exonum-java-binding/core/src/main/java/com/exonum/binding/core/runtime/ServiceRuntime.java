@@ -182,7 +182,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * @throws ExecutionException if such exception occurred in the service constructor;
    *     must be translated into an error of kind {@link ErrorKind#SERVICE}
    * @throws UnexpectedExecutionException if any other exception occurred in
-   *     the  the service constructor; it is included as cause. The cause must be translated
+   *     the service constructor; it is included as cause. The cause must be translated
    *     into an error of kind {@link ErrorKind#UNEXPECTED}
    * @throws RuntimeException if the runtime failed to instantiate the service for other reason
    */
@@ -202,6 +202,38 @@ public final class ServiceRuntime implements AutoCloseable {
     } catch (Exception e) {
       logger.error("Failed to initialize a service {} instance with parameters {}",
           instanceSpec, configuration, e);
+      throw e;
+    }
+  }
+
+  /**
+   * Initiates resuming of previously stopped service instance. Service instance artifact could
+   * be upgraded in advance to bring some new functionality.
+   *
+   * @param fork a database view to apply changes to
+   * @param instanceSpec a service instance specification; must reference a deployed artifact
+   * @param arguments a service arguments as a serialized protobuf message
+   * @throws IllegalArgumentException if the given service instance is active; or its artifact
+   *     is not deployed
+   * @throws ExecutionException if such exception occurred in the service method;
+   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedExecutionException if any other exception occurred in
+   *     the service method; it is included as cause. The cause must be translated
+   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @throws RuntimeException if the runtime failed to resume the service for other reason
+   */
+  public void initializeResumingService(Fork fork, ServiceInstanceSpec instanceSpec,
+      byte[] arguments) {
+    try {
+      synchronized (lock) {
+        checkStoppedService(instanceSpec.getId());
+        ServiceWrapper service = createServiceInstance(instanceSpec);
+        service.resume(fork, arguments);
+      }
+      logger.info("Resumed service: {}", instanceSpec);
+    } catch (Exception e) {
+      logger.error("Failed to resume a service {} instance with parameters {}",
+          instanceSpec, arguments, e);
       throw e;
     }
   }
@@ -486,14 +518,22 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   private ServiceWrapper getServiceById(Integer serviceId) {
-    checkService(serviceId);
+    checkActiveService(serviceId);
     return servicesById.get(serviceId);
   }
 
   /** Checks that the service with the given id is started in this runtime. */
-  private void checkService(Integer serviceId) {
+  private void checkActiveService(Integer serviceId) {
     checkArgument(servicesById.containsKey(serviceId),
         "No service with id=%s in the Java runtime", serviceId);
+  }
+
+  /** Checks that the service with the given id is not active in this runtime. */
+  private void checkStoppedService(Integer serviceId) {
+    ServiceWrapper activeService = servicesById.get(serviceId);
+    checkArgument(activeService == null,
+        "Service with id=%s should be stopped, but actually active. "
+            + "Found active service instance: %s", serviceId, activeService);
   }
 
   @VisibleForTesting

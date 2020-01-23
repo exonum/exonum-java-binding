@@ -311,8 +311,6 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void stopNonActiveService() {
-    serviceRuntime.initialize(mock(Node.class));
-
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
@@ -367,6 +365,67 @@ class ServiceRuntimeIntegrationTest {
         () -> serviceRuntime.updateInstanceStatus(instanceSpec, badStatus));
     assertThat(exception).hasMessageContaining(badStatus.name());
     assertThat(exception).hasMessageContaining(instanceSpec.getName());
+  }
+
+  @Test
+  void initializeResumingService() {
+    serviceRuntime.initialize(mock(Node.class));
+
+    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme/foo-service:1.0.0");
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+    when(serviceLoader.findService(artifactId))
+        .thenReturn(Optional.of(serviceDefinition));
+
+    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
+        .thenReturn(serviceWrapper);
+
+    // Create the service from the artifact
+    Fork fork = mock(Fork.class);
+    byte[] arguments = anyConfiguration();
+    serviceRuntime.initializeResumingService(fork, instanceSpec, arguments);
+
+    // Check it was instantiated as expected
+    verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class));
+
+    // and the service was resumed
+    verify(serviceWrapper).resume(fork, arguments);
+
+    // but not registered in the runtime yet:
+    assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
+  }
+
+  @Test
+  void initializeResumingActiveService() {
+    serviceRuntime.initialize(mock(Node.class));
+
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+    when(serviceLoader.findService(artifactId))
+        .thenReturn(Optional.of(serviceDefinition));
+
+    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
+        .thenReturn(serviceWrapper);
+
+    // Activate the service from the artifact
+    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+
+    byte[] arguments = anyConfiguration();
+    Fork fork = mock(Fork.class);
+    assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.initializeResumingService(fork, instanceSpec, arguments));
   }
 
   @Test
