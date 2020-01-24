@@ -23,7 +23,8 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.RuntimeId;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -42,18 +43,18 @@ class TimeSchemaProxy implements TimeSchema {
   private static final Serializer<ZonedDateTime> ZONED_DATE_TIME_SERIALIZER =
       UtcZonedDateTimeSerializer.INSTANCE;
 
-  private final View view;
+  private final Access access;
   private final String name;
 
-  TimeSchemaProxy(View view, String name) {
+  TimeSchemaProxy(Access access, String name) {
     this.name = name;
-    this.view = view;
+    this.access = access;
     checkIfEnabled();
   }
 
   private void checkIfEnabled() {
     MapIndex<String, InstanceState> serviceInstances =
-        new DispatcherSchema(view).serviceInstances();
+        new DispatcherSchema(access).serviceInstances();
     checkArgument(serviceInstances.containsKey(name), "No time service instance "
         + "with the given name (%s) started.", name);
 
@@ -71,18 +72,18 @@ class TimeSchemaProxy implements TimeSchema {
 
   @Override
   public ProofEntryIndexProxy<ZonedDateTime> getTime() {
-    return ProofEntryIndexProxy.newInstance(
-        indexName(TimeIndex.TIME), view, ZONED_DATE_TIME_SERIALIZER);
+    IndexAddress address = indexAddress(TimeIndex.TIME);
+    return access.getProofEntry(address, ZONED_DATE_TIME_SERIALIZER);
   }
 
   @Override
   public ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes() {
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(indexName(TimeIndex.VALIDATORS_TIMES), view,
-        PUBLIC_KEY_SERIALIZER, ZONED_DATE_TIME_SERIALIZER);
+    IndexAddress address = indexAddress(TimeIndex.VALIDATORS_TIMES);
+    return access.getRawProofMap(address, PUBLIC_KEY_SERIALIZER, ZONED_DATE_TIME_SERIALIZER);
   }
 
-  private String indexName(String simpleName) {
-    return name + "." + simpleName;
+  private IndexAddress indexAddress(String simpleName) {
+    return IndexAddress.valueOf(name + "." + simpleName);
   }
 
   /**

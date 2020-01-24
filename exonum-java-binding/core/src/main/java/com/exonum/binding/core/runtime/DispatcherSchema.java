@@ -19,7 +19,9 @@ package com.exonum.binding.core.runtime;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
 
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Runtime.InstanceState;
 
@@ -27,17 +29,22 @@ import com.exonum.core.messages.Runtime.InstanceState;
  * Exonum service instances database schema.
  */
 public class DispatcherSchema {
-  private final View view;
 
-  public DispatcherSchema(View view) {
-    this.view = view;
+  private static final IndexAddress DISPATCHER_INSTANCES =
+      IndexAddress.valueOf("dispatcher_instances");
+  private static final Serializer<InstanceState> INSTANCE_STATE_SERIALIZER =
+      protobuf(InstanceState.class);
+
+  private final Access access;
+
+  public DispatcherSchema(Access access) {
+    this.access = access;
   }
 
   /**
    * Returns a map of service instance specifications of started services indexed by their names.
    */
   public ProofMapIndexProxy<String, InstanceState> serviceInstances() {
-    return ProofMapIndexProxy.newInstance("dispatcher_instances", view,
-        string(), protobuf(InstanceState.class));
+    return access.getProofMap(DISPATCHER_INSTANCES, string(), INSTANCE_STATE_SERIALIZER);
   }
 }

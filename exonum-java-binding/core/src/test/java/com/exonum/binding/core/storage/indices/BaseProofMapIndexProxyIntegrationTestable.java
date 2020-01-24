@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.exonum.binding.core.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.core.storage.indices.MapTestEntry.absentEntry;
 import static com.exonum.binding.core.storage.indices.MapTestEntry.presentEntry;
@@ -53,7 +54,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.core.messages.MapProofOuterClass;
 import com.exonum.core.messages.MapProofOuterClass.OptionalEntry;
 import com.google.common.collect.ImmutableList;
@@ -517,27 +518,27 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
     return checkProofKey(proofKey);
   }
 
-  void runTestWithView(Function<Cleaner, View> viewFactory,
+  void runTestWithView(Function<Cleaner, Access> accessFactory,
       Consumer<ProofMapIndexProxy<HashCode, String>> mapTest) {
-    runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
+    runTestWithView(accessFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
   private void runTestWithView(
-      Function<Cleaner, View> viewFactory,
-      BiConsumer<View, ProofMapIndexProxy<HashCode, String>> mapTest) {
+      Function<Cleaner, Access> accessFactory,
+      BiConsumer<Access, ProofMapIndexProxy<HashCode, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      View view = viewFactory.apply(cleaner);
-      ProofMapIndexProxy<HashCode, String> map = this.create(MAP_NAME, view);
+      Access access = accessFactory.apply(cleaner);
+      ProofMapIndexProxy<HashCode, String> map = this.create(MAP_NAME, access);
 
-      mapTest.accept(view, map);
+      mapTest.accept(access, map);
     } catch (CloseFailuresException e) {
       throw new AssertionError("Unexpected exception", e);
     }
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, Access access) {
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   @Override

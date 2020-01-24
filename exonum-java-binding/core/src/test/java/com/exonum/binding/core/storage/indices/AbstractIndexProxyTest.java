@@ -24,9 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
@@ -38,17 +38,17 @@ class AbstractIndexProxyTest {
 
   @Test
   void testConstructor() {
-    View view = createFork();
-    proxy = new IndexProxyImpl(view);
+    AbstractAccess access = createFork();
+    proxy = new IndexProxyImpl(access);
 
-    assertThat(proxy.dbView, equalTo(view));
+    assertThat(proxy.dbAccess, equalTo(access));
   }
 
   @Test
   void constructorFailsIfNullView() {
-    View dbView = null;
+    AbstractAccess dbAccess = null;
 
-    assertThrows(NullPointerException.class, () -> proxy = new IndexProxyImpl(dbView));
+    assertThrows(NullPointerException.class, () -> proxy = new IndexProxyImpl(dbAccess));
   }
 
   @Test
@@ -60,7 +60,7 @@ class AbstractIndexProxyTest {
     UnsupportedOperationException thrown = assertThrows(UnsupportedOperationException.class,
         () -> proxy.notifyModified());
 
-    Pattern pattern = Pattern.compile("Cannot modify the view: .*[Ss]napshot.*"
+    Pattern pattern = Pattern.compile("Cannot modify the access: .*[Ss]napshot.*"
         + "\\nUse a Fork to modify any collection\\.", Pattern.MULTILINE);
     assertThat(thrown, hasMessage(matchesPattern(pattern)));
   }
@@ -100,8 +100,8 @@ class AbstractIndexProxyTest {
 
     private static final long NATIVE_HANDLE = 0x11L;
 
-    IndexProxyImpl(View view) {
-      super(new NativeHandle(NATIVE_HANDLE), IndexAddress.valueOf(INDEX_NAME), view);
+    IndexProxyImpl(AbstractAccess access) {
+      super(new NativeHandle(NATIVE_HANDLE), IndexAddress.valueOf(INDEX_NAME), access);
     }
   }
 

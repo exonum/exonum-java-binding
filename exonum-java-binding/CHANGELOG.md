@@ -73,6 +73,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Artifact name format is `groupId/artifactId` now.
   PluginId format is `runtimeId:artifactName:artifactVersion` now. (#1349)
 - Extracted `#getIndexHash` into `HashableIndex` interface. (#1366)
+- Made `View`s (`Fork` and `Snapshot`) index factories. An index factory
+  implements `Access` interface. `Access` allows instantiating various 
+  MerkleDB indexes, aka "collections" (e.g., `Access#getList -> ListIndex`).
+  `Access` methods **must** be used to create indexes in service code.
+  Factory methods in indexes must no longer be used (see also 'Removed' 
+  section below).
+    - Use `Access` instead of `View` (which is renamed to `AbstractAccess).
+    - `IndexAddress`es are resolved relatively to `Access`es (#1374)
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
@@ -85,6 +93,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   useful to create _expected_ transaction execution statuses in tests —
   an `ExecutionError` now has a lot of other properties.  
   `ExecutionStatuses.success` is replaced with `ExecutionStatuses.SUCCESS` constant.
+- `newInstance` methods in all the indexes are made *internal*:
+    - Use `Access` methods instead. E.g., instead of `ProofListIndexProxy.newInstance`
+    use `Access.getProofList`. 
+    - Instead of using overloads accepting protobuf classes, create a serializer 
+    explicitly with `StandardSerializers.protobuf`.
+    - To create _index groups_ (aka families), pass a *group address*:
+    `IndexAddress.valueOf(String, byte[])`. (#1374)
 
 ## 0.9.0-rc2 - 2019-12-17
 

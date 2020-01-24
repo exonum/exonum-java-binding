@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 
 @PrepareForTest({
-    Views.class,
+    Accesses.class,
 })
 @Disabled
 // TODO Won't run on Junit 5 till Powermock is updated [ECR-1614].
@@ -38,7 +38,7 @@ class ForkTest {
 
   @BeforeEach
   void setUp() {
-    mockStatic(Views.class);
+    mockStatic(Accesses.class);
   }
 
   @Test
@@ -48,8 +48,8 @@ class ForkTest {
       fork = Fork.newInstance(nativeHandle, true, cleaner);
     }
 
-    verifyStatic(Views.class);
-    Views.nativeFree(nativeHandle);
+    verifyStatic(Accesses.class);
+    Accesses.nativeFree(nativeHandle);
   }
 
   @Test
@@ -60,8 +60,8 @@ class ForkTest {
       fork = Fork.newInstance(nativeHandle, false, cleaner);
     }
 
-    verifyStatic(Views.class, never());
-    Views.nativeFree(nativeHandle);
+    verifyStatic(Accesses.class, never());
+    Accesses.nativeFree(nativeHandle);
   }
 
 

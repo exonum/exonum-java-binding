@@ -92,7 +92,7 @@ class ConfigurableRustIterTest {
   }
 
   @Test
-  void viewModificationResultsInTerminalState() {
+  void accessModificationResultsInTerminalState() {
     createFromIterable(asList(1, 2));
 
     notifyModified();

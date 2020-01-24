@@ -17,9 +17,13 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static com.exonum.binding.core.storage.indices.IndexAddress.valueOf;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
+import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -31,7 +35,9 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.database.Snapshot;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -44,6 +50,17 @@ class ProofEntryIndexProxyIntegrationTest
 
   private static final String ENTRY_NAME = "test_entry";
   public static final Serializer<String> SERIALIZER = StandardSerializers.string();
+
+  @Test
+  void entryGroupsAreNotSupported() throws CloseFailuresException {
+    try (Cleaner c = new Cleaner()) {
+      Snapshot snapshot = database.createSnapshot(c);
+      IndexAddress addressInGroup = IndexAddress.valueOf("test", bytes("id"));
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> snapshot.getProofEntry(addressInGroup, SERIALIZER));
+      assertThat(e.getMessage(), containsString("Groups of Entries are not supported"));
+    }
+  }
 
   @Test
   void setValue() {
@@ -152,34 +169,35 @@ class ProofEntryIndexProxyIntegrationTest
     });
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
       Consumer<ProofEntryIndexProxy<String>> entryTest) {
     runTestWithView(viewFactory, (ignoredView, entry) -> entryTest.accept(entry));
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, ProofEntryIndexProxy<String>> entryTest) {
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+      BiConsumer<Access, ProofEntryIndexProxy<String>> entryTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         ENTRY_NAME,
-        ProofEntryIndexProxy::newInstance,
+        (address, access, serializer) -> access.getProofEntry(address, serializer),
         entryTest
     );
   }
 
   @Override
-  ProofEntryIndexProxy<String> create(String name, View view) {
-    return ProofEntryIndexProxy.newInstance(name, view, SERIALIZER);
+  ProofEntryIndexProxy<String> create(String name, Access access) {
+    IndexAddress address = IndexAddress.valueOf(name);
+    return access.getProofEntry(address, SERIALIZER);
   }
 
   @Override
-  ProofEntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
+  ProofEntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
     return null; // Entry index does not support groups
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, Access access) {
+    return access.getList(valueOf(name), string());
   }
 
   @Override

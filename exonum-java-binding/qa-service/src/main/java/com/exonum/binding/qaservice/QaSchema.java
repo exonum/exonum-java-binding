@@ -21,9 +21,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.time.TimeSchema;
@@ -37,12 +37,12 @@ import com.exonum.binding.time.TimeSchema;
  */
 public final class QaSchema implements Schema {
 
-  private final View view;
+  private final Access access;
   /** A namespace of QA service collections. */
   private final String namespace;
 
-  public QaSchema(View view, String serviceName) {
-    this.view = checkNotNull(view);
+  public QaSchema(Access access, String serviceName) {
+    this.access = checkNotNull(access);
     namespace = serviceName;
   }
 
@@ -50,8 +50,8 @@ public final class QaSchema implements Schema {
    * Returns the index containing the name of the time oracle to use.
    */
   public ProofEntryIndexProxy<String> timeOracleName() {
-    String name = fullIndexName("time_oracle_name");
-    return ProofEntryIndexProxy.newInstance(name, view, StandardSerializers.string());
+    IndexAddress address = fullIndexAddress("time_oracle_name");
+    return access.getProofEntry(address, StandardSerializers.string());
   }
 
   /**
@@ -59,25 +59,23 @@ public final class QaSchema implements Schema {
    * {@link #timeOracleName()} must be non-empty.
    */
   public TimeSchema timeSchema() {
-    return TimeSchema.newInstance(view, timeOracleName().get());
+    return TimeSchema.newInstance(access, timeOracleName().get());
   }
 
   /**
    * Returns a proof map of counter values. Note that this is a proof map that uses non-hashed keys.
    */
   public ProofMapIndexProxy<HashCode, Long> counters() {
-    String name = fullIndexName("counters");
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, view, StandardSerializers.hash(),
-        StandardSerializers.uint64());
+    IndexAddress address = fullIndexAddress("counters");
+    return access.getRawProofMap(address, StandardSerializers.hash(), StandardSerializers.uint64());
   }
 
   /**
    * Returns a map of counter names.
    */
   public MapIndex<HashCode, String> counterNames() {
-    String name = fullIndexName("counterNames");
-    return MapIndexProxy.newInstance(name, view, StandardSerializers.hash(),
-        StandardSerializers.string());
+    IndexAddress address = fullIndexAddress("counterNames");
+    return access.getMap(address, StandardSerializers.hash(), StandardSerializers.string());
   }
 
   /** Clears all collections of the service. */
@@ -86,7 +84,8 @@ public final class QaSchema implements Schema {
     counterNames().clear();
   }
 
-  private String fullIndexName(String name) {
-    return namespace + "." + name;
+  private IndexAddress fullIndexAddress(String name) {
+    String fullName = namespace + "." + name;
+    return IndexAddress.valueOf(fullName);
   }
 }

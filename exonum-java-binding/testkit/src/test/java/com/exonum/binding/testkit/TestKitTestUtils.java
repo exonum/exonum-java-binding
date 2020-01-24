@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
@@ -76,9 +76,9 @@ final class TestKitTestUtils {
   }
 
   static void checkIfServiceEnabled(TestKit testKit, String serviceName, int serviceId) {
-    View view = testKit.getSnapshot();
+    Snapshot snapshot = testKit.getSnapshot();
     MapIndex<String, InstanceState> serviceInstances =
-        new DispatcherSchema(view).serviceInstances();
+        new DispatcherSchema(snapshot).serviceInstances();
     assertThat(serviceInstances.containsKey(serviceName)).isTrue();
 
     InstanceSpec serviceSpec = serviceInstances.get(serviceName).getSpec();

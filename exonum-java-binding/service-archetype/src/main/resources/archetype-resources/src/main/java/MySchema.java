@@ -20,23 +20,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * {@code MySchema} provides access to the tables of {@link MyService},
- * given a database state: a {@link View}.
+ * given a database state {@linkplain Access access object}.
  *
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/storage/#table-types">Exonum table types.</a>
  */
 public final class MySchema implements Schema {
 
-  private final View view;
+  private final Access access;
   private final String namespace;
 
-  public MySchema(View view, String serviceName) {
-    this.view = checkNotNull(view);
+  public MySchema(Access access, String serviceName) {
+    this.access = checkNotNull(access);
     this.namespace = serviceName + ".";
   }
 

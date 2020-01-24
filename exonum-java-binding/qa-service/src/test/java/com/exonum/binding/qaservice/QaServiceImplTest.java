@@ -110,8 +110,8 @@ class QaServiceImplTest {
                 .build())
         .withTimeService(timeServiceName, 2, TimeProvider.systemTime())
         .build()) {
-      Snapshot view = testKit.getSnapshot();
-      QaSchema schema = new QaSchema(view, serviceName);
+      Snapshot snapshot = testKit.getSnapshot();
+      QaSchema schema = new QaSchema(snapshot, serviceName);
       // Check the time dependency is saved
       Optional<String> timeService = schema.timeOracleName().toOptional();
       assertThat(timeService).hasValue(timeServiceName);
@@ -206,8 +206,8 @@ class QaServiceImplTest {
   }
 
   private void checkAfterCommitCounter(TestKit testKit, long expectedValue) {
-    Snapshot view = testKit.getSnapshot();
-    QaSchema schema = new QaSchema(view, QA_SERVICE_NAME);
+    Snapshot snapshot = testKit.getSnapshot();
+    QaSchema schema = new QaSchema(snapshot, QA_SERVICE_NAME);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> counterNames = schema.counterNames();
     HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);

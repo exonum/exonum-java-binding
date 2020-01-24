@@ -192,7 +192,7 @@ impl View {
 
 /// Destroys underlying `Snapshot` or `Fork` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_Accesses_nativeFree(
     env: JNIEnv,
     _: JClass,
     view_handle: Handle,
@@ -202,11 +202,12 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use exonum_merkledb::{
         access::{Access, FromAccess, RawAccess},
         Database, Entry, TemporaryDB,
     };
+
+    use super::*;
 
     const FIRST_TEST_VALUE: i32 = 42;
     const SECOND_TEST_VALUE: i32 = 57;

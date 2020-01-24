@@ -22,7 +22,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.core.proxy.NativeHandle;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -38,9 +38,9 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
 
   final CheckingSerializerDecorator<T> serializer;
 
-  AbstractListIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
+  AbstractListIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
                          CheckingSerializerDecorator<T> userSerializer) {
-    super(nativeHandle, address, view);
+    super(nativeHandle, address, access);
     this.serializer = userSerializer;
   }
 
@@ -131,14 +131,14 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
         nativeCreateIter(getNativeHandle()),
         this::nativeIterNext,
         this::nativeIterFree,
-        dbView,
+        dbAccess,
         modCounter,
         serializer::fromBytes);
   }
 
   @Override
   public Stream<T> stream() {
-    boolean immutable = !dbView.canModify();
+    boolean immutable = !dbAccess.canModify();
     ListSpliterator<T> spliterator = new ListSpliterator<>(this, modCounter, immutable);
     return StreamSupport.stream(spliterator, false);
   }

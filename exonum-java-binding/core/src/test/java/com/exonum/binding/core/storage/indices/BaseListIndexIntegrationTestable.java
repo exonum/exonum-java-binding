@@ -31,9 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -448,12 +448,12 @@ abstract class BaseListIndexIntegrationTestable
   void structuralModificationsInvalidateTheIteratorsOfIndexesWithSameName()
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Fork view = database.createFork(cleaner);
+      Fork fork = database.createFork(cleaner);
       List<String> elements = TestStorageItems.values;
       // Create two lists with the same name
       String name = "Test_List";
-      ListIndex<String> l1 = create(name, view);
-      ListIndex<String> l2 = create(name, view);
+      ListIndex<String> l1 = create(name, fork);
+      ListIndex<String> l2 = create(name, fork);
       l1.addAll(elements);
 
       // Take the iterator from the first list index proxy
@@ -473,11 +473,11 @@ abstract class BaseListIndexIntegrationTestable
   @Test
   void indexModificationCountersOfIndyIndexesMustBeIndependent() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Fork view = database.createFork(cleaner);
+      Fork fork = database.createFork(cleaner);
       List<String> elements = TestStorageItems.values;
       // Create two independent lists
-      ListIndex<String> l1 = create("List1", view);
-      ListIndex<String> l2 = create("List123", view);
+      ListIndex<String> l1 = create("List1", fork);
+      ListIndex<String> l2 = create("List123", fork);
       l1.addAll(elements);
 
       // Take the iterator from the first list
@@ -564,11 +564,11 @@ abstract class BaseListIndexIntegrationTestable
     });
   }
 
-  private void runTestWithView(Function<Cleaner, View> viewFactory,
+  private void runTestWithView(Function<Cleaner, Access> accessFactory,
       Consumer<ListIndex<String>> listTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      View view = viewFactory.apply(cleaner);
-      ListIndex<String> list = this.create(LIST_NAME, view);
+      Access access = accessFactory.apply(cleaner);
+      ListIndex<String> list = this.create(LIST_NAME, access);
 
       listTest.accept(list);
     } catch (CloseFailuresException e) {

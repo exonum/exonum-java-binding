@@ -66,7 +66,7 @@ public final class FrameworkModule extends AbstractModule {
     bind(Integer.class).annotatedWith(named(SERVICE_WEB_SERVER_PORT))
         .toInstance(serviceWebServerPort);
 
-    bind(ViewFactory.class).toInstance(ViewProxyFactory.getInstance());
+    bind(AccessFactory.class).toInstance(AccessProxyFactory.getInstance());
     // todo: Consider providing an implementation of a Node —
     //   requires changing its contract.
   }

@@ -34,7 +34,7 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -65,9 +65,9 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   @Override
-  protected CryptocurrencySchema createDataSchema(View view) {
+  protected CryptocurrencySchema createDataSchema(Access access) {
     String name = getName();
-    return new CryptocurrencySchema(view, name);
+    return new CryptocurrencySchema(access, name);
   }
 
   @Override
@@ -83,8 +83,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public Optional<Wallet> getWallet(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((view) -> {
-      CryptocurrencySchema schema = createDataSchema(view);
+    return node.withSnapshot((access) -> {
+      CryptocurrencySchema schema = createDataSchema(access);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       return Optional.ofNullable(wallets.get(ownerKey));
@@ -95,10 +95,10 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public List<HistoryEntity> getWalletHistory(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot(view -> {
-      CryptocurrencySchema schema = createDataSchema(view);
+    return node.withSnapshot(access -> {
+      CryptocurrencySchema schema = createDataSchema(access);
       ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
-      Blockchain blockchain = Blockchain.newInstance(view);
+      Blockchain blockchain = Blockchain.newInstance(access);
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
 
       return walletHistory.stream()

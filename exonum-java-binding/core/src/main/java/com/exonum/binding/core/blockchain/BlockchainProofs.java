@@ -16,8 +16,8 @@
 
 package com.exonum.binding.core.blockchain;
 
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.core.messages.Proofs.BlockProof;
 import com.exonum.core.messages.Proofs.IndexProof;
@@ -36,14 +36,14 @@ final class BlockchainProofs {
 
   /**
    * Creates a block proof for the block at the given height.
-   * @param view a database view
+   * @param access a database access
    * @param height the height of the block
    */
   static BlockProof createBlockProof(
       /* todo: here snapshot is not strictly required — but shall we allow Forks (see the ticket) */
-      View view,
+      Access access,
       long height) {
-    byte[] blockProof = nativeCreateBlockProof(view.getViewNativeHandle(), height);
+    byte[] blockProof = nativeCreateBlockProof(access.getAccessNativeHandle(), height);
     try {
       return BlockProof.parseFrom(blockProof);
     } catch (InvalidProtocolBufferException e) {
@@ -61,7 +61,7 @@ final class BlockchainProofs {
     // to combine a proof from an uninitialized index (which is not aggregated) with
     // a proof of absence in the aggregating collection.
     return Optional
-        .ofNullable(nativeCreateIndexProof(snapshot.getViewNativeHandle(), fullIndexName))
+        .ofNullable(nativeCreateIndexProof(snapshot.getAccessNativeHandle(), fullIndexName))
         .map(proof -> {
           try {
             return IndexProof.parseFrom(proof);
@@ -71,7 +71,7 @@ final class BlockchainProofs {
         });
   }
 
-  static native byte[] nativeCreateBlockProof(long viewNativeHandle, long blockHeight);
+  static native byte[] nativeCreateBlockProof(long accessNativeHandle, long blockHeight);
 
   @Nullable static native byte[] nativeCreateIndexProof(long snapshotNativeHandle,
       String fullIndexName);

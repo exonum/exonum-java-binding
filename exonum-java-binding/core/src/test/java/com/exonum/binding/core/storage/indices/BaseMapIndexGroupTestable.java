@@ -19,7 +19,8 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.database.Fork;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ abstract class BaseMapIndexGroupTestable<KeyT> extends BaseIndexGroupTestable {
 
   @Test
   void newInGroupUnsafe() {
-    View view = db.createFork(cleaner);
+    Fork fork = db.createFork(cleaner);
 
     ImmutableMap<String, ImmutableMap<KeyT, String>> entriesById = getTestEntriesById();
 
@@ -37,7 +38,7 @@ abstract class BaseMapIndexGroupTestable<KeyT> extends BaseIndexGroupTestable {
     Map<String, MapIndex<KeyT, String>> mapsById = new HashMap<>();
     for (String mapId : entriesById.keySet()) {
       byte[] id = bytes(mapId);
-      MapIndex<KeyT, String> map = createInGroup(id, view);
+      MapIndex<KeyT, String> map = createInGroup(id, fork);
 
       mapsById.put(mapId, map);
     }
@@ -69,6 +70,6 @@ abstract class BaseMapIndexGroupTestable<KeyT> extends BaseIndexGroupTestable {
   /**
    * Creates a map-under-test in some group with the given id.
    */
-  abstract MapIndex<KeyT, String> createInGroup(byte[] id, View view);
+  abstract MapIndex<KeyT, String> createInGroup(byte[] id, Access access);
 
 }

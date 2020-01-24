@@ -37,8 +37,8 @@ import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -62,8 +62,6 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A simple QA service.
@@ -77,8 +75,6 @@ import org.apache.logging.log4j.Logger;
  *     of a user service.
  */
 public final class QaServiceImpl extends AbstractService implements QaService {
-
-  private static final Logger logger = LogManager.getLogger(QaService.class);
 
   static final int CREATE_COUNTER_TX_ID = 0;
   static final int INCREMENT_COUNTER_TX_ID = 1;
@@ -103,8 +99,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  protected QaSchema createDataSchema(View view) {
-    return new QaSchema(view, getName());
+  protected QaSchema createDataSchema(Access access) {
+    return new QaSchema(access, getName());
   }
 
   @Override
@@ -209,8 +205,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Optional<Counter> getValue(HashCode counterId) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((view) -> {
-      QaSchema schema = createDataSchema(view);
+    return node.withSnapshot((snapshot) -> {
+      QaSchema schema = createDataSchema(snapshot);
       MapIndex<HashCode, Long> counters = schema.counters();
       if (!counters.containsKey(counterId)) {
         return Optional.empty();
@@ -227,8 +223,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((view) -> {
-      Blockchain blockchain = Blockchain.newInstance(view);
+    return node.withSnapshot((snapshot) -> {
+      Blockchain blockchain = Blockchain.newInstance(snapshot);
 
       return blockchain.getConsensusConfiguration();
     });

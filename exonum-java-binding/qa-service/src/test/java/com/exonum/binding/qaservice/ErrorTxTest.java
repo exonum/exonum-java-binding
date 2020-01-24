@@ -63,8 +63,8 @@ class ErrorTxTest {
     TransactionMessage errorTx = createErrorTransaction(errorCode, "");
     testKit.createBlockWithTransactions(errorTx);
 
-    Snapshot view = testKit.getSnapshot();
-    Blockchain blockchain = Blockchain.newInstance(view);
+    Snapshot snapshot = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(snapshot);
     ExecutionStatus txResult = blockchain.getTxResult(errorTx.hash()).get();
     assertTrue(txResult.hasError());
     ExecutionError error = txResult.getError();
@@ -84,8 +84,8 @@ class ErrorTxTest {
     TransactionMessage errorTx = createErrorTransaction(errorCode, errorDescription);
     testKit.createBlockWithTransactions(errorTx);
 
-    Snapshot view = testKit.getSnapshot();
-    Blockchain blockchain = Blockchain.newInstance(view);
+    Snapshot snapshot = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(snapshot);
     Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(errorTx.hash());
     assertThat(txResultOpt).hasValueSatisfying(status -> {
       assertTrue(status.hasError());
@@ -103,8 +103,8 @@ class ErrorTxTest {
   void executeClearsQaServiceData() throws CloseFailuresException {
     try (TemporaryDb db = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
-      Fork view = db.createFork(cleaner);
-      QaSchema schema = new QaSchema(view, QA_SERVICE_NAME);
+      Fork fork = db.createFork(cleaner);
+      QaSchema schema = new QaSchema(fork, QA_SERVICE_NAME);
 
       // Initialize storage with a counter equal to 10
       String name = "counter";
@@ -118,7 +118,7 @@ class ErrorTxTest {
           .setErrorCode(1)
           .setErrorDescription("Foo")
           .build();
-      TransactionContext context = newContext(view)
+      TransactionContext context = newContext(fork)
           .serviceName(QA_SERVICE_NAME)
           .serviceId(QA_SERVICE_ID)
           .build();

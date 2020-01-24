@@ -59,8 +59,8 @@ class CreateCounterTxTest {
     TransactionMessage tx = createCreateCounterTx(name, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(tx);
 
-    Snapshot view = testKit.getSnapshot();
-    Blockchain blockchain = Blockchain.newInstance(view);
+    Snapshot snapshot = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(snapshot);
     Optional<ExecutionStatus> txResultOpt = blockchain.getTxResult(tx.hash());
 
     assertThat(txResultOpt).isPresent();
@@ -77,8 +77,8 @@ class CreateCounterTxTest {
     TransactionMessage tx = createCreateCounterTx(counterName, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(tx);
 
-    Snapshot view = testKit.getSnapshot();
-    QaSchema schema = new QaSchema(view, QA_SERVICE_NAME);
+    Snapshot snapshot = testKit.getSnapshot();
+    QaSchema schema = new QaSchema(snapshot, QA_SERVICE_NAME);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> counterNames = schema.counterNames();
     HashCode counterId = sha256().hashString(counterName, UTF_8);
@@ -98,8 +98,8 @@ class CreateCounterTxTest {
     testKit.createBlockWithTransactions(transactionMessage);
     testKit.createBlockWithTransactions(transactionMessage2);
 
-    Snapshot view = testKit.getSnapshot();
-    Blockchain blockchain = Blockchain.newInstance(view);
+    Snapshot snapshot = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(snapshot);
     ExecutionStatus txResult = blockchain.getTxResult(transactionMessage2.hash()).get();
     ExecutionError error = txResult.getError();
     assertThat(error.getKind()).isEqualTo(SERVICE);

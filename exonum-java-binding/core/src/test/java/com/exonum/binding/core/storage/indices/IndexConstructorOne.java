@@ -17,9 +17,9 @@
 package com.exonum.binding.core.storage.indices;
 
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
 
 @FunctionalInterface
 interface IndexConstructorOne<IndexT, ElementT> {
-  IndexT create(String name, View view, Serializer<ElementT> serializer);
+  IndexT create(IndexAddress address, Access access, Serializer<ElementT> serializer);
 }
