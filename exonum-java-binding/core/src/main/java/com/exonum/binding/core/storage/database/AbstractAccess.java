@@ -232,7 +232,7 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    *     does not exist
    */
   /* TODO: either native — if all Accesses can have same impl; or abstract and native
-      in each Access */
+      in each Access [ECR-4157]*/
   private long findIndexId(String name, @Nullable byte[] idInGroup) {
     return 0;
   }
