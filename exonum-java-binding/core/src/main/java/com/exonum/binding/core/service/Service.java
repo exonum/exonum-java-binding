@@ -54,6 +54,27 @@ public interface Service {
   }
 
   /**
+   * Resumes the previously stopped service instance. This method is called when
+   * a stopped service instance is restarted.
+   *
+   * <p>This method may perform any changes to the database. For example, update some service
+   * parameters, deprecate old entries etc.
+   *
+   * <p>Also, note that performing any bulk operations or data migration
+   * <em>is not recommended</em> here, because this method is invoked synchronously
+   * when the block is committed.
+   * <!--TODO: Add a link to the migration procedure -->
+   *
+   * @param fork a database fork to apply changes to. Not valid after this method returns
+   * @param arguments the service arguments
+   * @throws ExecutionException if the arguments are not valid (e.g.,
+   *     malformed, or do not meet the preconditions)
+   */
+  default void resume(Fork fork, byte[] arguments) {
+    // No actions by default
+  }
+
+  /**
    * Creates handlers that make up the public HTTP API of this service.
    * The handlers are added to the given router, which is then mounted at the following path:
    * {@code /api/services/<service-name>}.
@@ -75,7 +96,8 @@ public interface Service {
    * documentation</a> for details.
    *
    * @param node a set-up Exonum node, providing an interface to access
-   *             the current blockchain state and submit transactions
+   *             the current blockchain state and submit transactions. Note that a node gets
+   *             closed automatically by the runtime when the service stops
    * @param router a router responsible for handling requests to this service
    * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>

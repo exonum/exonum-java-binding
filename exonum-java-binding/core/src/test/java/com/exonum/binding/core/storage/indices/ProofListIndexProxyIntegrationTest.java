@@ -17,6 +17,7 @@
 package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BITS;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesAbsence;
 import static com.exonum.binding.core.storage.indices.ProofListContainsMatcher.provesThatContains;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
@@ -32,9 +33,8 @@ import static org.hamcrest.core.IsNot.not;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.core.messages.ListProofOuterClass;
 import com.exonum.core.messages.ListProofOuterClass.ListProofEntry;
 import com.google.protobuf.ByteString;
@@ -59,19 +59,18 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   private static final String LIST_NAME = "test_proof_list";
 
   @Override
-  ProofListIndexProxy<String> create(String name, View view) {
-    return ProofListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  ProofListIndexProxy<String> create(String name, Access access) {
+    return access.getProofList(IndexAddress.valueOf(name), string());
   }
 
   @Override
-  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return ProofListIndexProxy.newInGroupUnsafe(groupName, idInGroup, view,
-        StandardSerializers.string());
+  ProofListIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
+    return access.getProofList(IndexAddress.valueOf(groupName, idInGroup), string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, Access access) {
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   @Override
@@ -163,7 +162,7 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
   }
 
   private static ListProofEntry listProofEntry(long index, String element) {
-    Serializer<String> serializer = StandardSerializers.string();
+    Serializer<String> serializer = string();
     return ListProofEntry.newBuilder()
         .setIndex(index)
         .setValue(ByteString.copyFrom(serializer.toBytes(element)))
@@ -293,17 +292,17 @@ class ProofListIndexProxyIntegrationTest extends BaseListIndexIntegrationTestabl
     });
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
                                       Consumer<ProofListIndexProxy<String>> listTest) {
     runTestWithView(viewFactory, (ignoredView, list) -> listTest.accept(list));
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
-                                      BiConsumer<View, ProofListIndexProxy<String>> listTest) {
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+                                      BiConsumer<Access, ProofListIndexProxy<String>> listTest) {
     IndicesTests.runTestWithView(
         viewFactory,
         LIST_NAME,
-        ProofListIndexProxy::newInstance,
+        ((address, access, serializer) -> access.getProofList(address, serializer)),
         listTest
     );
   }

@@ -16,17 +16,17 @@
 
 package com.exonum.binding.core.storage.database;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ListIndex;
-import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import java.util.Iterator;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +54,7 @@ class ForkIntegrationTest {
 
       // Check that all created native proxies are no longer accessible
       assertAll(
-          () -> assertThrows(IllegalStateException.class, fork::getViewNativeHandle),
+          () -> assertThrows(IllegalStateException.class, fork::getAccessNativeHandle),
           () -> assertThrows(IllegalStateException.class, list1::size),
           () -> assertThrows(IllegalStateException.class, list2::size),
           () -> assertThrows(IllegalStateException.class, it::next)
@@ -84,7 +84,7 @@ class ForkIntegrationTest {
 
       // Check that the 'normal' collection and the fork are no longer accessible
       assertThrows(IllegalStateException.class, list1::size);
-      assertThrows(IllegalStateException.class, fork::getViewNativeHandle);
+      assertThrows(IllegalStateException.class, fork::getAccessNativeHandle);
     }
   }
 
@@ -112,7 +112,7 @@ class ForkIntegrationTest {
     // Check that all created native proxies are no longer accessible, i.e.,
     // the internal Fork cleaner is properly registered with the parent cleaner.
     assertAll(
-        () -> assertThrows(IllegalStateException.class, fork::getViewNativeHandle),
+        () -> assertThrows(IllegalStateException.class, fork::getAccessNativeHandle),
         () -> assertThrows(IllegalStateException.class, list1::size),
         () -> assertThrows(IllegalStateException.class, list2::size),
         () -> assertThrows(IllegalStateException.class, it::next)
@@ -276,7 +276,7 @@ class ForkIntegrationTest {
     }
   }
 
-  private static ListIndex<String> newList(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  private static ListIndex<String> newList(String name, Access access) {
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 }

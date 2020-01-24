@@ -59,14 +59,14 @@ class ServiceRuntimeAdapterTest {
   @Mock
   private ServiceRuntime serviceRuntime;
   @Mock
-  private ViewFactory viewFactory;
+  private AccessFactory accessFactory;
   private ServiceRuntimeAdapter serviceRuntimeAdapter;
   @Mock
   private Snapshot snapshot;
 
   @BeforeEach
   void setUp() {
-    serviceRuntimeAdapter = new ServiceRuntimeAdapter(serviceRuntime, viewFactory);
+    serviceRuntimeAdapter = new ServiceRuntimeAdapter(serviceRuntime, accessFactory);
   }
 
   @Test
@@ -116,7 +116,7 @@ class ServiceRuntimeAdapterTest {
     long forkHandle = 0x110b;
     Cleaner cleaner = new Cleaner();
     Fork fork = Fork.newInstance(forkHandle, false, cleaner);
-    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
     String serviceName = "s1";
@@ -139,11 +139,38 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
+  void initializeResumingService() throws CloseFailuresException {
+    long forkHandle = 0x110b;
+    Cleaner cleaner = new Cleaner();
+    Fork fork = Fork.newInstance(forkHandle, false, cleaner);
+    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+        .thenReturn(fork);
+
+    int serviceId = 1;
+    String serviceName = "s1";
+    ArtifactId artifact = ARTIFACT_ID;
+    byte[] instanceSpec = InstanceSpec.newBuilder()
+        .setId(serviceId)
+        .setName(serviceName)
+        .setArtifact(artifact)
+        .build()
+        .toByteArray();
+    byte[] arguments = bytes(1, 2);
+
+    serviceRuntimeAdapter.initializeResumingService(forkHandle, instanceSpec, arguments);
+
+    // Check the runtime was invoked with correct config
+    ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
+        ServiceArtifactId.fromProto(artifact));
+    verify(serviceRuntime).initializeResumingService(fork, expected, arguments);
+  }
+
+  @Test
   void afterTransactions() throws CloseFailuresException {
     int serviceId = 1;
     long forkHandle = 0x110b;
     Fork fork = mock(Fork.class);
-    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
     serviceRuntimeAdapter.afterTransactions(serviceId, forkHandle);
@@ -153,7 +180,7 @@ class ServiceRuntimeAdapterTest {
 
   @Test
   void afterCommit_ValidatorNode() throws CloseFailuresException {
-    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+    when(accessFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
     serviceRuntimeAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
 
@@ -171,7 +198,7 @@ class ServiceRuntimeAdapterTest {
   void afterCommit_AuditorNode() throws CloseFailuresException {
     // For auditor nodes (which do not have validatorId) negative validatorId is passed
     int validatorId = -1;
-    when(viewFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
+    when(accessFactory.createSnapshot(eq(SNAPSHOT_HANDLE), any(Cleaner.class)))
         .thenReturn(snapshot);
     serviceRuntimeAdapter.afterCommit(SNAPSHOT_HANDLE, validatorId, HEIGHT);
 

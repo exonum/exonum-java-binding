@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.test.Bytes;
 import com.exonum.binding.test.CiOnly;
 import java.util.ArrayList;
@@ -71,19 +71,19 @@ class ProofMapIndexProxyNoKeyHashingIntegrationTest
   }
 
   @Override
-  ProofMapIndexProxy<HashCode, String> create(String name, View view) {
-    return createProofMap(name, view);
+  ProofMapIndexProxy<HashCode, String> create(String name, Access access) {
+    return createProofMap(name, access);
   }
 
   @Override
   ProofMapIndexProxy<HashCode, String> createInGroup(String groupName, byte[] idInGroup,
-                                                     View view) {
-    return ProofMapIndexProxy.newInGroupUnsafeNoKeyHashing(groupName, idInGroup, view,
+                                                     Access access) {
+    return access.getRawProofMap(IndexAddress.valueOf(groupName, idInGroup),
         StandardSerializers.hash(), StandardSerializers.string());
   }
 
-  private static ProofMapIndexProxy<HashCode, String> createProofMap(String name, View view) {
-    return ProofMapIndexProxy.newInstanceNoKeyHashing(name, view, StandardSerializers.hash(),
+  private static ProofMapIndexProxy<HashCode, String> createProofMap(String name, Access access) {
+    return access.getRawProofMap(IndexAddress.valueOf(name), StandardSerializers.hash(),
         StandardSerializers.string());
   }
 

@@ -86,8 +86,8 @@ class CoreSchemaIntegrationTest {
 
   private static void assertSchema(Consumer<CoreSchema> assertion) {
     try (TemporaryDb db = TemporaryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
-      Snapshot view = db.createSnapshot(cleaner);
-      assertion.accept(CoreSchema.newInstance(view));
+      Snapshot snapshot = db.createSnapshot(cleaner);
+      assertion.accept(CoreSchema.newInstance(snapshot));
     } catch (CloseFailuresException e) {
       fail(e.getLocalizedMessage());
     }

@@ -48,8 +48,8 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -480,8 +480,8 @@ class TestKitTest {
     assertThat(block.getHeight()).isEqualTo(1);
 
     // Check the transactions are indeed executed by the core
-    testKit.withSnapshot((view) -> checkCommittedBlockWithMessages(
-        view, block, message, message2));
+    testKit.withSnapshot((snapshot) -> checkCommittedBlockWithMessages(
+        snapshot, block, message, message2));
   }
 
   @Test
@@ -495,8 +495,8 @@ class TestKitTest {
     assertThat(block.getHeight()).isEqualTo(1);
 
     // Check the transactions are indeed executed by the core
-    testKit.withSnapshot((view) -> checkCommittedBlockWithMessages(
-        view, block, message, message2));
+    testKit.withSnapshot((snapshot) -> checkCommittedBlockWithMessages(
+        snapshot, block, message, message2));
   }
 
   private TransactionMessage constructTestTransactionMessage(String payload) {
@@ -511,10 +511,10 @@ class TestKitTest {
         .sign(keyPair);
   }
 
-  private void checkCommittedBlockWithMessages(View view, Block lastBlock,
+  private void checkCommittedBlockWithMessages(Access access, Block lastBlock,
       TransactionMessage... messages) {
     // Check the info in blockchain matches the block
-    Blockchain blockchain = Blockchain.newInstance(view);
+    Blockchain blockchain = Blockchain.newInstance(access);
     long blockHeight = lastBlock.getHeight();
     assertThat(blockchain.getHeight()).isEqualTo(blockHeight);
     assertThat(blockchain.getBlock(blockHeight)).isEqualTo(lastBlock);
@@ -643,8 +643,8 @@ class TestKitTest {
     testKit.close();
 
     // Verify that snapshot proxies were closed
-    assertThrows(exceptionType, view1::getViewNativeHandle);
-    assertThrows(exceptionType, view2::getViewNativeHandle);
+    assertThrows(exceptionType, view1::getAccessNativeHandle);
+    assertThrows(exceptionType, view2::getAccessNativeHandle);
   }
 
   private void checkValidatorsTimes(

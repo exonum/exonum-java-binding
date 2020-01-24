@@ -117,4 +117,10 @@ public final class NodeFake implements Node {
   public TemporaryDb getDatabase() {
     return database;
   }
+
+  @Override
+  public void close() {
+    // do nothing
+  }
+
 }

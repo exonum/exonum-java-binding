@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -94,9 +95,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void startsServerOnInitialization() {
-    Node node = mock(Node.class);
-
-    serviceRuntime.initialize(node);
+    serviceRuntime.initialize(mock(Node.class));
 
     verify(transport).start();
   }
@@ -165,8 +164,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void startAddingService() {
-    Node node = mock(Node.class);
-    serviceRuntime.initialize(node);
+    serviceRuntime.initialize(mock(Node.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme/foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -177,7 +175,8 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
@@ -186,7 +185,8 @@ class ServiceRuntimeIntegrationTest {
     serviceRuntime.initiateAddingService(fork, instanceSpec, configuration);
 
     // Check it was instantiated as expected
-    verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
+    verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class));
 
     // and the service was configured
     Configuration expectedConfig = new ServiceConfiguration(configuration);
@@ -198,8 +198,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void startAddingServiceUnknownServiceArtifact() {
-    Node node = mock(Node.class);
-    serviceRuntime.initialize(node);
+    serviceRuntime.initialize(mock(Node.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
@@ -220,8 +219,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void startAddingServiceBadInitialConfiguration() {
-    Node node = mock(Node.class);
-    serviceRuntime.initialize(node);
+    serviceRuntime.initialize(mock(Node.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -232,7 +230,8 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
         .thenReturn(serviceWrapper);
 
     Fork fork = mock(Fork.class);
@@ -250,8 +249,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void activateService() {
-    Node node = mock(Node.class);
-    serviceRuntime.initialize(node);
+    serviceRuntime.initialize(mock(Node.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -264,14 +262,16 @@ class ServiceRuntimeIntegrationTest {
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
         .thenReturn(serviceWrapper);
 
     // Activate the service from the artifact
     serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS);
 
     // Check it was instantiated as expected
-    verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
+    verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class));
 
     // and its API is connected
     verify(transport).connectServiceApi(serviceWrapper);
@@ -283,8 +283,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void activateServiceDuplicate() {
-    Node node = mock(Node.class);
-    serviceRuntime.initialize(node);
+    serviceRuntime.initialize(mock(Node.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -297,7 +296,8 @@ class ServiceRuntimeIntegrationTest {
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
         .thenReturn(serviceWrapper);
 
     // Activate the service
@@ -311,14 +311,12 @@ class ServiceRuntimeIntegrationTest {
     assertThat(e).hasMessageContaining(TEST_NAME);
 
     // Check the service was instantiated only once
-    verify(servicesFactory).createService(serviceDefinition, instanceSpec, node);
+    verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class));
   }
 
   @Test
   void stopNonActiveService() {
-    Node node = mock(Node.class);
-    serviceRuntime.initialize(node);
-
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
@@ -332,8 +330,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void stopService() {
-    Node node = mock(Node.class);
-    serviceRuntime.initialize(node);
+    serviceRuntime.initialize(mock(Node.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -343,10 +340,13 @@ class ServiceRuntimeIntegrationTest {
     when(serviceLoader.findService(artifactId))
         .thenReturn(Optional.of(serviceDefinition));
 
+    MultiplexingNodeDecorator node = mock(MultiplexingNodeDecorator.class);
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
-    when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
+
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
         .thenReturn(serviceWrapper);
 
     // Activate the service
@@ -361,6 +361,7 @@ class ServiceRuntimeIntegrationTest {
     verify(transport).disconnectServiceApi(any(ServiceWrapper.class));
     Optional<ServiceWrapper> serviceOpt = serviceRuntime.findService(TEST_NAME);
     assertThat(serviceOpt).isEmpty();
+    verify(serviceWrapper).requestToStop();
   }
 
   @ParameterizedTest
@@ -389,12 +390,86 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
+  void initializeResumingService() {
+    serviceRuntime.initialize(mock(Node.class));
+
+    ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme/foo-service:1.0.0");
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+    when(serviceLoader.findService(artifactId))
+        .thenReturn(Optional.of(serviceDefinition));
+
+    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
+        .thenReturn(serviceWrapper);
+
+    // Create the service from the artifact
+    Fork fork = mock(Fork.class);
+    byte[] arguments = anyConfiguration();
+    serviceRuntime.initializeResumingService(fork, instanceSpec, arguments);
+
+    // Check it was instantiated as expected
+    verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class));
+
+    // and the service was resumed
+    verify(serviceWrapper).resume(fork, arguments);
+
+    // but not registered in the runtime yet:
+    assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
+  }
+
+  @Test
+  void initializeResumingActiveService() {
+    serviceRuntime.initialize(mock(Node.class));
+
+    ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new);
+    ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
+        TEST_ID, artifactId);
+    when(serviceLoader.findService(artifactId))
+        .thenReturn(Optional.of(serviceDefinition));
+
+    ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
+    when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+        any(MultiplexingNodeDecorator.class)))
+        .thenReturn(serviceWrapper);
+
+    // Activate the service from the artifact
+    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+
+    byte[] arguments = anyConfiguration();
+    Fork fork = mock(Fork.class);
+    assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.initializeResumingService(fork, instanceSpec, arguments));
+  }
+
+  @Test
   void shutdown() throws InterruptedException {
     serviceRuntime.shutdown();
 
     InOrder inOrder = Mockito.inOrder(transport, serviceLoader);
     inOrder.verify(transport).close();
     inOrder.verify(serviceLoader).unloadAll();
+  }
+
+  @Test
+  void shutdownInitialized() throws InterruptedException {
+    Node node = mock(Node.class);
+    serviceRuntime.initialize(node);
+
+    serviceRuntime.shutdown();
+
+    InOrder inOrder = Mockito.inOrder(transport, serviceLoader, node);
+    inOrder.verify(transport).close();
+    inOrder.verify(serviceLoader).unloadAll();
+    inOrder.verify(node).close();
   }
 
   @Test
@@ -422,8 +497,7 @@ class ServiceRuntimeIntegrationTest {
     @BeforeEach
     void addService() {
       // Initialize the runtime
-      Node node = mock(Node.class);
-      serviceRuntime.initialize(node);
+      serviceRuntime.initialize(mock(Node.class));
 
       // Setup the service
       when(serviceWrapper.getId()).thenReturn(TEST_ID);
@@ -434,7 +508,8 @@ class ServiceRuntimeIntegrationTest {
       when(serviceLoader.findService(ARTIFACT_ID))
           .thenReturn(Optional.of(serviceDefinition));
       // Setup the factory
-      when(servicesFactory.createService(serviceDefinition, INSTANCE_SPEC, node))
+      when(servicesFactory.createService(eq(serviceDefinition), eq(INSTANCE_SPEC),
+          any(MultiplexingNodeDecorator.class)))
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
@@ -560,8 +635,7 @@ class ServiceRuntimeIntegrationTest {
     @BeforeEach
     void addServices() {
       // Initialize the runtime
-      Node node = mock(Node.class);
-      serviceRuntime.initialize(node);
+      serviceRuntime.initialize(mock(Node.class));
 
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
           .newInstance(ARTIFACT_ID, TestServiceModule::new);
@@ -573,7 +647,8 @@ class ServiceRuntimeIntegrationTest {
         ServiceWrapper service = entry.getValue();
         when(service.getId()).thenReturn(instanceSpec.getId());
         when(service.getName()).thenReturn(instanceSpec.getName());
-        when(servicesFactory.createService(serviceDefinition, instanceSpec, node))
+        when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
+            any(MultiplexingNodeDecorator.class)))
             .thenReturn(service);
       }
 

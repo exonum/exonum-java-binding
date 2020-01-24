@@ -54,7 +54,7 @@ class BlockTest {
   }
 
   @ParameterizedTest
-  @EnumSource(FieldNamingPolicy.class)
+  @EnumSource
   void jsonRepresentationIndependentOfNamingPolicy(FieldNamingPolicy policy) {
     Gson gson = JsonSerializer.builder()
         .setFieldNamingPolicy(policy)

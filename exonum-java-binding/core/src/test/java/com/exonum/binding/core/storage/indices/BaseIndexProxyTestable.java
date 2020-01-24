@@ -27,10 +27,10 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import org.assertj.core.api.Assertions;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,11 +59,11 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     }
   }
 
-  abstract IndexT create(String name, View view);
+  abstract IndexT create(String name, Access access);
 
-  abstract @Nullable IndexT createInGroup(String groupName, byte[] idInGroup, View view);
+  abstract @Nullable IndexT createInGroup(String groupName, byte[] idInGroup, Access access);
 
-  abstract StorageIndex createOfOtherType(String name, View view);
+  abstract StorageIndex createOfOtherType(String name, Access access);
 
   /**
    * Get any element from this index.
@@ -85,10 +85,10 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     String name = "test_index";
 
     try (Cleaner cleaner = new Cleaner()) {
-      View view = database.createSnapshot(cleaner);
+      Snapshot snapshot = database.createSnapshot(cleaner);
 
       int numAddedActions = cleaner.getNumRegisteredActions();
-      IndexT index = create(name, view);
+      IndexT index = create(name, snapshot);
 
       // Check that the index constructor registered a single clean action.
       int numActionsExpected = numAddedActions + 1;
@@ -117,9 +117,9 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   })
   void indexConstructorThrowsIfInvalidName(String name) throws Exception {
     try (Cleaner cleaner = new Cleaner()) {
-      Snapshot view = database.createSnapshot(cleaner);
+      Snapshot snapshot = database.createSnapshot(cleaner);
 
-      assertThrows(Exception.class, () -> create(name, view));
+      assertThrows(Exception.class, () -> create(name, snapshot));
     }
   }
 
@@ -127,11 +127,11 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   void indexConstructorAllowsMultipleInstancesFromFork() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
-      Fork view = database.createFork(cleaner);
+      Fork fork = database.createFork(cleaner);
       // Create two indices with the same name from the same Fork. It is disallowed currently
       // in Rust, but must work in Java with indices performing instance de-duplication.
-      IndexT i1 = create(name, view);
-      IndexT i2 = create(name, view);
+      IndexT i1 = create(name, fork);
+      IndexT i2 = create(name, fork);
 
       assertNotNull(i1);
       assertThat(i2, sameInstance(i1));
@@ -143,11 +143,11 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
       byte[] idInGroup = bytes("index id in the group");
-      Fork view = database.createFork(cleaner);
+      Fork fork = database.createFork(cleaner);
       // Create two indices with the same name from the same Fork. It is disallowed currently
       // in Rust, but must work in Java with indices performing instance de-duplication.
-      IndexT i1 = createInGroup(name, idInGroup, view);
-      IndexT i2 = createInGroup(name, idInGroup, view);
+      IndexT i1 = createInGroup(name, idInGroup, fork);
+      IndexT i2 = createInGroup(name, idInGroup, fork);
 
       assumeFalse(i1 == null, "Groups are not supported by EntryIndex");
       assertThat(i2, sameInstance(i1));
@@ -159,11 +159,11 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
-      Fork view = database.createFork(cleaner);
+      Fork fork = database.createFork(cleaner);
 
       // Try to create two indices of different types with the same name
-      StorageIndex other = createOfOtherType(name, view);
-      Exception e = assertThrows(IllegalArgumentException.class, () -> create(name, view));
+      StorageIndex other = createOfOtherType(name, fork);
+      Exception e = assertThrows(IllegalArgumentException.class, () -> create(name, fork));
 
       String message = e.getMessage();
       assertThat(message, containsString("Cannot create index"));
@@ -181,13 +181,13 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   void indexConstructorPersistsIndexTypeInfo() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
-      Fork view = database.createFork(cleaner);
+      Fork fork = database.createFork(cleaner);
       // Create an index with the given name
-      IndexT index = create(name, view);
+      IndexT index = create(name, fork);
       update(index);
 
       // Merge the changes into the database
-      database.merge(view);
+      database.merge(fork);
 
       // Create a new Snapshot to be able to create another index with the same address
       Snapshot snapshot = database.createSnapshot(cleaner);
@@ -203,8 +203,8 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   void getName() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
-      View view = database.createSnapshot(cleaner);
-      IndexT index = create(name, view);
+      Access access = database.createSnapshot(cleaner);
+      IndexT index = create(name, access);
 
       assertThat(index.getName(), equalTo(name));
     }
@@ -214,8 +214,8 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   void getAddress() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
       String name = "test_index";
-      View view = database.createSnapshot(cleaner);
-      IndexT index = create(name, view);
+      Access access = database.createSnapshot(cleaner);
+      IndexT index = create(name, access);
 
       IndexAddress expected = IndexAddress.valueOf(name);
       assertThat(index.getAddress(), equalTo(expected));
@@ -227,8 +227,8 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
     try (Cleaner cleaner = new Cleaner()) {
       String groupName = "test_index";
       byte[] idInGroup = bytes("prefix");
-      View view = database.createSnapshot(cleaner);
-      IndexT index = createInGroup(groupName, idInGroup, view);
+      Access access = database.createSnapshot(cleaner);
+      IndexT index = createInGroup(groupName, idInGroup, access);
 
       assumeFalse(index == null, "Groups are not supported by EntryIndex");
 
@@ -241,8 +241,8 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
   void toStringIncludesNameAndType() throws CloseFailuresException {
     String name = "test_index";
     try (Cleaner cleaner = new Cleaner()) {
-      View view = database.createSnapshot(cleaner);
-      IndexT index = create(name, view);
+      Access access = database.createSnapshot(cleaner);
+      IndexT index = create(name, access);
 
       String indexInfo = index.toString();
       assertThat(indexInfo, containsString(name));

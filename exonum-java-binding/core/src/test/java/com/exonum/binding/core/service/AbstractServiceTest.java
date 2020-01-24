@@ -21,7 +21,7 @@ import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
 import io.vertx.ext.web.Router;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +51,7 @@ class AbstractServiceTest {
     }
 
     @Override
-    protected Schema createDataSchema(View view) {
+    protected Schema createDataSchema(Access access) {
       return mock(Schema.class);
     }
 

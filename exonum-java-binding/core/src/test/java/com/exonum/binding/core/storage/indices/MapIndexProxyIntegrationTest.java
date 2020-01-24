@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.exonum.binding.core.storage.indices.MapEntries.putAll;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K2;
@@ -35,10 +36,7 @@ import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.TestProtoMessages.Id;
-import com.exonum.binding.core.storage.indices.TestProtoMessages.Point;
+import com.exonum.binding.core.storage.database.Access;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
@@ -60,29 +58,6 @@ class MapIndexProxyIntegrationTest
     extends BaseIndexProxyTestable<MapIndexProxy<String, String>> {
 
   private static final String MAP_NAME = "test_map";
-
-  @Test
-  void newInstanceStoringProtobufMessages() throws CloseFailuresException {
-    try (Cleaner c = new Cleaner()) {
-      Fork view = database.createFork(c);
-      MapIndex<Id, Point> map = MapIndexProxy.newInstance(MAP_NAME, view, Id.class, Point.class);
-
-      // Create a key-value pair of protobuf messages.
-      Id id = Id.newBuilder()
-          .setId("point 1")
-          .build();
-
-      Point point = Point.newBuilder()
-          .setX(1)
-          .setY(-1)
-          .build();
-
-      map.put(id, point);
-
-      // Check that the map contains these messages.
-      assertThat(map.get(id), equalTo(point));
-    }
-  }
 
   @Test
   void containsKeyShouldReturnFalseIfNoSuchKey() {
@@ -452,37 +427,37 @@ class MapIndexProxyIntegrationTest
     });
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
       Consumer<MapIndexProxy<String, String>> mapTest) {
     runTestWithView(viewFactory, (ignoredView, map) -> mapTest.accept(map));
   }
 
-  private static void runTestWithView(Function<Cleaner, View> viewFactory,
-      BiConsumer<View, MapIndexProxy<String, String>> mapTest) {
+  private static void runTestWithView(Function<Cleaner, Access> viewFactory,
+      BiConsumer<Access, MapIndexProxy<String, String>> mapTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      View view = viewFactory.apply(cleaner);
-      MapIndexProxy<String, String> map = createMap(MAP_NAME, view);
+      Access access = viewFactory.apply(cleaner);
+      MapIndexProxy<String, String> map = createMap(MAP_NAME, access);
 
-      mapTest.accept(view, map);
+      mapTest.accept(access, map);
     } catch (CloseFailuresException e) {
       throw new AssertionError("Unexpected exception", e);
     }
   }
 
   @Override
-  MapIndexProxy<String, String> create(String name, View view) {
-    return createMap(name, view);
+  MapIndexProxy<String, String> create(String name, Access access) {
+    return createMap(name, access);
   }
 
   @Override
-  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, View view) {
-    return MapIndexProxy.newInGroupUnsafe(groupName, idInGroup, view, StandardSerializers.string(),
+  MapIndexProxy<String, String> createInGroup(String groupName, byte[] idInGroup, Access access) {
+    return access.getMap(IndexAddress.valueOf(groupName, idInGroup), StandardSerializers.string(),
         StandardSerializers.string());
   }
 
   @Override
-  StorageIndex createOfOtherType(String name, View view) {
-    return ListIndexProxy.newInstance(name, view, StandardSerializers.string());
+  StorageIndex createOfOtherType(String name, Access access) {
+    return access.getList(IndexAddress.valueOf(name), string());
   }
 
   @Override
@@ -495,9 +470,8 @@ class MapIndexProxyIntegrationTest
     index.put(K1, V1);
   }
 
-  private static MapIndexProxy<String, String> createMap(String name, View view) {
-    return MapIndexProxy.newInstance(name, view, StandardSerializers.string(),
-        StandardSerializers.string());
+  private static MapIndexProxy<String, String> createMap(String name, Access access) {
+    return access.getMap(IndexAddress.valueOf(name), string(), string());
   }
 
   private static String prefix(String source, int prefixSize) {

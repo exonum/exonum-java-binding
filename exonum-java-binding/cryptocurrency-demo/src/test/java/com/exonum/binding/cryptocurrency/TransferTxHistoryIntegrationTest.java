@@ -75,10 +75,10 @@ class TransferTxHistoryIntegrationTest {
         seed2, ACCOUNT_2, ACCOUNT_1.getPublicKey(), transferSum2, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx2);
 
-    Snapshot view = testKit.getSnapshot();
+    Snapshot snapshot = testKit.getSnapshot();
 
     // Check that wallets have correct balances
-    CryptocurrencySchema schema = new CryptocurrencySchema(view, SERVICE_NAME);
+    CryptocurrencySchema schema = new CryptocurrencySchema(snapshot, SERVICE_NAME);
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     long expectedBalance1 = initialBalance - transferSum1 + transferSum2;
     assertThat(wallets.get(ACCOUNT_1.getPublicKey()).getBalance())

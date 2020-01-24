@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use exonum::crypto::Hash;
+use exonum_merkledb::IndexAddress;
 use exonum_proto::ProtobufConvert;
 use jni::objects::JString;
 use jni::sys::{jbyteArray, jobjectArray};
@@ -29,6 +30,28 @@ pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> JniResult<Hash> {
 /// Converts `Hash` to Java byte array.
 pub fn convert_hash(env: &JNIEnv, hash: &Hash) -> JniResult<jbyteArray> {
     env.byte_array_from_slice(hash.as_ref())
+}
+
+// todo: @bogdanov — please rewrite appropriately
+/// Converts a pair of (name, @Nullable id_in_group) into Rust IndexAddress.
+pub fn convert_to_index_address<'e, S>(
+    env: &JNIEnv<'e>,
+    name: S,
+    id_in_group: jbyteArray,
+) -> JniResult<IndexAddress>
+where
+    S: Into<JString<'e>>,
+{
+    let name = convert_to_string(env, name)?;
+    let address = IndexAddress::from_root(name);
+    if id_in_group.is_null() {
+        // Name address
+        Ok(address)
+    } else {
+        // Address in group
+        let id_in_group = env.convert_byte_array(id_in_group)?;
+        Ok(address.append_key(&id_in_group))
+    }
 }
 
 /// Converts JNI `JString` into Rust `String`.

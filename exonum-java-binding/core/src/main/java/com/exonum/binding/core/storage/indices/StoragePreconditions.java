@@ -162,20 +162,5 @@ final class StoragePreconditions {
     }
   }
 
-  /**
-   * Checks the type of the <em>cached</em> index instance.
-   *
-   * @param cachedIndex a cached index
-   * @param requestedIndexType a index type requested for the index address
-   * @throws IllegalArgumentException if the type of the cached index does not match the
-   *     requested index type
-   */
-  static void checkIndexType(StorageIndex cachedIndex,
-      Class<? extends StorageIndex> requestedIndexType) {
-    checkArgument(requestedIndexType.isInstance(cachedIndex),
-        "Cannot create index of type %s: the index with such address (%s) was already created"
-            + "of another type (%s)", requestedIndexType, cachedIndex.getAddress(), cachedIndex);
-  }
-
   private StoragePreconditions() {}
 }

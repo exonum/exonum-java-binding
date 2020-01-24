@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{panic, ptr};
+
 use exonum_merkledb::{
     access::{FromAccess, RawAccess},
     indexes::proof_map::{Hashed, Iter as IndexIter, Keys, Values, PROOF_MAP_KEY_SIZE},
-    Fork, IndexAddress, ObjectHash, ProofMapIndex, RawProofMapIndex, Snapshot,
+    Fork, ObjectHash, ProofMapIndex, RawProofMapIndex, Snapshot,
 };
 use exonum_proto::ProtobufConvert;
 use jni::{
@@ -24,8 +26,7 @@ use jni::{
     JNIEnv,
 };
 use protobuf::Message;
-
-use std::{panic, ptr};
+use JniResult;
 
 use handle::{self, Handle};
 use storage::{
@@ -33,7 +34,6 @@ use storage::{
     PairIter,
 };
 use utils;
-use JniResult;
 
 type RawKey = [u8; PROOF_MAP_KEY_SIZE];
 
@@ -101,58 +101,12 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     env: JNIEnv,
     _: JClass,
     name: JString,
+    id_in_group: jbyteArray,
     view_handle: Handle,
     key_hashing: jboolean,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let name = utils::convert_to_string(&env, name)?;
-        let key_is_hashed = key_hashing == JNI_TRUE;
-        Ok(handle::to_handle(
-            match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    let index = if key_is_hashed {
-                        ProofMapIndex::<_, _, _, Hashed>::from_access(snapshot, name.into())
-                            .unwrap()
-                            .into()
-                    } else {
-                        RawProofMapIndex::from_access(snapshot, name.into())
-                            .unwrap()
-                            .into()
-                    };
-                    IndexType::SnapshotIndex(index)
-                }
-                ViewRef::Fork(fork) => {
-                    let index = if key_is_hashed {
-                        ProofMapIndex::<_, _, _, Hashed>::from_access(fork, name.into())
-                            .unwrap()
-                            .into()
-                    } else {
-                        RawProofMapIndex::from_access(fork, name.into())
-                            .unwrap()
-                            .into()
-                    };
-                    IndexType::ForkIndex(index)
-                }
-            },
-        ))
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns a pointer to the created `ProofMapIndex` instance in an index family (= group).
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapIndexProxy_nativeCreateInGroup(
-    env: JNIEnv,
-    _: JClass,
-    group_name: JString,
-    map_id: jbyteArray,
-    view_handle: Handle,
-    key_hashing: jboolean,
-) -> Handle {
-    let res = panic::catch_unwind(|| {
-        let group_name = utils::convert_to_string(&env, group_name)?;
-        let map_id = env.convert_byte_array(map_id)?;
-        let address = IndexAddress::from_root(group_name).append_key(&map_id);
+        let address = utils::convert_to_index_address(&env, name, id_in_group)?;
         let key_is_hashed = key_hashing == JNI_TRUE;
         Ok(handle::to_handle(
             match handle::cast_handle::<View>(view_handle).get() {

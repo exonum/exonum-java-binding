@@ -26,7 +26,7 @@ import java.util.Optional;
 
 /**
  * A registry of open {@linkplain com.exonum.binding.core.storage.indices indexes}. Allows
- * to de-duplicate the indexes created with the same (View, name, prefix) tuple, which is
+ * to de-duplicate the indexes created with the same (Access, name, prefix) tuple, which is
  * required to overcome the MerkleDB limitation which prevents creating several indexes
  * with the same address (name + prefix) using the same Fork.
  */

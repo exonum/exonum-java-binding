@@ -102,8 +102,12 @@ final class ServiceWrapper {
     return instanceSpec.getId();
   }
 
-  void initialize(Fork view, Configuration configuration) {
-    callServiceMethod(() -> service.initialize(view, configuration));
+  void initialize(Fork fork, Configuration configuration) {
+    callServiceMethod(() -> service.initialize(fork, configuration));
+  }
+
+  void resume(Fork fork, byte[] arguments) {
+    callServiceMethod(() -> service.resume(fork, arguments));
   }
 
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
@@ -208,5 +212,12 @@ final class ServiceWrapper {
     //  in the normal service configuration, or a separate configuration?
     return UrlEscapers.urlPathSegmentEscaper()
         .escape(getName());
+  }
+
+  /**
+   * Closes an access to the node within the service.
+   */
+  void requestToStop() {
+    node.close();
   }
 }

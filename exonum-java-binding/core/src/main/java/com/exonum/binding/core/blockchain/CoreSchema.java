@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.blockchain;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.hash;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -27,12 +28,11 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
-import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -53,7 +53,7 @@ import java.nio.ByteOrder;
  */
 final class CoreSchema {
 
-  private final View dbView;
+  private final Access dbAccess;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final Serializer<TransactionLocation> TRANSACTION_LOCATION_SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
@@ -66,15 +66,15 @@ final class CoreSchema {
   private static final Serializer<Config> CONSENSUS_CONFIG_SERIALIZER =
       StandardSerializers.protobuf(Config.class);
 
-  private CoreSchema(View dbView) {
-    this.dbView = dbView;
+  private CoreSchema(Access dbAccess) {
+    this.dbAccess = dbAccess;
   }
 
   /**
    * Constructs a schema for a given dbView.
    */
-  static CoreSchema newInstance(View dbView) {
-    return new CoreSchema(dbView);
+  static CoreSchema newInstance(Access dbAccess) {
+    return new CoreSchema(dbAccess);
   }
 
   /**
@@ -95,8 +95,7 @@ final class CoreSchema {
    * (represented by list index id).
    */
   ListIndex<HashCode> getBlockHashes() {
-    return ListIndexProxy.newInstance(
-        CoreIndex.ALL_BLOCK_HASHES, dbView, StandardSerializers.hash());
+    return dbAccess.getList(CoreIndex.ALL_BLOCK_HASHES, hash());
   }
 
   /**
@@ -107,24 +106,22 @@ final class CoreSchema {
   ProofListIndexProxy<HashCode> getBlockTransactions(long blockHeight) {
     checkBlockHeight(blockHeight);
     byte[] id = toCoreStorageKey(blockHeight);
-    return ProofListIndexProxy.newInGroupUnsafe(
-        CoreIndex.BLOCK_TRANSACTIONS, id, dbView, StandardSerializers.hash());
+    IndexAddress address = IndexAddress.valueOf(CoreIndex.BLOCK_TRANSACTIONS, id);
+    return dbAccess.getProofList(address, hash());
   }
 
   /**
    * Returns a map that stores a block object for every block hash.
    */
   MapIndex<HashCode, Block> getBlocks() {
-    return MapIndexProxy.newInstance(
-        CoreIndex.BLOCKS, dbView, StandardSerializers.hash(), BLOCK_SERIALIZER);
+    return dbAccess.getMap(CoreIndex.BLOCKS, hash(), BLOCK_SERIALIZER);
   }
 
   /**
    * Returns a map of transaction messages identified by their SHA-256 hashes.
    */
   MapIndex<HashCode, TransactionMessage> getTxMessages() {
-    return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS, dbView, StandardSerializers.hash(),
-        TRANSACTION_MESSAGE_SERIALIZER);
+    return dbAccess.getMap(CoreIndex.TRANSACTIONS, hash(), TRANSACTION_MESSAGE_SERIALIZER);
   }
 
   /**
@@ -134,8 +131,8 @@ final class CoreSchema {
   ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
     checkBlockHeight(blockHeight);
     byte[] idInGroup = toCoreStorageKey(blockHeight);
-    return ProofMapIndexProxy.newInGroupUnsafe(CoreIndex.CALL_ERRORS, idInGroup, dbView,
-        CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_SERIALIZER);
+    IndexAddress address = IndexAddress.valueOf(CoreIndex.CALL_ERRORS, idInGroup);
+    return dbAccess.getProofMap(address, CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_SERIALIZER);
   }
 
   /**
@@ -143,8 +140,8 @@ final class CoreSchema {
    * transaction hash.
    */
   MapIndex<HashCode, TransactionLocation> getTxLocations() {
-    return MapIndexProxy.newInstance(CoreIndex.TRANSACTIONS_LOCATIONS, dbView,
-        StandardSerializers.hash(), TRANSACTION_LOCATION_SERIALIZER);
+    return dbAccess.getMap(CoreIndex.TRANSACTIONS_LOCATIONS, hash(),
+        TRANSACTION_LOCATION_SERIALIZER);
   }
 
   /**
@@ -155,8 +152,7 @@ final class CoreSchema {
    * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
    */
   KeySetIndexProxy<HashCode> getTransactionPool() {
-    return KeySetIndexProxy.newInstance(CoreIndex.TRANSACTIONS_POOL, dbView,
-        StandardSerializers.hash());
+    return dbAccess.getKeySet(CoreIndex.TRANSACTIONS_POOL, hash());
   }
 
   /**
@@ -165,9 +161,8 @@ final class CoreSchema {
    * @throws IllegalStateException if the "genesis block" was not created
    */
   Config getConsensusConfiguration() {
-    ProofEntryIndexProxy<Config> configEntry = ProofEntryIndexProxy
-        .newInstance(CoreIndex.CONSENSUS_CONFIG,
-                     dbView, CONSENSUS_CONFIG_SERIALIZER);
+    ProofEntryIndexProxy<Config> configEntry =
+        dbAccess.getProofEntry(CoreIndex.CONSENSUS_CONFIG, CONSENSUS_CONFIG_SERIALIZER);
     checkState(configEntry.isPresent(), "No consensus configuration: requesting the configuration "
         + "before the genesis block was created");
     return configEntry.get();
@@ -201,12 +196,16 @@ final class CoreSchema {
 
     private static final String PREFIX = "core.";
     private static final String BLOCK_TRANSACTIONS = PREFIX + "block_transactions";
-    private static final String ALL_BLOCK_HASHES = PREFIX + "block_hashes_by_height";
-    private static final String TRANSACTIONS = PREFIX + "transactions";
-    private static final String BLOCKS = PREFIX + "blocks";
+    private static final IndexAddress ALL_BLOCK_HASHES = IndexAddress
+        .valueOf(PREFIX + "block_hashes_by_height");
+    private static final IndexAddress TRANSACTIONS = IndexAddress.valueOf(PREFIX + "transactions");
+    private static final IndexAddress BLOCKS = IndexAddress.valueOf(PREFIX + "blocks");
     private static final String CALL_ERRORS = PREFIX + "call_errors";
-    private static final String TRANSACTIONS_LOCATIONS = PREFIX + "transactions_locations";
-    private static final String TRANSACTIONS_POOL = PREFIX + "transactions_pool";
-    private static final String CONSENSUS_CONFIG = PREFIX + "consensus_config";
+    private static final IndexAddress TRANSACTIONS_LOCATIONS = IndexAddress
+        .valueOf(PREFIX + "transactions_locations");
+    private static final IndexAddress TRANSACTIONS_POOL = IndexAddress
+        .valueOf(PREFIX + "transactions_pool");
+    private static final IndexAddress CONSENSUS_CONFIG = IndexAddress
+        .valueOf(PREFIX + "consensus_config");
   }
 }

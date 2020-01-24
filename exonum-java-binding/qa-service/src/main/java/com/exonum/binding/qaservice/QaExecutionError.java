@@ -24,7 +24,9 @@ enum QaExecutionError {
   // Increment counter errors
   UNKNOWN_COUNTER(1),
   // Empty time oracle name supplied in the configuration
-  EMPTY_TIME_ORACLE_NAME(2);
+  EMPTY_TIME_ORACLE_NAME(2),
+  // Error appeared while service resume
+  RESUME_SERVICE_ERROR(3);
 
   final byte code;
 

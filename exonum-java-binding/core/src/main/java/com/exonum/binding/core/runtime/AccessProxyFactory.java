@@ -21,27 +21,25 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 
 /**
- * A factory of views.
+ * A factory of Access proxies.
  *
- * <p>Enables easier testing of the service runtime adapter.
+ * <p>This class is thread-safe.
  */
-public interface ViewFactory {
+public enum AccessProxyFactory implements AccessFactory {
+  INSTANCE;
 
-  /**
-   * Creates a new owning snapshot.
-   *
-   * @param nativeHandle a handle to the native snapshot object
-   * @param cleaner a cleaner to register the destructor
-   * @return a new owning snapshot proxy
-   */
-  Snapshot createSnapshot(long nativeHandle, Cleaner cleaner);
+  /** Returns an instance of this factory. */
+  public static AccessFactory getInstance() {
+    return INSTANCE;
+  }
 
-  /**
-   * Creates a new owning fork.
-   *
-   * @param nativeHandle a handle to the native fork object
-   * @param cleaner a cleaner to register the destructor
-   * @return a new owning fork proxy
-   */
-  Fork createFork(long nativeHandle, Cleaner cleaner);
+  @Override
+  public Snapshot createSnapshot(long nativeHandle, Cleaner cleaner) {
+    return Snapshot.newInstance(nativeHandle, cleaner);
+  }
+
+  @Override
+  public Fork createFork(long nativeHandle, Cleaner cleaner) {
+    return Fork.newInstance(nativeHandle, cleaner);
+  }
 }

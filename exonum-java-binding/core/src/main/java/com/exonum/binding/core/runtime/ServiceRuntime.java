@@ -81,7 +81,6 @@ public final class ServiceRuntime implements AutoCloseable {
   private final Map<Integer, ServiceWrapper> servicesById = new HashMap<>();
   private final Object lock = new Object();
 
-  // todo: [ECR-2334] Ensure the Node is properly destroyed when the runtime is stopped
   private Node node;
 
   /**
@@ -175,7 +174,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceStatus)}
    * is invoked with the {@code Status=Active}.
    *
-   * @param fork a database view to apply configuration
+   * @param fork a database access to apply configuration
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param configuration service instance configuration parameters as a serialized protobuf
    *     message
@@ -184,7 +183,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * @throws ExecutionException if such exception occurred in the service constructor;
    *     must be translated into an error of kind {@link ErrorKind#SERVICE}
    * @throws UnexpectedExecutionException if any other exception occurred in
-   *     the  the service constructor; it is included as cause. The cause must be translated
+   *     the service constructor; it is included as cause. The cause must be translated
    *     into an error of kind {@link ErrorKind#UNEXPECTED}
    * @throws RuntimeException if the runtime failed to instantiate the service for other reason
    */
@@ -204,6 +203,38 @@ public final class ServiceRuntime implements AutoCloseable {
     } catch (Exception e) {
       logger.error("Failed to initialize a service {} instance with parameters {}",
           instanceSpec, configuration, e);
+      throw e;
+    }
+  }
+
+  /**
+   * Initiates resuming of previously stopped service instance. Service instance artifact could
+   * be upgraded in advance to bring some new functionality.
+   *
+   * @param fork a database fork to apply changes to
+   * @param instanceSpec a service instance specification; must reference a deployed artifact
+   * @param arguments a service arguments as a serialized protobuf message
+   * @throws IllegalArgumentException if the given service instance is active; or its artifact
+   *     is not deployed
+   * @throws ExecutionException if such exception occurred in the service method;
+   *     must be translated into an error of kind {@link ErrorKind#SERVICE}
+   * @throws UnexpectedExecutionException if any other exception occurred in
+   *     the service method; it is included as cause. The cause must be translated
+   *     into an error of kind {@link ErrorKind#UNEXPECTED}
+   * @throws RuntimeException if the runtime failed to resume the service for other reason
+   */
+  public void initializeResumingService(Fork fork, ServiceInstanceSpec instanceSpec,
+      byte[] arguments) {
+    try {
+      synchronized (lock) {
+        checkStoppedService(instanceSpec.getId());
+        ServiceWrapper service = createServiceInstance(instanceSpec);
+        service.resume(fork, arguments);
+      }
+      logger.info("Resumed service: {}", instanceSpec);
+    } catch (Exception e) {
+      logger.error("Failed to resume a service {} instance with parameters {}",
+          instanceSpec, arguments, e);
       throw e;
     }
   }
@@ -258,13 +289,13 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   private void stopService(ServiceInstanceSpec instanceSpec) {
-    // TODO: ECR-2334 add restriction for creation new snapshots
     String name = instanceSpec.getName();
     Optional<ServiceWrapper> activeService = findService(name);
     if (activeService.isPresent()) {
       ServiceWrapper service = activeService.get();
-      unRegisterService(service);
+      service.requestToStop();
       runtimeTransport.disconnectServiceApi(service);
+      unRegisterService(service);
       logger.info("Stopped a service: {}", instanceSpec);
     } else {
       logger.warn("There is no active service with the given name {}. "
@@ -284,7 +315,8 @@ public final class ServiceRuntime implements AutoCloseable {
         .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
     // Instantiate the service
-    return servicesFactory.createService(serviceDefinition, instanceSpec, node);
+    return servicesFactory.createService(serviceDefinition, instanceSpec,
+        new MultiplexingNodeDecorator(node));
   }
 
   private void registerService(ServiceWrapper service) {
@@ -439,6 +471,10 @@ public final class ServiceRuntime implements AutoCloseable {
         // Finally, when no service classes remain in use, unload the service artifacts
         unloadArtifacts();
 
+        // Free-up native resources
+        if (node != null) {
+          node.close();
+        }
         logger.info("The runtime shutdown complete");
       } catch (Exception e) {
         logger.error("Shutdown failure", e);
@@ -484,20 +520,26 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   private ServiceWrapper getServiceById(Integer serviceId) {
-    checkService(serviceId);
+    checkActiveService(serviceId);
     return servicesById.get(serviceId);
   }
 
   /** Checks that the service with the given id is started in this runtime. */
-  private void checkService(Integer serviceId) {
+  private void checkActiveService(Integer serviceId) {
     checkArgument(servicesById.containsKey(serviceId),
         "No service with id=%s in the Java runtime", serviceId);
+  }
+
+  /** Checks that the service with the given id is not active in this runtime. */
+  private void checkStoppedService(Integer serviceId) {
+    ServiceWrapper activeService = servicesById.get(serviceId);
+    checkArgument(activeService == null,
+        "Service with id=%s should be stopped, but actually active. "
+            + "Found active service instance: %s", serviceId, activeService);
   }
 
   @VisibleForTesting
   Optional<ServiceWrapper> findService(String name) {
     return Optional.ofNullable(services.get(name));
   }
-
-  // TODO: unloadArtifact and stopService, once they can be used/ECR-2275
 }

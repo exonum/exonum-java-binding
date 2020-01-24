@@ -18,14 +18,14 @@ package com.exonum.binding.core.storage.database;
 
 import com.exonum.binding.core.util.LibraryLoader;
 
-final class Views {
+final class Accesses {
 
   static {
     LibraryLoader.load();
   }
 
   /** Destroys the native `View` object. May be used with both Snapshots and Forks. */
-  static native void nativeFree(long viewNativeHandle);
+  static native void nativeFree(long accessNativeHandle);
 
-  private Views() {}
+  private Accesses() {}
 }

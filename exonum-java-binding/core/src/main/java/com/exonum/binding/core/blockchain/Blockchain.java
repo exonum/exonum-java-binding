@@ -27,9 +27,9 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.proofs.BlockProof;
 import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.service.Configuration;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -145,21 +145,21 @@ import java.util.Optional;
  */
 public final class Blockchain {
 
-  private final View view;
+  private final Access access;
   private final CoreSchema schema;
 
   @VisibleForTesting
-  Blockchain(View view, CoreSchema schema) {
-    this.view = view;
+  Blockchain(Access access, CoreSchema schema) {
+    this.access = access;
     this.schema = schema;
   }
 
   /**
-   * Constructs a new blockchain instance for the given database view.
+   * Constructs a new blockchain instance for the given database access.
    */
-  public static Blockchain newInstance(View view) {
-    CoreSchema coreSchema = CoreSchema.newInstance(view);
-    return new Blockchain(view, coreSchema);
+  public static Blockchain newInstance(Access access) {
+    CoreSchema coreSchema = CoreSchema.newInstance(access);
+    return new Blockchain(access, coreSchema);
   }
 
   /**
@@ -176,7 +176,7 @@ public final class Blockchain {
    */
   public BlockProof createBlockProof(long blockHeight) {
     checkHeight(blockHeight);
-    Proofs.BlockProof blockProof = BlockchainProofs.createBlockProof(view, blockHeight);
+    Proofs.BlockProof blockProof = BlockchainProofs.createBlockProof(access, blockHeight);
     return BlockProof.newInstance(blockProof);
   }
 
@@ -185,9 +185,9 @@ public final class Blockchain {
    * of a <a href="#service-data-proof">Service Data Proof</a>.
    *
    * @param fullIndexName the full index name for which to create a proof
-   * @throws IllegalStateException if the view is not a snapshot, because a state of a service index
-   *     can be proved only for the latest committed block, not for any intermediate state during
-   *     transaction processing
+   * @throws IllegalStateException if the access is not a snapshot, because a state of a service
+   *     index can be proved only for the latest committed block, not for any intermediate state
+   *     during transaction processing
    * @throws IllegalArgumentException if the index with the given name does not exist;
    *     or is not Merkelized. An index does not exist until it is <em>initialized</em> —
    *     created for the first time
@@ -198,9 +198,14 @@ public final class Blockchain {
    *     <!-- TODO: Simplify once initialization happens automatically: ECR-4121 -->
    */
   public IndexProof createIndexProof(String fullIndexName) {
-    checkState(!view.canModify(), "Cannot create an index proof for a mutable view (%s).",
-        view);
-    return BlockchainProofs.createIndexProof((Snapshot) view, fullIndexName)
+    checkState(!access.canModify(), "Cannot create an index proof for a mutable access (%s).",
+        access);
+    // FIXME: As #canModify is moved to Access-interface, it is no longer correct to assume
+    //  that a Snapshot is the only non-modifiable impl. On top of that, RoFork will be
+    //  unmodifiable, but it does not make sense to create IndexProofs for it.
+    //  Finally, Snapshot might get wrapped in Prefixed accesses, therefore, a simple type test
+    //  won't work either.
+    return BlockchainProofs.createIndexProof((Snapshot) access, fullIndexName)
         .map(IndexProof::newInstance)
         .orElseThrow(() -> new IllegalArgumentException(
             String.format("Index %s does not exist or is not Merkelized", fullIndexName)));
