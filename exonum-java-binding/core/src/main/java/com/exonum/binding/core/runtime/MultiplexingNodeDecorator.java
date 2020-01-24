@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -34,7 +35,7 @@ class MultiplexingNodeDecorator implements Node {
   private boolean closed;
 
   MultiplexingNodeDecorator(Node node) {
-    this.node = node;
+    this.node = checkNotNull(node);
     this.closed = false;
   }
 
