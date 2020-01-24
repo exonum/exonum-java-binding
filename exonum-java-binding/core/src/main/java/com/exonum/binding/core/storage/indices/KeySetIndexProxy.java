@@ -73,6 +73,9 @@ public final class KeySetIndexProxy<E> extends AbstractIndexProxy implements Ite
   /**
    * Creates a new key set proxy.
    *
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getKeySet(IndexAddress, Serializer)}.
+   *
    * @param address an index address
    * @param access a database access. Must be valid. If an access is read-only,
    *             "destructive" operations are not permitted.

@@ -33,6 +33,8 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  * <p>A fork allows to perform a transaction: a number of independent writes to the database,
  * which then may be <em>atomically</em> applied (i.e. committed) to the database and change
  * the database state.
+ *
+ * <p>The Fork does not modify the index name upon <em>address resolution</em>.
  */
 public final class Fork extends AbstractAccess {
 

@@ -92,6 +92,9 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   /**
    * Creates a ProofMapIndexProxy.
    *
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getProofMap(IndexAddress, Serializer, Serializer)}.
+   *
    * @param address an index address
    * @param access a database access. Must be valid.
    *             If an access is read-only, "destructive" operations are not permitted.
@@ -112,6 +115,9 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
   /**
    * Creates a <a href="ProofMapIndexProxy.html#key-hashing">ProofMapIndexProxy that uses non-hashed keys</a>.
    * Requires that keys are 32-byte long.
+   *
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getRawProofMap(IndexAddress, Serializer, Serializer)}.
    *
    * @param address an index address
    * @param access a database access. Must be valid.
