@@ -16,6 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.core.transaction.ExecutionPreconditions.checkExecution;
 import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
 import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
@@ -37,7 +38,6 @@ import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
@@ -56,7 +56,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public static final int CREATE_WALLET_TX_ID = 1;
   public static final int TRANSFER_TX_ID = 2;
 
-  @Nullable private Node node;
+  @Nullable
+  private Node node;
 
   @Inject
   public CryptocurrencyServiceImpl(ServiceInstanceSpec instanceSpec) {
@@ -159,20 +160,6 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   private static PublicKey toPublicKey(ByteString s) {
     return PublicKey.fromBytes(s.toByteArray());
-  }
-
-  // todo: consider extracting in a TransactionPreconditions or
-  //   ExecutionException, with proper lazy formatting: ECR-2746.
-  /** Checks a transaction execution precondition, throwing if it is false. */
-  private static void checkExecution(boolean precondition, byte errorCode) {
-    checkExecution(precondition, errorCode, null);
-  }
-
-  private static void checkExecution(boolean precondition, byte errorCode,
-      @Nullable String message) {
-    if (!precondition) {
-      throw new ExecutionException(errorCode, message);
-    }
   }
 
   private HistoryEntity createTransferHistoryEntry(TransactionMessage txMessage) {

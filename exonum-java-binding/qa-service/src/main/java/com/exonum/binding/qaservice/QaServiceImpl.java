@@ -16,8 +16,11 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+import static com.exonum.binding.core.transaction.ExecutionPreconditions.checkExecution;
 import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.QaExecutionError.EMPTY_TIME_ORACLE_NAME;
+import static com.exonum.binding.qaservice.QaExecutionError.RESUME_SERVICE_ERROR;
 import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -27,6 +30,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
@@ -43,6 +47,7 @@ import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
+import com.exonum.binding.qaservice.Config.QaResumeArguments;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.binding.time.TimeSchema;
 import com.exonum.core.messages.Blockchain.Config;
@@ -108,6 +113,15 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     // Add an afterCommit counter that will be incremented after each block committed event.
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
+  }
+
+  @Override
+  public void resume(Fork fork, byte[] arguments) {
+    QaResumeArguments resumeArguments = parseResumeArguments(arguments);
+
+    checkExecution(!resumeArguments.getShouldThrowException(), RESUME_SERVICE_ERROR.code);
+
+    createCounter(resumeArguments.getCounterName(), fork);
   }
 
   @Override
@@ -282,10 +296,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
     HashCode counterId = Hashing.defaultHashFunction()
         .hashString(counterName, UTF_8);
-    if (counters.containsKey(counterId)) {
-      throw new ExecutionException(COUNTER_ALREADY_EXISTS.code,
-          format("Counter %s already exists", counterName));
-    }
+    checkExecution(!counters.containsKey(counterId),
+        COUNTER_ALREADY_EXISTS.code, "Counter %s already exists", counterName);
     assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
 
     counters.put(counterId, 0L);
@@ -303,9 +315,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
 
     // Increment the counter if there is such.
-    if (!counters.containsKey(counterId)) {
-      throw new ExecutionException(UNKNOWN_COUNTER.code);
-    }
+    checkExecution(counters.containsKey(counterId), UNKNOWN_COUNTER.code);
+
     long newValue = counters.get(counterId) + 1;
     counters.put(counterId, newValue);
   }
@@ -344,10 +355,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // We do *not* check if the time oracle is active to (a) allow running this service with
     // reduced read functionality without time oracle; (b) testing time schema when it is not
     // active.
-    if (Strings.isNullOrEmpty(timeOracleName)) {
-      throw new ExecutionException(EMPTY_TIME_ORACLE_NAME.code,
-          format("Empty time oracle name: %s", timeOracleName));
-    }
+    checkExecution(!Strings.isNullOrEmpty(timeOracleName), EMPTY_TIME_ORACLE_NAME.code,
+        "Empty time oracle name: %s", timeOracleName);
   }
 
   private void updateTimeOracle(Fork fork, Configuration configuration) {
@@ -360,5 +369,10 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // Save the configuration
     String timeOracleName = config.getTimeOracleName();
     schema.timeOracleName().set(timeOracleName);
+  }
+
+  private QaResumeArguments parseResumeArguments(byte[] arguments) {
+    Serializer<QaResumeArguments> serializer = protobuf(QaResumeArguments.class);
+    return serializer.fromBytes(arguments);
   }
 }

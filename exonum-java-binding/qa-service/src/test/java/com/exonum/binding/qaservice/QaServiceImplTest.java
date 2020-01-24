@@ -24,8 +24,10 @@ import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_UNKNOWN_
 import static com.exonum.binding.qaservice.ApiController.QaPaths.TIME_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.VALIDATORS_TIMES_PATH;
 import static com.exonum.binding.qaservice.ApiControllerTest.multiMap;
+import static com.exonum.binding.qaservice.QaArtifactInfo.ARTIFACT_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
+import static com.exonum.binding.qaservice.QaExecutionError.RESUME_SERVICE_ERROR;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
@@ -37,15 +39,23 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
+import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
+import com.exonum.binding.qaservice.Config.QaResumeArguments;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
@@ -118,6 +128,50 @@ class QaServiceImplTest {
       assertThat(counters.get(afterCommitCounterId)).isEqualTo(0L);
       assertThat(counterNames.get(afterCommitCounterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
     }
+  }
+
+  @Test
+  void resume() throws CloseFailuresException {
+    String counterName = "resume";
+    ServiceInstanceSpec spec = ServiceInstanceSpec
+        .newInstance(QA_SERVICE_NAME, QA_SERVICE_ID, ARTIFACT_ID);
+    byte[] arguments = QaResumeArguments.newBuilder()
+        .setCounterName(counterName)
+        .setShouldThrowException(false)
+        .build()
+        .toByteArray();
+
+    try (TemporaryDb db = TemporaryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
+      Fork fork = db.createFork(cleaner);
+
+      QaServiceImpl qaService = new QaServiceImpl(spec);
+      qaService.resume(fork, arguments);
+
+      QaSchema schema = new QaSchema(fork, spec.getName());
+      MapIndex<HashCode, Long> counters = schema.counters();
+      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      HashCode counterId = sha256().hashString(counterName, UTF_8);
+
+      assertThat(counters.get(counterId)).isEqualTo(0L);
+      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
+    }
+  }
+
+  @Test
+  void resumeShouldThrowException() {
+    ServiceInstanceSpec spec = ServiceInstanceSpec
+        .newInstance(QA_SERVICE_NAME, QA_SERVICE_ID, ARTIFACT_ID);
+    byte[] arguments = QaResumeArguments.newBuilder()
+        .setShouldThrowException(true)
+        .build()
+        .toByteArray();
+    Fork fork = mock(Fork.class);
+
+    QaServiceImpl qaService = new QaServiceImpl(spec);
+
+    ExecutionException exception = assertThrows(ExecutionException.class,
+        () -> qaService.resume(fork, arguments));
+    assertThat(exception.getErrorCode()).isEqualTo(RESUME_SERVICE_ERROR.code);
   }
 
   @Test
