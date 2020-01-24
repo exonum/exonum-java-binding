@@ -30,7 +30,6 @@ import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
 import static com.exonum.binding.qaservice.QaExecutionError.RESUME_SERVICE_ERROR;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
-import static com.exonum.binding.qaservice.QaServiceImpl.RESUME_COUNTER_NAME;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.binding.qaservice.TransactionMessages.createIncrementCounterTx;
 import static com.exonum.binding.qaservice.TransactionMessages.createUnknownTx;
@@ -133,9 +132,11 @@ class QaServiceImplTest {
 
   @Test
   void resume() throws CloseFailuresException {
+    String counterName = "resume";
     ServiceInstanceSpec spec = ServiceInstanceSpec
         .newInstance(QA_SERVICE_NAME, QA_SERVICE_ID, ARTIFACT_ID);
     byte[] arguments = QaResumeArguments.newBuilder()
+        .setCounterName(counterName)
         .setShouldThrowException(false)
         .build()
         .toByteArray();
@@ -149,10 +150,10 @@ class QaServiceImplTest {
       QaSchema schema = new QaSchema(fork, spec.getName());
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
-      HashCode counterId = sha256().hashString(RESUME_COUNTER_NAME, UTF_8);
+      HashCode counterId = sha256().hashString(counterName, UTF_8);
 
       assertThat(counters.get(counterId)).isEqualTo(0L);
-      assertThat(counterNames.get(counterId)).isEqualTo(RESUME_COUNTER_NAME);
+      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
     }
   }
 

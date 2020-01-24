@@ -94,9 +94,6 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @VisibleForTesting
   static final String AFTER_COMMIT_COUNTER_NAME = "after_commit_counter";
 
-  @VisibleForTesting
-  static final String RESUME_COUNTER_NAME = "resume_counter";
-
   @Nullable
   private Node node;
 
@@ -122,13 +119,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
   }
 
-  //TODO: add @Override when 4133 will be ready
+  @Override
   public void resume(Fork fork, byte[] arguments) {
     QaResumeArguments resumeArguments = parseResumeArguments(arguments);
 
     checkExecution(!resumeArguments.getShouldThrowException(), RESUME_SERVICE_ERROR.code);
 
-    createCounter(RESUME_COUNTER_NAME, fork);
+    createCounter(resumeArguments.getCounterName(), fork);
   }
 
   @Override

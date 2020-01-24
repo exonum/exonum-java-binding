@@ -12,6 +12,8 @@ message QaConfiguration {
 
 // Parameters to use in the QA service resume.
 message QaResumeArguments {
+  // name of the counter to create
+  string counter_name = 1;
   // Identifies either to throw execution exception or not.
-  bool should_throw_exception = 1;
+  bool should_throw_exception = 2;
 }
