@@ -75,7 +75,8 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
    */
   public static <E> ProofEntryIndexProxy<E> newInstance(IndexAddress address,
       /* todo: (here and elsewhere) or Access? That would require pulling up #getCleaner
-          in the interface as well. */ AbstractAccess access,
+          in the interface as well. */
+      AbstractAccess access,
       Serializer<E> serializer) {
     checkArgument(!address.getIdInGroup().isPresent(),
         "Groups of Entries are not supported, use a ProofMapIndex instead");
@@ -97,8 +98,8 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
     return entryNativeHandle;
   }
 
-  private ProofEntryIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
-                               CheckingSerializerDecorator<T> serializer) {
+  private ProofEntryIndexProxy(NativeHandle nativeHandle, IndexAddress address,
+      AbstractAccess access, CheckingSerializerDecorator<T> serializer) {
     super(nativeHandle, address, access);
     this.serializer = serializer;
   }

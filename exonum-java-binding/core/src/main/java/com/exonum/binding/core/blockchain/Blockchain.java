@@ -185,9 +185,9 @@ public final class Blockchain {
    * of a <a href="#service-data-proof">Service Data Proof</a>.
    *
    * @param fullIndexName the full index name for which to create a proof
-   * @throws IllegalStateException if the access is not a snapshot, because a state of a service index
-   *     can be proved only for the latest committed block, not for any intermediate state during
-   *     transaction processing
+   * @throws IllegalStateException if the access is not a snapshot, because a state of a service
+   *     index can be proved only for the latest committed block, not for any intermediate state
+   *     during transaction processing
    * @throws IllegalArgumentException if the index with the given name does not exist;
    *     or is not Merkelized. An index does not exist until it is <em>initialized</em> —
    *     created for the first time

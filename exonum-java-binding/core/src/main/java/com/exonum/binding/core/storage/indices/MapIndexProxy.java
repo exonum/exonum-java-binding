@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;

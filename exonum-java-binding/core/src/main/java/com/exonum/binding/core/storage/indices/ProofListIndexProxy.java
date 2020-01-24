@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkRange;
 
 import com.exonum.binding.common.hash.HashCode;
@@ -97,8 +96,8 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
       long accessNativeHandle);
 
-  private ProofListIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
-                              CheckingSerializerDecorator<E> serializer) {
+  private ProofListIndexProxy(NativeHandle nativeHandle, IndexAddress address,
+      AbstractAccess access, CheckingSerializerDecorator<E> serializer) {
     super(nativeHandle, address, access, serializer);
   }
 

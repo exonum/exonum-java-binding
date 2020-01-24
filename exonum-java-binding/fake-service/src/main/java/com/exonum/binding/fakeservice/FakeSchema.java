@@ -33,10 +33,9 @@ public final class FakeSchema implements Schema {
     this.access = access;
   }
 
+  /** Creates a test proof map. */
   public ProofMapIndexProxy<String, String> testMap() {
     String fullName = namespace + ".test-map";
-    return access
-        .getProofMap(IndexAddress.valueOf(fullName),
-            string(), string());
+    return access.getProofMap(IndexAddress.valueOf(fullName), string(), string());
   }
 }

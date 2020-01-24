@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.collect.MapEntry;
@@ -105,7 +104,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @see StandardSerializers
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInstance(
-      IndexAddress address, AbstractAccess access, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+      IndexAddress address, AbstractAccess access, Serializer<K> keySerializer,
+      Serializer<V> valueSerializer) {
     return newMapIndexProxy(address, access, keySerializer, valueSerializer, true);
   }
 
@@ -125,7 +125,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    * @see StandardSerializers
    */
   public static <K, V> ProofMapIndexProxy<K, V> newInstanceNoKeyHashing(
-      IndexAddress address, AbstractAccess access, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+      IndexAddress address, AbstractAccess access, Serializer<K> keySerializer,
+      Serializer<V> valueSerializer) {
     return newMapIndexProxy(address, access, keySerializer, valueSerializer, false);
   }
 

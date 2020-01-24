@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkStorageValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 
