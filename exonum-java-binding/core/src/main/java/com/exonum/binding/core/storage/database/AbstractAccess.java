@@ -51,7 +51,7 @@ import javax.annotation.Nullable;
 public abstract class AbstractAccess extends AbstractNativeProxy implements Access {
 
   private static final long UNKNOWN_INDEX_ID = 0L;
-  private final OpenIndexRegistry indexRegistry = new OpenIndexRegistry();
+  private final OpenIndexRegistry indexRegistry;
   private final boolean canModify;
 
   /**
@@ -61,8 +61,20 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    * @param canModify if the access allows modifications
    */
   AbstractAccess(NativeHandle nativeHandle, boolean canModify) {
+    this(nativeHandle, canModify, new OpenIndexRegistry());
+  }
+
+  /**
+   * Create a new access proxy with the given index registry.
+   *
+   * @param nativeHandle a native handle: an implementation-specific reference to a native object
+   * @param canModify if the access allows modifications
+   * @param registry a pool of open indexes to use
+   */
+  AbstractAccess(NativeHandle nativeHandle, boolean canModify, OpenIndexRegistry registry) {
     super(nativeHandle);
     this.canModify = canModify;
+    indexRegistry = registry;
   }
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
@@ -229,6 +241,13 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
   @Override
   public long getAccessNativeHandle() {
     return super.getNativeHandle();
+  }
+
+  /**
+   * Returns the registry of open indexes for this Access.
+   */
+  protected OpenIndexRegistry getOpenIndexes() {
+    return indexRegistry;
   }
 
   /**

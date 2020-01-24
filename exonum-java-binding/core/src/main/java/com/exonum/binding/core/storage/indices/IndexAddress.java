@@ -19,6 +19,7 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.exonum.binding.core.storage.database.Access;
 import com.google.common.base.MoreObjects;
 import java.util.Arrays;
 import java.util.Objects;
@@ -29,6 +30,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * An Exonum index address: a pair of the name and an optional id in a group, which identifies
  * an Exonum index.
  *
+ * <p>Index addresses are resolved relatively to database {@link Access} objects.
+ * An index address cannot be translated into a resolved address without the corresponding
+ * {@link Access} object.
  * <!-- todo: Extend given accesses — shall we keep just IndexAddress, or split into Relative
  *       and Resolved IndexAddress? -->
  */
