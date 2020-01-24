@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Fork, Snapshot};
+use exonum_merkledb::{Fork, Snapshot, migration::{Migration, Scratchpad}, access::Prefixed};
 use jni::{objects::JClass, JNIEnv};
 
 use handle::{self, Handle};
@@ -61,10 +61,81 @@ pub(crate) enum View {
     Owned(ViewOwned),
 }
 
+pub(crate) enum EjbAccess {
+    Raw(View),
+    Migration(View, String),
+    Scratchpad(View, String),
+    Prefixed(View, String),
+}
+
+impl EjbAccess {
+    pub fn migration(access: View, namespace: &str) -> Self {
+        EjbAccess::Migration(access, namespace.to_string())
+    }
+
+    pub fn scratchpad(access: View, namespace: &str) -> Self {
+        EjbAccess::Scratchpad(access, namespace.to_string())
+    }
+
+    pub fn prefixed(access: View, namespace: &str) -> Self {
+        EjbAccess::Prefixed(access, namespace.to_string())
+    }
+
+    pub fn get_migration(&self) -> Migration<&Fork> {
+        match self {
+            EjbAccess::Migration(raw_view, ref namespace) => match raw_view {
+                View::RefFork(fork) => Migration::new(namespace, fork),
+                View::Owned(ViewOwned::Fork(fork)) => Migration::new(namespace, fork),
+                _ => unimplemented!()
+            },
+            _ => unimplemented!(),
+        }
+    }
+
+    pub fn get_scratchpad(&self) -> Scratchpad<&Fork> {
+        match self {
+            EjbAccess::Scratchpad(raw_view, ref namespace) => match raw_view {
+                View::RefFork(fork) => Scratchpad::new(namespace, fork),
+                View::Owned(ViewOwned::Fork(fork)) => Scratchpad::new(namespace, fork),
+                _ => unimplemented!()
+            },
+            _ => unimplemented!()
+        }
+    }
+
+    pub fn get_prefixed(&self) -> EjbPrefixed<'_> {
+        match self {
+            EjbAccess::Prefixed(raw_view, ref namespace) => match raw_view {
+                View::RefFork(fork) => EjbPrefixed::Mutable(Prefixed::new(namespace, fork)),
+                View::RefMutFork(fork) => EjbPrefixed::Mutable(Prefixed::new(namespace, fork)),
+                View::Owned(ViewOwned::Fork(fork)) => EjbPrefixed::Mutable(Prefixed::new(namespace, fork)),
+                View::RefSnapshot(snapshot) => EjbPrefixed::Immutable(Prefixed::new(namespace, *snapshot)),
+                View::Owned(ViewOwned::Snapshot(snapshot)) => EjbPrefixed::Immutable(Prefixed::new(namespace, snapshot)),
+            },
+            _ => unimplemented!()
+        }
+    }
+
+    pub fn get(&self) -> ViewRef<'_> {
+        match self {
+            EjbAccess::Raw(raw) => raw.get(),
+            EjbAccess::Migration(_, _) => ViewRef::Migration(self.get_migration()),
+            EjbAccess::Scratchpad(_, _) => ViewRef::Scratchpad(self.get_scratchpad()),
+            EjbAccess::Prefixed(_, _) => ViewRef::Prefixed(self.get_prefixed()),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum ViewOwned {
     Snapshot(Box<dyn Snapshot>),
     Fork(Box<Fork>),
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum EjbPrefixed<'a> {
+    Immutable(Prefixed<'a, &'a dyn Snapshot>),
+    Mutable(Prefixed<'a, &'a Fork>),
 }
 
 /// Hides the differences between owning and non-owning `View` variants
@@ -73,6 +144,9 @@ pub(crate) enum ViewOwned {
 pub(crate) enum ViewRef<'a> {
     Snapshot(&'a dyn Snapshot),
     Fork(&'a Fork),
+    Migration(Migration<'a, &'a Fork>),
+    Scratchpad(Scratchpad<'a, &'a Fork>),
+    Prefixed(EjbPrefixed<'a>),
 }
 
 impl View {
@@ -204,7 +278,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Views_nativ
 mod tests {
     use super::*;
     use exonum_merkledb::{
-        access::{Access, FromAccess, RawAccess},
+        access::{Access, FromAccess},
         Database, Entry, TemporaryDB,
     };
 
@@ -274,7 +348,7 @@ mod tests {
 
         view.rollback();
         // Fork's state restored to the checkpoint
-        check_value(&view.get(), FIRST_TEST_VALUE);
+        assert!(check_value(&view.get(), FIRST_TEST_VALUE));
     }
 
     #[test]
@@ -299,9 +373,54 @@ mod tests {
         }
     }
 
+    #[test]
+    fn migration_support() {
+        let db = TemporaryDB::new();
+        // create migration
+        let view = {
+            let fork = db.fork();
+            EjbAccess::migration(View::from_owned_fork(fork), "namespace")
+        };
+
+        // send to java and do stuff
+        // ...
+        // use migration:
+        view.get_migration().create_tombstone("address");
+    }
+
+    #[test]
+    fn scratchpad_support() {
+        let db = setup_database();
+        // create scratchpad
+        let view = {
+            let fork = db.fork();
+            EjbAccess::scratchpad(View::from_owned_fork(fork), "namespace")
+        };
+
+        // send to java and do stuff
+        // ...
+        // use scratchpad:
+        assert_eq!(check_value(&view.get(), FIRST_TEST_VALUE), false);
+    }
+
+    #[test]
+    fn prefixed_support() {
+        let db = setup_database();
+        // create prefixed
+        let view = {
+            let fork = db.fork();
+            EjbAccess::prefixed(View::from_owned_fork(fork), "namespace")
+        };
+
+        // send to java and do stuff
+        // ...
+        // use prefixed:
+        assert_eq!(check_value(&view.get(), FIRST_TEST_VALUE), false);
+    }
+
     fn check_snapshot(view_ref: ViewRef) {
         match view_ref {
-            ViewRef::Snapshot(_) => check_value(&view_ref, FIRST_TEST_VALUE),
+            ViewRef::Snapshot(_) => assert!(check_value(&view_ref, FIRST_TEST_VALUE)),
             _ => unreachable!("Invalid variant of ViewRef, expected Snapshot"),
         }
     }
@@ -329,17 +448,24 @@ mod tests {
         db
     }
 
-    fn check_value(view_ref: &ViewRef, expected: i32) {
+    fn check_value(view_ref: &ViewRef, expected: i32) -> bool {
         let value = match *view_ref {
             ViewRef::Snapshot(snapshot) => entry(&*snapshot).get(),
             ViewRef::Fork(fork) => entry(&*fork).get(),
+            ViewRef::Migration(migration) => entry(migration).get(),
+            ViewRef::Scratchpad(scratchpad) => entry(scratchpad).get(),
+            // wtf, Prefixed does not implement Copy, while `Migration` and `Scratchpad` does
+            ViewRef::Prefixed(ref prefixed) => match prefixed {
+                EjbPrefixed::Immutable(ref prefixed) => entry(prefixed.clone()).get(),
+                EjbPrefixed::Mutable(ref prefixed) => entry(prefixed.clone()).get(),
+            }
         };
-        assert_eq!(Some(expected), value);
+        Some(expected) == value
     }
 
     fn entry<T>(view: T) -> Entry<T::Base, i32>
     where
-        T: Access + RawAccess,
+        T: Access,
     {
         Entry::from_access(view, "test".into()).unwrap()
     }
