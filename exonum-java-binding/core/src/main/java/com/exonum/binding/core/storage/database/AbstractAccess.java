@@ -184,6 +184,26 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
     return newIndex;
   }
 
+  private OptionalLong findIndexId(IndexAddress address) {
+    long id = findIndexId(address.getName(), address.getIdInGroup().orElse(null));
+    if (id == UNKNOWN_INDEX_ID) {
+      return OptionalLong.empty();
+    }
+    return OptionalLong.of(id);
+  }
+
+  /**
+   * Finds an internal unique MerkleDB id of an index with the given relative name
+   * and optional id in group.
+   * @return a non-zero id if the index is created in the database; zero if the index
+   *     does not exist
+   */
+  /* TODO: either native — if all Accesses can have same impl; or abstract and native
+      in each Access [ECR-4157] */
+  private long findIndexId(String name, @Nullable byte[] idInGroup) {
+    return 0;
+  }
+
   /**
    * Registers a new index created with this access.
    */
@@ -216,24 +236,4 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    * and other objects depending on this access.
    */
   public abstract Cleaner getCleaner();
-
-  private OptionalLong findIndexId(IndexAddress address) {
-    long id = findIndexId(address.getName(), address.getIdInGroup().orElse(null));
-    if (id == UNKNOWN_INDEX_ID) {
-      return OptionalLong.empty();
-    }
-    return OptionalLong.of(id);
-  }
-
-  /**
-   * Finds an internal unique MerkleDB id of an index with the given relative name
-   * and optional id in group.
-   * @return a non-zero id if the index is created in the database; zero if the index
-   *     does not exist
-   */
-  /* TODO: either native — if all Accesses can have same impl; or abstract and native
-      in each Access [ECR-4157]*/
-  private long findIndexId(String name, @Nullable byte[] idInGroup) {
-    return 0;
-  }
 }
