@@ -141,7 +141,7 @@ class ServiceRuntimeAdapterTest {
     long forkHandle = 0x110b;
     Cleaner cleaner = new Cleaner();
     Fork fork = Fork.newInstance(forkHandle, false, cleaner);
-    when(viewFactory.createFork(eq(forkHandle), any(Cleaner.class)))
+    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
         .thenReturn(fork);
 
     int serviceId = 1;

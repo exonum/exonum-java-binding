@@ -210,7 +210,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * Initiates resuming of previously stopped service instance. Service instance artifact could
    * be upgraded in advance to bring some new functionality.
    *
-   * @param fork a database view to apply changes to
+   * @param fork a database fork to apply changes to
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param arguments a service arguments as a serialized protobuf message
    * @throws IllegalArgumentException if the given service instance is active; or its artifact

@@ -163,7 +163,7 @@ public class ServiceRuntimeAdapter {
   void initializeResumingService(long forkHandle, byte[] instanceSpec, byte[] arguments)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Fork fork = viewFactory.createFork(forkHandle, cleaner);
+      Fork fork = accessFactory.createFork(forkHandle, cleaner);
       ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
       serviceRuntime.initializeResumingService(fork, javaInstanceSpec, arguments);
     } catch (CloseFailuresException e) {
