@@ -19,6 +19,8 @@ use exonum::{
     crypto::{Hash, PublicKey},
     exonum_merkledb::{BinaryValue, Snapshot},
     runtime::{
+        migrations::{InitMigrationError, MigrationScript},
+        versioning::Version,
         ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, InstanceId, InstanceSpec,
         InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
     },
@@ -165,13 +167,15 @@ impl Runtime for JavaRuntimeProxy {
         &mut self,
         _snapshot: &dyn Snapshot,
         instance_spec: &InstanceSpec,
-        status: InstanceStatus,
+        status: &InstanceStatus,
     ) {
         let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
+        let serialized_instance_status: Vec<u8> = status.to_bytes();
         unwrap_jni(self.exec.with_attached(|env| {
             let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
-            let instance_status = status as i32;
+            let instance_status =
+                JObject::from(env.byte_array_from_slice(&serialized_instance_status)?);
 
             panic_on_exception(
                 env,
@@ -184,6 +188,15 @@ impl Runtime for JavaRuntimeProxy {
             );
             Ok(())
         }));
+    }
+
+    fn migrate(
+        &self,
+        _new_artifact: &ArtifactId,
+        _data_version: &Version,
+    ) -> Result<Option<MigrationScript>, InitMigrationError> {
+        // TODO (ECR-3787): implement
+        Ok(None)
     }
 
     fn execute(

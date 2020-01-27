@@ -43,11 +43,15 @@ import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
-import com.exonum.core.messages.Runtime.InstanceState.Status;
+import com.exonum.core.messages.Runtime.InstanceMigration;
+import com.exonum.core.messages.Runtime.InstanceStatus;
+import com.exonum.core.messages.Runtime.InstanceStatus.Simple;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -56,7 +60,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -72,6 +76,8 @@ class ServiceRuntimeIntegrationTest {
   static final int TEST_ID = 17;
   static final HashCode TEST_HASH = HashCode.fromBytes(bytes(1, 2, 3));
   static final PublicKey TEST_PUBLIC_KEY = PublicKey.fromBytes(bytes(4, 5, 6));
+  static final InstanceStatus ACTIVE_STATUS = InstanceStatus.newBuilder()
+      .setSimple(Simple.ACTIVE).build();
 
   @Mock
   private ServiceLoader serviceLoader;
@@ -261,7 +267,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Activate the service from the artifact
-    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+    serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
@@ -295,11 +301,11 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Activate the service
-    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+    serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS);
 
     // Try to activate another service with the same service instance specification
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE));
+        () -> serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS));
 
     assertThat(e).hasMessageContaining("name");
     assertThat(e).hasMessageContaining(TEST_NAME);
@@ -315,7 +321,9 @@ class ServiceRuntimeIntegrationTest {
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
 
-    serviceRuntime.updateInstanceStatus(instanceSpec, Status.STOPPED);
+    InstanceStatus stoppedStatus = InstanceStatus.newBuilder()
+        .setSimple(Simple.STOPPED).build();
+    serviceRuntime.updateInstanceStatus(instanceSpec, stoppedStatus);
 
     verify(transport, never()).disconnectServiceApi(any(ServiceWrapper.class));
   }
@@ -342,10 +350,12 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Activate the service
-    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+    serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS);
 
     // Stop the service
-    serviceRuntime.updateInstanceStatus(instanceSpec, Status.STOPPED);
+    InstanceStatus stoppedStatus = InstanceStatus.newBuilder()
+        .setSimple(Simple.STOPPED).build();
+    serviceRuntime.updateInstanceStatus(instanceSpec, stoppedStatus);
 
     // Verify service stopped
     verify(transport).disconnectServiceApi(any(ServiceWrapper.class));
@@ -355,16 +365,28 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @ParameterizedTest
-  @EnumSource(value = Status.class, names = {"NONE", "UNRECOGNIZED"})
-  void updateServiceStatusBadStatus(Status badStatus) {
+  @MethodSource("badStatuses")
+  void updateServiceStatusBadStatus(InstanceStatus badStatus) {
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
 
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
         () -> serviceRuntime.updateInstanceStatus(instanceSpec, badStatus));
-    assertThat(exception).hasMessageContaining(badStatus.name());
+    assertThat(exception).hasMessageContaining(badStatus.getSimple().name());
     assertThat(exception).hasMessageContaining(instanceSpec.getName());
+  }
+
+  private static List<InstanceStatus> badStatuses() {
+    return ImmutableList.of(
+        InstanceStatus.newBuilder()
+            .setSimple(Simple.NONE)
+            .build(),
+        //TODO: add migration support
+        InstanceStatus.newBuilder()
+            .setMigration(InstanceMigration.newBuilder().build())
+            .build()
+    );
   }
 
   @Test
@@ -420,7 +442,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Activate the service from the artifact
-    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+    serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS);
 
     byte[] arguments = anyConfiguration();
     Fork fork = mock(Fork.class);
@@ -491,7 +513,7 @@ class ServiceRuntimeIntegrationTest {
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
-      serviceRuntime.updateInstanceStatus(INSTANCE_SPEC, Status.ACTIVE);
+      serviceRuntime.updateInstanceStatus(INSTANCE_SPEC, ACTIVE_STATUS);
     }
 
     @Test
@@ -632,7 +654,7 @@ class ServiceRuntimeIntegrationTest {
 
       // Create the services
       for (ServiceInstanceSpec instanceSpec : SERVICES.keySet()) {
-        serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+        serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS);
       }
     }
 

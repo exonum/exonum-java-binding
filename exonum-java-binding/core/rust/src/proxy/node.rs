@@ -22,6 +22,7 @@ use exonum::{
 };
 use exonum_merkledb::{ObjectHash, Snapshot};
 use failure;
+use futures::Future;
 use jni::objects::JClass;
 use jni::sys::{jbyteArray, jshort};
 use jni::JNIEnv;
@@ -66,7 +67,10 @@ impl Node {
         let verified = Verified::from_value(tx, pub_key.to_owned(), secret_key);
         let tx_hash = verified.object_hash();
         // TODO(ECR-3679): check Core behaviour/any errors on service inactivity
-        self.blockchain.sender().broadcast_transaction(verified)?;
+        self.blockchain
+            .sender()
+            .broadcast_transaction(verified)
+            .wait()?;
         Ok(tx_hash)
     }
 }

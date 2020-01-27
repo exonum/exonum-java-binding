@@ -6,6 +6,7 @@ authors = ["Exonum team <contact@exonum.com>"]
 [dependencies]
 env_logger = "0.7"
 exonum-explorer-service = "0.13.0-rc.2"
+exonum-rust-runtime = "0.13.0-rc.2"
 exonum-supervisor = "0.13.0-rc.2"
 exonum-time = "0.13.0-rc.2"
 failure = "0.1"
