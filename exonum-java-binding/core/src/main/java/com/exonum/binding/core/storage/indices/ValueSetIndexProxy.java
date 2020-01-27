@@ -80,6 +80,9 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
   /**
    * Creates a new value set.
    *
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getValueSet(IndexAddress, Serializer)}.
+   *
    * @param address an index address
    * @param access a database access. Must be valid. If an access is read-only,
    *             "destructive" operations are not permitted.

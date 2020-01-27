@@ -33,6 +33,8 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  *   snapshots, however, might correspond to a new database state.
  * </ul>
  *
+ * <p>The Snapshot does not modify the index name upon <em>address resolution</em>.
+ *
  * @see Fork
  */
 public final class Snapshot extends AbstractAccess {

@@ -63,6 +63,9 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
   /**
    * Creates a new Entry.
    *
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getProofEntry(IndexAddress, Serializer)}.
+   *
    * @param address an index address. Must correspond to a regular index, not a group.
    *     Use {@link ProofMapIndexProxy} instead of groups of entries.
    * @param access a database access. Must be valid.

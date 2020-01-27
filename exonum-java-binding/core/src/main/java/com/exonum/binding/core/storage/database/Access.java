@@ -41,8 +41,8 @@ import com.exonum.binding.core.storage.indices.ValueSetIndexProxy;
  * state, but are performed separately. For example, Exonum will apply the changes
  * made by all transactions when a block is confirmed.
  *
- * <p>Accesses may perform index address resolution: they may modify the passed index address
- * before fetching it from the database. That implies that addresses passed to index factory
+ * <p>Accesses may perform <em>index address resolution</em>: they may modify the passed index
+ * address before fetching it from the database. That implies that addresses passed to index factory
  * methods are <em>relative</em> to an access object. The address resolution rules
  * must be documented in interface implementations.
  *
