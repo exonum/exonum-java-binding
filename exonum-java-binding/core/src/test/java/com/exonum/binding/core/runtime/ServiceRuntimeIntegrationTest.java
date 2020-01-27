@@ -442,7 +442,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     // Activate the service from the artifact
-    serviceRuntime.updateInstanceStatus(instanceSpec, Status.ACTIVE);
+    serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS);
 
     byte[] arguments = anyConfiguration();
     Fork fork = mock(Fork.class);
