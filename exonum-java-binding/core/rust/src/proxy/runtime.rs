@@ -19,6 +19,8 @@ use exonum::{
     crypto::{Hash, PublicKey},
     exonum_merkledb::{BinaryValue, Snapshot},
     runtime::{
+        migrations::{InitMigrationError, MigrationScript},
+        versioning::Version,
         ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, InstanceId, InstanceSpec,
         InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
     },
@@ -33,8 +35,6 @@ use jni::{
 
 use std::fmt;
 
-use exonum::runtime::migrations::{InitMigrationError, MigrationScript};
-use exonum::runtime::versioning::Version;
 use {
     runtime::{jni_call_default, jni_call_transaction, Error},
     storage::View,
