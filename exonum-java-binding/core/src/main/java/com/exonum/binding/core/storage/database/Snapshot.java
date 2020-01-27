@@ -45,21 +45,23 @@ public final class Snapshot extends AbstractAccess {
    * Creates a new owning Snapshot proxy.
    *
    * @param nativeHandle a handle of the native Snapshot object
+   * @param cleaner a cleaner to destroy the native peer and any dependent objects
    */
-  // todo: consider making package-private so that clients aren't able to reference an invalid
-  //   memory region (currently the registry of native allocations is required to be enabled
-  //   to safely discard such attempts): https://jira.bf.local/browse/ECR-471,
-  //   https://jira.bf.local/browse/ECR-1525
+  // todo: (Here and elsewhere) consider making package-private so that clients aren't able to
+  //   reference an invalid memory region (currently the registry of native allocations is
+  //   required to be enabled to safely discard such attempts):
+  //   https://jira.bf.local/browse/ECR-471, https://jira.bf.local/browse/ECR-1525
   public static Snapshot newInstance(long nativeHandle, Cleaner cleaner) {
     return newInstance(nativeHandle, true, cleaner);
   }
 
   /**
    * Creates a new Snapshot proxy.
+   *
    * @param nativeHandle a handle of the native Snapshot object
    * @param owningHandle whether a proxy owns the corresponding native object and is responsible
    *                     to clean it up
-   * @param cleaner a cleaner to destroy the native object
+   * @param cleaner a cleaner to destroy the native peer and any dependent objects
    */
   public static Snapshot newInstance(long nativeHandle, boolean owningHandle, Cleaner cleaner) {
     checkNotNull(cleaner, "cleaner");
