@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Fork, Snapshot, migration::{Migration, Scratchpad}, access::Prefixed};
+use exonum_merkledb::{
+    access::Prefixed,
+    migration::{Migration, MigrationHelper, Scratchpad},
+    Fork, Snapshot,
+};
 use jni::{objects::JClass, JNIEnv};
 
 use handle::{self, Handle};
@@ -86,7 +90,7 @@ impl EjbAccess {
             EjbAccess::Migration(raw_view, ref namespace) => match raw_view {
                 View::RefFork(fork) => Migration::new(namespace, fork),
                 View::Owned(ViewOwned::Fork(fork)) => Migration::new(namespace, fork),
-                _ => unimplemented!()
+                _ => unimplemented!(),
             },
             _ => unimplemented!(),
         }
@@ -97,9 +101,9 @@ impl EjbAccess {
             EjbAccess::Scratchpad(raw_view, ref namespace) => match raw_view {
                 View::RefFork(fork) => Scratchpad::new(namespace, fork),
                 View::Owned(ViewOwned::Fork(fork)) => Scratchpad::new(namespace, fork),
-                _ => unimplemented!()
+                _ => unimplemented!(),
             },
-            _ => unimplemented!()
+            _ => unimplemented!(),
         }
     }
 
@@ -108,11 +112,17 @@ impl EjbAccess {
             EjbAccess::Prefixed(raw_view, ref namespace) => match raw_view {
                 View::RefFork(fork) => EjbPrefixed::Mutable(Prefixed::new(namespace, fork)),
                 View::RefMutFork(fork) => EjbPrefixed::Mutable(Prefixed::new(namespace, fork)),
-                View::Owned(ViewOwned::Fork(fork)) => EjbPrefixed::Mutable(Prefixed::new(namespace, fork)),
-                View::RefSnapshot(snapshot) => EjbPrefixed::Immutable(Prefixed::new(namespace, *snapshot)),
-                View::Owned(ViewOwned::Snapshot(snapshot)) => EjbPrefixed::Immutable(Prefixed::new(namespace, snapshot)),
+                View::Owned(ViewOwned::Fork(fork)) => {
+                    EjbPrefixed::Mutable(Prefixed::new(namespace, fork))
+                }
+                View::RefSnapshot(snapshot) => {
+                    EjbPrefixed::Immutable(Prefixed::new(namespace, *snapshot))
+                }
+                View::Owned(ViewOwned::Snapshot(snapshot)) => {
+                    EjbPrefixed::Immutable(Prefixed::new(namespace, snapshot))
+                }
             },
-            _ => unimplemented!()
+            _ => unimplemented!(),
         }
     }
 
@@ -281,6 +291,7 @@ mod tests {
         access::{Access, FromAccess},
         Database, Entry, TemporaryDB,
     };
+    use {cast_handle, to_handle};
 
     const FIRST_TEST_VALUE: i32 = 42;
     const SECOND_TEST_VALUE: i32 = 57;
@@ -418,6 +429,40 @@ mod tests {
         assert_eq!(check_value(&view.get(), FIRST_TEST_VALUE), false);
     }
 
+    #[test]
+    fn migration_helper_support() {
+        let db = TemporaryDB::new();
+
+        struct MigrationHelperProxy {
+            inner: &'static mut MigrationHelper,
+        }
+
+        impl MigrationHelperProxy {
+            // represents native method which is called from Java
+            pub fn scratchpad(handle: Handle) -> Handle {
+                let helper_proxy: &mut MigrationHelperProxy = cast_handle(handle);
+                to_handle(helper_proxy.inner.scratchpad())
+            }
+        }
+
+        let migration_script = |helper: &mut MigrationHelper| {
+            let proxy = MigrationHelperProxy {
+                inner: unsafe { std::mem::transmute(helper) },
+            };
+            let handle = to_handle(proxy);
+            // ...
+            // sendHandleToJava(handle)
+            // ...
+            // java calls:
+            let scratchpad: &mut Scratchpad<&Fork> =
+                cast_handle(MigrationHelperProxy::scratchpad(handle));
+            let index: Entry<_, i32> = Entry::from_access(*scratchpad, "address".into()).unwrap();
+        };
+
+        let mut helper = MigrationHelper::new(db, "namespace");
+        migration_script(&mut helper);
+    }
+
     fn check_snapshot(view_ref: ViewRef) {
         match view_ref {
             ViewRef::Snapshot(_) => assert!(check_value(&view_ref, FIRST_TEST_VALUE)),
@@ -458,7 +503,7 @@ mod tests {
             ViewRef::Prefixed(ref prefixed) => match prefixed {
                 EjbPrefixed::Immutable(ref prefixed) => entry(prefixed.clone()).get(),
                 EjbPrefixed::Mutable(ref prefixed) => entry(prefixed.clone()).get(),
-            }
+            },
         };
         Some(expected) == value
     }
