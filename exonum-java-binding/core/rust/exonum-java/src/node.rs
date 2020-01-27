@@ -15,6 +15,7 @@
  */
 
 use exonum_explorer_service::ExplorerFactory;
+use exonum_rust_runtime::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory};
 use exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor};
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
@@ -26,7 +27,6 @@ use java_bindings::{
         },
         exonum_merkledb::{Database, RocksDB},
         node::{ApiSender, Node, NodeChannel, NodeConfig as CoreNodeConfig},
-        runtime::rust::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory},
     },
     Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
     JavaRuntimeProxy,
@@ -45,7 +45,8 @@ pub fn run_node(command: Command) -> Result<(), failure::Error> {
 
 fn create_node(config: Config) -> Result<Node, failure::Error> {
     let node_config = config.run_config.node_config.clone();
-    let events_pool_capacity = &node_config.private_config.mempool.events_pool_capacity;
+    // TODO: rewrite with NodeBuilder API when it is available
+    let events_pool_capacity = &Default::default();
     let channel = NodeChannel::new(events_pool_capacity);
     let blockchain = create_blockchain(&config, &channel)?;
 
@@ -92,7 +93,7 @@ fn create_rust_runtime(channel: &NodeChannel) -> RustRuntime {
         .with_factory(TimeServiceFactory::default())
         .with_factory(Supervisor)
         .with_factory(ExplorerFactory)
-        .build(channel.endpoints.0.clone())
+        .build(channel.endpoints_sender())
 }
 
 fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {

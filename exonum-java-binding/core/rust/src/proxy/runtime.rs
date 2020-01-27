@@ -33,6 +33,8 @@ use jni::{
 
 use std::fmt;
 
+use exonum::runtime::migrations::{InitMigrationError, MigrationScript};
+use exonum::runtime::versioning::Version;
 use {
     runtime::{jni_call_default, jni_call_transaction, Error},
     storage::View,
@@ -165,7 +167,7 @@ impl Runtime for JavaRuntimeProxy {
         &mut self,
         _snapshot: &dyn Snapshot,
         instance_spec: &InstanceSpec,
-        status: InstanceStatus,
+        status: &InstanceStatus,
     ) {
         let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
         let serialized_instance_status: Vec<u8> = status.to_bytes();
@@ -186,6 +188,15 @@ impl Runtime for JavaRuntimeProxy {
             );
             Ok(())
         }));
+    }
+
+    fn migrate(
+        &self,
+        _new_artifact: &ArtifactId,
+        _data_version: &Version,
+    ) -> Result<Option<MigrationScript>, InitMigrationError> {
+        // TODO (ECR-3787): implement
+        Ok(None)
     }
 
     fn execute(

@@ -27,6 +27,7 @@ extern crate exonum_cli;
 #[macro_use]
 extern crate exonum_derive;
 extern crate exonum_proto;
+extern crate exonum_rust_runtime;
 extern crate exonum_supervisor;
 extern crate failure;
 pub extern crate jni;

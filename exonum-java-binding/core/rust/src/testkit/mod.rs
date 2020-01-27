@@ -23,10 +23,10 @@ use exonum::{
     crypto::{PublicKey, SecretKey},
     exonum_merkledb::{self, BinaryValue},
     helpers::ValidatorId,
-    runtime::rust::ServiceFactory,
     runtime::ArtifactSpec,
 };
 use exonum_proto::ProtobufConvert;
+use exonum_rust_runtime::ServiceFactory;
 use exonum_testkit::{TestKit, TestKitBuilder};
 use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
 use jni::{
