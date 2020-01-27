@@ -63,6 +63,9 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   /**
    * Creates a new MapIndexProxy.
    *
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getMap(IndexAddress, Serializer, Serializer)}.
+   *
    * @param address an index address
    * @param access a database access. Must be valid.
    *             If an access is read-only, "destructive" operations are not permitted.

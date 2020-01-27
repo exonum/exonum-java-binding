@@ -56,6 +56,9 @@ public final class ListIndexProxy<E> extends AbstractListIndexProxy<E> implement
   /**
    * Creates a new ListIndexProxy.
    *
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getList(IndexAddress, Serializer)}.
+   *
    * @param address an index address
    * @param access a database access. Must be valid.
    *             If an access is read-only, "destructive" operations are not permitted.

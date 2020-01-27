@@ -62,6 +62,9 @@ public final class ProofListIndexProxy<E> extends AbstractListIndexProxy<E>
   /**
    * Creates a new ProofListIndexProxy.
    *
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getProofList(IndexAddress, Serializer)}.
+   *
    * @param address an index address
    * @param access a database access. Must be valid.
    *             If an access is read-only, "destructive" operations are not permitted.
