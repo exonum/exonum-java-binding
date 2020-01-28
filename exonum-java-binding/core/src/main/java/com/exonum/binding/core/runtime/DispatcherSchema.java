@@ -28,7 +28,7 @@ import com.exonum.core.messages.Runtime.InstanceState;
 /**
  * Exonum service instances database schema.
  */
-public class DispatcherSchema {
+public final class DispatcherSchema {
 
   private static final IndexAddress DISPATCHER_INSTANCES =
       IndexAddress.valueOf("dispatcher_instances");

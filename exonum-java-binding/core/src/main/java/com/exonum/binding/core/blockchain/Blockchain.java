@@ -156,6 +156,8 @@ public final class Blockchain {
 
   /**
    * Constructs a new blockchain instance for the given database access.
+   *
+   * <p>Expects a non-prefixed access. Use {@link BlockchainData#getBlockchain()} in service code.
    */
   public static Blockchain newInstance(Access access) {
     CoreSchema coreSchema = CoreSchema.newInstance(access);
