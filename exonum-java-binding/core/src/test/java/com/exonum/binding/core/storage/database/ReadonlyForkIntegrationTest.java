@@ -29,7 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled("ECR-xyz")
+@Disabled("ECR-4167")
 class ReadonlyForkIntegrationTest {
 
   private TemporaryDb db;
