@@ -32,7 +32,9 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.storage.indices.StorageIndex;
 import com.exonum.binding.core.storage.indices.ValueSetIndexProxy;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
 /**
  * Represents an access to the database.
@@ -48,6 +50,7 @@ import java.util.function.Supplier;
  */
 public abstract class AbstractAccess extends AbstractNativeProxy implements Access {
 
+  private static final long UNKNOWN_INDEX_ID = 0L;
   private final OpenIndexRegistry indexRegistry = new OpenIndexRegistry();
   private final boolean canModify;
 
@@ -140,8 +143,15 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    */
   private <T extends StorageIndex> Optional<T> findOpenIndex(IndexAddress address,
       Class<T> indexType) {
-    return indexRegistry.findIndex(address)
-        .map(index -> checkedCast(index, indexType));
+    OptionalLong indexId = findIndexId(address);
+    if (indexId.isPresent()) {
+      // An index with the given address exists in the storage
+      return indexRegistry.findIndex(indexId.getAsLong())
+          .map(index -> checkedCast(index, indexType));
+    } else {
+      // The index does not exist; hence cannot be in the cache
+      return Optional.empty();
+    }
   }
 
   /**
@@ -161,16 +171,44 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
   }
 
   private <T extends StorageIndex> T createIndex(Supplier<T> indexSupplier) {
+    // Create an index
     T newIndex = indexSupplier.get();
-    registerIndex(newIndex);
+    // Find the id of the index (possibly, newly created)
+    OptionalLong indexId = findIndexId(newIndex.getAddress());
+    // Register the open index in the pool, if it exists.
+    // It does not "exist" until it is created with a Fork-based Access,
+    // i.e., an empty index created with the Snapshot will not have an id.
+    // We can, of course, cache them by address then, but that is not
+    // required for correctness and may be done later as an optimization.
+    indexId.ifPresent(id -> registerIndex(id, newIndex));
     return newIndex;
+  }
+
+  private OptionalLong findIndexId(IndexAddress address) {
+    long id = findIndexId(address.getName(), address.getIdInGroup().orElse(null));
+    if (id == UNKNOWN_INDEX_ID) {
+      return OptionalLong.empty();
+    }
+    return OptionalLong.of(id);
+  }
+
+  /**
+   * Finds an internal unique MerkleDB id of an index with the given relative name
+   * and optional id in group.
+   * @return a non-zero id if the index is created in the database; zero if the index
+   *     does not exist
+   */
+  /* TODO: either native — if all Accesses can have same impl; or abstract and native
+      in each Access [ECR-4157] */
+  private long findIndexId(String name, @Nullable byte[] idInGroup) {
+    return 0;
   }
 
   /**
    * Registers a new index created with this access.
    */
-  private void registerIndex(StorageIndex index) {
-    indexRegistry.registerIndex(index);
+  private void registerIndex(Long id, StorageIndex index) {
+    indexRegistry.registerIndex(id, index);
   }
 
   /**

@@ -129,7 +129,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       String name = "test_index";
       Fork fork = database.createFork(cleaner);
       // Create two indices with the same name from the same Fork. It is disallowed currently
-      // in Rust, but must work in Java with indices performing instance de-duplication.
+      // in Rust, but must work in Java with Accesses performing instance de-duplication.
       IndexT i1 = create(name, fork);
       IndexT i2 = create(name, fork);
 
