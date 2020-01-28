@@ -22,6 +22,7 @@
 
     <!-- Allow `aBlock` name -->
     <suppress files="BlockchainIntegrationTest\.java" checks="MethodName"/>
+    <suppress files="Blocks\.java" checks="MethodName"/>
     <suppress files="BlockTest\.java" checks="MethodName"/>
 
     <!-- Suppress indentation as there is a bug with lambdas -->
