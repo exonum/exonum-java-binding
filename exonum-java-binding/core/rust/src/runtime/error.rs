@@ -111,9 +111,9 @@ where
 /// - Any JNI errors are converted into `ExecutionError::Runtime(JniError)`.
 /// - `IllegalArgumentException`s are converted into
 ///   `ExecutionError::Runtime(IllegalArgument)`.
-/// - `TransactionExecutionException`s are converted into
+/// - `ExecutionException`s are converted into
 ///   `ExecutionError::Service`.
-/// - `UnexpectedTransactionExecutionException`s are converted into
+/// - `UnexpectedExecutionException`s are converted into
 ///   `ExecutionError::Unexpected`.
 /// - Any other exceptions are converted into
 ///   `ExecutionError::Runtime(JavaException)`.

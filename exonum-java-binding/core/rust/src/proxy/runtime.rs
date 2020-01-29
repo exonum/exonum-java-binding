@@ -143,7 +143,7 @@ impl Runtime for JavaRuntimeProxy {
     ) -> Result<(), ExecutionError> {
         let serialized_instance_spec: Vec<u8> = spec.to_bytes();
 
-        jni_call_default(&self.exec, |env| {
+        jni_call_transaction(&self.exec, |env| {
             let fork_handle = to_handle(View::from_ref_mut_fork(context.fork));
             let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
@@ -171,7 +171,7 @@ impl Runtime for JavaRuntimeProxy {
     ) -> Result<(), ExecutionError> {
         let serialized_instance_spec: Vec<u8> = spec.to_bytes();
 
-        jni_call_default(&self.exec, |env| {
+        jni_call_transaction(&self.exec, |env| {
             let fork_handle = to_handle(View::from_ref_mut_fork(context.fork));
             let instance_spec =
                 JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
