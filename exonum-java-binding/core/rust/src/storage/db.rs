@@ -12,13 +12,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Fork, Snapshot};
+use exonum_merkledb::{
+    generic::{ErasedAccess, GenericRawAccess},
+    Fork, Snapshot,
+};
 use jni::{objects::JClass, JNIEnv};
 
+use exonum::blockchain::{BlockProof, IndexProof};
 use handle::{self, Handle};
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
+
+#[allow(missing_docs)]
+pub fn into_generic_raw_access<'a, T: Into<GenericRawAccess<'a>>>(
+    raw_access: T,
+) -> GenericRawAccess<'static> {
+    let generic_raw_access: GenericRawAccess = raw_access.into();
+    unsafe { std::mem::transmute(generic_raw_access) }
+}
+
+#[allow(missing_docs)]
+pub trait EjbAccessExt {
+    fn can_convert_into_fork(&self) -> bool;
+    fn into_fork(self) -> Fork;
+    fn create_checkpoint(&mut self);
+    fn rollback(&mut self);
+    fn can_rollback(&self) -> bool;
+    fn proof_for_index(&self, name: &str) -> Option<IndexProof>;
+    fn proof_for_block(&self, height: u64) -> BlockProof;
+}
+
+impl<'a> EjbAccessExt for ErasedAccess<'a> {
+    fn can_convert_into_fork(&self) -> bool {
+        unimplemented!()
+    }
+
+    fn into_fork(self) -> Fork {
+        unimplemented!()
+    }
+
+    fn create_checkpoint(&mut self) {
+        unimplemented!()
+    }
+
+    fn rollback(&mut self) {
+        unimplemented!()
+    }
+
+    fn can_rollback(&self) -> bool {
+        unimplemented!()
+    }
+
+    fn proof_for_index(&self, name: &str) -> Option<IndexProof> {
+        unimplemented!()
+    }
+
+    fn proof_for_block(&self, height: u64) -> BlockProof {
+        unimplemented!()
+    }
+}
 
 /// A `View` is a wrapper for `Snapshot` or `Fork`, which makes it possible to distinguish them
 /// on the rust side, and transfer them as a raw pointer to the java side.
@@ -37,7 +90,7 @@ pub(crate) type Value = Vec<u8>;
 /// Java code must never store a handle to the `View::Ref*` variants for longer than
 /// the method invocation.
 #[derive(Debug)]
-pub(crate) enum View {
+enum View {
     /// Immutable Fork view, constructed from `&Fork`.
     ///
     /// Created `View` must never outlive the reference it was created with,

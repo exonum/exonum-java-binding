@@ -20,7 +20,7 @@ use exonum::{
     messages::Verified,
     runtime::{AnyTx, CallInfo},
 };
-use exonum_merkledb::{ObjectHash, Snapshot};
+use exonum_merkledb::{generic::ErasedAccess, ObjectHash, Snapshot};
 use failure;
 use futures::Future;
 use jni::objects::JClass;
@@ -30,7 +30,7 @@ use jni::JNIEnv;
 use std::{panic, ptr};
 
 use handle::{cast_handle, drop_handle, to_handle, Handle};
-use storage::View;
+use storage::into_generic_raw_access;
 use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
 use JniResult;
 
@@ -140,8 +140,8 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeCrea
     let res = panic::catch_unwind(|| {
         let node = cast_handle::<Node>(node_handle);
         let snapshot = node.create_snapshot();
-        let view = View::from_owned_snapshot(snapshot);
-        Ok(to_handle(view))
+        let access = ErasedAccess::from(into_generic_raw_access(snapshot));
+        Ok(to_handle(access))
     });
     unwrap_exc_or_default(&env, res)
 }

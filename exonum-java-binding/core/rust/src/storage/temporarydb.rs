@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{Database, Patch, TemporaryDB};
+use exonum_merkledb::{generic::ErasedAccess, Database, Patch, TemporaryDB};
 use jni::{
     objects::{JClass, JObject},
     JNIEnv,
@@ -21,7 +21,7 @@ use jni::{
 use std::panic;
 
 use handle::{self, Handle};
-use storage::db::View;
+use storage::into_generic_raw_access;
 use utils;
 
 /// Returns pointer to created `TemporaryDB` object.
@@ -53,7 +53,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let db = handle::cast_handle::<TemporaryDB>(db_handle);
-        Ok(handle::to_handle(View::from_owned_snapshot(db.snapshot())))
+        let access = ErasedAccess::from(into_generic_raw_access(db.snapshot()));
+        Ok(handle::to_handle(access))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -67,7 +68,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let db = handle::cast_handle::<TemporaryDB>(db_handle);
-        Ok(handle::to_handle(View::from_owned_fork(db.fork())))
+        let access = ErasedAccess::from(into_generic_raw_access(db.fork()));
+        Ok(handle::to_handle(access))
     });
     utils::unwrap_exc_or_default(&env, res)
 }

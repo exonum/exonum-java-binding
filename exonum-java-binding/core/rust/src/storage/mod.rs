@@ -14,7 +14,8 @@
 
 pub use self::blockchain::*;
 pub use self::db::Java_com_exonum_binding_core_storage_database_Accesses_nativeFree;
-pub(crate) use self::db::View;
+pub use self::db::{into_generic_raw_access, EjbAccessExt};
+//pub(crate) use self::db::View;
 pub use self::key_set_index::*;
 pub use self::list_index::*;
 pub use self::map_index::*;

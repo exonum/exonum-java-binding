@@ -17,7 +17,7 @@
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
-    exonum_merkledb::{BinaryValue, Snapshot},
+    exonum_merkledb::{generic::ErasedAccess, BinaryValue, Snapshot},
     runtime::{
         migrations::{InitMigrationError, MigrationScript},
         versioning::Version,
@@ -37,7 +37,7 @@ use std::fmt;
 
 use {
     runtime::{jni_call_default, jni_call_transaction, Error},
-    storage::View,
+    storage::into_generic_raw_access,
     to_handle,
     utils::{jni_cache::runtime_adapter, panic_on_exception, proto_to_java_bytes, unwrap_jni},
     Node,
@@ -138,7 +138,8 @@ impl Runtime for JavaRuntimeProxy {
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
-            let fork_handle = to_handle(View::from_ref_mut_fork(context.fork));
+            let fork_handle =
+                to_handle(ErasedAccess::from(into_generic_raw_access(&*context.fork)));
             let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
             let configuration = JObject::from(env.byte_array_from_slice(&parameters)?);
 
@@ -163,7 +164,8 @@ impl Runtime for JavaRuntimeProxy {
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
-            let fork_handle = to_handle(View::from_ref_mut_fork(context.fork));
+            let fork_handle =
+                to_handle(ErasedAccess::from(into_generic_raw_access(&*context.fork)));
             let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
             let parameters = JObject::from(env.byte_array_from_slice(&parameters)?);
 
@@ -239,7 +241,8 @@ impl Runtime for JavaRuntimeProxy {
             let interface_name = JObject::from(env.new_string(context.interface_name)?);
             let tx_id = call_info.method_id as i32;
             let args = JObject::from(env.byte_array_from_slice(arguments)?);
-            let view_handle = to_handle(View::from_ref_fork(context.fork));
+            let view_handle =
+                to_handle(ErasedAccess::from(into_generic_raw_access(&*context.fork)));
             let caller_id = tx_info.0;
             let message_hash = tx_info.1.to_bytes();
             let message_hash = JObject::from(env.byte_array_from_slice(&message_hash)?);
@@ -280,7 +283,8 @@ impl Runtime for JavaRuntimeProxy {
         instance_id: InstanceId,
     ) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
-            let view_handle = to_handle(View::from_ref_mut_fork(context.fork));
+            let view_handle =
+                to_handle(ErasedAccess::from(into_generic_raw_access(&*context.fork)));
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::after_transactions_id(),
@@ -293,7 +297,7 @@ impl Runtime for JavaRuntimeProxy {
 
     fn after_commit(&mut self, snapshot: &dyn Snapshot, _mailbox: &mut Mailbox) {
         unwrap_jni(self.exec.with_attached(|env| {
-            let view_handle = to_handle(View::from_ref_snapshot(snapshot));
+            let view_handle = to_handle(ErasedAccess::from(into_generic_raw_access(snapshot)));
             let public_key = self
                 .blockchain
                 .as_ref()
