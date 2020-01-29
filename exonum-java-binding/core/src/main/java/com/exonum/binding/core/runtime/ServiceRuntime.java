@@ -223,7 +223,7 @@ public final class ServiceRuntime implements AutoCloseable {
    *     into an error of kind {@link ErrorKind#UNEXPECTED}
    * @throws RuntimeException if the runtime failed to resume the service for other reason
    */
-  public void initializeResumingService(Fork fork, ServiceInstanceSpec instanceSpec,
+  public void initiateResumingService(Fork fork, ServiceInstanceSpec instanceSpec,
       byte[] arguments) {
     try {
       synchronized (lock) {
