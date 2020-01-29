@@ -28,11 +28,11 @@ use futures::{
     Stream,
 };
 use integration_tests::vm::create_vm_for_tests_with_classes;
-use java_bindings::exonum::messages::Verified;
 use java_bindings::{
     exonum::{
         blockchain::{ApiSender, Blockchain},
         crypto::{gen_keypair, PublicKey, SecretKey},
+        messages::Verified,
         runtime::{AnyTx, CallInfo},
     },
     exonum_merkledb::TemporaryDB,
