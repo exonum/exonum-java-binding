@@ -57,12 +57,12 @@ import com.exonum.binding.testkit.TestKit;
 import com.exonum.core.messages.Blockchain.CallInBlock;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Blockchain.ValidatorKeys;
-import com.exonum.core.messages.Consensus;
 import com.exonum.core.messages.Consensus.ExonumMessage;
 import com.exonum.core.messages.Consensus.ExonumMessage.KindCase;
-import com.exonum.core.messages.Consensus.Precommit;
 import com.exonum.core.messages.MapProofOuterClass.MapProof;
 import com.exonum.core.messages.MapProofOuterClass.OptionalEntry;
+import com.exonum.core.messages.Messages;
+import com.exonum.core.messages.Messages.Precommit;
 import com.exonum.core.messages.Proofs;
 import com.exonum.core.messages.Runtime.ErrorKind;
 import com.exonum.core.messages.Runtime.ExecutionError;
@@ -194,7 +194,7 @@ class BlockchainIntegrationTest {
         // 2 Verify the proof: the precommit messages
         assertThat(proof.getPrecommitsList()).hasSize(VALIDATOR_COUNT);
         // Check the precommit message from the single validator
-        Consensus.SignedMessage rawPrecommitMessage = proof.getPrecommits(0).getRaw();
+        Messages.SignedMessage rawPrecommitMessage = proof.getPrecommits(0).getRaw();
         SignedMessage rawPrecommit = SignedMessage.fromProto(rawPrecommitMessage);
         ExonumMessage payload = rawPrecommit.getPayload();
         assertThat(payload.getKindCase()).isEqualTo(KindCase.PRECOMMIT);
