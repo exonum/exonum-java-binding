@@ -38,14 +38,15 @@ class PrefixedIntegrationTest {
   class WithIndex {
     final String namespace = "test-namespace";
     final String entryName = "test-index";
-    TemporaryDb db;
     Cleaner cleaner;
+    TemporaryDb db;
 
     @BeforeEach
     void initializeDatabase(TestInfo info) throws CloseFailuresException {
       // Create the database
-      db = TemporaryDb.newInstance();
       cleaner = new Cleaner(info.getDisplayName());
+      db = TemporaryDb.newInstance();
+      cleaner.add(db::close);
 
       // Initialize the test index
       try (Cleaner initCleaner = new Cleaner()) {
@@ -144,11 +145,7 @@ class PrefixedIntegrationTest {
 
     @AfterEach
     void dropDatabase() throws CloseFailuresException {
-      try {
-        cleaner.close();
-      } finally {
-        db.close();
-      }
+      cleaner.close();
     }
   }
 }

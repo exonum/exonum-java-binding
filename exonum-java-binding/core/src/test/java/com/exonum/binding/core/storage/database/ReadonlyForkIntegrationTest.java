@@ -32,24 +32,19 @@ import org.junit.jupiter.api.Test;
 @Disabled("ECR-4167")
 class ReadonlyForkIntegrationTest {
 
-  private TemporaryDb db;
   private Cleaner cleaner;
+  private TemporaryDb db;
 
   @BeforeEach
   void setupDb() {
-    db = TemporaryDb.newInstance();
     cleaner = new Cleaner();
+    db = TemporaryDb.newInstance();
+    cleaner.add(db::close);
   }
 
   @AfterEach
   void tearDown() throws CloseFailuresException {
-    try {
-      if (cleaner != null) {
-        cleaner.close();
-      }
-    } finally {
-      db.close();
-    }
+    cleaner.close();
   }
 
   @Test

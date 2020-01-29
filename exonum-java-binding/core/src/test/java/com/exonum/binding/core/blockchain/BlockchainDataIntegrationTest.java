@@ -42,23 +42,19 @@ import org.junit.jupiter.api.Test;
 @Disabled("ECR-4169")
 class BlockchainDataIntegrationTest {
 
-  TemporaryDb db;
   Cleaner cleaner;
+  TemporaryDb db;
 
   @BeforeEach
   void setUp() {
-    db = TemporaryDb.newInstance();
     cleaner = new Cleaner();
+    db = TemporaryDb.newInstance();
+    cleaner.add(db::close);
   }
 
   @AfterEach
   void tearDown() throws CloseFailuresException {
-    if (cleaner != null) {
-      cleaner.close();
-    }
-    if (db != null) {
-      db.close();
-    }
+    cleaner.close();
   }
 
   @Test
