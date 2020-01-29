@@ -163,6 +163,34 @@ impl Runtime for JavaRuntimeProxy {
         })
     }
 
+    fn initiate_resuming_service(
+        &self,
+        context: ExecutionContext,
+        spec: &InstanceSpec,
+        parameters: Vec<u8>,
+    ) -> Result<(), ExecutionError> {
+        let serialized_instance_spec: Vec<u8> = spec.to_bytes();
+
+        jni_call_default(&self.exec, |env| {
+            let fork_handle = to_handle(View::from_ref_mut_fork(context.fork));
+            let instance_spec =
+                JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
+            let parameters = JObject::from(env.byte_array_from_slice(&parameters)?);
+
+            env.call_method_unchecked(
+                self.runtime_adapter.as_obj(),
+                runtime_adapter::initiate_resuming_service_id(),
+                JavaType::Primitive(Primitive::Void),
+                &[
+                    JValue::from(fork_handle),
+                    JValue::from(instance_spec),
+                    JValue::from(parameters),
+                ],
+            )
+            .and_then(JValue::v)
+        })
+    }
+
     fn update_service_status(
         &mut self,
         _snapshot: &dyn Snapshot,

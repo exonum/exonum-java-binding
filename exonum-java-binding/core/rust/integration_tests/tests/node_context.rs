@@ -28,11 +28,11 @@ use futures::{
     Stream,
 };
 use integration_tests::vm::create_vm_for_tests_with_classes;
+use java_bindings::exonum::messages::Verified;
 use java_bindings::{
     exonum::{
-        blockchain::Blockchain,
+        blockchain::{ApiSender, Blockchain},
         crypto::{gen_keypair, PublicKey, SecretKey},
-        node::{ApiSender, ExternalMessage},
         runtime::{AnyTx, CallInfo},
     },
     exonum_merkledb::TemporaryDB,
@@ -53,21 +53,16 @@ fn submit_transaction() {
     let keypair = gen_keypair();
     let tx_author = keypair.0;
     let service_id = 0;
-    let raw_transaction = create_raw_transaction(service_id);
+    let raw_transaction = create_transaction(service_id);
 
     let (node, app_rx) = create_node(keypair);
     node.submit(raw_transaction.clone()).unwrap();
     let sent_message = app_rx.wait().next().unwrap().unwrap();
 
-    match sent_message {
-        ExternalMessage::Transaction(sent) => {
-            let message_payload = sent.payload();
-            let message_author = sent.author();
-            assert_eq!(&raw_transaction, message_payload);
-            assert_eq!(message_author, tx_author);
-        }
-        _ => panic!("Message is not Transaction"),
-    }
+    let message_payload = sent_message.payload();
+    let message_author = sent_message.author();
+    assert_eq!(raw_transaction, *message_payload);
+    assert_eq!(message_author, tx_author);
 }
 
 #[test]
@@ -76,13 +71,13 @@ fn submit_transaction_to_missing_service() {
     let (node, _) = create_node(keypair);
     // invalid service_id
     let service_id = 1;
-    let raw_transaction = create_raw_transaction(service_id);
+    let transaction = create_transaction(service_id);
 
-    let res = node.submit(raw_transaction);
+    let res = node.submit(transaction);
     assert!(res.is_err());
 }
 
-fn create_raw_transaction(instance_id: u32) -> AnyTx {
+fn create_transaction(instance_id: u32) -> AnyTx {
     AnyTx {
         call_info: CallInfo {
             instance_id,
@@ -92,7 +87,7 @@ fn create_raw_transaction(instance_id: u32) -> AnyTx {
     }
 }
 
-fn create_node(keypair: (PublicKey, SecretKey)) -> (Node, Receiver<ExternalMessage>) {
+fn create_node(keypair: (PublicKey, SecretKey)) -> (Node, Receiver<Verified<AnyTx>>) {
     let api_channel = mpsc::channel(128);
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 

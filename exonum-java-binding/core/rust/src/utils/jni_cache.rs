@@ -44,6 +44,7 @@ static mut RUNTIME_ADAPTER_INITIALIZE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_DEPLOY_ARTIFACT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE: Option<JMethodID> = None;
+static mut RUNTIME_ADAPTER_INITIATE_RESUMING_SERICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_UPDATE_SERVICE_STATUS: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_TRANSACTIONS: Option<JMethodID> = None;
@@ -115,6 +116,12 @@ unsafe fn cache_methods(env: &JNIEnv) {
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
         "initiateAddingService",
+        "(J[B[B)V",
+    );
+    RUNTIME_ADAPTER_INITIATE_RESUMING_SERICE = get_method_id(
+        &env,
+        SERVICE_RUNTIME_ADAPTER_CLASS,
+        "initiateResumingService",
         "(J[B[B)V",
     );
     RUNTIME_ADAPTER_UPDATE_SERVICE_STATUS = get_method_id(
@@ -233,6 +240,12 @@ pub mod runtime_adapter {
     pub fn initiate_adding_service_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE.unwrap() }
+    }
+
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.initiateResumingService()`.
+    pub fn initiate_resuming_service_id() -> JMethodID<'static> {
+        check_cache_initialized();
+        unsafe { RUNTIME_ADAPTER_INITIATE_RESUMING_SERICE.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.updateServiceStatus()`.
