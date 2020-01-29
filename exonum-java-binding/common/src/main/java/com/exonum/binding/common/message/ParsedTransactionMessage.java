@@ -20,8 +20,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.core.messages.Consensus;
 import com.exonum.core.messages.Consensus.ExonumMessage;
+import com.exonum.core.messages.Messages;
 import com.exonum.core.messages.Runtime.AnyTx;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.ByteString;
@@ -36,7 +36,7 @@ final class ParsedTransactionMessage implements TransactionMessage {
 
   // signedMessage is the source protocol buffers message; parsedMessage is its parsed
   // representation.
-  private final Consensus.SignedMessage signedMessage;
+  private final Messages.SignedMessage signedMessage;
   private final SignedMessage parsedMessage;
   private final AnyTx tx;
 
@@ -46,7 +46,7 @@ final class ParsedTransactionMessage implements TransactionMessage {
    * @throws IllegalArgumentException if the signed message does not contain an Exonum transaction
    *     message
    */
-  ParsedTransactionMessage(Consensus.SignedMessage signedMessage) {
+  ParsedTransactionMessage(Messages.SignedMessage signedMessage) {
     this.signedMessage = signedMessage;
     // Decode the signed message
     try {

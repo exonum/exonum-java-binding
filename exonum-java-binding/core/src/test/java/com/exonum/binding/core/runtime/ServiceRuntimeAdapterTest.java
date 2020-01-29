@@ -157,12 +157,12 @@ class ServiceRuntimeAdapterTest {
         .toByteArray();
     byte[] arguments = bytes(1, 2);
 
-    serviceRuntimeAdapter.initializeResumingService(forkHandle, instanceSpec, arguments);
+    serviceRuntimeAdapter.initiateResumingService(forkHandle, instanceSpec, arguments);
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
         ServiceArtifactId.fromProto(artifact));
-    verify(serviceRuntime).initializeResumingService(fork, expected, arguments);
+    verify(serviceRuntime).initiateResumingService(fork, expected, arguments);
   }
 
   @Test

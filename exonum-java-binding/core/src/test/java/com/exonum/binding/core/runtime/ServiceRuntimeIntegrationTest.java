@@ -409,7 +409,7 @@ class ServiceRuntimeIntegrationTest {
     // Create the service from the artifact
     Fork fork = mock(Fork.class);
     byte[] arguments = anyConfiguration();
-    serviceRuntime.initializeResumingService(fork, instanceSpec, arguments);
+    serviceRuntime.initiateResumingService(fork, instanceSpec, arguments);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
@@ -447,7 +447,7 @@ class ServiceRuntimeIntegrationTest {
     byte[] arguments = anyConfiguration();
     Fork fork = mock(Fork.class);
     assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.initializeResumingService(fork, instanceSpec, arguments));
+        () -> serviceRuntime.initiateResumingService(fork, instanceSpec, arguments));
   }
 
   @Test

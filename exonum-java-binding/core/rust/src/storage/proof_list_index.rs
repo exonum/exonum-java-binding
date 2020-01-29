@@ -233,7 +233,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             IndexType::SnapshotIndex(ref list) => list.get_proof(index as u64),
             IndexType::ForkIndex(ref list) => list.get_proof(index as u64),
         };
-        utils::proto_to_java_bytes(&env, proof)
+        utils::proto_to_java_bytes(&env, &proof)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -253,7 +253,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofListInd
             IndexType::SnapshotIndex(ref list) => list.get_range_proof(from as u64..to as u64),
             IndexType::ForkIndex(ref list) => list.get_range_proof(from as u64..to as u64),
         };
-        utils::proto_to_java_bytes(&env, proof)
+        utils::proto_to_java_bytes(&env, &proof)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }

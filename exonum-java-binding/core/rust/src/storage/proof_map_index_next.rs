@@ -151,7 +151,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
             IndexType::SnapshotIndex(ref map) => map.get_proof(key),
             IndexType::ForkIndex(ref map) => map.get_proof(key),
         };
-        utils::proto_to_java_bytes(&env, proof)
+        utils::proto_to_java_bytes(&env, &proof)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -170,7 +170,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
             IndexType::SnapshotIndex(ref map) => map.get_multiproof(keys),
             IndexType::ForkIndex(ref map) => map.get_multiproof(keys),
         };
-        utils::proto_to_java_bytes(&env, proof)
+        utils::proto_to_java_bytes(&env, &proof)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }

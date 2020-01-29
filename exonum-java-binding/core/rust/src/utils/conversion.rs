@@ -63,9 +63,9 @@ where
 }
 
 /// Converts anything convertible to a protobuf message into Java byte array.
-pub fn proto_to_java_bytes(
+pub fn proto_to_java_bytes<P: ProtobufConvert<ProtoStruct = impl Message>>(
     env: &JNIEnv,
-    proto: impl ProtobufConvert<ProtoStruct = impl Message>,
+    proto: &P,
 ) -> JniResult<jbyteArray> {
     let bytes = proto.to_pb().write_to_bytes().unwrap();
     env.byte_array_from_slice(&bytes)
