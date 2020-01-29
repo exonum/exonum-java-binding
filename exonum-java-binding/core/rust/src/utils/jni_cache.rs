@@ -184,6 +184,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && RUNTIME_ADAPTER_DEPLOY_ARTIFACT.is_some()
             && RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.is_some()
             && RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE.is_some()
+            && RUNTIME_ADAPTER_INITIATE_RESUMING_SERICE.is_some()
             && RUNTIME_ADAPTER_UPDATE_SERVICE_STATUS.is_some()
             && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
             && RUNTIME_ADAPTER_AFTER_TRANSACTIONS.is_some()

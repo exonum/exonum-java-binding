@@ -26,8 +26,8 @@ import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.core.messages.Consensus;
 import com.exonum.core.messages.Consensus.ExonumMessage;
+import com.exonum.core.messages.Messages;
 import com.exonum.core.messages.Runtime.AnyTx;
 import com.exonum.core.messages.Runtime.CallInfo;
 import com.exonum.core.messages.Types;
@@ -100,7 +100,7 @@ public interface TransactionMessage {
    */
   static TransactionMessage fromBytes(byte[] bytes) {
     try {
-      Consensus.SignedMessage signedMessage = Consensus.SignedMessage.parseFrom(bytes);
+      Messages.SignedMessage signedMessage = Messages.SignedMessage.parseFrom(bytes);
       return new ParsedTransactionMessage(signedMessage);
     } catch (InvalidProtocolBufferException e) {
       throw new IllegalArgumentException(e);
@@ -228,7 +228,7 @@ public interface TransactionMessage {
 
       byte[] signature = cryptoFunction.signMessage(exonumMessage, keys.getPrivateKey());
 
-      Consensus.SignedMessage signedMessage = Consensus.SignedMessage.newBuilder()
+      Messages.SignedMessage signedMessage = Messages.SignedMessage.newBuilder()
           .setAuthor(Types.PublicKey.newBuilder()
               .setData(ByteString.copyFrom(authorPublicKey.toBytes()))
               .build())

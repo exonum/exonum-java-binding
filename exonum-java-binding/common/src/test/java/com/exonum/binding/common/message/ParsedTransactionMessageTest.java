@@ -25,6 +25,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.core.messages.Consensus;
 import com.exonum.core.messages.Consensus.ExonumMessage;
 import com.exonum.core.messages.Consensus.Prevote;
+import com.exonum.core.messages.Messages;
 import com.exonum.core.messages.Runtime.AnyTx;
 import com.exonum.core.messages.Runtime.CallInfo;
 import com.exonum.core.messages.Types;
@@ -47,7 +48,7 @@ class ParsedTransactionMessageTest {
     final ByteString signature = ByteString.copyFrom(new byte[Ed25519.SIGNATURE_BYTES]);
     final PublicKey authorPublicKey = PublicKey.fromHexString("abcd");
 
-    Consensus.SignedMessage signedMessage;
+    Messages.SignedMessage signedMessage;
 
     @BeforeEach
     void createSignedMessage() {
@@ -94,8 +95,8 @@ class ParsedTransactionMessageTest {
       byte[] serializedMessage = message.toBytes();
 
       // Decode as the protobuf message
-      Consensus.SignedMessage signedProtoFromBytes =
-          Consensus.SignedMessage.parseFrom(serializedMessage);
+      Messages.SignedMessage signedProtoFromBytes =
+          Messages.SignedMessage.parseFrom(serializedMessage);
 
       // Check it is equal to the original proto message
       assertThat(signedProtoFromBytes).isEqualTo(signedMessage);
@@ -114,7 +115,7 @@ class ParsedTransactionMessageTest {
         .build()
         .toByteArray();
 
-    Consensus.SignedMessage signedMessage = aSignedMessageProto()
+    Messages.SignedMessage signedMessage = aSignedMessageProto()
         .setPayload(ByteString.copyFrom(prevoteMessage))
         .build();
 
@@ -135,7 +136,7 @@ class ParsedTransactionMessageTest {
         .suppress(Warning.NULL_FIELDS)
         // Only the source signedMessage is compared
         .withOnlyTheseFields("signedMessage")
-        .withPrefabValues(Consensus.SignedMessage.class,
+        .withPrefabValues(Messages.SignedMessage.class,
             signedConsensusMessage(red),
             signedConsensusMessage(black))
         .withPrefabValues(SignedMessage.class,
@@ -151,7 +152,7 @@ class ParsedTransactionMessageTest {
     return SignedMessage.fromProto(signedConsensusMessage(payload));
   }
 
-  private static Consensus.SignedMessage signedConsensusMessage(String payload) {
+  private static Messages.SignedMessage signedConsensusMessage(String payload) {
     return aSignedMessageProto()
         .setPayload(ExonumMessage.newBuilder()
             .setAnyTx(anyTx(payload))
@@ -160,8 +161,8 @@ class ParsedTransactionMessageTest {
         .build();
   }
 
-  private static Consensus.SignedMessage.Builder aSignedMessageProto() {
-    return Consensus.SignedMessage.newBuilder()
+  private static Messages.SignedMessage.Builder aSignedMessageProto() {
+    return Messages.SignedMessage.newBuilder()
         // Set the author only and keep the rest as defaults as the parser requires a non-empty key
         .setAuthor(Types.PublicKey.newBuilder()
             .setData(ByteString.copyFrom(bytes(1, 2, 3, 4)))

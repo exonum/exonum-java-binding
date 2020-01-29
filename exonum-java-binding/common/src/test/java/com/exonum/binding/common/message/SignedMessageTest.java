@@ -26,8 +26,8 @@ import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.core.messages.Consensus;
 import com.exonum.core.messages.Consensus.ExonumMessage;
+import com.exonum.core.messages.Messages;
 import com.exonum.core.messages.Types;
 import com.exonum.core.messages.Types.Signature;
 import com.google.protobuf.ByteString;
@@ -45,7 +45,7 @@ class SignedMessageTest {
   class ParsedFromTestData {
     private ExonumMessage payload;
     private byte[] testSignature;
-    private Consensus.SignedMessage message;
+    private Messages.SignedMessage message;
 
     @BeforeEach
     void createProtoMessage() {
@@ -57,7 +57,7 @@ class SignedMessageTest {
       Types.Signature signature = aSignature()
           .setData(ByteString.copyFrom(testSignature))
           .build();
-      message = Consensus.SignedMessage.newBuilder()
+      message = Messages.SignedMessage.newBuilder()
           .setPayload(payload.toByteString())
           .setAuthor(authorPk)
           .setSignature(signature)
@@ -102,7 +102,7 @@ class SignedMessageTest {
         bytes("Invalid payload: not an ExonumMessage"));
     Types.PublicKey authorPk = aPublicKey().build();
     Types.Signature signature = aSignature().build();
-    byte[] message = Consensus.SignedMessage.newBuilder()
+    byte[] message = Messages.SignedMessage.newBuilder()
         .setPayload(invalidPayload)
         .setAuthor(authorPk)
         .setSignature(signature)
