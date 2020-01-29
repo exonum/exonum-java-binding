@@ -33,7 +33,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainProofs_
             ViewRef::Snapshot(snapshot) => {
                 let proof = snapshot.proof_for_index(&name);
                 if let Some(proof) = proof {
-                    proto_to_java_bytes(&env, proof)
+                    proto_to_java_bytes(&env, &proof)
                 } else {
                     Ok(ptr::null_mut() as jbyteArray)
                 }
@@ -64,7 +64,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainProofs_
                 let proof = schema
                     .block_and_precommits(Height(block_height as u64))
                     .unwrap();
-                proto_to_java_bytes(&env, proof)
+                proto_to_java_bytes(&env, &proof)
             }
             ViewRef::Fork(_) => panic!("nativeCreateBlockProof called with Fork"),
         }

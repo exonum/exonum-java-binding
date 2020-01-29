@@ -39,7 +39,7 @@ use {
     runtime::{jni_call_default, jni_call_transaction, Error},
     storage::View,
     to_handle,
-    utils::{jni_cache::runtime_adapter, panic_on_exception, unwrap_jni},
+    utils::{jni_cache::runtime_adapter, panic_on_exception, proto_to_java_bytes, unwrap_jni},
     Node,
 };
 
@@ -98,10 +98,8 @@ impl Runtime for JavaRuntimeProxy {
         artifact_id: ArtifactId,
         deploy_spec: Vec<u8>,
     ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
-        let serialized_artifact_id: Vec<u8> = artifact_id.to_bytes();
-
         let result = jni_call_default(&self.exec, |env| {
-            let artifact_id = JObject::from(env.byte_array_from_slice(&serialized_artifact_id)?);
+            let artifact_id = JObject::from(proto_to_java_bytes(env, &artifact_id)?);
             let spec = JObject::from(env.byte_array_from_slice(&deploy_spec)?);
 
             env.call_method_unchecked(
@@ -117,10 +115,8 @@ impl Runtime for JavaRuntimeProxy {
     }
 
     fn is_artifact_deployed(&self, artifact_id: &ArtifactId) -> bool {
-        let serialized_artifact_id: Vec<u8> = artifact_id.to_bytes();
-
         unwrap_jni(self.exec.with_attached(|env| {
-            let artifact_id = JObject::from(env.byte_array_from_slice(&serialized_artifact_id)?);
+            let artifact_id = JObject::from(proto_to_java_bytes(env, artifact_id)?);
 
             panic_on_exception(
                 env,
@@ -141,12 +137,9 @@ impl Runtime for JavaRuntimeProxy {
         spec: &InstanceSpec,
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
-        let serialized_instance_spec: Vec<u8> = spec.to_bytes();
-
         jni_call_transaction(&self.exec, |env| {
             let fork_handle = to_handle(View::from_ref_mut_fork(context.fork));
-            let instance_spec =
-                JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
+            let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
             let configuration = JObject::from(env.byte_array_from_slice(&parameters)?);
 
             env.call_method_unchecked(
@@ -169,12 +162,9 @@ impl Runtime for JavaRuntimeProxy {
         spec: &InstanceSpec,
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
-        let serialized_instance_spec: Vec<u8> = spec.to_bytes();
-
         jni_call_transaction(&self.exec, |env| {
             let fork_handle = to_handle(View::from_ref_mut_fork(context.fork));
-            let instance_spec =
-                JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
+            let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
             let parameters = JObject::from(env.byte_array_from_slice(&parameters)?);
 
             env.call_method_unchecked(
@@ -194,16 +184,12 @@ impl Runtime for JavaRuntimeProxy {
     fn update_service_status(
         &mut self,
         _snapshot: &dyn Snapshot,
-        instance_spec: &InstanceSpec,
+        spec: &InstanceSpec,
         status: &InstanceStatus,
     ) {
-        let serialized_instance_spec: Vec<u8> = instance_spec.to_bytes();
-        let serialized_instance_status: Vec<u8> = status.to_bytes();
         unwrap_jni(self.exec.with_attached(|env| {
-            let instance_spec =
-                JObject::from(env.byte_array_from_slice(&serialized_instance_spec)?);
-            let instance_status =
-                JObject::from(env.byte_array_from_slice(&serialized_instance_status)?);
+            let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
+            let instance_status = JObject::from(proto_to_java_bytes(env, status)?);
 
             panic_on_exception(
                 env,
