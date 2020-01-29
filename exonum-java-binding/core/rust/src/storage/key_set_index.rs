@@ -14,7 +14,12 @@
 
 use std::{panic, ptr};
 
-use exonum_merkledb::{access::FromAccess, indexes::key_set::Iter, Fork, KeySetIndex, Snapshot};
+use exonum_merkledb::{
+    access::AccessExt,
+    generic::{ErasedAccess, GenericRawAccess},
+    indexes::key_set::Iter,
+    KeySetIndex,
+};
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray},
@@ -22,15 +27,10 @@ use jni::{
 };
 
 use handle::{self, Handle};
-use storage::db::{Key, View, ViewRef};
+use storage::db::Key;
 use utils;
 
-type Index<T> = KeySetIndex<T, Key>;
-
-enum IndexType {
-    SnapshotIndex(Index<&'static dyn Snapshot>),
-    ForkIndex(Index<&'static Fork>),
-}
+type Index = KeySetIndex<GenericRawAccess<'static>, Key>;
 
 /// Returns pointer to created `KeySetIndex` object.
 #[no_mangle]
@@ -43,16 +43,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let address = utils::convert_to_index_address(&env, name, id_in_group)?;
-        Ok(handle::to_handle(
-            match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::from_access(snapshot, address).unwrap())
-                }
-                ViewRef::Fork(fork) => {
-                    IndexType::ForkIndex(Index::from_access(fork, address).unwrap())
-                }
-            },
-        ))
+        let access = handle::cast_handle::<ErasedAccess>(view_handle);
+        let index: Index = access.get_key_set(address);
+        Ok(handle::to_handle(index))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -64,7 +57,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     _: JClass,
     set_handle: Handle,
 ) {
-    handle::drop_handle::<IndexType>(&env, set_handle);
+    handle::drop_handle::<Index>(&env, set_handle);
 }
 
 /// Returns `true` if the set contains the specified value.
@@ -76,11 +69,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     value: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
         let value = env.convert_byte_array(value)?;
-        Ok(match *handle::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.contains(&value),
-            IndexType::ForkIndex(ref set) => set.contains(&value),
-        } as jboolean)
+        let contains = set.contains(&value);
+        (Ok(contains as jboolean))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -93,12 +85,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(handle::to_handle(
-            match *handle::cast_handle::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.iter(),
-                IndexType::ForkIndex(ref set) => set.iter(),
-            },
-        ))
+        let set = handle::cast_handle::<Index>(set_handle);
+        let iter = set.iter();
+        Ok(handle::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -112,13 +101,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     from: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
         let from = env.convert_byte_array(from)?;
-        Ok(handle::to_handle(
-            match *handle::cast_handle::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
-                IndexType::ForkIndex(ref set) => set.iter_from(&from),
-            },
-        ))
+        let iter = set.iter_from(&from);
+        Ok(handle::to_handle(iter))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -131,15 +117,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     set_handle: Handle,
     value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(set_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut set) => {
-            let value = env.convert_byte_array(value)?;
-            set.insert(value);
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
+        let value = env.convert_byte_array(value)?;
+        set.insert(value);
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -152,15 +134,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     set_handle: Handle,
     value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(set_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut set) => {
-            let value = env.convert_byte_array(value)?;
-            set.remove(&value);
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
+        let value = env.convert_byte_array(value)?;
+        set.remove(&value);
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -172,14 +150,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     _: JObject,
     set_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(set_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut set) => {
-            set.clear();
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
+        set.clear();
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }
