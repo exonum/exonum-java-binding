@@ -46,11 +46,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_MapIndexProx
     _: JClass,
     name: JString,
     id_in_group: jbyteArray,
-    view_handle: Handle,
+    access_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let address = utils::convert_to_index_address(&env, name, id_in_group)?;
-        let access = handle::cast_handle::<ErasedAccess>(view_handle);
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
         let index: Index = access.get_map(address);
         Ok(handle::to_handle(index))
     });

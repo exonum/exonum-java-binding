@@ -37,11 +37,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
     env: JNIEnv,
     _: JClass,
     address: JString,
-    view_handle: Handle,
+    access_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let address = utils::convert_to_string(&env, address)?;
-        let access = handle::cast_handle::<ErasedAccess>(view_handle);
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
         let index: Index = access.get_entry(address);
         Ok(handle::to_handle(index))
     });
@@ -66,8 +66,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
     entry_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let index = handle::cast_handle::<Index>(entry_handle);
-        let value = index.get();
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        let value = entry.get();
         match value {
             Some(val) => env.byte_array_from_slice(&val),
             None => Ok(ptr::null_mut()),
@@ -84,8 +84,8 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_n
     entry_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let index = handle::cast_handle::<Index>(entry_handle);
-        let exists = index.exists();
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        let exists = entry.exists();
         Ok(exists as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -100,9 +100,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
     value: jbyteArray,
 ) {
     let res = panic::catch_unwind(|| {
-        let index = handle::cast_handle::<Index>(entry_handle);
+        let entry = handle::cast_handle::<Index>(entry_handle);
         let value = env.convert_byte_array(value)?;
-        index.set(value);
+        entry.set(value);
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -116,8 +116,8 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_n
     entry_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
-        let index = handle::cast_handle::<Index>(entry_handle);
-        index.remove();
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        entry.remove();
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
