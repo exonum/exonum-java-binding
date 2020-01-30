@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use exonum::{
+    blockchain::{BlockProof, IndexProof, Schema},
+    helpers::Height,
+    runtime::SnapshotExt,
+};
 use exonum_merkledb::{
     access::{Access, AccessError},
     generic::{ErasedAccess, GenericAccess, GenericRawAccess},
     Fork, IndexAddress,
 };
-use jni::sys::{jbyteArray, jlong, jstring};
 use jni::{
     objects::{JClass, JObject},
+    sys::{jbyteArray, jlong, jstring},
     JNIEnv,
 };
 
-use exonum::blockchain::{BlockProof, IndexProof, Schema};
-use exonum::helpers::Height;
-use exonum::runtime::SnapshotExt;
+use std::{panic, rc::Rc};
+
 use handle::{self, Handle};
-use std::panic;
-use std::rc::Rc;
 use utils;
 
 pub(crate) type Key = Vec<u8>;
@@ -37,9 +39,10 @@ pub(crate) type Value = Vec<u8>;
 /// Prolongs lifetime of the GenericRawAccess.
 ///
 /// The caller is responsible for validation of lifetime of the passed `raw_access`.
-pub(crate) unsafe fn into_generic_raw_access<'a, T: Into<GenericRawAccess<'a>>>(
-    raw_access: T,
-) -> GenericRawAccess<'static> {
+pub(crate) unsafe fn into_generic_raw_access<'a, T>(raw_access: T) -> GenericRawAccess<'static>
+where
+    T: Into<GenericRawAccess<'a>>,
+{
     let generic_raw_access: GenericRawAccess = raw_access.into();
     std::mem::transmute(generic_raw_access)
 }
