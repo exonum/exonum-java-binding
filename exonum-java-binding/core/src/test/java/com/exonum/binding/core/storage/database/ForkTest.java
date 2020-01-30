@@ -17,53 +17,11 @@
 package com.exonum.binding.core.storage.database;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import com.exonum.binding.core.proxy.Cleaner;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@PrepareForTest({
-    Accesses.class,
-})
-@Disabled
-// TODO Won't run on Junit 5 till Powermock is updated [ECR-1614].
 class ForkTest {
-
-  private Fork fork;
-
-  @BeforeEach
-  void setUp() {
-    mockStatic(Accesses.class);
-  }
-
-  @Test
-  void disposeInternal_OwningProxy() throws Exception {
-    int nativeHandle = 0x0A;
-    try (Cleaner cleaner = new Cleaner()) {
-      fork = Fork.newInstance(nativeHandle, true, cleaner);
-    }
-
-    verifyStatic(Accesses.class);
-    Accesses.nativeFree(nativeHandle);
-  }
-
-  @Test
-  void disposeInternal_NotOwningProxy() throws Exception {
-    int nativeHandle = 0x0A;
-
-    try (Cleaner cleaner = new Cleaner()) {
-      fork = Fork.newInstance(nativeHandle, false, cleaner);
-    }
-
-    verifyStatic(Accesses.class, never());
-    Accesses.nativeFree(nativeHandle);
-  }
-
 
   @Test
   void canModify() {
