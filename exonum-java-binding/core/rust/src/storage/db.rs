@@ -13,20 +13,22 @@
 // limitations under the License.
 
 use exonum_merkledb::{
-    access::{AccessError, Access},
+    access::{Access, AccessError},
     generic::{ErasedAccess, GenericAccess, GenericRawAccess},
-    IndexAddress,
-    Fork,
+    Fork, IndexAddress,
 };
-use jni::{objects::{JClass, JObject}, JNIEnv};
-use jni::sys::{jbyteArray, jstring, jlong};
+use jni::sys::{jbyteArray, jlong, jstring};
+use jni::{
+    objects::{JClass, JObject},
+    JNIEnv,
+};
 
 use exonum::blockchain::{BlockProof, IndexProof, Schema};
 use exonum::helpers::Height;
 use exonum::runtime::SnapshotExt;
 use handle::{self, Handle};
-use std::rc::Rc;
 use std::panic;
+use std::rc::Rc;
 use utils;
 
 pub(crate) type Key = Vec<u8>;
@@ -99,7 +101,10 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
                 let fork = Rc::get_mut(fork).unwrap();
                 fork.flush();
             }
-            _ => panic!("'create_checkpoint' called on non-owning access or Snapshot: {:?}", self),
+            _ => panic!(
+                "'create_checkpoint' called on non-owning access or Snapshot: {:?}",
+                self
+            ),
         }
     }
 
@@ -109,7 +114,10 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
                 let fork = Rc::get_mut(fork).unwrap();
                 fork.rollback();
             }
-            _ => panic!("'rollback' called on non-owning access or Snapshot: {:?}", self),
+            _ => panic!(
+                "'rollback' called on non-owning access or Snapshot: {:?}",
+                self
+            ),
         }
     }
 
@@ -125,22 +133,36 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
             GenericAccess::Raw(raw) => match raw {
                 GenericRawAccess::Snapshot(snapshot) => snapshot.proof_for_index(index_name),
                 GenericRawAccess::OwnedSnapshot(snapshot) => snapshot.proof_for_index(index_name),
-                _ => panic!("'proof_for_index' called on non-Snapshot access: {:?}", self),
+                _ => panic!(
+                    "'proof_for_index' called on non-Snapshot access: {:?}",
+                    self
+                ),
             },
-            _ => panic!("'proof_for_index' called on non-Snapshot access: {:?}", self),
+            _ => panic!(
+                "'proof_for_index' called on non-Snapshot access: {:?}",
+                self
+            ),
         }
     }
 
     fn proof_for_block(&self, height: u64) -> Option<BlockProof> {
         match self {
             GenericAccess::Raw(raw) => match raw {
-                GenericRawAccess::Snapshot(snapshot) => Schema::new(*snapshot)
-                    .block_and_precommits(Height(height)),
-                GenericRawAccess::OwnedSnapshot(snapshot) => Schema::new(snapshot.as_ref())
-                    .block_and_precommits(Height(height)),
-                _ => panic!("'proof_for_block' called on non-Snapshot access: {:?}", self),
+                GenericRawAccess::Snapshot(snapshot) => {
+                    Schema::new(*snapshot).block_and_precommits(Height(height))
+                }
+                GenericRawAccess::OwnedSnapshot(snapshot) => {
+                    Schema::new(snapshot.as_ref()).block_and_precommits(Height(height))
+                }
+                _ => panic!(
+                    "'proof_for_block' called on non-Snapshot access: {:?}",
+                    self
+                ),
             },
-            _ => panic!("'proof_for_block' called on non-Snapshot access: {:?}", self),
+            _ => panic!(
+                "'proof_for_block' called on non-Snapshot access: {:?}",
+                self
+            ),
         }
     }
 
@@ -185,8 +207,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Accesses_na
 #[cfg(test)]
 mod tests {
     use exonum_merkledb::{
-        generic::ErasedAccess,
         access::{Access, AccessExt},
+        generic::ErasedAccess,
         Database, Entry, TemporaryDB,
     };
 

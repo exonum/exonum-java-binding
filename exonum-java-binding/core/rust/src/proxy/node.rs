@@ -140,7 +140,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeCrea
     let res = panic::catch_unwind(|| {
         let node = cast_handle::<Node>(node_handle);
         let snapshot = node.create_snapshot();
-        let access = ErasedAccess::from(unsafe{into_generic_raw_access(snapshot)});
+        let access = ErasedAccess::from(unsafe { into_generic_raw_access(snapshot) });
         Ok(to_handle(access))
     });
     unwrap_exc_or_default(&env, res)

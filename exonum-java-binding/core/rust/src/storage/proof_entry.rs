@@ -14,9 +14,8 @@
 
 use exonum_merkledb::{
     access::AccessExt,
-    ObjectHash,
     generic::{ErasedAccess, GenericRawAccess},
-    ProofEntry,
+    ObjectHash, ProofEntry,
 };
 use jni::{
     objects::{JClass, JObject, JString},
