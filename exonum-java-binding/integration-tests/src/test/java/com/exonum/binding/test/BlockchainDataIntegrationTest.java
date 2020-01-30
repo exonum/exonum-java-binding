@@ -35,6 +35,7 @@ import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.fakeservice.FakeSchema;
 import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.core.messages.Runtime.InstanceState;
@@ -82,12 +83,10 @@ public class BlockchainDataIntegrationTest {
     testKit.createBlockWithTransactions(putTransaction);
 
     // Check that that data is accessible through BlockchainData by simple name
-    // TODO [ECR-4175]: Use the schema when it is BD-ready.
     BlockchainData blockchainData = getBlockchainData(SERVICE_1_NAME);
     Prefixed serviceData = blockchainData.getExecutingServiceData();
-    IndexAddress address = IndexAddress.valueOf("test-map");
-    ProofMapIndexProxy<String, String> testMap =
-        serviceData.getProofMap(address, string(), string());
+    FakeSchema serviceSchema = new FakeSchema(serviceData);
+    ProofMapIndexProxy<String, String> testMap = serviceSchema.testMap();
 
     assertThat(testMap.get(key)).isEqualTo(value);
   }
@@ -101,7 +100,6 @@ public class BlockchainDataIntegrationTest {
     testKit.createBlockWithTransactions(putTransaction);
 
     // Check that that data is accessible through BlockchainData _of service 1_ by simple name
-    // TODO [ECR-4175]: Use the schema when it is BD-ready.
     BlockchainData blockchainData = getBlockchainData(SERVICE_1_NAME);
     Prefixed serviceData = blockchainData.findServiceData(SERVICE_2_NAME).get();
     IndexAddress address = IndexAddress.valueOf("test-map");
@@ -126,12 +124,10 @@ public class BlockchainDataIntegrationTest {
     testKit.createBlockWithTransactions(putTransaction);
 
     // Check that that data is accessible through BlockchainData of service 1 by simple name
-    // TODO [ECR-4175]: Use the schema when it is BD-ready.
     BlockchainData blockchainData = getBlockchainData(SERVICE_1_NAME);
     Prefixed serviceData = blockchainData.findServiceData(SERVICE_1_NAME).get();
-    IndexAddress address = IndexAddress.valueOf("test-map");
-    ProofMapIndexProxy<String, String> testMap =
-        serviceData.getProofMap(address, string(), string());
+    FakeSchema serviceSchema = new FakeSchema(serviceData);
+    ProofMapIndexProxy<String, String> testMap = serviceSchema.testMap();
 
     assertThat(testMap.get(key)).isEqualTo(value);
   }
@@ -161,8 +157,6 @@ public class BlockchainDataIntegrationTest {
     assertThat(instances.containsKey(SERVICE_1_NAME));
     assertThat(instances.containsKey(SERVICE_2_NAME));
   }
-
-  // todo: Consider testing time oracle schema access [ECR-4175]
 
   private static TransactionMessage createPutTransaction(int serviceId, String key, String value) {
     return TransactionMessage.builder()
