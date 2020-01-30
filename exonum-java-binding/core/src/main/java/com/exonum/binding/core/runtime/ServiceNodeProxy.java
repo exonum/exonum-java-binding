@@ -59,7 +59,7 @@ class ServiceNodeProxy implements Node {
 
   /**
    * Closes an access to the node. After calling this method subsequent calling
-   * {@link #submitTransaction(RawTransaction)} or {@link Node#withSnapshot(Function)} methods
+   * {@link #submitTransaction(RawTransaction)} or {@link #withSnapshot(Function)} methods
    * will cause {@link IllegalStateException}.
    */
   @Override

@@ -64,11 +64,6 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     super(instanceSpec);
   }
 
-
-  private CryptocurrencySchema createDataSchema(BlockchainData blockchainData) {
-    return new CryptocurrencySchema(blockchainData.getExecutingServiceData());
-  }
-
   @Override
   public void createPublicApiHandlers(Node node, Router router) {
     this.node = node;
@@ -82,8 +77,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public Optional<Wallet> getWallet(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((blockchainData) -> {
-      CryptocurrencySchema schema = createDataSchema(blockchainData);
+    return node.withServiceData(serviceData -> {
+      CryptocurrencySchema schema = new CryptocurrencySchema(serviceData);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       return Optional.ofNullable(wallets.get(ownerKey));
@@ -153,6 +148,10 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     HashCode messageHash = context.getTransactionMessageHash();
     schema.transactionsHistory(fromWallet).add(messageHash);
     schema.transactionsHistory(toWallet).add(messageHash);
+  }
+
+  private CryptocurrencySchema createDataSchema(BlockchainData blockchainData) {
+    return new CryptocurrencySchema(blockchainData.getExecutingServiceData());
   }
 
   private static PublicKey toPublicKey(ByteString s) {
