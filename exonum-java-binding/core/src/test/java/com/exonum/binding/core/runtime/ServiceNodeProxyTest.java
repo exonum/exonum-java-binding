@@ -67,7 +67,7 @@ class ServiceNodeProxyTest {
 
   @Test
   void withSnapshot() {
-    decorator.withSnapshot(SNAPSHOT_FUNCTION);
+    decorator.withBlockchainData(SNAPSHOT_FUNCTION);
 
     verify(node).withSnapshot(any(Function.class));
   }
@@ -76,7 +76,8 @@ class ServiceNodeProxyTest {
   void restrictWithSnapshot() {
     decorator.close();
 
-    assertThrows(IllegalStateException.class, () -> decorator.withSnapshot(SNAPSHOT_FUNCTION));
+    assertThrows(IllegalStateException.class,
+        () -> decorator.withBlockchainData(SNAPSHOT_FUNCTION));
   }
 
   @Test

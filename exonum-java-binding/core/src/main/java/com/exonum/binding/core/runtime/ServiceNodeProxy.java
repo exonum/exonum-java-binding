@@ -47,7 +47,7 @@ class ServiceNodeProxy implements Node {
   }
 
   @Override
-  public <ResultT> ResultT withSnapshot(Function<BlockchainData, ResultT> snapshotFunction) {
+  public <ResultT> ResultT withBlockchainData(Function<BlockchainData, ResultT> snapshotFunction) {
     return node().withSnapshot(snapshotFunction
         .compose(snapshot -> BlockchainData.fromRawAccess(snapshot, instanceName)));
   }
@@ -59,7 +59,7 @@ class ServiceNodeProxy implements Node {
 
   /**
    * Closes an access to the node. After calling this method subsequent calling
-   * {@link #submitTransaction(RawTransaction)} or {@link #withSnapshot(Function)} methods
+   * {@link #submitTransaction(RawTransaction)} or {@link #withBlockchainData(Function)} methods
    * will cause {@link IllegalStateException}.
    */
   @Override

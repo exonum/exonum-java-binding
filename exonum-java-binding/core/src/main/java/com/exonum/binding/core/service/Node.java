@@ -66,13 +66,12 @@ public interface Node extends AutoCloseable {
    * @param <ResultT> a type the function returns
    * @param snapshotFunction a function to execute
    * @return the result of applying the given function to the database state
-   * @see #withSnapshot(Function)
+   * @see #withBlockchainData(Function)
    */
   default <ResultT> ResultT withServiceData(Function<? super Prefixed, ResultT> snapshotFunction) {
-    return withSnapshot(snapshotFunction.compose(BlockchainData::getExecutingServiceData));
+    return withBlockchainData(snapshotFunction.compose(BlockchainData::getExecutingServiceData));
   }
 
-  // todo: Shall we rename? The present name highlights it is "read-only".
   /**
    * Performs the given function with a snapshot of the current database state.
    *
@@ -81,7 +80,7 @@ public interface Node extends AutoCloseable {
    * @return the result of applying the given function to the database state
    * @see #withServiceData(Function)
    */
-  <ResultT> ResultT withSnapshot(Function<BlockchainData, ResultT> snapshotFunction);
+  <ResultT> ResultT withBlockchainData(Function<BlockchainData, ResultT> snapshotFunction);
 
   /**
    * Returns the service public key of this node. The corresponding private key is used

@@ -89,7 +89,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public List<HistoryEntity> getWalletHistory(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot(blockchainData -> {
+    return node.withBlockchainData(blockchainData -> {
       CryptocurrencySchema schema = createDataSchema(blockchainData);
       ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
       Blockchain blockchain = blockchainData.getBlockchain();

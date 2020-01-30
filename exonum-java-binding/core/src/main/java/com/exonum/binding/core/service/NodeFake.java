@@ -98,8 +98,8 @@ public final class NodeFake implements Node {
   }
 
   @Override
-  public <ResultT> ResultT withSnapshot(Function<BlockchainData, ResultT> snapshotFunction) {
-    try (Cleaner cleaner = new Cleaner("NodeFake#withSnapshot")) {
+  public <ResultT> ResultT withBlockchainData(Function<BlockchainData, ResultT> snapshotFunction) {
+    try (Cleaner cleaner = new Cleaner("NodeFake#withBlockchainData")) {
       Snapshot snapshot = database.createSnapshot(cleaner);
       BlockchainData blockchainData = BlockchainData.fromRawAccess(snapshot, serviceName);
       return snapshotFunction.apply(blockchainData);

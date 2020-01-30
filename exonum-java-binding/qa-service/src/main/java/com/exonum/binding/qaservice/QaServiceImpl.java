@@ -203,7 +203,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Optional<Counter> getValue(HashCode counterId) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((snapshot) -> {
+    return node.withBlockchainData((snapshot) -> {
       QaSchema schema = createDataSchema(snapshot);
       MapIndex<HashCode, Long> counters = schema.counters();
       if (!counters.containsKey(counterId)) {
@@ -221,7 +221,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((blockchainData) -> {
+    return node.withBlockchainData((blockchainData) -> {
       Blockchain blockchain = blockchainData.getBlockchain();
 
       return blockchain.getConsensusConfiguration();
@@ -231,7 +231,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Optional<ZonedDateTime> getTime() {
-    return node.withSnapshot(s -> {
+    return node.withBlockchainData(s -> {
       TimeSchema timeOracle = createDataSchema(s).timeSchema();
       ProofEntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
       return currentTime.toOptional();
@@ -241,7 +241,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   @SuppressWarnings("ConstantConditions")  // Node is not null.
   public Map<PublicKey, ZonedDateTime> getValidatorsTimes() {
-    return node.withSnapshot(s -> {
+    return node.withBlockchainData(s -> {
       TimeSchema timeOracle = createDataSchema(s).timeSchema();
       MapIndex<PublicKey, ZonedDateTime> validatorsTimes = timeOracle.getValidatorsTimes();
       return toMap(validatorsTimes);
