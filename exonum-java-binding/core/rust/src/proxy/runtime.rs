@@ -139,7 +139,7 @@ impl Runtime for JavaRuntimeProxy {
     ) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
             let fork_handle =
-                to_handle(ErasedAccess::from(into_generic_raw_access(&*context.fork)));
+                to_handle(ErasedAccess::from(unsafe {into_generic_raw_access(&*context.fork)}));
             let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
             let configuration = JObject::from(env.byte_array_from_slice(&parameters)?);
 
@@ -165,7 +165,7 @@ impl Runtime for JavaRuntimeProxy {
     ) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
             let fork_handle =
-                to_handle(ErasedAccess::from(into_generic_raw_access(&*context.fork)));
+                to_handle(ErasedAccess::from(unsafe {into_generic_raw_access(&*context.fork)}));
             let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
             let parameters = JObject::from(env.byte_array_from_slice(&parameters)?);
 
@@ -242,7 +242,7 @@ impl Runtime for JavaRuntimeProxy {
             let tx_id = call_info.method_id as i32;
             let args = JObject::from(env.byte_array_from_slice(arguments)?);
             let view_handle =
-                to_handle(ErasedAccess::from(into_generic_raw_access(&*context.fork)));
+                to_handle(ErasedAccess::from(unsafe {into_generic_raw_access(&*context.fork)}));
             let caller_id = tx_info.0;
             let message_hash = tx_info.1.to_bytes();
             let message_hash = JObject::from(env.byte_array_from_slice(&message_hash)?);
@@ -284,7 +284,7 @@ impl Runtime for JavaRuntimeProxy {
     ) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
             let view_handle =
-                to_handle(ErasedAccess::from(into_generic_raw_access(&*context.fork)));
+                to_handle(ErasedAccess::from(unsafe {into_generic_raw_access(&*context.fork)}));
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::after_transactions_id(),
@@ -297,7 +297,7 @@ impl Runtime for JavaRuntimeProxy {
 
     fn after_commit(&mut self, snapshot: &dyn Snapshot, _mailbox: &mut Mailbox) {
         unwrap_jni(self.exec.with_attached(|env| {
-            let view_handle = to_handle(ErasedAccess::from(into_generic_raw_access(snapshot)));
+            let view_handle = to_handle(ErasedAccess::from(unsafe {into_generic_raw_access(snapshot)}));
             let public_key = self
                 .blockchain
                 .as_ref()

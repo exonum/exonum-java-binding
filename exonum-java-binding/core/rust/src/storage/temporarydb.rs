@@ -53,7 +53,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let db = handle::cast_handle::<TemporaryDB>(db_handle);
-        let access = ErasedAccess::from(into_generic_raw_access(db.snapshot()));
+        let access = ErasedAccess::from(unsafe {into_generic_raw_access(db.snapshot())});
         Ok(handle::to_handle(access))
     });
     utils::unwrap_exc_or_default(&env, res)
@@ -68,7 +68,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_TemporaryDb
 ) -> Handle {
     let res = panic::catch_unwind(|| {
         let db = handle::cast_handle::<TemporaryDB>(db_handle);
-        let access = ErasedAccess::from(into_generic_raw_access(db.fork()));
+        let access = ErasedAccess::from(unsafe {into_generic_raw_access(db.fork())});
         Ok(handle::to_handle(access))
     });
     utils::unwrap_exc_or_default(&env, res)

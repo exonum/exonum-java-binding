@@ -53,7 +53,10 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainProofs_
     let res = panic::catch_unwind(|| {
         let access = handle::cast_handle::<ErasedAccess>(snapshot_handle);
         let proof = access.proof_for_block(block_height as u64);
-        Ok(proto_to_java_bytes(&env, &proof)?)
+        match proof {
+            Some(proof) => proto_to_java_bytes(&env, &proof),
+            None => Ok(ptr::null_mut() as jbyteArray),
+        }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }

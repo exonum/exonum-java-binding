@@ -141,7 +141,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnaps
         let testkit = cast_handle::<TestKit>(handle);
         testkit.poll_events();
         let snapshot = testkit.snapshot();
-        let access = ErasedAccess::from(into_generic_raw_access(snapshot));
+        let access = ErasedAccess::from(unsafe {into_generic_raw_access(snapshot)});
         Ok(to_handle(access))
     });
     unwrap_exc_or_default(&env, res)

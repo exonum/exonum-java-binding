@@ -13,63 +13,126 @@
 // limitations under the License.
 
 use exonum_merkledb::{
-    generic::{ErasedAccess, GenericRawAccess},
+    generic::{ErasedAccess, GenericAccess, GenericRawAccess},
     Fork, Snapshot,
 };
 use jni::{objects::JClass, JNIEnv};
 
-use exonum::blockchain::{BlockProof, IndexProof};
+use exonum::blockchain::{BlockProof, IndexProof, Schema};
+use exonum::helpers::Height;
+use exonum::runtime::SnapshotExt;
 use handle::{self, Handle};
+use std::rc::Rc;
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
 
-#[allow(missing_docs)]
-pub fn into_generic_raw_access<'a, T: Into<GenericRawAccess<'a>>>(
+/// Prolongs lifetime of the GenericRawAccess.
+///
+/// The caller is responsible for validation of lifetime of the passed `raw_access`.
+pub(crate) unsafe fn into_generic_raw_access<'a, T: Into<GenericRawAccess<'a>>>(
     raw_access: T,
 ) -> GenericRawAccess<'static> {
     let generic_raw_access: GenericRawAccess = raw_access.into();
-    unsafe { std::mem::transmute(generic_raw_access) }
+    std::mem::transmute(generic_raw_access)
 }
 
-#[allow(missing_docs)]
 pub trait EjbAccessExt {
+    /// Returns `true` iff `into_fork` conversion is possible.
     fn can_convert_into_fork(&self) -> bool;
+    /// Unwraps the stored Fork from the Access, panics if it's not possible.
     fn into_fork(self) -> Fork;
+    /// Creates checkpoint for the owned Fork instance.
+    ///
+    /// Panics if it is not possible (`EjbAccessExt::can_rollback` returns false).
     fn create_checkpoint(&mut self);
+    /// Rollbacks owned Fork to the latest checkpoint.
+    /// If no checkpoint was created (`create_checkpoint` method was never called),
+    /// rollbacks all changes in Fork.
+    ///
+    /// Does not affect database, but only a specific Fork instance.
+    ///
+    /// Panics if it is not possible (`EjbAccessExt::can_rollback` returns false).
     fn rollback(&mut self);
+    /// Returns `true` iff `create_checkpoint` and `rollback` methods available.
     fn can_rollback(&self) -> bool;
+    /// Returns a proof of existence for the index with the specified name.
+    ///
+    /// Returns `None` if index was not initialized or does not exist.
     fn proof_for_index(&self, name: &str) -> Option<IndexProof>;
-    fn proof_for_block(&self, height: u64) -> BlockProof;
+    /// Returns a proof of existence for the block with the specified height.
+    ///
+    /// Returns `None` if the block does not exist.
+    fn proof_for_block(&self, height: u64) -> Option<BlockProof>;
 }
 
 impl<'a> EjbAccessExt for ErasedAccess<'a> {
     fn can_convert_into_fork(&self) -> bool {
-        unimplemented!()
+        match self {
+            GenericAccess::Raw(GenericRawAccess::OwnedFork(_)) => true,
+            _ => false,
+        }
     }
 
     fn into_fork(self) -> Fork {
-        unimplemented!()
+        match self {
+            GenericAccess::Raw(GenericRawAccess::OwnedFork(fork)) => Rc::try_unwrap(fork).unwrap(),
+            _ => panic!(
+                "'into_fork' called on non-owning access or Snapshot: {:?}",
+                self
+            ),
+        }
     }
 
     fn create_checkpoint(&mut self) {
-        unimplemented!()
+        match self {
+            GenericAccess::Raw(GenericRawAccess::OwnedFork(ref mut fork)) => {
+                let fork = Rc::get_mut(fork).unwrap();
+                fork.flush();
+            }
+            _ => panic!("'create_checkpoint' called on non-owning access or Snapshot: {:?}", self),
+        }
     }
 
     fn rollback(&mut self) {
-        unimplemented!()
+        match self {
+            GenericAccess::Raw(GenericRawAccess::OwnedFork(ref mut fork)) => {
+                let fork = Rc::get_mut(fork).unwrap();
+                fork.rollback();
+            }
+            _ => panic!("'rollback' called on non-owning access or Snapshot: {:?}", self),
+        }
     }
 
     fn can_rollback(&self) -> bool {
-        unimplemented!()
+        match self {
+            GenericAccess::Raw(GenericRawAccess::OwnedFork(_)) => true,
+            _ => false,
+        }
     }
 
     fn proof_for_index(&self, name: &str) -> Option<IndexProof> {
-        unimplemented!()
+        match self {
+            GenericAccess::Raw(raw) => match raw {
+                GenericRawAccess::Snapshot(snapshot) => snapshot.proof_for_index(name),
+                GenericRawAccess::OwnedSnapshot(snapshot) => snapshot.proof_for_index(name),
+                _ => panic!("'proof_for_index' called on non-Snapshot access: {:?}", self),
+            },
+            _ => panic!("'proof_for_index' called on non-Snapshot access: {:?}", self),
+        }
     }
 
-    fn proof_for_block(&self, height: u64) -> BlockProof {
-        unimplemented!()
+    fn proof_for_block(&self, height: u64) -> Option<BlockProof> {
+        match self {
+            GenericAccess::Raw(raw) => match raw {
+                GenericRawAccess::Snapshot(snapshot) => Schema::new(*snapshot)
+                    .block_and_precommits(Height(height)),
+                GenericRawAccess::OwnedSnapshot(snapshot) => Schema::new(snapshot.as_ref())
+                    .block_and_precommits(Height(height)),
+                _ => panic!("'proof_for_block' called on non-Snapshot access: {:?}", self),
+            },
+            _ => panic!("'proof_for_block' called on non-Snapshot access: {:?}", self),
+        }
     }
 }
 
@@ -250,7 +313,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Accesses_na
     _: JClass,
     view_handle: Handle,
 ) {
-    handle::drop_handle::<View>(&env, view_handle);
+    handle::drop_handle::<ErasedAccess>(&env, view_handle);
 }
 
 #[cfg(test)]
