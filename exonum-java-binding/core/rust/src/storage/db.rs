@@ -13,16 +13,22 @@
 // limitations under the License.
 
 use exonum_merkledb::{
+    access::{AccessError, Access},
     generic::{ErasedAccess, GenericAccess, GenericRawAccess},
+    IndexAddress,
     Fork, Snapshot,
 };
 use jni::{objects::JClass, JNIEnv};
+use jni::sys::{jbyteArray, jstring, jlong};
 
 use exonum::blockchain::{BlockProof, IndexProof, Schema};
 use exonum::helpers::Height;
 use exonum::runtime::SnapshotExt;
 use handle::{self, Handle};
 use std::rc::Rc;
+use jni::objects::{JObject, JString};
+use std::panic;
+use utils;
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
@@ -59,11 +65,15 @@ pub trait EjbAccessExt {
     /// Returns a proof of existence for the index with the specified name.
     ///
     /// Returns `None` if index was not initialized or does not exist.
-    fn proof_for_index(&self, name: &str) -> Option<IndexProof>;
+    fn proof_for_index(&self, index_name: &str) -> Option<IndexProof>;
     /// Returns a proof of existence for the block with the specified height.
     ///
     /// Returns `None` if the block does not exist.
     fn proof_for_block(&self, height: u64) -> Option<BlockProof>;
+    /// Returns `IndexMetadata::identifier` - a unique identifier of the index.
+    ///
+    /// Returns `None` if the index does not exist.
+    fn find_index_id(&self, index_address: IndexAddress) -> Result<Option<u64>, AccessError>;
 }
 
 impl<'a> EjbAccessExt for ErasedAccess<'a> {
@@ -111,11 +121,11 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
         }
     }
 
-    fn proof_for_index(&self, name: &str) -> Option<IndexProof> {
+    fn proof_for_index(&self, index_name: &str) -> Option<IndexProof> {
         match self {
             GenericAccess::Raw(raw) => match raw {
-                GenericRawAccess::Snapshot(snapshot) => snapshot.proof_for_index(name),
-                GenericRawAccess::OwnedSnapshot(snapshot) => snapshot.proof_for_index(name),
+                GenericRawAccess::Snapshot(snapshot) => snapshot.proof_for_index(index_name),
+                GenericRawAccess::OwnedSnapshot(snapshot) => snapshot.proof_for_index(index_name),
                 _ => panic!("'proof_for_index' called on non-Snapshot access: {:?}", self),
             },
             _ => panic!("'proof_for_index' called on non-Snapshot access: {:?}", self),
@@ -134,6 +144,31 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
             _ => panic!("'proof_for_block' called on non-Snapshot access: {:?}", self),
         }
     }
+
+    fn find_index_id(&self, index_address: IndexAddress) -> Result<Option<u64>, AccessError> {
+        let metadata = self.clone().get_index_metadata(index_address)?;
+        Ok(metadata.map(|metadata| metadata.identifier().get()))
+    }
+}
+
+/// Returns the unique id of the index
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAccess_nativeFindIndexId(
+    env: JNIEnv,
+    _: JObject,
+    access_handle: Handle,
+    name: jstring,
+    id_in_group: jbyteArray,
+) -> jlong {
+    let res = panic::catch_unwind(|| {
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        let address = utils::convert_to_index_address(&env, name, id_in_group)?;
+        match access.find_index_id(address).unwrap() {
+            Some(id) => Ok(id as jlong),
+            None => Ok(0 as jlong),
+        }
+    });
+    utils::unwrap_exc_or(&env, res, 0 as jlong)
 }
 
 /// A `View` is a wrapper for `Snapshot` or `Fork`, which makes it possible to distinguish them
