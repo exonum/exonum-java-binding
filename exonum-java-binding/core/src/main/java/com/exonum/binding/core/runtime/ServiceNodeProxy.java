@@ -32,11 +32,14 @@ import java.util.function.Function;
 class ServiceNodeProxy implements Node {
 
   private final NodeProxy node;
+  private final BlockchainDataFactory blockchainDataFactory;
   private final String instanceName;
   private boolean closed;
 
-  ServiceNodeProxy(NodeProxy node, String instanceName) {
+  ServiceNodeProxy(NodeProxy node, BlockchainDataFactory blockchainDataFactory,
+      String instanceName) {
     this.node = checkNotNull(node);
+    this.blockchainDataFactory = blockchainDataFactory;
     this.instanceName = instanceName;
     this.closed = false;
   }
@@ -49,7 +52,7 @@ class ServiceNodeProxy implements Node {
   @Override
   public <ResultT> ResultT withBlockchainData(Function<BlockchainData, ResultT> snapshotFunction) {
     return node().withSnapshot(snapshotFunction
-        .compose(snapshot -> BlockchainData.fromRawAccess(snapshot, instanceName)));
+        .compose(snapshot -> blockchainDataFactory.fromRawAccess(snapshot, instanceName)));
   }
 
   @Override

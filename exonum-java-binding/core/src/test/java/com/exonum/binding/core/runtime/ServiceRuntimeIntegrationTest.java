@@ -88,12 +88,15 @@ class ServiceRuntimeIntegrationTest {
   private ServicesFactory servicesFactory;
   @Mock
   private RuntimeTransport transport;
+  @Mock
+  private BlockchainDataFactory blockchainDataFactory;
 
   private ServiceRuntime serviceRuntime;
 
   @BeforeEach
   void setUp() {
-    serviceRuntime = new ServiceRuntime(serviceLoader, servicesFactory, transport, ARTIFACTS_DIR);
+    serviceRuntime = new ServiceRuntime(serviceLoader, servicesFactory, transport,
+        blockchainDataFactory, ARTIFACTS_DIR);
   }
 
   @Test
@@ -597,6 +600,9 @@ class ServiceRuntimeIntegrationTest {
       Snapshot snapshot = mock(Snapshot.class);
       OptionalInt validatorId = OptionalInt.of(1);
       long height = 2L;
+      BlockchainData blockchainData = mock(BlockchainData.class);
+      when(blockchainDataFactory.fromRawAccess(snapshot, TEST_NAME))
+          .thenReturn(blockchainData);
 
       serviceRuntime.afterCommit(snapshot, validatorId, height);
 
@@ -606,6 +612,7 @@ class ServiceRuntimeIntegrationTest {
       BlockCommittedEvent actual = ac.getValue();
       assertThat(actual.getValidatorId()).isEqualTo(validatorId);
       assertThat(actual.getHeight()).isEqualTo(height);
+      assertThat(actual.getSnapshot()).isEqualTo(blockchainData);
     }
 
     @Test
@@ -691,9 +698,15 @@ class ServiceRuntimeIntegrationTest {
 
       // Verify that each service got the notifications, i.e., the first service
       // throwing an exception has not disrupted the notification process
-      InOrder inOrder = Mockito.inOrder(services.toArray(new Object[0]));
+      InOrder afterCommitOrder = Mockito.inOrder(services.toArray(new Object[0]));
       for (ServiceWrapper service : services) {
-        inOrder.verify(service).afterCommit(any(BlockCommittedEvent.class));
+        afterCommitOrder.verify(service).afterCommit(any(BlockCommittedEvent.class));
+      }
+
+      // Verify the blockchain data instantiation
+      InOrder dataOrder = Mockito.inOrder(blockchainDataFactory);
+      for (ServiceWrapper service : services) {
+        dataOrder.verify(blockchainDataFactory).fromRawAccess(snapshot, service.getName());
       }
     }
   }

@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,11 +45,13 @@ class ServiceNodeProxyTest {
 
   @Mock
   private NodeProxy node;
+  @Mock
+  private BlockchainDataFactory blockchainDataFactory;
   private ServiceNodeProxy decorator;
 
   @BeforeEach
   void setUp() {
-    decorator = new ServiceNodeProxy(node, SERVICE_NAME);
+    decorator = new ServiceNodeProxy(node, blockchainDataFactory, SERVICE_NAME);
   }
 
   @Test
@@ -70,6 +73,7 @@ class ServiceNodeProxyTest {
     decorator.withBlockchainData(SNAPSHOT_FUNCTION);
 
     verify(node).withSnapshot(any(Function.class));
+    verify(blockchainDataFactory).fromRawAccess(any(Snapshot.class), SERVICE_NAME);
   }
 
   @Test

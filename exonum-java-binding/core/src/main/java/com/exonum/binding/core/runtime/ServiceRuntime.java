@@ -69,6 +69,7 @@ public final class ServiceRuntime implements AutoCloseable {
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
   private final RuntimeTransport runtimeTransport;
+  private final BlockchainDataFactory blockchainDataFactory;
   private final Path artifactsDir;
   /**
    * The active services indexed by their name. It is stored in a sorted map that offers
@@ -96,11 +97,12 @@ public final class ServiceRuntime implements AutoCloseable {
    */
   @Inject
   public ServiceRuntime(ServiceLoader serviceLoader, ServicesFactory servicesFactory,
-      RuntimeTransport runtimeTransport,
+      RuntimeTransport runtimeTransport, BlockchainDataFactory blockchainDataFactory,
       @Named(FrameworkModule.SERVICE_RUNTIME_ARTIFACTS_DIRECTORY) Path artifactsDir) {
     this.serviceLoader = checkNotNull(serviceLoader);
     this.servicesFactory = checkNotNull(servicesFactory);
     this.runtimeTransport = checkNotNull(runtimeTransport);
+    this.blockchainDataFactory = blockchainDataFactory;
     this.artifactsDir = checkNotNull(artifactsDir);
   }
 
@@ -317,7 +319,7 @@ public final class ServiceRuntime implements AutoCloseable {
         .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
     // Instantiate the service
-    ServiceNodeProxy serviceNode = new ServiceNodeProxy(nodeProxy, name);
+    ServiceNodeProxy serviceNode = new ServiceNodeProxy(nodeProxy, blockchainDataFactory, name);
     return servicesFactory.createService(serviceDefinition, instanceSpec, serviceNode);
   }
 
@@ -434,7 +436,8 @@ public final class ServiceRuntime implements AutoCloseable {
     synchronized (lock) {
       for (ServiceWrapper service : services.values()) {
         try {
-          BlockchainData blockchainData = BlockchainData.fromRawAccess(snapshot, service.getName());
+          BlockchainData blockchainData = blockchainDataFactory.fromRawAccess(snapshot,
+              service.getName());
           BlockCommittedEvent event =
               BlockCommittedEventImpl.valueOf(blockchainData, validatorId, height);
           // todo: [ECR-3436] BCE carries a Snapshot which is based on a cleaner, which gets
