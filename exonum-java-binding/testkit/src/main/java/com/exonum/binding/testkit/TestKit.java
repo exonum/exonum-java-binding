@@ -41,6 +41,7 @@ import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -246,12 +247,26 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   }
 
   /**
+   * Returns the snapshot of the current state of the service data for a service
+   * with the given name.
+   *
+   * <p>A shortcut for {@link BlockchainData#getExecutingServiceData()}.</p>
+   *
+   * @param serviceName the name of the service instance to which data the access is needed
+   * @throws IllegalArgumentException if the service with the given name does not exist
+   */
+  public Prefixed getServiceData(String serviceName) {
+    return getBlockchainData(serviceName).getExecutingServiceData();
+  }
+
+  /**
    * Returns the snapshot of the current state of the blockchain data for a service
    * with the given name.
    *
    * @param serviceName the name of the service instance to which data the access is needed
    * @throws IllegalArgumentException if the service with the given name does not exist
    * @see #getSnapshot()
+   * @see #getServiceData(String)
    */
   public BlockchainData getBlockchainData(String serviceName) {
     Snapshot snapshot = createSnapshot(snapshotCleaner);

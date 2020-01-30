@@ -37,7 +37,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
-import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -81,11 +81,10 @@ class TransferTxIntegrationTest {
         seed, FROM_KEY_PAIR, TO_KEY_PAIR.getPublicKey(), transferSum, SERVICE_ID);
     testKit.createBlockWithTransactions(transferTx);
 
-    BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+    Prefixed serviceData = testKit.getServiceData(SERVICE_NAME);
+    CryptocurrencySchema schema = new CryptocurrencySchema(serviceData);
 
     // Check that wallets have correct balances
-    CryptocurrencySchema schema =
-        new CryptocurrencySchema(blockchainData.getExecutingServiceData());
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     long expectedFromValue = initialBalance - transferSum;
     assertThat(wallets.get(FROM_KEY_PAIR.getPublicKey()).getBalance())

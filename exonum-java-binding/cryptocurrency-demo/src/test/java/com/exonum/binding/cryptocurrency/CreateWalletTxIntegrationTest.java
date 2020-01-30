@@ -31,7 +31,7 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
-import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -61,9 +61,8 @@ class CreateWalletTxIntegrationTest {
     testKit.createBlockWithTransactions(transactionMessage);
 
     // Check that entries have been added
-    BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
-    CryptocurrencySchema schema =
-        new CryptocurrencySchema(blockchainData.getExecutingServiceData());
+    Prefixed serviceData = testKit.getServiceData(SERVICE_NAME);
+    CryptocurrencySchema schema = new CryptocurrencySchema(serviceData);
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
     PublicKey emulatedNodePublicKey = OWNER_KEY_PAIR.getPublicKey();

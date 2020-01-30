@@ -652,10 +652,28 @@ class TestKitTest {
   }
 
   @Test
+  void getServiceData(TestKit testKit) {
+    Prefixed serviceData = testKit.getServiceData(SERVICE_NAME);
+    // Check the service has the initial value in its schema
+    TestSchema testSchema = new TestSchema(serviceData);
+    Map<String, String> testMap = toMap(testSchema.testMap());
+    assertThat(testMap).containsKey(TestService.INITIAL_ENTRY_KEY);
+  }
+
+  @Test
+  void getServiceDataUnknownService(TestKit testKit) {
+    String name = "unknown-service";
+    // Check it is not possible to access unknown service data
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> testKit.getServiceData(name));
+    assertThat(e).hasMessageContaining(name);
+  }
+
+  @Test
   void getBlockchainData(TestKit testKit) {
-    // Check the service data is accessible
     BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
-    // The service must have the initial value in its schema
+    // Check the blockchain data provides access to the service data:
+    // the service must have the initial value in its schema.
     Prefixed serviceData = blockchainData.getExecutingServiceData();
     TestSchema testSchema = new TestSchema(serviceData);
     Map<String, String> testMap = toMap(testSchema.testMap());
