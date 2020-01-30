@@ -18,7 +18,9 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,7 +34,6 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
-import org.assertj.core.api.Assertions;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -194,8 +195,9 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       // Try to create an index of other type with the same name as the index above
       Exception e = assertThrows(RuntimeException.class, () -> createOfOtherType(name, snapshot));
 
-      Assertions.assertThat(e.getMessage())
-          .containsIgnoringCase("WrongIndexType");
+      // TODO: use only the first variant once it is fixed in Core (https://github.com/exonum/exonum/pull/1752)
+      assertThat(e.getMessage(),
+          anyOf(containsStringIgnoringCase("wrong index type"), containsString("WrongIndexType")));
     }
   }
 
