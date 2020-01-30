@@ -27,7 +27,7 @@ use jni::{
 };
 
 use handle::{self, Handle};
-use storage::{db::Value, PairIter};
+use storage::{PairIter, Value};
 use utils;
 
 type Index = ValueSetIndex<GenericRawAccess<'static>, Value>;

@@ -27,7 +27,7 @@ use jni::{
 };
 
 use handle::{self, Handle};
-use storage::db::Value;
+use storage::Value;
 use utils;
 
 type Index = ListIndex<GenericRawAccess<'static>, Value>;

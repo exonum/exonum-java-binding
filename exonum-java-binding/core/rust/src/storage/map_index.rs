@@ -27,10 +27,7 @@ use jni::{
 };
 
 use handle::{self, Handle};
-use storage::{
-    db::{Key, Value},
-    PairIter,
-};
+use storage::{Key, PairIter, Value};
 use utils;
 
 type Index = MapIndex<GenericRawAccess<'static>, Key, Value>;

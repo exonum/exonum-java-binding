@@ -26,7 +26,7 @@ use jni::{
 use std::{panic, ptr};
 
 use handle::{self, Handle};
-use storage::db::Value;
+use storage::Value;
 use utils;
 
 type Index = ProofEntry<GenericRawAccess<'static>, Value>;

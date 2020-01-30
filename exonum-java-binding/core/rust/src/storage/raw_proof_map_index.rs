@@ -28,7 +28,7 @@ use jni::{
 use JniResult;
 
 use handle::{self, Handle};
-use storage::{db::Value, PairIter};
+use storage::{PairIter, Value};
 use utils;
 
 type Key = [u8; PROOF_MAP_KEY_SIZE];

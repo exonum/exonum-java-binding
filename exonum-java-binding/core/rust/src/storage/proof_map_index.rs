@@ -30,10 +30,7 @@ use protobuf::Message;
 use JniResult;
 
 use handle::{self, Handle};
-use storage::{
-    db::{Key, Value},
-    PairIter,
-};
+use storage::{Key, PairIter, Value};
 use utils;
 
 type RawKey = [u8; PROOF_MAP_KEY_SIZE];

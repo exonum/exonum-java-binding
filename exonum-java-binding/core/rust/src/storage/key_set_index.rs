@@ -27,7 +27,7 @@ use jni::{
 };
 
 use handle::{self, Handle};
-use storage::db::Key;
+use storage::Key;
 use utils;
 
 type Index = KeySetIndex<GenericRawAccess<'static>, Key>;

@@ -33,9 +33,6 @@ use std::{panic, rc::Rc};
 use handle::{self, Handle};
 use utils;
 
-pub(crate) type Key = Vec<u8>;
-pub(crate) type Value = Vec<u8>;
-
 /// Prolongs lifetime of the GenericRawAccess.
 ///
 /// The caller is responsible for validation of lifetime of the passed `raw_access`.
