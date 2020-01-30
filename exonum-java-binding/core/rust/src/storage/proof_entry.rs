@@ -93,7 +93,7 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexPr
 
 /// Inserts value to the entry.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexProxy_nativeSet(
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexProxy_nativeSet(
     env: JNIEnv,
     _: JObject,
     entry_handle: Handle,
