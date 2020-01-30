@@ -150,7 +150,9 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
     }
 }
 
-/// Returns the unique id of the index
+/// Returns the unique id of the index.
+///
+/// Returns 0 if the index does not exist.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAccess_nativeFindIndexId(
     env: JNIEnv,
