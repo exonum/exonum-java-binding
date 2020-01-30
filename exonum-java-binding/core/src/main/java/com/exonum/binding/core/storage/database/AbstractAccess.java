@@ -254,6 +254,5 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    */
   public abstract Cleaner getCleaner();
 
-
   static native long nativeFindIndexId(long nativeHandle, String name, @Nullable byte[] idInGroup);
 }
