@@ -34,7 +34,7 @@ public final class ContextUtils {
    */
   public static TransactionContext newContext(Fork fork) {
     return TransactionContext.builder()
-        .fork(fork)
+        .blockchainData(fork)
         .txMessageHash(DEFAULT_HASH)
         .authorPk(DEFAULT_AUTHOR_KEY)
         .build();

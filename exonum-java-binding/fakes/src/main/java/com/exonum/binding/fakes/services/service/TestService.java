@@ -18,12 +18,12 @@ package com.exonum.binding.fakes.services.service;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Access;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
@@ -60,8 +60,8 @@ public final class TestService extends AbstractService {
    * Always puts the same value identified by the same key.
    */
   @Override
-  public void initialize(Fork fork, Configuration configuration) {
-    TestSchema schema = createDataSchema(fork);
+  public void initialize(BlockchainData blockchainData, Configuration configuration) {
+    TestSchema schema = createDataSchema(blockchainData);
     ProofMapIndexProxy<HashCode, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, INITIAL_ENTRY_VALUE);
   }

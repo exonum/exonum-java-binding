@@ -27,20 +27,20 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.DeployArguments;
+import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.FrameworkModule;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
-import com.exonum.binding.core.runtime.ServiceRuntime;
 import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -84,7 +84,8 @@ import javax.annotation.Nullable;
  * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized — service instances are
- * {@linkplain Service#initialize(Fork, Configuration) initialized} and genesis block is committed.
+ * {@linkplain Service#initialize(com.exonum.binding.core.blockchain.BlockchainData, Configuration)
+ * initialized} and genesis block is committed.
  * Then the {@linkplain Service#createPublicApiHandlers(Node, Router) public API handlers} are
  * created.
  *
@@ -114,18 +115,13 @@ public final class TestKit extends AbstractCloseableNativeProxy {
   private static final int SERVER_PORT = 0;
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
 
-  private final ServiceRuntime serviceRuntime;
-  private final Integer timeServiceId;
   private final int port;
 
   @VisibleForTesting
   final Cleaner snapshotCleaner = new Cleaner("TestKit#getSnapshot");
 
-  private TestKit(long nativeHandle, @Nullable TimeServiceSpec timeServiceSpec,
-      ServiceRuntime serviceRuntime, int port) {
+  private TestKit(long nativeHandle, int port) {
     super(nativeHandle, true);
-    this.serviceRuntime = serviceRuntime;
-    timeServiceId = timeServiceSpec == null ? null : timeServiceSpec.serviceId;
     this.port = port;
   }
 
@@ -147,8 +143,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       int port = serviceServer.getActualPort()
           .orElseThrow(() -> new IllegalStateException(
               "No port set after testkit has been created"));
-      ServiceRuntime serviceRuntime = serviceRuntimeAdapter.getServiceRuntime();
-      return new TestKit(nativeHandle, timeServiceSpec, serviceRuntime, port);
+      return new TestKit(nativeHandle, port);
     } catch (Exception e) {
       // Free the native object and re-throw
       nativeFreeTestKit(nativeHandle);
@@ -248,6 +243,29 @@ public final class TestKit extends AbstractCloseableNativeProxy {
           .filter(predicate)
           .collect(toList());
     });
+  }
+
+  /**
+   * Returns the snapshot of the current state of the blockchain data for a service
+   * with the given name.
+   *
+   * @param serviceName the name of the service instance to which data the access is needed
+   * @throws IllegalArgumentException if the service with the given name does not exist
+   * @see #getSnapshot()
+   */
+  public BlockchainData getBlockchainData(String serviceName) {
+    Snapshot snapshot = createSnapshot(snapshotCleaner);
+    checkServiceExists(serviceName, snapshot);
+    return BlockchainData.fromRawAccess(snapshot, serviceName);
+  }
+
+  private void checkServiceExists(String serviceName, Snapshot snapshot) {
+    boolean hasService = new DispatcherSchema(snapshot)
+            .serviceInstances()
+            .containsKey(serviceName);
+    if (!hasService) {
+      throw new IllegalArgumentException("No service with the given name: " + serviceName);
+    }
   }
 
   /**

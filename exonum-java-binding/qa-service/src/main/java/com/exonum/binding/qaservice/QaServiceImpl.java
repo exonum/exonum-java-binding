@@ -32,13 +32,12 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.Access;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -98,30 +97,29 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     super(instanceSpec);
   }
 
-  @Override
-  protected QaSchema createDataSchema(Access access) {
-    return new QaSchema(access, getName());
+  private QaSchema createDataSchema(BlockchainData blockchainData) {
+    return new QaSchema(blockchainData);
   }
 
   @Override
-  public void initialize(Fork fork, Configuration configuration) {
+  public void initialize(BlockchainData blockchainData, Configuration configuration) {
     // Init the time oracle
-    updateTimeOracle(fork, configuration);
+    updateTimeOracle(blockchainData, configuration);
 
     // Add a default counter to the blockchain.
-    createCounter(DEFAULT_COUNTER_NAME, fork);
+    createCounter(DEFAULT_COUNTER_NAME, blockchainData);
 
     // Add an afterCommit counter that will be incremented after each block committed event.
-    createCounter(AFTER_COMMIT_COUNTER_NAME, fork);
+    createCounter(AFTER_COMMIT_COUNTER_NAME, blockchainData);
   }
 
   @Override
-  public void resume(Fork fork, byte[] arguments) {
+  public void resume(BlockchainData blockchainData, byte[] arguments) {
     QaResumeArguments resumeArguments = parseResumeArguments(arguments);
 
     checkExecution(!resumeArguments.getShouldThrowException(), RESUME_SERVICE_ERROR.code);
 
-    createCounter(resumeArguments.getCounterName(), fork);
+    createCounter(resumeArguments.getCounterName(), blockchainData);
   }
 
   @Override
@@ -223,8 +221,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Config getConsensusConfiguration() {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((snapshot) -> {
-      Blockchain blockchain = Blockchain.newInstance(snapshot);
+    return node.withSnapshot((blockchainData) -> {
+      Blockchain blockchain = blockchainData.getBlockchain();
 
       return blockchain.getConsensusConfiguration();
     });
@@ -269,14 +267,14 @@ public final class QaServiceImpl extends AbstractService implements QaService {
    * @throws ExecutionException if time oracle name is empty
    */
   @Override
-  public void verifyConfiguration(Fork fork, Configuration configuration) {
+  public void verifyConfiguration(BlockchainData blockchainData, Configuration configuration) {
     QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
     checkConfiguration(config);
   }
 
   @Override
-  public void applyConfiguration(Fork fork, Configuration configuration) {
-    updateTimeOracle(fork, configuration);
+  public void applyConfiguration(BlockchainData blockchainData, Configuration configuration) {
+    updateTimeOracle(blockchainData, configuration);
   }
 
   @Override
@@ -286,11 +284,11 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     String name = arguments.getName();
     checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
 
-    createCounter(name, context.getFork());
+    createCounter(name, context.getBlockchainData());
   }
 
-  private void createCounter(String counterName, Fork fork) {
-    QaSchema schema = createDataSchema(fork);
+  private void createCounter(String counterName, BlockchainData blockchainData) {
+    QaSchema schema = createDataSchema(blockchainData);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> names = schema.counterNames();
 
@@ -311,7 +309,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     byte[] rawCounterId = arguments.getCounterId().toByteArray();
     HashCode counterId = HashCode.fromBytes(rawCounterId);
 
-    QaSchema schema = createDataSchema(context.getFork());
+    QaSchema schema = createDataSchema(context.getBlockchainData());
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
 
     // Increment the counter if there is such.
@@ -324,7 +322,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   @Transaction(VALID_THROWING_TX_ID)
   public void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context) {
-    QaSchema schema = createDataSchema(context.getFork());
+    QaSchema schema = createDataSchema(context.getBlockchainData());
 
     // Attempt to clear all service indices.
     schema.clearAll();
@@ -339,7 +337,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     int errorCode = arguments.getErrorCode();
     checkArgument(0 <= errorCode && errorCode <= 127,
         "error code (%s) must be in range [0; 127]", errorCode);
-    QaSchema schema = createDataSchema(context.getFork());
+    QaSchema schema = createDataSchema(context.getBlockchainData());
 
     // Attempt to clear all service indices.
     schema.clearAll();
@@ -359,8 +357,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
         "Empty time oracle name: %s", timeOracleName);
   }
 
-  private void updateTimeOracle(Fork fork, Configuration configuration) {
-    QaSchema schema = createDataSchema(fork);
+  private void updateTimeOracle(BlockchainData blockchainData, Configuration configuration) {
+    QaSchema schema = createDataSchema(blockchainData);
     QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
 
     // Verify the configuration

@@ -33,11 +33,11 @@ import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,65 +78,65 @@ class ServiceWrapperTest {
 
   @Test
   void initialize() {
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     Configuration config = new ServiceConfiguration(new byte[0]);
-    serviceWrapper.initialize(fork, config);
-    verify(service).initialize(fork, config);
+    serviceWrapper.initialize(blockchainData, config);
+    verify(service).initialize(blockchainData, config);
   }
 
   @Test
   void initializePropagatesExecutionException() {
     ExecutionException e = new ExecutionException((byte) 1);
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     Configuration config = new ServiceConfiguration(new byte[0]);
-    doThrow(e).when(service).initialize(fork, config);
+    doThrow(e).when(service).initialize(blockchainData, config);
 
     ExecutionException actual = assertThrows(ExecutionException.class,
-        () -> serviceWrapper.initialize(fork, config));
+        () -> serviceWrapper.initialize(blockchainData, config));
     assertThat(actual).isSameAs(e);
   }
 
   @Test
   void initializeWrapsRuntimeExceptions() {
     RuntimeException e = new RuntimeException("unexpected");
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     Configuration config = new ServiceConfiguration(new byte[0]);
-    doThrow(e).when(service).initialize(fork, config);
+    doThrow(e).when(service).initialize(blockchainData, config);
 
     Exception actual = assertThrows(UnexpectedExecutionException.class,
-        () -> serviceWrapper.initialize(fork, config));
+        () -> serviceWrapper.initialize(blockchainData, config));
     assertThat(actual).hasCause(e);
   }
 
   @Test
   void resume() {
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     byte[] arguments = new byte[0];
-    serviceWrapper.resume(fork, arguments);
-    verify(service).resume(fork, arguments);
+    serviceWrapper.resume(blockchainData, arguments);
+    verify(service).resume(blockchainData, arguments);
   }
 
   @Test
   void resumePropagatesExecutionException() {
     ExecutionException e = new ExecutionException((byte) 1);
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     byte[] arguments = new byte[0];
-    doThrow(e).when(service).resume(fork, arguments);
+    doThrow(e).when(service).resume(blockchainData, arguments);
 
     ExecutionException actual = assertThrows(ExecutionException.class,
-        () -> serviceWrapper.resume(fork, arguments));
+        () -> serviceWrapper.resume(blockchainData, arguments));
     assertThat(actual).isSameAs(e);
   }
 
   @Test
   void resumeWrapsRuntimeExceptions() {
     RuntimeException e = new RuntimeException("unexpected");
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     byte[] arguments = new byte[0];
-    doThrow(e).when(service).resume(fork, arguments);
+    doThrow(e).when(service).resume(blockchainData, arguments);
 
     Exception actual = assertThrows(UnexpectedExecutionException.class,
-        () -> serviceWrapper.resume(fork, arguments));
+        () -> serviceWrapper.resume(blockchainData, arguments));
     assertThat(actual).hasCause(e);
   }
 
@@ -172,16 +172,16 @@ class ServiceWrapperTest {
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     TransactionContext context = anyContext()
-        .fork(fork)
+        .blockchainData(blockchainData)
         .build();
 
     serviceWrapper.executeTransaction(interfaceName, txId, arguments,
         SUPERVISOR_SERVICE_ID, context);
 
     Configuration expected = new ServiceConfiguration(arguments);
-    verify(service).verifyConfiguration(fork, expected);
+    verify(service).verifyConfiguration(blockchainData, expected);
   }
 
   @Test
@@ -190,14 +190,14 @@ class ServiceWrapperTest {
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     TransactionContext context = anyContext()
-        .fork(fork)
+        .blockchainData(blockchainData)
         .build();
 
     ExecutionException e = new ExecutionException((byte) 0);
     Configuration config = new ServiceConfiguration(arguments);
-    doThrow(e).when(service).verifyConfiguration(fork, config);
+    doThrow(e).when(service).verifyConfiguration(blockchainData, config);
 
     ExecutionException actual = assertThrows(ExecutionException.class,
         () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
@@ -211,14 +211,14 @@ class ServiceWrapperTest {
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     TransactionContext context = anyContext()
-        .fork(fork)
+        .blockchainData(blockchainData)
         .build();
 
     RuntimeException e = new RuntimeException("unexpected");
     Configuration config = new ServiceConfiguration(arguments);
-    doThrow(e).when(service).verifyConfiguration(fork, config);
+    doThrow(e).when(service).verifyConfiguration(blockchainData, config);
 
     Exception actual = assertThrows(UnexpectedExecutionException.class,
         () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
@@ -232,16 +232,16 @@ class ServiceWrapperTest {
     int txId = APPLY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     TransactionContext context = anyContext()
-        .fork(fork)
+        .blockchainData(blockchainData)
         .build();
 
     serviceWrapper.executeTransaction(interfaceName, txId, arguments,
         SUPERVISOR_SERVICE_ID, context);
 
     Configuration expected = new ServiceConfiguration(arguments);
-    verify(service).applyConfiguration(fork, expected);
+    verify(service).applyConfiguration(blockchainData, expected);
   }
 
   @ParameterizedTest
@@ -251,9 +251,9 @@ class ServiceWrapperTest {
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     TransactionContext context = anyContext()
-        .fork(fork)
+        .blockchainData(blockchainData)
         .build();
 
     Exception e = assertThrows(IllegalArgumentException.class,
@@ -319,22 +319,22 @@ class ServiceWrapperTest {
   @Test
   void afterTransactionsPropagatesExecutionException() {
     ExecutionException e = new ExecutionException((byte) 0);
-    doThrow(e).when(service).afterTransactions(any(Fork.class));
+    doThrow(e).when(service).afterTransactions(any(BlockchainData.class));
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     ExecutionException actual = assertThrows(ExecutionException.class,
-        () -> serviceWrapper.afterTransactions(fork));
+        () -> serviceWrapper.afterTransactions(blockchainData));
     assertThat(actual).isSameAs(e);
   }
 
   @Test
   void afterTransactionsKeepsRuntimeExceptionAsCause() {
     Exception e = new RuntimeException("Boom");
-    doThrow(e).when(service).afterTransactions(any(Fork.class));
+    doThrow(e).when(service).afterTransactions(any(BlockchainData.class));
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     Exception actual = assertThrows(UnexpectedExecutionException.class,
-        () -> serviceWrapper.afterTransactions(fork));
+        () -> serviceWrapper.afterTransactions(blockchainData));
     assertThat(actual).hasCause(e);
   }
 
@@ -359,7 +359,7 @@ class ServiceWrapperTest {
         .serviceId(TEST_SERVICE_ID)
         .authorPk(PublicKey.fromBytes(new byte[Ed25519.PUBLIC_KEY_BYTES]))
         .txMessageHash(HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]))
-        .fork(mock(Fork.class));
+        .blockchainData(mock(BlockchainData.class));
   }
 
   private interface ConfigurableService extends Service, Configurable {

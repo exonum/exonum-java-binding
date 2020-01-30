@@ -31,6 +31,7 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.TestKit;
@@ -77,8 +78,8 @@ class CreateCounterTxTest {
     TransactionMessage tx = createCreateCounterTx(counterName, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(tx);
 
-    Snapshot snapshot = testKit.getSnapshot();
-    QaSchema schema = new QaSchema(snapshot, QA_SERVICE_NAME);
+    BlockchainData snapshot = testKit.getBlockchainData(QA_SERVICE_NAME);
+    QaSchema schema = new QaSchema(snapshot);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> counterNames = schema.counterNames();
     HashCode counterId = sha256().hashString(counterName, UTF_8);

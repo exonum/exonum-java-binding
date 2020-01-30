@@ -18,7 +18,7 @@ package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.google.auto.value.AutoValue;
 
 /**
@@ -27,9 +27,10 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 abstract class InternalTransactionContext implements TransactionContext {
 
-  public static InternalTransactionContext newInstance(Fork fork, HashCode hash,
+  public static InternalTransactionContext newInstance(BlockchainData blockchainData, HashCode hash,
                                                        PublicKey authorPk, String serviceName,
                                                        int serviceId) {
-    return new AutoValue_InternalTransactionContext(fork, hash, authorPk, serviceName, serviceId);
+    return new AutoValue_InternalTransactionContext(blockchainData, hash, authorPk, serviceName,
+        serviceId);
   }
 }

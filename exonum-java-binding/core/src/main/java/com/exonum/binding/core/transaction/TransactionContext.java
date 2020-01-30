@@ -23,8 +23,9 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
-import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.Prefixed;
 
 /**
  * Transaction context class. Contains required information for the transaction execution.
@@ -32,10 +33,24 @@ import com.exonum.binding.core.storage.database.Fork;
  * except tests.
  */
 public interface TransactionContext {
+
   /**
-   * Returns database access allowing R/W operations.
+   * Returns the prefixed database access for the executing service. Allows R/W operations.
+   *
+   * <p>A shortcut for {@code context.getBlockchainData().getExecutingServiceData()}.
+   *
+   * @see #getBlockchainData()
    */
-  Fork getFork();
+  default Prefixed getServiceData() {
+    return getBlockchainData().getExecutingServiceData();
+  }
+
+  /**
+   * Returns the database access object allowing R/W operations.
+   *
+   * @see #getServiceData()
+   */
+  BlockchainData getBlockchainData();
 
   /**
    * Returns SHA-256 hash of the {@linkplain TransactionMessage transaction message} that
@@ -77,17 +92,17 @@ public interface TransactionContext {
    * Transaction context builder.
    */
   final class Builder {
-    private Fork fork;
+    private BlockchainData blockchainData;
     private HashCode hash;
     private PublicKey authorPk;
     private String serviceName;
     private Integer serviceId;
 
     /**
-     * Sets database fork for the context.
+     * Sets the blockchain data for the context.
      */
-    public Builder fork(Fork fork) {
-      this.fork = fork;
+    public Builder blockchainData(BlockchainData blockchainData) {
+      this.blockchainData = blockchainData;
       return this;
     }
 
@@ -127,7 +142,7 @@ public interface TransactionContext {
      * Creates the transaction context instance.
      */
     public TransactionContext build() {
-      return InternalTransactionContext.newInstance(fork, hash, authorPk, serviceName,
+      return InternalTransactionContext.newInstance(blockchainData, hash, authorPk, serviceName,
           checkNotNull(serviceId));
     }
 

@@ -19,7 +19,7 @@ package com.exonum.binding.core.service;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.Blockchain;
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
 
@@ -56,14 +56,15 @@ public interface Node extends AutoCloseable {
    */
   HashCode submitTransaction(RawTransaction rawTransaction);
 
+  // todo: Shall we rename? The present name highlights it is "read-only".
   /**
    * Performs the given function with a snapshot of the current database state.
    *
-   * @param snapshotFunction a function to execute
    * @param <ResultT> a type the function returns
+   * @param snapshotFunction a function to execute
    * @return the result of applying the given function to the database state
    */
-  <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction);
+  <ResultT> ResultT withSnapshot(Function<BlockchainData, ResultT> snapshotFunction);
 
   /**
    * Returns the service public key of this node. The corresponding private key is used

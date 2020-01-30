@@ -20,12 +20,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.throwIfInstanceOf;
 import static java.lang.String.format;
 
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
@@ -102,12 +102,12 @@ final class ServiceWrapper {
     return instanceSpec.getId();
   }
 
-  void initialize(Fork fork, Configuration configuration) {
-    callServiceMethod(() -> service.initialize(fork, configuration));
+  void initialize(BlockchainData blockchainData, Configuration configuration) {
+    callServiceMethod(() -> service.initialize(blockchainData, configuration));
   }
 
-  void resume(Fork fork, byte[] arguments) {
-    callServiceMethod(() -> service.resume(fork, arguments));
+  void resume(BlockchainData blockchainData, byte[] arguments) {
+    callServiceMethod(() -> service.resume(blockchainData, arguments));
   }
 
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
@@ -141,7 +141,7 @@ final class ServiceWrapper {
         callerServiceId, SUPERVISOR_SERVICE_ID);
     // Invoke the Configurable operation
     Configurable configurable = (Configurable) service;
-    Fork fork = context.getFork();
+    BlockchainData fork = context.getBlockchainData();
     Configuration config = new ServiceConfiguration(arguments);
     switch (txId) {
       case VERIFY_CONFIGURATION_TX_ID:
@@ -174,19 +174,11 @@ final class ServiceWrapper {
     }
   }
 
-  void afterTransactions(Fork fork) {
+  void afterTransactions(BlockchainData blockchainData) {
     try {
-      service.afterTransactions(fork);
+      service.afterTransactions(blockchainData);
     } catch (ExecutionException e) {
       // Re-throw as is to keep the error code
-      // todo: consider _always_ wrapping in UserCodeException to avoid conditional code
-      //  both in all exception handlers **and** in native code? Would it be simpler?
-      //  It seems that an even simpler approach is to _not_ distinguish service-originated
-      //  'unexpected' errors and 'runtime' errors — then we don't need to wrap any exceptions
-      //  (if we also forbid checked in @Transaction methods), but in this case we will
-      //  go **against** the spec (see ErrorKind) and lose the benefit of error kind telling
-      //  the error source ('unexpected' — only in service code,
-      //  'runtime' — only somewhere in the runtime).
       throw e;
     } catch (Exception e) {
       throw new UnexpectedExecutionException(e);

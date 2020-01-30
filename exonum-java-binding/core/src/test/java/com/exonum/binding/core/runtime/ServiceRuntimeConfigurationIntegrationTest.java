@@ -19,9 +19,10 @@ package com.exonum.binding.core.runtime;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.service.NodeFake;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.test.RequiresNativeLibrary;
@@ -73,7 +74,7 @@ class ServiceRuntimeConfigurationIntegrationTest {
     try (TemporaryDb database = TemporaryDb.newInstance();
         Cleaner cleaner = new Cleaner()) {
       // Initialize it
-      runtime.initialize(new NodeFake(database));
+      runtime.initialize(mock(NodeProxy.class));
 
       // Deploy the service to the runtime
       runtime.deployArtifact(ARTIFACT_ID, ARTIFACT_FILENAME);
@@ -84,7 +85,8 @@ class ServiceRuntimeConfigurationIntegrationTest {
       ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(name, 1, ARTIFACT_ID);
       InstanceStatus instanceStatus = InstanceStatus.newBuilder().setSimple(Simple.ACTIVE).build();
       Fork fork = database.createFork(cleaner);
-      runtime.initiateAddingService(fork, instanceSpec, new byte[0]);
+      BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, name);
+      runtime.initiateAddingService(blockchainData, instanceSpec, new byte[0]);
       runtime.updateInstanceStatus(instanceSpec, instanceStatus);
       assertThat(runtime.findService(name)).isNotEmpty();
     }

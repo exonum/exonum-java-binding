@@ -25,17 +25,15 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
 public final class FakeSchema implements Schema {
 
-  private final String namespace;
   private final Access access;
 
-  public FakeSchema(String serviceName, Access access) {
-    this.namespace = serviceName;
+  public FakeSchema(Access access) {
     this.access = access;
   }
 
   /** Creates a test proof map. */
   public ProofMapIndexProxy<String, String> testMap() {
-    String fullName = namespace + ".test-map";
-    return access.getProofMap(IndexAddress.valueOf(fullName), string(), string());
+    IndexAddress address = IndexAddress.valueOf("test-map");
+    return access.getProofMap(address, string(), string());
   }
 }

@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -32,7 +33,6 @@ public interface AccessFactory {
    *
    * @param nativeHandle a handle to the native snapshot object
    * @param cleaner a cleaner to register the destructor
-   * @return a new owning snapshot proxy
    */
   Snapshot createSnapshot(long nativeHandle, Cleaner cleaner);
 
@@ -41,7 +41,14 @@ public interface AccessFactory {
    *
    * @param nativeHandle a handle to the native fork object
    * @param cleaner a cleaner to register the destructor
-   * @return a new owning fork proxy
    */
   Fork createFork(long nativeHandle, Cleaner cleaner);
+
+  /**
+   * Creates a new owning blockchain data.
+   *
+   * @param nativeHandle a handle to the native BlockchainData object
+   * @param cleaner a cleaner to register the destructor\
+   */
+  BlockchainData createBlockchainData(long nativeHandle, Cleaner cleaner);
 }

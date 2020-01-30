@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ${package};
+package $
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,6 +27,8 @@ import com.google.common.base.Strings;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
+
+{package};
 
 class MyServiceIntegrationTest {
 
@@ -44,7 +46,7 @@ class MyServiceIntegrationTest {
    *
    * <p>If you get an UnsatisfiedLinkError in this test — please check that the EXONUM_HOME
    * environment variable is set properly:
-   * https://exonum.com/doc/version/latest/get-started/java-binding/#after-install
+   * https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#after-install
    */
   @Test
   void testGenesisBlockCommit() {

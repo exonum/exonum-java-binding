@@ -19,7 +19,6 @@ package com.exonum.binding.core.service;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
-import com.exonum.binding.core.storage.database.Access;
 
 /**
  * A base class for user services.
@@ -54,12 +53,4 @@ public abstract class AbstractService implements Service {
   protected final ServiceInstanceSpec getInstanceSpec() {
     return instanceSpec;
   }
-
-  /**
-   * Creates a data schema of this service.
-   *
-   * @param access a database access
-   * @return a data schema of the service
-   */
-  protected abstract Schema createDataSchema(Access access);
 }

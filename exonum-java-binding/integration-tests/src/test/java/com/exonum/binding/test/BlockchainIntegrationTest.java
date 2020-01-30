@@ -222,7 +222,7 @@ class BlockchainIntegrationTest {
         MapProof aggregatingIndexProof = proof.getIndexProof();
         // It must have a single entry: (testMapName, indexHash(testMap))
         Snapshot snapshot = testKit.getSnapshot();
-        FakeSchema serviceSchema = new FakeSchema(SERVICE_NAME, snapshot);
+        FakeSchema serviceSchema = new FakeSchema(snapshot);
         HashCode testMapHash = serviceSchema.testMap().getIndexHash();
         OptionalEntry expectedEntry = OptionalEntry.newBuilder()
             .setKey(ByteString.copyFromUtf8(testMapName))

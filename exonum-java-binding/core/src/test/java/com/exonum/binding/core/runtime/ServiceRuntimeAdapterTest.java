@@ -26,19 +26,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.service.BlockCommittedEvent;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.core.messages.Runtime.ArtifactId;
 import com.exonum.core.messages.Runtime.InstanceSpec;
 import com.exonum.core.messages.Runtime.InstanceStatus;
 import com.exonum.core.messages.Runtime.InstanceStatus.Simple;
+import java.util.OptionalInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -113,11 +112,10 @@ class ServiceRuntimeAdapterTest {
   @Test
   void addService() throws CloseFailuresException {
     int serviceId = 1;
-    long forkHandle = 0x110b;
-    Cleaner cleaner = new Cleaner();
-    Fork fork = Fork.newInstance(forkHandle, false, cleaner);
-    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
-        .thenReturn(fork);
+    long bdHandle = 0x110b;
+    BlockchainData blockchainData = mock(BlockchainData.class);
+    when(accessFactory.createBlockchainData(eq(bdHandle), any(Cleaner.class)))
+        .thenReturn(blockchainData);
 
     String serviceName = "s1";
     ArtifactId artifact = ARTIFACT_ID;
@@ -130,21 +128,20 @@ class ServiceRuntimeAdapterTest {
     byte[] configuration = bytes(1, 2);
 
     // Initialize the service
-    serviceRuntimeAdapter.initiateAddingService(forkHandle, instanceSpec, configuration);
+    serviceRuntimeAdapter.initiateAddingService(bdHandle, instanceSpec, configuration);
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
         ServiceArtifactId.fromProto(artifact));
-    verify(serviceRuntime).initiateAddingService(fork, expected, configuration);
+    verify(serviceRuntime).initiateAddingService(blockchainData, expected, configuration);
   }
 
   @Test
   void initializeResumingService() throws CloseFailuresException {
-    long forkHandle = 0x110b;
-    Cleaner cleaner = new Cleaner();
-    Fork fork = Fork.newInstance(forkHandle, false, cleaner);
-    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
-        .thenReturn(fork);
+    long bdNativeHandle = 0x110b;
+    BlockchainData blockchainData = mock(BlockchainData.class);
+    when(accessFactory.createBlockchainData(eq(bdNativeHandle), any(Cleaner.class)))
+        .thenReturn(blockchainData);
 
     int serviceId = 1;
     String serviceName = "s1";
@@ -157,25 +154,25 @@ class ServiceRuntimeAdapterTest {
         .toByteArray();
     byte[] arguments = bytes(1, 2);
 
-    serviceRuntimeAdapter.initiateResumingService(forkHandle, instanceSpec, arguments);
+    serviceRuntimeAdapter.initiateResumingService(bdNativeHandle, instanceSpec, arguments);
 
     // Check the runtime was invoked with correct config
     ServiceInstanceSpec expected = ServiceInstanceSpec.newInstance(serviceName, serviceId,
         ServiceArtifactId.fromProto(artifact));
-    verify(serviceRuntime).initiateResumingService(fork, expected, arguments);
+    verify(serviceRuntime).initiateResumingService(blockchainData, expected, arguments);
   }
 
   @Test
   void afterTransactions() throws CloseFailuresException {
     int serviceId = 1;
-    long forkHandle = 0x110b;
-    Fork fork = mock(Fork.class);
-    when(accessFactory.createFork(eq(forkHandle), any(Cleaner.class)))
-        .thenReturn(fork);
+    long bdNativeHandle = 0x110b;
+    BlockchainData blockchainData = mock(BlockchainData.class);
+    when(accessFactory.createBlockchainData(eq(bdNativeHandle), any(Cleaner.class)))
+        .thenReturn(blockchainData);
 
-    serviceRuntimeAdapter.afterTransactions(serviceId, forkHandle);
+    serviceRuntimeAdapter.afterTransactions(serviceId, bdNativeHandle);
 
-    verify(serviceRuntime).afterTransactions(serviceId, fork);
+    verify(serviceRuntime).afterTransactions(serviceId, blockchainData);
   }
 
   @Test
@@ -184,14 +181,7 @@ class ServiceRuntimeAdapterTest {
         .thenReturn(snapshot);
     serviceRuntimeAdapter.afterCommit(SNAPSHOT_HANDLE, VALIDATOR_ID, HEIGHT);
 
-    ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
-    verify(serviceRuntime).afterCommit(ac.capture());
-
-    BlockCommittedEvent event = ac.getValue();
-
-    assertThat(event.getHeight()).isEqualTo(HEIGHT);
-    assertThat(event.getValidatorId()).hasValue(VALIDATOR_ID);
-    assertThat(event.getSnapshot()).isEqualTo(snapshot);
+    verify(serviceRuntime).afterCommit(snapshot, OptionalInt.of(VALIDATOR_ID), HEIGHT);
   }
 
   @Test
@@ -202,13 +192,7 @@ class ServiceRuntimeAdapterTest {
         .thenReturn(snapshot);
     serviceRuntimeAdapter.afterCommit(SNAPSHOT_HANDLE, validatorId, HEIGHT);
 
-    ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
-    verify(serviceRuntime).afterCommit(ac.capture());
-
-    BlockCommittedEvent event = ac.getValue();
-
-    assertThat(event.getHeight()).isEqualTo(HEIGHT);
-    assertThat(event.getValidatorId()).isEmpty();
+    verify(serviceRuntime).afterCommit(snapshot, OptionalInt.empty(), HEIGHT);
   }
 
   @Test

@@ -79,12 +79,12 @@ public final class BlockchainData extends AbstractNativeProxy {
    * Creates a BlockchainData for the service with the given name.
    *
    * @param baseAccess the base database access, must be a "RawAccess"
-   * @param instanceName a service instance name
+   * @param serviceName a service instance name
    */
   @VisibleForTesting
-  public static BlockchainData fromRawAccess(AbstractAccess baseAccess, String instanceName) {
+  public static BlockchainData fromRawAccess(AbstractAccess baseAccess, String serviceName) {
     Cleaner cleaner = baseAccess.getCleaner();
-    long bdNativeHandle = nativeCreate(baseAccess.getAccessNativeHandle(), instanceName);
+    long bdNativeHandle = nativeCreate(baseAccess.getAccessNativeHandle(), serviceName);
     return fromHandleInternal(bdNativeHandle, cleaner);
   }
 

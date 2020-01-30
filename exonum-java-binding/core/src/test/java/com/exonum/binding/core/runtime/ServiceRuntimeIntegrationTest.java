@@ -34,13 +34,14 @@ import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
-import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.core.messages.Runtime.InstanceMigration;
@@ -55,12 +56,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -95,14 +98,14 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void startsServerOnInitialization() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     verify(transport).start();
   }
 
   @Test
   void deployCorrectArtifact() throws Exception {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId serviceId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     String artifactFilename = "foo-service.jar";
@@ -122,7 +125,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void deployArtifactWrongId() throws Exception {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId actualId = ServiceArtifactId.newJavaId("com.acme/actual", "1.0.0");
     String artifactFilename = "foo-service.jar";
@@ -145,7 +148,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void deployArtifactFailed() throws Exception {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId serviceId = ServiceArtifactId.newJavaId("com.acme/actual", "1.0.0");
     String artifactFilename = "foo-service.jar";
@@ -164,7 +167,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void startAddingService() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme/foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -176,21 +179,21 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class)))
+        any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     byte[] configuration = anyConfiguration();
-    serviceRuntime.initiateAddingService(fork, instanceSpec, configuration);
+    serviceRuntime.initiateAddingService(blockchainData, instanceSpec, configuration);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class));
+        any(ServiceNodeProxy.class));
 
     // and the service was configured
     Configuration expectedConfig = new ServiceConfiguration(configuration);
-    verify(serviceWrapper).initialize(fork, expectedConfig);
+    verify(serviceWrapper).initialize(blockchainData, expectedConfig);
 
     // but not committed
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
@@ -198,7 +201,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void startAddingServiceUnknownServiceArtifact() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
@@ -206,10 +209,10 @@ class ServiceRuntimeIntegrationTest {
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     byte[] configuration = anyConfiguration();
     Exception e = assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.initiateAddingService(fork, instanceSpec, configuration));
+        () -> serviceRuntime.initiateAddingService(blockchainData, instanceSpec, configuration));
 
     assertThat(e).hasMessageFindingMatch("Unknown.+artifact");
     assertThat(e).hasMessageContaining(String.valueOf(artifactId));
@@ -219,7 +222,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void startAddingServiceBadInitialConfiguration() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -231,25 +234,25 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class)))
+        any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
 
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     byte[] configuration = anyConfiguration();
     ServiceConfiguration expectedConfig = new ServiceConfiguration(configuration);
     doThrow(IllegalArgumentException.class).when(serviceWrapper)
-        .initialize(fork, expectedConfig);
+        .initialize(blockchainData, expectedConfig);
 
     // Try to create and initialize the service
     assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.initiateAddingService(fork, instanceSpec, configuration));
+        () -> serviceRuntime.initiateAddingService(blockchainData, instanceSpec, configuration));
 
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
   }
 
   @Test
   void activateService() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -263,7 +266,7 @@ class ServiceRuntimeIntegrationTest {
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class)))
+        any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
 
     // Activate the service from the artifact
@@ -271,7 +274,7 @@ class ServiceRuntimeIntegrationTest {
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class));
+        any(ServiceNodeProxy.class));
 
     // and its API is connected
     verify(transport).connectServiceApi(serviceWrapper);
@@ -283,7 +286,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void activateServiceDuplicate() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -297,7 +300,7 @@ class ServiceRuntimeIntegrationTest {
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class)))
+        any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
 
     // Activate the service
@@ -312,7 +315,7 @@ class ServiceRuntimeIntegrationTest {
 
     // Check the service was instantiated only once
     verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class));
+        any(ServiceNodeProxy.class));
   }
 
   @Test
@@ -330,7 +333,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void stopService() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -340,13 +343,12 @@ class ServiceRuntimeIntegrationTest {
     when(serviceLoader.findService(artifactId))
         .thenReturn(Optional.of(serviceDefinition));
 
-    MultiplexingNodeDecorator node = mock(MultiplexingNodeDecorator.class);
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
 
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class)))
+        any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
 
     // Activate the service
@@ -391,7 +393,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void initializeResumingService() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme/foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -403,20 +405,20 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class)))
+        any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
 
     // Create the service from the artifact
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     byte[] arguments = anyConfiguration();
-    serviceRuntime.initiateResumingService(fork, instanceSpec, arguments);
+    serviceRuntime.initiateResumingService(blockchainData, instanceSpec, arguments);
 
     // Check it was instantiated as expected
     verify(servicesFactory).createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class));
+        any(ServiceNodeProxy.class));
 
     // and the service was resumed
-    verify(serviceWrapper).resume(fork, arguments);
+    verify(serviceWrapper).resume(blockchainData, arguments);
 
     // but not registered in the runtime yet:
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
@@ -424,7 +426,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void initializeResumingActiveService() {
-    serviceRuntime.initialize(mock(Node.class));
+    serviceRuntime.initialize(mock(NodeProxy.class));
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
@@ -438,16 +440,16 @@ class ServiceRuntimeIntegrationTest {
     when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(serviceWrapper.getName()).thenReturn(TEST_NAME);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
-        any(MultiplexingNodeDecorator.class)))
+        any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
 
     // Activate the service from the artifact
     serviceRuntime.updateInstanceStatus(instanceSpec, ACTIVE_STATUS);
 
     byte[] arguments = anyConfiguration();
-    Fork fork = mock(Fork.class);
+    BlockchainData blockchainData = mock(BlockchainData.class);
     assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.initiateResumingService(fork, instanceSpec, arguments));
+        () -> serviceRuntime.initiateResumingService(blockchainData, instanceSpec, arguments));
   }
 
   @Test
@@ -461,7 +463,7 @@ class ServiceRuntimeIntegrationTest {
 
   @Test
   void shutdownInitialized() throws InterruptedException {
-    Node node = mock(Node.class);
+    NodeProxy node = mock(NodeProxy.class);
     serviceRuntime.initialize(node);
 
     serviceRuntime.shutdown();
@@ -497,7 +499,7 @@ class ServiceRuntimeIntegrationTest {
     @BeforeEach
     void addService() {
       // Initialize the runtime
-      serviceRuntime.initialize(mock(Node.class));
+      serviceRuntime.initialize(mock(NodeProxy.class));
 
       // Setup the service
       when(serviceWrapper.getId()).thenReturn(TEST_ID);
@@ -509,7 +511,7 @@ class ServiceRuntimeIntegrationTest {
           .thenReturn(Optional.of(serviceDefinition));
       // Setup the factory
       when(servicesFactory.createService(eq(serviceDefinition), eq(INSTANCE_SPEC),
-          any(MultiplexingNodeDecorator.class)))
+          any(ServiceNodeProxy.class)))
           .thenReturn(serviceWrapper);
 
       // Create the service from the artifact
@@ -524,16 +526,17 @@ class ServiceRuntimeIntegrationTest {
         int txId = 1;
         byte[] arguments = bytes(127);
         Fork fork = database.createFork(cleaner);
+        BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, TEST_NAME);
         int callerServiceId = 0;
         TransactionContext expectedContext = TransactionContext.builder()
-            .fork(fork)
+            .blockchainData(blockchainData)
             .txMessageHash(TEST_HASH)
             .authorPk(TEST_PUBLIC_KEY)
             .serviceName(TEST_NAME)
             .serviceId(TEST_ID)
             .build();
 
-        serviceRuntime.executeTransaction(TEST_ID, interfaceName, txId, arguments, fork,
+        serviceRuntime.executeTransaction(TEST_ID, interfaceName, txId, arguments, blockchainData,
             callerServiceId, TEST_HASH, TEST_PUBLIC_KEY);
 
         verify(serviceWrapper).executeTransaction(interfaceName, txId, arguments,
@@ -549,10 +552,11 @@ class ServiceRuntimeIntegrationTest {
         int txId = 1;
         byte[] arguments = bytes(127);
         Fork fork = database.createFork(cleaner);
+        BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, TEST_NAME);
 
         Exception e = assertThrows(IllegalArgumentException.class,
             () -> serviceRuntime.executeTransaction(serviceId, DEFAULT_INTERFACE_NAME, txId,
-                arguments, fork, 0, TEST_HASH, TEST_PUBLIC_KEY));
+                arguments, blockchainData, 0, TEST_HASH, TEST_PUBLIC_KEY));
 
         assertThat(e).hasMessageContaining(String.valueOf(serviceId));
       }
@@ -563,10 +567,11 @@ class ServiceRuntimeIntegrationTest {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
         Fork fork = database.createFork(cleaner);
+        BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, TEST_NAME);
 
-        serviceRuntime.afterTransactions(TEST_ID, fork);
+        serviceRuntime.afterTransactions(TEST_ID, blockchainData);
 
-        verify(serviceWrapper).afterTransactions(fork);
+        verify(serviceWrapper).afterTransactions(blockchainData);
       }
     }
 
@@ -575,36 +580,46 @@ class ServiceRuntimeIntegrationTest {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {
         Fork fork = database.createFork(cleaner);
+        BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, TEST_NAME);
         RuntimeException serviceException = new RuntimeException("Service exception");
-        doThrow(serviceException).when(serviceWrapper).afterTransactions(fork);
+        doThrow(serviceException).when(serviceWrapper).afterTransactions(blockchainData);
 
         RuntimeException actual = assertThrows(serviceException.getClass(),
-            () -> serviceRuntime.afterTransactions(TEST_ID, fork));
+            () -> serviceRuntime.afterTransactions(TEST_ID, blockchainData));
         assertThat(actual).isSameAs(serviceException);
 
-        verify(serviceWrapper).afterTransactions(fork);
+        verify(serviceWrapper).afterTransactions(blockchainData);
       }
     }
 
     @Test
     void afterCommitSingleService() {
-      BlockCommittedEvent event = mock(BlockCommittedEvent.class);
+      Snapshot snapshot = mock(Snapshot.class);
+      OptionalInt validatorId = OptionalInt.of(1);
+      long height = 2L;
 
-      serviceRuntime.afterCommit(event);
+      serviceRuntime.afterCommit(snapshot, validatorId, height);
 
-      verify(serviceWrapper).afterCommit(event);
+      ArgumentCaptor<BlockCommittedEvent> ac = ArgumentCaptor.forClass(BlockCommittedEvent.class);
+      verify(serviceWrapper).afterCommit(ac.capture());
+
+      BlockCommittedEvent actual = ac.getValue();
+      assertThat(actual.getValidatorId()).isEqualTo(validatorId);
+      assertThat(actual.getHeight()).isEqualTo(height);
     }
 
     @Test
     void afterCommitSingleServiceThrowingException() {
-      BlockCommittedEvent event = mock(BlockCommittedEvent.class);
+      Snapshot snapshot = mock(Snapshot.class);
+      OptionalInt validatorId = OptionalInt.of(1);
+      long height = 2L;
       doThrow(RuntimeException.class).when(serviceWrapper)
-          .afterCommit(event);
+          .afterCommit(any(BlockCommittedEvent.class));
 
       // Notify of block commit event — the service runtime must swallow the exception
-      serviceRuntime.afterCommit(event);
+      serviceRuntime.afterCommit(snapshot, validatorId, height);
 
-      verify(serviceWrapper).afterCommit(event);
+      verify(serviceWrapper).afterCommit(any(BlockCommittedEvent.class));
     }
   }
 
@@ -635,7 +650,7 @@ class ServiceRuntimeIntegrationTest {
     @BeforeEach
     void addServices() {
       // Initialize the runtime
-      serviceRuntime.initialize(mock(Node.class));
+      serviceRuntime.initialize(mock(NodeProxy.class));
 
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
           .newInstance(ARTIFACT_ID, TestServiceModule::new);
@@ -648,7 +663,7 @@ class ServiceRuntimeIntegrationTest {
         when(service.getId()).thenReturn(instanceSpec.getId());
         when(service.getName()).thenReturn(instanceSpec.getName());
         when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
-            any(MultiplexingNodeDecorator.class)))
+            any(ServiceNodeProxy.class)))
             .thenReturn(service);
       }
 
@@ -666,17 +681,19 @@ class ServiceRuntimeIntegrationTest {
       ServiceWrapper service1 = services
           .iterator()
           .next();
-      BlockCommittedEvent event = mock(BlockCommittedEvent.class);
-      doThrow(RuntimeException.class).when(service1).afterCommit(event);
+      doThrow(RuntimeException.class).when(service1).afterCommit(any(BlockCommittedEvent.class));
 
       // Notify the runtime of the block commit
-      serviceRuntime.afterCommit(event);
+      Snapshot snapshot = mock(Snapshot.class);
+      OptionalInt validatorId = OptionalInt.of(1);
+      long height = 2L;
+      serviceRuntime.afterCommit(snapshot, validatorId, height);
 
       // Verify that each service got the notifications, i.e., the first service
       // throwing an exception has not disrupted the notification process
       InOrder inOrder = Mockito.inOrder(services.toArray(new Object[0]));
       for (ServiceWrapper service : services) {
-        inOrder.verify(service).afterCommit(event);
+        inOrder.verify(service).afterCommit(any(BlockCommittedEvent.class));
       }
     }
   }

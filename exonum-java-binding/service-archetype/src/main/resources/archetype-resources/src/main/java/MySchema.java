@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package ${package};
+package $
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.Access;
-import java.util.Collections;
-import java.util.List;
+import com.exonum.binding.core.storage.database.Prefixed;
+
+{package};
 
 /**
  * {@code MySchema} provides access to the tables of {@link MyService},
@@ -32,12 +31,10 @@ import java.util.List;
  */
 public final class MySchema implements Schema {
 
-  private final Access access;
-  private final String namespace;
+  private final Prefixed access;
 
-  public MySchema(Access access, String serviceName) {
-    this.access = checkNotNull(access);
-    this.namespace = serviceName + ".";
+  public MySchema(Prefixed serviceData) {
+    this.access = checkNotNull(serviceData);
   }
 
   // TODO: Add index factories here.

@@ -22,9 +22,10 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.BlockCommittedEvent;
-import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.service.BlockCommittedEventImpl;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.core.transport.Server;
@@ -40,6 +41,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.logging.log4j.LogManager;
@@ -81,7 +83,7 @@ public final class ServiceRuntime implements AutoCloseable {
   private final Map<Integer, ServiceWrapper> servicesById = new HashMap<>();
   private final Object lock = new Object();
 
-  private Node node;
+  private NodeProxy nodeProxy;
 
   /**
    * Creates a new Java service runtime.
@@ -105,11 +107,11 @@ public final class ServiceRuntime implements AutoCloseable {
   /**
    * Initializes the runtime with the given node. Starts the transport for Java services.
    */
-  public void initialize(Node node) {
+  public void initialize(NodeProxy node) {
     synchronized (lock) {
-      checkState(this.node == null, "Invalid attempt to replace already set node (%s) with %s",
-          this.node, node);
-      this.node = checkNotNull(node);
+      checkState(this.nodeProxy == null, "Invalid attempt to replace already set node (%s) with %s",
+          this.nodeProxy, node);
+      this.nodeProxy = checkNotNull(node);
 
       // Start the server
       runtimeTransport.start();
@@ -174,7 +176,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * {@link #updateInstanceStatus(ServiceInstanceSpec, InstanceStatus)}
    * is invoked with the {@code Status=Active}.
    *
-   * @param fork a database access to apply configuration
+   * @param blockchainData a database access to apply configuration
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param configuration service instance configuration parameters as a serialized protobuf
    *     message
@@ -187,7 +189,7 @@ public final class ServiceRuntime implements AutoCloseable {
    *     into an error of kind {@link ErrorKind#UNEXPECTED}
    * @throws RuntimeException if the runtime failed to instantiate the service for other reason
    */
-  public void initiateAddingService(Fork fork, ServiceInstanceSpec instanceSpec,
+  public void initiateAddingService(BlockchainData blockchainData, ServiceInstanceSpec instanceSpec,
       byte[] configuration) {
     try {
       synchronized (lock) {
@@ -195,7 +197,7 @@ public final class ServiceRuntime implements AutoCloseable {
         ServiceWrapper service = createServiceInstance(instanceSpec);
 
         // Initialize it
-        service.initialize(fork, new ServiceConfiguration(configuration));
+        service.initialize(blockchainData, new ServiceConfiguration(configuration));
       }
 
       // Log the initialization event
@@ -211,7 +213,7 @@ public final class ServiceRuntime implements AutoCloseable {
    * Initiates resuming of previously stopped service instance. Service instance artifact could
    * be upgraded in advance to bring some new functionality.
    *
-   * @param fork a database fork to apply changes to
+   * @param blockchainData a database access object to apply changes to
    * @param instanceSpec a service instance specification; must reference a deployed artifact
    * @param arguments a service arguments as a serialized protobuf message
    * @throws IllegalArgumentException if the given service instance is active; or its artifact
@@ -223,13 +225,13 @@ public final class ServiceRuntime implements AutoCloseable {
    *     into an error of kind {@link ErrorKind#UNEXPECTED}
    * @throws RuntimeException if the runtime failed to resume the service for other reason
    */
-  public void initiateResumingService(Fork fork, ServiceInstanceSpec instanceSpec,
-      byte[] arguments) {
+  public void initiateResumingService(BlockchainData blockchainData,
+      ServiceInstanceSpec instanceSpec, byte[] arguments) {
     try {
       synchronized (lock) {
         checkStoppedService(instanceSpec.getId());
         ServiceWrapper service = createServiceInstance(instanceSpec);
-        service.resume(fork, arguments);
+        service.resume(blockchainData, arguments);
       }
       logger.info("Resumed service: {}", instanceSpec);
     } catch (Exception e) {
@@ -242,7 +244,7 @@ public final class ServiceRuntime implements AutoCloseable {
   /**
    * Modifies the state of the given service instance at the runtime either by activation it or
    * stopping. The service instance should be successfully initialized
-   * by {@link #initiateAddingService(Fork, ServiceInstanceSpec, byte[])} in advance.
+   * by {@link #initiateAddingService(BlockchainData, ServiceInstanceSpec, byte[])} in advance.
    * Activation leads to the service instance registration, allowing subsequent operations on it:
    * transactions, API requests.
    * Stopping leads to the service disabling i.e. stopped service does not execute transactions,
@@ -315,8 +317,8 @@ public final class ServiceRuntime implements AutoCloseable {
         .orElseThrow(() -> new IllegalArgumentException("Unknown artifactId: " + artifactId));
 
     // Instantiate the service
-    return servicesFactory.createService(serviceDefinition, instanceSpec,
-        new MultiplexingNodeDecorator(node));
+    ServiceNodeProxy serviceNode = new ServiceNodeProxy(nodeProxy, name);
+    return servicesFactory.createService(serviceDefinition, instanceSpec, serviceNode);
   }
 
   private void registerService(ServiceWrapper service) {
@@ -360,7 +362,7 @@ public final class ServiceRuntime implements AutoCloseable {
    *     is defined, or empty string if it is defined in the service directly (implicit interface)
    * @param txId the transaction type identifier
    * @param arguments the serialized transaction arguments
-   * @param fork a native fork object
+   * @param blockchainData a database accessor to apply changes to
    * @param callerServiceId the id of the caller service if transaction is invoked by other
    *     service. Currently only applicable to invocations of Configure interface methods
    * @param txMessageHash the hash of the transaction message
@@ -374,13 +376,13 @@ public final class ServiceRuntime implements AutoCloseable {
    * @see com.exonum.binding.core.transaction.Transaction
    */
   public void executeTransaction(int serviceId, String interfaceName, int txId,
-      byte[] arguments, Fork fork, int callerServiceId, HashCode txMessageHash,
+      byte[] arguments, BlockchainData blockchainData, int callerServiceId, HashCode txMessageHash,
       PublicKey authorPublicKey) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       String serviceName = service.getName();
       TransactionContext context = TransactionContext.builder()
-          .fork(fork)
+          .blockchainData(blockchainData)
           .txMessageHash(txMessageHash)
           .authorPk(authorPublicKey)
           .serviceName(serviceName)
@@ -400,7 +402,8 @@ public final class ServiceRuntime implements AutoCloseable {
    * Performs the after transactions operation on the specified service in this runtime.
    *
    * @param serviceId the id of the service on which to perform the operation
-   * @param fork a fork allowing the runtime and the service to modify the database state.
+   * @param blockchainData a database access object allowing the runtime and
+   *     the service to modify the database state
    * @throws ExecutionException if such exception occurred in the transaction;
    *     must be translated into an error of kind {@link ErrorKind#SERVICE}
    * @throws UnexpectedExecutionException if any other exception occurred in
@@ -408,11 +411,11 @@ public final class ServiceRuntime implements AutoCloseable {
    *     into an error of kind {@link ErrorKind#UNEXPECTED}
    * @throws IllegalArgumentException if any argument is not valid (e.g., unknown service)
    */
-  public void afterTransactions(int serviceId, Fork fork) {
+  public void afterTransactions(int serviceId, BlockchainData blockchainData) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       try {
-        service.afterTransactions(fork);
+        service.afterTransactions(blockchainData);
       } catch (Exception e) {
         logger.error("Service {} threw exception in afterTransactions."
             + " Any changes will be rolled-back", service.getName(), e);
@@ -423,11 +426,17 @@ public final class ServiceRuntime implements AutoCloseable {
 
   /**
    * Notifies the services in the runtime of the block commit event.
+   * @param snapshot a snapshot of the current database state
+   * @param validatorId an optional id of the validator node, or none for an auditor
+   * @param height the current blockchain height
    */
-  public void afterCommit(BlockCommittedEvent event) {
+  public void afterCommit(Snapshot snapshot, OptionalInt validatorId, long height) {
     synchronized (lock) {
       for (ServiceWrapper service : services.values()) {
         try {
+          BlockchainData blockchainData = BlockchainData.fromRawAccess(snapshot, service.getName());
+          BlockCommittedEvent event =
+              BlockCommittedEventImpl.valueOf(blockchainData, validatorId, height);
           // todo: [ECR-3436] BCE carries a Snapshot which is based on a cleaner, which gets
           //   re-used by all services. If the total number of native proxies they create is large,
           //   that may result in excessive memory usage. Some ways to solve this:
@@ -435,6 +444,12 @@ public final class ServiceRuntime implements AutoCloseable {
           //   to destroy the native peer once.
           //   2. Support Snapshot copying with new cleaners — but that breaks index de-duplication
           //   (though for snapshots that mustn't be an issue).
+          //   3. Support some kind of "nested" or "sub"-scopes:
+          //     try (Cleaner cleaner = snapshot.getCleaner().newNested()) {
+          //       BlockchainData bdData = BlockchainData.fromRawAccess(snapshot, cleaner, name);
+          //     } // bdData gets destroyed here; snapshot remains.
+          //     However, there is a possible issue to study — index pool sharing,
+          //     and possible cache poisoning.
           //   -
           //   As a side note, 'excessive memory usage' may occur in any *single* transaction/
           //   read request/service life-cycle method, it just has higher probability when
@@ -443,8 +458,8 @@ public final class ServiceRuntime implements AutoCloseable {
           service.afterCommit(event);
         } catch (Exception e) {
           // Log, but do not re-throw either immediately or later
-          logger.error("Service {} threw an exception in its afterCommit handler of {}",
-              service.getName(), event, e);
+          logger.error("Service {} threw an exception in its afterCommit handler. Height={}",
+              service.getName(), height, e);
         }
       }
     }
@@ -472,8 +487,8 @@ public final class ServiceRuntime implements AutoCloseable {
         unloadArtifacts();
 
         // Free-up native resources
-        if (node != null) {
-          node.close();
+        if (nodeProxy != null) {
+          nodeProxy.close();
         }
         logger.info("The runtime shutdown complete");
       } catch (Exception e) {

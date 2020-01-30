@@ -33,7 +33,6 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.storage.database.Prefixed;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
@@ -178,7 +177,6 @@ public class BlockchainDataIntegrationTest {
   }
 
   private BlockchainData getBlockchainData(String serviceName) {
-    Snapshot snapshot = testKit.getSnapshot();
-    return BlockchainData.fromRawAccess(snapshot, serviceName);
+    return testKit.getBlockchainData(serviceName);
   }
 }

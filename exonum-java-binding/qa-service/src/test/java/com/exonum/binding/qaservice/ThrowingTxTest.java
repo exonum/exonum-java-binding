@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
@@ -77,7 +78,8 @@ class ThrowingTxTest {
     try (TemporaryDb db = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
-      QaSchema schema = new QaSchema(fork, QA_SERVICE_NAME);
+      BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, QA_SERVICE_NAME);
+      QaSchema schema = new QaSchema(blockchainData);
 
       // Initialize storage with a counter equal to 10
       String name = "counter";
@@ -91,7 +93,7 @@ class ThrowingTxTest {
       ThrowingTxBody arguments = ThrowingTxBody.newBuilder()
           .setSeed(17L)
           .build();
-      TransactionContext context = newContext(fork)
+      TransactionContext context = newContext(blockchainData)
           .serviceName(QA_SERVICE_NAME)
           .serviceId(QA_SERVICE_ID)
           .build();

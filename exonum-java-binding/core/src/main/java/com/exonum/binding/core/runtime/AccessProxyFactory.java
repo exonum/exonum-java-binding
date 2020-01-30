@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -41,5 +42,10 @@ public enum AccessProxyFactory implements AccessFactory {
   @Override
   public Fork createFork(long nativeHandle, Cleaner cleaner) {
     return Fork.newInstance(nativeHandle, cleaner);
+  }
+
+  @Override
+  public BlockchainData createBlockchainData(long nativeHandle, Cleaner cleaner) {
+    return BlockchainData.fromHandle(nativeHandle, cleaner);
   }
 }

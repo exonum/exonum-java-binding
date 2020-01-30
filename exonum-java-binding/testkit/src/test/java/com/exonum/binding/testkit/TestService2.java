@@ -19,23 +19,14 @@ package com.exonum.binding.testkit;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.Access;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 
 public final class TestService2 extends AbstractService {
 
-  private final int serviceInstanceId;
-
   @Inject
   public TestService2(ServiceInstanceSpec serviceSpec) {
     super(serviceSpec);
-    this.serviceInstanceId = serviceSpec.getId();
-  }
-
-  @Override
-  protected TestSchema createDataSchema(Access access) {
-    return new TestSchema(access, serviceInstanceId);
   }
 
   @Override
