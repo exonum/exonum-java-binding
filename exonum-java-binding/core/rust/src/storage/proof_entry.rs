@@ -14,6 +14,7 @@
 
 use exonum_merkledb::{
     access::AccessExt,
+    ObjectHash,
     generic::{ErasedAccess, GenericRawAccess},
     ProofEntry,
 };
@@ -89,6 +90,21 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexPr
         Ok(exists as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
+}
+
+/// Returns the hash of the value or default hash if value is absent.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexProxy_nativeGetIndexHash(
+    env: JNIEnv,
+    _: JObject,
+    entry_handle: Handle,
+) -> jbyteArray {
+    let res = panic::catch_unwind(|| {
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        let hash = entry.object_hash();
+        utils::convert_hash(&env, &hash)
+    });
+    utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
 
 /// Inserts value to the entry.
