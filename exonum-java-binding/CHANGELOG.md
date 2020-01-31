@@ -46,8 +46,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Exonum Core data. BlockchainData is a service-specific object — it remembers
   the service to which it is provided and allows modification only to the data
   of that service. The service data is automatically isolated via namespaces,
-  with a service name followed by a dot as a prefix. (#1393)
-- `Prefixed` and `ReadonlyFork` database Accesses.
+  with a service name followed by a dot as a prefix 
+  (see `BlockchainData#getExecutingServiceData`). (#1393)
+- `Prefixed` and `ReadonlyFork` database Accesses. (#1382, #1385)
 
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
