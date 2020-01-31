@@ -222,6 +222,7 @@ mod tests {
 
     const FIRST_TEST_VALUE: i32 = 42;
     const SECOND_TEST_VALUE: i32 = 57;
+    const TEST_ENTRY_NAME: &str = "test";
 
     #[test]
     fn snapshot_ref_access() {
@@ -292,6 +293,24 @@ mod tests {
         let _patch = access.into_fork().into_patch();
     }
 
+    #[test]
+    fn find_index_id_test() {
+        let db = TemporaryDB::new();
+
+        // create index to initialize metadata
+        let fork = db.fork();
+        {
+            let _index = entry(&fork);
+        }
+        db.merge(fork.into_patch()).unwrap();
+
+        // check if index id is available
+        let snapshot = db.snapshot();
+        let access = unsafe { into_erased_access(snapshot) };
+        let index_id = access.find_index_id(TEST_ENTRY_NAME.into()).unwrap();
+        assert!(index_id.is_some())
+    }
+
     fn change_value(access: ErasedAccess, new_value: i32) {
         let mut index = entry(access.clone());
         index.set(new_value);
@@ -315,6 +334,6 @@ mod tests {
     where
         T: Access,
     {
-        access.get_entry("test")
+        access.get_entry(TEST_ENTRY_NAME)
     }
 }
