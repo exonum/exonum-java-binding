@@ -113,7 +113,7 @@ public final class BlockchainData extends AbstractNativeProxy {
    */
   public Prefixed getExecutingServiceData() {
     // Since the base access (Fork) is unknown in the main use-case (BlockchainData
-    // received from  core), we must create the Prefixed access at most once so that index
+    // received from core), we must create the Prefixed access at most once so that index
     // pooling works for read-write-based Accesses.
     if (executingServiceAccess == null) {
       long nativeHandle = getNativeHandle();
