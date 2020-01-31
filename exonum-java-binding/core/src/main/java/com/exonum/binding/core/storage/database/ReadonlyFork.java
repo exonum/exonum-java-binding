@@ -75,8 +75,7 @@ public final class ReadonlyFork extends AbstractAccess {
    */
   private static ReadonlyFork fromHandleInternal(long roForkNativeHandle, Cleaner cleaner) {
     NativeHandle handle = new NativeHandle(roForkNativeHandle);
-    ProxyDestructor.newRegistered(cleaner, handle, ReadonlyFork.class,
-        /* todo [ECR-4167]: Verify after native implementation! */ Accesses::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, handle, ReadonlyFork.class, Accesses::nativeFree);
     return new ReadonlyFork(handle, cleaner);
   }
 
