@@ -227,8 +227,8 @@ mod tests {
     fn snapshot_ref_access() {
         let db = setup_database();
         let snapshot = db.snapshot();
-        let access = unsafe { into_erased_access(&*snapshot)};
-        check_value(access.clone(), FIRST_TEST_VALUE);
+        let access = unsafe { into_erased_access(&*snapshot) };
+        assert_value_eq(access.clone(), FIRST_TEST_VALUE);
         assert!(!access.can_convert_into_fork());
         assert!(!access.can_rollback());
     }
@@ -237,8 +237,8 @@ mod tests {
     fn snapshot_owned_access() {
         let db = setup_database();
         let snapshot = db.snapshot();
-        let access = unsafe { into_erased_access(snapshot)};
-        check_value(access.clone(), FIRST_TEST_VALUE);
+        let access = unsafe { into_erased_access(snapshot) };
+        assert_value_eq(access.clone(), FIRST_TEST_VALUE);
         assert!(!access.can_convert_into_fork());
         assert!(!access.can_rollback());
     }
@@ -247,8 +247,10 @@ mod tests {
     fn fork_ref_access() {
         let db = setup_database();
         let fork = db.fork();
-        let access = unsafe { into_erased_access(&fork)};
-        check_fork(access.clone());
+        let access = unsafe { into_erased_access(&fork) };
+        assert_value_eq(access.clone(), FIRST_TEST_VALUE);
+        change_value(access.clone(), SECOND_TEST_VALUE);
+        assert_value_eq(access.clone(), SECOND_TEST_VALUE);
         assert!(!access.can_convert_into_fork());
         assert!(!access.can_rollback());
     }
@@ -257,8 +259,10 @@ mod tests {
     fn fork_owned_access() {
         let db = setup_database();
         let fork = db.fork();
-        let access = unsafe { into_erased_access(fork)};
-        check_fork(access.clone());
+        let access = unsafe { into_erased_access(fork) };
+        assert_value_eq(access.clone(), FIRST_TEST_VALUE);
+        change_value(access.clone(), SECOND_TEST_VALUE);
+        assert_value_eq(access.clone(), SECOND_TEST_VALUE);
         assert!(access.can_convert_into_fork());
         assert!(access.can_rollback());
     }
@@ -267,33 +271,30 @@ mod tests {
     fn rollback() {
         let db = setup_database();
         let fork = db.fork();
-        let mut access = unsafe { into_erased_access(fork)};
+        let mut access = unsafe { into_erased_access(fork) };
         // create checkpoint that will be used later to restore Fork's state
         access.create_checkpoint();
+        assert_value_eq(access.clone(), FIRST_TEST_VALUE);
         // change stored value to SECOND_TEST_VALUE
-        check_fork(access.clone());
-        check_value(access.clone(), SECOND_TEST_VALUE);
+        change_value(access.clone(), SECOND_TEST_VALUE);
+        assert_value_eq(access.clone(), SECOND_TEST_VALUE);
 
         access.rollback();
         // Fork's state restored to the checkpoint
-        check_value(access.clone(), FIRST_TEST_VALUE);
+        assert_value_eq(access.clone(), FIRST_TEST_VALUE);
     }
 
     #[test]
     fn convert_fork_into_patch() {
         let db = TemporaryDB::new();
         let fork = db.fork();
-        let access = unsafe { into_erased_access(fork)};
+        let access = unsafe { into_erased_access(fork) };
         let _patch = access.into_fork().into_patch();
     }
 
-    fn check_fork(access: ErasedAccess) {
-        check_value(access.clone(), FIRST_TEST_VALUE);
-        {
-            let mut index = entry(access.clone());
-            index.set(SECOND_TEST_VALUE);
-        }
-        check_value(access.clone(), SECOND_TEST_VALUE);
+    fn change_value(access: ErasedAccess, new_value: i32) {
+        let mut index = entry(access.clone());
+        index.set(new_value);
     }
 
     // Creates database with a prepared state.
@@ -305,7 +306,7 @@ mod tests {
         db
     }
 
-    fn check_value(access: ErasedAccess, expected: i32) {
+    fn assert_value_eq(access: ErasedAccess, expected: i32) {
         let value = entry(access).get();
         assert_eq!(Some(expected), value);
     }
