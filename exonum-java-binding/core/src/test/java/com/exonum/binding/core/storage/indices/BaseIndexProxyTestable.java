@@ -18,7 +18,6 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.sameInstance;
@@ -195,9 +194,7 @@ abstract class BaseIndexProxyTestable<IndexT extends StorageIndex> {
       // Try to create an index of other type with the same name as the index above
       Exception e = assertThrows(RuntimeException.class, () -> createOfOtherType(name, snapshot));
 
-      // TODO: use only the first variant once it is fixed in Core (https://github.com/exonum/exonum/pull/1752)
-      assertThat(e.getMessage(),
-          anyOf(containsStringIgnoringCase("wrong index type"), containsString("WrongIndexType")));
+      assertThat(e.getMessage(), containsStringIgnoringCase("wrong index type"));
     }
   }
 
