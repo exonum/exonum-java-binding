@@ -12,28 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use exonum_merkledb::generic::ErasedAccess;
 use jni::{objects::JObject, sys::jboolean, JNIEnv};
 
 use std::panic;
 
-use handle::{self, acquire_handle_ownership, Handle};
-use storage::db::View;
-use {to_handle, utils};
+use {
+    handle::{self, acquire_handle_ownership, to_handle, Handle},
+    storage::EjbAccessExt,
+    utils,
+};
 
 /// Creates checkpoint for `Fork`.
 ///
-/// Throws RuntimeException if the View behind the provided handle does not support checkpoints.
+/// Throws RuntimeException if the Access behind the provided handle does not support checkpoints.
 ///
-/// See `View::create_checkpoint`.
+/// See `EjbAccessExt::create_checkpoint`.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeCreateCheckpoint(
     env: JNIEnv,
     _: JObject,
-    view_handle: Handle,
+    access_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
-        let view = handle::cast_handle::<View>(view_handle);
-        view.create_checkpoint();
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        access.create_checkpoint();
         Ok(())
     });
     utils::unwrap_exc_or(&env, res, ())
@@ -41,62 +44,62 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_native
 
 /// Rollbacks `Fork`.
 ///
-/// Throws RuntimeException if the View behind the provided handle does not support rollbacks.
+/// Throws RuntimeException if the Access behind the provided handle does not support rollbacks.
 ///
-/// See `View::rollback`.
+/// See `EjbAccessExt::rollback`.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeRollback(
     env: JNIEnv,
     _: JObject,
-    view_handle: Handle,
+    access_handle: Handle,
 ) {
     let res = panic::catch_unwind(|| {
-        let view = handle::cast_handle::<View>(view_handle);
-        view.rollback();
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        access.rollback();
         Ok(())
     });
     utils::unwrap_exc_or(&env, res, ())
 }
 
-/// Returns true if this View supports creating checkpoints and rollback.
+/// Returns true if this Access supports creating checkpoints and rollback.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeCanRollback(
     env: JNIEnv,
     _: JObject,
-    view_handle: Handle,
+    access_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let view = handle::cast_handle::<View>(view_handle);
-        Ok(view.can_rollback() as jboolean)
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        Ok(access.can_rollback() as jboolean)
     });
     utils::unwrap_exc_or(&env, res, false as jboolean)
 }
 
-/// Returns true if this View can be converted into patch.
+/// Returns true if this Access can be converted into patch.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeCanConvertIntoPatch(
     env: JNIEnv,
     _: JObject,
-    view_handle: Handle,
+    access_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let view = handle::cast_handle::<View>(view_handle);
-        Ok(view.can_convert_into_fork() as jboolean)
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        Ok(access.can_convert_into_fork() as jboolean)
     });
     utils::unwrap_exc_or(&env, res, false as jboolean)
 }
 
-/// Converts View into patch and returns the handle to this patch.
-/// Provided `view_handle` will be cleared and can no longer be used.
+/// Converts Access into patch and returns the handle to this patch.
+/// Provided `access_handle` will be cleared and can no longer be used.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_Fork_nativeIntoPatch(
     env: JNIEnv,
     _: JObject,
-    view_handle: Handle,
+    access_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let view: Box<View> = acquire_handle_ownership(view_handle);
-        let fork = view.into_fork();
+        let access: Box<ErasedAccess> = acquire_handle_ownership(access_handle);
+        let fork = access.into_fork();
         let patch = fork.into_patch();
         Ok(to_handle(patch))
     });

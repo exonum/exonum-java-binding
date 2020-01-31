@@ -94,8 +94,7 @@ public final class Prefixed extends AbstractAccess {
   private static Prefixed fromHandleInternal(long prefixedNativeHandle, boolean canModify,
       Cleaner cleaner, OpenIndexRegistry registry) {
     NativeHandle handle = new NativeHandle(prefixedNativeHandle);
-    ProxyDestructor.newRegistered(cleaner, handle, Prefixed.class,
-        /* todo [ECR-4161]: Verify after native implementation! */ Accesses::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, handle, Prefixed.class, Accesses::nativeFree);
     return new Prefixed(handle, canModify, cleaner, registry);
   }
 

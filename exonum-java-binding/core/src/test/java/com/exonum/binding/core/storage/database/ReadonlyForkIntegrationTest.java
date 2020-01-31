@@ -26,10 +26,8 @@ import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled("ECR-4167")
 class ReadonlyForkIntegrationTest {
 
   private Cleaner cleaner;

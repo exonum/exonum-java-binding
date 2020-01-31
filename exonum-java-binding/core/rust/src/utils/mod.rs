@@ -18,7 +18,7 @@
 
 pub use self::conversion::{
     convert_hash, convert_to_hash, convert_to_index_address, convert_to_string,
-    java_arrays_to_rust, proto_to_java_bytes,
+    java_arrays_to_rust, optional_array_to_java, proto_to_java_bytes,
 };
 pub use self::errors::{
     any_to_string, check_error_on_exception, describe_java_exception, get_and_clear_java_exception,

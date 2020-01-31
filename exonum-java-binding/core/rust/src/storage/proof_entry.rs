@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{access::FromAccess, Fork, ObjectHash, ProofEntry, Snapshot};
+use exonum_merkledb::{
+    access::AccessExt,
+    generic::{ErasedAccess, GenericRawAccess},
+    ObjectHash, ProofEntry,
+};
 use jni::{
     objects::{JClass, JObject, JString},
     sys::{jboolean, jbyteArray},
@@ -22,36 +26,24 @@ use jni::{
 use std::{panic, ptr};
 
 use handle::{self, Handle};
-use storage::db::{Value, View, ViewRef};
+use storage::Value;
 use utils;
 
-type Index<T> = ProofEntry<T, Value>;
-
-enum IndexType {
-    SnapshotIndex(Index<&'static dyn Snapshot>),
-    ForkIndex(Index<&'static Fork>),
-}
+type Index = ProofEntry<GenericRawAccess<'static>, Value>;
 
 /// Returns pointer to the created `Entry` object.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexProxy_nativeCreate(
     env: JNIEnv,
     _: JClass,
-    name: JString,
-    view_handle: Handle,
+    address: JString,
+    access_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let name = utils::convert_to_string(&env, name)?;
-        Ok(handle::to_handle(
-            match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::from_access(snapshot, name.into()).unwrap())
-                }
-                ViewRef::Fork(fork) => {
-                    IndexType::ForkIndex(Index::from_access(fork, name.into()).unwrap())
-                }
-            },
-        ))
+        let address = utils::convert_to_string(&env, address)?;
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        let index: Index = access.get_proof_entry(address);
+        Ok(handle::to_handle(index))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -63,7 +55,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIn
     _: JClass,
     entry_handle: Handle,
 ) {
-    handle::drop_handle::<IndexType>(&env, entry_handle);
+    handle::drop_handle::<Index>(&env, entry_handle);
 }
 
 /// Returns the value or null pointer if it is absent.
@@ -74,14 +66,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIn
     entry_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let val = match *handle::cast_handle::<IndexType>(entry_handle) {
-            IndexType::SnapshotIndex(ref entry) => entry.get(),
-            IndexType::ForkIndex(ref entry) => entry.get(),
-        };
-        match val {
-            Some(val) => env.byte_array_from_slice(&val),
-            None => Ok(ptr::null_mut()),
-        }
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        let value = entry.get();
+        utils::optional_array_to_java(&env, value)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -94,10 +81,9 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexPr
     entry_handle: Handle,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        Ok(match *handle::cast_handle::<IndexType>(entry_handle) {
-            IndexType::SnapshotIndex(ref entry) => entry.exists(),
-            IndexType::ForkIndex(ref entry) => entry.exists(),
-        } as jboolean)
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        let exists = entry.exists();
+        Ok(exists as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -110,13 +96,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIn
     entry_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        utils::convert_hash(
-            &env,
-            &match *handle::cast_handle::<IndexType>(entry_handle) {
-                IndexType::SnapshotIndex(ref entry) => entry.object_hash(),
-                IndexType::ForkIndex(ref entry) => entry.object_hash(),
-            },
-        )
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        let hash = entry.object_hash();
+        utils::convert_hash(&env, &hash)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -129,15 +111,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIn
     entry_handle: Handle,
     value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(entry_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut entry) => {
-            let value = env.convert_byte_array(value)?;
-            entry.set(value);
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        let value = env.convert_byte_array(value)?;
+        entry.set(value);
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -149,14 +127,10 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ProofEntryIndexPr
     _: JObject,
     entry_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(entry_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut entry) => {
-            entry.remove();
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let entry = handle::cast_handle::<Index>(entry_handle);
+        entry.remove();
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }

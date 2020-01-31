@@ -210,10 +210,8 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    * @return a non-zero id if the index is created in the database; zero if the index
    *     does not exist
    */
-  /* TODO: either native — if all Accesses can have same impl; or abstract and native
-      in each Access [ECR-4157] */
   private long findIndexId(String name, @Nullable byte[] idInGroup) {
-    return 0;
+    return nativeFindIndexId(getNativeHandle(), name, idInGroup);
   }
 
   /**
@@ -255,4 +253,6 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    * and other objects depending on this access.
    */
   public abstract Cleaner getCleaner();
+
+  static native long nativeFindIndexId(long nativeHandle, String name, @Nullable byte[] idInGroup);
 }

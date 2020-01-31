@@ -1,4 +1,4 @@
-use exonum::{blockchain::Schema, helpers::Height, runtime::SnapshotExt};
+use exonum_merkledb::generic::ErasedAccess;
 use jni::{
     objects::JObject,
     sys::{jbyteArray, jlong, jstring},
@@ -9,7 +9,7 @@ use std::{panic, ptr};
 
 use {
     handle,
-    storage::db::{View, ViewRef},
+    storage::EjbAccessExt,
     utils::{self, convert_to_string, proto_to_java_bytes},
 };
 
@@ -28,17 +28,11 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainProofs_
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let name = convert_to_string(&env, full_index_name)?;
-        let db = handle::cast_handle::<View>(snapshot_handle);
-        match db.get() {
-            ViewRef::Snapshot(snapshot) => {
-                let proof = snapshot.proof_for_index(&name);
-                if let Some(proof) = proof {
-                    proto_to_java_bytes(&env, &proof)
-                } else {
-                    Ok(ptr::null_mut() as jbyteArray)
-                }
-            }
-            ViewRef::Fork(_) => panic!("nativeCreateIndexProof called with Fork"),
+        let access = handle::cast_handle::<ErasedAccess>(snapshot_handle);
+        let proof = access.proof_for_index(&name);
+        match proof {
+            Some(proof) => proto_to_java_bytes(&env, &proof),
+            None => Ok(ptr::null_mut() as jbyteArray),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -57,16 +51,11 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainProofs_
     block_height: jlong,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let db = handle::cast_handle::<View>(snapshot_handle);
-        match db.get() {
-            ViewRef::Snapshot(snapshot) => {
-                let schema = Schema::new(snapshot);
-                let proof = schema
-                    .block_and_precommits(Height(block_height as u64))
-                    .unwrap();
-                proto_to_java_bytes(&env, &proof)
-            }
-            ViewRef::Fork(_) => panic!("nativeCreateBlockProof called with Fork"),
+        let access = handle::cast_handle::<ErasedAccess>(snapshot_handle);
+        let proof = access.proof_for_block(block_height as u64);
+        match proof {
+            Some(proof) => proto_to_java_bytes(&env, &proof),
+            None => Ok(ptr::null_mut() as jbyteArray),
         }
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
