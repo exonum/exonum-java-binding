@@ -48,7 +48,7 @@ public interface AccessFactory {
    * Creates a new owning blockchain data.
    *
    * @param nativeHandle a handle to the native BlockchainData object
-   * @param cleaner a cleaner to register the destructor\
+   * @param cleaner a cleaner to register the destructor
    */
   BlockchainData createBlockchainData(long nativeHandle, Cleaner cleaner);
 }
