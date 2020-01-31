@@ -36,12 +36,11 @@ use jni::{
 };
 
 use handle::{cast_handle, drop_handle, to_handle, Handle};
-use storage::View;
 use utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default};
 use {JavaRuntimeProxy, JniResult};
 
 use self::time_provider::JavaTimeProvider;
-use proto;
+use {proto, storage::into_erased_access};
 
 mod time_provider;
 
@@ -141,8 +140,8 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnaps
         let testkit = cast_handle::<TestKit>(handle);
         testkit.poll_events();
         let snapshot = testkit.snapshot();
-        let view = View::from_owned_snapshot(snapshot);
-        Ok(to_handle(view))
+        let access = unsafe { into_erased_access(snapshot) };
+        Ok(to_handle(access))
     });
     unwrap_exc_or_default(&env, res)
 }

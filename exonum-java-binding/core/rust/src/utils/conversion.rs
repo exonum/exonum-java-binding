@@ -19,6 +19,9 @@ use jni::objects::JString;
 use jni::sys::{jbyteArray, jobjectArray};
 use jni::JNIEnv;
 use protobuf::Message;
+
+use std::ptr;
+
 use JniResult;
 
 /// Converts Java byte array to `Hash`. Panics if array has the wrong length.
@@ -88,4 +91,16 @@ where
         result.push(array);
     }
     Ok(result)
+}
+
+/// Converts optional array of bytes into `jbyteArray`.
+///
+/// If `None` passed, returns null.
+pub fn optional_array_to_java<B: AsRef<[u8]>>(
+    env: &JNIEnv,
+    slice: Option<B>,
+) -> JniResult<jbyteArray> {
+    slice.map_or(Ok(ptr::null_mut() as *mut _), |slice| {
+        env.byte_array_from_slice(slice.as_ref())
+    })
 }
