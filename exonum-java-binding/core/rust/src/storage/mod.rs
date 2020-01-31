@@ -13,7 +13,7 @@
 // limitations under the License.
 
 pub use self::access::Java_com_exonum_binding_core_storage_database_Accesses_nativeFree;
-pub(crate) use self::access::{into_generic_raw_access, EjbAccessExt};
+pub(crate) use self::access::{into_erased_access, EjbAccessExt};
 pub use self::blockchain::*;
 pub use self::key_set_index::*;
 pub use self::list_index::*;

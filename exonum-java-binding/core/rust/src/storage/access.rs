@@ -36,12 +36,14 @@ use utils;
 /// Prolongs lifetime of the GenericRawAccess.
 ///
 /// The caller is responsible for validation of lifetime of the passed `raw_access`.
-pub(crate) unsafe fn into_generic_raw_access<'a, T>(raw_access: T) -> GenericRawAccess<'static>
+pub(crate) unsafe fn into_erased_access<'a, T>(raw_access: T) -> ErasedAccess<'static>
 where
     T: Into<GenericRawAccess<'a>>,
 {
     let generic_raw_access: GenericRawAccess = raw_access.into();
-    std::mem::transmute(generic_raw_access)
+    // prolong the lifetime
+    let generic_raw_access: GenericRawAccess<'static> = std::mem::transmute(generic_raw_access);
+    ErasedAccess::from(generic_raw_access)
 }
 
 pub trait EjbAccessExt {
@@ -225,7 +227,7 @@ mod tests {
     fn snapshot_ref_access() {
         let db = setup_database();
         let snapshot = db.snapshot();
-        let access = ErasedAccess::from(unsafe { into_generic_raw_access(&*snapshot) });
+        let access = unsafe { into_erased_access(&*snapshot)};
         check_value(access.clone(), FIRST_TEST_VALUE);
         assert!(!access.can_convert_into_fork());
         assert!(!access.can_rollback());
@@ -235,7 +237,7 @@ mod tests {
     fn snapshot_owned_access() {
         let db = setup_database();
         let snapshot = db.snapshot();
-        let access = ErasedAccess::from(unsafe { into_generic_raw_access(snapshot) });
+        let access = unsafe { into_erased_access(snapshot)};
         check_value(access.clone(), FIRST_TEST_VALUE);
         assert!(!access.can_convert_into_fork());
         assert!(!access.can_rollback());
@@ -245,7 +247,7 @@ mod tests {
     fn fork_ref_access() {
         let db = setup_database();
         let fork = db.fork();
-        let access = ErasedAccess::from(unsafe { into_generic_raw_access(&fork) });
+        let access = unsafe { into_erased_access(&fork)};
         check_fork(access.clone());
         assert!(!access.can_convert_into_fork());
         assert!(!access.can_rollback());
@@ -255,7 +257,7 @@ mod tests {
     fn fork_owned_access() {
         let db = setup_database();
         let fork = db.fork();
-        let access = ErasedAccess::from(unsafe { into_generic_raw_access(fork) });
+        let access = unsafe { into_erased_access(fork)};
         check_fork(access.clone());
         assert!(access.can_convert_into_fork());
         assert!(access.can_rollback());
@@ -265,7 +267,7 @@ mod tests {
     fn rollback() {
         let db = setup_database();
         let fork = db.fork();
-        let mut access = ErasedAccess::from(unsafe { into_generic_raw_access(fork) });
+        let mut access = unsafe { into_erased_access(fork)};
         // create checkpoint that will be used later to restore Fork's state
         access.create_checkpoint();
         // change stored value to SECOND_TEST_VALUE
@@ -281,7 +283,7 @@ mod tests {
     fn convert_fork_into_patch() {
         let db = TemporaryDB::new();
         let fork = db.fork();
-        let access = ErasedAccess::from(unsafe { into_generic_raw_access(fork) });
+        let access = unsafe { into_erased_access(fork)};
         let _patch = access.into_fork().into_patch();
     }
 

@@ -25,7 +25,6 @@ use exonum::{
     helpers::ValidatorId,
     runtime::ArtifactSpec,
 };
-use exonum_merkledb::generic::ErasedAccess;
 use exonum_proto::ProtobufConvert;
 use exonum_rust_runtime::ServiceFactory;
 use exonum_testkit::{TestKit, TestKitBuilder};
@@ -41,7 +40,7 @@ use utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default};
 use {JavaRuntimeProxy, JniResult};
 
 use self::time_provider::JavaTimeProvider;
-use {proto, storage::into_generic_raw_access};
+use {proto, storage::into_erased_access};
 
 mod time_provider;
 
@@ -141,7 +140,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateSnaps
         let testkit = cast_handle::<TestKit>(handle);
         testkit.poll_events();
         let snapshot = testkit.snapshot();
-        let access = ErasedAccess::from(unsafe { into_generic_raw_access(snapshot) });
+        let access = unsafe { into_erased_access(snapshot) };
         Ok(to_handle(access))
     });
     unwrap_exc_or_default(&env, res)
