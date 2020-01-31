@@ -23,7 +23,7 @@ use exonum_merkledb::{
     Fork, IndexAddress,
 };
 use jni::{
-    objects::{JClass, JObject},
+    objects::JClass,
     sys::{jbyteArray, jlong, jstring},
     JNIEnv,
 };
@@ -184,7 +184,7 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAccess_nativeFindIndexId(
     env: JNIEnv,
-    _: JObject,
+    _: JClass,
     access_handle: Handle,
     name: jstring,
     id_in_group: jbyteArray,
