@@ -71,10 +71,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     let res = panic::catch_unwind(|| {
         let list = handle::cast_handle::<Index>(list_handle);
         let value = list.get(index as u64);
-        match value {
-            Some(value) => env.byte_array_from_slice(&value),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, value)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -89,10 +86,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     let res = panic::catch_unwind(|| {
         let list = handle::cast_handle::<Index>(list_handle);
         let value = list.last();
-        match value {
-            Some(value) => env.byte_array_from_slice(&value),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, value)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -185,10 +179,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     let res = panic::catch_unwind(|| {
         let list = handle::cast_handle::<Index>(list_handle);
         let value = list.pop();
-        match value {
-            Some(value) => env.byte_array_from_slice(&value),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, value)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -251,10 +242,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let iter = handle::cast_handle::<Iter<Value>>(iter_handle);
-        match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, iter.next())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }

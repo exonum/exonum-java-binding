@@ -68,10 +68,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_EntryIndexPr
     let res = panic::catch_unwind(|| {
         let entry = handle::cast_handle::<Index>(entry_handle);
         let value = entry.get();
-        match value {
-            Some(val) => env.byte_array_from_slice(&val),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, value)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }

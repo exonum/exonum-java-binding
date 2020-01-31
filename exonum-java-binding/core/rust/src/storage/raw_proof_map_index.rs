@@ -93,10 +93,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
         let map = handle::cast_handle::<Index>(map_handle);
         let key = convert_to_key(&env, key)?;
         let value = map.get(&key);
-        match value {
-            Some(value) => env.byte_array_from_slice(&value),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, value)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -347,10 +344,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let iter = handle::cast_handle::<Keys<Key>>(iter_handle);
-        match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, iter.next())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -374,10 +368,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_RawProofMapI
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let iter = handle::cast_handle::<Values<Value>>(iter_handle);
-        match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, iter.next())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }

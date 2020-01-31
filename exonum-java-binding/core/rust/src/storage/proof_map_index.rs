@@ -152,10 +152,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
             Index::Raw(map) => map.get(&key.to_raw()),
             Index::Hashed(map) => map.get(&key),
         };
-        match value {
-            Some(value) => env.byte_array_from_slice(&value),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, value)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -450,13 +447,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let array = match *handle::cast_handle::<KeysIter>(iter_handle) {
-            KeysIter::Raw(ref mut iter) => iter.next().map(|val| env.byte_array_from_slice(&val)),
-            KeysIter::Hashed(ref mut iter) => {
-                iter.next().map(|val| env.byte_array_from_slice(&val))
-            }
+        let value = match *handle::cast_handle::<KeysIter>(iter_handle) {
+            KeysIter::Raw(ref mut iter) => utils::optional_array_to_java(&env, iter.next())?,
+            KeysIter::Hashed(ref mut iter) => utils::optional_array_to_java(&env, iter.next())?,
         };
-        array.or(Some(Ok(ptr::null_mut()))).unwrap()
+        Ok(value)
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
@@ -480,10 +475,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
         let iter = handle::cast_handle::<Values<Value>>(iter_handle);
-        match iter.next() {
-            Some(val) => env.byte_array_from_slice(&val),
-            None => Ok(ptr::null_mut()),
-        }
+        utils::optional_array_to_java(&env, iter.next())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
 }
