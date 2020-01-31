@@ -17,7 +17,7 @@ use jni::{objects::JObject, JNIEnv};
 
 use std::panic;
 
-use {handle, into_generic_raw_access, utils::unwrap_exc_or_default, Handle};
+use {handle, into_erased_access, utils::unwrap_exc_or_default, Handle};
 
 /// Creates `ReadonlyFork` from base access (passed as `access_handle`).
 ///
@@ -38,7 +38,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_ReadonlyFor
             },
             _ => panic!("Attempt to create ReadonlyFork from non-Fork: {:?}", access),
         };
-        let readonly_fork = ErasedAccess::from(unsafe { into_generic_raw_access(readonly_fork) });
+        let readonly_fork = unsafe { into_erased_access(readonly_fork) };
         let handle = handle::to_handle(readonly_fork);
         Ok(handle)
     });
