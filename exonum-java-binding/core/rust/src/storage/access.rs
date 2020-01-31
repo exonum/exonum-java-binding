@@ -28,7 +28,7 @@ use jni::{
     JNIEnv,
 };
 
-use std::{panic, rc::Rc};
+use std::{num::NonZeroU64, panic, rc::Rc};
 
 use handle::{self, Handle};
 use utils;
@@ -74,7 +74,8 @@ pub trait EjbAccessExt {
     /// Returns `IndexMetadata::identifier` - a unique identifier of the index.
     ///
     /// Returns `None` if the index does not exist.
-    fn find_index_id(&self, index_address: IndexAddress) -> Result<Option<u64>, AccessError>;
+    fn find_index_id(&self, index_address: IndexAddress)
+        -> Result<Option<NonZeroU64>, AccessError>;
 }
 
 impl<'a> EjbAccessExt for ErasedAccess<'a> {
@@ -166,9 +167,12 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
         }
     }
 
-    fn find_index_id(&self, index_address: IndexAddress) -> Result<Option<u64>, AccessError> {
+    fn find_index_id(
+        &self,
+        index_address: IndexAddress,
+    ) -> Result<Option<NonZeroU64>, AccessError> {
         let metadata = self.clone().get_index_metadata(index_address)?;
-        Ok(metadata.map(|metadata| metadata.identifier().get()))
+        Ok(metadata.map(|metadata| metadata.identifier()))
     }
 }
 
@@ -187,7 +191,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAcc
         let access = handle::cast_handle::<ErasedAccess>(access_handle);
         let address = utils::convert_to_index_address(&env, name, id_in_group)?;
         match access.find_index_id(address).unwrap() {
-            Some(id) => Ok(id as jlong),
+            Some(id) => Ok(id.get() as jlong),
             None => Ok(0 as jlong),
         }
     });
