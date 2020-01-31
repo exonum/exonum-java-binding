@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package ${package};
+package $
 
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.Access;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+
+{package};
 
 public final class MyService extends AbstractService {
 
   @Inject
   public MyService(ServiceInstanceSpec instanceSpec) {
     super(instanceSpec);
-  }
-
-  @Override
-  protected Schema createDataSchema(Access access) {
-    String name = getName();
-    return new MySchema(access, name);
   }
 
   @Override

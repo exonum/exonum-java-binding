@@ -46,11 +46,11 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.ExecutionException;
@@ -110,8 +110,8 @@ class QaServiceImplTest {
                 .build())
         .withTimeService(timeServiceName, 2, TimeProvider.systemTime())
         .build()) {
-      Snapshot snapshot = testKit.getSnapshot();
-      QaSchema schema = new QaSchema(snapshot, serviceName);
+      BlockchainData snapshot = testKit.getBlockchainData(serviceName);
+      QaSchema schema = new QaSchema(snapshot);
       // Check the time dependency is saved
       Optional<String> timeService = schema.timeOracleName().toOptional();
       assertThat(timeService).hasValue(timeServiceName);
@@ -141,13 +141,15 @@ class QaServiceImplTest {
         .build()
         .toByteArray();
 
-    try (TemporaryDb db = TemporaryDb.newInstance(); Cleaner cleaner = new Cleaner()) {
+    try (TemporaryDb db = TemporaryDb.newInstance();
+        Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
+      BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, QA_SERVICE_NAME);
 
       QaServiceImpl qaService = new QaServiceImpl(spec);
-      qaService.resume(fork, arguments);
+      qaService.resume(blockchainData, arguments);
 
-      QaSchema schema = new QaSchema(fork, spec.getName());
+      QaSchema schema = new QaSchema(blockchainData);
       MapIndex<HashCode, Long> counters = schema.counters();
       MapIndex<HashCode, String> counterNames = schema.counterNames();
       HashCode counterId = sha256().hashString(counterName, UTF_8);
@@ -165,7 +167,7 @@ class QaServiceImplTest {
         .setShouldThrowException(true)
         .build()
         .toByteArray();
-    Fork fork = mock(Fork.class);
+    BlockchainData fork = mock(BlockchainData.class);
 
     QaServiceImpl qaService = new QaServiceImpl(spec);
 
@@ -206,8 +208,8 @@ class QaServiceImplTest {
   }
 
   private void checkAfterCommitCounter(TestKit testKit, long expectedValue) {
-    Snapshot snapshot = testKit.getSnapshot();
-    QaSchema schema = new QaSchema(snapshot, QA_SERVICE_NAME);
+    BlockchainData snapshot = testKit.getBlockchainData(QA_SERVICE_NAME);
+    QaSchema schema = new QaSchema(snapshot);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> counterNames = schema.counterNames();
     HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);

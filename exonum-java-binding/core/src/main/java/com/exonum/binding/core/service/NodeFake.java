@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -60,7 +61,7 @@ public final class NodeFake implements Node {
   private static final Logger logger = LogManager.getLogger(NodeFake.class);
 
   private final TemporaryDb database;
-
+  private final String serviceName;
   private final PublicKey publicKey;
 
   /**
@@ -68,8 +69,8 @@ public final class NodeFake implements Node {
    *
    * @param database a database to provide snapshots of
    */
-  public NodeFake(TemporaryDb database) {
-    this(database, PublicKey.fromBytes(new byte[PUBLIC_KEY_BYTES]));
+  public NodeFake(TemporaryDb database, String serviceName) {
+    this(database, serviceName, PublicKey.fromBytes(new byte[PUBLIC_KEY_BYTES]));
   }
 
   /**
@@ -78,8 +79,9 @@ public final class NodeFake implements Node {
    * @param database a database to provide snapshots of
    * @param publicKey a public key of the node
    */
-  public NodeFake(TemporaryDb database, PublicKey publicKey) {
+  public NodeFake(TemporaryDb database, String serviceName, PublicKey publicKey) {
     this.database = checkNotNull(database);
+    this.serviceName = serviceName;
     this.publicKey = publicKey;
   }
 
@@ -96,10 +98,11 @@ public final class NodeFake implements Node {
   }
 
   @Override
-  public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
-    try (Cleaner cleaner = new Cleaner("NodeFake#withSnapshot")) {
+  public <ResultT> ResultT withBlockchainData(Function<BlockchainData, ResultT> snapshotFunction) {
+    try (Cleaner cleaner = new Cleaner("NodeFake#withBlockchainData")) {
       Snapshot snapshot = database.createSnapshot(cleaner);
-      return snapshotFunction.apply(snapshot);
+      BlockchainData blockchainData = BlockchainData.fromRawAccess(snapshot, serviceName);
+      return snapshotFunction.apply(blockchainData);
     } catch (CloseFailuresException e) {
       logger.error(e);
       throw new RuntimeException(e);

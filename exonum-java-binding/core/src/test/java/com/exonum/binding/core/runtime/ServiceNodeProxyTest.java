@@ -18,33 +18,41 @@ package com.exonum.binding.core.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class MultiplexingNodeDecoratorTest {
+class ServiceNodeProxyTest {
+  private static final String SERVICE_NAME = "test-service";
   private static final RawTransaction TX = RawTransaction.newBuilder()
       .serviceId(1)
       .transactionId(1)
       .payload(new byte[]{})
       .build();
-  private static final Function<Snapshot, Void> SNAPSHOT_FUNCTION = s -> null;
+  private static final Function<BlockchainData, Void> SNAPSHOT_FUNCTION = s -> null;
 
   @Mock
-  private Node node;
-  @InjectMocks
-  private MultiplexingNodeDecorator decorator;
+  private NodeProxy node;
+  @Mock
+  private BlockchainDataFactory blockchainDataFactory;
+  private ServiceNodeProxy decorator;
+
+  @BeforeEach
+  void setUp() {
+    decorator = new ServiceNodeProxy(node, blockchainDataFactory, SERVICE_NAME);
+  }
 
   @Test
   void submitTransaction() {
@@ -62,16 +70,18 @@ class MultiplexingNodeDecoratorTest {
 
   @Test
   void withSnapshot() {
-    decorator.withSnapshot(SNAPSHOT_FUNCTION);
+    decorator.withBlockchainData(SNAPSHOT_FUNCTION);
 
-    verify(node).withSnapshot(SNAPSHOT_FUNCTION);
+    verify(node).withSnapshot(any(Function.class));
+    verify(blockchainDataFactory).fromRawAccess(any(Snapshot.class), SERVICE_NAME);
   }
 
   @Test
   void restrictWithSnapshot() {
     decorator.close();
 
-    assertThrows(IllegalStateException.class, () -> decorator.withSnapshot(SNAPSHOT_FUNCTION));
+    assertThrows(IllegalStateException.class,
+        () -> decorator.withBlockchainData(SNAPSHOT_FUNCTION));
   }
 
   @Test
@@ -90,5 +100,4 @@ class MultiplexingNodeDecoratorTest {
 
     assertThrows(IllegalStateException.class, () -> decorator.getPublicKey());
   }
-
 }

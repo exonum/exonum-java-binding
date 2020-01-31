@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.google.auto.value.AutoValue;
 import java.util.OptionalInt;
 
@@ -31,12 +31,12 @@ public abstract class BlockCommittedEventImpl implements BlockCommittedEvent {
    * @param height the current blockchain height
    */
   public static BlockCommittedEventImpl valueOf(
-      Snapshot snapshot, OptionalInt validatorId, long height) {
+      BlockchainData snapshot, OptionalInt validatorId, long height) {
     return new AutoValue_BlockCommittedEventImpl(snapshot, validatorId, height);
   }
 
   @Override
-  public abstract Snapshot getSnapshot();
+  public abstract BlockchainData getSnapshot();
 
   @Override
   public abstract OptionalInt getValidatorId();

@@ -19,7 +19,8 @@ package com.exonum.binding.core.service;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.Blockchain;
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
 
@@ -58,12 +59,28 @@ public interface Node extends AutoCloseable {
 
   /**
    * Performs the given function with a snapshot of the current database state.
+   * Only the executing service data is accessible through the provided snapshot.
    *
-   * @param snapshotFunction a function to execute
+   * <p>A shortcut for {@link BlockchainData#getExecutingServiceData()}.
+   *
    * @param <ResultT> a type the function returns
+   * @param snapshotFunction a function to execute
    * @return the result of applying the given function to the database state
+   * @see #withBlockchainData(Function)
    */
-  <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction);
+  default <ResultT> ResultT withServiceData(Function<? super Prefixed, ResultT> snapshotFunction) {
+    return withBlockchainData(snapshotFunction.compose(BlockchainData::getExecutingServiceData));
+  }
+
+  /**
+   * Performs the given function with a snapshot of the current database state.
+   *
+   * @param <ResultT> a type the function returns
+   * @param snapshotFunction a function to execute
+   * @return the result of applying the given function to the database state
+   * @see #withServiceData(Function)
+   */
+  <ResultT> ResultT withBlockchainData(Function<BlockchainData, ResultT> snapshotFunction);
 
   /**
    * Returns the service public key of this node. The corresponding private key is used

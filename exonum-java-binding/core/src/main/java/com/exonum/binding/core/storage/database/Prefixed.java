@@ -28,8 +28,8 @@ import com.google.common.annotations.VisibleForTesting;
 /**
  * A prefixed database access. It uses a base Access, and adds an address resolution.
  *
- * <p>The Prefixed Access resolves the index addresses by prepending a namespace, followed by
- * a dot ('.'), to the {@linkplain IndexAddress#getName() name part} of the address.
+ * <p>The Prefixed Access resolves the index addresses by prepending a <em>namespace</em>, followed
+ * by a dot ('.'), to the {@linkplain IndexAddress#getName() name part} of the address.
  *
  * <p>This class is a native proxy of the {@code Prefixed} Rust Access.
  */

@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
@@ -54,13 +54,16 @@ class TimeSchemaProxyIntegrationTest {
 
   @Test
   void newInstanceFailsIfNoSuchService(@TempDir Path tmp) {
+    String otherService = "other-service";
     try (TestKit testkit = TestKit.builder()
         .withArtifactsDirectory(tmp)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, otherService, 10)
         .build()) {
-      Snapshot snapshot = testkit.getSnapshot();
+      BlockchainData blockchainData = testkit.getBlockchainData(otherService);
       String timeServiceName = "inactive-service";
       Exception e = assertThrows(IllegalArgumentException.class,
-          () -> TimeSchema.newInstance(snapshot, timeServiceName));
+          () -> TimeSchema.newInstance(blockchainData, timeServiceName));
 
       assertThat(e.getMessage()).containsIgnoringCase("No time service instance")
           .contains(timeServiceName);
@@ -69,13 +72,13 @@ class TimeSchemaProxyIntegrationTest {
 
   @Test
   void newInstanceFailsIfServiceOfOtherType() {
-    String serviceName = "inactive-service";
+    String serviceName = "other-service";
     try (TestKit testkit = TestKit.builder()
         .withArtifactsDirectory(ARTIFACT_DIR)
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
         .withService(ARTIFACT_ID, serviceName, 10)
         .build()) {
-      Snapshot snapshot = testkit.getSnapshot();
+      BlockchainData snapshot = testkit.getBlockchainData(serviceName);
       Exception e = assertThrows(IllegalArgumentException.class,
           () -> TimeSchema.newInstance(snapshot, serviceName));
 
@@ -97,8 +100,8 @@ class TimeSchemaProxyIntegrationTest {
         .withTimeService(timeServiceName, 10, timeProvider)
         .build()) {
       setUpConsolidatedTime(testkit);
-      Snapshot snapshot = testkit.getSnapshot();
-      TimeSchema timeSchema = TimeSchema.newInstance(snapshot, timeServiceName);
+      BlockchainData blockchainData = testkit.getBlockchainData(timeServiceName);
+      TimeSchema timeSchema = TimeSchema.newInstance(blockchainData, timeServiceName);
       assertThat(timeSchema.getTime().toOptional()).hasValue(EXPECTED_TIME);
     }
   }
@@ -157,8 +160,8 @@ class TimeSchemaProxyIntegrationTest {
     }
 
     private void testKitTest(Consumer<TimeSchema> test) {
-      Snapshot view = testKit.getSnapshot();
-      TimeSchema timeSchema = TimeSchema.newInstance(view, SERVICE_NAME);
+      BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+      TimeSchema timeSchema = TimeSchema.newInstance(blockchainData, SERVICE_NAME);
       test.accept(timeSchema);
     }
   }

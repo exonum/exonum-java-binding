@@ -24,7 +24,7 @@ import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.arti
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
@@ -46,8 +46,8 @@ class CryptocurrencySchemaIntegrationTest {
 
   @Test
   void walletHistoryNoRecords(TestKit testKit) {
-    Snapshot snapshot = testKit.getSnapshot();
-    CryptocurrencySchema schema = new CryptocurrencySchema(snapshot, SERVICE_NAME);
+    Prefixed serviceData = testKit.getServiceData(SERVICE_NAME);
+    CryptocurrencySchema schema = new CryptocurrencySchema(serviceData);
 
     assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
   }

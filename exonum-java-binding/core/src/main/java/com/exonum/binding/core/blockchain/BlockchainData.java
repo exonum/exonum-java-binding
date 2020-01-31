@@ -23,6 +23,7 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.runtime.DispatcherSchema;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.database.ReadonlyFork;
@@ -79,12 +80,12 @@ public final class BlockchainData extends AbstractNativeProxy {
    * Creates a BlockchainData for the service with the given name.
    *
    * @param baseAccess the base database access, must be a "RawAccess"
-   * @param instanceName a service instance name
+   * @param serviceName a service instance name
    */
   @VisibleForTesting
-  public static BlockchainData fromRawAccess(AbstractAccess baseAccess, String instanceName) {
+  public static BlockchainData fromRawAccess(AbstractAccess baseAccess, String serviceName) {
     Cleaner cleaner = baseAccess.getCleaner();
-    long bdNativeHandle = nativeCreate(baseAccess.getAccessNativeHandle(), instanceName);
+    long bdNativeHandle = nativeCreate(baseAccess.getAccessNativeHandle(), serviceName);
     return fromHandleInternal(bdNativeHandle, cleaner);
   }
 
@@ -110,10 +111,12 @@ public final class BlockchainData extends AbstractNativeProxy {
    *
    * <p>Only service data is accessible through the returned access. All indexes, initialized
    * through this access, are created in a namespace, separate from other services.
+   * The namespace is equal to the executing service {@linkplain ServiceInstanceSpec#getName()
+   * name}.
    */
   public Prefixed getExecutingServiceData() {
     // Since the base access (Fork) is unknown in the main use-case (BlockchainData
-    // received from  core), we must create the Prefixed access at most once so that index
+    // received from core), we must create the Prefixed access at most once so that index
     // pooling works for read-write-based Accesses.
     if (executingServiceAccess == null) {
       long nativeHandle = getNativeHandle();
@@ -135,10 +138,12 @@ public final class BlockchainData extends AbstractNativeProxy {
    *
    * <p>Only service data is accessible through the returned access.
    *
-   * @param instanceName the name of the service instance to which data to provide access
+   * <p>The namespace is equal to the service instance name.
+   *
+   * @param serviceName the name of the service instance to which data to provide access
    */
-  public Optional<Prefixed> findServiceData(String instanceName) {
-    long prefixedHandle = nativeFindServiceData(getNativeHandle(), instanceName);
+  public Optional<Prefixed> findServiceData(String serviceName) {
+    long prefixedHandle = nativeFindServiceData(getNativeHandle(), serviceName);
     if (prefixedHandle == NativeHandle.INVALID_NATIVE_HANDLE) {
       return Optional.empty();
     } else {
@@ -151,7 +156,7 @@ public final class BlockchainData extends AbstractNativeProxy {
    * Returns a valid handle to a Prefixed access for the data of service with the given name;
    * or 0 (nullptr) if no such service exists.
    */
-  private static native long nativeFindServiceData(long bdNativeHandle, String instanceName);
+  private static native long nativeFindServiceData(long bdNativeHandle, String serviceName);
 
   /**
    * Returns the blockchain schema (aka Exonum core schema).

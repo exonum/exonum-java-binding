@@ -17,6 +17,8 @@
 package com.exonum.binding.core.service;
 
 import com.exonum.binding.core.blockchain.Block;
+import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.transaction.Transaction;
 
 /**
  * A schema of the collections (a.k.a. indices) of a service.
@@ -29,7 +31,10 @@ import com.exonum.binding.core.blockchain.Block;
  * and Precommit messages.
  *
  * <p>Exonum starts aggregating a service collection state hash once it is <em>initialized</em>:
- * created for the first time with a {@link com.exonum.binding.core.storage.database.Fork}.
+ * created for the first time with a read-write
+ * {@link com.exonum.binding.core.blockchain.BlockchainData} (e.g., in a
+ * {@linkplain Service#initialize(BlockchainData, Configuration) service constructor},
+ * or in a {@linkplain Transaction}).
  *
  * <p>Please note that if the service does not use any Merkelized collections,
  * the framework will not be able to verify that its transactions cause the same

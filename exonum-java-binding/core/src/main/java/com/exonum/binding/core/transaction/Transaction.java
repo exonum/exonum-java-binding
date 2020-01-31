@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
  *       Protobuf messages are deserialized using a {@code #parseFrom(byte[])} method
  *   <li>transaction execution context as {@link TransactionContext}. It allows to access
  *       the information about this transaction and modify the blockchain state
- *       through the included database fork.
+ *       through the included database access object.
  * </ol>
  *
  * <h3>Exceptions</h3>

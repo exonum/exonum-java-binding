@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.TestKit;
@@ -61,8 +62,8 @@ class IncrementCounterTxTest {
     testKit.createBlockWithTransactions(incrementTx);
 
     // Check the counter has an incremented value
-    Snapshot view = testKit.getSnapshot();
-    QaSchema schema = new QaSchema(view, QA_SERVICE_NAME);
+    BlockchainData view = testKit.getBlockchainData(QA_SERVICE_NAME);
+    QaSchema schema = new QaSchema(view);
     MapIndex<HashCode, Long> counters = schema.counters();
     long expectedValue = 1;
 

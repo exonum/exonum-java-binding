@@ -31,7 +31,6 @@ import static com.exonum.binding.testkit.TestKitTestUtils.checkIfServiceEnabled;
 import static com.exonum.binding.testkit.TestKitTestUtils.createInvalidArtifact;
 import static com.exonum.binding.testkit.TestKitTestUtils.createTestService2Artifact;
 import static com.exonum.binding.testkit.TestKitTestUtils.createTestServiceArtifact;
-import static com.exonum.binding.testkit.TestService.BODY_CHARSET;
 import static com.exonum.binding.testkit.TestService.TEST_TRANSACTION_ID;
 import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
@@ -47,14 +46,17 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
+import com.exonum.binding.testkit.Transactions.PutTransactionArgs;
 import com.exonum.binding.time.TimeSchema;
 import com.exonum.core.messages.Blockchain.Config;
 import com.exonum.core.messages.Blockchain.ValidatorKeys;
@@ -227,10 +229,10 @@ class TestKitTest {
         .build()) {
       // Check that configuration value is used in initialization
       Snapshot view = testKit.getSnapshot();
-      TestSchema testSchema = new TestSchema(view, SERVICE_ID);
-      ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
-      Map<HashCode, String> testMap = toMap(testProofMap);
-      Map<HashCode, String> expected = ImmutableMap.of(
+      TestSchema testSchema = new TestSchema(view);
+      ProofMapIndexProxy<String, String> testProofMap = testSchema.testMap();
+      Map<String, String> testMap = toMap(testProofMap);
+      Map<String, String> expected = ImmutableMap.of(
           TestService.INITIAL_ENTRY_KEY, configurationValue);
       assertThat(testMap).isEqualTo(expected);
     }
@@ -297,10 +299,10 @@ class TestKitTest {
     checkIfServiceEnabled(testKit, serviceName, serviceId);
 
     // Check that initialization changed database state
-    TestSchema testSchema = new TestSchema(view, serviceId);
-    ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
-    Map<HashCode, String> testMap = toMap(testProofMap);
-    Map<HashCode, String> expected = ImmutableMap.of(
+    TestSchema testSchema = new TestSchema(view);
+    ProofMapIndexProxy<String, String> testProofMap = testSchema.testMap();
+    Map<String, String> testMap = toMap(testProofMap);
+    Map<String, String> expected = ImmutableMap.of(
         TestService.INITIAL_ENTRY_KEY, CONFIGURATION_VALUE);
     assertThat(testMap).isEqualTo(expected);
   }
@@ -499,15 +501,18 @@ class TestKitTest {
         snapshot, block, message, message2));
   }
 
-  private TransactionMessage constructTestTransactionMessage(String payload) {
-    return constructTestTransactionMessage(payload, KEY_PAIR);
+  private TransactionMessage constructTestTransactionMessage(String key) {
+    return constructTestTransactionMessage(key, KEY_PAIR);
   }
 
-  private TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
+  private TransactionMessage constructTestTransactionMessage(String key, KeyPair keyPair) {
     return TransactionMessage.builder()
         .serviceId(SERVICE_ID)
         .transactionId(TEST_TRANSACTION_ID)
-        .payload(payload.getBytes(BODY_CHARSET))
+        .payload(
+            PutTransactionArgs.newBuilder()
+                .setKey(key)
+                .build())
         .sign(keyPair);
   }
 
@@ -536,7 +541,7 @@ class TestKitTest {
     TransactionMessage message = TransactionMessage.builder()
         .serviceId(unknownServiceId)
         .transactionId(TEST_TRANSACTION_ID)
-        .payload("Test message".getBytes(BODY_CHARSET))
+        .payload(new byte[0])
         .sign(KEY_PAIR);
     Exception e = assertThrows(Exception.class,
         () -> testKit.createBlockWithTransactions(message));
@@ -591,17 +596,16 @@ class TestKitTest {
       // processed
       testKit.createBlock();
       testKit.createBlock();
-      testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view, TIME_SERVICE_NAME);
-        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-        assertThat(consolidatedTime).contains(TIME);
+      // Check the time after the first processed time transaction
+      BlockchainData blockchainData1 = testKit.getBlockchainData(TIME_SERVICE_NAME);
+      TimeSchema timeSchema1 = TimeSchema.newInstance(blockchainData1, TIME_SERVICE_NAME);
+      Optional<ZonedDateTime> consolidatedTime = timeSchema1.getTime().toOptional();
+      assertThat(consolidatedTime).contains(TIME);
+      // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
+      // public key and time provider's time
+      checkValidatorsTimes(timeSchema1, testKit, TIME);
 
-        // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
-        // public key and time provider's time
-        checkValidatorsTimes(timeSchema, testKit, TIME);
-      });
-
-      // Update time in time provider
+      // Update the time in time provider
       ZonedDateTime newTime = TIME.plusDays(1);
       timeProvider.setTime(newTime);
       // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
@@ -609,11 +613,11 @@ class TestKitTest {
       // processed
       testKit.createBlock();
       testKit.createBlock();
-      testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view, TIME_SERVICE_NAME);
-        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-        assertThat(consolidatedTime).contains(newTime);
-      });
+      // Check the time after the 3rd time transaction which uses the new time
+      BlockchainData blockchainData2 = testKit.getBlockchainData(TIME_SERVICE_NAME);
+      TimeSchema timeSchema = TimeSchema.newInstance(blockchainData2, TIME_SERVICE_NAME);
+      Optional<ZonedDateTime> consolidatedTime2 = timeSchema.getTime().toOptional();
+      assertThat(consolidatedTime2).contains(newTime);
     }
   }
 
@@ -647,6 +651,44 @@ class TestKitTest {
     assertThrows(exceptionType, view2::getAccessNativeHandle);
   }
 
+  @Test
+  void getServiceData(TestKit testKit) {
+    Prefixed serviceData = testKit.getServiceData(SERVICE_NAME);
+    // Check the service has the initial value in its schema
+    TestSchema testSchema = new TestSchema(serviceData);
+    Map<String, String> testMap = toMap(testSchema.testMap());
+    assertThat(testMap).containsKey(TestService.INITIAL_ENTRY_KEY);
+  }
+
+  @Test
+  void getServiceDataUnknownService(TestKit testKit) {
+    String name = "unknown-service";
+    // Check it is not possible to access unknown service data
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> testKit.getServiceData(name));
+    assertThat(e).hasMessageContaining(name);
+  }
+
+  @Test
+  void getBlockchainData(TestKit testKit) {
+    BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+    // Check the blockchain data provides access to the service data:
+    // the service must have the initial value in its schema.
+    Prefixed serviceData = blockchainData.getExecutingServiceData();
+    TestSchema testSchema = new TestSchema(serviceData);
+    Map<String, String> testMap = toMap(testSchema.testMap());
+    assertThat(testMap).containsKey(TestService.INITIAL_ENTRY_KEY);
+  }
+
+  @Test
+  void getBlockchainDataUnknownService(TestKit testKit) {
+    String name = "unknown-service";
+    // Check it is not possible to access unknown service data
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> testKit.getBlockchainData(name));
+    assertThat(e).hasMessageContaining(name);
+  }
+
   private void checkValidatorsTimes(
       TimeSchema timeSchema, TestKit testKit, ZonedDateTime expectedTime) {
     Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
@@ -656,7 +698,7 @@ class TestKitTest {
     assertThat(validatorsTimes).isEqualTo(expected);
   }
 
-  private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
+  private static <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
     return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 }

@@ -16,7 +16,6 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.storage.database.Fork;
 import com.google.protobuf.MessageLite;
 
 /**
@@ -25,13 +24,13 @@ import com.google.protobuf.MessageLite;
  * <p>Network administrators agree on and pass
  * the configuration parameters as a service-specific protobuf message when adding
  * that service instance to the network. After Exonum starts the service, it
- * {@linkplain Service#initialize(Fork, Configuration) passes the configuration parameters}
- * to the newly created service instance.
+ * {@linkplain Service#initialize(com.exonum.binding.core.blockchain.BlockchainData, Configuration)
+ * passes the configuration parameters} to the newly created service instance.
  *
  * <p>Reconfiguration of a started service may be implemented with a supervisor service
  * and {@link Configurable} interface.
  *
- * @see Service#initialize(Fork, Configuration)
+ * @see Service#initialize(com.exonum.binding.core.blockchain.BlockchainData, Configuration)
  * @see Configurable
  */
 public interface Configuration {

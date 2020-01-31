@@ -48,6 +48,7 @@ final class RuntimeModule extends PrivateModule {
         .toInstance(dependencyReferenceClasses);
     bind(ServiceLoader.class).to(Pf4jServiceLoader.class);
     bind(ServicesFactory.class).to(GuiceServicesFactory.class);
+    bind(BlockchainDataFactory.class).toInstance(new BlockchainDataFactory() {});
     bind(PluginManager.class).to(JarPluginManager.class);
   }
 }

@@ -34,13 +34,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
      - [`Blockchain`][blockchain-proofs].
 - `ProofEntryIndexProxy` collection.
 - Transaction precondition utility methods,
-  see `com.exonum.binding.core.transaction.ExecutionPreconditions`.(#1351)
+  see `com.exonum.binding.core.transaction.ExecutionPreconditions`. (#1351)
 - `supervisor-mode` CLI parameter added for `generate-template` command. It
   allows to configure the mode of the Supervisor service. Possible values are
   "simple" and "decentralized". (#1361)
 - Support of service instances lifecycle: they can be activated, stopped and resumed now.
   Also, service instance artifacts can be upgraded before resuming which allows services
   API update, add new service transactions, synchronous data migration etc. (#1358, #1372)
+- `BlockchainData` — an object providing access to all categories of persistent data
+  stored in the database: the executing service data, other services’ data, 
+  Exonum Core data. BlockchainData is a service-specific object — it remembers
+  the service to which it is provided and allows modification only to the data
+  of that service. The service data is automatically isolated via namespaces,
+  with a service name followed by a dot as a prefix 
+  (see `BlockchainData#getExecutingServiceData`). (#1393)
+- `Prefixed` and `ReadonlyFork` database Accesses. (#1382, #1385)
+
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 
@@ -100,6 +109,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     explicitly with `StandardSerializers.protobuf`.
     - To create _index groups_ (aka families), pass a *group address*:
     `IndexAddress.valueOf(String, byte[])`. (#1374)
+- `AbstractService#createDataSchema` — just use the schema constructor/factory
+  method, as passing the instance name is no longer required with the `Prefixed`
+  DB Access. (#1393)
 
 ## 0.9.0-rc2 - 2019-12-17
 

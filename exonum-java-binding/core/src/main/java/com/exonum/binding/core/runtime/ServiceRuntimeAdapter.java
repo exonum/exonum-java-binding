@@ -18,13 +18,9 @@ package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.service.BlockCommittedEvent;
-import com.exonum.binding.core.service.BlockCommittedEventImpl;
-import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.NodeProxy;
-import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.core.messages.Runtime.ArtifactId;
@@ -65,10 +61,10 @@ public class ServiceRuntimeAdapter {
    * Initializes the runtime.
    *
    * @param nodeNativeHandle the native handle to the Node object
-   * @see ServiceRuntime#initialize(Node)
+   * @see ServiceRuntime#initialize(NodeProxy)
    */
   void initialize(long nodeNativeHandle) {
-    Node node = new NodeProxy(nodeNativeHandle);
+    NodeProxy node = new NodeProxy(nodeNativeHandle);
     serviceRuntime.initialize(node);
   }
 
@@ -128,7 +124,7 @@ public class ServiceRuntimeAdapter {
   /**
    * Starts registration of a new service instance with the given specification.
    *
-   * @param forkHandle a handle to a native fork object
+   * @param bdNativeHandle a handle to a native BlockchainData object
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
    * @param configuration the service initial configuration parameters as a serialized protobuf
@@ -137,15 +133,16 @@ public class ServiceRuntimeAdapter {
    * @throws ExecutionException if the service initialization failed
    * @throws UnexpectedExecutionException if the service initialization failed
    *     with an unexpected exception
-   * @see ServiceRuntime#initiateAddingService(Fork, ServiceInstanceSpec, byte[])
+   * @see ServiceRuntime#initiateAddingService(com.exonum.binding.core.blockchain.BlockchainData,
+   *     ServiceInstanceSpec, byte[])
    */
-  void initiateAddingService(long forkHandle, byte[] instanceSpec, byte[] configuration)
+  void initiateAddingService(long bdNativeHandle, byte[] instanceSpec, byte[] configuration)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Fork fork = accessFactory.createFork(forkHandle, cleaner);
+      BlockchainData blockchainData = accessFactory.createBlockchainData(bdNativeHandle, cleaner);
       ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
 
-      serviceRuntime.initiateAddingService(fork, javaInstanceSpec, configuration);
+      serviceRuntime.initiateAddingService(blockchainData, javaInstanceSpec, configuration);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
@@ -154,18 +151,19 @@ public class ServiceRuntimeAdapter {
   /**
    * Starts resuming a service with the given specification.
    *
-   * @param forkHandle a handle to a native fork object
+   * @param bdHandle a handle to a native BlockchainData object
    * @param instanceSpec the service instance specification as a serialized {@link InstanceSpec}
    *     protobuf message
    * @param arguments the service arguments as a serialized protobuf message
-   * @see ServiceRuntime#initiateResumingService(Fork, ServiceInstanceSpec, byte[])
+   * @see ServiceRuntime#initiateResumingService(com.exonum.binding.core.blockchain.BlockchainData,
+   *     ServiceInstanceSpec, byte[])
    */
-  void initiateResumingService(long forkHandle, byte[] instanceSpec, byte[] arguments)
+  void initiateResumingService(long bdHandle, byte[] instanceSpec, byte[] arguments)
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Fork fork = accessFactory.createFork(forkHandle, cleaner);
+      BlockchainData blockchainData = accessFactory.createBlockchainData(bdHandle, cleaner);
       ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
-      serviceRuntime.initiateResumingService(fork, javaInstanceSpec, arguments);
+      serviceRuntime.initiateResumingService(blockchainData, javaInstanceSpec, arguments);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
@@ -214,7 +212,7 @@ public class ServiceRuntimeAdapter {
    * @param interfaceName the name of the interface in which the transaction is defined
    * @param txId the transaction type identifier within the service
    * @param arguments the transaction arguments
-   * @param forkNativeHandle a handle to a native fork object
+   * @param bdNativeHandle a handle to a native BlockchainData object
    * @param callerServiceId the id of the service which invoked the transaction (in case of
    *      inner transactions); or 0 when the caller is an external message
    * @param txMessageHash the hash of the transaction message
@@ -223,19 +221,19 @@ public class ServiceRuntimeAdapter {
    * @throws UnexpectedExecutionException if the transaction execution failed
    *     with an unexpected exception
    * @throws IllegalArgumentException if any argument is not valid
-   * @see ServiceRuntime#executeTransaction(int, String, int, byte[], Fork, int, HashCode,
-   *      PublicKey)
+   * @see ServiceRuntime#executeTransaction(int, String, int, byte[], BlockchainData, int, HashCode,
+   *     PublicKey)
    */
   void executeTransaction(int serviceId, String interfaceName, int txId, byte[] arguments,
-      long forkNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)
+      long bdNativeHandle, int callerServiceId, byte[] txMessageHash, byte[] authorPublicKey)
       throws CloseFailuresException {
 
     try (Cleaner cleaner = new Cleaner("executeTransaction")) {
-      Fork fork = accessFactory.createFork(forkNativeHandle, cleaner);
+      BlockchainData blockchainData = accessFactory.createBlockchainData(bdNativeHandle, cleaner);
       HashCode hash = HashCode.fromBytes(txMessageHash);
       PublicKey authorPk = PublicKey.fromBytes(authorPublicKey);
 
-      serviceRuntime.executeTransaction(serviceId, interfaceName, txId, arguments, fork,
+      serviceRuntime.executeTransaction(serviceId, interfaceName, txId, arguments, blockchainData,
           callerServiceId, hash, authorPk);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
@@ -243,20 +241,19 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
-   * Performs the after transactions operation for services in this runtime.
+   * Performs the after transactions operation for the service in this runtime.
    *
-   * @param forkHandle a handle to the native fork object, which must support checkpoints
-   *                   and rollbacks
+   * @param bdNativeHandle a handle to the native BlockchainData object
    * @throws ExecutionException if the transaction execution failed
    * @throws UnexpectedExecutionException if the transaction execution failed
    *     with an unexpected exception
    * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#afterTransactions(int, Fork)
+   * @see ServiceRuntime#afterTransactions(int, com.exonum.binding.core.blockchain.BlockchainData)
    */
-  void afterTransactions(int serviceId, long forkHandle) throws CloseFailuresException {
+  void afterTransactions(int serviceId, long bdNativeHandle) throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner("afterTransactions")) {
-      Fork fork = accessFactory.createFork(forkHandle, cleaner);
-      serviceRuntime.afterTransactions(serviceId, fork);
+      BlockchainData blockchainData = accessFactory.createBlockchainData(bdNativeHandle, cleaner);
+      serviceRuntime.afterTransactions(serviceId, blockchainData);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }
@@ -269,7 +266,7 @@ public class ServiceRuntimeAdapter {
    * @param validatorId a validator id. Negative if this node is not a validator
    * @param height the current blockchain height
    * @throws CloseFailuresException if there was a failure in destroying some native peers
-   * @see ServiceRuntime#afterCommit(BlockCommittedEvent)
+   * @see ServiceRuntime#afterCommit(Snapshot, OptionalInt, long)
    */
   void afterCommit(long snapshotHandle, int validatorId, long height)
       throws CloseFailuresException {
@@ -278,10 +275,7 @@ public class ServiceRuntimeAdapter {
       OptionalInt optionalValidatorId = validatorId >= 0
           ? OptionalInt.of(validatorId)
           : OptionalInt.empty();
-      BlockCommittedEvent event =
-          BlockCommittedEventImpl.valueOf(snapshot, optionalValidatorId, height);
-
-      serviceRuntime.afterCommit(event);
+      serviceRuntime.afterCommit(snapshot, optionalValidatorId, height);
     } catch (CloseFailuresException e) {
       handleCloseFailure(e);
     }

@@ -33,22 +33,18 @@ import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
  */
 public final class CryptocurrencySchema implements Schema {
 
-  /** A namespace of cryptocurrency service collections. */
-  private final String namespace;
-
+  private static final IndexAddress WALLETS_ADDRESS = IndexAddress.valueOf("wallets");
   private final Access access;
 
-  public CryptocurrencySchema(Access access, String serviceName) {
+  public CryptocurrencySchema(Access access) {
     this.access = checkNotNull(access);
-    this.namespace = serviceName + ".";
   }
 
   /**
    * Returns a proof map of wallets. Note that this is a proof map that uses non-hashed keys.
    */
   public ProofMapIndexProxy<PublicKey, Wallet> wallets() {
-    String name = fullIndexName("wallets");
-    return access.getRawProofMap(IndexAddress.valueOf(name), StandardSerializers.publicKey(),
+    return access.getRawProofMap(WALLETS_ADDRESS, StandardSerializers.publicKey(),
         WalletSerializer.INSTANCE);
   }
 
@@ -60,12 +56,8 @@ public final class CryptocurrencySchema implements Schema {
    * @param walletId wallet address
    */
   public ListIndexProxy<HashCode> transactionsHistory(PublicKey walletId) {
-    String name = fullIndexName("transactions_history");
+    String name = "transactions_history";
     IndexAddress address = IndexAddress.valueOf(name, walletId.toBytes());
     return access.getList(address, StandardSerializers.hash());
-  }
-
-  private String fullIndexName(String name) {
-    return namespace + name;
   }
 }

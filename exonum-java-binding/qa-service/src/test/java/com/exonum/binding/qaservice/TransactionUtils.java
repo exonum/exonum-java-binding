@@ -21,7 +21,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.TransactionContext;
 
@@ -36,9 +36,9 @@ final class TransactionUtils {
   /**
    * Returns new context with default values for a given fork.
    */
-  static TransactionContext.Builder newContext(Fork fork) {
+  static TransactionContext.Builder newContext(BlockchainData fork) {
     return TransactionContext.builder()
-        .fork(fork)
+        .blockchainData(fork)
         .txMessageHash(DEFAULT_HASH)
         .authorPk(DEFAULT_AUTHOR_KEY);
   }

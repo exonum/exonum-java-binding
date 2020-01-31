@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import java.util.OptionalInt;
 
 /**
@@ -40,8 +40,8 @@ public interface BlockCommittedEvent {
   long getHeight();
 
   /**
-   * Returns the current database snapshot. It is immutable and represents the database state
-   * as of the block at the current {@linkplain #getHeight() height}.
+   * Returns the current database snapshot for the executing service. It is immutable and represents
+   * the database state as of the block at the current {@linkplain #getHeight() height}.
    */
-  Snapshot getSnapshot();
+  BlockchainData getSnapshot();
 }

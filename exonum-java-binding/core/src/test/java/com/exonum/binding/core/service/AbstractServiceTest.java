@@ -17,11 +17,9 @@
 package com.exonum.binding.core.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
-import com.exonum.binding.core.storage.database.Access;
 import io.vertx.ext.web.Router;
 import org.junit.jupiter.api.Test;
 
@@ -48,11 +46,6 @@ class AbstractServiceTest {
 
     ServiceUnderTest(ServiceInstanceSpec instanceSpec) {
       super(instanceSpec);
-    }
-
-    @Override
-    protected Schema createDataSchema(Access access) {
-      return mock(Schema.class);
     }
 
     @Override

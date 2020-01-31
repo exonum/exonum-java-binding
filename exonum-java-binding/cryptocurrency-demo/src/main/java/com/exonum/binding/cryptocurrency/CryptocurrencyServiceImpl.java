@@ -31,10 +31,10 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -65,12 +65,6 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   }
 
   @Override
-  protected CryptocurrencySchema createDataSchema(Access access) {
-    String name = getName();
-    return new CryptocurrencySchema(access, name);
-  }
-
-  @Override
   public void createPublicApiHandlers(Node node, Router router) {
     this.node = node;
 
@@ -83,8 +77,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public Optional<Wallet> getWallet(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((access) -> {
-      CryptocurrencySchema schema = createDataSchema(access);
+    return node.withServiceData(serviceData -> {
+      CryptocurrencySchema schema = new CryptocurrencySchema(serviceData);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       return Optional.ofNullable(wallets.get(ownerKey));
@@ -95,10 +89,10 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public List<HistoryEntity> getWalletHistory(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot(access -> {
-      CryptocurrencySchema schema = createDataSchema(access);
+    return node.withBlockchainData(blockchainData -> {
+      CryptocurrencySchema schema = createDataSchema(blockchainData);
       ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
-      Blockchain blockchain = Blockchain.newInstance(access);
+      Blockchain blockchain = blockchainData.getBlockchain();
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
 
       return walletHistory.stream()
@@ -113,8 +107,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context) {
     PublicKey ownerPublicKey = context.getAuthorPk();
 
-    CryptocurrencySchema schema =
-        new CryptocurrencySchema(context.getFork(), context.getServiceName());
+    CryptocurrencySchema schema = createDataSchema(context.getBlockchainData());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
     checkExecution(!wallets.containsKey(ownerPublicKey), WALLET_ALREADY_EXISTS.errorCode);
@@ -138,8 +131,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     PublicKey toWallet = toPublicKey(arguments.getToWallet());
     checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
 
-    CryptocurrencySchema schema =
-        new CryptocurrencySchema(context.getFork(), context.getServiceName());
+    CryptocurrencySchema schema = createDataSchema(context.getBlockchainData());
     ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
     checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
     checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
@@ -156,6 +148,10 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     HashCode messageHash = context.getTransactionMessageHash();
     schema.transactionsHistory(fromWallet).add(messageHash);
     schema.transactionsHistory(toWallet).add(messageHash);
+  }
+
+  private CryptocurrencySchema createDataSchema(BlockchainData blockchainData) {
+    return new CryptocurrencySchema(blockchainData.getExecutingServiceData());
   }
 
   private static PublicKey toPublicKey(ByteString s) {

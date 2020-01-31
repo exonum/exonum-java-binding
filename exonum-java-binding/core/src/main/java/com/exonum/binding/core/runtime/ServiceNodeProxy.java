@@ -21,21 +21,26 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
 
 /**
- * Node decorator which can restrict an access to the node by calling {@link #close()} method.
+ * NodeProxy adapter for a particular service.
  */
-class MultiplexingNodeDecorator implements Node {
+class ServiceNodeProxy implements Node {
 
-  private final Node node;
+  private final NodeProxy node;
+  private final BlockchainDataFactory blockchainDataFactory;
+  private final String instanceName;
   private boolean closed;
 
-  MultiplexingNodeDecorator(Node node) {
+  ServiceNodeProxy(NodeProxy node, BlockchainDataFactory blockchainDataFactory,
+      String instanceName) {
     this.node = checkNotNull(node);
+    this.blockchainDataFactory = blockchainDataFactory;
+    this.instanceName = instanceName;
     this.closed = false;
   }
 
@@ -45,8 +50,9 @@ class MultiplexingNodeDecorator implements Node {
   }
 
   @Override
-  public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
-    return node().withSnapshot(snapshotFunction);
+  public <ResultT> ResultT withBlockchainData(Function<BlockchainData, ResultT> snapshotFunction) {
+    return node().withSnapshot(snapshotFunction
+        .compose(snapshot -> blockchainDataFactory.fromRawAccess(snapshot, instanceName)));
   }
 
   @Override
@@ -56,7 +62,7 @@ class MultiplexingNodeDecorator implements Node {
 
   /**
    * Closes an access to the node. After calling this method subsequent calling
-   * {@link #submitTransaction(RawTransaction)} or {@link #withSnapshot(Function)} methods
+   * {@link #submitTransaction(RawTransaction)} or {@link #withBlockchainData(Function)} methods
    * will cause {@link IllegalStateException}.
    */
   @Override
@@ -64,7 +70,7 @@ class MultiplexingNodeDecorator implements Node {
     this.closed = true;
   }
 
-  private Node node() {
+  private NodeProxy node() {
     checkState(!closed, "Node access is closed");
     return node;
   }

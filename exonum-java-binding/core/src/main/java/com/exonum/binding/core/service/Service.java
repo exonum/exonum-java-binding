@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.transaction.ExecutionException;
 import io.vertx.ext.web.Router;
 
@@ -40,7 +40,8 @@ public interface Service {
    * or save all or some configuration parameters as is for later retrieval in transactions
    * and/or read requests.
    *
-   * @param fork a database fork to apply changes to. Not valid after this method returns
+   * @param blockchainData blockchain data accessor for this service. Not valid after this method
+   *     returns
    * @param configuration the service configuration parameters
    * @throws ExecutionException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
@@ -49,7 +50,7 @@ public interface Service {
    *     the registry of call errors}
    * @see Configurable
    */
-  default void initialize(Fork fork, Configuration configuration) {
+  default void initialize(BlockchainData blockchainData, Configuration configuration) {
     // No configuration
   }
 
@@ -65,12 +66,13 @@ public interface Service {
    * when the block is committed.
    * <!--TODO: Add a link to the migration procedure -->
    *
-   * @param fork a database fork to apply changes to. Not valid after this method returns
+   * @param blockchainData blockchain data accessor for this service. Not valid after this method
+   *     returns
    * @param arguments the service arguments
    * @throws ExecutionException if the arguments are not valid (e.g.,
    *     malformed, or do not meet the preconditions)
    */
-  default void resume(Fork fork, byte[] arguments) {
+  default void resume(BlockchainData blockchainData, byte[] arguments) {
     // No actions by default
   }
 
@@ -119,11 +121,13 @@ public interface Service {
    * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
    * the registry of call errors} with appropriate error kinds.
    *
+   * @param blockchainData blockchain data accessor for this service. Not valid after this method
+   *     returns
    * @throws ExecutionException if an error occurs during the method execution;
    *     it is saved as a call error of kind "service". Any other exceptions
    *     are considered unexpected. They are saved with kind "unexpected".
    */
-  default void afterTransactions(Fork fork) {}
+  default void afterTransactions(BlockchainData blockchainData) {}
 
   /**
    * Handles read-only block commit event. This handler is an optional callback method which is

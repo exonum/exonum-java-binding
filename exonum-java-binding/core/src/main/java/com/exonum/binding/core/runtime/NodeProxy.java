@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 The Exonum Team
+ * Copyright 2020 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.service;
+package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
  * An Exonum node context. Allows to add transactions to Exonum network
  * and get a snapshot of the database state.
  */
-public final class NodeProxy extends AbstractCloseableNativeProxy implements Node {
+public final class NodeProxy extends AbstractCloseableNativeProxy {
 
   static {
     LibraryLoader.load();
@@ -49,7 +49,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
     super(nativeHandle, false);
   }
 
-  @Override
   public HashCode submitTransaction(RawTransaction rawTransaction) {
     byte[] payload = rawTransaction.getPayload();
     int serviceId = rawTransaction.getServiceId();
@@ -71,7 +70,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
   private static native byte[] nativeSubmit(long nodeHandle, byte[] payload, int serviceId,
       int transactionId);
 
-  @Override
   public <ResultT> ResultT withSnapshot(Function<Snapshot, ResultT> snapshotFunction) {
     try (Cleaner cleaner = new Cleaner("NodeProxy#withSnapshot")) {
       long nodeNativeHandle = getNativeHandle();
@@ -86,7 +84,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy implements Nod
 
   private native long nativeCreateSnapshot(long nativeHandle);
 
-  @Override
   public PublicKey getPublicKey() {
     byte[] publicKey = nativeGetPublicKey(getNativeHandle());
     return PublicKey.fromBytes(publicKey);

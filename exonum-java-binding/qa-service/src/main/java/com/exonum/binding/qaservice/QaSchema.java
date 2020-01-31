@@ -16,12 +16,15 @@
 
 package com.exonum.binding.qaservice;
 
+import static com.exonum.binding.common.serialization.StandardSerializers.hash;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static com.exonum.binding.common.serialization.StandardSerializers.uint64;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
@@ -30,28 +33,27 @@ import com.exonum.binding.time.TimeSchema;
 
 /**
  * A schema of the QA service.
- *
- * <p>Has two collections:
- * (a) values of the counters (Merkelized),
- * (b) names of the counters.
  */
 public final class QaSchema implements Schema {
 
-  private final Access access;
-  /** A namespace of QA service collections. */
-  private final String namespace;
+  private static final IndexAddress TIME_ORACLE_NAME_ADDRESS =
+      IndexAddress.valueOf("time_oracle_name");
+  private static final IndexAddress COUNTERS_ADDRESS = IndexAddress.valueOf("counters");
+  private static final IndexAddress COUNTER_NAMES_ADDRESS = IndexAddress.valueOf("counterNames");
 
-  public QaSchema(Access access, String serviceName) {
-    this.access = checkNotNull(access);
-    namespace = serviceName;
+  private final BlockchainData blockchainData;
+  private final Prefixed access;
+
+  public QaSchema(BlockchainData blockchainData) {
+    this.blockchainData = checkNotNull(blockchainData);
+    this.access = blockchainData.getExecutingServiceData();
   }
 
   /**
    * Returns the index containing the name of the time oracle to use.
    */
   public ProofEntryIndexProxy<String> timeOracleName() {
-    IndexAddress address = fullIndexAddress("time_oracle_name");
-    return access.getProofEntry(address, StandardSerializers.string());
+    return access.getProofEntry(TIME_ORACLE_NAME_ADDRESS, string());
   }
 
   /**
@@ -59,33 +61,26 @@ public final class QaSchema implements Schema {
    * {@link #timeOracleName()} must be non-empty.
    */
   public TimeSchema timeSchema() {
-    return TimeSchema.newInstance(access, timeOracleName().get());
+    return TimeSchema.newInstance(blockchainData, timeOracleName().get());
   }
 
   /**
    * Returns a proof map of counter values. Note that this is a proof map that uses non-hashed keys.
    */
   public ProofMapIndexProxy<HashCode, Long> counters() {
-    IndexAddress address = fullIndexAddress("counters");
-    return access.getRawProofMap(address, StandardSerializers.hash(), StandardSerializers.uint64());
+    return access.getRawProofMap(COUNTERS_ADDRESS, hash(), uint64());
   }
 
   /**
    * Returns a map of counter names.
    */
   public MapIndex<HashCode, String> counterNames() {
-    IndexAddress address = fullIndexAddress("counterNames");
-    return access.getMap(address, StandardSerializers.hash(), StandardSerializers.string());
+    return access.getMap(COUNTER_NAMES_ADDRESS, hash(), string());
   }
 
   /** Clears all collections of the service. */
   public void clearAll() {
     counters().clear();
     counterNames().clear();
-  }
-
-  private IndexAddress fullIndexAddress(String name) {
-    String fullName = namespace + "." + name;
-    return IndexAddress.valueOf(fullName);
   }
 }
