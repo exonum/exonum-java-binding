@@ -26,6 +26,8 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.DispatcherSchema;
+import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.database.TemporaryDb;
@@ -34,10 +36,15 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Runtime.InstanceState;
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.function.BiFunction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @Disabled("ECR-4169")
 class BlockchainDataIntegrationTest {
@@ -87,10 +94,11 @@ class BlockchainDataIntegrationTest {
     assertThat(entry2.get()).isEqualTo("V1");
   }
 
-  @Test
-  void getBlockchain() {
-    Fork fork = db.createFork(cleaner);
-    BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, "test-service");
+  @ParameterizedTest
+  @MethodSource("accessConstructors")
+  void getBlockchain(BiFunction<Database, Cleaner, AbstractAccess> accessCtor) {
+    AbstractAccess access = accessCtor.apply(db, cleaner);
+    BlockchainData blockchainData = BlockchainData.fromRawAccess(access, "test-service");
 
     Blockchain blockchain = blockchainData.getBlockchain();
     // Check it works
@@ -102,10 +110,11 @@ class BlockchainDataIntegrationTest {
     assertThrows(UnsupportedOperationException.class, () -> blocks.put(blockHash, block));
   }
 
-  @Test
-  void getDispatcherSchema() {
-    Fork fork = db.createFork(cleaner);
-    BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, "test-service");
+  @ParameterizedTest
+  @MethodSource("accessConstructors")
+  void getDispatcherSchema(BiFunction<Database, Cleaner, AbstractAccess> accessCtor) {
+    AbstractAccess access = accessCtor.apply(db, cleaner);
+    BlockchainData blockchainData = BlockchainData.fromRawAccess(access, "test-service");
 
     DispatcherSchema dispatcherSchema = blockchainData.getDispatcherSchema();
     // Check it works
@@ -115,5 +124,12 @@ class BlockchainDataIntegrationTest {
     // Check it is readonly
     assertThrows(UnsupportedOperationException.class,
         () -> instances.put("test-service-2", InstanceState.getDefaultInstance()));
+  }
+
+  private static Collection<BiFunction<Database, Cleaner, AbstractAccess>> accessConstructors() {
+    return ImmutableList.of(
+        Database::createFork,
+        Database::createSnapshot
+    );
   }
 }
