@@ -25,6 +25,7 @@ pub use self::proof_list_index::*;
 pub use self::proof_map_index::*;
 pub use self::proof_map_index_next::*;
 pub use self::raw_proof_map_index::*;
+pub use self::readonly_fork::*;
 pub use self::temporarydb::*;
 pub use self::value_set_index::*;
 
@@ -42,6 +43,7 @@ mod proof_list_index;
 mod proof_map_index;
 mod proof_map_index_next;
 mod raw_proof_map_index;
+mod readonly_fork;
 mod temporarydb;
 mod value_set_index;
 
