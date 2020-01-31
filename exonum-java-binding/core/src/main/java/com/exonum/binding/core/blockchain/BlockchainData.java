@@ -18,6 +18,7 @@ package com.exonum.binding.core.blockchain;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
@@ -26,7 +27,7 @@ import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Prefixed;
-import com.exonum.binding.core.storage.database.ReadonlyFork;
+import com.exonum.binding.core.storage.database.RoErasedAccess;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
@@ -172,9 +173,9 @@ public final class BlockchainData extends AbstractNativeProxy {
     return new DispatcherSchema(getUnstructuredAccess());
   }
 
-  private ReadonlyFork getUnstructuredAccess() {
-    long roForkHandle = nativeGetUnstructuredAccess(getNativeHandle());
-    return ReadonlyFork.fromHandle(roForkHandle, cleaner);
+  private RoErasedAccess getUnstructuredAccess() {
+    long roAccessHandle = nativeGetUnstructuredAccess(getNativeHandle());
+    return RoErasedAccess.fromHandle(roAccessHandle, cleaner);
   }
 
   private static native long nativeGetUnstructuredAccess(long bdNativeHandle);

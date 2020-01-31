@@ -25,7 +25,12 @@ import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
- * A readonly {@link Fork}-based database Access object.
+ * A readonly, "erased", database Access object.
+ *
+ * <p>This class primarily exists to support readonly forks and snapshots, but also supports
+ * other readonly accesses.
+ *
+ * <h2>Readonly Forks</h2>
  *
  * <p>A readonly Fork sees all the changes made to the base Fork, but forbids
  * modifications. That allows safely passing the readonly fork to foreign code.
@@ -33,7 +38,7 @@ import com.google.common.annotations.VisibleForTesting;
  * <p>A readonly fork forbids accessing the same index that is being modified in the base
  * fork. Also, accessing an index in the readonly fork will make it inaccessible in the base fork.
  */
-public final class ReadonlyFork extends AbstractAccess {
+public final class RoErasedAccess extends AbstractAccess {
 
   static {
     LibraryLoader.load();
@@ -41,42 +46,45 @@ public final class ReadonlyFork extends AbstractAccess {
 
   private final Cleaner cleaner;
 
-  private ReadonlyFork(NativeHandle nativeHandle, Cleaner cleaner) {
+  private RoErasedAccess(NativeHandle nativeHandle, Cleaner cleaner) {
     super(nativeHandle, false);
     this.cleaner = cleaner;
   }
 
   /**
-   * Creates a new ReadonlyFork from the native handle. The destructor will be registered
+   * Creates a new erased readonly access from the native handle. The destructor will be registered
    * in the given cleaner.
    *
-   * @param nativeHandle a handle of the native ReadonlyFork object
+   * @param nativeHandle a handle of the native readonly ErasedAccess object
    * @param cleaner a cleaner to destroy the native peer and any dependent objects
    */
-  public static ReadonlyFork fromHandle(long nativeHandle, Cleaner cleaner) {
+  public static RoErasedAccess fromHandle(long nativeHandle, Cleaner cleaner) {
     checkNotNull(cleaner);
     return fromHandleInternal(nativeHandle, cleaner);
   }
 
-  @VisibleForTesting static ReadonlyFork fromFork(Fork fork) {
-    long baseForkHandle = fork.getAccessNativeHandle();
-    long roForkHandle = nativeCreate(baseForkHandle);
-    return fromHandleInternal(roForkHandle, fork.getCleaner());
+  /**
+   * Creates a readonly access from the given one.
+   */
+  @VisibleForTesting static RoErasedAccess fromRawAccess(AbstractAccess access) {
+    long baseForkHandle = access.getAccessNativeHandle();
+    long roForkHandle = nativeAsReadonly(baseForkHandle);
+    return fromHandleInternal(roForkHandle, access.getCleaner());
   }
 
   /**
-   * Creates a ReadonlyFork from the Fork (basically, {@code Fork#readonly}.
+   * Creates a readonly access from the given one (basically, {@code AsReadonly#as_readonly}.
    */
-  private static native long nativeCreate(long baseForkHandle);
+  private static native long nativeAsReadonly(long baseAccessHandle);
 
   /**
    * Expects validated parameters so that it does not throw and registers the destructor
    * properly, which is *required* to prevent leaks.
    */
-  private static ReadonlyFork fromHandleInternal(long roForkNativeHandle, Cleaner cleaner) {
-    NativeHandle handle = new NativeHandle(roForkNativeHandle);
-    ProxyDestructor.newRegistered(cleaner, handle, ReadonlyFork.class, Accesses::nativeFree);
-    return new ReadonlyFork(handle, cleaner);
+  private static RoErasedAccess fromHandleInternal(long erasedNativeHandle, Cleaner cleaner) {
+    NativeHandle handle = new NativeHandle(erasedNativeHandle);
+    ProxyDestructor.newRegistered(cleaner, handle, RoErasedAccess.class, Accesses::nativeFree);
+    return new RoErasedAccess(handle, cleaner);
   }
 
   @Override

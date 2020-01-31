@@ -200,7 +200,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAcc
     utils::unwrap_exc_or(&env, res, 0 as jlong)
 }
 
-/// Destroys underlying `Snapshot` or `Fork` object and frees memory.
+/// Destroys the underlying `ErasedAccess` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_Accesses_nativeFree(
     env: JNIEnv,
