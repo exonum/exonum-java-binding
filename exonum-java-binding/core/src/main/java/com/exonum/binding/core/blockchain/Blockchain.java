@@ -28,7 +28,6 @@ import com.exonum.binding.core.blockchain.proofs.BlockProof;
 import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.storage.database.Access;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -202,12 +201,7 @@ public final class Blockchain {
   public IndexProof createIndexProof(String fullIndexName) {
     checkState(!access.canModify(), "Cannot create an index proof for a mutable access (%s).",
         access);
-    // FIXME: As #canModify is moved to Access-interface, it is no longer correct to assume
-    //  that a Snapshot is the only non-modifiable impl. On top of that, RoFork will be
-    //  unmodifiable, but it does not make sense to create IndexProofs for it.
-    //  Finally, Snapshot might get wrapped in Prefixed accesses, therefore, a simple type test
-    //  won't work either.
-    return BlockchainProofs.createIndexProof((Snapshot) access, fullIndexName)
+    return BlockchainProofs.createIndexProof(access, fullIndexName)
         .map(IndexProof::newInstance)
         .orElseThrow(() -> new IllegalArgumentException(
             String.format("Index %s does not exist or is not Merkelized", fullIndexName)));
