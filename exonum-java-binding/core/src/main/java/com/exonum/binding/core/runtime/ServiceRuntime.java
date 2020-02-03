@@ -401,6 +401,23 @@ public final class ServiceRuntime implements AutoCloseable {
   }
 
   /**
+   * Performs the before transactions operation on the specified service in this runtime.
+   *
+   * @see #afterTransactions(int, BlockchainData)
+   */
+  public void beforeTransactions(int serviceId, BlockchainData blockchainData) {
+    synchronized (lock) {
+      ServiceWrapper service = getServiceById(serviceId);
+      try {
+        service.beforeTransactions(blockchainData);
+      } catch (Exception e) {
+        logger.error("Service {} threw exception in beforeTransactions.", service.getName(), e);
+        throw e;
+      }
+    }
+  }
+
+  /**
    * Performs the after transactions operation on the specified service in this runtime.
    *
    * @param serviceId the id of the service on which to perform the operation

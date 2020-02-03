@@ -270,8 +270,20 @@ impl Runtime for JavaRuntimeProxy {
         _context: ExecutionContext,
         _instance_id: InstanceId,
     ) -> Result<(), ExecutionError> {
-        // TODO(ECR-4016): implement
-        Ok(())
+        jni_call_transaction(&self.exec, |env| {
+            // FIXME: as mostly a copy-paste of after_txs, it needs BlockchainData just as well [ECR-4169]
+            let access_handle = unsafe { to_handle(into_erased_access(&*context.fork)) };
+            env.call_method_unchecked(
+                self.runtime_adapter.as_obj(),
+                runtime_adapter::before_transactions_id(),
+                JavaType::Primitive(Primitive::Void),
+                &[
+                    JValue::from(instance_id as i32),
+                    JValue::from(access_handle),
+                ],
+            )
+                .and_then(JValue::v)
+        })
     }
 
     fn after_transactions(

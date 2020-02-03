@@ -156,6 +156,14 @@ final class ServiceWrapper {
     }
   }
 
+  void beforeTransactions(BlockchainData blockchainData) {
+    callServiceMethod(() -> service.beforeTransaction(blockchainData));
+  }
+
+  void afterTransactions(BlockchainData blockchainData) {
+    callServiceMethod(() -> service.afterTransactions(blockchainData));
+  }
+
   /**
    * Calls a service method — a method that is specified to throw {@link ExecutionException}.
    *
@@ -170,17 +178,6 @@ final class ServiceWrapper {
       // Propagate ExecutionExceptions as-is
       throwIfInstanceOf(e, ExecutionException.class);
       // Wrap any other exception type
-      throw new UnexpectedExecutionException(e);
-    }
-  }
-
-  void afterTransactions(BlockchainData blockchainData) {
-    try {
-      service.afterTransactions(blockchainData);
-    } catch (ExecutionException e) {
-      // Re-throw as is to keep the error code
-      throw e;
-    } catch (Exception e) {
       throw new UnexpectedExecutionException(e);
     }
   }

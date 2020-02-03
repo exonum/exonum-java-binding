@@ -566,6 +566,19 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Test
+    void beforeTransactionsSingleService() throws CloseFailuresException {
+      try (Database database = TemporaryDb.newInstance();
+          Cleaner cleaner = new Cleaner()) {
+        Fork fork = database.createFork(cleaner);
+        BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, TEST_NAME);
+
+        serviceRuntime.beforeTransactions(TEST_ID, blockchainData);
+
+        verify(serviceWrapper).beforeTransactions(blockchainData);
+      }
+    }
+
+    @Test
     void afterTransactionsSingleService() throws CloseFailuresException {
       try (Database database = TemporaryDb.newInstance();
           Cleaner cleaner = new Cleaner()) {

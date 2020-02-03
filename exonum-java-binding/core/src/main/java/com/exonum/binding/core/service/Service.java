@@ -107,6 +107,33 @@ public interface Service {
   void createPublicApiHandlers(Node node, Router router);
 
   /**
+   * An optional callback method invoked by the blockchain before any transactions in a block
+   * are executed.
+   * <!--
+   * FIXME: Or just @see #afterTransactions(BlockchainData) to avoid duplication? Is it acceptable?
+   * The service can modify its state in this handler, therefore, implementations must
+   * be deterministic and use only the current database state as their input.
+   *
+   * <p>This method is invoked synchronously from the thread that commits the block, therefore,
+   * implementations of this method must not perform any blocking or long-running operations.
+   *
+   * <p>Any exceptions in this method will revert any changes made to the database by it,
+   * but will not affect the processing of this block. Exceptions are saved
+   * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   * the registry of call errors} with appropriate error kinds.
+   *
+   * @param blockchainData blockchain data accessor for this service. Not valid after this method
+   *     returns
+   * @throws ExecutionException if an error occurs during the method execution;
+   *     it is saved as a call error of kind "service". Any other exceptions
+   *     are considered unexpected. They are saved with kind "unexpected".
+   *     -->
+   * @see #afterTransactions(BlockchainData)
+   * @see com.exonum.binding.core.transaction.Transaction
+   */
+  default void beforeTransaction(BlockchainData blockchainData) {}
+
+  /**
    * Handles the changes made by all transactions included in the upcoming block.
    * This handler is an optional callback method invoked by the blockchain after all transactions
    * in a block are executed, but before it is committed. The service can modify its state
@@ -126,6 +153,8 @@ public interface Service {
    * @throws ExecutionException if an error occurs during the method execution;
    *     it is saved as a call error of kind "service". Any other exceptions
    *     are considered unexpected. They are saved with kind "unexpected".
+   * @see #beforeTransaction(BlockchainData)
+   * @see com.exonum.binding.core.transaction.Transaction
    */
   default void afterTransactions(BlockchainData blockchainData) {}
 
