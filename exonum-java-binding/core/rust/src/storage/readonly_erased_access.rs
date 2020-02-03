@@ -41,8 +41,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_RoErasedAcc
                     unsafe { into_erased_access(ro_fork) }
                 }
                 GenericRawAccess::OwnedSnapshot(snapshot) => {
-                    // fixme: Does not compile: the trait bound `exonum::exonum_merkledb::generic::GenericRawAccess<'_>: std::convert::From<&mut std::rc::Rc<(dyn exonum::exonum_merkledb::Snapshot + 'static)>>` is not satisfied
-                    unsafe { into_erased_access(snapshot) }
+                    let raw_access = GenericRawAccess::OwnedSnapshot(snapshot.clone());
+                    unsafe { into_erased_access(raw_access) }
                 }
                 _ => panic!(
                     "Attempt to create readonly Access from an unsupported type: {:?}",
