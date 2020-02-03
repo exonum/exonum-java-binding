@@ -60,6 +60,10 @@ matrix:
       osx_image: xcode11.3
       env:
         - CHECK_RUST=false
+        - ROCKSDB_LIB_DIR=/usr/local/lib
+        - ROCKSDB_STATIC=1
+        - SNAPPY_LIB_DIR=/usr/local/lib
+        - SNAPPY_STATIC=1
 
 cache:
   directories:
