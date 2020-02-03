@@ -241,6 +241,21 @@ public class ServiceRuntimeAdapter {
   }
 
   /**
+   * Performs the before transactions operation for the service in this runtime.
+   *
+   * @see #afterTransactions(int, long)
+   * @see ServiceRuntime#beforeTransactions(int, BlockchainData)
+   */
+  void beforeTransactions(int serviceId, long bdNativeHandle) throws CloseFailuresException {
+    try (Cleaner cleaner = new Cleaner("beforeTransactions")) {
+      BlockchainData blockchainData = accessFactory.createBlockchainData(bdNativeHandle, cleaner);
+      serviceRuntime.beforeTransactions(serviceId, blockchainData);
+    } catch (CloseFailuresException e) {
+      handleCloseFailure(e);
+    }
+  }
+
+  /**
    * Performs the after transactions operation for the service in this runtime.
    *
    * @param bdNativeHandle a handle to the native BlockchainData object

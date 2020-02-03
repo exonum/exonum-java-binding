@@ -317,6 +317,13 @@ class ServiceWrapperTest {
   }
 
   @Test
+  void beforeTransactions() {
+    BlockchainData blockchainData = mock(BlockchainData.class);
+    serviceWrapper.beforeTransactions(blockchainData);
+    verify(service).beforeTransaction(blockchainData);
+  }
+
+  @Test
   void afterTransactionsPropagatesExecutionException() {
     ExecutionException e = new ExecutionException((byte) 0);
     doThrow(e).when(service).afterTransactions(any(BlockchainData.class));

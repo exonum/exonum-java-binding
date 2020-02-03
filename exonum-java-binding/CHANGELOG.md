@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   with a service name followed by a dot as a prefix 
   (see `BlockchainData#getExecutingServiceData`). (#1393)
 - `Prefixed` and `ReadonlyFork` database Accesses. (#1382, #1385)
+- `Service#beforeTranactions`.
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 

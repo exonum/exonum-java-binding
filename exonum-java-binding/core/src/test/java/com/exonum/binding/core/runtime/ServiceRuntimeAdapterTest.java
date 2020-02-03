@@ -163,6 +163,19 @@ class ServiceRuntimeAdapterTest {
   }
 
   @Test
+  void beforeTransactions() throws CloseFailuresException {
+    int serviceId = 1;
+    long bdNativeHandle = 0x110b;
+    BlockchainData blockchainData = mock(BlockchainData.class);
+    when(accessFactory.createBlockchainData(eq(bdNativeHandle), any(Cleaner.class)))
+        .thenReturn(blockchainData);
+
+    serviceRuntimeAdapter.beforeTransactions(serviceId, bdNativeHandle);
+
+    verify(serviceRuntime).beforeTransactions(serviceId, blockchainData);
+  }
+
+  @Test
   void afterTransactions() throws CloseFailuresException {
     int serviceId = 1;
     long bdNativeHandle = 0x110b;

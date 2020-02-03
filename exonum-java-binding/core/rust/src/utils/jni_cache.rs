@@ -47,6 +47,7 @@ static mut RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_INITIATE_RESUMING_SERICE: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_UPDATE_SERVICE_STATUS: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_EXECUTE_TX: Option<JMethodID> = None;
+static mut RUNTIME_ADAPTER_BEFORE_TRANSACTIONS: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_TRANSACTIONS: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_AFTER_COMMIT: Option<JMethodID> = None;
 static mut RUNTIME_ADAPTER_SHUTDOWN: Option<JMethodID> = None;
@@ -136,6 +137,12 @@ unsafe fn cache_methods(env: &JNIEnv) {
         "executeTransaction",
         "(ILjava/lang/String;I[BJI[B[B)V",
     );
+    RUNTIME_ADAPTER_BEFORE_TRANSACTIONS = get_method_id(
+        &env,
+        SERVICE_RUNTIME_ADAPTER_CLASS,
+        "beforeTransactions",
+        "(IJ)V",
+    );
     RUNTIME_ADAPTER_AFTER_TRANSACTIONS = get_method_id(
         &env,
         SERVICE_RUNTIME_ADAPTER_CLASS,
@@ -187,6 +194,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
             && RUNTIME_ADAPTER_INITIATE_RESUMING_SERICE.is_some()
             && RUNTIME_ADAPTER_UPDATE_SERVICE_STATUS.is_some()
             && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
+            && RUNTIME_ADAPTER_BEFORE_TRANSACTIONS.is_some()
             && RUNTIME_ADAPTER_AFTER_TRANSACTIONS.is_some()
             && RUNTIME_ADAPTER_AFTER_COMMIT.is_some()
             && RUNTIME_ADAPTER_SHUTDOWN.is_some()
@@ -259,6 +267,12 @@ pub mod runtime_adapter {
     pub fn execute_tx_id() -> JMethodID<'static> {
         check_cache_initialized();
         unsafe { RUNTIME_ADAPTER_EXECUTE_TX.unwrap() }
+    }
+
+    /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.beforeTransactions()`.
+    pub fn before_transactions_id() -> JMethodID<'static> {
+        check_cache_initialized();
+        unsafe { RUNTIME_ADAPTER_BEFORE_TRANSACTIONS.unwrap() }
     }
 
     /// Returns cached `JMethodID` for `ServiceRuntimeAdapter.afterTransactions()`.
