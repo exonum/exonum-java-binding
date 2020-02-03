@@ -56,10 +56,10 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
 import io.vertx.ext.web.Router;
-import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /**
@@ -89,6 +89,12 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @VisibleForTesting
   static final String AFTER_COMMIT_COUNTER_NAME = "after_commit_counter";
 
+  @VisibleForTesting
+  static final String BEFORE_TXS_COUNTER_NAME = "before_txs";
+
+  @VisibleForTesting
+  static final String AFTER_TXS_COUNTER_NAME = "after_txs";
+
   @Nullable
   private Node node;
 
@@ -106,11 +112,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     // Init the time oracle
     updateTimeOracle(blockchainData, configuration);
 
-    // Add a default counter to the blockchain.
-    createCounter(DEFAULT_COUNTER_NAME, blockchainData);
-
-    // Add an afterCommit counter that will be incremented after each block committed event.
-    createCounter(AFTER_COMMIT_COUNTER_NAME, blockchainData);
+    // Create the default counters:
+    Stream.of(
+        DEFAULT_COUNTER_NAME,
+        BEFORE_TXS_COUNTER_NAME,
+        AFTER_TXS_COUNTER_NAME,
+        AFTER_COMMIT_COUNTER_NAME)
+        .forEach(name -> createCounter(name, blockchainData));
   }
 
   @Override
@@ -130,6 +138,21 @@ public final class QaServiceImpl extends AbstractService implements QaService {
     controller.mountApi(router);
   }
 
+  @Override
+  public void beforeTransaction(BlockchainData blockchainData) {
+    // fixme! ECR-3849
+    HashCode counterId = Hashing.sha256()
+        .hashString(BEFORE_TXS_COUNTER_NAME, UTF_8);
+    incrementCounter(counterId, blockchainData);
+  }
+
+  @Override
+  public void afterTransactions(BlockchainData blockchainData) {
+    HashCode counterId = Hashing.sha256()
+        .hashString(AFTER_TXS_COUNTER_NAME, UTF_8);
+    incrementCounter(counterId, blockchainData);
+  }
+
   /**
    * Increments the afterCommit counter so the number of times this method was invoked is stored
    * in it.
@@ -138,7 +161,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public void afterCommit(BlockCommittedEvent event) {
     long seed = event.getHeight();
     HashCode counterId = Hashing.sha256()
-        .hashString(AFTER_COMMIT_COUNTER_NAME, StandardCharsets.UTF_8);
+        .hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
     submitIncrementCounter(seed, counterId);
   }
 
@@ -308,8 +331,11 @@ public final class QaServiceImpl extends AbstractService implements QaService {
       TransactionContext context) {
     byte[] rawCounterId = arguments.getCounterId().toByteArray();
     HashCode counterId = HashCode.fromBytes(rawCounterId);
+    incrementCounter(counterId, context.getBlockchainData());
+  }
 
-    QaSchema schema = createDataSchema(context.getBlockchainData());
+  private void incrementCounter(HashCode counterId, BlockchainData blockchainData) {
+    QaSchema schema = createDataSchema(blockchainData);
     ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
 
     // Increment the counter if there is such.

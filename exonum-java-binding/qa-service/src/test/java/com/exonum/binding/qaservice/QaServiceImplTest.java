@@ -29,6 +29,8 @@ import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
 import static com.exonum.binding.qaservice.QaExecutionError.RESUME_SERVICE_ERROR;
 import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_COMMIT_COUNTER_NAME;
+import static com.exonum.binding.qaservice.QaServiceImpl.AFTER_TXS_COUNTER_NAME;
+import static com.exonum.binding.qaservice.QaServiceImpl.BEFORE_TXS_COUNTER_NAME;
 import static com.exonum.binding.qaservice.QaServiceImpl.DEFAULT_COUNTER_NAME;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.binding.qaservice.TransactionMessages.createIncrementCounterTx;
@@ -193,6 +195,31 @@ class QaServiceImplTest {
   }
 
   @Test
+  void beforeTransactions(TestKit testKit) {
+    // Initially, before txs must be 0 for services added in genesis block,
+    // because beforeTransactions is not called for genesis-block added services.
+    checkCounter(testKit, BEFORE_TXS_COUNTER_NAME, 0L);
+
+    // Create several blocks
+    for (int i = 1; i <= 2; i++) {
+      testKit.createBlock();
+      checkCounter(testKit, BEFORE_TXS_COUNTER_NAME, i);
+    }
+  }
+
+  @Test
+  void afterTransactions(TestKit testKit) {
+    // Initially, after txs must be 1 for services added in genesis block.
+    // afterTransactions is called for genesis-block added services.
+    checkCounter(testKit, AFTER_TXS_COUNTER_NAME, 1L);
+    // Create several blocks
+    for (int i = 1; i <= 2; i++) {
+      testKit.createBlock();
+      checkCounter(testKit, AFTER_TXS_COUNTER_NAME, 1L + i);
+    }
+  }
+
+  @Test
   void afterCommit(TestKit testKit) {
     // Create a block so that the transaction, submitted in after commit handler,
     // executed after the genesis block, is executed.
@@ -207,15 +234,19 @@ class QaServiceImplTest {
     checkAfterCommitCounter(testKit, 2L);
   }
 
-  private void checkAfterCommitCounter(TestKit testKit, long expectedValue) {
-    BlockchainData snapshot = testKit.getBlockchainData(QA_SERVICE_NAME);
+  private static void checkAfterCommitCounter(TestKit testkit, long expectedValue) {
+    checkCounter(testkit, AFTER_COMMIT_COUNTER_NAME, expectedValue);
+  }
+
+  private static void checkCounter(TestKit testkit, String counterName, long expectedValue) {
+    BlockchainData snapshot = testkit.getBlockchainData(QA_SERVICE_NAME);
     QaSchema schema = new QaSchema(snapshot);
     MapIndex<HashCode, Long> counters = schema.counters();
     MapIndex<HashCode, String> counterNames = schema.counterNames();
-    HashCode counterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
+    HashCode counterId = sha256().hashString(counterName, UTF_8);
 
     assertThat(counters.get(counterId)).isEqualTo(expectedValue);
-    assertThat(counterNames.get(counterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
+    assertThat(counterNames.get(counterId)).isEqualTo(counterName);
   }
 
   @Nested
