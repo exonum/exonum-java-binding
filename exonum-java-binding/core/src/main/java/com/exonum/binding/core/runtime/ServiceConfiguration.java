@@ -94,7 +94,6 @@ final class ServiceConfiguration implements Configuration {
     return Arrays.hashCode(configuration);
   }
 
-
   private String validateAndGet(Format format) {
     Service.ServiceConfiguration configuration = getAsMessage(Service.ServiceConfiguration.class);
     checkArgument(configuration.getFormat() == format,
@@ -103,5 +102,4 @@ final class ServiceConfiguration implements Configuration {
 
     return configuration.getValue();
   }
-
 }

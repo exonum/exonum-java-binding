@@ -103,5 +103,4 @@ public class StandardServiceConfigurationTestKitTest {
   private static HashCode toMapKey(String key) {
     return Hashing.defaultHashFunction().hashString(key, StandardCharsets.UTF_8);
   }
-
 }
