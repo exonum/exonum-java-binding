@@ -15,6 +15,7 @@
 pub use self::access::Java_com_exonum_binding_core_storage_database_Accesses_nativeFree;
 pub(crate) use self::access::{into_erased_access, EjbAccessExt};
 pub use self::blockchain::*;
+pub use self::blockchain_data::*;
 pub use self::key_set_index::*;
 pub use self::list_index::*;
 pub use self::map_index::*;
@@ -31,6 +32,7 @@ pub use self::value_set_index::*;
 
 mod access;
 mod blockchain;
+mod blockchain_data;
 mod entry;
 mod fork;
 mod key_set_index;

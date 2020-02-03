@@ -36,10 +36,8 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.core.messages.Runtime.InstanceState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-@Disabled("ECR-4169")
 class BlockchainDataIntegrationTest {
 
   Cleaner cleaner;
