@@ -18,10 +18,14 @@ package com.exonum.binding.core.runtime;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.common.messages.Service;
+import com.exonum.binding.common.messages.Service.ServiceConfiguration.Format;
 import com.exonum.binding.core.storage.indices.TestProtoMessages.Id;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Properties;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -60,9 +64,65 @@ class ServiceConfigurationTest {
         .verify();
   }
 
+  @Test
+  void getAsPlainString() {
+    String configValue = "foo";
+    byte[] configuration = Service.ServiceConfiguration.newBuilder()
+        .setFormat(Format.TEXT)
+        .setValue(configValue)
+        .build()
+        .toByteArray();
+    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(configuration);
+
+    String actualConfig = serviceConfiguration.getAsString();
+
+    assertThat(actualConfig).isEqualTo(configValue);
+  }
+
+  @Test
+  void getAsPlainStringIsNotServiceConfiguration() {
+    byte[] serializedConfig = anyId().toByteArray();
+    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(serializedConfig);
+
+    assertThrows(IllegalArgumentException.class, serviceConfiguration::getAsString);
+  }
+
+  @Test
+  void getAsJson() {
+    byte[] configuration = Service.ServiceConfiguration.newBuilder()
+        .setFormat(Format.JSON)
+        .setValue("{'foo' : 'bar'}")
+        .build()
+        .toByteArray();
+    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(configuration);
+
+    Foo actualConfig = serviceConfiguration.getAsJson(Foo.class);
+
+    assertThat(actualConfig.foo).isEqualTo("bar");
+  }
+
+  @Test
+  void getAsProperties() {
+    byte[] configuration = Service.ServiceConfiguration.newBuilder()
+        .setFormat(Format.PROPERTIES)
+        .setValue("foo=foo\nbar=bar")
+        .build()
+        .toByteArray();
+    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(configuration);
+
+    Properties properties = serviceConfiguration.getAsProperties();
+
+    assertThat(properties).contains(entry("foo", "foo"), entry("bar", "bar"));
+  }
+
   private static Id anyId() {
     return Id.newBuilder()
         .setId("12ab")
         .build();
   }
+
+  private static class Foo {
+    String foo;
+  }
+
 }
