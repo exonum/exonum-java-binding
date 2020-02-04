@@ -19,6 +19,7 @@ package com.exonum.binding.core.blockchain;
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.exonum.binding.core.blockchain.Blocks.aBlock;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,6 +31,7 @@ import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Prefixed;
+import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
@@ -82,15 +84,48 @@ class BlockchainDataIntegrationTest {
     BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, serviceName);
 
     Prefixed serviceData1 = blockchainData.getExecutingServiceData();
-    // Check the service data is accessible
+    // Check the service data is accessible by the simple name
     IndexAddress relativeAddress = IndexAddress.valueOf(simpleIndexName);
     ProofEntryIndexProxy<String> entry1 = serviceData1.getProofEntry(relativeAddress, string());
     assertThat(entry1.get()).isEqualTo("V1");
 
+    // Check it is writeable
+    assertTrue(serviceData1.canModify());
+    entry1.set("V2");
+
     // Check the service data is accessible in case of several requests to getExecutingServiceData
     Prefixed serviceData2 = blockchainData.getExecutingServiceData();
     ProofEntryIndexProxy<String> entry2 = serviceData2.getProofEntry(relativeAddress, string());
-    assertThat(entry2.get()).isEqualTo("V1");
+    assertThat(entry2.get()).isEqualTo("V2");
+  }
+
+  @Test
+  void getExecutingServiceDataFromSnapshot() throws CloseFailuresException {
+    // Setup the service data
+    String serviceName = "test-service";
+    String simpleIndexName = "test-entry";
+    try (Cleaner cl = new Cleaner()) {
+      Fork fork = db.createFork(cl);
+
+      // Use the full index name
+      String fullIndexName = serviceName + "." + simpleIndexName;
+      fork.getProofEntry(IndexAddress.valueOf(fullIndexName), string())
+          .set("V1");
+
+      db.merge(fork);
+    }
+
+    Snapshot snapshot = db.createSnapshot(cleaner);
+    BlockchainData blockchainData = BlockchainData.fromRawAccess(snapshot, serviceName);
+
+    Prefixed serviceData1 = blockchainData.getExecutingServiceData();
+    // Check the service data is accessible by the simple name
+    IndexAddress relativeAddress = IndexAddress.valueOf(simpleIndexName);
+    ProofEntryIndexProxy<String> entry1 = serviceData1.getProofEntry(relativeAddress, string());
+    assertThat(entry1.get()).isEqualTo("V1");
+
+    // Check it is not writeable
+    assertFalse(serviceData1.canModify());
   }
 
   @Test

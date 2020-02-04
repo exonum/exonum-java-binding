@@ -18,7 +18,9 @@ package com.exonum.binding.core.storage.database;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
@@ -70,6 +72,10 @@ class PrefixedIntegrationTest {
 
       // Create a Prefixed Access to that namespace
       Prefixed prefixed = Prefixed.fromAccess(namespace, fork);
+
+      // Check can modify the Fork-based Prefixed Access
+      assertTrue(prefixed.canModify());
+
       // Try to access the same index from the Prefixed
       ProofEntryIndexProxy<String> e2 = prefixed
           .getProofEntry(IndexAddress.valueOf(entryName), string());
@@ -114,6 +120,10 @@ class PrefixedIntegrationTest {
 
       // Create a Prefixed Access to that namespace
       Prefixed prefixed = Prefixed.fromAccess(namespace, base);
+
+      // Check it inherits the immutability property
+      assertFalse(prefixed.canModify());
+
       // Try to access the same index from the Prefixed
       ProofEntryIndexProxy<String> e2 = prefixed
           .getProofEntry(IndexAddress.valueOf(entryName), string());

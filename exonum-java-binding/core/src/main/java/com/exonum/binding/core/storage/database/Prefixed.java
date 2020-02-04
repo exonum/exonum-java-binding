@@ -41,7 +41,7 @@ public final class Prefixed extends AbstractAccess {
 
   private final Cleaner cleaner;
 
-  Prefixed(NativeHandle prefixedNativeHandle, boolean canModify, Cleaner cleaner,
+  private Prefixed(NativeHandle prefixedNativeHandle, boolean canModify, Cleaner cleaner,
       OpenIndexRegistry registry) {
     super(prefixedNativeHandle, canModify, registry);
     this.cleaner = cleaner;
@@ -63,7 +63,7 @@ public final class Prefixed extends AbstractAccess {
     Cleaner cleaner = baseAccess.getCleaner();
     OpenIndexRegistry registry = baseAccess.getOpenIndexes();
     long handle = nativeCreate(namespace, baseAccess.getAccessNativeHandle());
-    return fromHandleInternal(handle, baseAccess.canModify(), cleaner, registry);
+    return fromHandleInternal(handle, cleaner, registry);
   }
 
   /**
@@ -77,24 +77,27 @@ public final class Prefixed extends AbstractAccess {
    * in the given cleaner.
    *
    * @param prefixedNativeHandle a handle to the native Prefixed Access
-   * @param canModify whether the base access allows modifications
    * @param cleaner a cleaner to destroy the native peer and any dependent objects
    */
-  public static Prefixed fromHandle(long prefixedNativeHandle, boolean canModify, Cleaner cleaner) {
+  public static Prefixed fromHandle(long prefixedNativeHandle, Cleaner cleaner) {
     checkNotNull(cleaner);
     // When the base Access is unknown (hidden in native) — use a separate pool of open indexes
     OpenIndexRegistry registry = new OpenIndexRegistry();
-    return fromHandleInternal(prefixedNativeHandle, canModify, cleaner, registry);
+    return fromHandleInternal(prefixedNativeHandle, cleaner, registry);
   }
 
   /**
    * Expects validated parameters so that it does not throw and registers the destructor
    * properly, which is *required* to prevent leaks.
    */
-  private static Prefixed fromHandleInternal(long prefixedNativeHandle, boolean canModify,
-      Cleaner cleaner, OpenIndexRegistry registry) {
+  private static Prefixed fromHandleInternal(long prefixedNativeHandle, Cleaner cleaner,
+      OpenIndexRegistry registry) {
+    // Register the destructor
     NativeHandle handle = new NativeHandle(prefixedNativeHandle);
     ProxyDestructor.newRegistered(cleaner, handle, Prefixed.class, Accesses::nativeFree);
+
+    // Query the 'canModify' property — it is not always known in advance
+    boolean canModify = nativeCanModify(prefixedNativeHandle);
     return new Prefixed(handle, canModify, cleaner, registry);
   }
 

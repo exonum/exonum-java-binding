@@ -122,16 +122,12 @@ public final class BlockchainData extends AbstractNativeProxy {
     if (executingServiceAccess == null) {
       long nativeHandle = getNativeHandle();
       long prefixedHandle = nativeGetExecutingServiceAccess(nativeHandle);
-      boolean canModify = nativeCanModify(nativeHandle);
-      executingServiceAccess = Prefixed.fromHandle(prefixedHandle, canModify, cleaner);
+      executingServiceAccess = Prefixed.fromHandle(prefixedHandle, cleaner);
     }
     return executingServiceAccess;
   }
 
   private static native long nativeGetExecutingServiceAccess(long bdNativeHandle);
-
-  /** Returns true if the base Access is modifiable. */
-  private static native boolean nativeCanModify(long bdNativeHandle);
 
   /**
    * Returns a <em>readonly</em> database access for the data of the service instance with
@@ -148,7 +144,7 @@ public final class BlockchainData extends AbstractNativeProxy {
     if (prefixedHandle == NativeHandle.INVALID_NATIVE_HANDLE) {
       return Optional.empty();
     } else {
-      Prefixed access = Prefixed.fromHandle(prefixedHandle, false, cleaner);
+      Prefixed access = Prefixed.fromHandle(prefixedHandle, cleaner);
       return Optional.of(access);
     }
   }

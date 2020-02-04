@@ -254,5 +254,13 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    */
   public abstract Cleaner getCleaner();
 
-  static native long nativeFindIndexId(long nativeHandle, String name, @Nullable byte[] idInGroup);
+  private static native long nativeFindIndexId(long nativeHandle, String name,
+      @Nullable byte[] idInGroup);
+
+  /**
+   * Returns true if the <em>native</em> Access allows modifications to the storage.
+   * Note that it may differ from the Java Access {@link #canModify()} property
+   * (may be more permissive, but never — stricter).
+   */
+  protected static native boolean nativeCanModify(long nativeHandle);
 }
