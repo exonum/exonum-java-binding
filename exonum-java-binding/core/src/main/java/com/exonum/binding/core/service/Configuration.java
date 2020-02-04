@@ -61,7 +61,7 @@ public interface Configuration {
    * Returns the configuration format.
    *
    * @throws IllegalArgumentException if the actual type of the configuration is not an instance of
-   *     {@link ServiceConfiguration}; or the configuration contains some unrecognized format
+   *     {@link ServiceConfiguration}
    */
   Format getConfigurationFormat();
 
@@ -69,7 +69,7 @@ public interface Configuration {
    * Returns the configuration as a plain text string.
    *
    * @throws IllegalArgumentException if the actual type of the configuration is not an instance of
-   *     {@link ServiceConfiguration}; or the configuration contains some unrecognized format
+   *     {@link ServiceConfiguration}
    */
   String getAsString();
 

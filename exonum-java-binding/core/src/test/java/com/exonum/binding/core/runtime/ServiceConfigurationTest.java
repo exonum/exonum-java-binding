@@ -79,15 +79,6 @@ class ServiceConfigurationTest {
     assertThat(actualFormat).isEqualTo(configuration.getFormat());
   }
 
-  @Test
-  void getConfigurationFormatBadFormat() {
-    Service.ServiceConfiguration configuration = fooConfiguration(Format.NONE);
-    ServiceConfiguration serviceConfiguration =
-        new ServiceConfiguration(configuration.toByteArray());
-
-    assertThrows(IllegalArgumentException.class, serviceConfiguration::getConfigurationFormat);
-  }
-
   @ParameterizedTest
   @MethodSource("configurations")
   void getAsPlainString(Service.ServiceConfiguration configuration) {
@@ -97,15 +88,6 @@ class ServiceConfigurationTest {
     String actualConfig = serviceConfiguration.getAsString();
 
     assertThat(actualConfig).isEqualTo(configuration.getValue());
-  }
-
-  @Test
-  void getConfigurationAsStringBadFormat() {
-    Service.ServiceConfiguration configuration = fooConfiguration(Format.NONE);
-    ServiceConfiguration serviceConfiguration =
-        new ServiceConfiguration(configuration.toByteArray());
-
-    assertThrows(IllegalArgumentException.class, serviceConfiguration::getAsString);
   }
 
   private static List<Service.ServiceConfiguration> configurations() {
@@ -125,7 +107,7 @@ class ServiceConfigurationTest {
 
   @Test
   void getAsPlainStringIsNotServiceConfiguration() {
-    byte[] serializedConfig = anyId().toByteArray();
+    byte[] serializedConfig = new byte[]{0x0, 0x1, 0x2, 0x3};
     ServiceConfiguration serviceConfiguration = new ServiceConfiguration(serializedConfig);
 
     assertThrows(IllegalArgumentException.class, serviceConfiguration::getAsString);

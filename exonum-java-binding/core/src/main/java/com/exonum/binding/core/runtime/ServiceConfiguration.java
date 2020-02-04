@@ -85,7 +85,6 @@ final class ServiceConfiguration implements Configuration {
 
   private Service.ServiceConfiguration getAsServiceConfiguration() {
     Service.ServiceConfiguration configuration = getAsMessage(Service.ServiceConfiguration.class);
-    checkArgument(Format.NONE != configuration.getFormat());
     checkArgument(Format.UNRECOGNIZED != configuration.getFormat());
 
     return configuration;
