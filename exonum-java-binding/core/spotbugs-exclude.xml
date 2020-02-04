@@ -45,7 +45,7 @@
   <Match>
     <Source name="~.*TestKitProtos\.java"/>
   </Match>
-  <!--  TODO: remove when the proto moves to proto-sources -->
+  <!--  TODO: ECR-4199 remove when the proto moves to proto-sources -->
   <Match>
     <Class name="com.exonum.binding.common.messages.Service$ServiceConfiguration$Builder"/>
   </Match>

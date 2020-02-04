@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.testkit;
+package com.exonum.binding.test.service;
 
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Service;
 import com.google.inject.Singleton;
 
-public final class TestServiceModuleStandardConfiguration extends AbstractServiceModule {
+public final class TestServiceModule extends AbstractServiceModule {
   @Override
   protected void configure() {
-    bind(Service.class).to(TestServiceStandardConfiguration.class).in(Singleton.class);
+    bind(Service.class).to(TestService.class).in(Singleton.class);
   }
 }

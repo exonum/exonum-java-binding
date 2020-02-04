@@ -19,7 +19,6 @@ package com.exonum.binding.core.service;
 import com.exonum.binding.common.messages.Service.ServiceConfiguration;
 import com.exonum.binding.common.messages.Service.ServiceConfiguration.Format;
 import com.exonum.binding.core.storage.database.Fork;
-import com.google.gson.JsonSyntaxException;
 import com.google.protobuf.MessageLite;
 import java.util.Properties;
 
@@ -32,8 +31,8 @@ import java.util.Properties;
  * {@linkplain Service#initialize(Fork, Configuration) passes the configuration parameters}
  * to the newly created service instance.
  *
- * <p>The configuration can be any protobuf message, but it is recommended to use
- * {@linkplain ServiceConfiguration standard service configuration message} in most cases.
+ * <p>Services that have few arguments are encouraged to use the standard protobuf
+ * message {@link ServiceConfiguration}. It supports common text-based configuration formats.
  *
  * <p>Reconfiguration of a started service may be implemented with a supervisor service
  * and {@link Configurable} interface.
@@ -59,22 +58,20 @@ public interface Configuration {
   <MessageT extends MessageLite> MessageT getAsMessage(Class<MessageT> parametersType);
 
   /**
+   * Returns the configuration format.
+   *
+   * @throws IllegalArgumentException if the actual type of the configuration is not an instance of
+   *     {@link ServiceConfiguration}; or the configuration contains some unrecognized format
+   */
+  Format getConfigurationFormat();
+
+  /**
    * Returns the configuration as a plain text string.
    *
    * @throws IllegalArgumentException if the actual type of the configuration is not an instance of
-   *     {@link ServiceConfiguration};
-   *     or the configuration is not in the {@linkplain Format#TEXT plain text} format
+   *     {@link ServiceConfiguration}; or the configuration contains some unrecognized format
    */
   String getAsString();
-
-  /**
-   * Returns the configuration as a raw JSON string.
-   *
-   * @throws IllegalArgumentException if the actual type of the configuration is not an instance of
-   *     {@link ServiceConfiguration};
-   *     or the configuration is not in the {@linkplain Format#JSON JSON} format
-   */
-  String getAsJson();
 
   /**
    * Returns the configuration as an object  of the given type decoded from the underlying JSON.
@@ -84,8 +81,7 @@ public interface Configuration {
    * @throws IllegalArgumentException if the actual type of the configuration is not an instance of
    *     {@link ServiceConfiguration};
    *     or the configuration is not in the {@linkplain Format#JSON JSON} format
-   * @throws JsonSyntaxException if json is not a valid representation for an object of the given
-   *     type
+   * @throws com.google.gson.JsonParseException in case of JSON parse error
    */
   <T> T getAsJson(Class<T> configType);
 

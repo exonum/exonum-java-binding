@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.testkit;
+package com.exonum.binding.test.service;
 
-import static com.exonum.binding.testkit.TestKitTestUtils.createArtifact;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -27,6 +26,8 @@ import com.exonum.binding.common.messages.Service.ServiceConfiguration.Format;
 import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
+import com.exonum.binding.testkit.TestKit;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.io.IOException;
@@ -37,13 +38,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class StandardServiceConfigurationTestKitTest {
-  private static final String ARTIFACT_FILENAME = "test-service-props-configuration.jar";
+public class ServiceConfigurationIntegrationTest {
+  private static final String ARTIFACT_FILENAME = "test-service.jar";
   private static final String ARTIFACT_VERSION = "1.0.0";
   static final ServiceArtifactId ARTIFACT_ID =
       ServiceArtifactId
-          .newJavaId("com.exonum.binding/test-service-props-configuration", ARTIFACT_VERSION);
-  private static final String SERVICE_NAME = "test-service-props-configuration";
+          .newJavaId("com.exonum.binding/test-service", ARTIFACT_VERSION);
+  private static final String SERVICE_NAME = "test-service";
   private static final int SERVICE_ID = 77;
 
   @TempDir
@@ -53,8 +54,9 @@ public class StandardServiceConfigurationTestKitTest {
   @BeforeAll
   static void setUp() throws IOException {
     Path artifactLocation = artifactsDirectory.resolve(ARTIFACT_FILENAME);
-    createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModuleStandardConfiguration.class,
-        TestSchema.class, TestServiceStandardConfiguration.class);
+
+    createArtifact(artifactLocation, ARTIFACT_ID, TestServiceModule.class,
+        TestSchema.class, TestService.class);
   }
 
   @Test
@@ -103,4 +105,15 @@ public class StandardServiceConfigurationTestKitTest {
   private static HashCode toMapKey(String key) {
     return Hashing.defaultHashFunction().hashString(key, StandardCharsets.UTF_8);
   }
+
+  private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,
+      Class serviceModule, Class<?>... artifactClasses) throws IOException {
+    new ServiceArtifactBuilder()
+        .setPluginId(serviceArtifactId.toString())
+        .setPluginVersion(serviceArtifactId.getVersion())
+        .addClasses(artifactClasses)
+        .addExtensionClass(serviceModule)
+        .writeTo(artifactLocation);
+  }
+
 }

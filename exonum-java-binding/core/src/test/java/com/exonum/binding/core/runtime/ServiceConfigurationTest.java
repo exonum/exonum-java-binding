@@ -24,10 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.common.messages.Service;
 import com.exonum.binding.common.messages.Service.ServiceConfiguration.Format;
 import com.exonum.binding.core.storage.indices.TestProtoMessages.Id;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.List;
 import java.util.Properties;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ServiceConfigurationTest {
 
@@ -64,19 +68,59 @@ class ServiceConfigurationTest {
         .verify();
   }
 
+  @ParameterizedTest
+  @MethodSource("configurations")
+  void getConfigurationFormat(Service.ServiceConfiguration configuration) {
+    ServiceConfiguration serviceConfiguration =
+        new ServiceConfiguration(configuration.toByteArray());
+
+    Format actualFormat = serviceConfiguration.getConfigurationFormat();
+
+    assertThat(actualFormat).isEqualTo(configuration.getFormat());
+  }
+
   @Test
-  void getAsPlainString() {
-    String configValue = "foo";
-    byte[] configuration = Service.ServiceConfiguration.newBuilder()
-        .setFormat(Format.TEXT)
-        .setValue(configValue)
-        .build()
-        .toByteArray();
-    ServiceConfiguration serviceConfiguration = new ServiceConfiguration(configuration);
+  void getConfigurationFormatBadFormat() {
+    Service.ServiceConfiguration configuration = fooConfiguration(Format.NONE);
+    ServiceConfiguration serviceConfiguration =
+        new ServiceConfiguration(configuration.toByteArray());
+
+    assertThrows(IllegalArgumentException.class, serviceConfiguration::getConfigurationFormat);
+  }
+
+  @ParameterizedTest
+  @MethodSource("configurations")
+  void getAsPlainString(Service.ServiceConfiguration configuration) {
+    ServiceConfiguration serviceConfiguration =
+        new ServiceConfiguration(configuration.toByteArray());
 
     String actualConfig = serviceConfiguration.getAsString();
 
-    assertThat(actualConfig).isEqualTo(configValue);
+    assertThat(actualConfig).isEqualTo(configuration.getValue());
+  }
+
+  @Test
+  void getConfigurationAsStringBadFormat() {
+    Service.ServiceConfiguration configuration = fooConfiguration(Format.NONE);
+    ServiceConfiguration serviceConfiguration =
+        new ServiceConfiguration(configuration.toByteArray());
+
+    assertThrows(IllegalArgumentException.class, serviceConfiguration::getAsString);
+  }
+
+  private static List<Service.ServiceConfiguration> configurations() {
+    return ImmutableList.of(
+        fooConfiguration(Format.TEXT),
+        fooConfiguration(Format.JSON),
+        fooConfiguration(Format.PROPERTIES)
+    );
+  }
+
+  private static Service.ServiceConfiguration fooConfiguration(Format format) {
+    return Service.ServiceConfiguration.newBuilder()
+        .setFormat(format)
+        .setValue("foo")
+        .build();
   }
 
   @Test

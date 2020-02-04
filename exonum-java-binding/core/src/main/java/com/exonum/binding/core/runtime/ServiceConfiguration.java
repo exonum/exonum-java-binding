@@ -22,8 +22,8 @@ import com.exonum.binding.common.messages.Service;
 import com.exonum.binding.common.messages.Service.ServiceConfiguration.Format;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.core.service.Configuration;
-import com.google.gson.Gson;
 import com.google.protobuf.MessageLite;
 import java.io.IOException;
 import java.io.StringReader;
@@ -45,24 +45,26 @@ final class ServiceConfiguration implements Configuration {
   }
 
   @Override
-  public String getAsString() {
-    return validateAndGet(Format.TEXT);
+  public Format getConfigurationFormat() {
+    Service.ServiceConfiguration configuration = getAsServiceConfiguration();
+    return configuration.getFormat();
   }
 
   @Override
-  public String getAsJson() {
-    return validateAndGet(Format.JSON);
+  public String getAsString() {
+    Service.ServiceConfiguration configuration = getAsServiceConfiguration();
+    return configuration.getValue();
   }
 
   @Override
   public <T> T getAsJson(Class<T> configType) {
-    String configuration = getAsJson();
-    return new Gson().fromJson(configuration, configType);
+    String configuration = getServiceConfigurationInFormat(Format.JSON);
+    return JsonSerializer.json().fromJson(configuration, configType);
   }
 
   @Override
   public Properties getAsProperties() {
-    String configuration = validateAndGet(Format.PROPERTIES);
+    String configuration = getServiceConfigurationInFormat(Format.PROPERTIES);
     Properties properties = new Properties();
     try {
       properties.load(new StringReader(configuration));
@@ -70,6 +72,23 @@ final class ServiceConfiguration implements Configuration {
       throw new IllegalArgumentException("Error reading properties configuration", e);
     }
     return properties;
+  }
+
+  private String getServiceConfigurationInFormat(Format format) {
+    Service.ServiceConfiguration configuration = getAsServiceConfiguration();
+    checkArgument(configuration.getFormat() == format,
+        "Expected configuration in %s format, but actual was %s",
+        format, configuration.getFormat());
+
+    return configuration.getValue();
+  }
+
+  private Service.ServiceConfiguration getAsServiceConfiguration() {
+    Service.ServiceConfiguration configuration = getAsMessage(Service.ServiceConfiguration.class);
+    checkArgument(Format.NONE != configuration.getFormat());
+    checkArgument(Format.UNRECOGNIZED != configuration.getFormat());
+
+    return configuration;
   }
 
   @Override
@@ -92,14 +111,5 @@ final class ServiceConfiguration implements Configuration {
   @Override
   public int hashCode() {
     return Arrays.hashCode(configuration);
-  }
-
-  private String validateAndGet(Format format) {
-    Service.ServiceConfiguration configuration = getAsMessage(Service.ServiceConfiguration.class);
-    checkArgument(configuration.getFormat() == format,
-        "Expected configuration in %s format, but actual was %s",
-        format, configuration.getFormat());
-
-    return configuration.getValue();
   }
 }

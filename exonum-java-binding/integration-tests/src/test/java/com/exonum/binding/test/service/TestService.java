@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.testkit;
+package com.exonum.binding.test.service;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -30,10 +30,10 @@ import io.vertx.ext.web.Router;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-public class TestServiceStandardConfiguration extends AbstractService {
+public class TestService extends AbstractService {
 
   @Inject
-  protected TestServiceStandardConfiguration(ServiceInstanceSpec instanceSpec) {
+  protected TestService(ServiceInstanceSpec instanceSpec) {
     super(instanceSpec);
   }
 

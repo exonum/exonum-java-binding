@@ -86,7 +86,7 @@ final class TestKitTestUtils {
     assertThat(actualServiceId).isEqualTo(serviceId);
   }
 
-  static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,
+  private static void createArtifact(Path artifactLocation, ServiceArtifactId serviceArtifactId,
       Class serviceModule, Class<?>... artifactClasses) throws IOException {
     new ServiceArtifactBuilder()
         .setPluginId(serviceArtifactId.toString())

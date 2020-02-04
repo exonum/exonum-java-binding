@@ -19,13 +19,12 @@ package exonum.binding;
 option java_package = "com.exonum.binding.common.messages";
 
 /**
-TODO: move this file to exonum-proto-sources-repo
+TODO: ECR-4199 move this file to exonum-proto-sources-repo
 currently this action is blocked till native update to the latest revision
 */
 
-// An object for the service configuration which passed to `service#initialize` method.
-// It brings a possibility to configure a service using any of provided formats.
-// The format provides the type of the configuration encoded as string value.
+// Service configuration arguments in a text-based format.
+// The configuration string must be in one of the pre-defined formats.
 message ServiceConfiguration {
     enum Format {
         NONE = 0;
@@ -35,6 +34,8 @@ message ServiceConfiguration {
         JSON = 2;
         // Identifies that the given configuration represented as Properties,
         // i.e. `key=value` pairs.
+        // See the format specification in java.util.Properties:
+        // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Properties.html#load(java.io.Reader)
         PROPERTIES = 3;
     }
     Format format = 1;
