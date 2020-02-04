@@ -24,7 +24,7 @@ use exonum_merkledb::{
 };
 use jni::{
     objects::JClass,
-    sys::{jbyteArray, jlong, jstring},
+    sys::{jboolean, jbyteArray, jlong, jstring},
     JNIEnv,
 };
 
@@ -176,6 +176,22 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
         let metadata = self.clone().get_index_metadata(index_address)?;
         Ok(metadata.map(|metadata| metadata.identifier()))
     }
+}
+
+/// Returns `true` if the access allows changes in storage.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAccess_nativeCanModify(
+    env: JNIEnv,
+    _: JClass,
+    access_handle: Handle,
+) -> jboolean {
+    let res = panic::catch_unwind(|| {
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        let can_modify = access.is_mutable();
+        Ok(can_modify as jboolean)
+    });
+
+    utils::unwrap_exc_or_default(&env, res)
 }
 
 /// Returns the unique id of the index.
