@@ -24,7 +24,7 @@ use exonum_merkledb::{
 };
 use jni::{
     objects::JClass,
-    sys::{jbyteArray, jlong, jstring},
+    sys::{jboolean, jbyteArray, jlong, jstring},
     JNIEnv,
 };
 
@@ -178,6 +178,22 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
     }
 }
 
+/// Returns `true` if the access allows changes in storage.
+#[no_mangle]
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAccess_nativeCanModify(
+    env: JNIEnv,
+    _: JClass,
+    access_handle: Handle,
+) -> jboolean {
+    let res = panic::catch_unwind(|| {
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        let can_modify = access.is_mutable();
+        Ok(can_modify as jboolean)
+    });
+
+    utils::unwrap_exc_or_default(&env, res)
+}
+
 /// Returns the unique id of the index.
 ///
 /// Returns 0 if the index does not exist.
@@ -200,7 +216,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAcc
     utils::unwrap_exc_or(&env, res, 0 as jlong)
 }
 
-/// Destroys underlying `Snapshot` or `Fork` object and frees memory.
+/// Destroys the underlying `ErasedAccess` object and frees memory.
 #[no_mangle]
 pub extern "system" fn Java_com_exonum_binding_core_storage_database_Accesses_nativeFree(
     env: JNIEnv,

@@ -17,7 +17,6 @@
 package com.exonum.binding.core.blockchain;
 
 import com.exonum.binding.core.storage.database.Access;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.core.messages.Proofs.BlockProof;
 import com.exonum.core.messages.Proofs.IndexProof;
@@ -36,13 +35,11 @@ final class BlockchainProofs {
 
   /**
    * Creates a block proof for the block at the given height.
+   *
    * @param access a database access
    * @param height the height of the block
    */
-  static BlockProof createBlockProof(
-      /* todo: here snapshot is not strictly required — but shall we allow Forks (see the ticket) */
-      Access access,
-      long height) {
+  static BlockProof createBlockProof(Access access, long height) {
     byte[] blockProof = nativeCreateBlockProof(access.getAccessNativeHandle(), height);
     try {
       return BlockProof.parseFrom(blockProof);
@@ -53,10 +50,11 @@ final class BlockchainProofs {
 
   /**
    * Creates an index proof for the index with the given full name, as of the given snapshot.
-   * @param snapshot a database snapshot
+   *
+   * @param snapshot a snapshot-based database access
    * @param fullIndexName the full name of a proof index for which to create a proof
    */
-  static Optional<IndexProof> createIndexProof(Snapshot snapshot, String fullIndexName) {
+  static Optional<IndexProof> createIndexProof(Access snapshot, String fullIndexName) {
     // IndexProof for non-existent index is not supported because it doesn't make sense
     // to combine a proof from an uninitialized index (which is not aggregated) with
     // a proof of absence in the aggregating collection.
@@ -73,7 +71,13 @@ final class BlockchainProofs {
 
   static native byte[] nativeCreateBlockProof(long accessNativeHandle, long blockHeight);
 
-  @Nullable static native byte[] nativeCreateIndexProof(long snapshotNativeHandle,
+  /**
+   * Creates an index proof for the index with the given full name. If it does not exist
+   * or is not Merkelized, returns null.
+   *
+   * @throws RuntimeException if the access is not Snapshot-based
+   */
+  @Nullable static native byte[] nativeCreateIndexProof(long accessNativeHandle,
       String fullIndexName);
 
   private BlockchainProofs() {}

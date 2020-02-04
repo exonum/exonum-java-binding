@@ -18,6 +18,7 @@ package com.exonum.binding.core.blockchain;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
@@ -26,7 +27,7 @@ import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Prefixed;
-import com.exonum.binding.core.storage.database.ReadonlyFork;
+import com.exonum.binding.core.storage.database.RoErasedAccess;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
@@ -159,6 +160,26 @@ public final class BlockchainData extends AbstractNativeProxy {
   private static native long nativeFindServiceData(long bdNativeHandle, String serviceName);
 
   /**
+   * Creates an index proof for an index of the executing service given the index simple name.
+   *
+   * @param simpleIndexName the name of the index for which to create a proof
+   * @throws IllegalStateException if the blockchain data is not based on a snapshot,
+   *     because a state of a service index can be proved only for the latest committed block,
+   *     not for any intermediate state during transaction processing
+   * @throws IllegalArgumentException if the index with the given name does not exist;
+   *     or is not Merkelized. See {@link Blockchain#createIndexProof(String)} for details.
+   * @see Blockchain#createIndexProof(String)
+   */
+  public IndexProof createIndexProof(String simpleIndexName) {
+    String serviceName = nativeGetServiceName(getNativeHandle());
+    String fullIndexName = serviceName + "." + simpleIndexName;
+    return getBlockchain().createIndexProof(fullIndexName);
+  }
+
+  /** Returns the executing service instance name. */
+  private static native String nativeGetServiceName(long bdNativeHandle);
+
+  /**
    * Returns the blockchain schema (aka Exonum core schema).
    */
   public Blockchain getBlockchain() {
@@ -172,9 +193,9 @@ public final class BlockchainData extends AbstractNativeProxy {
     return new DispatcherSchema(getUnstructuredAccess());
   }
 
-  private ReadonlyFork getUnstructuredAccess() {
-    long roForkHandle = nativeGetUnstructuredAccess(getNativeHandle());
-    return ReadonlyFork.fromHandle(roForkHandle, cleaner);
+  private RoErasedAccess getUnstructuredAccess() {
+    long roAccessHandle = nativeGetUnstructuredAccess(getNativeHandle());
+    return RoErasedAccess.fromHandle(roAccessHandle, cleaner);
   }
 
   private static native long nativeGetUnstructuredAccess(long bdNativeHandle);

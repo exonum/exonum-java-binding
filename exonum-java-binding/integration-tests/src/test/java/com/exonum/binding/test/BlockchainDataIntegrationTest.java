@@ -27,10 +27,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
@@ -38,18 +40,20 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.fakeservice.FakeSchema;
 import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.core.messages.MapProofOuterClass.MapProof;
+import com.exonum.core.messages.MapProofOuterClass.OptionalEntry;
+import com.exonum.core.messages.Proofs;
 import com.exonum.core.messages.Runtime.InstanceState;
+import com.google.protobuf.ByteString;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
  * This test augments the IT from core, testing the aspects that are managed by the core:
  * accessing other service instances data.
  */
-@Disabled("ECR-4169")
 public class BlockchainDataIntegrationTest {
 
   private static final KeyPair KEY_PAIR = CryptoFunctions.ed25519().generateKeyPair();
@@ -138,6 +142,46 @@ public class BlockchainDataIntegrationTest {
     BlockchainData blockchainData = getBlockchainData(SERVICE_1_NAME);
     Optional<Prefixed> serviceData = blockchainData.findServiceData("non-existing");
     assertThat(serviceData).isEmpty();
+  }
+
+  @Test
+  void createIndexProof() {
+    // Setup the service 1 data, to initialize the test proof map.
+    TransactionMessage putTransaction = createPutTransaction(SERVICE_1_ID, "k1", "v1");
+    testKit.createBlockWithTransactions(putTransaction);
+
+    // Create the blockchainData for service 1
+    BlockchainData blockchainData = getBlockchainData(SERVICE_1_NAME);
+    // Request the proof for the service merkelized collection by simple name
+    String testMapName = "test-map";
+    IndexProof indexProof = blockchainData.createIndexProof(testMapName);
+
+    // Check the proof. Perform only basic verification — the proof creation is tested
+    // in Blockchain IT.
+    Prefixed serviceData = blockchainData.getExecutingServiceData();
+    FakeSchema serviceSchema = new FakeSchema(serviceData);
+    String expectedMapName = SERVICE_1_NAME + "." + testMapName;
+    HashCode expectedIndexHash = serviceSchema.testMap().getIndexHash();
+    OptionalEntry expectedEntry = OptionalEntry.newBuilder()
+        .setKey(ByteString.copyFromUtf8(expectedMapName))
+        .setValue(ByteString.copyFrom(expectedIndexHash.asBytes()))
+        .build();
+
+    Proofs.IndexProof proof = indexProof.getAsMessage();
+    MapProof aggregatingIndexProof = proof.getIndexProof();
+    assertThat(aggregatingIndexProof.getEntriesList()).containsExactly(expectedEntry);
+  }
+
+  @Test
+  void createIndexProofUninitialized() {
+    // Don't setup the service data, so that the test proof map remains uninitialized.
+    // Create the blockchainData for service 1
+    BlockchainData blockchainData = getBlockchainData(SERVICE_1_NAME);
+    // Request the proof for the service merkelized collection by simple name
+    String testMapName = "test-map";
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> blockchainData.createIndexProof(testMapName));
+    assertThat(e.getMessage()).containsIgnoringCase("does not exist");
   }
 
   @Test

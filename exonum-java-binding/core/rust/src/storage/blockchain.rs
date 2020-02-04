@@ -16,6 +16,7 @@ use {
 /// Returns IndexProof (serialized to protobuf) for specified index.
 ///
 /// Throws exception and returns null if passed `snapshot_handle` is Fork handle.
+///
 /// Returns null if
 /// - index is not initialized (index have not been used before calling the method)
 /// - index is not Merkelized

@@ -22,15 +22,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - Call Result Proof
     - Service Data Proof.
 
-  See [`Blockchain`][blockchain-proofs], `BlockProof` and `IndexProof`
+  See [`Blockchain`][blockchain-proofs] `BlockProof` and `IndexProof`
   for details. (#1355)
+    - Proofs for executing service can be created with 
+    `BlockchainData#createIndexProof` directly by the index simple name.
 - Support of creation of Protobuf-based proofs for maps and lists.
   Such proofs can be easily serialized using Protocol Buffers
   and sent to the light clients.
   See:
      - `ProofMapIndexProxy#getProof` and `MapProof`;
      - `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
-  `ListProof`;
+     `ListProof`;
      - [`Blockchain`][blockchain-proofs].
 - `ProofEntryIndexProxy` collection.
 - Transaction precondition utility methods,
@@ -50,7 +52,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   (see `BlockchainData#getExecutingServiceData`). (#1393)
 - `Prefixed` and `ReadonlyFork` database Accesses. (#1382, #1385)
 - `Service#beforeTranactions`.
-
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 
