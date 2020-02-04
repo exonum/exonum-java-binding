@@ -42,14 +42,12 @@ import com.exonum.core.messages.Runtime.InstanceState;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
  * This test augments the IT from core, testing the aspects that are managed by the core:
  * accessing other service instances data.
  */
-@Disabled("ECR-4169")
 public class BlockchainDataIntegrationTest {
 
   private static final KeyPair KEY_PAIR = CryptoFunctions.ed25519().generateKeyPair();
