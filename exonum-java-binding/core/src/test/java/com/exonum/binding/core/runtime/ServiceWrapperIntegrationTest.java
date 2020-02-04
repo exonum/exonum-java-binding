@@ -49,8 +49,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/*
+It is a unit test marked as IT because it loads classes with native methods (which, in turn,
+load the native library in static initializers).
+ */
 @ExtendWith(MockitoExtension.class)
-class ServiceWrapperTest {
+class ServiceWrapperIntegrationTest {
 
   private static final ServiceArtifactId TEST_ARTIFACT_ID =
       ServiceArtifactId.newJavaId("com.acme/foo", "1.2.3");

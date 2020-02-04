@@ -19,6 +19,7 @@ package com.exonum.binding.core.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,8 +34,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/*
+It is a unit test marked as IT because it loads classes with native methods (which, in turn,
+load the native library in static initializers).
+ */
 @ExtendWith(MockitoExtension.class)
-class ServiceNodeProxyTest {
+class ServiceNodeProxyIntegrationTest {
   private static final String SERVICE_NAME = "test-service";
   private static final RawTransaction TX = RawTransaction.newBuilder()
       .serviceId(1)
@@ -73,7 +78,7 @@ class ServiceNodeProxyTest {
     decorator.withBlockchainData(SNAPSHOT_FUNCTION);
 
     verify(node).withSnapshot(any(Function.class));
-    verify(blockchainDataFactory).fromRawAccess(any(Snapshot.class), SERVICE_NAME);
+    verify(blockchainDataFactory).fromRawAccess(any(Snapshot.class), eq(SERVICE_NAME));
   }
 
   @Test

@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -633,6 +634,9 @@ class ServiceRuntimeIntegrationTest {
       Snapshot snapshot = mock(Snapshot.class);
       OptionalInt validatorId = OptionalInt.of(1);
       long height = 2L;
+      BlockchainData blockchainData = mock(BlockchainData.class);
+      when(blockchainDataFactory.fromRawAccess(snapshot, TEST_NAME))
+          .thenReturn(blockchainData);
       doThrow(RuntimeException.class).when(serviceWrapper)
           .afterCommit(any(BlockCommittedEvent.class));
 
@@ -703,10 +707,14 @@ class ServiceRuntimeIntegrationTest {
           .next();
       doThrow(RuntimeException.class).when(service1).afterCommit(any(BlockCommittedEvent.class));
 
-      // Notify the runtime of the block commit
       Snapshot snapshot = mock(Snapshot.class);
+      BlockchainData blockchainData = mock(BlockchainData.class);
+      when(blockchainDataFactory.fromRawAccess(eq(snapshot), anyString()))
+          .thenReturn(blockchainData);
       OptionalInt validatorId = OptionalInt.of(1);
       long height = 2L;
+
+      // Notify the runtime of the block commit
       serviceRuntime.afterCommit(snapshot, validatorId, height);
 
       // Verify that each service got the notifications, i.e., the first service
