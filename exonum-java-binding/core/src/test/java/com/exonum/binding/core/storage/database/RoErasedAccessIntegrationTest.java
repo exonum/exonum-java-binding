@@ -24,11 +24,16 @@ import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
+import java.util.function.BiFunction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-class ReadonlyForkIntegrationTest {
+class RoErasedAccessIntegrationTest {
 
   private Cleaner cleaner;
   private TemporaryDb db;
@@ -46,7 +51,7 @@ class ReadonlyForkIntegrationTest {
   }
 
   @Test
-  void roForkCanAccessIndex() throws CloseFailuresException {
+  void roFromForkCanAccessIndex() throws CloseFailuresException {
     // Initialize an index in the database
     IndexAddress address = IndexAddress.valueOf("test");
     try (Cleaner forkCleaner = new Cleaner()) {
@@ -57,7 +62,7 @@ class ReadonlyForkIntegrationTest {
     }
 
     Fork fork = db.createFork(cleaner);
-    ReadonlyFork roFork = ReadonlyFork.fromFork(fork);
+    RoErasedAccess roFork = RoErasedAccess.fromRawAccess(fork);
 
     // Check the created index is accessible
     ProofEntryIndexProxy<String> entry = roFork.getProofEntry(address, string());
@@ -68,14 +73,26 @@ class ReadonlyForkIntegrationTest {
   }
 
   @Test
-  void roForkForbidsModifications() {
-    Fork fork = db.createFork(cleaner);
-    ReadonlyFork roFork = ReadonlyFork.fromFork(fork);
+  void roFromSnapshotCanAccessIndex() throws CloseFailuresException {
+    // Initialize an index in the database
+    IndexAddress address = IndexAddress.valueOf("test");
+    try (Cleaner forkCleaner = new Cleaner()) {
+      Fork fork = db.createFork(forkCleaner);
+      fork.getProofEntry(address, string())
+          .set("V1");
+      db.merge(fork);
+    }
 
-    ProofEntryIndexProxy<String> entry = roFork
-        .getProofEntry(IndexAddress.valueOf("test"), string());
+    Snapshot snapshot = db.createSnapshot(cleaner);
+    RoErasedAccess roSnapshot = RoErasedAccess.fromRawAccess(snapshot);
 
-    assertThrows(UnsupportedOperationException.class, () -> entry.set("V1"));
+    // Check the created index is accessible from roSnapshot
+    ProofEntryIndexProxy<String> entry = roSnapshot.getProofEntry(address, string());
+    assertThat(entry.get()).isEqualTo("V1");
+
+    // And remains accessible from the original
+    ProofEntryIndexProxy<String> entry2 = snapshot.getProofEntry(address, string());
+    assertThat(entry2.get()).isEqualTo("V1");
   }
 
   /*
@@ -84,15 +101,35 @@ class ReadonlyForkIntegrationTest {
   But, until that is needed, such limitation seems reasonable.
    */
   @Test
-  void roForkCannotAccessSameIndexesAsFork() {
+  void roFromForkCannotAccessSameIndexesAsOpenInFork() {
     IndexAddress address = IndexAddress.valueOf("test");
     Fork fork = db.createFork(cleaner);
     // Access the index
     fork.getProofEntry(address, string());
 
-    ReadonlyFork roFork = ReadonlyFork.fromFork(fork);
+    RoErasedAccess roFork = RoErasedAccess.fromRawAccess(fork);
     // Try to access it again — it is not possible/allowed
     assertThrows(RuntimeException.class,
         () -> roFork.getProofEntry(address, string()));
+  }
+
+  @ParameterizedTest
+  @MethodSource("accessConstructors")
+  void fromRawAccessForbidsModifications(
+      BiFunction<Database, Cleaner, AbstractAccess> accessCtor) {
+    AbstractAccess access = accessCtor.apply(db, cleaner);
+    RoErasedAccess roFork = RoErasedAccess.fromRawAccess(access);
+
+    ProofEntryIndexProxy<String> entry = roFork
+        .getProofEntry(IndexAddress.valueOf("test"), string());
+
+    assertThrows(UnsupportedOperationException.class, () -> entry.set("V1"));
+  }
+
+  private static Collection<BiFunction<Database, Cleaner, AbstractAccess>> accessConstructors() {
+    return ImmutableList.of(
+        Database::createFork,
+        Database::createSnapshot
+    );
   }
 }
