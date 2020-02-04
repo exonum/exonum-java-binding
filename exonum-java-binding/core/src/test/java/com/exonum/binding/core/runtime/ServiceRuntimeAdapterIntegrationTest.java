@@ -41,8 +41,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/*
+It is a unit test marked as IT because it loads classes with native methods (which, in turn,
+load the native library in static initializers).
+ */
 @ExtendWith(MockitoExtension.class)
-class ServiceRuntimeAdapterTest {
+class ServiceRuntimeAdapterIntegrationTest {
 
   private static final long SNAPSHOT_HANDLE = 0x0A;
   private static final long HEIGHT = 1;
