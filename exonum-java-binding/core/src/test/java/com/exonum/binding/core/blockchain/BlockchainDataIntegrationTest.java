@@ -80,6 +80,7 @@ class BlockchainDataIntegrationTest {
 
     Fork fork = db.createFork(cleaner);
     BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, serviceName);
+
     Prefixed serviceData1 = blockchainData.getExecutingServiceData();
     // Check the service data is accessible
     IndexAddress relativeAddress = IndexAddress.valueOf(simpleIndexName);
@@ -90,6 +91,31 @@ class BlockchainDataIntegrationTest {
     Prefixed serviceData2 = blockchainData.getExecutingServiceData();
     ProofEntryIndexProxy<String> entry2 = serviceData2.getProofEntry(relativeAddress, string());
     assertThat(entry2.get()).isEqualTo("V1");
+  }
+
+  @Test
+  void createIndexProofFromForkDisallowed() throws CloseFailuresException {
+    // Setup the service data, so that the index is initialized
+    String serviceName = "test-service";
+    String simpleIndexName = "test-list";
+    try (Cleaner cl = new Cleaner()) {
+      Fork fork = db.createFork(cl);
+
+      // Use the full index name
+      String fullIndexName = serviceName + "." + simpleIndexName;
+      fork.getProofList(IndexAddress.valueOf(fullIndexName), string())
+          .add("V1");
+
+      db.merge(fork);
+    }
+
+    // Try to use a fork to create a proof for that index
+    Fork fork = db.createFork(cleaner);
+    BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, "test-service");
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> blockchainData.createIndexProof(simpleIndexName));
+    assertThat(e).hasMessageFindingMatch("(?i)(Snapshot)|(Fork)");
   }
 
   @ParameterizedTest
