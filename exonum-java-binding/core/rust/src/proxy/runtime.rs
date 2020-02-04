@@ -267,8 +267,8 @@ impl Runtime for JavaRuntimeProxy {
 
     fn before_transactions(
         &self,
-        _context: ExecutionContext,
-        _instance_id: InstanceId,
+        context: ExecutionContext,
+        instance_id: InstanceId,
     ) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
             // FIXME: as mostly a copy-paste of after_txs, it needs BlockchainData just as well [ECR-4169]
