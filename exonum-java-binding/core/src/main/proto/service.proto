@@ -19,7 +19,7 @@ package exonum.binding;
 option java_package = "com.exonum.binding.common.messages";
 
 /**
-TODO: ECR-4199 move this file to exonum-proto-sources-repo
+TODO: ECR-4199 move this file to common module
 currently this action is blocked till native update to the latest revision
 */
 
