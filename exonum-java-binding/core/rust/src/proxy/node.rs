@@ -24,7 +24,7 @@ use exonum_merkledb::{ObjectHash, Snapshot};
 use failure;
 use futures::Future;
 use jni::objects::JClass;
-use jni::sys::{jbyteArray, jshort};
+use jni::sys::{jbyteArray, jint};
 use jni::JNIEnv;
 
 use std::{panic, ptr};
@@ -83,13 +83,13 @@ impl Node {
 /// - `arguments` - an array containing the transaction arguments
 /// - `instance_id` - an identifier of the service
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubmit(
+pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeSubmit(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
     arguments: jbyteArray,
-    instance_id: jshort,
-    method_id: jshort,
+    instance_id: jint,
+    method_id: jint,
 ) -> jbyteArray {
     use utils::convert_hash;
     let res = panic::catch_unwind(|| {
@@ -126,7 +126,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
 ///
 /// Returns a `Snapshot` of the database state
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeCreateSnapshot(
+pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeCreateSnapshot(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
@@ -142,7 +142,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeCrea
 
 /// Returns the public key of this node.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeGetPublicKey(
+pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeGetPublicKey(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
@@ -160,7 +160,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeGetP
 
 /// Destroys node context.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeFree(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
