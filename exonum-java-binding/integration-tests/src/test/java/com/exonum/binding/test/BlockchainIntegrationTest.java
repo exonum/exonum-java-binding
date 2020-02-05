@@ -42,6 +42,7 @@ import com.exonum.binding.common.message.SignedMessage;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.blockchain.proofs.BlockProof;
 import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -206,8 +207,9 @@ class BlockchainIntegrationTest {
     @Test
     void createIndexProof() {
       testKitTest(blockchain -> {
-        String testMapName = SERVICE_NAME + ".test-map";
-        IndexProof indexProof = blockchain.createIndexProof(testMapName);
+        String testMapName = "test-map";
+        String testMapFullName = SERVICE_NAME + "." + testMapName;
+        IndexProof indexProof = blockchain.createIndexProof(testMapFullName);
 
         // Check the index proof message
         Proofs.IndexProof proof = indexProof.getAsMessage();
@@ -220,12 +222,12 @@ class BlockchainIntegrationTest {
 
         // 2 Verify the aggregating index proof
         MapProof aggregatingIndexProof = proof.getIndexProof();
-        // It must have a single entry: (testMapName, indexHash(testMap))
-        Snapshot snapshot = testKit.getSnapshot();
-        FakeSchema serviceSchema = new FakeSchema(snapshot);
+        // It must have a single entry: (testMapFullName, indexHash(testMap))
+        BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+        FakeSchema serviceSchema = new FakeSchema(blockchainData.getExecutingServiceData());
         HashCode testMapHash = serviceSchema.testMap().getIndexHash();
         OptionalEntry expectedEntry = OptionalEntry.newBuilder()
-            .setKey(ByteString.copyFromUtf8(testMapName))
+            .setKey(ByteString.copyFromUtf8(testMapFullName))
             .setValue(ByteString.copyFrom(testMapHash.asBytes()))
             .build();
         assertThat(aggregatingIndexProof.getEntriesList()).containsExactly(expectedEntry);
