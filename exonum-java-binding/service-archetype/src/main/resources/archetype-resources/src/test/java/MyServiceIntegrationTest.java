@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package $
+package ${package};
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,8 +27,6 @@ import com.google.common.base.Strings;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
-
-{package};
 
 class MyServiceIntegrationTest {
 

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package $
+package ${package};
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.Prefixed;
-
-{package};
 
 /**
  * {@code MySchema} provides access to the tables of {@link MyService},
