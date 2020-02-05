@@ -239,7 +239,7 @@ impl Runtime for JavaRuntimeProxy {
         //   in some cases) with a single protobuf message or other alternative [ECR-3872]
         let tx_info: (InstanceId, Hash, PublicKey) = match context.caller() {
             Caller::Transaction { author: author_pk } => {
-                (0, context.transaction_hash().unwrap(), author_pk.clone())
+                (0, context.transaction_hash().unwrap(), *author_pk)
             }
             Caller::Service {
                 instance_id: caller_id,

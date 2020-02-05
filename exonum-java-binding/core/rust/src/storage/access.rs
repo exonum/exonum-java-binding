@@ -35,6 +35,8 @@ use utils;
 
 /// Prolongs lifetime of the GenericRawAccess.
 ///
+/// # Safety
+///
 /// The caller is responsible for validation of lifetime of the passed `raw_access`.
 pub(crate) unsafe fn into_erased_access<'a, T>(raw_access: T) -> ErasedAccess<'static>
 where
