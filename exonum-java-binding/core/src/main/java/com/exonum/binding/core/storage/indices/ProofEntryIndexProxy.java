@@ -28,8 +28,6 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.util.LibraryLoader;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 /**
  * A proxy of a native MerkleDB ProofEntry.
@@ -38,14 +36,12 @@ import java.util.Optional;
  *
  * @param <T> the type of an element in this entry
  */
-public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
+public final class ProofEntryIndexProxy<T> extends AbstractEntryIndexProxy<T> implements
     ProofEntryIndex<T> {
 
   static {
     LibraryLoader.load();
   }
-
-  private final CheckingSerializerDecorator<T> serializer;
 
   /**
    * Creates a new Entry.
@@ -90,29 +86,7 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
 
   private ProofEntryIndexProxy(NativeHandle nativeHandle, IndexAddress address,
       AbstractAccess access, CheckingSerializerDecorator<T> serializer) {
-    super(nativeHandle, address, access);
-    this.serializer = serializer;
-  }
-
-  @Override
-  public void set(T value) {
-    notifyModified();
-    byte[] valueBytes = serializer.toBytes(value);
-    nativeSet(getNativeHandle(), valueBytes);
-  }
-
-  @Override
-  public boolean isPresent() {
-    return nativeIsPresent(getNativeHandle());
-  }
-
-  @Override
-  public T get() {
-    byte[] value = nativeGet(getNativeHandle());
-    if (value == null) {
-      throw new NoSuchElementException("No value in this entry");
-    }
-    return serializer.fromBytes(value);
+    super(nativeHandle, address, access, serializer);
   }
 
   @Override
@@ -120,32 +94,22 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
     return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
 
-  @Override
-  public void remove() {
-    notifyModified();
-    nativeRemove(getNativeHandle());
-  }
-
-  @Override
-  public Optional<T> toOptional() {
-    if (isPresent()) {
-      return Optional.of(get());
-    } else {
-      return Optional.empty();
-    }
-  }
-
   private static native long nativeCreate(String name, long accessNativeHandle);
 
-  private native void nativeSet(long nativeHandle, byte[] value);
+  @Override
+  protected native void nativeSet(long nativeHandle, byte[] value);
 
-  private native boolean nativeIsPresent(long nativeHandle);
+  @Override
+  protected native boolean nativeIsPresent(long nativeHandle);
 
-  private native byte[] nativeGet(long nativeHandle);
+  @Override
+  protected native byte[] nativeGet(long nativeHandle);
 
-  private native byte[] nativeGetIndexHash(long nativeHandle);
+  @Override
+  protected native byte[] nativeGetIndexHash(long nativeHandle);
 
-  private native void nativeRemove(long nativeHandle);
+  @Override
+  protected native void nativeRemove(long nativeHandle);
 
   private static native void nativeFree(long nativeHandle);
 }
