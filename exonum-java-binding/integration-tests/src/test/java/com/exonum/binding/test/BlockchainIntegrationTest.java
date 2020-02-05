@@ -192,7 +192,7 @@ class BlockchainIntegrationTest {
         // 2 Verify the proof: the precommit messages
         assertThat(proof.getPrecommitsList()).hasSize(VALIDATOR_COUNT);
         // Check the precommit message from the single validator
-        Messages.SignedMessage rawPrecommitMessage = proof.getPrecommits(0).getRaw();
+        Messages.SignedMessage rawPrecommitMessage = proof.getPrecommits(0);
         SignedMessage rawPrecommit = SignedMessage.fromProto(rawPrecommitMessage);
         ExonumMessage payload = rawPrecommit.getPayload();
         assertThat(payload.getKindCase()).isEqualTo(KindCase.PRECOMMIT);
