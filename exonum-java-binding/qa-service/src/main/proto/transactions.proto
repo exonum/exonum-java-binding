@@ -11,7 +11,7 @@ message CreateCounterTxBody {
 
 message IncrementCounterTxBody {
   uint64 seed = 1;
-  bytes counterId = 2;
+  string counterName = 3;
 }
 
 message ThrowingTxBody {

@@ -16,7 +16,6 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_CONSENSUS_CONFIGURATION_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
@@ -38,14 +37,12 @@ import static com.exonum.binding.qaservice.TransactionMessages.createUnknownTx;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_OK;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
@@ -118,17 +115,14 @@ class QaServiceImplTest {
       Optional<String> timeService = schema.timeOracleName().toOptional();
       assertThat(timeService).hasValue(timeServiceName);
 
-      // Check that both the default and afterCommit counters were created.
-      MapIndex<HashCode, Long> counters = schema.counters();
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
+      // Check that all the default counters were created.
+      MapIndex<String, Long> counters = schema.counters();
 
-      HashCode defaultCounterId = sha256().hashString(DEFAULT_COUNTER_NAME, UTF_8);
-      HashCode afterCommitCounterId = sha256().hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
-
-      assertThat(counters.get(defaultCounterId)).isEqualTo(0L);
-      assertThat(counterNames.get(defaultCounterId)).isEqualTo(DEFAULT_COUNTER_NAME);
-      assertThat(counters.get(afterCommitCounterId)).isEqualTo(0L);
-      assertThat(counterNames.get(afterCommitCounterId)).isEqualTo(AFTER_COMMIT_COUNTER_NAME);
+      assertThat(counters.get(DEFAULT_COUNTER_NAME)).isEqualTo(0L);
+      assertThat(counters.get(AFTER_COMMIT_COUNTER_NAME)).isEqualTo(0L);
+      assertThat(counters.get(BEFORE_TXS_COUNTER_NAME)).isEqualTo(0L);
+      // This one is immediately incremented for genesis-created QA service
+      assertThat(counters.get(AFTER_TXS_COUNTER_NAME)).isEqualTo(1L);
     }
   }
 
@@ -152,12 +146,8 @@ class QaServiceImplTest {
       qaService.resume(blockchainData, arguments);
 
       QaSchema schema = new QaSchema(blockchainData);
-      MapIndex<HashCode, Long> counters = schema.counters();
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
-      HashCode counterId = sha256().hashString(counterName, UTF_8);
-
-      assertThat(counters.get(counterId)).isEqualTo(0L);
-      assertThat(counterNames.get(counterId)).isEqualTo(counterName);
+      MapIndex<String, Long> counters = schema.counters();
+      assertThat(counters.get(counterName)).isEqualTo(0L);
     }
   }
 
@@ -241,12 +231,8 @@ class QaServiceImplTest {
   private static void checkCounter(TestKit testkit, String counterName, long expectedValue) {
     BlockchainData snapshot = testkit.getBlockchainData(QA_SERVICE_NAME);
     QaSchema schema = new QaSchema(snapshot);
-    MapIndex<HashCode, Long> counters = schema.counters();
-    MapIndex<HashCode, String> counterNames = schema.counterNames();
-    HashCode counterId = sha256().hashString(counterName, UTF_8);
-
-    assertThat(counters.get(counterId)).isEqualTo(expectedValue);
-    assertThat(counterNames.get(counterId)).isEqualTo(counterName);
+    MapIndex<String, Long> counters = schema.counters();
+    assertThat(counters.get(counterName)).isEqualTo(expectedValue);
   }
 
   @Nested
@@ -268,9 +254,8 @@ class QaServiceImplTest {
     void submitIncrementCounter(TestKit testKit, VertxTestContext context) {
       // Send 'submitIncrementCounter' request
       String counterName = "test counter";
-      HashCode counterId = sha256().hashString(counterName, UTF_8);
       long seed = 17L;
-      MultiMap params = multiMap("counterId", counterId.toString(),
+      MultiMap params = multiMap("counterName", counterName,
           "seed", Long.toString(seed));
 
       post(SUBMIT_INCREMENT_COUNTER_TX_PATH)
@@ -282,7 +267,7 @@ class QaServiceImplTest {
             List<TransactionMessage> transactionPool = testKit.getTransactionPool();
 
             KeyPair expectedAuthor = testKit.getEmulatedNode().getServiceKeyPair();
-            TransactionMessage expectedMessage = createIncrementCounterTx(seed, counterId,
+            TransactionMessage expectedMessage = createIncrementCounterTx(seed, counterName,
                 QA_SERVICE_ID, expectedAuthor);
 
             assertThat(transactionPool).contains(expectedMessage);
@@ -319,8 +304,7 @@ class QaServiceImplTest {
       testKit.createBlockWithTransactions(createCounterTransaction);
 
       // Request its value
-      HashCode counterId = sha256().hashString(counterName, UTF_8);
-      get("counter/" + counterId)
+      get("counter/" + counterName)
           .send(context.succeeding(response -> context.verify(() -> {
             // Verify the response
             assertThat(response.statusCode()).isEqualTo(HTTP_OK);
@@ -334,9 +318,8 @@ class QaServiceImplTest {
 
     @Test
     void getValueNoSuchCounter(VertxTestContext context) {
-      HashCode counterId = sha256().hashString("Unknown counter", UTF_8);
       // Check there is no such counter
-      get("counter/" + counterId)
+      get("counter/unknown")
           .send(context.succeeding(response -> context.verify(() -> {
             // Verify the response
             assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);

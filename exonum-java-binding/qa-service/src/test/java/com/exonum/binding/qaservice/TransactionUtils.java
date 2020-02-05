@@ -16,9 +16,6 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.BlockchainData;
@@ -45,10 +42,7 @@ final class TransactionUtils {
 
   /** Creates a counter in the storage with the given name and initial value. */
   static void createCounter(QaSchema schema, String name, Long initialValue) {
-    HashCode nameHash = defaultHashFunction().hashString(name, UTF_8);
-    MapIndex<HashCode, Long> counters = schema.counters();
-    MapIndex<HashCode, String> counterNames = schema.counterNames();
-    counters.put(nameHash, initialValue);
-    counterNames.put(nameHash, name);
+    MapIndex<String, Long> counters = schema.counters();
+    counters.put(name, initialValue);
   }
 }

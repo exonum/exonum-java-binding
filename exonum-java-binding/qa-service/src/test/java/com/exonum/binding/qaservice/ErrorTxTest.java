@@ -128,8 +128,7 @@ class ErrorTxTest {
       assertThrows(ExecutionException.class, () -> qaService.error(arguments, context));
 
       // Check that it has cleared the maps
-      assertThat(schema.counters().isEmpty()).isTrue();
-      assertThat(schema.counterNames().isEmpty()).isTrue();
+      assertTrue(schema.counters().isEmpty());
     }
   }
 
