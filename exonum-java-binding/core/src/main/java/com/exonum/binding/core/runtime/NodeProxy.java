@@ -66,7 +66,6 @@ public final class NodeProxy extends AbstractCloseableNativeProxy {
    * @param serviceId an identifier of the service
    * @param transactionId an identifier of the transaction
    */
-  // todo: fix the native impl to work with int ids
   private static native byte[] nativeSubmit(long nodeHandle, byte[] payload, int serviceId,
       int transactionId);
 

@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::generic::{ErasedAccess, GenericAccess, GenericRawAccess};
+use exonum_merkledb::{
+    generic::{ErasedAccess, GenericAccess},
+    AsReadonly,
+};
 use jni::{objects::JClass, JNIEnv};
 
 use std::panic;
@@ -31,24 +34,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_RoErasedAcc
     let res = panic::catch_unwind(|| {
         let access = handle::cast_handle::<ErasedAccess>(access_handle);
         let readonly_access = match access {
-            GenericAccess::Raw(raw) => match raw {
-                GenericRawAccess::Fork(fork) => {
-                    let ro_fork = fork.readonly();
-                    unsafe { into_erased_access(ro_fork) }
-                }
-                GenericRawAccess::OwnedFork(fork) => {
-                    let ro_fork = fork.readonly();
-                    unsafe { into_erased_access(ro_fork) }
-                }
-                GenericRawAccess::OwnedSnapshot(snapshot) => {
-                    let raw_access = GenericRawAccess::OwnedSnapshot(snapshot.clone());
-                    unsafe { into_erased_access(raw_access) }
-                }
-                _ => panic!(
-                    "Attempt to create readonly Access from an unsupported type: {:?}",
-                    access
-                ),
-            },
+            GenericAccess::Raw(raw) => {
+                let readonly_access = raw.as_readonly();
+                unsafe { into_erased_access(readonly_access) }
+            }
             _ => panic!(
                 "Attempt to create readonly Access from an unsupported type: {:?}",
                 access

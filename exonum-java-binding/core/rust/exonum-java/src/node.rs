@@ -45,10 +45,12 @@ pub fn run_node(command: Command) -> Result<(), failure::Error> {
 fn create_node(config: Config) -> Result<Node, failure::Error> {
     let database = create_database(&config)?;
     let node_config: CoreNodeConfig = config.run_config.node_config.clone().into();
+    let node_keys = config.run_config.node_keys.clone();
     let genesis_config = create_genesis_config(&config);
     let config_manager = DefaultConfigManager::new(config.run_config.node_config_path.clone());
 
-    let node = NodeBuilder::new(database, node_config, genesis_config)
+    let node = NodeBuilder::new(database, node_config, node_keys)
+        .with_genesis_config(genesis_config)
         .with_runtime_fn(|api| create_rust_runtime(api))
         .with_runtime(create_java_runtime(&config))
         .with_config_manager(config_manager)

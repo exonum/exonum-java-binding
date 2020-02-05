@@ -148,7 +148,7 @@ class BlockchainDataIntegrationTest {
     Fork fork = db.createFork(cleaner);
     BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, "test-service");
 
-    Exception e = assertThrows(IllegalArgumentException.class,
+    Exception e = assertThrows(RuntimeException.class,
         () -> blockchainData.createIndexProof(simpleIndexName));
     assertThat(e).hasMessageFindingMatch("(?i)(Snapshot)|(Fork)");
   }

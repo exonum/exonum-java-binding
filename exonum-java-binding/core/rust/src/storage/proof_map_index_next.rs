@@ -17,7 +17,7 @@ use std::{panic, ptr};
 use exonum::merkledb::{
     access::AccessExt,
     generic::{ErasedAccess, GenericRawAccess},
-    indexes::proof_map::{Iter as IndexIter, Keys, Values},
+    indexes::{Entries as IndexIter, Keys, Values},
     ObjectHash, ProofMapIndex,
 };
 use jni::{

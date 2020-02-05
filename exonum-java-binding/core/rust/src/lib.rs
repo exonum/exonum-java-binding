@@ -45,13 +45,14 @@ pub extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
 
+extern crate exonum_crypto;
 extern crate exonum_testkit;
 extern crate exonum_time;
 extern crate futures;
 #[cfg(test)]
 extern crate tempfile;
 
-pub use exonum::exonum_merkledb;
+pub use exonum::merkledb as exonum_merkledb;
 
 mod cmd;
 pub mod handle;

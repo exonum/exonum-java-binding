@@ -94,7 +94,7 @@ public enum BlockSerializer implements Serializer<Block> {
 
   @VisibleForTesting
   static ImmutableMap<String, ByteString> toHeadersMap(AdditionalHeaders headers) {
-    return headers.getHeaders().getEntryList()
+    return headers.getHeaders().getEntriesList()
         .stream()
         .collect(toImmutableMap(KeyValue::getKey, KeyValue::getValue));
   }
@@ -103,7 +103,7 @@ public enum BlockSerializer implements Serializer<Block> {
   static AdditionalHeaders toHeadersProto(ImmutableMap<String, ByteString> headers) {
     Builder additionalHeadersBuilder = KeyValueSequence.newBuilder();
 
-    headers.forEach((k, v) -> additionalHeadersBuilder.addEntry(toProtoEntry(k, v)));
+    headers.forEach((k, v) -> additionalHeadersBuilder.addEntries(toProtoEntry(k, v)));
 
     return AdditionalHeaders.newBuilder()
         .setHeaders(additionalHeadersBuilder.build())

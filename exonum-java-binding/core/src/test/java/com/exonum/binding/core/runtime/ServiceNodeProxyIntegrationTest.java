@@ -19,13 +19,11 @@ package com.exonum.binding.core.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.core.blockchain.BlockchainData;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +76,6 @@ class ServiceNodeProxyIntegrationTest {
     decorator.withBlockchainData(SNAPSHOT_FUNCTION);
 
     verify(node).withSnapshot(any(Function.class));
-    verify(blockchainDataFactory).fromRawAccess(any(Snapshot.class), eq(SERVICE_NAME));
   }
 
   @Test

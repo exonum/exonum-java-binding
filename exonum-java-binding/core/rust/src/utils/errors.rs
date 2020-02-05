@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use exonum::exonum_merkledb::Error as DatabaseError;
+use exonum::merkledb::Error as DatabaseError;
 use jni::{objects::JObject, signature::JavaType, JNIEnv};
 
 use std::{any::Any, cell::Cell, error::Error, result, thread};

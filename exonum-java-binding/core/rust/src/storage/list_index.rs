@@ -17,7 +17,7 @@ use std::{panic, ptr};
 use exonum_merkledb::{
     access::AccessExt,
     generic::{ErasedAccess, GenericRawAccess},
-    indexes::list::Iter,
+    indexes::Values as Iter,
     ListIndex,
 };
 use jni::{

@@ -24,7 +24,7 @@ use exonum_merkledb::{ObjectHash, Snapshot};
 use failure;
 use futures::Future;
 use jni::objects::JClass;
-use jni::sys::{jbyteArray, jshort};
+use jni::sys::{jbyteArray, jint};
 use jni::JNIEnv;
 
 use std::{panic, ptr};
@@ -57,14 +57,14 @@ impl Node {
 
     #[doc(hidden)]
     pub fn public_key(&self) -> PublicKey {
-        self.blockchain.service_keypair().0
+        self.blockchain.service_keypair().public_key()
     }
 
     #[doc(hidden)]
     pub fn submit(&self, tx: AnyTx) -> Result<Hash, failure::Error> {
-        let (pub_key, secret_key) = self.blockchain.service_keypair();
+        let keypair = self.blockchain.service_keypair();
 
-        let verified = Verified::from_value(tx, pub_key.to_owned(), secret_key);
+        let verified = Verified::from_value(tx, keypair.public_key(), keypair.secret_key());
         let tx_hash = verified.object_hash();
         // TODO(ECR-3679): check Core behaviour/any errors on service inactivity
         self.blockchain
@@ -83,13 +83,13 @@ impl Node {
 /// - `arguments` - an array containing the transaction arguments
 /// - `instance_id` - an identifier of the service
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubmit(
+pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeSubmit(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
     arguments: jbyteArray,
-    instance_id: jshort,
-    method_id: jshort,
+    instance_id: jint,
+    method_id: jint,
 ) -> jbyteArray {
     use utils::convert_hash;
     let res = panic::catch_unwind(|| {
@@ -97,14 +97,9 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
         let hash = unwrap_jni_verbose(
             &env,
             || -> JniResult<jbyteArray> {
+                let call_info = CallInfo::new(instance_id as u32, method_id as u32);
                 let args = env.convert_byte_array(arguments)?;
-                let tx = AnyTx {
-                    call_info: CallInfo {
-                        instance_id: instance_id as u32,
-                        method_id: method_id as u32,
-                    },
-                    arguments: args,
-                };
+                let tx = AnyTx::new(call_info, args);
 
                 match node.submit(tx) {
                     Ok(tx_hash) => convert_hash(&env, &tx_hash),
@@ -132,7 +127,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeSubm
 ///
 /// Returns a `Snapshot` of the database state
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeCreateSnapshot(
+pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeCreateSnapshot(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
@@ -148,7 +143,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeCrea
 
 /// Returns the public key of this node.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeGetPublicKey(
+pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeGetPublicKey(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
@@ -166,7 +161,7 @@ pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeGetP
 
 /// Destroys node context.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_service_NodeProxy_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeFree(
     env: JNIEnv,
     _: JClass,
     node_handle: Handle,
