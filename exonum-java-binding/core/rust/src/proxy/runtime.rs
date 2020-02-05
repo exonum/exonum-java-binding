@@ -37,7 +37,7 @@ use std::fmt;
 
 use {
     runtime::{jni_call_default, jni_call_transaction, Error},
-    storage::{into_erased_access, blockchain_data_from_execution_context},
+    storage::{blockchain_data_from_execution_context, into_erased_access},
     to_handle,
     utils::{jni_cache::runtime_adapter, panic_on_exception, proto_to_java_bytes, unwrap_jni},
     Node,

@@ -97,8 +97,9 @@ pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeSubm
         let hash = unwrap_jni_verbose(
             &env,
             || -> JniResult<jbyteArray> {
+                let call_info = CallInfo::new(instance_id as u32, method_id as u32);
                 let args = env.convert_byte_array(arguments)?;
-                let tx = AnyTx::new(CallInfo::new(instance_id as u32, method_id as u32), args);
+                let tx = AnyTx::new(call_info, args);
 
                 match node.submit(tx) {
                     Ok(tx_hash) => convert_hash(&env, &tx_hash),

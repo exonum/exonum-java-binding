@@ -78,10 +78,9 @@ fn submit_transaction_to_missing_service() {
 }
 
 fn create_transaction(instance_id: u32) -> AnyTx {
-    AnyTx::new(
-        CallInfo::new(instance_id, TEST_TRANSACTION_ID),
-        TEST_TRANSACTION_PAYLOAD.to_vec(),
-    )
+    let call_info = CallInfo::new(instance_id, TEST_TRANSACTION_ID);
+    let tx_args = TEST_TRANSACTION_PAYLOAD.to_vec();
+    AnyTx::new(call_info, tx_args)
 }
 
 fn create_node(keypair: (PublicKey, SecretKey)) -> (Node, Receiver<Verified<AnyTx>>) {
