@@ -228,8 +228,8 @@ class TestKitTest {
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       // Check that configuration value is used in initialization
-      Snapshot view = testKit.getSnapshot();
-      TestSchema testSchema = new TestSchema(view);
+      BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+      TestSchema testSchema = new TestSchema(blockchainData.getExecutingServiceData());
       ProofMapIndexProxy<String, String> testProofMap = testSchema.testMap();
       Map<String, String> testMap = toMap(testProofMap);
       Map<String, String> expected = ImmutableMap.of(
@@ -291,15 +291,15 @@ class TestKitTest {
   }
 
   private void checkTestServiceInitialization(TestKit testKit, String serviceName, int serviceId) {
-    Snapshot view = testKit.getSnapshot();
+    BlockchainData blockchainData = testKit.getBlockchainData(serviceName);
     // Check that genesis block was committed
-    checkGenesisBlockCommit(view);
+    checkGenesisBlockCommit(blockchainData.getBlockchain());
 
     // Check that service appears in dispatcher schema
     checkIfServiceEnabled(testKit, serviceName, serviceId);
 
     // Check that initialization changed database state
-    TestSchema testSchema = new TestSchema(view);
+    TestSchema testSchema = new TestSchema(blockchainData.getExecutingServiceData());
     ProofMapIndexProxy<String, String> testProofMap = testSchema.testMap();
     Map<String, String> testMap = toMap(testProofMap);
     Map<String, String> expected = ImmutableMap.of(
@@ -310,14 +310,14 @@ class TestKitTest {
   private void checkTestService2Initialization(TestKit testKit, String serviceName,
                                                int serviceId) {
     // Check that genesis block was committed
-    checkGenesisBlockCommit(testKit.getSnapshot());
+    Snapshot snapshot = testKit.getSnapshot();
+    checkGenesisBlockCommit(Blockchain.newInstance(snapshot));
 
     // Check that service appears in dispatcher schema
     checkIfServiceEnabled(testKit, serviceName, serviceId);
   }
 
-  private void checkGenesisBlockCommit(Snapshot view) {
-    Blockchain blockchain = Blockchain.newInstance(view);
+  private void checkGenesisBlockCommit(Blockchain blockchain) {
     assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
