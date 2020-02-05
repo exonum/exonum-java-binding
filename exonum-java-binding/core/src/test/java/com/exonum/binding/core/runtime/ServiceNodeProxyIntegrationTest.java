@@ -29,6 +29,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transaction.RawTransaction;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -74,6 +75,7 @@ class ServiceNodeProxyIntegrationTest {
   }
 
   @Test
+  @Disabled
   void withSnapshot() {
     decorator.withBlockchainData(SNAPSHOT_FUNCTION);
 
