@@ -35,10 +35,9 @@ use jni::{
 
 use std::fmt;
 
-use blockchain_data_from_execution_context;
 use {
     runtime::{jni_call_default, jni_call_transaction, Error},
-    storage::into_erased_access,
+    storage::{into_erased_access, blockchain_data_from_execution_context},
     to_handle,
     utils::{jni_cache::runtime_adapter, panic_on_exception, proto_to_java_bytes, unwrap_jni},
     Node,
@@ -138,6 +137,7 @@ impl Runtime for JavaRuntimeProxy {
         artifact_id: &ArtifactId,
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
+        // TODO: change Java API to accept ArtifactId, not InstanceSpec
         let spec = InstanceSpec::new(
             context.instance().id,
             context.instance().name.clone(),
@@ -170,6 +170,7 @@ impl Runtime for JavaRuntimeProxy {
         artifact_id: &ArtifactId,
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
+        // TODO: change Java API to accept ArtifactId, not InstanceSpec
         let spec = InstanceSpec::new(
             context.instance().id,
             context.instance().name.clone(),

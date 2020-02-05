@@ -1,4 +1,5 @@
 use exonum_merkledb::generic::{ErasedAccess, GenericAccess, GenericRawAccess};
+use exonum_rust_runtime::ExecutionContext;
 use jni::{
     objects::{JClass, JObject},
     sys::jstring,
@@ -7,7 +8,6 @@ use jni::{
 
 use std::panic;
 
-use exonum_rust_runtime::ExecutionContext;
 use {
     handle::{self, Handle},
     utils,
