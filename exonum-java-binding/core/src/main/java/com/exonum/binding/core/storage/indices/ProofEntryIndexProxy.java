@@ -27,32 +27,19 @@ import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Access;
-import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.util.LibraryLoader;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * An Entry is a database index that can contain no or a single value.
- *
- * <p>An Entry is analogous to {@link java.util.Optional}, but provides modifying ("destructive")
- * operations when created with a {@link Fork}.
- * Such methods are specified to throw {@link UnsupportedOperationException} if
- * the entry is created with a {@link Snapshot} — a read-only database access.
- *
- * <p>All method arguments are non-null by default.
+ * A proxy of a native MerkleDB ProofEntry.
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
- * <p>When the access goes out of scope, this entry is destroyed. Subsequent use of the closed entry
- * is prohibited and will result in {@link IllegalStateException}.
- *
  * @param <T> the type of an element in this entry
- *
- * @see Access
  */
-public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements HashableIndex {
+public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
+    ProofEntryIndex<T> {
 
   static {
     LibraryLoader.load();
@@ -107,37 +94,19 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
     this.serializer = serializer;
   }
 
-  /**
-   * Sets a new value of the entry, overwriting the previous value.
-   *
-   * @param value a value to set. Must not be null.
-   * @throws UnsupportedOperationException if the entry is read-only
-   * @throws IllegalStateException if the proxy is invalid
-   */
+  @Override
   public void set(T value) {
     notifyModified();
     byte[] valueBytes = serializer.toBytes(value);
     nativeSet(getNativeHandle(), valueBytes);
   }
 
-  /**
-   * Returns true if this entry exists in the database.
-   *
-   * @throws IllegalStateException if the proxy is invalid.
-   */
+  @Override
   public boolean isPresent() {
     return nativeIsPresent(getNativeHandle());
   }
 
-  /**
-   * If value is present in the entry, returns it, otherwise,
-   * throws {@link NoSuchElementException}.
-   *
-   * @return a non-null value
-   * @throws NoSuchElementException if a value is not present in the Entry
-   * @throws IllegalStateException if the proxy is invalid
-   * @throws IllegalArgumentException if the supplied serializer cannot decode the value
-   */
+  @Override
   public T get() {
     byte[] value = nativeGet(getNativeHandle());
     if (value == null) {
@@ -146,48 +115,18 @@ public final class ProofEntryIndexProxy<T> extends AbstractIndexProxy implements
     return serializer.fromBytes(value);
   }
 
-  /**
-   * Returns the index hash which represents the complete state of this entry.
-   * Any modifications to this entry affect the index hash.
-   *
-   * <p>The entry index hash is computed as SHA-256 of the entry binary representation, or
-   * a hash of zeroes if the entry is not set.
-   *
-   * @throws IllegalStateException if the proxy is invalid
-   */
   @Override
   public HashCode getIndexHash() {
     return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
 
-  /**
-   * Removes a value from this entry.
-   *
-   * @throws UnsupportedOperationException if the entry is read-only.
-   * @throws IllegalStateException if the proxy is invalid
-   */
+  @Override
   public void remove() {
     notifyModified();
     nativeRemove(getNativeHandle());
   }
 
-  /**
-   * Converts the entry to {@link java.util.Optional}.
-   *
-   * <p>Be aware that this method represents a state of the entry at the time
-   * of calling. And the returned value won't reflect the entry changes:
-   * <pre>
-   *  {@code
-   *    entry.set("foo");
-   *    Optional<String> optionalEntry = entry.toOptional();
-   *    entry.remove();
-   *    optionalEntry.get(); // -> returns "foo"
-   *  }
-   * </pre>
-   *
-   * @return {@code Optional.of(value)} if value is present in the entry,
-   *        otherwise returns {@code Optional.empty()}
-   */
+  @Override
   public Optional<T> toOptional() {
     if (isPresent()) {
       return Optional.of(get());
