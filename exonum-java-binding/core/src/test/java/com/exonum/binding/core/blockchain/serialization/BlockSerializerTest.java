@@ -101,8 +101,8 @@ class BlockSerializerTest {
         .build();
     AdditionalHeaders expected = AdditionalHeaders.newBuilder()
         .setHeaders(KeyValueSequence.newBuilder()
-            .addEntry(first)
-            .addEntry(second)
+            .addEntries(first)
+            .addEntries(second)
             .build())
         .build();
 
