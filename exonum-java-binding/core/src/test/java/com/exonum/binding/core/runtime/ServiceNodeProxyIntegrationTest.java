@@ -75,7 +75,7 @@ class ServiceNodeProxyIntegrationTest {
   }
 
   @Test
-  @Disabled
+  @Disabled("ECR-3828")
   void withSnapshot() {
     decorator.withBlockchainData(SNAPSHOT_FUNCTION);
 
