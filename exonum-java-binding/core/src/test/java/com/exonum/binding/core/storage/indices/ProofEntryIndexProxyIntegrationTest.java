@@ -59,9 +59,4 @@ public class ProofEntryIndexProxyIntegrationTest
     IndexAddress address = IndexAddress.valueOf(name);
     return access.getProofEntry(address, SERIALIZER);
   }
-
-  @Override
-  ProofEntryIndexProxy<String> createInGroup(String groupName, byte[] idInGroup, Access access) {
-    return null; // Entry index does not support groups
-  }
 }

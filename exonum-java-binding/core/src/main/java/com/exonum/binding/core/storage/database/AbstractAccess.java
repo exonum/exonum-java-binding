@@ -22,6 +22,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
+import com.exonum.binding.core.storage.indices.EntryIndex;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
@@ -136,6 +137,11 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
   public <E> ProofEntryIndexProxy<E> getProofEntry(IndexAddress address, Serializer<E> serializer) {
     return findOrCreate(address, ProofEntryIndexProxy.class,
         () -> ProofEntryIndexProxy.newInstance(address, this, serializer));
+  }
+
+  @Override
+  public <E> EntryIndex<E> getEntry(IndexAddress address, Serializer<E> serializer) {
+    return null;
   }
 
   private <T extends StorageIndex> T findOrCreate(IndexAddress address, Class<T> indexType,

@@ -19,6 +19,7 @@ package com.exonum.binding.core.storage.database;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
+import com.exonum.binding.core.storage.indices.EntryIndex;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
@@ -166,6 +167,17 @@ public interface Access {
    * @see StandardSerializers
    */
   <E> ProofEntryIndexProxy<E> getProofEntry(IndexAddress address, Serializer<E> serializer);
+
+  /**
+   * Creates a new Entry.
+   *
+   * @param address an index address in the MerkleDB
+   * @param serializer an entry serializer
+   * @param <E> the type of the entry
+   * @throws IllegalStateException if this access is not valid
+   * @see StandardSerializers
+   */
+  <E> EntryIndex<E> getEntry(IndexAddress address, Serializer<E> serializer);
 
   /**
    * Returns true if this access allows modifications to the database state; false if it is

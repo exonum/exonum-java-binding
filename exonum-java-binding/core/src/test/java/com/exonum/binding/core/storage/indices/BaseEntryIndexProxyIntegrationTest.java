@@ -160,6 +160,11 @@ abstract class BaseEntryIndexProxyIntegrationTest<IndexT extends EntryIndex<Stri
   }
 
   @Override
+  IndexT createInGroup(String groupName, byte[] idInGroup, Access access) {
+    return null; // Entry indexes do not support groups
+  }
+
+  @Override
   StorageIndex createOfOtherType(String name, Access access) {
     return access.getList(valueOf(name), string());
   }
