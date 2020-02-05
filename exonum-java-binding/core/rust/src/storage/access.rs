@@ -136,15 +136,9 @@ impl<'a> EjbAccessExt for ErasedAccess<'a> {
             GenericAccess::Raw(raw) => match raw {
                 GenericRawAccess::Snapshot(snapshot) => snapshot.proof_for_index(index_name),
                 GenericRawAccess::OwnedSnapshot(snapshot) => snapshot.proof_for_index(index_name),
-                _ => panic!(
-                    "'proof_for_index' called on non-Snapshot access: {:?}",
-                    self
-                ),
+                _ => panic!("'proof_for_index' called on modifiable access: {:?}", self),
             },
-            _ => panic!(
-                "'proof_for_index' called on non-Snapshot access: {:?}",
-                self
-            ),
+            _ => panic!("'proof_for_index' called on modifiable access: {:?}", self),
         }
     }
 
