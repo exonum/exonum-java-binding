@@ -53,17 +53,17 @@ rpath = true
 
 # FIXME: using git dependency until Exonum 1.0 is released
 [patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-build = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-cli = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-crypto = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-derive = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-explorer-service = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-merkledb = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-node = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-proto = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-rust-runtime = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-system-api = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "ad32e019" }
+exonum = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-build = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-cli = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-crypto = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-derive = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-explorer-service = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-merkledb = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-node = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-proto = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-rust-runtime = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-system-api = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }

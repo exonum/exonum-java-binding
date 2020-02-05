@@ -1,4 +1,4 @@
-use exonum_merkledb::generic::{ErasedAccess, GenericRawAccess};
+use exonum_merkledb::generic::{ErasedAccess, GenericAccess, GenericRawAccess};
 use jni::{
     objects::{JClass, JObject},
     sys::jstring,
@@ -7,12 +7,24 @@ use jni::{
 
 use std::panic;
 
+use exonum_rust_runtime::ExecutionContext;
 use {
     handle::{self, Handle},
     utils,
 };
 
 type BlockchainData = exonum::runtime::BlockchainData<GenericRawAccess<'static>>;
+
+/// Creates a handle to `BlockchainData` from `ExecutionContext`. Prolongs the lifetime of
+/// used `BlockchainData` using unsafe, the caller is fully responsible for controlling of
+/// `BlockchainData` lifetime.
+pub unsafe fn blockchain_data_from_execution_context(
+    execution_context: &ExecutionContext,
+) -> Handle {
+    let blockchain_data = execution_context.data().erase_access();
+    let blockchain_data: BlockchainData = std::mem::transmute(blockchain_data);
+    handle::to_handle(blockchain_data)
+}
 
 /// Creates new BlockchainData for the specified `instance_name` and based on specified `base_access_handle`.
 #[no_mangle]
@@ -23,9 +35,15 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainData_na
     instance_name: jstring,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let access = handle::cast_handle::<GenericRawAccess<'static>>(base_access_handle);
+        let access = handle::cast_handle::<ErasedAccess<'static>>(base_access_handle);
         let instance_name = utils::convert_to_string(&env, instance_name)?;
-        let blockchain_data = BlockchainData::new(access.clone(), instance_name);
+        let blockchain_data = match access {
+            GenericAccess::Raw(raw) => BlockchainData::new(raw.clone(), instance_name),
+            _ => panic!(
+                "Attempt to create BlockchainData from an unsupported type: {:?}",
+                access
+            ),
+        };
         Ok(handle::to_handle(blockchain_data))
     });
 

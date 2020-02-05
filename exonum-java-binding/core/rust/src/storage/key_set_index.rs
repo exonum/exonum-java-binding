@@ -17,7 +17,7 @@ use std::{panic, ptr};
 use exonum_merkledb::{
     access::AccessExt,
     generic::{ErasedAccess, GenericRawAccess},
-    indexes::key_set::Iter,
+    indexes::Keys as Iter,
     KeySetIndex,
 };
 use jni::{
@@ -120,7 +120,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     let res = panic::catch_unwind(|| {
         let set = handle::cast_handle::<Index>(set_handle);
         let value = env.convert_byte_array(value)?;
-        set.insert(value);
+        set.insert(&value);
         Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)

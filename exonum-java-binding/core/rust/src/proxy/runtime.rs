@@ -17,11 +17,11 @@
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
-    exonum_merkledb::{BinaryValue, Snapshot},
+    merkledb::{BinaryValue, Snapshot},
     runtime::{
         migrations::{InitMigrationError, MigrationScript},
         versioning::Version,
-        ArtifactId, CallInfo, Caller, ExecutionContext, ExecutionError, InstanceId, InstanceSpec,
+        ArtifactId, Caller, ExecutionContext, ExecutionError, InstanceId, InstanceSpec,
         InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
     },
 };
@@ -35,6 +35,7 @@ use jni::{
 
 use std::fmt;
 
+use blockchain_data_from_execution_context;
 use {
     runtime::{jni_call_default, jni_call_transaction, Error},
     storage::into_erased_access,
@@ -134,12 +135,19 @@ impl Runtime for JavaRuntimeProxy {
     fn initiate_adding_service(
         &self,
         context: ExecutionContext<'_>,
-        spec: &InstanceSpec,
+        artifact_id: &ArtifactId,
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
+        let spec = InstanceSpec::new(
+            context.instance().id,
+            context.instance().name.clone(),
+            artifact_id.to_string(),
+        )
+        .unwrap();
         jni_call_transaction(&self.exec, |env| {
-            let access_handle = unsafe { to_handle(into_erased_access(&*context.fork)) };
-            let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
+            let blockchain_data_handle =
+                unsafe { blockchain_data_from_execution_context(&context) };
+            let instance_spec = JObject::from(proto_to_java_bytes(env, &spec)?);
             let configuration = JObject::from(env.byte_array_from_slice(&parameters)?);
 
             env.call_method_unchecked(
@@ -147,7 +155,7 @@ impl Runtime for JavaRuntimeProxy {
                 runtime_adapter::initiate_adding_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
-                    JValue::from(access_handle),
+                    JValue::from(blockchain_data_handle),
                     JValue::from(instance_spec),
                     JValue::from(configuration),
                 ],
@@ -159,12 +167,19 @@ impl Runtime for JavaRuntimeProxy {
     fn initiate_resuming_service(
         &self,
         context: ExecutionContext,
-        spec: &InstanceSpec,
+        artifact_id: &ArtifactId,
         parameters: Vec<u8>,
     ) -> Result<(), ExecutionError> {
+        let spec = InstanceSpec::new(
+            context.instance().id,
+            context.instance().name.clone(),
+            artifact_id.to_string(),
+        )
+        .unwrap();
         jni_call_transaction(&self.exec, |env| {
-            let access_handle = unsafe { to_handle(into_erased_access(&*context.fork)) };
-            let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
+            let blockchain_data_handle =
+                unsafe { blockchain_data_from_execution_context(&context) };
+            let instance_spec = JObject::from(proto_to_java_bytes(env, &spec)?);
             let parameters = JObject::from(env.byte_array_from_slice(&parameters)?);
 
             env.call_method_unchecked(
@@ -172,7 +187,7 @@ impl Runtime for JavaRuntimeProxy {
                 runtime_adapter::initiate_resuming_service_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
-                    JValue::from(access_handle),
+                    JValue::from(blockchain_data_handle),
                     JValue::from(instance_spec),
                     JValue::from(parameters),
                 ],
@@ -216,30 +231,31 @@ impl Runtime for JavaRuntimeProxy {
     fn execute(
         &self,
         context: ExecutionContext,
-        call_info: &CallInfo,
+        method_id: u32,
         arguments: &[u8],
     ) -> Result<(), ExecutionError> {
         // todo: Replace this abomination (8-parameter method, arguments that make sense only
         //   in some cases) with a single protobuf message or other alternative [ECR-3872]
-        let tx_info: (InstanceId, Hash, PublicKey) = match context.caller {
-            Caller::Transaction {
-                hash: message_hash,
-                author: author_pk,
-            } => (0, message_hash, author_pk),
+        let tx_info: (InstanceId, Hash, PublicKey) = match context.caller() {
+            Caller::Transaction { author: author_pk } => {
+                (0, context.transaction_hash().unwrap(), author_pk.clone())
+            }
             Caller::Service {
                 instance_id: caller_id,
-            } => (caller_id, Hash::default(), PublicKey::default()),
+            } => (*caller_id, Hash::default(), PublicKey::default()),
             Caller::Blockchain => {
                 return Err(Error::NotSupportedOperation.into());
             }
+            _ => unreachable!(),
         };
 
         jni_call_transaction(&self.exec, |env| {
-            let service_id = call_info.instance_id as i32;
-            let interface_name = JObject::from(env.new_string(context.interface_name)?);
-            let tx_id = call_info.method_id as i32;
+            let service_id = context.instance().id as i32;
+            let interface_name = JObject::from(env.new_string(context.interface_name())?);
+            let tx_id = method_id as i32;
             let args = JObject::from(env.byte_array_from_slice(arguments)?);
-            let access_handle = unsafe { to_handle(into_erased_access(&*context.fork)) };
+            let blockchain_data_handle =
+                unsafe { blockchain_data_from_execution_context(&context) };
             let caller_id = tx_info.0;
             let message_hash = tx_info.1.to_bytes();
             let message_hash = JObject::from(env.byte_array_from_slice(&message_hash)?);
@@ -255,7 +271,7 @@ impl Runtime for JavaRuntimeProxy {
                     JValue::from(interface_name),
                     JValue::from(tx_id),
                     JValue::from(args),
-                    JValue::from(access_handle),
+                    JValue::from(blockchain_data_handle),
                     JValue::from(caller_id as jint),
                     JValue::from(message_hash),
                     JValue::from(author_pk),
@@ -265,41 +281,36 @@ impl Runtime for JavaRuntimeProxy {
         })
     }
 
-    fn before_transactions(
-        &self,
-        context: ExecutionContext,
-        instance_id: InstanceId,
-    ) -> Result<(), ExecutionError> {
+    fn before_transactions(&self, context: ExecutionContext) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
-            // FIXME: as mostly a copy-paste of after_txs, it needs BlockchainData just as well [ECR-4169]
-            let access_handle = unsafe { to_handle(into_erased_access(&*context.fork)) };
+            let instance_id = context.instance().id;
+            let blockchain_data_handle =
+                unsafe { blockchain_data_from_execution_context(&context) };
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::before_transactions_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(instance_id as i32),
-                    JValue::from(access_handle),
+                    JValue::from(blockchain_data_handle),
                 ],
             )
-                .and_then(JValue::v)
+            .and_then(JValue::v)
         })
     }
 
-    fn after_transactions(
-        &self,
-        context: ExecutionContext,
-        instance_id: InstanceId,
-    ) -> Result<(), ExecutionError> {
+    fn after_transactions(&self, context: ExecutionContext) -> Result<(), ExecutionError> {
         jni_call_transaction(&self.exec, |env| {
-            let access_handle = unsafe { to_handle(into_erased_access(&*context.fork)) };
+            let instance_id = context.instance().id;
+            let blockchain_data_handle =
+                unsafe { blockchain_data_from_execution_context(&context) };
             env.call_method_unchecked(
                 self.runtime_adapter.as_obj(),
                 runtime_adapter::after_transactions_id(),
                 JavaType::Primitive(Primitive::Void),
                 &[
                     JValue::from(instance_id as i32),
-                    JValue::from(access_handle),
+                    JValue::from(blockchain_data_handle),
                 ],
             )
             .and_then(JValue::v)
@@ -314,7 +325,7 @@ impl Runtime for JavaRuntimeProxy {
                 .as_ref()
                 .expect("afterCommit called before initialize")
                 .service_keypair()
-                .0;
+                .public_key();
             let validator_id = Self::validator_id(snapshot, &public_key);
             let height: u64 = snapshot.for_core().height().into();
 

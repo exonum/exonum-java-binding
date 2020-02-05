@@ -17,7 +17,7 @@ use std::{panic, ptr};
 use exonum_merkledb::{
     access::AccessExt,
     generic::{ErasedAccess, GenericRawAccess},
-    indexes::proof_map::{Iter as IndexIter, Keys, Values, PROOF_MAP_KEY_SIZE},
+    indexes::{proof_map::PROOF_MAP_KEY_SIZE, Entries as IndexIter, Keys, Values},
     ObjectHash, ProofMapIndex, RawProofMapIndex,
 };
 use exonum_proto::ProtobufConvert;

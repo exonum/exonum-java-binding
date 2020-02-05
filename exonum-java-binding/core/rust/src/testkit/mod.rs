@@ -20,15 +20,15 @@ use std::{panic, sync::Arc};
 
 use exonum::{
     blockchain::{config::InstanceInitParams, Block},
-    crypto::{PublicKey, SecretKey},
-    exonum_merkledb::{self, BinaryValue},
+    crypto::KeyPair,
     helpers::ValidatorId,
+    merkledb::{self as exonum_merkledb, BinaryValue},
     runtime::ArtifactSpec,
 };
 use exonum_proto::ProtobufConvert;
 use exonum_rust_runtime::ServiceFactory;
 use exonum_testkit::{TestKit, TestKitBuilder};
-use exonum_time::{time_provider::TimeProvider, TimeServiceFactory};
+use exonum_time::{TimeProvider, TimeServiceFactory};
 use jni::{
     objects::{JClass, JObject, JValue},
     sys::{jboolean, jbyteArray, jobjectArray, jshort},
@@ -107,7 +107,7 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
 
             builder
         };
-        let mut testkit = builder.create();
+        let mut testkit = builder.build();
         // Mount API handlers
         testkit.api();
         Ok(to_handle(testkit))
@@ -231,12 +231,11 @@ fn serialize_block(env: &JNIEnv, block: Block) -> jni::errors::Result<jbyteArray
     env.byte_array_from_slice(&serialized_block)
 }
 
-fn create_java_keypair<'a>(
-    env: &'a JNIEnv,
-    keypair: (PublicKey, SecretKey),
-) -> jni::errors::Result<JValue<'a>> {
-    let public_key_byte_array: JObject = env.byte_array_from_slice(&keypair.0[..])?.into();
-    let secret_key_byte_array: JObject = env.byte_array_from_slice(&keypair.1[..])?.into();
+fn create_java_keypair<'a>(env: &'a JNIEnv, keypair: KeyPair) -> jni::errors::Result<JValue<'a>> {
+    let public_key_byte_array: JObject =
+        env.byte_array_from_slice(&keypair.public_key()[..])?.into();
+    let secret_key_byte_array: JObject =
+        env.byte_array_from_slice(&keypair.secret_key()[..])?.into();
     env.call_static_method(
         KEYPAIR_CLASS,
         "createKeyPair",
