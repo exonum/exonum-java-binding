@@ -14,10 +14,10 @@
 
 use std::{panic, ptr};
 
-use exonum_merkledb::{
+use exonum::merkledb::{
     access::AccessExt,
     generic::{ErasedAccess, GenericRawAccess},
-    indexes::{Entries as IndexIter, Keys},
+    indexes::{Entries, Keys},
     ValueSetIndex,
 };
 use jni::{
@@ -33,7 +33,8 @@ use utils;
 
 type Index = ValueSetIndex<GenericRawAccess<'static>, Value>;
 
-type Iter<'a> = PairIter<IndexIter<'a, Hash, Value>>;
+type Iter<'a> = PairIter<Entries<'a, Hash, Value>>;
+type HashIter<'a> = Keys<'a, Hash>;
 
 const JAVA_ENTRY_FQN: &str =
     "com/exonum/binding/core/storage/indices/ValueSetIndexProxy$EntryInternal";
@@ -277,7 +278,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<Keys<Hash>>(iter_handle);
+        let iter = handle::cast_handle::<HashIter>(iter_handle);
         match iter.next() {
             Some(val) => utils::convert_hash(&env, &val),
             None => Ok(ptr::null_mut()),
@@ -293,5 +294,5 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<Keys<Hash>>(&env, iter_handle);
+    handle::drop_handle::<HashIter>(&env, iter_handle);
 }

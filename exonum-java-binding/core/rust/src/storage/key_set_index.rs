@@ -7,17 +7,16 @@
 //   http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// distributed under the License is distributed on an "AS IS" // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
 use std::{panic, ptr};
 
-use exonum_merkledb::{
+use exonum::merkledb::{
     access::AccessExt,
     generic::{ErasedAccess, GenericRawAccess},
-    indexes::Keys as Iter,
+    indexes::Keys,
     KeySetIndex,
 };
 use jni::{
@@ -31,6 +30,8 @@ use storage::Key;
 use utils;
 
 type Index = KeySetIndex<GenericRawAccess<'static>, Key>;
+
+type KeyIter<'a> = Keys<'a, Key>;
 
 /// Returns pointer to created `KeySetIndex` object.
 #[no_mangle]
@@ -166,7 +167,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<Iter<Key>>(iter_handle);
+        let iter = handle::cast_handle::<KeyIter>(iter_handle);
         utils::optional_array_to_java(&env, iter.next())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -179,5 +180,5 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<Iter<Key>>(&env, iter_handle);
+    handle::drop_handle::<KeyIter>(&env, iter_handle);
 }

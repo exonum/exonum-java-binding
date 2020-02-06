@@ -14,10 +14,10 @@
 
 use std::{panic, ptr};
 
-use exonum_merkledb::{
+use exonum::merkledb::{
     access::AccessExt,
     generic::{ErasedAccess, GenericRawAccess},
-    indexes::Values as Iter,
+    indexes::Values,
     ListIndex,
 };
 use jni::{
@@ -31,6 +31,8 @@ use storage::Value;
 use utils;
 
 type Index = ListIndex<GenericRawAccess<'static>, Value>;
+
+type Iter<'a> = Values<'a, Value>;
 
 /// Returns pointer to the created `ListIndex` object.
 #[no_mangle]
@@ -241,7 +243,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<Iter<Value>>(iter_handle);
+        let iter = handle::cast_handle::<Iter>(iter_handle);
         utils::optional_array_to_java(&env, iter.next())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -254,5 +256,5 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ListIndexPro
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<Iter<Value>>(&env, iter_handle);
+    handle::drop_handle::<Iter>(&env, iter_handle);
 }

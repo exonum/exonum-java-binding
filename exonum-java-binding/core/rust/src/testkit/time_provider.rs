@@ -15,7 +15,7 @@
  */
 
 use chrono::{DateTime, Utc};
-use exonum_merkledb::BinaryValue;
+use exonum::merkledb::BinaryValue;
 use exonum_time::TimeProvider;
 use jni::{
     objects::{GlobalRef, JObject},
