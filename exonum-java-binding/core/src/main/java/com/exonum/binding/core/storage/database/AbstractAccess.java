@@ -23,6 +23,7 @@ import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.storage.indices.EntryIndex;
+import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
@@ -139,9 +140,11 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
         () -> ProofEntryIndexProxy.newInstance(address, this, serializer));
   }
 
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
   public <E> EntryIndex<E> getEntry(IndexAddress address, Serializer<E> serializer) {
-    return null;
+    return findOrCreate(address, EntryIndexProxy.class,
+        () -> EntryIndexProxy.newInstance(address, this, serializer));
   }
 
   private <T extends StorageIndex> T findOrCreate(IndexAddress address, Class<T> indexType,

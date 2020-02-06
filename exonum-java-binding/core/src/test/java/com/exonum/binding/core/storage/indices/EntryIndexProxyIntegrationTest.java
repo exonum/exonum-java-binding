@@ -20,7 +20,8 @@ import static com.exonum.binding.common.serialization.StandardSerializers.string
 
 import com.exonum.binding.core.storage.database.Access;
 
-public class EntryIndexProxyIntegrationTest extends BaseEntryIndexProxyIntegrationTest<EntryIndex<String>> {
+class EntryIndexProxyIntegrationTest
+    extends BaseEntryIndexProxyIntegrationTest<EntryIndex<String>> {
 
   @Override
   EntryIndex<String> create(IndexAddress address, Access access) {

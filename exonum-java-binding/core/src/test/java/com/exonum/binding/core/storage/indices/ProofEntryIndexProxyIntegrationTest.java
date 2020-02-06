@@ -26,7 +26,7 @@ import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.core.storage.database.Access;
 import org.junit.jupiter.api.Test;
 
-public class ProofEntryIndexProxyIntegrationTest
+class ProofEntryIndexProxyIntegrationTest
     extends BaseEntryIndexProxyIntegrationTest<ProofEntryIndex<String>> {
 
   @Test
