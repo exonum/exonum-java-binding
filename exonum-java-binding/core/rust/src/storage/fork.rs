@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::generic::ErasedAccess;
+use exonum::merkledb::generic::ErasedAccess;
 use jni::{objects::JObject, sys::jboolean, JNIEnv};
 
 use std::panic;

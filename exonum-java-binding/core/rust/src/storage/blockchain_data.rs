@@ -1,4 +1,4 @@
-use exonum_merkledb::generic::{ErasedAccess, GenericAccess, GenericRawAccess};
+use exonum::merkledb::generic::{ErasedAccess, GenericAccess, GenericRawAccess};
 use exonum_rust_runtime::ExecutionContext;
 use jni::{
     objects::{JClass, JObject},
