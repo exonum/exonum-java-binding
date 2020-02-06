@@ -101,9 +101,8 @@ class ThrowingTxTest {
       assertThrows(IllegalStateException.class,
           () -> qaService.throwing(arguments, context));
 
-      // Check that it has cleared the maps
+      // Check that it has cleared the map
       assertThat(schema.counters().isEmpty()).isTrue();
-      assertThat(schema.counterNames().isEmpty()).isTrue();
     }
   }
 }

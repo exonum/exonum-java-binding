@@ -87,8 +87,6 @@ class ApiControllerTest {
 
   private static final HashCode EXPECTED_TX_HASH = sha256().hashInt(1);
 
-  private static final HashCode HASH_1 = HashCode.fromInt(0x00);
-
   private static final Gson JSON_SERIALIZER = JsonSerializer.builder()
       .registerTypeAdapterFactory(CoreTypeAdapterFactory.create())
       .create();
@@ -129,11 +127,11 @@ class ApiControllerTest {
   @Test
   void submitIncrementCounter(VertxTestContext context) {
     long seed = 1L;
-    HashCode counterId = HASH_1;
+    String counterName = "counter1";
     MultiMap params = multiMap("seed", Long.toString(seed),
-        "counterId", String.valueOf(counterId));
+        "counterName", counterName);
 
-    when(qaService.submitIncrementCounter(eq(seed), eq(counterId)))
+    when(qaService.submitIncrementCounter(eq(seed), eq(counterName)))
         .thenReturn(EXPECTED_TX_HASH);
 
     post(SUBMIT_INCREMENT_COUNTER_TX_PATH)
@@ -143,7 +141,7 @@ class ApiControllerTest {
   @Test
   void submitIncrementCounter_NoParameter(VertxTestContext context) {
     // No required seed in the request
-    MultiMap params = multiMap("counterId", String.valueOf(HASH_1));
+    MultiMap params = multiMap("counterName", "num_events");
 
     post(SUBMIT_INCREMENT_COUNTER_TX_PATH)
         .sendForm(params, context.succeeding(response -> {
@@ -169,14 +167,12 @@ class ApiControllerTest {
 
   @Test
   void getCounter(VertxTestContext context) {
-    HashCode id = HASH_1;
     String name = "counter";
     long value = 10L;
     Counter counter = new Counter(name, value);
-    when(qaService.getValue(eq(id)))
-        .thenReturn(Optional.of(counter));
+    when(qaService.getValue(name)).thenReturn(Optional.of(counter));
 
-    String getCounterUri = getCounterUri(id);
+    String getCounterUri = getCounterUri(name);
     get(getCounterUri)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode())
@@ -192,11 +188,11 @@ class ApiControllerTest {
 
   @Test
   void getCounter_NoCounter(VertxTestContext context) {
-    HashCode id = HASH_1;
-    when(qaService.getValue(id))
+    String name = "counter_1";
+    when(qaService.getValue(name))
         .thenReturn(Optional.empty());
 
-    String getCounterUri = getCounterUri(id);
+    String getCounterUri = getCounterUri(name);
     get(getCounterUri)
         .send(context.succeeding(response -> context.verify(() -> {
           assertThat(response.statusCode()).isEqualTo(HTTP_NOT_FOUND);
@@ -206,24 +202,9 @@ class ApiControllerTest {
   }
 
   @Test
-  void getCounter_InvalidIdFormat(VertxTestContext context) {
-    String hash = "Invalid hexadecimal hash";
-    String getCounterUri = getCounterUri(hash);
-
-    get(getCounterUri)
-        .send(context.succeeding(response -> context.verify(() -> {
-          assertAll(
-              () -> assertThat(response.statusCode()).isEqualTo(HTTP_BAD_REQUEST),
-              () -> assertThat(response.bodyAsString())
-                  .startsWith("Failed to convert parameter (counterId):"));
-          context.completeNow();
-        })));
-  }
-
-  @Test
   @DisplayName("failureHandler converts unexpected exceptions to HTTP_INTERNAL_ERROR")
   void failureHandlerUnexpectedException(VertxTestContext context) {
-    HashCode id = HASH_1;
+    String id = "Counter_1";
     String message = "Boom";
     // This test is not specific to any service method — what matters is the exception type:
     // RuntimeException.
@@ -331,13 +312,9 @@ class ApiControllerTest {
     return params;
   }
 
-  private String getCounterUri(HashCode id) {
-    return getCounterUri(String.valueOf(id));
-  }
-
-  private String getCounterUri(String id) {
+  private static String getCounterUri(String name) {
     try {
-      return "/counter/" + URLEncoder.encode(id, "UTF-8");
+      return "/counter/" + URLEncoder.encode(name, "UTF-8");
     } catch (UnsupportedEncodingException e) {
       throw new AssertionError("UTF-8 must be supported", e);
     }

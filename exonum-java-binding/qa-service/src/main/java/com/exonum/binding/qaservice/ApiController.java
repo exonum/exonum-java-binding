@@ -17,7 +17,7 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.json.JsonSerializer.json;
-import static com.exonum.binding.qaservice.ApiController.QaPaths.COUNTER_ID_PARAM;
+import static com.exonum.binding.qaservice.ApiController.QaPaths.COUNTER_NAME_PARAM;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_CONSENSUS_CONFIGURATION_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.GET_COUNTER_PATH;
 import static com.exonum.binding.qaservice.ApiController.QaPaths.SUBMIT_INCREMENT_COUNTER_TX_PATH;
@@ -32,6 +32,7 @@ import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
+import static java.util.function.Function.identity;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -89,9 +90,9 @@ final class ApiController {
   private void submitIncrementCounter(RoutingContext rc) {
     MultiMap parameters = rc.request().params();
     long seed = getRequiredParameter(parameters, "seed", Long::parseLong);
-    HashCode counterId = getRequiredParameter(parameters, COUNTER_ID_PARAM, HashCode::fromString);
+    String counterName = getRequiredParameter(parameters, COUNTER_NAME_PARAM, identity());
 
-    HashCode txHash = service.submitIncrementCounter(seed, counterId);
+    HashCode txHash = service.submitIncrementCounter(seed, counterName);
     replyTxSubmitted(rc, txHash);
   }
 
@@ -101,9 +102,9 @@ final class ApiController {
   }
 
   private void getCounter(RoutingContext rc) {
-    HashCode counterId = getRequiredParameter(rc.request(), COUNTER_ID_PARAM, HashCode::fromString);
+    String counterName = getRequiredParameter(rc.request(), COUNTER_NAME_PARAM, identity());
 
-    Optional<Counter> counter = service.getValue(counterId);
+    Optional<Counter> counter = service.getValue(counterName);
 
     respondWithJson(rc, counter);
   }
@@ -216,8 +217,8 @@ final class ApiController {
     static final String SUBMIT_INCREMENT_COUNTER_TX_PATH = "/submit-increment-counter";
     @VisibleForTesting
     static final String SUBMIT_UNKNOWN_TX_PATH = "/submit-unknown";
-    static final String COUNTER_ID_PARAM = "counterId";
-    static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_ID_PARAM;
+    static final String COUNTER_NAME_PARAM = "counterName";
+    static final String GET_COUNTER_PATH = "/counter/:" + COUNTER_NAME_PARAM;
     @VisibleForTesting
     static final String GET_CONSENSUS_CONFIGURATION_PATH = "/consensusConfiguration";
     @VisibleForTesting

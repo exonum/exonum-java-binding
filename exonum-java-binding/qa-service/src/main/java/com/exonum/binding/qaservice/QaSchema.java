@@ -16,17 +16,14 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.serialization.StandardSerializers.hash;
 import static com.exonum.binding.common.serialization.StandardSerializers.string;
 import static com.exonum.binding.common.serialization.StandardSerializers.uint64;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
-import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.time.TimeSchema;
@@ -39,7 +36,6 @@ public final class QaSchema implements Schema {
   private static final IndexAddress TIME_ORACLE_NAME_ADDRESS =
       IndexAddress.valueOf("time_oracle_name");
   private static final IndexAddress COUNTERS_ADDRESS = IndexAddress.valueOf("counters");
-  private static final IndexAddress COUNTER_NAMES_ADDRESS = IndexAddress.valueOf("counterNames");
 
   private final BlockchainData blockchainData;
   private final Prefixed access;
@@ -67,20 +63,12 @@ public final class QaSchema implements Schema {
   /**
    * Returns a proof map of counter values. Note that this is a proof map that uses non-hashed keys.
    */
-  public ProofMapIndexProxy<HashCode, Long> counters() {
-    return access.getRawProofMap(COUNTERS_ADDRESS, hash(), uint64());
-  }
-
-  /**
-   * Returns a map of counter names.
-   */
-  public MapIndex<HashCode, String> counterNames() {
-    return access.getMap(COUNTER_NAMES_ADDRESS, hash(), string());
+  public ProofMapIndexProxy<String, Long> counters() {
+    return access.getProofMap(COUNTERS_ADDRESS, string(), uint64());
   }
 
   /** Clears all collections of the service. */
   public void clearAll() {
     counters().clear();
-    counterNames().clear();
   }
 }

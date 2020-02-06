@@ -17,18 +17,15 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.crypto.CryptoFunctions.ed25519;
-import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
 import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.crypto.KeyPair;
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
@@ -80,12 +77,8 @@ class CreateCounterTxTest {
 
     BlockchainData snapshot = testKit.getBlockchainData(QA_SERVICE_NAME);
     QaSchema schema = new QaSchema(snapshot);
-    MapIndex<HashCode, Long> counters = schema.counters();
-    MapIndex<HashCode, String> counterNames = schema.counterNames();
-    HashCode counterId = sha256().hashString(counterName, UTF_8);
-
-    assertThat(counters.get(counterId)).isEqualTo(0L);
-    assertThat(counterNames.get(counterId)).isEqualTo(counterName);
+    MapIndex<String, Long> counters = schema.counters();
+    assertThat(counters.get(counterName)).isEqualTo(0L);
   }
 
   @Test
