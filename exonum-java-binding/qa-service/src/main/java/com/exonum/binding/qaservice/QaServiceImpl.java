@@ -39,7 +39,7 @@ import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
@@ -256,7 +256,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public Optional<ZonedDateTime> getTime() {
     return node.withBlockchainData(s -> {
       TimeSchema timeOracle = createDataSchema(s).timeSchema();
-      ProofEntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
+      ProofEntryIndex<ZonedDateTime> currentTime = timeOracle.getTime();
       return currentTime.toOptional();
     });
   }

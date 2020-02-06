@@ -24,7 +24,7 @@ import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndexProxy;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.storage.indices.ValueSetIndexProxy;
@@ -166,7 +166,7 @@ public interface Access {
    * @throws IllegalStateException if this access is not valid
    * @see StandardSerializers
    */
-  <E> ProofEntryIndexProxy<E> getProofEntry(IndexAddress address, Serializer<E> serializer);
+  <E> ProofEntryIndex<E> getProofEntry(IndexAddress address, Serializer<E> serializer);
 
   /**
    * Creates a new Entry.

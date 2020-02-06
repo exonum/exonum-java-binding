@@ -55,7 +55,7 @@ class ProofEntryIndexProxyIntegrationTest
   }
 
   @Override
-  ProofEntryIndexProxy<String> create(IndexAddress address, Access access) {
+  ProofEntryIndex<String> create(IndexAddress address, Access access) {
     return access.getProofEntry(address, SERIALIZER);
   }
 }
