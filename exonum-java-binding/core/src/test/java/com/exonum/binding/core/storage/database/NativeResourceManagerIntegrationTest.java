@@ -38,7 +38,7 @@ class NativeResourceManagerIntegrationTest {
 
 
     RuntimeException thrown = assertThrows(RuntimeException.class,
-        () -> Accesses.nativeFree(unknownNativeHandle));
+        () -> AbstractAccess.nativeFree(unknownNativeHandle));
     assertThat(thrown).hasMessage("Invalid handle value: '110B'");
   }
 
