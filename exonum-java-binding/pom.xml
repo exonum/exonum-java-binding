@@ -107,7 +107,7 @@
     <!-- Empty for all JDKs but 11 -->
     <maven.javadoc.joption></maven.javadoc.joption>
 
-    <assertj.version>3.14.0</assertj.version>
+    <assertj.version>3.15.0</assertj.version>
     <checkstyle.configLocation>${project.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.2</guice.version>
@@ -115,7 +115,6 @@
     <hamcrest.version>2.2</hamcrest.version>
     <junit.version>4.13</junit.version>
     <junit.jupiter.version>5.6.0</junit.jupiter.version>
-    <powermock.version>2.0.4</powermock.version>
     <protobuf.version>3.11.0</protobuf.version>
     <mockito.version>3.2.4</mockito.version>
     <guava.version>28.2-jre</guava.version>
@@ -245,20 +244,6 @@
         <groupId>org.mockito</groupId>
         <artifactId>mockito-junit-jupiter</artifactId>
         <version>${mockito.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-module-junit4</artifactId>
-        <version>${powermock.version}</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.powermock</groupId>
-        <artifactId>powermock-api-mockito2</artifactId>
-        <version>${powermock.version}</version>
         <scope>test</scope>
       </dependency>
 
@@ -556,11 +541,10 @@
                 <exclude>**/DeployArguments*</exclude>
                 <exclude>**/TestKitProtos*</exclude>
                 <exclude>com/exonum/core/messages/*</exclude>
-                <!-- TODO(ECR-4059): remove when proto sources are fixed -->
-                <exclude>exonum/OrderedMap*</exclude>
                 <exclude>com/exonum/binding/fakeservice/Transactions*</exclude>
                 <exclude>com/exonum/binding/qaservice/Config*</exclude>
                 <exclude>com/exonum/binding/qaservice/transactions/TxMessageProtos*</exclude>
+                <exclude>com/exonum/binding/common/messages/Service*</exclude>
               </excludes>
             </configuration>
             <executions>
