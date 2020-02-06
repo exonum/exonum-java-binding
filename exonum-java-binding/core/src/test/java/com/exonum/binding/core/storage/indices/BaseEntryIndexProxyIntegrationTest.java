@@ -57,7 +57,7 @@ abstract class BaseEntryIndexProxyIntegrationTest<IndexT extends EntryIndex<Stri
       Snapshot snapshot = database.createSnapshot(c);
       IndexAddress addressInGroup = IndexAddress.valueOf("test", bytes("id"));
       Exception e = assertThrows(IllegalArgumentException.class,
-          () -> snapshot.getProofEntry(addressInGroup, SERIALIZER));
+          () -> create(addressInGroup, snapshot));
       assertThat(e.getMessage(), containsString("Groups of Entries are not supported"));
     }
   }
@@ -154,13 +154,20 @@ abstract class BaseEntryIndexProxyIntegrationTest<IndexT extends EntryIndex<Stri
     IndicesTests.runTestWithView(
         viewFactory,
         ENTRY_NAME,
-        (address, access, serializer) -> create(address.getName(), access),
+        (address, access, serializer) -> create(address, access),
         entryTest
     );
   }
 
+  abstract IndexT create(IndexAddress address, Access access);
+
   @Override
-  IndexT createInGroup(String groupName, byte[] idInGroup, Access access) {
+  final IndexT create(String name, Access access) {
+    return create(IndexAddress.valueOf(name), access);
+  }
+
+  @Override
+  final IndexT createInGroup(String groupName, byte[] idInGroup, Access access) {
     return null; // Entry indexes do not support groups
   }
 

@@ -23,7 +23,7 @@ import com.exonum.binding.core.storage.database.Access;
 public class EntryIndexProxyIntegrationTest extends BaseEntryIndexProxyIntegrationTest<EntryIndex<String>> {
 
   @Override
-  EntryIndex<String> create(String name, Access access) {
-    return access.getEntry(IndexAddress.valueOf(name), string());
+  EntryIndex<String> create(IndexAddress address, Access access) {
+    return access.getEntry(address, string());
   }
 }

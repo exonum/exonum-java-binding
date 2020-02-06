@@ -55,8 +55,7 @@ public class ProofEntryIndexProxyIntegrationTest
   }
 
   @Override
-  ProofEntryIndexProxy<String> create(String name, Access access) {
-    IndexAddress address = IndexAddress.valueOf(name);
+  ProofEntryIndexProxy<String> create(IndexAddress address, Access access) {
     return access.getProofEntry(address, SERIALIZER);
   }
 }
