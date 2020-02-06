@@ -15,7 +15,11 @@ use {
 
 type BlockchainData = exonum::runtime::BlockchainData<GenericRawAccess<'static>>;
 
-/// Creates a handle to `BlockchainData` from `ExecutionContext`. Prolongs the lifetime of
+/// Creates a handle to `BlockchainData` from `ExecutionContext`.
+///
+/// # Safety
+///
+/// Prolongs the lifetime of
 /// used `BlockchainData` using unsafe, the caller is fully responsible for controlling of
 /// `BlockchainData` lifetime.
 pub unsafe fn blockchain_data_from_execution_context(
@@ -109,7 +113,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_BlockchainData_na
         let service_name = utils::convert_to_string(&env, service_name)?;
         let service_data = blockchain_data
             .for_service(service_name.as_ref())
-            .map(|prefixed| ErasedAccess::from(prefixed));
+            .map(ErasedAccess::from);
         match service_data {
             Some(service_data) => Ok(handle::to_handle(service_data)),
             None => Ok(0 as Handle),

@@ -55,7 +55,7 @@ public final class TestService extends AbstractService {
       throw new ExecutionException(ANY_ERROR_CODE, "Service configuration had an invalid value: "
           + configurationValue);
     }
-    TestSchema schema = createDataSchema(blockchainData.getExecutingServiceData());
+    TestSchema schema = new TestSchema(blockchainData.getExecutingServiceData());
     ProofMapIndexProxy<String, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, configurationValue);
   }
@@ -63,16 +63,12 @@ public final class TestService extends AbstractService {
   @Transaction(TEST_TRANSACTION_ID)
   public void putEntry(PutTransactionArgs arguments, TransactionContext context) {
     Prefixed serviceData = context.getServiceData();
-    TestSchema schema = createDataSchema(serviceData);
+    TestSchema schema = new TestSchema(serviceData);
 
     String key = arguments.getKey();
     String value = arguments.getValue();
     schema.testMap()
         .put(key, value);
-  }
-
-  private TestSchema createDataSchema(Prefixed serviceData) {
-    return new TestSchema(serviceData);
   }
 
   @Override

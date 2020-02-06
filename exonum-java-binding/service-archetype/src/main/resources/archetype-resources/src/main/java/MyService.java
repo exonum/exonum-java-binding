@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package $
+package ${package};
 
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
-
-{package};
 
 public final class MyService extends AbstractService {
 

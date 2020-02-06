@@ -53,14 +53,16 @@ class TimeSchemaProxyIntegrationTest {
       .of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
   @Test
-  void newInstanceFailsIfNoSuchService(@TempDir Path tmp) {
-    String otherService = "other-service";
+  void newInstanceFailsIfNoSuchService() {
+    // Create a testkit with some service, just to be able to request BlockchainData
+    String someService = "some-service";
     try (TestKit testkit = TestKit.builder()
-        .withArtifactsDirectory(tmp)
+        .withArtifactsDirectory(ARTIFACT_DIR)
         .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
-        .withService(ARTIFACT_ID, otherService, 10)
+        .withService(ARTIFACT_ID, someService, 10)
         .build()) {
-      BlockchainData blockchainData = testkit.getBlockchainData(otherService);
+      BlockchainData blockchainData = testkit.getBlockchainData(someService);
+
       String timeServiceName = "inactive-service";
       Exception e = assertThrows(IllegalArgumentException.class,
           () -> TimeSchema.newInstance(blockchainData, timeServiceName));
