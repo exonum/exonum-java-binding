@@ -48,6 +48,7 @@ where
     ErasedAccess::from(generic_raw_access)
 }
 
+/// A helper trait for operations that are not supported by `ErasedAccess` directly.
 pub trait EjbAccessExt {
     /// Returns `true` iff `into_fork` conversion is possible.
     fn can_convert_into_fork(&self) -> bool;
