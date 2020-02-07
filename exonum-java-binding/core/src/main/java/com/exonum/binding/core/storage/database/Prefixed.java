@@ -94,7 +94,7 @@ public final class Prefixed extends AbstractAccess {
       OpenIndexRegistry registry) {
     // Register the destructor
     NativeHandle handle = new NativeHandle(prefixedNativeHandle);
-    ProxyDestructor.newRegistered(cleaner, handle, Prefixed.class, Accesses::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, handle, Prefixed.class, AbstractAccess::nativeFree);
 
     // Query the 'canModify' property — it is not always known in advance
     boolean canModify = nativeCanModify(prefixedNativeHandle);

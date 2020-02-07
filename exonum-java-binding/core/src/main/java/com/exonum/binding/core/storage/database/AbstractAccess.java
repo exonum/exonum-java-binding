@@ -263,4 +263,10 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
    * (may be more permissive, but never — stricter).
    */
   protected static native boolean nativeCanModify(long nativeHandle);
+
+  /**
+   * Destroys the native `ErasedAccess` object. May be used with Snapshots, Forks,
+   * and any other ErasedAccesses.
+   */
+  protected static native void nativeFree(long accessNativeHandle);
 }

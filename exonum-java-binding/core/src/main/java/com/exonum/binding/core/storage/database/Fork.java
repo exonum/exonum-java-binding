@@ -82,7 +82,7 @@ public final class Fork extends AbstractAccess {
     // Add an action destroying the native peer if necessary.
     ProxyDestructor destructor = ProxyDestructor.newRegistered(cleaner, h, Fork.class, nh -> {
       if (owningHandle) {
-        Accesses.nativeFree(nh);
+        AbstractAccess.nativeFree(nh);
       }
     });
 

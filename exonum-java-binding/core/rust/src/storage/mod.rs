@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use self::access::Java_com_exonum_binding_core_storage_database_Accesses_nativeFree;
-pub(crate) use self::access::{into_erased_access, EjbAccessExt};
+pub use self::access::*;
 pub use self::blockchain::*;
 pub use self::blockchain_data::*;
 pub use self::key_set_index::*;
