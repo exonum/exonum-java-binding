@@ -18,7 +18,7 @@ package com.exonum.binding.common.blockchain;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import org.junit.jupiter.api.Test;
 
 class ExecutionStatusesTest {

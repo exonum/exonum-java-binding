@@ -24,8 +24,8 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
-import com.exonum.core.messages.Runtime.InstanceSpec;
-import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.messages.core.runtime.Base.InstanceSpec;
+import com.exonum.messages.core.runtime.Lifecycle.InstanceState;
 import java.io.IOException;
 import java.nio.file.Path;
 

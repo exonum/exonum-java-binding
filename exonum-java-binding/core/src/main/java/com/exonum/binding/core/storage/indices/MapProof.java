@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import com.exonum.core.messages.MapProofOuterClass;
+import com.exonum.messages.proof.MapProofOuterClass;
 import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -44,7 +44,7 @@ public abstract class MapProof {
   /**
    * Creates a new MapProof given the serialized map proof message.
    * @throws InvalidProtocolBufferException if the message is not
-   *     {@link com.exonum.core.messages.MapProofOuterClass.MapProof}
+   *     {@link com.exonum.messages.proof.MapProofOuterClass.MapProof}
    */
   public static MapProof parseFrom(byte[] mapProofMessage) throws InvalidProtocolBufferException {
     return newInstance(MapProofOuterClass.MapProof.parseFrom(mapProofMessage));

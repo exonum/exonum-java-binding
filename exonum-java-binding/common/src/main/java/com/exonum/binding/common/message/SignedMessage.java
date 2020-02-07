@@ -20,9 +20,9 @@ import static com.exonum.binding.common.hash.Hashing.sha256;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.core.messages.Consensus;
-import com.exonum.core.messages.Consensus.ExonumMessage;
-import com.exonum.core.messages.Messages;
+import com.exonum.messages.consensus.Consensus;
+import com.exonum.messages.consensus.Consensus.ExonumMessage;
+import com.exonum.messages.core.Messages;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 

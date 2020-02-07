@@ -20,9 +20,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.core.messages.Consensus.ExonumMessage;
-import com.exonum.core.messages.Messages;
-import com.exonum.core.messages.Runtime.AnyTx;
+import com.exonum.messages.consensus.Consensus.ExonumMessage;
+import com.exonum.messages.core.Messages;
+import com.exonum.messages.core.runtime.Base.AnyTx;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;

@@ -17,7 +17,7 @@
 package com.exonum.binding.core.blockchain.proofs;
 
 import com.exonum.binding.core.storage.indices.MapProof;
-import com.exonum.core.messages.Proofs;
+import com.exonum.messages.core.Proofs;
 import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -43,7 +43,7 @@ public abstract class IndexProof {
   /**
    * Parses a serialized index proof message.
    * @throws InvalidProtocolBufferException if the message is not
-   *     {@link com.exonum.core.messages.Proofs.IndexProof}
+   *     {@link com.exonum.messages.core.Proofs.IndexProof}
    */
   public static IndexProof parseFrom(byte[] indexProof)
       throws InvalidProtocolBufferException {
