@@ -32,12 +32,11 @@ import com.exonum.client.response.ServiceInstanceState;
 import com.exonum.client.response.ServicesResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
-import com.exonum.core.messages.Runtime.CallSite;
-import com.exonum.core.messages.Runtime.CallSite.Type;
-import com.exonum.core.messages.Runtime.ErrorKind;
-import com.exonum.core.messages.Runtime.ExecutionError;
-import com.exonum.core.messages.Runtime.ExecutionError.Builder;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.CallSite;
+import com.exonum.messages.core.runtime.Errors.CallSite.Type;
+import com.exonum.messages.core.runtime.Errors.ErrorKind;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -171,7 +170,7 @@ final class ExplorerApiHelper {
     }
 
     ExecutionError asError() {
-      Builder errorBuilder = ExecutionError.newBuilder()
+      ExecutionError.Builder errorBuilder = ExecutionError.newBuilder()
           .setKind(type.toProto());
 
       if (description != null) {

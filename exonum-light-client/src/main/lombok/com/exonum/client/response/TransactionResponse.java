@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import com.google.common.base.Objects;
 import lombok.Value;
 
