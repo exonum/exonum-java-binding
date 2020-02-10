@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * An Entry is a database index that can contain no or a single value.
+ * An Entry is a database index that may or may not contain a single value.
  *
  * <p>An Entry is analogous to {@link java.util.Optional}, but provides modifying ("destructive")
  * operations when created with a {@link Fork}.
@@ -46,14 +46,14 @@ public interface EntryIndex<T> extends StorageIndex {
    *
    * @param value a value to set. Must not be null.
    * @throws UnsupportedOperationException if the entry is read-only
-   * @throws IllegalStateException if the proxy is invalid
+   * @throws IllegalStateException if the index is invalid
    */
   void set(T value);
 
   /**
    * Returns true if this entry exists in the database.
    *
-   * @throws IllegalStateException if the proxy is invalid.
+   * @throws IllegalStateException if the index is invalid.
    */
   boolean isPresent();
 
@@ -63,7 +63,7 @@ public interface EntryIndex<T> extends StorageIndex {
    *
    * @return a non-null value
    * @throws NoSuchElementException if a value is not present in the Entry
-   * @throws IllegalStateException if the proxy is invalid
+   * @throws IllegalStateException if the index is invalid
    * @throws IllegalArgumentException if the supplied serializer cannot decode the value
    */
   T get();
@@ -72,7 +72,7 @@ public interface EntryIndex<T> extends StorageIndex {
    * Removes a value from this entry.
    *
    * @throws UnsupportedOperationException if the entry is read-only.
-   * @throws IllegalStateException if the proxy is invalid
+   * @throws IllegalStateException if the index is invalid
    */
   void remove();
 

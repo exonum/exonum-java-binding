@@ -32,7 +32,7 @@ public interface ProofEntryIndex<T> extends EntryIndex<T>, HashableIndex {
    * <p>The entry index hash is computed as SHA-256 of the entry binary representation, or
    * a hash of zeroes if the entry is not set.
    *
-   * @throws IllegalStateException if the proxy is invalid
+   * @throws IllegalStateException if the index is invalid
    */
   @Override
   HashCode getIndexHash();
