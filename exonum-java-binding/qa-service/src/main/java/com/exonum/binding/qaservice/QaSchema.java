@@ -24,7 +24,7 @@ import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.time.TimeSchema;
 
@@ -48,7 +48,7 @@ public final class QaSchema implements Schema {
   /**
    * Returns the index containing the name of the time oracle to use.
    */
-  public ProofEntryIndexProxy<String> timeOracleName() {
+  public ProofEntryIndex<String> timeOracleName() {
     return access.getProofEntry(TIME_ORACLE_NAME_ADDRESS, string());
   }
 

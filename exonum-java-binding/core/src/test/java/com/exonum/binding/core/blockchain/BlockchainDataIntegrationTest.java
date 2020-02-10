@@ -35,7 +35,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.messages.core.runtime.Lifecycle.InstanceState;
 import com.google.common.collect.ImmutableList;
@@ -86,7 +86,7 @@ class BlockchainDataIntegrationTest {
     Prefixed serviceData1 = blockchainData.getExecutingServiceData();
     // Check the service data is accessible by the simple name
     IndexAddress relativeAddress = IndexAddress.valueOf(simpleIndexName);
-    ProofEntryIndexProxy<String> entry1 = serviceData1.getProofEntry(relativeAddress, string());
+    ProofEntryIndex<String> entry1 = serviceData1.getProofEntry(relativeAddress, string());
     assertThat(entry1.get()).isEqualTo("V1");
 
     // Check it is writeable
@@ -95,7 +95,7 @@ class BlockchainDataIntegrationTest {
 
     // Check the service data is accessible in case of several requests to getExecutingServiceData
     Prefixed serviceData2 = blockchainData.getExecutingServiceData();
-    ProofEntryIndexProxy<String> entry2 = serviceData2.getProofEntry(relativeAddress, string());
+    ProofEntryIndex<String> entry2 = serviceData2.getProofEntry(relativeAddress, string());
     assertThat(entry2.get()).isEqualTo("V2");
   }
 
@@ -121,7 +121,7 @@ class BlockchainDataIntegrationTest {
     Prefixed serviceData1 = blockchainData.getExecutingServiceData();
     // Check the service data is accessible by the simple name
     IndexAddress relativeAddress = IndexAddress.valueOf(simpleIndexName);
-    ProofEntryIndexProxy<String> entry1 = serviceData1.getProofEntry(relativeAddress, string());
+    ProofEntryIndex<String> entry1 = serviceData1.getProofEntry(relativeAddress, string());
     assertThat(entry1.get()).isEqualTo("V1");
 
     // Check it is not writeable

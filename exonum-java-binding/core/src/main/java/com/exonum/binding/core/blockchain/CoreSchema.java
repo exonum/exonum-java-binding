@@ -33,7 +33,7 @@ import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.messages.core.Blockchain.CallInBlock;
@@ -161,7 +161,7 @@ final class CoreSchema {
    * @throws IllegalStateException if the "genesis block" was not created
    */
   Config getConsensusConfiguration() {
-    ProofEntryIndexProxy<Config> configEntry =
+    ProofEntryIndex<Config> configEntry =
         dbAccess.getProofEntry(CoreIndex.CONSENSUS_CONFIG, CONSENSUS_CONFIG_SERIALIZER);
     checkState(configEntry.isPresent(), "No consensus configuration: requesting the configuration "
         + "before the genesis block was created");

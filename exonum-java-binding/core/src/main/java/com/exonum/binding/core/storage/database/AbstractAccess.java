@@ -22,10 +22,13 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.proxy.AbstractNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
+import com.exonum.binding.core.storage.indices.EntryIndex;
+import com.exonum.binding.core.storage.indices.EntryIndexProxy;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
@@ -133,9 +136,16 @@ public abstract class AbstractAccess extends AbstractNativeProxy implements Acce
 
   @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
   @Override
-  public <E> ProofEntryIndexProxy<E> getProofEntry(IndexAddress address, Serializer<E> serializer) {
+  public <E> ProofEntryIndex<E> getProofEntry(IndexAddress address, Serializer<E> serializer) {
     return findOrCreate(address, ProofEntryIndexProxy.class,
         () -> ProofEntryIndexProxy.newInstance(address, this, serializer));
+  }
+
+  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
+  @Override
+  public <E> EntryIndex<E> getEntry(IndexAddress address, Serializer<E> serializer) {
+    return findOrCreate(address, EntryIndexProxy.class,
+        () -> EntryIndexProxy.newInstance(address, this, serializer));
   }
 
   private <T extends StorageIndex> T findOrCreate(IndexAddress address, Class<T> indexType,
