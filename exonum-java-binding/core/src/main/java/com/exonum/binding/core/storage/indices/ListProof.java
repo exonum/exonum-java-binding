@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import com.exonum.core.messages.ListProofOuterClass;
+import com.exonum.messages.proof.ListProofOuterClass;
 import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 

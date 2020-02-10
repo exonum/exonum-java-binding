@@ -16,19 +16,15 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.common.hash.Hashing.defaultHashFunction;
-import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;
 import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
 import static com.exonum.binding.qaservice.TransactionMessages.createCreateCounterTx;
 import static com.exonum.binding.qaservice.TransactionMessages.createIncrementCounterTx;
-import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.exonum.messages.core.runtime.Errors.ErrorKind.SERVICE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
@@ -36,8 +32,8 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.core.messages.Runtime.ExecutionError;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -57,24 +53,22 @@ class IncrementCounterTxTest {
 
     // Submit and execute the transaction
     long seed = 0L;
-    HashCode counterId = sha256().hashString(counterName, UTF_8);
-    TransactionMessage incrementTx = createIncrementCounterTx(seed, counterId, QA_SERVICE_ID);
+    TransactionMessage incrementTx = createIncrementCounterTx(seed, counterName, QA_SERVICE_ID);
     testKit.createBlockWithTransactions(incrementTx);
 
     // Check the counter has an incremented value
     BlockchainData view = testKit.getBlockchainData(QA_SERVICE_NAME);
     QaSchema schema = new QaSchema(view);
-    MapIndex<HashCode, Long> counters = schema.counters();
+    MapIndex<String, Long> counters = schema.counters();
     long expectedValue = 1;
 
-    assertThat(counters.get(counterId)).isEqualTo(expectedValue);
+    assertThat(counters.get(counterName)).isEqualTo(expectedValue);
   }
 
   @Test
   void executeNoSuchCounter(TestKit testKit) {
     String counterName = "unknown-counter";
-    HashCode counterId = defaultHashFunction().hashString(counterName, UTF_8);
-    TransactionMessage incrementCounterTx = createIncrementCounterTx(0L, counterId,
+    TransactionMessage incrementCounterTx = createIncrementCounterTx(0L, counterName,
         QA_SERVICE_ID);
     testKit.createBlockWithTransactions(incrementCounterTx);
 

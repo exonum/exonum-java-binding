@@ -19,7 +19,7 @@ package com.exonum.binding.core.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.core.messages.Runtime.ArtifactId;
+import com.exonum.messages.core.runtime.Base.ArtifactId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

@@ -19,7 +19,7 @@ package com.exonum.binding.common.blockchain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.core.messages.Blockchain.CallInBlock;
+import com.exonum.messages.core.Blockchain.CallInBlock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 

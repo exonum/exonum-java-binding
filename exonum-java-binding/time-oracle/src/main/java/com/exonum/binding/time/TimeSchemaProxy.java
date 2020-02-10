@@ -29,9 +29,9 @@ import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.core.messages.Runtime.ArtifactId;
-import com.exonum.core.messages.Runtime.InstanceSpec;
-import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.messages.core.runtime.Base.ArtifactId;
+import com.exonum.messages.core.runtime.Base.InstanceSpec;
+import com.exonum.messages.core.runtime.Lifecycle.InstanceState;
 import java.time.ZonedDateTime;
 
 class TimeSchemaProxy implements TimeSchema {

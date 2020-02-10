@@ -25,7 +25,7 @@ import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
-import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.Config;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public interface QaService extends Service, Configurable {
    * it through the {@link com.exonum.binding.core.service.Node}.
    * Enables testing of {@link Node#submitTransaction(RawTransaction)}.
    */
-  HashCode submitIncrementCounter(long requestSeed, HashCode counterId);
+  HashCode submitIncrementCounter(long requestSeed, String counterName);
 
   /**
    * Creates a new self-signed 'unknown' transaction and submits
@@ -49,7 +49,7 @@ public interface QaService extends Service, Configurable {
    */
   HashCode submitUnknownTx();
 
-  Optional<Counter> getValue(HashCode counterId);
+  Optional<Counter> getValue(String counterName);
 
   Config getConsensusConfiguration();
 
@@ -73,7 +73,7 @@ public interface QaService extends Service, Configurable {
    *
    * <p>Parameters:
    *  - seed transaction seed
-   *  - counterId counter id, a hash of the counter name
+   *  - counterName the counter name
    * @throws ExecutionException if a counter with the given id does not exist
    */
   void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,

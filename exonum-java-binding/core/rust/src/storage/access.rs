@@ -15,12 +15,12 @@
 use exonum::{
     blockchain::{BlockProof, IndexProof, Schema},
     helpers::Height,
+    merkledb::{
+        access::{Access, AccessError},
+        generic::{ErasedAccess, GenericAccess, GenericRawAccess},
+        Fork, IndexAddress,
+    },
     runtime::SnapshotExt,
-};
-use exonum_merkledb::{
-    access::{Access, AccessError},
-    generic::{ErasedAccess, GenericAccess, GenericRawAccess},
-    Fork, IndexAddress,
 };
 use jni::{
     objects::JClass,
@@ -48,6 +48,7 @@ where
     ErasedAccess::from(generic_raw_access)
 }
 
+/// A helper trait for operations that are not supported by `ErasedAccess` directly.
 pub trait EjbAccessExt {
     /// Returns `true` iff `into_fork` conversion is possible.
     fn can_convert_into_fork(&self) -> bool;
@@ -214,7 +215,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAcc
 
 /// Destroys the underlying `ErasedAccess` object and frees memory.
 #[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_database_Accesses_nativeFree(
+pub extern "system" fn Java_com_exonum_binding_core_storage_database_AbstractAccess_nativeFree(
     env: JNIEnv,
     _: JClass,
     access_handle: Handle,
@@ -224,7 +225,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_database_Accesses_na
 
 #[cfg(test)]
 mod tests {
-    use exonum_merkledb::{
+    use exonum::merkledb::{
         access::{Access, AccessExt},
         generic::ErasedAccess,
         Database, Entry, TemporaryDB,

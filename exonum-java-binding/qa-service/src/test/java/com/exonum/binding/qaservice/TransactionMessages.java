@@ -24,7 +24,6 @@ import static com.exonum.binding.qaservice.QaServiceImpl.VALID_ERROR_TX_ID;
 import static com.exonum.binding.qaservice.QaServiceImpl.VALID_THROWING_TX_ID;
 
 import com.exonum.binding.common.crypto.KeyPair;
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.CreateCounterTxBody;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
@@ -81,22 +80,22 @@ final class TransactionMessages {
    * with the test key pair.
    */
   static TransactionMessage createIncrementCounterTx(long seed,
-      HashCode counterId, int qaServiceId) {
-    return createIncrementCounterTx(seed, counterId, qaServiceId, TEST_KEY_PAIR);
+      String counterName, int qaServiceId) {
+    return createIncrementCounterTx(seed, counterName, qaServiceId, TEST_KEY_PAIR);
   }
 
   /**
    * Returns an increment counter transaction message with the given arguments and signed
    * with the given key pair.
    */
-  static TransactionMessage createIncrementCounterTx(long seed, HashCode counterId,
+  static TransactionMessage createIncrementCounterTx(long seed, String counterName,
       int qaServiceId, KeyPair keys) {
     return TransactionMessage.builder()
       .serviceId(qaServiceId)
       .transactionId(INCREMENT_COUNTER_TX_ID)
       .payload(IncrementCounterTxBody.newBuilder()
           .setSeed(seed)
-          .setCounterId(ByteString.copyFrom(counterId.asBytes()))
+          .setCounterName(counterName)
           .build())
       .sign(keys);
   }

@@ -25,11 +25,9 @@ import static com.exonum.binding.qaservice.QaExecutionError.UNKNOWN_COUNTER;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
@@ -49,12 +47,11 @@ import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.Config.QaResumeArguments;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.binding.time.TimeSchema;
-import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.Config;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.protobuf.ByteString;
 import io.vertx.ext.web.Router;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -140,17 +137,12 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   public void beforeTransaction(BlockchainData blockchainData) {
-    // fixme! ECR-3849
-    HashCode counterId = Hashing.sha256()
-        .hashString(BEFORE_TXS_COUNTER_NAME, UTF_8);
-    incrementCounter(counterId, blockchainData);
+    incrementCounter(BEFORE_TXS_COUNTER_NAME, blockchainData);
   }
 
   @Override
   public void afterTransactions(BlockchainData blockchainData) {
-    HashCode counterId = Hashing.sha256()
-        .hashString(AFTER_TXS_COUNTER_NAME, UTF_8);
-    incrementCounter(counterId, blockchainData);
+    incrementCounter(AFTER_TXS_COUNTER_NAME, blockchainData);
   }
 
   /**
@@ -160,14 +152,12 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   @Override
   public void afterCommit(BlockCommittedEvent event) {
     long seed = event.getHeight();
-    HashCode counterId = Hashing.sha256()
-        .hashString(AFTER_COMMIT_COUNTER_NAME, UTF_8);
-    submitIncrementCounter(seed, counterId);
+    submitIncrementCounter(seed, AFTER_COMMIT_COUNTER_NAME);
   }
 
   @Override
-  public HashCode submitIncrementCounter(long requestSeed, HashCode counterId) {
-    RawTransaction tx = newRawIncrementCounterTransaction(requestSeed, counterId, getId());
+  public HashCode submitIncrementCounter(long requestSeed, String counterName) {
+    RawTransaction tx = newRawIncrementCounterTransaction(requestSeed, counterName, getId());
 
     return submitTransaction(tx);
   }
@@ -176,15 +166,14 @@ public final class QaServiceImpl extends AbstractService implements QaService {
    * Creates a new raw transaction of this type with the given parameters.
    *
    * @param requestSeed transaction id
-   * @param counterId counter id, a hash of the counter name
+   * @param counterName the counter name
    * @param serviceId the id of QA service
    */
   private static RawTransaction newRawIncrementCounterTransaction(long requestSeed,
-      HashCode counterId, int serviceId) {
-    byte[] payload = TxMessageProtos.IncrementCounterTxBody
-        .newBuilder()
+      String counterName, int serviceId) {
+    byte[] payload = TxMessageProtos.IncrementCounterTxBody.newBuilder()
         .setSeed(requestSeed)
-        .setCounterId(ByteString.copyFrom(counterId.asBytes()))
+        .setCounterName(counterName)
         .build().toByteArray();
 
     return RawTransaction.newBuilder()
@@ -223,20 +212,14 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   @Override
   @SuppressWarnings("ConstantConditions")  // Node is not null.
-  public Optional<Counter> getValue(HashCode counterId) {
+  public Optional<Counter> getValue(String counterName) {
     checkBlockchainInitialized();
 
     return node.withBlockchainData((snapshot) -> {
       QaSchema schema = createDataSchema(snapshot);
-      MapIndex<HashCode, Long> counters = schema.counters();
-      if (!counters.containsKey(counterId)) {
-        return Optional.empty();
-      }
-
-      MapIndex<HashCode, String> counterNames = schema.counterNames();
-      String name = counterNames.get(counterId);
-      Long value = counters.get(counterId);
-      return Optional.of(new Counter(name, value));
+      MapIndex<String, Long> counters = schema.counters();
+      return Optional.ofNullable(counters.get(counterName))
+          .map(value -> new Counter(counterName, value));
     });
   }
 
@@ -312,37 +295,31 @@ public final class QaServiceImpl extends AbstractService implements QaService {
 
   private void createCounter(String counterName, BlockchainData blockchainData) {
     QaSchema schema = createDataSchema(blockchainData);
-    MapIndex<HashCode, Long> counters = schema.counters();
-    MapIndex<HashCode, String> names = schema.counterNames();
+    MapIndex<String, Long> counters = schema.counters();
 
-    HashCode counterId = Hashing.defaultHashFunction()
-        .hashString(counterName, UTF_8);
-    checkExecution(!counters.containsKey(counterId),
+    checkExecution(!counters.containsKey(counterName),
         COUNTER_ALREADY_EXISTS.code, "Counter %s already exists", counterName);
-    assert !names.containsKey(counterId) : "counterNames must not contain the id of " + counterName;
 
-    counters.put(counterId, 0L);
-    names.put(counterId, counterName);
+    counters.put(counterName, 0L);
   }
 
   @Override
   @Transaction(INCREMENT_COUNTER_TX_ID)
   public void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
       TransactionContext context) {
-    byte[] rawCounterId = arguments.getCounterId().toByteArray();
-    HashCode counterId = HashCode.fromBytes(rawCounterId);
-    incrementCounter(counterId, context.getBlockchainData());
+    String counterName = arguments.getCounterName();
+    incrementCounter(counterName, context.getBlockchainData());
   }
 
-  private void incrementCounter(HashCode counterId, BlockchainData blockchainData) {
+  private void incrementCounter(String counterName, BlockchainData blockchainData) {
     QaSchema schema = createDataSchema(blockchainData);
-    ProofMapIndexProxy<HashCode, Long> counters = schema.counters();
+    ProofMapIndexProxy<String, Long> counters = schema.counters();
 
     // Increment the counter if there is such.
-    checkExecution(counters.containsKey(counterId), UNKNOWN_COUNTER.code);
+    checkExecution(counters.containsKey(counterName), UNKNOWN_COUNTER.code);
 
-    long newValue = counters.get(counterId) + 1;
-    counters.put(counterId, newValue);
+    long newValue = counters.get(counterName) + 1;
+    counters.put(counterName, newValue);
   }
 
   @Override

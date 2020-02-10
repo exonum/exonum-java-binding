@@ -17,7 +17,7 @@ use std::{panic, ptr};
 use exonum::merkledb::{
     access::AccessExt,
     generic::{ErasedAccess, GenericRawAccess},
-    indexes::{Entries as IndexIter, Keys, Values},
+    indexes::{Entries, Keys, Values},
     ObjectHash, ProofMapIndex,
 };
 use jni::{
@@ -36,7 +36,9 @@ type Index = ProofMapIndex<GenericRawAccess<'static>, Key, Value>;
 
 const JAVA_ENTRY_FQN: &str = "com/exonum/binding/core/storage/indices/MapEntryInternal";
 
-type Iter<'a> = PairIter<IndexIter<'a, Key, Value>>;
+type Iter<'a> = PairIter<Entries<'a, Key, Value>>;
+type ValuesIter<'a> = Values<'a, Value>;
+type KeysIter<'a> = Keys<'a, Key>;
 
 /// Returns a pointer to the created `ProofMapIndex` object.
 #[no_mangle]
@@ -343,7 +345,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<Keys<Key>>(iter_handle);
+        let iter = handle::cast_handle::<KeysIter>(iter_handle);
         utils::optional_array_to_java(&env, iter.next())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -356,7 +358,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<Keys<Key>>(&env, iter_handle);
+    handle::drop_handle::<KeysIter>(&env, iter_handle);
 }
 
 /// Return next value from the values-iterator. Returns null pointer when iteration is finished.
@@ -367,7 +369,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<Values<Value>>(iter_handle);
+        let iter = handle::cast_handle::<ValuesIter>(iter_handle);
         utils::optional_array_to_java(&env, iter.next())
     });
     utils::unwrap_exc_or(&env, res, ptr::null_mut())
@@ -380,7 +382,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ProofMapInde
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<Values<Value>>(&env, iter_handle);
+    handle::drop_handle::<ValuesIter>(&env, iter_handle);
 }
 
 // Converts Java byte array to key.

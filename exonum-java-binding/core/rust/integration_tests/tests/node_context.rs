@@ -32,10 +32,10 @@ use java_bindings::{
     exonum::{
         blockchain::{ApiSender, Blockchain},
         crypto::{gen_keypair, PublicKey, SecretKey},
+        merkledb::TemporaryDB,
         messages::Verified,
         runtime::{AnyTx, CallInfo},
     },
-    exonum_merkledb::TemporaryDB,
     jni::JavaVM,
     Executor, Node,
 };

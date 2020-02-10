@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Integer.parseInt;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
-import com.exonum.core.messages.Runtime.ArtifactId;
+import com.exonum.messages.core.runtime.Base.ArtifactId;
 import com.google.auto.value.AutoValue;
 
 /**

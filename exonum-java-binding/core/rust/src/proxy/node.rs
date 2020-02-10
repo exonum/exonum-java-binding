@@ -17,15 +17,17 @@
 use exonum::{
     blockchain::Blockchain,
     crypto::{Hash, PublicKey},
+    merkledb::{ObjectHash, Snapshot},
     messages::Verified,
     runtime::{AnyTx, CallInfo},
 };
-use exonum_merkledb::{ObjectHash, Snapshot};
 use failure;
 use futures::Future;
-use jni::objects::JClass;
-use jni::sys::{jbyteArray, jint};
-use jni::JNIEnv;
+use jni::{
+    objects::JClass,
+    sys::{jbyteArray, jint},
+    JNIEnv,
+};
 
 use std::{panic, ptr};
 

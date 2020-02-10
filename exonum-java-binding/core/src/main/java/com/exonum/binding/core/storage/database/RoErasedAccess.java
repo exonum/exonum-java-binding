@@ -83,7 +83,8 @@ public final class RoErasedAccess extends AbstractAccess {
    */
   private static RoErasedAccess fromHandleInternal(long erasedNativeHandle, Cleaner cleaner) {
     NativeHandle handle = new NativeHandle(erasedNativeHandle);
-    ProxyDestructor.newRegistered(cleaner, handle, RoErasedAccess.class, Accesses::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, handle, RoErasedAccess.class,
+        AbstractAccess::nativeFree);
     return new RoErasedAccess(handle, cleaner);
   }
 

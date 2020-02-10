@@ -18,11 +18,11 @@ package com.exonum.binding.common.blockchain;
 
 import static com.google.common.base.Preconditions.checkElementIndex;
 
-import com.exonum.core.messages.Blockchain.CallInBlock;
+import com.exonum.messages.core.Blockchain.CallInBlock;
 
 /**
  * Provides factory methods to concisely create
- * {@link com.exonum.core.messages.Blockchain.CallInBlock}s.
+ * {@link com.exonum.messages.core.Blockchain.CallInBlock}s.
  */
 public final class CallInBlocks {
 

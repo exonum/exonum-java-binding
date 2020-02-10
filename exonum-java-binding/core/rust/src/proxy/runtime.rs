@@ -226,7 +226,7 @@ impl Runtime for JavaRuntimeProxy {
         _data_version: &Version,
     ) -> Result<Option<MigrationScript>, InitMigrationError> {
         // TODO (ECR-3787): implement
-        Ok(None)
+        Err(InitMigrationError::NotSupported)
     }
 
     fn execute(

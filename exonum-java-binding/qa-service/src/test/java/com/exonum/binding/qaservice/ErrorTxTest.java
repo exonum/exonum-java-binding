@@ -41,9 +41,9 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.core.messages.Runtime.ErrorKind;
-import com.exonum.core.messages.Runtime.ExecutionError;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.ErrorKind;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -128,8 +128,7 @@ class ErrorTxTest {
       assertThrows(ExecutionException.class, () -> qaService.error(arguments, context));
 
       // Check that it has cleared the maps
-      assertThat(schema.counters().isEmpty()).isTrue();
-      assertThat(schema.counterNames().isEmpty()).isTrue();
+      assertTrue(schema.counters().isEmpty());
     }
   }
 

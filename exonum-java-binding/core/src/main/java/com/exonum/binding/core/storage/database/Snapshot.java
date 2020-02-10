@@ -69,7 +69,7 @@ public final class Snapshot extends AbstractAccess {
     NativeHandle h = new NativeHandle(nativeHandle);
     ProxyDestructor.newRegistered(cleaner, h, Snapshot.class, nh -> {
       if (owningHandle) {
-        Accesses.nativeFree(nh);
+        AbstractAccess.nativeFree(nh);
       }
     });
 

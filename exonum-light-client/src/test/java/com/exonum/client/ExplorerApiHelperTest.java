@@ -61,7 +61,7 @@ class ExplorerApiHelperTest {
 
   private static String TEMPLATE_TRANSACTION_MESSAGE_JSON = "{\n"
       + "    'type': 'committed',\n"
-      + "    'content': '" + toHex(TRANSACTION_MESSAGE) + "',\n"
+      + "    'message': '" + toHex(TRANSACTION_MESSAGE) + "',\n"
       + "    'location': {\n"
       + "        'block_height': " + BLOCK_HEIGHT + ",\n"
       + "        'position_in_block': " + INDEX_IN_BLOCK + "\n"
@@ -93,7 +93,7 @@ class ExplorerApiHelperTest {
   void parseGetTxResponseInPool() {
     String json = "{\n"
         + "    'type': 'in-pool',\n"
-        + "    'content': '" + toHex(TRANSACTION_MESSAGE) + "'\n"
+        + "    'message': '" + toHex(TRANSACTION_MESSAGE) + "'\n"
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 

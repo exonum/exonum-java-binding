@@ -37,7 +37,7 @@ import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.messages.core.runtime.Lifecycle.InstanceState;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.function.BiFunction;

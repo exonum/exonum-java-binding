@@ -33,11 +33,11 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.core.messages.Blockchain.CallInBlock;
-import com.exonum.core.messages.Blockchain.Config;
-import com.exonum.core.messages.Proofs;
-import com.exonum.core.messages.Runtime.ExecutionError;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.Blockchain.CallInBlock;
+import com.exonum.messages.core.Blockchain.Config;
+import com.exonum.messages.core.Proofs;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
 

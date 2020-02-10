@@ -16,16 +16,16 @@ invocation = ["jni/invocation"]
 
 [dependencies]
 chrono = "0.4"
-exonum = { version = "0.13.0-rc.2", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
-exonum-cli = "0.13.0-rc.2"
+exonum = { version = "1.0.0-rc.1", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
+exonum-cli = "1.0.0-rc.1"
 # Though it is not required here explicitly, it is added in order to access core proto files. [ECR-4036]
-exonum-crypto = "0.13.0-rc.2"
-exonum-derive = "0.13.0-rc.2"
-exonum-proto = "0.13.0-rc.2"
-exonum-rust-runtime = "0.13.0-rc.2"
-exonum-supervisor = "0.13.0-rc.2"
-exonum-testkit = "0.13.0-rc.2"
-exonum-time = "0.13.0-rc.2"
+exonum-crypto = "1.0.0-rc.1"
+exonum-derive = "1.0.0-rc.1"
+exonum-proto = "1.0.0-rc.1"
+exonum-rust-runtime = "1.0.0-rc.1"
+exonum-supervisor = "1.0.0-rc.1"
+exonum-testkit = "1.0.0-rc.1"
+exonum-time = "1.0.0-rc.1"
 failure = "0.1"
 futures = "0.1"
 jni = { version = "0.14", features = ["invocation"] }
@@ -43,27 +43,10 @@ toml = "0.5"
 tempfile = "3"
 
 [build-dependencies]
-exonum-build = { version = "0.13.0-rc.2" }
+exonum-build = { version = "1.0.0-rc.1" }
 
 [profile.dev]
 rpath = true
 
 [profile.release]
 rpath = true
-
-# FIXME: using git dependency until Exonum 1.0 is released
-[patch.crates-io]
-exonum = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-build = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-cli = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-crypto = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-derive = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-explorer-service = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-merkledb = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-node = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-proto = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-rust-runtime = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-system-api = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
-exonum-time = { git = "https://github.com/exonum/exonum", rev = "805dee9e" }
