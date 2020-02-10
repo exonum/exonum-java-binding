@@ -47,7 +47,7 @@ import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.Config.QaResumeArguments;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.binding.time.TimeSchema;
-import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.Config;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;

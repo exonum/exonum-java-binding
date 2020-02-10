@@ -20,9 +20,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.core.messages.Consensus.ExonumMessage;
-import com.exonum.core.messages.Messages;
-import com.exonum.core.messages.Runtime.AnyTx;
+import com.exonum.messages.core.Messages;
+import com.exonum.messages.core.Messages.CoreMessage;
+import com.exonum.messages.core.runtime.Base.AnyTx;
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -56,7 +56,7 @@ final class ParsedTransactionMessage implements TransactionMessage {
     }
 
     // Decode the transaction
-    ExonumMessage payload = parsedMessage.getPayload();
+    CoreMessage payload = parsedMessage.getPayload();
     checkArgument(payload.hasAnyTx(), "SignedMessage does not contain a transaction "
         + "in its payload but %s", payload.getKindCase());
 

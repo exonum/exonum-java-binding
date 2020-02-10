@@ -26,11 +26,11 @@ import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.core.messages.Consensus.ExonumMessage;
-import com.exonum.core.messages.Messages;
-import com.exonum.core.messages.Runtime.AnyTx;
-import com.exonum.core.messages.Runtime.CallInfo;
-import com.exonum.core.messages.Types;
+import com.exonum.messages.core.Messages;
+import com.exonum.messages.core.Messages.CoreMessage;
+import com.exonum.messages.core.runtime.Base.AnyTx;
+import com.exonum.messages.core.runtime.Base.CallInfo;
+import com.exonum.messages.crypto.Types;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.MessageLite;
@@ -215,7 +215,7 @@ public interface TransactionMessage {
           "PublicKey has invalid size (%s), expected: %s. Key: %s",
           authorPublicKey.size(), Ed25519.PUBLIC_KEY_BYTES, authorPublicKey);
 
-      byte[] exonumMessage = ExonumMessage.newBuilder()
+      byte[] exonumMessage = CoreMessage.newBuilder()
           .setAnyTx(AnyTx.newBuilder()
               .setCallInfo(CallInfo.newBuilder()
                   .setInstanceId(serviceId)

@@ -18,8 +18,8 @@ package com.exonum.binding.core.blockchain;
 
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.exonum.core.messages.Proofs.BlockProof;
-import com.exonum.core.messages.Proofs.IndexProof;
+import com.exonum.messages.core.Proofs.BlockProof;
+import com.exonum.messages.core.Proofs.IndexProof;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Optional;
 import javax.annotation.Nullable;

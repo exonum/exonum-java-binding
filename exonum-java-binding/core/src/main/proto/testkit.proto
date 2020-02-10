@@ -19,7 +19,8 @@ package exonum.testkit;
 option java_package = "com.exonum.binding.core.testkit.internal";
 option java_outer_classname = "TestKitProtos";
 
-import "runtime.proto";
+import "exonum/runtime/lifecycle.proto";
+import "exonum/runtime/base.proto";
 
 // DTO for TestKit initialization.
 message TestKitServiceInstances {

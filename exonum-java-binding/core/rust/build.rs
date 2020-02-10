@@ -20,7 +20,6 @@ fn main() {
     ProtobufGenerator::with_mod_name("protobuf_mod.rs")
         .with_input_dir("../src/main/proto")
         .add_path("../src/main/proto")
-        .with_exonum()
-        .with_crypto()
+        .add_path("../../common/src/main/proto/src")
         .generate();
 }

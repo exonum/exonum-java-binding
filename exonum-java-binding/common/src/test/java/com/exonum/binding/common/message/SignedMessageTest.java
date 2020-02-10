@@ -26,10 +26,10 @@ import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.core.messages.Consensus.ExonumMessage;
-import com.exonum.core.messages.Messages;
-import com.exonum.core.messages.Types;
-import com.exonum.core.messages.Types.Signature;
+import com.exonum.messages.core.Messages;
+import com.exonum.messages.core.Messages.CoreMessage;
+import com.exonum.messages.crypto.Types;
+import com.exonum.messages.crypto.Types.Signature;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,13 +43,13 @@ class SignedMessageTest {
 
   @Nested
   class ParsedFromTestData {
-    private ExonumMessage payload;
+    private CoreMessage payload;
     private byte[] testSignature;
     private Messages.SignedMessage message;
 
     @BeforeEach
     void createProtoMessage() {
-      payload = ExonumMessage.getDefaultInstance();
+      payload = CoreMessage.getDefaultInstance();
       Types.PublicKey authorPk = aPublicKey()
           .setData(ByteString.copyFrom(TEST_PUBLIC_KEY.toBytes()))
           .build();

@@ -22,14 +22,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.core.messages.Consensus;
-import com.exonum.core.messages.Consensus.ExonumMessage;
-import com.exonum.core.messages.Consensus.Prevote;
-import com.exonum.core.messages.Messages;
-import com.exonum.core.messages.Runtime.AnyTx;
-import com.exonum.core.messages.Runtime.CallInfo;
-import com.exonum.core.messages.Types;
-import com.exonum.core.messages.Types.Signature;
+import com.exonum.messages.core.Messages;
+import com.exonum.messages.core.Messages.CoreMessage;
+import com.exonum.messages.core.runtime.Base.AnyTx;
+import com.exonum.messages.core.runtime.Base.CallInfo;
+import com.exonum.messages.crypto.Types;
+import com.exonum.messages.crypto.Types.Signature;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -52,7 +50,7 @@ class ParsedTransactionMessageTest {
 
     @BeforeEach
     void createSignedMessage() {
-      byte[] exonumMessage = ExonumMessage.newBuilder()
+      byte[] exonumMessage = CoreMessage.newBuilder()
           .setAnyTx(AnyTx.newBuilder()
               .setCallInfo(CallInfo.newBuilder()
                   .setInstanceId(serviceId)
@@ -109,14 +107,14 @@ class ParsedTransactionMessageTest {
 
   @Test
   void createMessageNotTx() {
-    // Use Prevote message instead of AnyTx
-    byte[] prevoteMessage = Consensus.ExonumMessage.newBuilder()
-        .setPrevote(Prevote.getDefaultInstance())
+    // Use Precommit message instead of AnyTx
+    byte[] precommitMessage = CoreMessage.newBuilder()
+        .setPrecommit(Messages.Precommit.getDefaultInstance())
         .build()
         .toByteArray();
 
     Messages.SignedMessage signedMessage = aSignedMessageProto()
-        .setPayload(ByteString.copyFrom(prevoteMessage))
+        .setPayload(ByteString.copyFrom(precommitMessage))
         .build();
 
     Exception e = assertThrows(IllegalArgumentException.class,
@@ -124,7 +122,7 @@ class ParsedTransactionMessageTest {
 
     assertThat(e.getMessage())
         .containsIgnoringCase("does not contain a transaction")
-        .containsIgnoringCase("Prevote");
+        .containsIgnoringCase("Precommit");
   }
 
   @Test
@@ -154,7 +152,7 @@ class ParsedTransactionMessageTest {
 
   private static Messages.SignedMessage signedConsensusMessage(String payload) {
     return aSignedMessageProto()
-        .setPayload(ExonumMessage.newBuilder()
+        .setPayload(CoreMessage.newBuilder()
             .setAnyTx(anyTx(payload))
             .build()
             .toByteString())

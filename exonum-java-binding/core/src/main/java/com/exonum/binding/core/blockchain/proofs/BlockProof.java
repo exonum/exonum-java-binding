@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.blockchain.proofs;
 
-import com.exonum.core.messages.Proofs;
+import com.exonum.messages.core.Proofs;
 import com.google.auto.value.AutoValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -41,7 +41,7 @@ public abstract class BlockProof {
   /**
    * Parses a serialized block proof message.
    * @throws InvalidProtocolBufferException if the message is not
-   *     {@link com.exonum.core.messages.Proofs.BlockProof}
+   *     {@link com.exonum.messages.core.Proofs.BlockProof}
    */
   public static BlockProof parseFrom(byte[] blockProof)
       throws InvalidProtocolBufferException {

@@ -49,7 +49,8 @@ import com.exonum.binding.core.testkit.internal.TestKitProtos.TestKitServiceInst
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.exonum.core.messages.Runtime;
+import com.exonum.messages.core.runtime.Base;
+import com.exonum.messages.core.runtime.Lifecycle;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -403,7 +404,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
 
     private EmulatedNodeType nodeType = EmulatedNodeType.VALIDATOR;
     private short validatorCount = 1;
-    private Multimap<ServiceArtifactId, Runtime.InstanceInitParams> services =
+    private Multimap<ServiceArtifactId, Lifecycle.InstanceInitParams> services =
             ArrayListMultimap.create();
     private HashMap<ServiceArtifactId, String> serviceArtifactFilenames = new HashMap<>();
     private Path artifactsDirectory;
@@ -502,12 +503,12 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkServiceArtifactIsDeployed(serviceArtifactId);
 
       // Collect specifications of service instances in their protobuf representation.
-      Runtime.InstanceSpec instanceSpec = Runtime.InstanceSpec.newBuilder()
+      Base.InstanceSpec instanceSpec = Base.InstanceSpec.newBuilder()
           .setId(serviceId)
           .setName(serviceName)
           .setArtifact(artifactIdToProto(serviceArtifactId))
           .build();
-      Runtime.InstanceInitParams params = Runtime.InstanceInitParams.newBuilder()
+      Lifecycle.InstanceInitParams params = Lifecycle.InstanceInitParams.newBuilder()
           .setInstanceSpec(instanceSpec)
           .setConstructor(configuration.toByteString())
           .build();
@@ -590,7 +591,7 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       // Add specifications of artifacts to deploy.
       for (Map.Entry<ServiceArtifactId, String> entry : serviceArtifactFilenames.entrySet()) {
         ServiceArtifactId artifactId = entry.getKey();
-        Runtime.ArtifactSpec artifactSpec = Runtime.ArtifactSpec.newBuilder()
+        Base.ArtifactSpec artifactSpec = Base.ArtifactSpec.newBuilder()
             .setArtifact(artifactIdToProto(artifactId))
             .setPayload(DeployArguments.newBuilder()
                 .setArtifactFilename(entry.getValue())
@@ -602,15 +603,15 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       }
 
       // Add specifications of service instances to start.
-      for (Runtime.InstanceInitParams instanceInitParams : services.values()) {
+      for (Lifecycle.InstanceInitParams instanceInitParams : services.values()) {
         builder.addServiceSpecs(instanceInitParams);
       }
 
       return builder.build();
     }
 
-    private Runtime.ArtifactId artifactIdToProto(ServiceArtifactId artifactId) {
-      return Runtime.ArtifactId.newBuilder()
+    private Base.ArtifactId artifactIdToProto(ServiceArtifactId artifactId) {
+      return Base.ArtifactId.newBuilder()
           .setRuntimeId(artifactId.getRuntimeId())
           .setName(artifactId.getName())
           .setVersion(artifactId.getVersion())
