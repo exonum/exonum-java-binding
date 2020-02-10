@@ -69,7 +69,7 @@ final class ExplorerApiHelper {
 
     return new TransactionResponse(
         response.getType(),
-        response.getContent(),
+        response.getMessage(),
         executionResult,
         response.getLocation()
     );
@@ -167,7 +167,7 @@ final class ExplorerApiHelper {
     @NonNull
     TransactionStatus type;
     @NonNull
-    TransactionMessage content;
+    TransactionMessage message;
     TransactionLocation location;
     JsonObject locationProof; //TODO: in scope of LC P3
     GetTxResponseExecutionResult status;
