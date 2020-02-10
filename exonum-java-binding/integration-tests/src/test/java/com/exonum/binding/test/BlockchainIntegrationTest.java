@@ -54,20 +54,20 @@ import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
 import com.exonum.binding.fakeservice.Transactions.RaiseErrorArgs;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.core.messages.Blockchain.CallInBlock;
-import com.exonum.core.messages.Blockchain.Config;
-import com.exonum.core.messages.Blockchain.ValidatorKeys;
-import com.exonum.core.messages.Consensus.ExonumMessage;
-import com.exonum.core.messages.Consensus.ExonumMessage.KindCase;
-import com.exonum.core.messages.MapProofOuterClass.MapProof;
-import com.exonum.core.messages.MapProofOuterClass.OptionalEntry;
-import com.exonum.core.messages.Messages;
-import com.exonum.core.messages.Messages.Precommit;
-import com.exonum.core.messages.Proofs;
-import com.exonum.core.messages.Runtime.ErrorKind;
-import com.exonum.core.messages.Runtime.ExecutionError;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
-import com.exonum.core.messages.Types;
+import com.exonum.messages.core.Blockchain.CallInBlock;
+import com.exonum.messages.core.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.ValidatorKeys;
+import com.exonum.messages.core.Messages;
+import com.exonum.messages.core.Messages.CoreMessage;
+import com.exonum.messages.core.Messages.CoreMessage.KindCase;
+import com.exonum.messages.core.Messages.Precommit;
+import com.exonum.messages.core.Proofs;
+import com.exonum.messages.core.runtime.Errors.ErrorKind;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
+import com.exonum.messages.crypto.Types;
+import com.exonum.messages.proof.MapProofOuterClass.MapProof;
+import com.exonum.messages.proof.MapProofOuterClass.OptionalEntry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -123,7 +123,7 @@ class BlockchainIntegrationTest {
 
         // Check the block proof message
         Proofs.BlockProof proof = blockProof.getAsMessage();
-        com.exonum.core.messages.Blockchain.Block genesisBlock = proof.getBlock();
+        com.exonum.messages.core.Blockchain.Block genesisBlock = proof.getBlock();
         assertThat(genesisBlock.getHeight()).isEqualTo(GENESIS_BLOCK_HEIGHT);
         // A genesis block proof is a special case: it does not have precommit messages,
         // for it is created based on the network configuration only, with no messages.
@@ -195,7 +195,7 @@ class BlockchainIntegrationTest {
         // Check the precommit message from the single validator
         Messages.SignedMessage rawPrecommitMessage = proof.getPrecommits(0);
         SignedMessage rawPrecommit = SignedMessage.fromProto(rawPrecommitMessage);
-        ExonumMessage payload = rawPrecommit.getPayload();
+        CoreMessage payload = rawPrecommit.getPayload();
         assertThat(payload.getKindCase()).isEqualTo(KindCase.PRECOMMIT);
         Precommit precommit = payload.getPrecommit();
         HashCode blockHash = hashFromProto(precommit.getBlockHash());

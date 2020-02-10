@@ -25,7 +25,7 @@ import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
-import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.Config;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;

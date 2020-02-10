@@ -16,7 +16,7 @@
 
 package com.exonum.binding.common.blockchain;
 
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import com.google.protobuf.Empty;
 
 /**

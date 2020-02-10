@@ -23,7 +23,7 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.core.messages.Runtime.InstanceState;
+import com.exonum.messages.core.runtime.Lifecycle.InstanceState;
 
 /**
  * Exonum service instances database schema.

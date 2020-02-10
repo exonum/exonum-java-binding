@@ -28,7 +28,7 @@ import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVE
 import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
 import static com.exonum.binding.cryptocurrency.TransactionUtils.newCreateWalletTransaction;
 import static com.exonum.binding.cryptocurrency.TransactionUtils.newTransferTransaction;
-import static com.exonum.core.messages.Runtime.ErrorKind.SERVICE;
+import static com.exonum.messages.core.runtime.Errors.ErrorKind.SERVICE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,8 +43,8 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.exonum.core.messages.Runtime.ExecutionError;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;

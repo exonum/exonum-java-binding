@@ -60,7 +60,7 @@ import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.binding.testkit.TimeProvider;
-import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.Config;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import io.vertx.core.MultiMap;

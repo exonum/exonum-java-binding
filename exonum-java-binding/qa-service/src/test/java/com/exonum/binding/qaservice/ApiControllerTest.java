@@ -38,7 +38,7 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.json.JsonSerializer;
 import com.exonum.binding.core.blockchain.serialization.CoreTypeAdapterFactory;
-import com.exonum.core.messages.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.Config;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

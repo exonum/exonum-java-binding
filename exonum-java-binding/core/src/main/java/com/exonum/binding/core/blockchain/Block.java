@@ -128,7 +128,7 @@ public abstract class Block {
    * Creates a block from the block message.
    * @param blockMessage a block
    */
-  public static Block fromMessage(com.exonum.core.messages.Blockchain.Block blockMessage) {
+  public static Block fromMessage(com.exonum.messages.core.Blockchain.Block blockMessage) {
     // Such implementation prevents a redundant deserialization of Block message
     // (in BlockSerializer#fromBytes).
     HashCode blockHash = sha256().hashBytes(blockMessage.toByteArray());
@@ -139,7 +139,7 @@ public abstract class Block {
    * Creates a block from the serialized block message.
    * @param serializedBlock a serialized block message
    * @throws IllegalArgumentException if the block bytes are not a serialized
-   *     {@link com.exonum.core.messages.Blockchain.Block}
+   *     {@link com.exonum.messages.core.Blockchain.Block}
    */
   public static Block parseFrom(byte[] serializedBlock) {
     return BlockSerializer.INSTANCE.fromBytes(serializedBlock);

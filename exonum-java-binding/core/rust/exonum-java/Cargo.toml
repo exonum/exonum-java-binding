@@ -5,12 +5,12 @@ authors = ["Exonum team <contact@exonum.com>"]
 
 [dependencies]
 env_logger = "0.7"
-exonum-explorer-service = "0.13.0-rc.2"
-exonum-node = "0.13.0-rc.2"
-exonum-rust-runtime = "0.13.0-rc.2"
-exonum-supervisor = "0.13.0-rc.2"
-exonum-system-api = "0.13.0-rc.2"
-exonum-time = "0.13.0-rc.2"
+exonum-explorer-service = "1.0.0-rc.1"
+exonum-node = "1.0.0-rc.1"
+exonum-rust-runtime = "1.0.0-rc.1"
+exonum-supervisor = "1.0.0-rc.1"
+exonum-system-api = "1.0.0-rc.1"
+exonum-time = "1.0.0-rc.1"
 failure = "0.1"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).
 # Although its primary goal is to detect _programming_ errors that shall not occur
