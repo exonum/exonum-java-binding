@@ -54,12 +54,12 @@ import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
 import com.exonum.binding.fakeservice.Transactions.RaiseErrorArgs;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
-import com.exonum.messages.consensus.Consensus.ExonumMessage;
-import com.exonum.messages.consensus.Consensus.ExonumMessage.KindCase;
 import com.exonum.messages.core.Blockchain.CallInBlock;
 import com.exonum.messages.core.Blockchain.Config;
 import com.exonum.messages.core.Blockchain.ValidatorKeys;
 import com.exonum.messages.core.Messages;
+import com.exonum.messages.core.Messages.CoreMessage;
+import com.exonum.messages.core.Messages.CoreMessage.KindCase;
 import com.exonum.messages.core.Messages.Precommit;
 import com.exonum.messages.core.Proofs;
 import com.exonum.messages.core.runtime.Errors.ErrorKind;
@@ -195,7 +195,7 @@ class BlockchainIntegrationTest {
         // Check the precommit message from the single validator
         Messages.SignedMessage rawPrecommitMessage = proof.getPrecommits(0);
         SignedMessage rawPrecommit = SignedMessage.fromProto(rawPrecommitMessage);
-        ExonumMessage payload = rawPrecommit.getPayload();
+        CoreMessage payload = rawPrecommit.getPayload();
         assertThat(payload.getKindCase()).isEqualTo(KindCase.PRECOMMIT);
         Precommit precommit = payload.getPrecommit();
         HashCode blockHash = hashFromProto(precommit.getBlockHash());
