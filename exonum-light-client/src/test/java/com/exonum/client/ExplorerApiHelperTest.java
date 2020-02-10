@@ -42,12 +42,19 @@ import com.exonum.client.response.BlocksResponse;
 import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.exonum.core.messages.Runtime.CallSite;
+import com.exonum.core.messages.Runtime.CallSite.Type;
 import com.exonum.core.messages.Runtime.ErrorKind;
+import com.exonum.core.messages.Runtime.ExecutionError;
 import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Empty;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Stream;
+import lombok.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -57,7 +64,7 @@ class ExplorerApiHelperTest {
 
   private static TransactionMessage TRANSACTION_MESSAGE = createTransactionMessage();
   private static long BLOCK_HEIGHT = 1L;
-  private static long INDEX_IN_BLOCK = 0L;
+  private static int INDEX_IN_BLOCK = 0;
 
   private static String TEMPLATE_TRANSACTION_MESSAGE_JSON = "{\n"
       + "    'type': 'committed',\n"
@@ -104,7 +111,7 @@ class ExplorerApiHelperTest {
   }
 
   @ParameterizedTest
-  @MethodSource("testData")
+  @MethodSource("txResponseTestData")
   void parseGetTxResponseCommitted(ExecutionStatus executionStatus, String statusJson) {
     String json = String.format(TEMPLATE_TRANSACTION_MESSAGE_JSON, statusJson);
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
@@ -205,38 +212,97 @@ class ExplorerApiHelperTest {
     assertThat(actual, contains(expected.toArray()));
   }
 
-  private static Stream<Arguments> testData() {
+  private static Collection<Arguments> txResponseTestData() {
+    List<Arguments> arguments = new ArrayList<>();
+
+    // Add success status
     String successStatus = "'status': {\n"
         + "    'type': 'success'\n"
         + "}\n";
+    arguments.add(arguments(ExecutionStatuses.SUCCESS, successStatus));
 
+    // Add error statuses of various types from various call site types:
     int errorCode = 1;
     String errorDescription = "Some error";
+    int runtimeId = 2;
+    int instanceId = 3;
+    int methodId = 4;
+    String interfaceId = "exonum.Configure";
+
+    ExecutionError errorTemplate = ExecutionError.newBuilder()
+        .setCode(errorCode)
+        .setDescription(errorDescription)
+        .setRuntimeId(runtimeId)
+        .buildPartial();
+    CallSite callSiteTemplate = CallSite.newBuilder()
+        .setInstanceId(instanceId)
+        .setMethodId(methodId)
+        .setInterface(interfaceId)
+        .buildPartial();
+
     String errorStatusTemplate = "'status': {\n"
         + "    'type': '%s',\n"
         + "    'code': " + errorCode + ",\n"
-        + "    'description': \"" + errorDescription + "\""
+        + "    'description': \"" + errorDescription + "\","
+        + "    \"runtime_id\": " + runtimeId + ",\n"
+        + "    \"call_site\": {\n"
+        + "            \"instance_id\": " + instanceId + ",\n"
+        + "            \"call_type\": \"%s\",\n"
+        + "            \"method_id\": " + methodId + ",\n"
+        + "            \"interface\": \"" + interfaceId + "\"\n"
+        + "    }\n"
         + "}\n";
 
-    String serviceErrorStatus = String.format(errorStatusTemplate, "service_error");
-    String dispatcherErrorStatus = String.format(errorStatusTemplate, "dispatcher_error");
-    String runtimeErrorStatus = String.format(errorStatusTemplate, "runtime_error");
+    @Value
+    class StatusParameters {
+      ErrorKind errorKind;
+      String errorKindStr;
+      CallSite.Type callSiteType;
+      String callSiteTypeStr;
+    }
 
-    String panicStatus = "'status': {\n"
-        + "    'type': 'panic',\n"
-        + "    'description': \"" + errorDescription + "\""
-        + "}\n";
-
-    return Stream.of(
-        arguments(ExecutionStatuses.success(), successStatus),
-        arguments(ExecutionStatuses.serviceError(errorCode, errorDescription), serviceErrorStatus),
-        arguments(ExplorerApiHelper.buildExecutionStatus(ErrorKind.DISPATCHER, errorCode,
-            errorDescription),
-            dispatcherErrorStatus),
-        arguments(ExplorerApiHelper.buildExecutionStatus(ErrorKind.RUNTIME, errorCode,
-            errorDescription),
-            runtimeErrorStatus),
-        arguments(ExplorerApiHelper.buildPanicExecutionStatus(errorDescription), panicStatus)
+    List<StatusParameters> combinations = ImmutableList.of(
+        new StatusParameters(ErrorKind.UNEXPECTED, "unexpected_error",
+            Type.CONSTRUCTOR, "constructor"),
+        new StatusParameters(ErrorKind.CORE, "core_error", Type.METHOD, "method"),
+        new StatusParameters(ErrorKind.RUNTIME, "runtime_error",
+            Type.BEFORE_TRANSACTIONS, "before_transactions"),
+        new StatusParameters(ErrorKind.SERVICE, "service_error",
+            Type.AFTER_TRANSACTIONS, "after_transactions"),
+        new StatusParameters(ErrorKind.COMMON, "common_error", Type.RESUME, "resume")
     );
+
+    for (StatusParameters params: combinations) {
+      arguments.add(
+          arguments(
+              ExecutionStatus.newBuilder()
+                  .setError(
+                      ExecutionError.newBuilder(errorTemplate)
+                          .setKind(params.errorKind)
+                          .setCallSite(
+                              CallSite.newBuilder(callSiteTemplate)
+                                  .setCallType(params.callSiteType)))
+                  .build(),
+              String.format(errorStatusTemplate, params.errorKindStr, params.callSiteTypeStr)));
+    }
+
+    // Add an error with no optional properties: no code, no runtime id, no call site.
+    arguments.add(arguments(
+        ExecutionStatus.newBuilder()
+          .setError(
+              ExecutionError.newBuilder()
+                  .setKind(ErrorKind.UNEXPECTED)
+                  .setDescription(errorDescription)
+                  .setNoRuntimeId(Empty.getDefaultInstance())
+                  .setNoCallSite(Empty.getDefaultInstance())
+                  .build())
+          .build(),
+        "'status': {\n"
+            + "    'type': 'unexpected_error',\n"
+            + "    'description': \"" + errorDescription + "\""
+            + "}\n"
+    ));
+
+    return arguments;
   }
 }
