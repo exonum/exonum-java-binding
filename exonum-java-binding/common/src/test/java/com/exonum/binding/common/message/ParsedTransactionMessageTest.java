@@ -18,6 +18,7 @@ package com.exonum.binding.common.message;
 
 import static com.exonum.binding.test.Bytes.bytes;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.PublicKey;
@@ -102,6 +103,26 @@ class ParsedTransactionMessageTest {
       ParsedTransactionMessage parsedFromBytes = new ParsedTransactionMessage(signedProtoFromBytes);
       assertThat(parsedFromBytes).isEqualTo(message);
     }
+  }
+
+  @Test
+  void createMessageNotTx() {
+    // Use Precommit message instead of AnyTx
+    byte[] precommitMessage = CoreMessage.newBuilder()
+        .setPrecommit(Messages.Precommit.getDefaultInstance())
+        .build()
+        .toByteArray();
+
+    Messages.SignedMessage signedMessage = aSignedMessageProto()
+        .setPayload(ByteString.copyFrom(precommitMessage))
+        .build();
+
+    Exception e = assertThrows(IllegalArgumentException.class,
+        () -> new ParsedTransactionMessage(signedMessage));
+
+    assertThat(e.getMessage())
+        .containsIgnoringCase("does not contain a transaction")
+        .containsIgnoringCase("Precommit");
   }
 
   @Test
