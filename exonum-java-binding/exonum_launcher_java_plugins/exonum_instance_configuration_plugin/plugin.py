@@ -106,6 +106,8 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
             configuration_message.format = service_pb2.ServiceConfiguration.Format.TEXT
         elif config_format == "json":
             configuration_message.format = service_pb2.ServiceConfiguration.Format.JSON
+        elif config_format == "properties":
+            configuration_message.format = service_pb2.ServiceConfiguration.Format.PROPERTIES
         else:
             raise InstanceSpecLoadError(f"Invalid config format ({config_format}) for instance '{instance_name}'")
 

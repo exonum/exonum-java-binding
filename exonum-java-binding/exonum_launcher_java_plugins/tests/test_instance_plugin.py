@@ -52,6 +52,15 @@ class TestInstancePlugin(unittest.TestCase):
             serialized_parameters = instance_loader.load_spec(None, instance)
             self.assertEqual(serialized_parameters,b'\x08\x01\x12\x17{"some": ["json", {}]}\n')
 
+    def test_plugin_standard_configuration_message_properties(self):
+        config = self.load_config("standard_message_properties.yml")
+        self.assertEqual(len(config.instances), 2)
+        instance_loader = InstanceSpecLoader()
+
+        for instance in config.instances:
+            serialized_parameters = instance_loader.load_spec(None, instance)
+            self.assertEqual(serialized_parameters, b'\x08\x02\x12\x0cTruth=Beauty')
+
     def test_plugin_errors_invalid_config(self) -> None:
         config = self.load_config("invalid_config.yml")
         self.assertEqual(len(config.instances), 8)

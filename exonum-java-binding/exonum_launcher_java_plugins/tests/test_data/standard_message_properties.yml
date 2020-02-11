@@ -1,0 +1,29 @@
+networks:
+  - host: "127.0.0.1"
+    ssl: false
+    public-api-port: 8080
+    private-api-port: 8081
+
+plugins:
+  artifact:
+    timestamping: "exonum_instance_configuration_plugin.InstanceSpecLoader"
+
+deadline_height: 20000
+
+artifacts:
+  timestamping:
+    runtime: rust
+    name: "exonum-timestamping"
+    version: "0.12.0"
+
+instances:
+  properties-in-place:
+    artifact: timestamping
+    config:
+      format: "properties"
+      value: "Truth=Beauty"
+  properties-from-file:
+    artifact: timestamping
+    config:
+      format: "properties"
+      from_file: "test_data/config.properties"
