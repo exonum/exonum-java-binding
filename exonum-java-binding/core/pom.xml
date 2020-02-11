@@ -40,9 +40,12 @@
     <skipRustLibBuild>false</skipRustLibBuild>
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->
     <build.cargoFlag></build.cargoFlag>
-    <protobuf.python.outputDirectory>
+    <protobuf.python.deployArguments.outputDirectory>
       ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_java_runtime_plugin/proto
-    </protobuf.python.outputDirectory>
+    </protobuf.python.deployArguments.outputDirectory>
+    <protobuf.python.service.outputDirectory>
+      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_instance_configuration_plugin/proto
+    </protobuf.python.service.outputDirectory>
   </properties>
 
   <dependencies>
@@ -312,14 +315,28 @@
           <!-- Compile protobuf description of Java service runtime deploy arguments
                to Python for exonum_java_runtime_plugin -->
           <execution>
-            <id>protobuf-compile-python</id>
+            <id>protobuf-compile-python-deploy-arguments</id>
             <goals>
               <goal>compile-python</goal>
             </goals>
             <configuration>
-              <outputDirectory>${protobuf.python.outputDirectory}</outputDirectory>
+              <outputDirectory>${protobuf.python.deployArguments.outputDirectory}</outputDirectory>
               <includes>
                 <include>deploy_arguments.proto</include>
+              </includes>
+            </configuration>
+          </execution>
+          <!-- Compile protobuf description of Java service runtime deploy arguments
+               to Python for exonum_instace_configuration_plugin -->
+          <execution>
+            <id>protobuf-compile-python-service-configuration</id>
+            <goals>
+              <goal>compile-python</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${protobuf.python.service.outputDirectory}</outputDirectory>
+              <includes>
+                <include>service.proto</include>
               </includes>
             </configuration>
           </execution>

@@ -36,6 +36,7 @@ setuptools.setup(
         "exonum_java_runtime_plugin",
         "exonum_java_runtime_plugin.proto",
         "exonum_instance_configuration_plugin",
+        "exonum_instance_configuration_plugin.proto",
     ],
     install_requires=INSTALL_REQUIRES,
     python_requires=PYTHON_REQUIRES,
