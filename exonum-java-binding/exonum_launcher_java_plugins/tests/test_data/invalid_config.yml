@@ -44,3 +44,12 @@ instances:
     artifact: timestamping
     config:
       format: "text"
+  standard_message_no_format:
+    artifact: timestamping
+    config:
+      value: "text"
+  standard_message_invalid_format:
+    artifact: timestamping
+    config:
+      format: "not-supported-format"
+      value: "text"

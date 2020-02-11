@@ -17,13 +17,13 @@ artifacts:
     version: "0.12.0"
 
 instances:
-  text-in-place:
+  json-in-place:
     artifact: timestamping
     config:
-      format: "text"
-      value: "text-configuration\n"
-  text-from-file:
+      format: "json"
+      value: "{\"some\": [\"json\", {}]}\n"
+  json-from-file:
     artifact: timestamping
     config:
-      format: "text"
-      from_file: "test_data/config.txt"
+      format: "json"
+      from_file: "test_data/config.json"

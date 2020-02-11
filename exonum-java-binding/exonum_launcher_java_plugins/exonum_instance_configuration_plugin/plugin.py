@@ -100,7 +100,15 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
         else:
             InstanceSpecLoader.raise_exception_field_not_found(instance_name, "value")
 
-        configuration_message.format = 0
+        self.assert_field_exists(config, instance_name, "format")
+        config_format = config["format"]
+        if config_format == "text":
+            configuration_message.format = service_pb2.ServiceConfiguration.Format.TEXT
+        elif config_format == "json":
+            configuration_message.format = service_pb2.ServiceConfiguration.Format.JSON
+        else:
+            raise InstanceSpecLoadError(f"Invalid config format ({config_format}) for instance '{instance_name}'")
+
         return configuration_message.SerializeToString()
 
     @staticmethod
