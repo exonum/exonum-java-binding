@@ -17,22 +17,13 @@ artifacts:
     version: "0.12.0"
 
 instances:
-  no_config:
-    artifact: timestamping
-  no_sources:
+  text-configuration:
     artifact: timestamping
     config:
-      config_message_source: "service.proto"
-      data:
-        time_service_name: "testing"
-  no_module_name:
+      format: "text"
+      value: "text-configuration"
+  from-file:
     artifact: timestamping
     config:
-      sources: "test_data/proto_sources"
-      data:
-        time_service_name: "testing"
-  no_data:
-    artifact: timestamping
-    config:
-      sources: "test_data/proto_sources"
-      config_message_source: "service.proto"
+      format: "text"
+      from_file: "config.txt"
