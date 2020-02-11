@@ -18,7 +18,6 @@
 package com.exonum.client;
 
 import static com.exonum.client.ExonumApi.JSON;
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
 
 import com.exonum.binding.common.blockchain.ExecutionStatuses;
@@ -33,17 +32,22 @@ import com.exonum.client.response.ServiceInstanceState;
 import com.exonum.client.response.ServicesResponse;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
-import com.exonum.core.messages.Runtime.ErrorKind;
-import com.exonum.core.messages.Runtime.ExecutionError;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.CallSite;
+import com.exonum.messages.core.runtime.Errors.CallSite.Type;
+import com.exonum.messages.core.runtime.Errors.ErrorKind;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.google.protobuf.Empty;
 import java.time.ZonedDateTime;
 import java.util.List;
+import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
@@ -101,46 +105,13 @@ final class ExplorerApiHelper {
         .collect(toList());
   }
 
-  private static ExecutionStatus getExecutionStatus(
-      GetTxResponseExecutionResult executionStatus) {
+  private static @Nullable ExecutionStatus getExecutionStatus(
+      GetTxResponseExecutionStatus executionStatus) {
     if (executionStatus == null) {
       return null;
+    } else {
+      return executionStatus.toProto();
     }
-    switch (executionStatus.getType()) {
-      case SUCCESS:
-        return ExecutionStatuses.success();
-      case PANIC:
-        return buildPanicExecutionStatus(executionStatus.getDescription());
-      case DISPATCHER_ERROR:
-        return buildExecutionStatus(ErrorKind.DISPATCHER, executionStatus.getCode(),
-            executionStatus.getDescription());
-      case RUNTIME_ERROR:
-        return buildExecutionStatus(ErrorKind.RUNTIME, executionStatus.getCode(),
-            executionStatus.getDescription());
-      case SERVICE_ERROR:
-        return ExecutionStatuses.serviceError(executionStatus.getCode(),
-            executionStatus.getDescription());
-      default:
-        throw new IllegalStateException("Unexpected transaction execution status: "
-            + executionStatus.getType());
-    }
-  }
-
-  @VisibleForTesting
-  static ExecutionStatus buildPanicExecutionStatus(String description) {
-    return buildExecutionStatus(ErrorKind.PANIC, 0, description);
-  }
-
-  @VisibleForTesting
-  static ExecutionStatus buildExecutionStatus(ErrorKind errorKind, int code,
-      String description) {
-    checkArgument(0 <= code, "Error code (%s) must be non-negative", code);
-    return ExecutionStatus.newBuilder()
-        .setError(ExecutionError.newBuilder()
-            .setKind(errorKind)
-            .setCode(code)
-            .setDescription(description))
-        .build();
   }
 
   /**
@@ -169,36 +140,143 @@ final class ExplorerApiHelper {
     @NonNull
     TransactionMessage message;
     TransactionLocation location;
-    JsonObject locationProof; //TODO: in scope of LC P3
-    GetTxResponseExecutionResult status;
+    JsonObject locationProof; // TODO: in scope of LC P3
+    GetTxResponseExecutionStatus status;
   }
 
   /**
    * Json object wrapper for transaction execution result, i.e.,
    * {@code "$.status"}.
+   *
+   * <p>See serde::ExecutionStatus: https://github.com/exonum/exonum/blob/v1.0.0-rc.1/exonum/src/runtime/error/execution_status.rs#L102
    */
   @Value
-  private static class GetTxResponseExecutionResult {
-    GetTxResponseExecutionStatus type;
-    int code;
-    String description;
+  private static class GetTxResponseExecutionStatus {
+    GetTxResponseExecutionType type;
+    @Nullable String description;
+    @Nullable Integer code;
+    @Nullable Integer runtimeId;
+    @Nullable GetTxResponseCallSite callSite;
+
+    ExecutionStatus toProto() {
+      if (type == GetTxResponseExecutionType.SUCCESS) {
+        return ExecutionStatuses.SUCCESS;
+      }
+
+      ExecutionError error = asError();
+      return ExecutionStatus.newBuilder()
+          .setError(error)
+          .build();
+    }
+
+    ExecutionError asError() {
+      ExecutionError.Builder errorBuilder = ExecutionError.newBuilder()
+          .setKind(type.toProto());
+
+      if (description != null) {
+        errorBuilder.setDescription(description);
+      }
+      if (code != null) {
+        errorBuilder.setCode(code);
+      }
+      if (runtimeId != null) {
+        errorBuilder.setRuntimeId(runtimeId);
+      } else {
+        errorBuilder.setNoRuntimeId(Empty.getDefaultInstance());
+      }
+      if (callSite != null) {
+        errorBuilder.setCallSite(callSite.toProto());
+      } else {
+        errorBuilder.setNoCallSite(Empty.getDefaultInstance());
+      }
+
+      return errorBuilder.build();
+    }
   }
 
   /**
    * Json object wrapper for transaction execution status, i.e.,
    * {@code "$.status.type"}.
+   *
+   * <p>See serde::ExecutionType: https://github.com/exonum/exonum/blob/v1.0.0-rc.1/exonum/src/runtime/error/execution_status.rs#L90</p>
    */
-  private enum GetTxResponseExecutionStatus {
+  private enum GetTxResponseExecutionType {
     @SerializedName("success")
     SUCCESS,
-    @SerializedName("panic")
-    PANIC,
-    @SerializedName("dispatcher_error")
-    DISPATCHER_ERROR,
+    @SerializedName("unexpected_error")
+    UNEXPECTED_ERROR,
+    @SerializedName("common_error")
+    COMMON_ERROR,
+    @SerializedName("core_error")
+    CORE_ERROR,
     @SerializedName("runtime_error")
     RUNTIME_ERROR,
     @SerializedName("service_error")
-    SERVICE_ERROR
+    SERVICE_ERROR;
+
+    ErrorKind toProto() {
+      switch (this) {
+        case UNEXPECTED_ERROR:
+          return ErrorKind.UNEXPECTED;
+        case COMMON_ERROR:
+          return ErrorKind.COMMON;
+        case CORE_ERROR:
+          return ErrorKind.CORE;
+        case RUNTIME_ERROR:
+          return ErrorKind.RUNTIME;
+        case SERVICE_ERROR:
+          return ErrorKind.SERVICE;
+        default:
+          throw new IllegalStateException("Unsupported type: " + this);
+      }
+    }
+  }
+
+  @Value
+  private static class GetTxResponseCallSite {
+    int instanceId;
+    GetTxResponseCallType callType;
+    @SerializedName("interface") @Nullable String interfaceId;
+    @Nullable Integer methodId;
+
+    CallSite toProto() {
+      return CallSite.newBuilder()
+          .setCallType(callType.toProto())
+          .setInstanceId(instanceId)
+          .setMethodId((methodId == null) ? 0 : methodId)
+          .setInterface(Strings.nullToEmpty(interfaceId))
+          .build();
+    }
+  }
+
+  private enum GetTxResponseCallType {
+    @SerializedName("constructor")
+    CONSTRUCTOR,
+    @SerializedName("resume")
+    RESUME,
+    @SerializedName("method")
+    METHOD,
+    @SerializedName("before_transactions")
+    BEFORE_TRANSACTIONS,
+    @SerializedName("after_transactions")
+    AFTER_TRANSACTIONS;
+
+    CallSite.Type toProto() {
+      switch (this) {
+        case CONSTRUCTOR:
+          return Type.CONSTRUCTOR;
+        case RESUME:
+          return Type.RESUME;
+        case METHOD:
+          return Type.METHOD;
+        case BEFORE_TRANSACTIONS:
+          return Type.BEFORE_TRANSACTIONS;
+        case AFTER_TRANSACTIONS:
+          return Type.AFTER_TRANSACTIONS;
+        default:
+          throw new IllegalStateException("Unsupported type: " + this);
+      }
+    }
   }
 
   @Value

@@ -202,7 +202,7 @@ public abstract class Block {
     /**
      * Sets error hash.
      *
-     * @see Blockchain#getCallErrors()
+     * @see Blockchain#getCallErrors(long)
      */
     public abstract Builder errorHash(HashCode errorHash);
 

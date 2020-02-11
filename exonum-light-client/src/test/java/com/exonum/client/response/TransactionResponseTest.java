@@ -27,7 +27,8 @@ import static org.hamcrest.Matchers.not;
 import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.core.messages.Runtime.ExecutionStatus;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import com.google.protobuf.ByteString;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ class TransactionResponseTest {
     TransactionResponse response =
         new TransactionResponse(COMMITTED,
             withTxMessage(),
-            ExecutionStatuses.success(),
+            ExecutionStatuses.SUCCESS,
             withTxLocation());
 
     assertThat(response.toString(), allOf(
@@ -68,7 +69,11 @@ class TransactionResponseTest {
         .withPrefabValues(
             ByteString.class, ByteString.copyFromUtf8("a"), ByteString.copyFromUtf8("b"))
         .withPrefabValues(
-            ExecutionStatus.class, ExecutionStatuses.success(), ExecutionStatuses.serviceError(1))
+            ExecutionStatus.class,
+            ExecutionStatuses.SUCCESS,
+            ExecutionStatus.newBuilder()
+                .setError(ExecutionError.getDefaultInstance())
+                .build())
         .verify();
   }
 
@@ -81,7 +86,7 @@ class TransactionResponseTest {
   }
 
   private static TransactionLocation withTxLocation() {
-    return TransactionLocation.valueOf(1L, 0L);
+    return TransactionLocation.valueOf(1L, 0);
   }
 
 }

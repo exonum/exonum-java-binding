@@ -27,7 +27,7 @@ import com.exonum.binding.core.transaction.ExecutionException;
  * in a service method. The original exception is stored as <em>cause</em>.
  *
  * @see ExecutionException
- * @see com.exonum.core.messages.Runtime.ErrorKind#UNEXPECTED
+ * @see com.exonum.messages.core.runtime.Errors.ErrorKind#UNEXPECTED
  */
 public class UnexpectedExecutionException extends RuntimeException {
 
