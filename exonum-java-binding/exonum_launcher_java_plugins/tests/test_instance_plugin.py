@@ -41,11 +41,11 @@ class TestInstancePlugin(unittest.TestCase):
 
         for instance in config.instances:
             serialized_parameters = instance_loader.load_spec(None, instance)
-            self.assertEqual(serialized_parameters, b"")
+            self.assertEqual(serialized_parameters, b'\x12\x13text-configuration\n')
 
     def test_plugin_errors_no_config_field(self) -> None:
         config = self.load_config("no_config.yml")
-        self.assertEqual(len(config.instances), 4)
+        self.assertEqual(len(config.instances), 6)
         instance_loader = InstanceSpecLoader()
 
         for instance in config.instances:

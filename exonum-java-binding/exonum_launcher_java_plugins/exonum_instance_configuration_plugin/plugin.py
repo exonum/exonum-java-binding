@@ -33,6 +33,11 @@ _MODULE_FILENAME_FIELD_NAME = "config_message_source"
 _CONFIG_MESSAGE_FIELD_NAME = "message_name"
 _DATA_FIELD_NAME = "data"
 
+try:
+    from .proto import service_pb2
+except (ModuleNotFoundError, ImportError):
+    raise RuntimeError("Protobuf definition is not found")
+
 
 class InstanceSpecLoader(BaseInstanceSpecLoader):
     """Instance spec loader for Java runtime
@@ -60,7 +65,7 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
         else:
             raise InstanceSpecLoadError(f"Invalid configuration of '{instance_name}'")
 
-    def serialize_custom_config(self, config: Any, instance_name: str):
+    def serialize_custom_config(self, config: Any, instance_name: str) -> bytes:
         self.assert_field_exists(config, instance_name, _MODULE_FILENAME_FIELD_NAME)
         self.assert_field_exists(config, instance_name, _DATA_FIELD_NAME)
 
@@ -84,8 +89,19 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
 
             return result
 
-    def serialize_standard_config(self, config: Any, instance_name: str):
-        raise InstanceSpecLoadError("Not implemented")
+    def serialize_standard_config(self, config: Any, instance_name: str) -> bytes:
+        configuration_message = service_pb2.ServiceConfiguration()
+        if self.does_config_field_exist(config, "value"):
+            configuration_message.value = config["value"]
+        elif self.does_config_field_exist(config, "from_file"):
+            file_path = config["from_file"]
+            with open(file_path, 'r') as file:
+                configuration_message.value = file.read()
+        else:
+            InstanceSpecLoader.raise_exception_field_not_found(instance_name, "value")
+
+        configuration_message.format = 0
+        return configuration_message.SerializeToString()
 
     @staticmethod
     def filename_without_extension(protobuf_filename):

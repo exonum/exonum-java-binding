@@ -19,6 +19,10 @@ artifacts:
 instances:
   no_config:
     artifact: timestamping
+  empty_config:
+    artifact: timestamping
+    config:
+      random_field: ""
   no_sources:
     artifact: timestamping
     config:
@@ -36,3 +40,7 @@ instances:
     config:
       sources: "test_data/proto_sources"
       config_message_source: "service.proto"
+  standard_message_no_value:
+    artifact: timestamping
+    config:
+      format: "text"

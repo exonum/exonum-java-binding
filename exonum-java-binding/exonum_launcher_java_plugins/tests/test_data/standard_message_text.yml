@@ -21,9 +21,9 @@ instances:
     artifact: timestamping
     config:
       format: "text"
-      value: "text-configuration"
+      value: "text-configuration\n"
   from-file:
     artifact: timestamping
     config:
       format: "text"
-      from_file: "config.txt"
+      from_file: "test_data/config.txt"
