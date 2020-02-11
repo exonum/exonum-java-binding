@@ -50,7 +50,7 @@ class TestInstancePlugin(unittest.TestCase):
 
         for instance in config.instances:
             serialized_parameters = instance_loader.load_spec(None, instance)
-            self.assertEqual(serialized_parameters,b'\x08\x01\x12\x17{"some": ["json", {}]}\n')
+            self.assertEqual(serialized_parameters, b'\x08\x01\x12\x17{"some": ["json", {}]}\n')
 
     def test_plugin_standard_configuration_message_properties(self):
         config = self.load_config("standard_message_properties.yml")

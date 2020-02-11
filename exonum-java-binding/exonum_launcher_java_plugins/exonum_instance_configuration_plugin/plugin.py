@@ -32,6 +32,9 @@ _PYTHON_MODULES_NAME = "service_modules"
 _MODULE_FILENAME_FIELD_NAME = "config_message_source"
 _CONFIG_MESSAGE_FIELD_NAME = "message_name"
 _DATA_FIELD_NAME = "data"
+_FORMAT_FIELD_NAME = "format"
+_VALUE_FIELD_NAME = "value"
+_FROM_FILE_FIELD_NAME = "from_file"
 
 try:
     from .proto import service_pb2
@@ -60,7 +63,7 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
 
         if self.does_config_field_exist(config, _PROTOBUF_SOURCES_FIELD_NAME):
             return self.serialize_custom_config(config, instance_name)
-        elif self.does_config_field_exist(config, "format"):
+        elif self.does_config_field_exist(config, _FORMAT_FIELD_NAME):
             return self.serialize_standard_config(config, instance_name)
         else:
             raise InstanceSpecLoadError(f"Invalid configuration of '{instance_name}'")
@@ -91,27 +94,36 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
 
     def serialize_standard_config(self, config: Any, instance_name: str) -> bytes:
         configuration_message = service_pb2.ServiceConfiguration()
-        if self.does_config_field_exist(config, "value"):
-            configuration_message.value = config["value"]
-        elif self.does_config_field_exist(config, "from_file"):
-            file_path = config["from_file"]
-            with open(file_path, 'r') as file:
-                configuration_message.value = file.read()
-        else:
-            InstanceSpecLoader.raise_exception_field_not_found(instance_name, "value")
 
-        self.assert_field_exists(config, instance_name, "format")
-        config_format = config["format"]
-        if config_format == "text":
-            configuration_message.format = service_pb2.ServiceConfiguration.Format.TEXT
-        elif config_format == "json":
-            configuration_message.format = service_pb2.ServiceConfiguration.Format.JSON
-        elif config_format == "properties":
-            configuration_message.format = service_pb2.ServiceConfiguration.Format.PROPERTIES
-        else:
-            raise InstanceSpecLoadError(f"Invalid config format ({config_format}) for instance '{instance_name}'")
+        configuration_message.value = self.extract_value(config, instance_name)
+        configuration_message.format = self.extract_format(config[_FORMAT_FIELD_NAME], instance_name)
 
         return configuration_message.SerializeToString()
+
+    @staticmethod
+    def extract_value(config, instance_name) -> str:
+        if InstanceSpecLoader.does_config_field_exist(config, _VALUE_FIELD_NAME):
+            return config[_VALUE_FIELD_NAME]
+        elif InstanceSpecLoader.does_config_field_exist(config, _FROM_FILE_FIELD_NAME):
+            file_path = config[_FROM_FILE_FIELD_NAME]
+            with open(file_path, 'r') as file:
+                return file.read()
+        else:
+            InstanceSpecLoader.raise_exception_field_not_found(instance_name, _VALUE_FIELD_NAME)
+
+    @staticmethod
+    def extract_format(config, instance_name) -> int:
+        InstanceSpecLoader.assert_field_exists(config, instance_name, _FORMAT_FIELD_NAME)
+        config_format = config[_FORMAT_FIELD_NAME]
+
+        if config_format == "text":
+            return service_pb2.ServiceConfiguration.Format.TEXT
+        elif config_format == "json":
+            return service_pb2.ServiceConfiguration.Format.JSON
+        elif config_format == "properties":
+            return service_pb2.ServiceConfiguration.Format.PROPERTIES
+        else:
+            raise InstanceSpecLoadError(f"Invalid config format ({config_format}) for instance '{instance_name}'")
 
     @staticmethod
     def filename_without_extension(protobuf_filename):
