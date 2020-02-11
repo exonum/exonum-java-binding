@@ -37,9 +37,10 @@ transactions after the commit of each block.
 private final Node node;
 
 public Optional<ZonedDateTime> getTime() {
-  return node.withSnapshot(s -> {
-    TimeSchema timeOracle = TimeSchema.newInstance(s);
-    ProofEntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
+  return node.withBlockchainData(bd -> {
+    String timeServiceName = "time";
+    TimeSchema timeOracle = TimeSchema.newInstance(bd, timeServiceName);
+    ProofEntryIndex<ZonedDateTime> currentTime = timeOracle.getTime();
     return currentTime.toOptional();
   });
 }

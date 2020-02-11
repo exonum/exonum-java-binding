@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 The Exonum Team
+ * Copyright 2020 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
@@ -30,14 +29,13 @@ import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.util.LibraryLoader;
 
 /**
- * A proxy of a native MerkleDB ProofEntry.
+ * A proxy of a native MerkleDB Entry.
  *
  * <p>This class is not thread-safe and and its instances shall not be shared between threads.
  *
  * @param <T> the type of an element in this entry
  */
-public final class ProofEntryIndexProxy<T> extends AbstractEntryIndexProxy<T> implements
-    ProofEntryIndex<T> {
+public final class EntryIndexProxy<T> extends AbstractEntryIndexProxy<T> {
 
   static {
     LibraryLoader.load();
@@ -47,10 +45,10 @@ public final class ProofEntryIndexProxy<T> extends AbstractEntryIndexProxy<T> im
    * Creates a new Entry.
    *
    * <p><strong>Warning:</strong> do not invoke this method from service code, use
-   * {@link Access#getProofEntry(IndexAddress, Serializer)}.
+   * {@link Access#getEntry(IndexAddress, Serializer)}.
    *
    * @param address an index address. Must correspond to a regular index, not a group.
-   *     Use {@link ProofMapIndexProxy} instead of groups of entries.
+   *     Use {@link MapIndex} instead of groups of entries.
    * @param access a database access. Must be valid.
    *     If an access is read-only, "destructive" operations are not permitted.
    * @param serializer an entry serializer
@@ -59,18 +57,15 @@ public final class ProofEntryIndexProxy<T> extends AbstractEntryIndexProxy<T> im
    * @throws IllegalStateException if the access proxy is invalid
    * @see StandardSerializers
    */
-  public static <E> ProofEntryIndexProxy<E> newInstance(IndexAddress address,
-      /* todo: (here and elsewhere) or Access? That would require pulling up #getCleaner
-          in the interface as well. */
-      AbstractAccess access,
+  public static <E> EntryIndexProxy<E> newInstance(IndexAddress address, AbstractAccess access,
       Serializer<E> serializer) {
     checkArgument(!address.getIdInGroup().isPresent(),
-        "Groups of Entries are not supported, use a ProofMapIndex instead");
+        "Groups of Entries are not supported, use a MapIndex instead");
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 
     NativeHandle entryNativeHandle = createNativeEntry(address.getName(), access);
 
-    return new ProofEntryIndexProxy<>(entryNativeHandle, address, access, s);
+    return new EntryIndexProxy<>(entryNativeHandle, address, access, s);
   }
 
   private static NativeHandle createNativeEntry(String name, AbstractAccess access) {
@@ -79,19 +74,14 @@ public final class ProofEntryIndexProxy<T> extends AbstractEntryIndexProxy<T> im
     NativeHandle entryNativeHandle = new NativeHandle(handle);
 
     Cleaner cleaner = access.getCleaner();
-    ProxyDestructor.newRegistered(cleaner, entryNativeHandle, ProofEntryIndexProxy.class,
-        ProofEntryIndexProxy::nativeFree);
+    ProxyDestructor.newRegistered(cleaner, entryNativeHandle, EntryIndexProxy.class,
+        EntryIndexProxy::nativeFree);
     return entryNativeHandle;
   }
 
-  private ProofEntryIndexProxy(NativeHandle nativeHandle, IndexAddress address,
-      AbstractAccess access, CheckingSerializerDecorator<T> serializer) {
+  private EntryIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
+      CheckingSerializerDecorator<T> serializer) {
     super(nativeHandle, address, access, serializer);
-  }
-
-  @Override
-  public HashCode getIndexHash() {
-    return HashCode.fromBytes(nativeGetIndexHash(getNativeHandle()));
   }
 
   private static native long nativeCreate(String name, long accessNativeHandle);

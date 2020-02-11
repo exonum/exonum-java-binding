@@ -27,7 +27,7 @@ import com.exonum.binding.core.runtime.RuntimeId;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.messages.core.runtime.Base.ArtifactId;
 import com.exonum.messages.core.runtime.Base.InstanceSpec;
@@ -73,7 +73,7 @@ class TimeSchemaProxy implements TimeSchema {
   }
 
   @Override
-  public ProofEntryIndexProxy<ZonedDateTime> getTime() {
+  public ProofEntryIndex<ZonedDateTime> getTime() {
     return access.getProofEntry(TimeIndex.TIME, ZONED_DATE_TIME_SERIALIZER);
   }
 

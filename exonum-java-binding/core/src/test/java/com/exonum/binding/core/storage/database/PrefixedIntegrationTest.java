@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.indices.IndexAddress;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -53,8 +53,7 @@ class PrefixedIntegrationTest {
         Fork fork = db.createFork(initCleaner);
         String fullName = namespace + "." + entryName;
         // Initialize the index
-        ProofEntryIndexProxy<String> e1 = fork
-            .getProofEntry(IndexAddress.valueOf(fullName), string());
+        ProofEntryIndex<String> e1 = fork.getProofEntry(IndexAddress.valueOf(fullName), string());
         String value = "V1";
         e1.set(value);
         // Merge into the DB
@@ -67,7 +66,7 @@ class PrefixedIntegrationTest {
       // Access the index from a Fork
       Fork fork = db.createFork(cleaner);
       String fullName = namespace + "." + entryName;
-      ProofEntryIndexProxy<String> e1 = fork
+      ProofEntryIndex<String> e1 = fork
           .getProofEntry(IndexAddress.valueOf(fullName), string());
 
       // Create a Prefixed Access to that namespace
@@ -77,7 +76,7 @@ class PrefixedIntegrationTest {
       assertTrue(prefixed.canModify());
 
       // Try to access the same index from the Prefixed
-      ProofEntryIndexProxy<String> e2 = prefixed
+      ProofEntryIndex<String> e2 = prefixed
           .getProofEntry(IndexAddress.valueOf(entryName), string());
 
       // Check it is the same instance (which is required for correct operation with Forks):
@@ -96,12 +95,12 @@ class PrefixedIntegrationTest {
       // Create a Prefixed Access to that namespace
       Prefixed prefixed = Prefixed.fromAccess(namespace, fork);
       // Access the index from the Prefixed
-      ProofEntryIndexProxy<String> e1 = prefixed
+      ProofEntryIndex<String> e1 = prefixed
           .getProofEntry(IndexAddress.valueOf(entryName), string());
 
       // Try to access the same index from the Fork
       String fullName = namespace + "." + entryName;
-      ProofEntryIndexProxy<String> e2 = fork
+      ProofEntryIndex<String> e2 = fork
           .getProofEntry(IndexAddress.valueOf(fullName), string());
 
       // Check it is the same instance (which is required for correct operation with Forks):
@@ -115,7 +114,7 @@ class PrefixedIntegrationTest {
 
       // Access the index from the base
       String fullName = namespace + "." + entryName;
-      ProofEntryIndexProxy<String> e1 = base
+      ProofEntryIndex<String> e1 = base
           .getProofEntry(IndexAddress.valueOf(fullName), string());
 
       // Create a Prefixed Access to that namespace
@@ -125,7 +124,7 @@ class PrefixedIntegrationTest {
       assertFalse(prefixed.canModify());
 
       // Try to access the same index from the Prefixed
-      ProofEntryIndexProxy<String> e2 = prefixed
+      ProofEntryIndex<String> e2 = prefixed
           .getProofEntry(IndexAddress.valueOf(entryName), string());
 
       // Check the entry has the same _state_: readonly accesses do not require caching
@@ -140,7 +139,7 @@ class PrefixedIntegrationTest {
       // Create a Prefixed Access from the base
       Prefixed prefixed = Prefixed.fromAccess(namespace, base);
       // Create an index from the Prefixed
-      ProofEntryIndexProxy<String> index = prefixed
+      ProofEntryIndex<String> index = prefixed
           .getProofEntry(IndexAddress.valueOf(entryName), string());
 
       // Close the cleaner

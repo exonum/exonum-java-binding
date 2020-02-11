@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.storage.indices.IndexAddress;
-import com.exonum.binding.core.storage.indices.ProofEntryIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.function.BiFunction;
@@ -65,7 +65,7 @@ class RoErasedAccessIntegrationTest {
     RoErasedAccess roFork = RoErasedAccess.fromRawAccess(fork);
 
     // Check the created index is accessible
-    ProofEntryIndexProxy<String> entry = roFork.getProofEntry(address, string());
+    ProofEntryIndex<String> entry = roFork.getProofEntry(address, string());
     assertThat(entry.get()).isEqualTo("V1");
 
     // But, once accessed in RoFork, it becomes inaccessible from Fork (first wins):
@@ -87,11 +87,11 @@ class RoErasedAccessIntegrationTest {
     RoErasedAccess roSnapshot = RoErasedAccess.fromRawAccess(snapshot);
 
     // Check the created index is accessible from roSnapshot
-    ProofEntryIndexProxy<String> entry = roSnapshot.getProofEntry(address, string());
+    ProofEntryIndex<String> entry = roSnapshot.getProofEntry(address, string());
     assertThat(entry.get()).isEqualTo("V1");
 
     // And remains accessible from the original
-    ProofEntryIndexProxy<String> entry2 = snapshot.getProofEntry(address, string());
+    ProofEntryIndex<String> entry2 = snapshot.getProofEntry(address, string());
     assertThat(entry2.get()).isEqualTo("V1");
   }
 
@@ -120,7 +120,7 @@ class RoErasedAccessIntegrationTest {
     AbstractAccess access = accessCtor.apply(db, cleaner);
     RoErasedAccess roFork = RoErasedAccess.fromRawAccess(access);
 
-    ProofEntryIndexProxy<String> entry = roFork
+    ProofEntryIndex<String> entry = roFork
         .getProofEntry(IndexAddress.valueOf("test"), string());
 
     assertThrows(UnsupportedOperationException.class, () -> entry.set("V1"));
