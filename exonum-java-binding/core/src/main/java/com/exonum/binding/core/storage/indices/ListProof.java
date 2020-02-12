@@ -45,7 +45,7 @@ public abstract class ListProof {
   /**
    * Creates a new ListProof given the serialized map proof message.
    * @throws InvalidProtocolBufferException if the message is not
-   *     {@link com.exonum.core.messages.MapProofOuterClass.MapProof}
+   *     {@link com.exonum.messages.proof.ListProofOuterClass.ListProof}
    */
   public static ListProof parseFrom(byte[] proofMessage) throws InvalidProtocolBufferException {
     return newInstance(ListProofOuterClass.ListProof.parseFrom(proofMessage));
