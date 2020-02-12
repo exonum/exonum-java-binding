@@ -32,7 +32,7 @@ import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.proxy.AbstractCloseableNativeProxy;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
-import com.exonum.binding.core.runtime.DeployArguments;
+import com.exonum.binding.common.messages.DeployArguments;
 import com.exonum.binding.core.runtime.DispatcherSchema;
 import com.exonum.binding.core.runtime.FrameworkModule;
 import com.exonum.binding.core.runtime.ServiceArtifactId;

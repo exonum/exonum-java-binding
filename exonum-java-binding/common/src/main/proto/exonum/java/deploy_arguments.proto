@@ -16,9 +16,9 @@
 
 syntax = "proto3";
 
-package exonum.java.runtime;
+package exonum.java;
 
-option java_package = "com.exonum.binding.core.runtime";
+option java_package = "com.exonum.binding.common.messages";
 option java_multiple_files = true;
 
 
