@@ -59,7 +59,6 @@ class ServiceRuntimeAdapterIntegrationTest {
           .setVersion("1.2.3")
           .build();
 
-
   @Mock
   private ServiceRuntime serviceRuntime;
   @Mock
