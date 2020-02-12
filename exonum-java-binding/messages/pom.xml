@@ -16,10 +16,16 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>exonum-java-binding-parent</artifactId>
+    <groupId>com.exonum.binding</groupId>
+    <version>0.10.0-SNAPSHOT</version>
+  </parent>
 
   <groupId>com.exonum.messages</groupId>
   <artifactId>exonum-messages</artifactId>
-  <version>1.0.0-rc.1</version>
+  <packaging>jar</packaging>
+  <version>0.10.0-SNAPSHOT</version>
 
   <name>Exonum Protocol Buffers Messages</name>
   <description>
@@ -27,73 +33,18 @@
     public Protocol Buffers messages, and the compiled (generated) Java classes to work
     with these messages.
   </description>
-  <url>https://github.com/exonum/exonum-java-binding/tree/master/exonum-messages</url>
-  <organization>
-    <name>Exonum</name>
-    <url>https://exonum.com/</url>
-  </organization>
-  <licenses>
-    <license>
-      <name>The Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
-
-  <developers>
-    <developer>
-      <id>dmitry-timofeev</id>
-      <name>Dmitry Timofeev</name>
-      <url>https://github.com/dmitry-timofeev</url>
-    </developer>
-
-    <developer>
-      <id>bullet-tooth</id>
-      <name>Oleg Bondar</name>
-      <url>https://github.com/bullet-tooth</url>
-    </developer>
-  </developers>
-
-  <scm>
-    <connection>scm:git:https://github.com/exonum/exonum-java-binding.git</connection>
-    <developerConnection>scm:git:git@github.com:/exonum/exonum-java-binding.git</developerConnection>
-    <url>https://github.com/exonum/exonum-java-binding</url>
-    <tag>HEAD</tag>
-  </scm>
-  <issueManagement>
-    <system>github</system>
-    <url>https://github.com/exonum/exonum-java-binding/issues</url>
-  </issueManagement>
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
 
   <properties>
-    <java.compiler.source>8</java.compiler.source>
-    <java.compiler.target>8</java.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Skip coverage collection for this module -->
     <jacoco.skip>true</jacoco.skip>
-    <!-- Skip Javadocs generation by default -->
-    <maven.javadoc.skip>false</maven.javadoc.skip>
-    <!-- Empty for all JDKs but 11 and 12 -->
-    <maven.javadoc.joption></maven.javadoc.joption>
-    <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
-    <protobuf.version>3.11.0</protobuf.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>${protobuf.version}</version>
     </dependency>
   </dependencies>
 
@@ -102,13 +53,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
       </plugin>
 
       <plugin>
         <groupId>org.xolstice.maven.plugins</groupId>
         <artifactId>protobuf-maven-plugin</artifactId>
-        <version>0.6.1</version>
         <extensions>true</extensions>
         <executions>
           <execution>
@@ -126,38 +75,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.1.1</version>
-        <configuration>
-          <source>${java.compiler.source}</source>
-          <doclint>none</doclint>
-          <detectOfflineLinks>false</detectOfflineLinks>
-          <additionalJOption>${maven.javadoc.joption}</additionalJOption>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.2.1</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
-
     <extensions>
       <!-- Use an extension that sets the OS classifier, required to locate
            the correct protoc executable -->
