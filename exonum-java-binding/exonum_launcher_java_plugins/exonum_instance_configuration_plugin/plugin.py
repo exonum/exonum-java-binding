@@ -61,9 +61,9 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
         if config is None:
             raise InstanceSpecLoadError(f"No config found for instance: {instance_name}")
 
-        if self.does_config_field_exist(config, _PROTOBUF_SOURCES_FIELD_NAME):
+        if self.config_field_exists(config, _PROTOBUF_SOURCES_FIELD_NAME):
             return self.serialize_custom_config(config, instance_name)
-        elif self.does_config_field_exist(config, _FORMAT_FIELD_NAME):
+        elif self.config_field_exists(config, _FORMAT_FIELD_NAME):
             return self.serialize_standard_config(config, instance_name)
         else:
             raise InstanceSpecLoadError(f"Invalid configuration of '{instance_name}'")
@@ -96,15 +96,15 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
         configuration_message = service_pb2.ServiceConfiguration()
 
         configuration_message.value = self.extract_value(config, instance_name)
-        configuration_message.format = self.extract_format(config[_FORMAT_FIELD_NAME], instance_name)
+        configuration_message.format = self.extract_format(config, instance_name)
 
         return configuration_message.SerializeToString()
 
     @staticmethod
-    def extract_value(config, instance_name) -> str:
-        if InstanceSpecLoader.does_config_field_exist(config, _VALUE_FIELD_NAME):
+    def extract_value(config: Any, instance_name: str) -> str:
+        if InstanceSpecLoader.config_field_exists(config, _VALUE_FIELD_NAME):
             return config[_VALUE_FIELD_NAME]
-        elif InstanceSpecLoader.does_config_field_exist(config, _FROM_FILE_FIELD_NAME):
+        elif InstanceSpecLoader.config_field_exists(config, _FROM_FILE_FIELD_NAME):
             file_path = config[_FROM_FILE_FIELD_NAME]
             with open(file_path, 'r') as file:
                 return file.read()
@@ -112,7 +112,7 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
             InstanceSpecLoader.raise_exception_field_not_found(instance_name, _VALUE_FIELD_NAME)
 
     @staticmethod
-    def extract_format(config, instance_name) -> int:
+    def extract_format(config: Any, instance_name: str) -> int:
         InstanceSpecLoader.assert_field_exists(config, instance_name, _FORMAT_FIELD_NAME)
         config_format = config[_FORMAT_FIELD_NAME]
 
@@ -158,12 +158,12 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
             self.cleanup(tmp_dir)
 
     @staticmethod
-    def does_config_field_exist(config: Any, field_name: str) -> bool:
+    def config_field_exists(config: Any, field_name: str) -> bool:
         return field_name in config
 
     @staticmethod
     def assert_field_exists(config: Any, instance_name: str, field_name: str) -> None:
-        if not InstanceSpecLoader.does_config_field_exist(config, field_name):
+        if not InstanceSpecLoader.config_field_exists(config, field_name):
             InstanceSpecLoader.raise_exception_field_not_found(instance_name, field_name)
 
     @staticmethod
