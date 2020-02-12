@@ -59,6 +59,7 @@
   <modules>
     <module>exonum-java-binding</module>
     <module>exonum-light-client</module>
+    <module>exonum-messages</module>
   </modules>
 
   <scm>
