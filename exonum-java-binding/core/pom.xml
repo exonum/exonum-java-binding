@@ -327,7 +327,7 @@
             </configuration>
           </execution>
           <!-- Compile protobuf description of Java service runtime deploy arguments
-               to Python for exonum_instace_configuration_plugin -->
+               to Python for exonum_instance_configuration_plugin -->
           <execution>
             <id>protobuf-compile-python-service-configuration</id>
             <goals>
