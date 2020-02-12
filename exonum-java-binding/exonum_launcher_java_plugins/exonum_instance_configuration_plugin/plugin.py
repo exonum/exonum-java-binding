@@ -66,7 +66,7 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
         elif self.config_field_exists(config, _FORMAT_FIELD_NAME):
             return self.serialize_standard_config(config, instance_name)
         else:
-            raise InstanceSpecLoadError(f"Invalid configuration of '{instance_name}'")
+            raise InstanceSpecLoadError(f"Invalid configuration of '{instance_name}', expected {_PROTOBUF_SOURCES_FIELD_NAME} or {_FORMAT_FIELD_NAME} field")
 
     def serialize_custom_config(self, config: Any, instance_name: str) -> bytes:
         self.assert_field_exists(config, instance_name, _MODULE_FILENAME_FIELD_NAME)
@@ -109,7 +109,7 @@ class InstanceSpecLoader(BaseInstanceSpecLoader):
             with open(file_path, 'r') as file:
                 return file.read()
         else:
-            InstanceSpecLoader.raise_exception_field_not_found(instance_name, _VALUE_FIELD_NAME)
+            raise InstanceSpecLoadError(f"Invalid configuration of {instance_name}, expected {_VALUE_FIELD_NAME} or {_FROM_FILE_FIELD_NAME} field")
 
     @staticmethod
     def extract_format(config: Any, instance_name: str) -> int:
