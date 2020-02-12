@@ -97,10 +97,10 @@ Prefer ExecutionException for service-defined errors to other runtime exceptions
 ### Update the Project Build Definition
 
 1. Update the Plugin-Id manifest entry to «javaRuntimeId:groupId/artifactId:version», where
-  1. javaRuntimeId = 1
-  2. groupId, artifactId, version are the standard Maven coordinates.
-  3. The «groupId/artifactId» part is considered to be the _Exonum service artifact name_.  
-  For example, "1:com.acme/example-service:1.2.1".
+    1. javaRuntimeId = 1
+    2. groupId, artifactId, version are the standard Maven coordinates.
+    3. The «groupId/artifactId» part is considered to be the _Exonum service artifact name_.  
+    An example Plugin-Id value: "1:com.acme/example-service:1.2.1".
 2. Then, update the exonum-launcher configuration files with the new service name: «groupId/artifactId»,
 and add the version to them.
 
