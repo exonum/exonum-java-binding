@@ -65,7 +65,7 @@ else
       pip3 install --user -e .
       wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.3/protoc-3.11.3-linux-x86_64.zip
       unzip protoc-3.11.3-linux-x86_64.zip
-      export PROTOC=./bin/protoc
+      export PROTOC="$(pwd)/bin/protoc"
       cd tests
       python3.7 -m unittest -v
     fi
