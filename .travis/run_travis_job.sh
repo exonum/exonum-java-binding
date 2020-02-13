@@ -59,15 +59,13 @@ else
       cd "${TRAVIS_BUILD_DIR}/exonum-java-binding/exonum_launcher_java_plugins"
       curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
       python3.7 get-pip.py --user
-      pip3 install --user --upgrade pip
       git clone https://github.com/exonum/exonum-launcher.git
       pip3 install --user -r exonum-launcher/requirements.txt
       pip3 install --user -e exonum-launcher --no-binary=protobuf protobuf
       pip3 install --user -e .
       wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.3/protoc-3.11.3-linux-x86_64.zip
       unzip protoc-3.11.3-linux-x86_64.zip
-      export PATH=bin/:$PATH
-      protoc --version
+      export PROTOC=./bin/protoc
       cd tests
       python3.7 -m unittest -v
     fi
