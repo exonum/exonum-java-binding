@@ -60,10 +60,8 @@ else
       # Install pip
       curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
       python3.7 get-pip.py --user
-      # Install exonum-launcher
-      git clone https://github.com/exonum/exonum-launcher.git
-      pip3 install --user -r exonum-launcher/requirements.txt
-      pip3 install --user -e exonum-launcher --no-binary=protobuf protobuf
+      # Install dependencies
+      pip3 install --user -r requirements.txt --no-binary=protobuf
       # Install exonum_launcher_java_plugins
       pip3 install --user -e .
       # Download latest protobuf compiler
