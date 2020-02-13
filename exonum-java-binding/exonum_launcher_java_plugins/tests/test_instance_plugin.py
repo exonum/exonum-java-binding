@@ -6,6 +6,8 @@ from exonum_launcher.instances import InstanceSpecLoadError
 
 from exonum_instance_configuration_plugin import InstanceSpecLoader
 
+from exonum_instance_configuration_plugin.proto import service_pb2
+
 _DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -34,11 +36,54 @@ class TestInstancePlugin(unittest.TestCase):
         serialized_parameters = instance_loader.load_spec(None, instance)
         self.assertEqual(serialized_parameters, b"\n\x07\x74\x65\x73\x74\x69\x6e\x67")
 
-    def test_plugin_errors_no_config_field(self) -> None:
-        config = self.load_config("no_config.yml")
-        self.assertEqual(len(config.instances), 4)
+    def test_plugin_standard_configuration_message_text(self):
+        config = self.load_config("standard_message_text.yml")
+        self.assertEqual(len(config.instances), 2)
+        instance_loader = InstanceSpecLoader()
+
+        expected_message = service_pb2.ServiceConfiguration()
+        expected_message.format = service_pb2.ServiceConfiguration.Format.TEXT
+        expected_message.value = "text-configuration\n"
+
+        for instance in config.instances:
+            serialized_parameters = instance_loader.load_spec(None, instance)
+            self.assertEqual(serialized_parameters, expected_message.SerializeToString())
+
+    def test_plugin_standard_configuration_message_json(self):
+        config = self.load_config("standard_message_json.yml")
+        self.assertEqual(len(config.instances), 2)
+        instance_loader = InstanceSpecLoader()
+
+        expected_message = service_pb2.ServiceConfiguration()
+        expected_message.format = service_pb2.ServiceConfiguration.Format.JSON
+        expected_message.value = "{\"some\": [\"json\", {}]}\n"
+
+        for instance in config.instances:
+            serialized_parameters = instance_loader.load_spec(None, instance)
+            self.assertEqual(serialized_parameters, expected_message.SerializeToString())
+
+    def test_plugin_standard_configuration_message_properties(self):
+        config = self.load_config("standard_message_properties.yml")
+        self.assertEqual(len(config.instances), 2)
+        instance_loader = InstanceSpecLoader()
+
+        expected_message = service_pb2.ServiceConfiguration()
+        expected_message.format = service_pb2.ServiceConfiguration.Format.PROPERTIES
+        expected_message.value = "Truth=Beauty"
+
+        for instance in config.instances:
+            serialized_parameters = instance_loader.load_spec(None, instance)
+            self.assertEqual(serialized_parameters, expected_message.SerializeToString())
+
+    def test_plugin_errors_invalid_config(self) -> None:
+        config = self.load_config("invalid_config.yml")
+        self.assertEqual(len(config.instances), 8)
         instance_loader = InstanceSpecLoader()
 
         for instance in config.instances:
             with self.assertRaisesRegex(InstanceSpecLoadError, instance.name):
                 instance_loader.load_spec(None, instance)
+
+
+if __name__ == '__main__':
+    unittest.main()
