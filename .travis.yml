@@ -65,6 +65,10 @@ matrix:
         - ROCKSDB_STATIC=1
         - SNAPPY_LIB_DIR=/usr/local/lib
         - SNAPPY_STATIC=1
+    - name: "Python unit tests"
+      script:
+        - cd "${TRAVIS_BUILD_DIR}"
+        - .travis/run_python_tests.sh
 
 cache:
   directories:

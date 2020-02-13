@@ -53,23 +53,4 @@ else
     if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]; then
       mvn org.eluder.coveralls:coveralls-maven-plugin:report
     fi
-
-    # Test exonum_launcher_java_plugins
-    if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]; then
-      cd "${TRAVIS_BUILD_DIR}/exonum-java-binding/exonum_launcher_java_plugins"
-      # Install pip
-      curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-      python3.7 get-pip.py --user
-      # Install dependencies
-      pip3 install --user -r requirements.txt --no-binary=protobuf
-      # Install exonum_launcher_java_plugins
-      pip3 install --user -e .
-      # Download latest protobuf compiler
-      wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.3/protoc-3.11.3-linux-x86_64.zip
-      unzip protoc-3.11.3-linux-x86_64.zip
-      export PROTOC="$(pwd)/bin/protoc"
-      # Run tests
-      cd tests
-      python3.7 -m unittest -v
-    fi
 fi
