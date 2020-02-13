@@ -136,7 +136,7 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public void beforeTransaction(BlockchainData blockchainData) {
+  public void beforeTransactions(BlockchainData blockchainData) {
     incrementCounter(BEFORE_TXS_COUNTER_NAME, blockchainData);
   }
 
