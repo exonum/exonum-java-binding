@@ -324,7 +324,7 @@ class ServiceWrapperIntegrationTest {
   void beforeTransactions() {
     BlockchainData blockchainData = mock(BlockchainData.class);
     serviceWrapper.beforeTransactions(blockchainData);
-    verify(service).beforeTransaction(blockchainData);
+    verify(service).beforeTransactions(blockchainData);
   }
 
   @Test
