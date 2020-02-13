@@ -24,7 +24,7 @@ enum TransactionError {
   SAME_SENDER_AND_RECEIVER(4),
   NON_POSITIVE_TRANSFER_AMOUNT(5);
 
-  public final byte errorCode;
+  final byte errorCode;
 
   TransactionError(int errorCode) {
     this.errorCode = (byte) errorCode;
