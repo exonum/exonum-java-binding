@@ -113,7 +113,7 @@ public interface Service {
    * @see #afterTransactions(BlockchainData)
    * @see com.exonum.binding.core.transaction.Transaction
    */
-  default void beforeTransaction(BlockchainData blockchainData) {}
+  default void beforeTransactions(BlockchainData blockchainData) {}
 
   /**
    * Handles the changes made by all transactions included in the upcoming block.
@@ -136,7 +136,7 @@ public interface Service {
    * @throws ExecutionException if an error occurs during the method execution;
    *     it is saved as a call error of kind "service". Any other exceptions
    *     are considered unexpected. They are saved with kind "unexpected".
-   * @see #beforeTransaction(BlockchainData)
+   * @see #beforeTransactions(BlockchainData)
    * @see com.exonum.binding.core.transaction.Transaction
    */
   default void afterTransactions(BlockchainData blockchainData) {}
