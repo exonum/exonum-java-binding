@@ -419,6 +419,7 @@
             <doclint>none</doclint>
             <detectOfflineLinks>false</detectOfflineLinks>
             <additionalJOption>${maven.javadoc.joption}</additionalJOption>
+            <reportOutputDirectory>${project.reporting.outputDirectory}/apidocs/${project.version}</reportOutputDirectory>
           </configuration>
           <executions>
             <execution>
