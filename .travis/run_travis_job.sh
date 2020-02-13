@@ -58,7 +58,7 @@ else
     if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]; then
       cd "${TRAVIS_BUILD_DIR}/exonum-java-binding/exonum_launcher_java_plugins"
       curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-      python3 get-pip.py --user
+      python3.7 get-pip.py --user
       pip3 install --user --upgrade pip
       git clone https://github.com/exonum/exonum-launcher.git
       pip3 install --user -r exonum-launcher/requirements.txt
@@ -69,6 +69,6 @@ else
       export PATH=bin/:$PATH
       protoc --version
       cd tests
-      python3 -m unittest -v
+      python3.7 -m unittest -v
     fi
 fi
