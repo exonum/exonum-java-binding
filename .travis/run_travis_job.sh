@@ -51,8 +51,7 @@ else
 
     # Upload the coverage report to Coveralls from a single job only
     if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]; then
-      echo "PASS"
-      # mvn org.eluder.coveralls:coveralls-maven-plugin:report
+      mvn org.eluder.coveralls:coveralls-maven-plugin:report
     fi
 
     # Test exonum_launcher_java_plugins

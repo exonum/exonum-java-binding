@@ -21,8 +21,13 @@ echo "Start building the project with running all Java test"
 #  - Native unit & integration tests that do not require a JVM.
 #  - Test coverage information collection.
 # See build definitions of the modules for more.
-mvn install -DskipTests -DskipRustLibBuild -pl 'exonum-java-binding/core' -am
+mvn install \
+  --activate-profiles ci-build \
+  -Drust.compiler.version="${RUST_COMPILER_VERSION}" \
+  -pl '!exonum-java-binding/fakes'
 
 echo "Start running EJB native tests"
 cd exonum-java-binding
 # Run native integration tests that require prepared classpaths for Java classes.
+./run_native_integration_tests.sh --skip-compile
+./run_app_tests.sh
