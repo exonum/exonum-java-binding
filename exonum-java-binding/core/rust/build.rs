@@ -20,6 +20,6 @@ fn main() {
     ProtobufGenerator::with_mod_name("protobuf_mod.rs")
         .with_input_dir("../src/main/proto")
         .add_path("../src/main/proto")
-        .add_path("../../common/src/main/proto/src")
+        .add_path("../../messages/src/main/proto/src")
         .generate();
 }

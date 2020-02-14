@@ -29,6 +29,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.exonum.messages</groupId>
+      <artifactId>exonum-messages</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -150,7 +156,6 @@
             </goals>
             <configuration>
               <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
-              <protoSourceRoot>${basedir}/src/main/proto/src</protoSourceRoot>
             </configuration>
           </execution>
         </executions>

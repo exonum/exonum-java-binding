@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.exonum.binding.common.messages.DeployArguments;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
@@ -57,7 +58,6 @@ class ServiceRuntimeAdapterIntegrationTest {
           .setName("com.acme/foo")
           .setVersion("1.2.3")
           .build();
-
 
   @Mock
   private ServiceRuntime serviceRuntime;

@@ -18,6 +18,7 @@ package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.messages.DeployArguments;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
@@ -73,7 +74,7 @@ public class ServiceRuntimeAdapter {
    *
    * @param artifactId bytes representation of the Java service artifact id as a serialized message
    * @param deploySpec the deploy specification as a serialized
-   *     {@link com.exonum.binding.core.runtime.DeployArguments}
+   *     {@link com.exonum.binding.common.messages.DeployArguments}
    *     protobuf message
    * @throws IllegalArgumentException if the deploy specification or id are not valid
    * @throws ServiceLoadingException if the runtime failed to load the service or it is not correct
