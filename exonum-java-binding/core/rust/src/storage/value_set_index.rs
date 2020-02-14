@@ -14,11 +14,14 @@
 
 use std::{panic, ptr};
 
-use exonum::merkledb::{
-    access::AccessExt,
-    generic::{ErasedAccess, GenericRawAccess},
-    indexes::{Entries, Keys},
-    ValueSetIndex,
+use exonum::{
+    crypto::Hash,
+    merkledb::{
+        access::AccessExt,
+        generic::{ErasedAccess, GenericRawAccess},
+        indexes::{Entries, Keys},
+        ValueSetIndex,
+    },
 };
 use jni::{
     objects::{JClass, JObject, JString},
@@ -26,7 +29,6 @@ use jni::{
     JNIEnv,
 };
 
-use exonum_crypto::Hash;
 use handle::{self, Handle};
 use storage::{PairIter, Value};
 use utils;

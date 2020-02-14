@@ -1388,7 +1388,6 @@ dependencies = [
  "exonum 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-build 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-cli 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-crypto 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-derive 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-proto 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-rust-runtime 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",

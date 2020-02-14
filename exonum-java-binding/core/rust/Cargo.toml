@@ -18,8 +18,6 @@ invocation = ["jni/invocation"]
 chrono = "0.4"
 exonum = { version = "1.0.0-rc.1", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
 exonum-cli = "1.0.0-rc.1"
-# Though it is not required here explicitly, it is added in order to access core proto files. [ECR-4036]
-exonum-crypto = "1.0.0-rc.1"
 exonum-derive = "1.0.0-rc.1"
 exonum-proto = "1.0.0-rc.1"
 exonum-rust-runtime = "1.0.0-rc.1"
