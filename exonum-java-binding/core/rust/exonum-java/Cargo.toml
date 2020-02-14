@@ -4,7 +4,8 @@ version = "0.10.0-SNAPSHOT"
 authors = ["Exonum team <contact@exonum.com>"]
 
 [dependencies]
-env_logger = "0.7"
+env_logger = "0.6"
+exonum-btc-anchoring = "1.0.0-rc.1"
 exonum-explorer-service = "1.0.0-rc.1"
 exonum-node = "1.0.0-rc.1"
 exonum-rust-runtime = "1.0.0-rc.1"

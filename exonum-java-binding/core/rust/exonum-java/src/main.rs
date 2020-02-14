@@ -15,6 +15,7 @@
  */
 
 extern crate env_logger;
+extern crate exonum_btc_anchoring;
 extern crate exonum_explorer_service;
 extern crate exonum_node;
 extern crate exonum_rust_runtime;

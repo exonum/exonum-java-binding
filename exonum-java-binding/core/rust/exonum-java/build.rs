@@ -12,12 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate exonum_build;
-
-use exonum_build::ProtobufGenerator;
 use std::env;
 
 fn main() {
+    let lib_paths = [
+        "ROCKSDB_LIB_DIR",
+        "SNAPPY_LIB_DIR",
+        "LZ4_LIB_DIR",
+        "BZ2_LIB_DIR",
+        "Z_LIB_DIR",
+    ];
+
+    lib_paths
+        .iter()
+        .filter_map(|lib| env::var(lib).ok())
+        .for_each(|path| println!("cargo:rustc-search-lib=native={}", path));
+
+    let libs_linking_types = [
+        "ROCKSDB_STATIC",
+        "SNAPPY_STATIC",
+        "LZ4_STATIC",
+        "BZ2_STATIC",
+        "Z_STATIC",
+    ];
+
+    for lib_linking_type in &libs_linking_types {
+        let lib_parts: Vec<&str> = lib_linking_type.split('_').collect();
+        let lib_name = lib_parts[0].to_lowercase();
+        let linking_type = if env::var_os(lib_linking_type).is_some() {
+            "static"
+        } else {
+            "dylib"
+        };
+        println!("cargo:rustc-link-lib={}={}", linking_type, lib_name);
+    }
+
     if cfg!(target_os = "macos") && env::var_os("ROCKSDB_STATIC").is_some() {
         // We need to link to libc++.dylib on Mac if using static linkage with RocksDB
         // This is because `librocksdb.a` provided with Homebrew package depends on
@@ -32,10 +61,4 @@ fn main() {
         println!("cargo:rustc-link-search=native={}", zstd_lib_path);
         println!("cargo:rustc-link-lib=static=zstd");
     }
-
-    ProtobufGenerator::with_mod_name("protobuf_mod.rs")
-        .with_input_dir("../src/main/proto")
-        .add_path("../src/main/proto")
-        .add_path("../../messages/src/main/proto/src")
-        .generate();
 }
