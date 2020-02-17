@@ -27,9 +27,6 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=c++");
         // We do the same thing for zstd.a as official rocksdb package depends on this library.
         // We use static linkage to avoid runtime dependency on zstd.
-        let zstd_lib_path =
-            env::var("ZSTD_LIB_DIR").unwrap_or_else(|_| "/usr/local/lib".to_owned());
-        println!("cargo:rustc-link-search=native={}", zstd_lib_path);
         println!("cargo:rustc-link-lib=static=zstd");
     }
 

@@ -21,11 +21,8 @@ use exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor};
 use exonum_system_api::SystemApiPlugin;
 use exonum_time::TimeServiceFactory;
 use java_bindings::{
-    create_java_vm, create_service_runtime,
-    exonum::{
-        blockchain::config::{GenesisConfigBuilder, InstanceInitParams},
-        merkledb::{Database, RocksDB},
-    },
+    create_database, create_java_vm, create_service_runtime,
+    exonum::blockchain::config::{GenesisConfigBuilder, InstanceInitParams},
     Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
     JavaRuntimeProxy,
 };
@@ -43,7 +40,10 @@ pub fn run_node(command: Command) -> Result<(), failure::Error> {
 }
 
 fn create_node(config: Config) -> Result<Node, failure::Error> {
-    let database = create_database(&config)?;
+    let database = create_database(
+        &config.run_config, //.db_path,
+                            //        &config.run_config.node_config.private_config.database,
+    )?;
     let node_config: CoreNodeConfig = config.run_config.node_config.clone().into();
     let node_keys = config.run_config.node_keys.clone();
     let genesis_config = create_genesis_config(&config);
@@ -91,14 +91,6 @@ fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
     )));
 
     create_service_runtime(executor, &config.runtime_config)
-}
-
-fn create_database(config: &Config) -> Result<Arc<dyn Database>, failure::Error> {
-    let database = Arc::new(RocksDB::open(
-        &config.run_config.db_path,
-        &config.run_config.node_config.private_config.database,
-    )?) as Arc<dyn Database>;
-    Ok(database)
 }
 
 fn supervisor_service(config: &Config) -> InstanceInitParams {
