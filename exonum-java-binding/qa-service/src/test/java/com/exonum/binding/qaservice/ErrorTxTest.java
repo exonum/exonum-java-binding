@@ -39,6 +39,7 @@ import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
+import com.exonum.binding.test.Integration;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.messages.core.runtime.Errors.ErrorKind;
