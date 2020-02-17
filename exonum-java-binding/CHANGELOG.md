@@ -15,6 +15,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.10.0] - 2020-02-TBD
+
+### Overview
+
+The main feature of the release is enhanced support of dynamic services and
+their lifetime. Service instances might be stopped and resumed now. While
+stopped, the service artifact can be upgraded, which allows services API updates
+and synchronous data migration.
+
+Most of the user-facing interfaces were reworked to facilitate access to the
+database and transaction execution context, and more distinction between
+storage access abstractions were added to enforce services isolation.
+
+Finally, the support of Protobuf-serialized proofs has been reenabled and
+expanded since the last release.
+
+*If you are upgrading an existing Java service, consult
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.10.0/exonum-java-binding/doc/Migration_guide_0.10.md).*
+
+This release is based on [Exonum 1.0.0-rc.1][exonum-1.0.0-rc.1].
+
+[exonum-1.0.0-rc.1]: https://github.com/exonum/exonum/releases/tag/v1.0.0-rc.1
+
 ### Added
 - Support of creation of various blockchain proofs:
     - Block Proof
@@ -458,6 +481,7 @@ Parent module and BOM module were released as they are required dependencies to 
 The first release of Exonum Java Binding.
 
 [Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.9.0-rc1...HEAD
+[0.10.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.9.0-rc1...ejb/v0.10.0
 [0.9.0-rc1]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.8.0...ejb/v0.9.0-rc1
 [0.8.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.7.0...ejb/v0.8.0
 [0.7.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...ejb/v0.7.0
