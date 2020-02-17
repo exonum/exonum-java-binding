@@ -19,11 +19,12 @@ addons:
     packages:
       - build-essential
       - libsodium-dev
-      - librocksdb5.17
+      - librocksdb6.2
       - libssl-dev
       - pkg-config
       - protobuf-compiler
       - libprotobuf-dev
+      - openjdk-8-jdk
   homebrew:
     packages:
       - libsodium
@@ -42,11 +43,9 @@ jobs:
   include:
     - name: "Linux JDK 8 CHECK_RUST=true"
       os: linux
-      jdk: openjdk8
       env: CHECK_RUST=true
     - name: "Linux JDK 8 CHECK_RUST=false"
       os: linux
-      jdk: openjdk8
       env: CHECK_RUST=false
     - name: "Linux JDK 13 CHECK_RUST=false"
       os: linux
