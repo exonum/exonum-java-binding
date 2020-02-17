@@ -9,7 +9,7 @@ set -eu -o pipefail
 source tests_profile
 
 # The published modules for which Javadocs must be generated
-PROJECTS_TO_DOCUMENT="com.exonum.binding:exonum-java-binding-parent,common,core,testkit,time-oracle"
+PROJECTS_TO_DOCUMENT="com.exonum.binding:exonum-java-binding-parent,messages,common,core,testkit,time-oracle"
 
 # Clean the project and install the artifacts in the local repository,
 # so that Javadocs can be generated for a subset of the modules — the published ones

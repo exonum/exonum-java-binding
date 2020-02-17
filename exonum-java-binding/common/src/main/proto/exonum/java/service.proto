@@ -14,14 +14,9 @@
 
 syntax = "proto3";
 
-package exonum.binding;
+package exonum.java;
 
 option java_package = "com.exonum.binding.common.messages";
-
-/**
-TODO: ECR-4199 move this file to common module
-currently this action is blocked till native update to the latest revision
-*/
 
 // Service configuration arguments in a text-based format.
 // The configuration string must be in one of the pre-defined formats.

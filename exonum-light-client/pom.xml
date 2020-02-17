@@ -83,7 +83,7 @@
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <!-- Empty for all JDKs but 11+ -->
+    <!-- Empty for all JDKs but 11 and 12 -->
     <maven.javadoc.joption></maven.javadoc.joption>
   </properties>
 
@@ -163,7 +163,6 @@
       <version>${equalsverifier.version}</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>
@@ -183,7 +182,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
         <configuration>
           <configLocation>${project.basedir}/../checkstyle.xml</configLocation>
           <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml</suppressionsLocation>

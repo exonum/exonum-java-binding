@@ -45,7 +45,6 @@ pub extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
 
-extern crate exonum_crypto;
 extern crate exonum_testkit;
 extern crate exonum_time;
 extern crate futures;

@@ -59,6 +59,7 @@
   <modules>
     <module>bom</module>
     <module>testing</module>
+    <module>messages</module>
     <module>common</module>
     <module>core</module>
     <module>fakes</module>
@@ -311,7 +312,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.1.1</version>
           <configuration>
             <configLocation>${checkstyle.configLocation}</configLocation>
             <propertyExpansion>checkstyle.severity=${checkstyle.severity}</propertyExpansion>

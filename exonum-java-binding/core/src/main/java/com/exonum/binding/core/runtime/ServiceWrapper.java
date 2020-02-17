@@ -157,7 +157,7 @@ final class ServiceWrapper {
   }
 
   void beforeTransactions(BlockchainData blockchainData) {
-    callServiceMethod(() -> service.beforeTransaction(blockchainData));
+    callServiceMethod(() -> service.beforeTransactions(blockchainData));
   }
 
   void afterTransactions(BlockchainData blockchainData) {
