@@ -1,5 +1,5 @@
 language: java
-dist: xenial
+dist: bionic
 
 # Build only the following branches/tags pushed to the repository:
 branches:
