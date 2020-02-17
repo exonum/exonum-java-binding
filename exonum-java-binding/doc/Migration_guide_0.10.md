@@ -144,6 +144,6 @@ See the [release page][release-page] for an overview of the new features.
 
 - The 0.10.0 [release page][release-page] for the changelog and pre-built binaries.
 - [User Guide](https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/)
-- [Javadocs](https://exonum.com/doc/api/java-binding/0.9.0-rc1/index.html)
+- [Javadocs](https://exonum.com/doc/api/java-binding/0.10.0/index.html)
 
 [release-page]: https://github.com/exonum/exonum-java-binding/releases/tag/ejb/v0.10.0
