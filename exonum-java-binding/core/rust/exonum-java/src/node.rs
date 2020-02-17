@@ -40,10 +40,7 @@ pub fn run_node(command: Command) -> Result<(), failure::Error> {
 }
 
 fn create_node(config: Config) -> Result<Node, failure::Error> {
-    let database = create_database(
-        &config.run_config, //.db_path,
-                            //        &config.run_config.node_config.private_config.database,
-    )?;
+    let database = create_database(&config.run_config)?;
     let node_config: CoreNodeConfig = config.run_config.node_config.clone().into();
     let node_keys = config.run_config.node_keys.clone();
     let genesis_config = create_genesis_config(&config);
