@@ -90,7 +90,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   `Access` methods **must** be used to create indexes in service code.
   Factory methods in indexes must no longer be used (see also 'Removed' 
   section below).
-    - Use `Access` instead of `View` (which is renamed to `AbstractAccess).
+    - Use `Access` instead of `View` (which is renamed to `AbstractAccess`).
     - `IndexAddress`es are resolved relatively to `Access`es (#1374)
 
 ### Removed
