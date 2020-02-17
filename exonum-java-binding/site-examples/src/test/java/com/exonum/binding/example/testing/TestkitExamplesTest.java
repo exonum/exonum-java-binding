@@ -103,7 +103,7 @@ class TestkitExamplesTest {
     try (TestKit testKit = TestKit.forService(ARTIFACT_ID, ARTIFACT_FILENAME,
         SERVICE_NAME, SERVICE_ID, ARTIFACTS_DIR)) {
       // Construct a valid transaction
-      TransactionMessage validTx = createPutTransaction(SERVICE_ID,"key1", "v1");
+      TransactionMessage validTx = createPutTransaction(SERVICE_ID, "key1", "v1");
 
       // Commit block with this transaction
       testKit.createBlockWithTransactions(validTx);
