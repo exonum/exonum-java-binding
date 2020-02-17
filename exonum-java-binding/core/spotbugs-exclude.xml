@@ -37,16 +37,6 @@
 
   <!--  Auto-generated Protobuf-messages -->
   <Match>
-    <Source name="~.*ServiceRuntimeProtos\.java"/>
-  </Match>
-  <Match>
-    <Source name="~.*DeployArguments\.java"/>
-  </Match>
-  <Match>
     <Source name="~.*TestKitProtos\.java"/>
-  </Match>
-  <!--  TODO: ECR-4199 remove when the proto moves to proto-sources -->
-  <Match>
-    <Class name="com.exonum.binding.common.messages.Service$ServiceConfiguration$Builder"/>
   </Match>
 </FindBugsFilter>
