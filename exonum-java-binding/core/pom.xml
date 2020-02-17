@@ -312,34 +312,6 @@
               <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
             </configuration>
           </execution>
-          <!-- Compile protobuf description of Java service runtime deploy arguments
-               to Python for exonum_java_runtime_plugin -->
-          <execution>
-            <id>protobuf-compile-python-deploy-arguments</id>
-            <goals>
-              <goal>compile-python</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${protobuf.python.deployArguments.outputDirectory}</outputDirectory>
-              <includes>
-                <include>deploy_arguments.proto</include>
-              </includes>
-            </configuration>
-          </execution>
-          <!-- Compile protobuf description of Java service runtime deploy arguments
-               to Python for exonum_instance_configuration_plugin -->
-          <execution>
-            <id>protobuf-compile-python-service-configuration</id>
-            <goals>
-              <goal>compile-python</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${protobuf.python.service.outputDirectory}</outputDirectory>
-              <includes>
-                <include>service.proto</include>
-              </includes>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
 
