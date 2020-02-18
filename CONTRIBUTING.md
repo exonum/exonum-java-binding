@@ -59,18 +59,6 @@ Then run:
 $ ./run_all_tests.sh
 ```
 
----
-
-⚠️ Some maven modules have not been migrated to dynamic services and
-have to be excluded when executing `mvn` directly (from the project root):
-```sh
-mvn -pl '!exonum-java-binding/fakes' <commands>
-```
-or, when running `mvn` from the `exonum-java-binding` directory:
-```sh
-mvn -pl '!fakes' <commands>
-```
-
 #### Building Exonum Java App
 
 Run:
@@ -151,9 +139,8 @@ Here are the main ones:
 There are several categories of tests:
   * Unit tests in Java and Rust modules.
   * Integration tests in Java, some of which require a native library.
-  * Integration tests in Rust that require a JVM together with `ejb-core` 
-    and `ejb-fakes` artefacts. Reside 
-    in [`core-native`](exonum-java-binding/core/rust/integration_tests).
+  * Integration tests in Rust that require a JVM together with `ejb-core` artifact.
+    Reside in [`core-native`](exonum-java-binding/core/rust/integration_tests).
   * System tests — these are currently performed internally 
     and use a [QA-service](exonum-java-binding/qa-service).
 
