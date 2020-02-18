@@ -6,7 +6,7 @@ from exonum_launcher.instances import InstanceSpecLoadError
 
 from exonum_instance_configuration_plugin import InstanceSpecLoader
 
-from exonum_instance_configuration_plugin.proto import service_pb2
+from exonum_instance_configuration_plugin.proto.exonum.java import service_pb2
 
 _DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
