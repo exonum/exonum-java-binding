@@ -156,7 +156,6 @@
         <extensions>true</extensions>
         <configuration>
           <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
-          <protoSourceRoot>${basedir}/src/main/proto/exonum/java</protoSourceRoot>
         </configuration>
         <executions>
           <execution>
@@ -175,7 +174,7 @@
             <configuration>
               <outputDirectory>${protobuf.python.deployArguments.outputDirectory}</outputDirectory>
               <includes>
-                <include>deploy_arguments.proto</include>
+                <include>exonum/java/deploy_arguments.proto</include>
               </includes>
             </configuration>
           </execution>
@@ -189,7 +188,7 @@
             <configuration>
               <outputDirectory>${protobuf.python.service.outputDirectory}</outputDirectory>
               <includes>
-                <include>service.proto</include>
+                <include>exonum/java/service.proto</include>
               </includes>
             </configuration>
           </execution>
