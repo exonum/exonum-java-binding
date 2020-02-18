@@ -34,7 +34,8 @@ expanded since the last release.
 *If you are upgrading an existing Java service, consult
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.10.0/exonum-java-binding/doc/Migration_guide_0.10.md).*
 
-This release is based on [Exonum 1.0.0-rc.1][exonum-1.0.0-rc.1].
+This release is based on [Exonum 1.0.0-rc.1][exonum-1.0.0-rc.1], the first
+stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
 
 [exonum-1.0.0-rc.1]: https://github.com/exonum/exonum/releases/tag/v1.0.0-rc.1
 
