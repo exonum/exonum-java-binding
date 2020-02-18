@@ -40,12 +40,6 @@
     <skipRustLibBuild>false</skipRustLibBuild>
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->
     <build.cargoFlag></build.cargoFlag>
-    <protobuf.python.deployArguments.outputDirectory>
-      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_java_runtime_plugin/proto
-    </protobuf.python.deployArguments.outputDirectory>
-    <protobuf.python.service.outputDirectory>
-      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_instance_configuration_plugin/proto
-    </protobuf.python.service.outputDirectory>
   </properties>
 
   <dependencies>

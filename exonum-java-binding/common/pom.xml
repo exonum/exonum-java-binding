@@ -25,6 +25,12 @@
     <lazysodium-java.version>4.2.3</lazysodium-java.version>
     <auto-value.version>1.7</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
+    <protobuf.python.deployArguments.outputDirectory>
+      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_java_runtime_plugin/proto
+    </protobuf.python.deployArguments.outputDirectory>
+    <protobuf.python.service.outputDirectory>
+      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_instance_configuration_plugin/proto
+    </protobuf.python.service.outputDirectory>
   </properties>
 
   <dependencies>
@@ -148,15 +154,16 @@
         <groupId>org.xolstice.maven.plugins</groupId>
         <artifactId>protobuf-maven-plugin</artifactId>
         <extensions>true</extensions>
+        <configuration>
+          <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+          <protoSourceRoot>${basedir}/src/main/proto/exonum/java</protoSourceRoot>
+        </configuration>
         <executions>
           <execution>
             <goals>
               <goal>compile</goal>
               <goal>test-compile</goal>
             </goals>
-            <configuration>
-              <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
-            </configuration>
           </execution>
           <!-- Compile protobuf description of Java service runtime deploy arguments
                to Python for exonum_java_runtime_plugin -->
