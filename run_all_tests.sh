@@ -23,8 +23,7 @@ echo "Start building the project with running all Java test"
 # See build definitions of the modules for more.
 mvn install \
   --activate-profiles ci-build \
-  -Drust.compiler.version="${RUST_COMPILER_VERSION}" \
-  -pl '!exonum-java-binding/fakes'
+  -Drust.compiler.version="${RUST_COMPILER_VERSION}"
 
 echo "Start running EJB native tests"
 cd exonum-java-binding

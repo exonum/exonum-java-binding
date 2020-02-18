@@ -1,2 +1,0 @@
-# Use the mock maker that enables Mockito to mock _final_ classes.
-mock-maker-inline
