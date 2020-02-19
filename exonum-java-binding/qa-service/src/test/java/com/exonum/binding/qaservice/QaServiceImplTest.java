@@ -55,6 +55,7 @@ import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.Config.QaResumeArguments;
+import com.exonum.binding.test.Integration;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
 import com.exonum.binding.testkit.TestKit;

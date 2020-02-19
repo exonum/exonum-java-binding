@@ -30,6 +30,7 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.test.Integration;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.messages.core.runtime.Errors.ExecutionError;
