@@ -21,8 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 The main feature of the release is enhanced support of dynamic services and
 their lifetime. Service instances might be stopped and resumed now. While
-stopped, the service artifact can be upgraded, which allows services API and
-business logic updates.
+stopped, the service artifact can be upgraded, which allows services API
+updates.
 
 Most of the user-facing interfaces were reworked to facilitate access to the
 database and transaction execution context, and more distinction between
