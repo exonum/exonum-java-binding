@@ -23,9 +23,6 @@ extern crate java_bindings;
 #[macro_use]
 extern crate log;
 
-#[cfg(test)]
-extern crate tempfile;
-
 use java_bindings::{get_lib_version, Command};
 use node::run_node;
 
