@@ -16,13 +16,13 @@
 
 use exonum_explorer_service::ExplorerFactory;
 use exonum_node::{Node, NodeBuilder, NodeChannel, NodeConfig as CoreNodeConfig};
-use exonum_rust_runtime::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory};
-use exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor};
 use exonum_system_api::SystemApiPlugin;
-use exonum_time::TimeServiceFactory;
 use java_bindings::{
     create_database, create_java_vm, create_service_runtime,
     exonum::blockchain::config::{GenesisConfigBuilder, InstanceInitParams},
+    exonum_rust_runtime::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory},
+    exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor},
+    exonum_time::TimeServiceFactory,
     Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
     JavaRuntimeProxy,
 };

@@ -27,8 +27,8 @@ extern crate exonum_cli;
 #[macro_use]
 extern crate exonum_derive;
 extern crate exonum_proto;
-extern crate exonum_rust_runtime;
-extern crate exonum_supervisor;
+pub extern crate exonum_rust_runtime;
+pub extern crate exonum_supervisor;
 extern crate failure;
 pub extern crate jni;
 extern crate structopt;
@@ -46,7 +46,7 @@ pub extern crate serde_json;
 extern crate lazy_static;
 
 extern crate exonum_testkit;
-extern crate exonum_time;
+pub extern crate exonum_time;
 extern crate futures;
 #[cfg(test)]
 extern crate tempfile;
