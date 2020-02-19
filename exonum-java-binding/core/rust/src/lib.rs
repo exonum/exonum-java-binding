@@ -21,18 +21,26 @@
 // Function names must follow Java naming for the native functions.
 #![allow(non_snake_case)]
 
-extern crate chrono;
 pub extern crate exonum;
+// Though we do not need exonum-btc-anchoring in libjava_bindings, it solves issue ECR-3459,
+// as all RocksDB-related symbols resides inside libjava_bindings and not need to be exported for
+// exonum-java.
+pub extern crate exonum_btc_anchoring;
+pub extern crate exonum_rust_runtime;
+pub extern crate exonum_supervisor;
+pub extern crate exonum_time;
+pub extern crate jni;
+
+extern crate chrono;
 extern crate exonum_cli;
 #[macro_use]
 extern crate exonum_derive;
 extern crate exonum_proto;
-extern crate exonum_rust_runtime;
-extern crate exonum_supervisor;
+extern crate exonum_testkit;
 extern crate failure;
-pub extern crate jni;
-extern crate structopt;
-extern crate toml;
+extern crate futures;
+#[macro_use]
+extern crate lazy_static;
 #[macro_use]
 extern crate log;
 extern crate parking_lot;
@@ -40,16 +48,8 @@ extern crate protobuf;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-pub extern crate serde_json;
-
-#[macro_use]
-extern crate lazy_static;
-
-extern crate exonum_testkit;
-extern crate exonum_time;
-extern crate futures;
-#[cfg(test)]
-extern crate tempfile;
+extern crate structopt;
+extern crate toml;
 
 mod cmd;
 pub mod handle;

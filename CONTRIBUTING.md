@@ -19,8 +19,8 @@ You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
   * [JDK 1.8+](https://jdk.java.net/).
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
-  * [Rust 1.36.0](https://www.rust-lang.org/).
-  To install a specific Rust version, use `rustup install 1.36.0` command.
+  * [Stable Rust compiler](https://www.rust-lang.org/).
+    The minimum supported version is Rust 1.41.0.
   * The [system dependencies](https://exonum.com/doc/version/0.13-rc.2/get-started/install/) of Exonum. 
   You do _not_ need to manually fetch and compile Exonum.
 
@@ -199,7 +199,7 @@ Rust code follows the [Rust style guide](https://github.com/rust-lang-nursery/fm
 After installation, you can run it with
 ```$sh
 $ cd exonum-java-binding/core/rust
-$ cargo fmt --all -- --check
+$ cargo +stable fmt --all -- --check
 ```
 
 ## Submitting Issues

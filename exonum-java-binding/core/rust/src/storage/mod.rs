@@ -29,6 +29,10 @@ pub use self::readonly_erased_access::*;
 pub use self::temporarydb::*;
 pub use self::value_set_index::*;
 
+use exonum::merkledb::{Database, RocksDB};
+use exonum_cli::command::run::NodeRunConfig;
+use std::sync::Arc;
+
 mod access;
 mod blockchain;
 mod blockchain_data;
@@ -50,3 +54,12 @@ mod value_set_index;
 
 pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
+
+/// Creates database.
+pub fn create_database(config: &NodeRunConfig) -> Result<Arc<dyn Database>, failure::Error> {
+    let database = Arc::new(RocksDB::open(
+        &config.db_path,
+        &config.node_config.private_config.database,
+    )?) as Arc<dyn Database>;
+    Ok(database)
+}
