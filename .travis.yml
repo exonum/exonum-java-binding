@@ -83,9 +83,8 @@ before_install:
   - source .travis/skip-ci.sh
   # Use OpenJDK 8 on "Linux JDK 8" job. By default, Travis provides only JDK 9+.
   - |
-    if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]
-    then update-java-alternatives --list
-    sudo update-java-alternatives --set java-8-openjdk-amd64
+    if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]; then
+    sudo update-java-alternatives --set java-1.8.0-openjdk-amd64
     fi
   # Install JDK 8 on Mac. We use latest osx_image for faster Homebrew packages
   # installation, but it has JDK 13 by default. We can't use Homebrew for installing
