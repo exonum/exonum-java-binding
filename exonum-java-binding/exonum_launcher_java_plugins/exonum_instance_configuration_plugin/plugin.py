@@ -37,7 +37,7 @@ _VALUE_FIELD_NAME = "value"
 _FROM_FILE_FIELD_NAME = "from_file"
 
 try:
-    from .proto import service_pb2
+    from .proto.exonum.java import service_pb2
 except (ModuleNotFoundError, ImportError):
     raise RuntimeError("Protobuf definition is not found")
 
