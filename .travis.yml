@@ -20,7 +20,7 @@ addons:
     packages:
       - build-essential
       - libsodium-dev
-      - librocksdb5.17
+      - librocksdb6.2
       - libssl-dev
       - pkg-config
       - protobuf-compiler
