@@ -83,7 +83,8 @@ before_install:
   # Use OpenJDK 8 on "Linux JDK 8" job. By default, Travis provides only JDK 9+.
   - |
     if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]
-    then export PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH
+    then export JAVA_HOME=/usr/lob/jvm/java-8-openjdk
+    export PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH
     fi
   # Install JDK 8 on Mac. We use latest osx_image for faster Homebrew packages
   # installation, but it has JDK 13 by default. We can't use Homebrew for installing
