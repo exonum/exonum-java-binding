@@ -15,19 +15,12 @@
  */
 
 extern crate env_logger;
-extern crate exonum_btc_anchoring;
 extern crate exonum_explorer_service;
 extern crate exonum_node;
-extern crate exonum_rust_runtime;
-extern crate exonum_supervisor;
 extern crate exonum_system_api;
-extern crate exonum_time;
 extern crate java_bindings;
 #[macro_use]
 extern crate log;
-
-#[cfg(test)]
-extern crate tempfile;
 
 use java_bindings::{get_lib_version, Command};
 use node::run_node;

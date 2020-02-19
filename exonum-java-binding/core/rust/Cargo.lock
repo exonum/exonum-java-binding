@@ -968,19 +968,14 @@ name = "exonum-java"
 version = "0.10.0-SNAPSHOT"
 dependencies = [
  "env_logger 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-btc-anchoring 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-explorer-service 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-node 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-rust-runtime 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-supervisor 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-system-api 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "exonum-time 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "java_bindings 0.10.0-SNAPSHOT",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
- "tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "toml 0.5.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -1514,7 +1509,6 @@ dependencies = [
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
- "tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1548,6 +1542,7 @@ version = "0.10.0-SNAPSHOT"
 dependencies = [
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "exonum-btc-anchoring 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-build 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-cli 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "exonum-derive 1.0.0-rc.1 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -16,13 +16,14 @@
 
 use exonum_explorer_service::ExplorerFactory;
 use exonum_node::{Node, NodeBuilder, NodeChannel, NodeConfig as CoreNodeConfig};
-use exonum_rust_runtime::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory};
-use exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor};
 use exonum_system_api::SystemApiPlugin;
-use exonum_time::TimeServiceFactory;
 use java_bindings::{
     create_database, create_java_vm, create_service_runtime,
     exonum::blockchain::config::{GenesisConfigBuilder, InstanceInitParams},
+    exonum_btc_anchoring::BtcAnchoringService,
+    exonum_rust_runtime::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory},
+    exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor},
+    exonum_time::TimeServiceFactory,
     Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
     JavaRuntimeProxy,
 };
@@ -69,6 +70,7 @@ fn create_genesis_config(config: &Config) -> GenesisConfig {
         .with_instance(supervisor_service)
         .with_artifact(ExplorerFactory.artifact_id())
         .with_instance(ExplorerFactory.default_instance())
+        .with_artifact(BtcAnchoringService.artifact_id())
         .build()
 }
 
@@ -77,6 +79,7 @@ fn create_rust_runtime(channel: &NodeChannel) -> RustRuntime {
         .with_factory(TimeServiceFactory::default())
         .with_factory(Supervisor)
         .with_factory(ExplorerFactory)
+        .with_factory(BtcAnchoringService)
         .build(channel.endpoints_sender())
 }
 

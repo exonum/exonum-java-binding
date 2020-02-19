@@ -14,7 +14,6 @@
 
 extern crate java_bindings;
 extern crate lazy_static;
-extern crate tempfile;
 
 pub mod example_proxy;
 pub mod vm;
