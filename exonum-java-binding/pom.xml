@@ -62,7 +62,6 @@
     <module>messages</module>
     <module>common</module>
     <module>core</module>
-    <module>fakes</module>
     <module>fake-service</module>
     <module>qa-service</module>
     <module>cryptocurrency-demo</module>
@@ -73,6 +72,7 @@
     <module>app</module>
     <module>integration-tests</module>
     <module>benchmarks</module>
+    <module>site-examples</module>
   </modules>
 
   <scm>
