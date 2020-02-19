@@ -1,5 +1,6 @@
 language: java
 dist: bionic
+python: 3.7
 
 # Build only the following branches/tags pushed to the repository:
 branches:
