@@ -17,7 +17,7 @@ from typing import Dict, Any
 from exonum_launcher.runtimes.runtime import RuntimeSpecLoader
 
 try:
-    from .proto import deploy_arguments_pb2
+    from .proto.exonum.java import deploy_arguments_pb2
 except (ModuleNotFoundError, ImportError):
     raise RuntimeError("Protobuf definition is not found")
 

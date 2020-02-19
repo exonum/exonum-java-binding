@@ -34,9 +34,9 @@ setuptools.setup(
     url="https://github.com/exonum/exonum-java-binding",
     packages=[
         "exonum_java_runtime_plugin",
-        "exonum_java_runtime_plugin.proto",
+        "exonum_java_runtime_plugin.proto.exonum.java",
         "exonum_instance_configuration_plugin",
-        "exonum_instance_configuration_plugin.proto",
+        "exonum_instance_configuration_plugin.proto.exonum.java",
     ],
     install_requires=INSTALL_REQUIRES,
     python_requires=PYTHON_REQUIRES,
