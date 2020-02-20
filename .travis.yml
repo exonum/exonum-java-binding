@@ -58,17 +58,16 @@ jobs:
     - name: "Linux JDK EA CHECK_RUST=false"
       os: linux
       jdk: openjdk-ea
-      env: CHECK_RUST=false
-      before_script:
-        - if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]; then travis_terminate 0; fi
+      env:
+        - CHECK_RUST=false
+        - ONLY_CRON_JOB=1
     - name: "Linux JDK 8 CHECK_RUST=false nightly Rust"
       os: linux
       jdk: openjdk13
       env:
         - CHECK_RUST=false
         - RUST_COMPILER_VERSION=nightly
-      before_script:
-        - if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]; then travis_terminate 0; fi
+        - ONLY_CRON_JOB=1
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
       # See: https://docs.travis-ci.com/user/reference/osx#macos-version
@@ -87,8 +86,7 @@ jobs:
         - ROCKSDB_LIB_DIR=/usr/local/lib
         - SNAPPY_LIB_DIR=/usr/local/lib
         - SNAPPY_STATIC=1
-      before_script:
-        - if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]; then travis_terminate 0; fi
+        - ONLY_CRON_JOB=1
     - name: "Python unit tests"
       before_install: true
       script:
@@ -111,6 +109,7 @@ before_cache:
   - rm -rf "$TRAVIS_HOME/.cargo/registry/src"
 
 before_install:
+  - if [[ -n "$ONLY_CRON_JOB" && "$TRAVIS_EVENT_TYPE" == "cron" ]]; then travis_terminate 0; fi
   # Skip the build if only md files were updated.
   - source .travis/skip-ci.sh
   # Install JDK 8 on Mac. We use latest osx_image for faster Homebrew packages
