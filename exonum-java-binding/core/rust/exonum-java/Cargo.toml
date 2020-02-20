@@ -16,6 +16,4 @@ failure = "0.1"
 # because some public APIs in Java permit passing arbitrary pointers (e.g., Snapshot#newInstance).
 java_bindings = { path = "..", features = ["resource-manager"] }
 log = "0.4"
-serde = "1.0"
-serde_derive = "1.0"
-toml = "0.5"
+serde = { version = "1.0", features = ["serde_derive"] }

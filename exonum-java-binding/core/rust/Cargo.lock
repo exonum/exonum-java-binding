@@ -975,8 +975,6 @@ dependencies = [
  "java_bindings 0.10.0-SNAPSHOT",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
- "toml 0.5.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
