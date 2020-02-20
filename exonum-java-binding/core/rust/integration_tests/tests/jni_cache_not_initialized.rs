@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate java_bindings;
-
 use java_bindings::utils::{assert_panics, jni_cache};
 
 #[test]

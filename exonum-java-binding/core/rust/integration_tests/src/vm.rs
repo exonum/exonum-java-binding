@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-use std::fs::File;
-use std::io::Read;
-use std::path::PathBuf;
-use std::sync::Arc;
+use java_bindings::{
+    jni::{InitArgsBuilder, JNIVersion, JavaVM},
+    utils::jni_cache,
+};
 
-use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
-use java_bindings::utils::jni_cache;
+use std::{fs::File, io::Read, path::PathBuf, sync::Arc};
 
 /// Kibibyte
 pub const KIB: usize = 1024;

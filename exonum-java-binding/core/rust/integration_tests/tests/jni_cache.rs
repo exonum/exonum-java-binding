@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate integration_tests;
-extern crate java_bindings;
-
 use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::utils::jni_cache;
 
