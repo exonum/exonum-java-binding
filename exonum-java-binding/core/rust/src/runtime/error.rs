@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use exonum::runtime::{ErrorKind, ExecutionError, ExecutionFail};
+use exonum_derive::ExecutionFail;
 use jni::{
     objects::{GlobalRef, JObject},
     signature::{JavaType, Primitive},

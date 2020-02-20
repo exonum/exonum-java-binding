@@ -16,6 +16,7 @@
 
 use exonum_cli::command::{run::Run as StandardRun, ExonumCommand, StandardResult};
 use failure;
+use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
 use std::path::PathBuf;

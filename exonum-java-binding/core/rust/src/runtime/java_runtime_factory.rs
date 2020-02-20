@@ -20,6 +20,7 @@ use jni::{
     objects::{GlobalRef, JObject},
     Executor, InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
+use log::info;
 
 use crate::{
     runtime::config::{self, InternalConfig, JvmConfig, RuntimeConfig},

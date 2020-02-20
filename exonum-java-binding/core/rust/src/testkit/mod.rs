@@ -25,6 +25,7 @@ use exonum::{
     merkledb::{self as exonum_merkledb, BinaryValue},
     runtime::ArtifactSpec,
 };
+use exonum_derive::BinaryValue;
 use exonum_proto::ProtobufConvert;
 use exonum_rust_runtime::ServiceFactory;
 use exonum_testkit::{TestKit, TestKitBuilder};

@@ -12,8 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate java_bindings;
-extern crate lazy_static;
-
 pub mod example_proxy;
 pub mod vm;

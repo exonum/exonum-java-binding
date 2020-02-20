@@ -25,7 +25,9 @@ use jni::{
     sys::{jint, JNI_VERSION_1_8},
     JNIEnv, JavaVM,
 };
+use log::debug;
 use parking_lot::Once;
+
 use std::{os::raw::c_void, panic::catch_unwind};
 
 /// Invalid JNI version constant, signifying JNI_OnLoad failure.

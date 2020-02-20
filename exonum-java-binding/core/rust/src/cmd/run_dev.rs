@@ -23,6 +23,7 @@ use exonum_cli::command::{
 };
 use exonum_supervisor::mode::Mode;
 use failure;
+use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
 use std::{path::PathBuf, str::FromStr};

@@ -15,6 +15,7 @@
  */
 
 use exonum_cli::command::run::NodeRunConfig;
+use serde::{Deserialize, Serialize};
 
 use std::{fmt, path::PathBuf};
 

@@ -16,6 +16,7 @@
 
 use exonum::merkledb::Error as DatabaseError;
 use jni::{objects::JObject, signature::JavaType, JNIEnv};
+use log::error;
 
 use std::{any::Any, cell::Cell, error::Error, result, thread};
 

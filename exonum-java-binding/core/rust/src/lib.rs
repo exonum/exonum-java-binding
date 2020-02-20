@@ -31,25 +31,6 @@ pub extern crate exonum_supervisor;
 pub extern crate exonum_time;
 pub extern crate jni;
 
-extern crate chrono;
-extern crate exonum_cli;
-#[macro_use]
-extern crate exonum_derive;
-extern crate exonum_proto;
-extern crate exonum_testkit;
-extern crate failure;
-extern crate futures;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate log;
-extern crate parking_lot;
-extern crate protobuf;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate structopt;
-
 mod cmd;
 pub mod handle;
 mod proto;

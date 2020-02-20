@@ -2,6 +2,7 @@
 name = "exonum-java"
 version = "0.10.0-SNAPSHOT"
 authors = ["Exonum team <contact@exonum.com>"]
+edition = "2018"
 
 [dependencies]
 env_logger = "0.6"
