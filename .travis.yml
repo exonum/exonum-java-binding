@@ -72,13 +72,18 @@ jobs:
 
 cache:
   directories:
-    - "$HOME/.cargo"
-    - "$HOME/.m2"
+    # Bits of Rust (see https://docs.travis-ci.com/user/languages/rust/#dependency-management).
+    # We do not cache `target` as the produced artifacts are huge and don't make sense caching.
+    - "$TRAVIS_HOME/.cargo"
+    - "$TRAVIS_HOME/.rustup/"
+    # Java (Maven)
+    - "$TRAVIS_HOME/.m2"
 
 before_cache:
   # Remove the project artifacts — no need to cache them.
-  - rm -rf ${HOME}/.m2/repository/com/exonum/binding/ ${HOME}/.m2/repository/com/exonum/client/
-
+  # See also: https://docs.travis-ci.com/user/languages/rust/#dependency-management
+  - rm -rf "$TRAVIS_HOME/.m2/repository/com/exonum/binding/" "$TRAVIS_HOME/.m2/repository/com/exonum/client/" "$TRAVIS_HOME/.m2/repository/com/exonum/messages/"
+  - rm -rf "$TRAVIS_HOME/.cargo/registry/src"
 
 before_install:
   # Skip the build if only md files were updated.
