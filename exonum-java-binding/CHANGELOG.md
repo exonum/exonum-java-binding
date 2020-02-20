@@ -15,6 +15,190 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.10.0] - 2020-02-TBD
+
+### Overview
+
+The main feature of the release is enhanced support of dynamic services and
+their lifetime. Service instances might be stopped and resumed now. While
+stopped, the service does not process transactions and its API endpoints are
+unavailable.
+
+Most of the user-facing interfaces were reworked to facilitate access to the
+database and transaction execution context, and more distinction between
+storage access abstractions were added to enforce services isolation.
+
+Finally, the support of Protobuf-serialized proofs has been reenabled and
+expanded since the last release.
+
+*If you are upgrading an existing Java service, consult
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.10.0/exonum-java-binding/doc/Migration_guide_0.10.md).*
+
+This release is based on [Exonum 1.0.0-rc.1][exonum-1.0.0-rc.1], the first
+stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
+
+[exonum-1.0.0-rc.1]: https://github.com/exonum/exonum/releases/tag/v1.0.0-rc.1
+
+### Added
+- Support of creation of various blockchain proofs:
+    - Block Proof
+    - Transaction Execution Proof
+    - Call Result Proof
+    - Service Data Proof.
+
+  See [`Blockchain`][blockchain-proofs] `BlockProof` and `IndexProof`
+  for details. (#1355)
+    - Proofs for executing service can be created with 
+    `BlockchainData#createIndexProof` directly by the index simple name.
+- Support of creation of Protobuf-based proofs for maps and lists.
+  Such proofs can be easily serialized using Protocol Buffers
+  and sent to the light clients.
+  See:
+     - `ProofMapIndexProxy#getProof` and `MapProof`;
+     - `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
+     `ListProof`;
+     - [`Blockchain`][blockchain-proofs].
+- `ProofEntryIndexProxy` collection.
+- Transaction precondition utility methods,
+  see `com.exonum.binding.core.transaction.ExecutionPreconditions`. (#1351)
+- `supervisor-mode` CLI parameter added for `generate-template` command. It
+  allows to configure the mode of the Supervisor service. Possible values are
+  "simple" and "decentralized". (#1361)
+- Support of service instances lifecycle: they can be activated, stopped and resumed now.
+  Also, service instance artifacts can be upgraded before resuming which allows services
+  API update, add new service transactions, synchronous data migration etc. (#1358, #1372)
+- `BlockchainData` — an object providing access to all categories of persistent data
+  stored in the database: the executing service data, other services’ data, 
+  Exonum Core data. BlockchainData is a service-specific object — it remembers
+  the service to which it is provided and allows modification only to the data
+  of that service. The service data is automatically isolated via namespaces,
+  with a service name followed by a dot as a prefix 
+  (see `BlockchainData#getExecutingServiceData`). (#1393)
+- `Prefixed` and `ReadonlyFork` database Accesses. (#1382, #1385)
+- `Service#beforeTranactions`.
+
+[blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
+
+### Changed
+- Transactions are now implemented as service methods annotated with
+  `@Transaction(TX_ID)`, instead of classes implementing
+  `Transaction` _interface_. (#1274, #1307)
+- Any exceptions thrown from the `Transaction` methods
+  but `TransactionExecutionException` are saved with the error kind
+  "unexpected" into `Blockchain#getCallErrors`.
+- Redefined `TransactionExecutionException`:
+  - Renamed into `ExecutionException`
+  - Made `TransactionExecutionException` an unchecked (runtime) exception
+  - Specified it as _the_ exception to communicate execution errors
+  of `Service` methods: `@Transaction`s; `Service#afterTransactions`,
+  `#initialize`; `Configurable` methods.
+- Renamed `Service#beforeCommit` into `Service#afterTransactions`.
+- Allowed throwing execution exceptions from `Service#afterTransactions`
+  (ex. `beforeCommit`).
+  Any exceptions thrown in these methods are saved in the blockchain
+  in `Blockchain#getCallErrors` and can be retrieved by any services or
+  light clients.
+- `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`.
+  - Use `CallInBlocks` to concisely create `CallInBlock`s.
+- The specification of `Configurable` operations and `Service#initialize` 
+  to require throwing `ExecutionException` instead of
+  `IllegalArgumentException`.
+- Transaction index in block type changed from `long` to `int`. (#1348)
+- Extracted artifact version to the separate field from the artifact name.
+  Artifact name format is `groupId/artifactId` now.
+  PluginId format is `runtimeId:artifactName:artifactVersion` now. (#1349)
+- Extracted `#getIndexHash` into `HashableIndex` interface. (#1366)
+- Made `View`s (`Fork` and `Snapshot`) index factories. An index factory
+  implements `Access` interface. `Access` allows instantiating various 
+  MerkleDB indexes, aka "collections" (e.g., `Access#getList -> ListIndex`).
+  `Access` methods **must** be used to create indexes in service code.
+  Factory methods in indexes must no longer be used (see also 'Removed' 
+  section below).
+    - Use `Access` instead of `View` (which is renamed to `AbstractAccess`).
+    - `IndexAddress`es are resolved relatively to `Access`es (#1374)
+
+### Removed
+- Classes supporting no longer used tree-like list proof representation.
+- `Schema#getStateHashes` and `Service#getStateHashes` methods. Framework
+  automatically aggregates state hashes of the Merkelized collections.
+- `TransactionConverter` — it is no longer needed with transactions
+  as `Service` methods annotated with `@Transaction`. Such methods may accept
+  arbitrary protobuf messages as their argument. (#1304, #1307)
+- `ExecutionStatuses` factory methods (`serviceError`) as they are no longer
+  useful to create _expected_ transaction execution statuses in tests —
+  an `ExecutionError` now has a lot of other properties.  
+  `ExecutionStatuses.success` is replaced with `ExecutionStatuses.SUCCESS` constant.
+- `newInstance` methods in all the indexes are made *internal*:
+    - Use `Access` methods instead. E.g., instead of `ProofListIndexProxy.newInstance`
+    use `Access.getProofList`. 
+    - Instead of using overloads accepting protobuf classes, create a serializer 
+    explicitly with `StandardSerializers.protobuf`.
+    - To create _index groups_ (aka families), pass a *group address*:
+    `IndexAddress.valueOf(String, byte[])`. (#1374)
+- `AbstractService#createDataSchema` — just use the schema constructor/factory
+  method, as passing the instance name is no longer required with the `Prefixed`
+  DB Access. (#1393)
+
+## 0.9.0-rc2 - 2019-12-17
+
+### Fixed
+- Published on Maven Central a missing dependency of a Testkit module 
+(exonum-java-app).
+
+## [0.9.0-rc1] - 2019-12-12
+
+### Overview
+
+The main feature of this release is support for dynamic services. Dynamic services can be added
+to the blockchain network after it has been started. Since this release EJB also supports multiple
+instances of the same service.
+Creating proofs is not supported in this release. They will be re-enabled in one of the following
+releases.
+
+This release is based on [*Exonum 0.13.0-rc.2*][exonum-0.13].
+
+*If you are upgrading an existing Java service, consult
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.9.0-rc1/exonum-java-binding/doc/Migration_guide_0.9.md).*
+
+### Added
+- Dynamic services support. (#1065, #1145, #1183)
+- Exonum protobuf messages to `common` module. (#1085)
+- `Service#beforeCommit` handler. (#1132)
+- `TestKit` support for dynamic services. (#1145)
+- Support for flat list proofs, the new compact proof format for `ProofList`. Not introduced to
+  `ProofListIndexProxy` for now. (#1156)
+- Java runtime plugin for exonum-launcher. (#1171)
+- `serviceName` and `serviceId` were added to `TransactionContext`. They are used for creating
+  schemas with unique namespaces. (#1181)
+- Implement `run-dev` command support for running the node in development mode. (#1217)
+- `Configurable` interface corresponding to `exonum.Configure`. (#1234)
+- `ProofMapIndexProxy#truncate` and `#removeLast`. (#1272)
+- Java 13 support.
+
+### Changed
+- Support for the new protobuf-based `TransactionMessage` format is provided. (#1085)
+- `TimeSchema` supports multiple time service instances. (#1136)
+- `TransactionResult` is replaced with `ExecutionStatus`. (#1174)
+- `MapProof` enforces 32-byte long hash codes. (#1191)
+- The default `ProofMapIndexProxy` implementation has been changed to hash user keys to produce an
+  internal key. The implementation that does not hash the keys is still supported, see
+  [documentation][proof-map-non-hashing]. (#1222)
+- Updated Exonum to 0.13.0-rc.2 — see [Exonum release page][exonum-0.13]
+for details.
+
+[exonum-0.13]: https://github.com/exonum/exonum/releases/tag/v0.13.0-rc.2
+
+### Removed
+- `Service#getId` and `Service#getName` are removed. `AbstractService` now provides 
+  similar methods that can be used as replacements. (#1065)
+- `Blockchain#getActualConfiguration` has been replaced with
+  `Blockchain#getConsensusConfiguration`, returning only the consensus configuration (now also
+  containing the validator public keys) as a Protobuf message. (#1185)
+- `Transaction#info` method is removed as it is no longer used by the framework. (#1225)
+- `ProofMapIndexProxy#getProof` and `ProofListIndexProxy#getProof` are disabled in this release.
+
+[proof-map-non-hashing]: https://exonum.com/doc/api/java-binding/0.9.0-rc1/com/exonum/binding/core/storage/indices/ProofMapIndexProxy.html#key-hashing
+
 ## [0.8.0] - 2019-09-09
 
 ### Overview
@@ -297,7 +481,9 @@ Parent module and BOM module were released as they are required dependencies to 
 
 The first release of Exonum Java Binding.
 
-[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.8.0...HEAD
+[Unreleased]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.9.0-rc1...HEAD
+[0.10.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.9.0-rc1...ejb/v0.10.0
+[0.9.0-rc1]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.8.0...ejb/v0.9.0-rc1
 [0.8.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.7.0...ejb/v0.8.0
 [0.7.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.6.0...ejb/v0.7.0
 [0.6.0]: https://github.com/exonum/exonum-java-binding/compare/ejb/v0.5.0...ejb/v0.6.0

@@ -17,9 +17,9 @@
 package com.exonum.binding.common.proofs.list;
 
 import static com.exonum.binding.common.hash.Funnels.hashCodeFunnel;
-import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.BLOB_PREFIX;
-import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.LIST_BRANCH_PREFIX;
-import static com.exonum.binding.common.proofs.list.ListProofHashCalculator.LIST_ROOT_PREFIX;
+import static com.exonum.binding.common.proofs.list.FlatListProof.BLOB_PREFIX;
+import static com.exonum.binding.common.proofs.list.FlatListProof.LIST_BRANCH_PREFIX;
+import static com.exonum.binding.common.proofs.list.FlatListProof.LIST_ROOT_PREFIX;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.Hashing;
@@ -29,35 +29,21 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 /**
- * Various utilities for testing ListProof verification {@link ListProofNode}s.
+ * Various utilities for testing ListProof verification.
  */
 final class ListProofUtils {
 
   private ListProofUtils() {
   }
 
-  /**
-   * Generates right leaning proof tree of specified depth.
-   */
-  static ListProofNode generateRightLeaningProofTree(int depth, ListProofNode leafNode) {
-    ListProofNode root = null;
-    ListProofNode left = leafNode;
-    HashCode h1 = HashCode.fromString("a1");
-
-    int d = depth;
-    while (d != 0) {
-      ListProofNode right = new ListProofHashNode(h1);
-      root = new ListProofBranch(left, right);
-      left = root;
-      d--;
-    }
-    return root;
+  static HashCode getLeafHashCode(ByteString value) {
+    return getLeafHashCode(value.toByteArray());
   }
 
-  static HashCode getNodeHashCode(ByteString v) {
+  static HashCode getLeafHashCode(byte[] value) {
     return Hashing.defaultHashFunction().newHasher()
         .putByte(BLOB_PREFIX)
-        .putBytes(v.toByteArray())
+        .putBytes(value)
         .hash();
   }
 

@@ -16,11 +16,34 @@
 
 package com.exonum.binding.core.blockchain;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.core.blockchain.Block.Builder;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
+import com.google.common.collect.ImmutableMap;
 
 public final class Blocks {
+
+  /**
+   * Creates a fully initialized builder of some block with some default values.
+   */
+  static Builder aBlock() {
+    HashFunction hashFunction = Hashing.sha256();
+    long blockHeight = 1;
+    return Block.builder()
+        .proposerId(0)
+        .height(blockHeight)
+        .numTransactions(0)
+        .blockHash(hashFunction.hashLong(blockHeight))
+        .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
+        .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
+        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8))
+        .additionalHeaders(ImmutableMap.of())
+        .errorHash(HashCode.fromString("ab"));
+  }
 
   /**
    * Returns a new block that has its hash set up to the proper value — SHA-256 hash
@@ -40,6 +63,8 @@ public final class Blocks {
         .previousBlockHash(block.getPreviousBlockHash())
         .txRootHash(block.getTxRootHash())
         .stateHash(block.getStateHash())
+        .errorHash(block.getErrorHash())
+        .additionalHeaders(block.getAdditionalHeaders())
         .build();
   }
 

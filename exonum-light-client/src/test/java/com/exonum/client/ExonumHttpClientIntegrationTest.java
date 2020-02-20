@@ -25,6 +25,7 @@ import static com.exonum.client.TestUtils.createTransactionMessage;
 import static com.exonum.client.TestUtils.toHex;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,9 +36,11 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
 import com.exonum.client.response.ConsensusStatus;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -47,6 +50,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ExonumHttpClientIntegrationTest {
+
+  private static String SERVICE_NAME = "service-name";
+  private static int SERVICE_ID = 1;
+
   private MockWebServer server;
   private ExonumClient exonumClient;
 
@@ -70,10 +77,10 @@ class ExonumHttpClientIntegrationTest {
     // Create request
     KeyPair keys = ed25519().generateKeyPair();
     TransactionMessage txMessage = TransactionMessage.builder()
-        .serviceId((short) 1)
-        .transactionId((short) 2)
+        .serviceId(1)
+        .transactionId(2)
         .payload(new byte[]{0x00, 0x01, 0x02})
-        .sign(keys, ed25519());
+        .sign(keys);
     // Mock response
     String hash = "f128c720e04b8243";
     String mockResponse = "{\"tx_hash\":\"" + hash + "\"}";
@@ -160,16 +167,7 @@ class ExonumHttpClientIntegrationTest {
     TransactionMessage expectedMessage = createTransactionMessage();
     String mockResponse = "{\n"
         + "    'type': 'in-pool',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'to': {\n"
-        + "                'data': []\n"
-        + "            },\n"
-        + "            'amount': 10,\n"
-        + "            'seed': 9587307158524814255\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    }\n"
+        + "    'message': '" + toHex(expectedMessage) + "'\n"
         + "}";
     server.enqueue(new MockResponse().setBody(mockResponse));
 
@@ -209,4 +207,98 @@ class ExonumHttpClientIntegrationTest {
     assertThat(recordedRequest, hasQueryParam("hash", id));
   }
 
+  @Test
+  void findServiceInfo() throws InterruptedException {
+    ServiceInstanceInfo serviceInstanceInfo = new ServiceInstanceInfo(SERVICE_NAME, SERVICE_ID);
+    // Mock response
+    String mockResponse = "{\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "            \"id\": " + SERVICE_ID + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
+        + "    ]\n"
+        + "}";
+    server.enqueue(new MockResponse().setBody(mockResponse));
+
+    // Call
+    Optional<ServiceInstanceInfo> response = exonumClient.findServiceInfo(SERVICE_NAME);
+
+    // Assert response
+    assertTrue(response.isPresent());
+    ServiceInstanceInfo actualResponse = response.get();
+    assertThat(actualResponse, is(serviceInstanceInfo));
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+  }
+
+  @Test
+  void findServiceInfoNotFound() throws InterruptedException {
+    // Mock response
+    String mockResponse = "{\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "            \"id\": " + SERVICE_ID + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
+        + "    ]\n"
+        + "}";
+    server.enqueue(new MockResponse().setBody(mockResponse));
+
+    // Call
+    Optional<ServiceInstanceInfo> response = exonumClient.findServiceInfo("invalid-service-name");
+
+    // Assert response
+    assertFalse(response.isPresent());
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+  }
+
+  @Test
+  void getServiceInfoList() throws InterruptedException {
+    String serviceName2 = "service-name-2";
+    int serviceId2 = 2;
+    ServiceInstanceInfo serviceInstanceInfo1 = new ServiceInstanceInfo(SERVICE_NAME, SERVICE_ID);
+    ServiceInstanceInfo serviceInstanceInfo2 = new ServiceInstanceInfo(serviceName2, serviceId2);
+    // Mock response
+    String mockResponse = "{\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + SERVICE_NAME + "\",\n"
+        + "            \"id\": " + SERVICE_ID + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        },\n"
+        + "        {\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + serviceName2 + "\",\n"
+        + "            \"id\": " + serviceId2 + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
+        + "    ]\n"
+        + "}";
+    server.enqueue(new MockResponse().setBody(mockResponse));
+
+    // Call
+    List<ServiceInstanceInfo> response = exonumClient.getServiceInfoList();
+
+    // Assert response
+    assertThat(response, contains(serviceInstanceInfo1, serviceInstanceInfo2));
+
+    // Assert request params
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getMethod(), is("GET"));
+    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+  }
 }

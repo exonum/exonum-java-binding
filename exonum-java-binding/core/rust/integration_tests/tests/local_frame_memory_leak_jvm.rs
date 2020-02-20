@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-extern crate integration_tests;
-extern crate java_bindings;
-#[macro_use]
-extern crate lazy_static;
-extern crate rand;
-
 use integration_tests::vm::{create_vm_for_leak_tests, KIB, MIB};
-use java_bindings::jni::objects::JObject;
-use java_bindings::jni::JavaVM;
+use java_bindings::jni::{objects::JObject, JavaVM};
+use lazy_static::lazy_static;
 use rand::prelude::*;
 
 const MEMORY_LIMIT_MIB: usize = 32;

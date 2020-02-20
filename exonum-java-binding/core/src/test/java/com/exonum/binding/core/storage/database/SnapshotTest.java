@@ -17,54 +17,11 @@
 package com.exonum.binding.core.storage.database;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.never;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import com.exonum.binding.core.proxy.Cleaner;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 
-@PrepareForTest({
-    Views.class,
-})
 class SnapshotTest {
-
-  @Nested
-  @Disabled
-  // TODO Won't run with JUnit 5 till Powermock is updated [ECR-1614] (downgrade to 4?)
-  class DestroysPeersIfNeeded {
-    @BeforeEach
-    void setUp() {
-      mockStatic(Views.class);
-    }
-
-    @Test
-    void destroy_NotOwning() throws Exception {
-      try (Cleaner cleaner = new Cleaner()) {
-        Snapshot.newInstance(0x0A, false, cleaner);
-      }
-
-      verifyStatic(Views.class, never());
-      Views.nativeFree(anyLong());
-    }
-
-    @Test
-    void destroy_Owning() throws Exception {
-      int nativeHandle = 0x0A;
-
-      try (Cleaner cleaner = new Cleaner()) {
-        Snapshot.newInstance(nativeHandle, true, cleaner);
-      }
-
-      verifyStatic(Views.class);
-      Views.nativeFree(nativeHandle);
-    }
-  }
 
   @Test
   void cannotModify() {

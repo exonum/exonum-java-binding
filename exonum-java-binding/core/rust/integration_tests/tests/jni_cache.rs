@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate integration_tests;
-extern crate java_bindings;
-
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
+use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::utils::jni_cache;
 
 use std::{
@@ -30,7 +27,7 @@ fn concurrent_cache_read() {
     let mut threads = Vec::new();
 
     // Create a VM, initializing the JNI cache
-    let _jvm = create_vm_for_tests_with_fake_classes();
+    let _jvm = create_vm_for_tests_with_classes();
 
     let barrier = Arc::new(Barrier::new(THREAD_NUM));
 
@@ -38,14 +35,19 @@ fn concurrent_cache_read() {
         let barrier = Arc::clone(&barrier);
         let jh = spawn(move || {
             barrier.wait();
-            jni_cache::transaction_adapter::execute_id();
-            jni_cache::transaction_adapter::info_id();
-            jni_cache::service_adapter::convert_transaction_id();
-            jni_cache::service_adapter::state_hashes_id();
+            jni_cache::runtime_adapter::initialize_id();
+            jni_cache::runtime_adapter::deploy_artifact_id();
+            jni_cache::runtime_adapter::is_artifact_deployed_id();
+            jni_cache::runtime_adapter::initiate_adding_service_id();
+            jni_cache::runtime_adapter::update_service_status_id();
+            jni_cache::runtime_adapter::execute_tx_id();
+            jni_cache::runtime_adapter::after_transactions_id();
+            jni_cache::runtime_adapter::after_commit_id();
+            jni_cache::runtime_adapter::shutdown_id();
             jni_cache::class::get_name_id();
             jni_cache::object::get_class_id();
             jni_cache::classes_refs::java_lang_error();
-            jni_cache::classes_refs::transaction_execution_exception();
+            jni_cache::classes_refs::execution_exception();
         });
         threads.push(jh);
     }

@@ -17,62 +17,93 @@
 package com.exonum.binding.test;
 
 import static com.exonum.binding.common.hash.Hashing.DEFAULT_HASH_SIZE_BYTES;
-import static com.exonum.binding.test.TestTransaction.BODY_CHARSET;
+import static com.exonum.binding.fakeservice.FakeService.PUT_TX_ID;
+import static com.exonum.binding.fakeservice.FakeService.RAISE_ERROR_TX_ID;
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_DIR;
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_FILENAME;
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_ID;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import com.exonum.binding.common.blockchain.CallInBlocks;
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
-import com.exonum.binding.common.configuration.StoredConfiguration;
-import com.exonum.binding.common.configuration.ValidatorKey;
-import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
+import com.exonum.binding.common.message.SignedMessage;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.blockchain.proofs.BlockProof;
+import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.RawTransaction;
+import com.exonum.binding.fakeservice.FakeSchema;
+import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
+import com.exonum.binding.fakeservice.Transactions.RaiseErrorArgs;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.TestKit;
+import com.exonum.messages.core.Blockchain.CallInBlock;
+import com.exonum.messages.core.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.ValidatorKeys;
+import com.exonum.messages.core.Messages;
+import com.exonum.messages.core.Messages.CoreMessage;
+import com.exonum.messages.core.Messages.CoreMessage.KindCase;
+import com.exonum.messages.core.Messages.Precommit;
+import com.exonum.messages.core.Proofs;
+import com.exonum.messages.core.runtime.Errors.ErrorKind;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
+import com.exonum.messages.crypto.Types;
+import com.exonum.messages.proof.MapProofOuterClass.MapProof;
+import com.exonum.messages.proof.MapProofOuterClass.OptionalEntry;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.MessageLite;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingConsumer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class BlockchainIntegrationTest {
 
-  private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
-  private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
+  private static final KeyPair KEY_PAIR = CryptoFunctions.ed25519().generateKeyPair();
   private static final short VALIDATOR_COUNT = 1;
   private static final HashCode ZERO_HASH_CODE = HashCode.fromBytes(
       new byte[DEFAULT_HASH_SIZE_BYTES]);
-  private static final int GENESIS_BLOCK_HEIGHT = 0;
+  private static final long GENESIS_BLOCK_HEIGHT = 0;
+  private static final String SERVICE_NAME = "service";
+  private static final int SERVICE_ID = 100;
 
   private TestKit testKit;
 
   @BeforeEach
   void setUp() {
     testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
         .withValidators(VALIDATOR_COUNT)
+        .withArtifactsDirectory(ARTIFACT_DIR)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
         .build();
   }
 
@@ -84,6 +115,22 @@ class BlockchainIntegrationTest {
   /** Tests specific to genesis-block only blockchain. */
   @Nested
   class WithGenesisBlock {
+
+    @Test
+    void createBlockProof() {
+      testKitTest(blockchain -> {
+        BlockProof blockProof = blockchain.createBlockProof(GENESIS_BLOCK_HEIGHT);
+
+        // Check the block proof message
+        Proofs.BlockProof proof = blockProof.getAsMessage();
+        com.exonum.messages.core.Blockchain.Block genesisBlock = proof.getBlock();
+        assertThat(genesisBlock.getHeight()).isEqualTo(GENESIS_BLOCK_HEIGHT);
+        // A genesis block proof is a special case: it does not have precommit messages,
+        // for it is created based on the network configuration only, with no messages.
+        assertThat(proof.getPrecommitsList()).isEmpty();
+      });
+    }
+
     @Test
     void getHeight() {
       testKitTest((blockchain) -> {
@@ -126,11 +173,77 @@ class BlockchainIntegrationTest {
     private TransactionMessage expectedBlockTransaction;
 
     @BeforeEach
-    void commitBlock() {
-      String payload = "Test";
-      TransactionMessage transactionMessage = constructTestTransactionMessage(payload);
+    void commitBlockWithSingleTx() {
+      TransactionMessage transactionMessage = createPutTransactionMessage();
       expectedBlockTransaction = transactionMessage;
       block = testKit.createBlockWithTransactions(transactionMessage);
+    }
+
+    @Test
+    void createBlockProof() {
+      testKitTest(blockchain -> {
+        long height = 1L;
+        BlockProof blockProof = blockchain.createBlockProof(height);
+
+        // Check the block proof message
+        Proofs.BlockProof proof = blockProof.getAsMessage();
+        // 1 Verify the block
+        Block blockInProof = Block.fromMessage(proof.getBlock());
+        assertThat(blockInProof).isEqualTo(block);
+        // 2 Verify the proof: the precommit messages
+        assertThat(proof.getPrecommitsList()).hasSize(VALIDATOR_COUNT);
+        // Check the precommit message from the single validator
+        Messages.SignedMessage rawPrecommitMessage = proof.getPrecommits(0);
+        SignedMessage rawPrecommit = SignedMessage.fromProto(rawPrecommitMessage);
+        CoreMessage payload = rawPrecommit.getPayload();
+        assertThat(payload.getKindCase()).isEqualTo(KindCase.PRECOMMIT);
+        Precommit precommit = payload.getPrecommit();
+        HashCode blockHash = hashFromProto(precommit.getBlockHash());
+        // Check the block hash in precommit matches the actual block hash
+        assertThat(blockHash).isEqualTo(block.getBlockHash());
+      });
+    }
+
+    @Test
+    void createIndexProof() {
+      testKitTest(blockchain -> {
+        String testMapName = "test-map";
+        String testMapFullName = SERVICE_NAME + "." + testMapName;
+        IndexProof indexProof = blockchain.createIndexProof(testMapFullName);
+
+        // Check the index proof message
+        Proofs.IndexProof proof = indexProof.getAsMessage();
+        // 1 Verify the block proof
+        Proofs.BlockProof blockProof = proof.getBlockProof();
+        Block blockInProof = Block.fromMessage(blockProof.getBlock());
+        assertThat(blockInProof).isEqualTo(block);
+        // Verify the precommits
+        assertThat(blockProof.getPrecommitsList()).hasSize(VALIDATOR_COUNT);
+
+        // 2 Verify the aggregating index proof
+        MapProof aggregatingIndexProof = proof.getIndexProof();
+        // It must have a single entry: (testMapFullName, indexHash(testMap))
+        BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+        FakeSchema serviceSchema = new FakeSchema(blockchainData.getExecutingServiceData());
+        HashCode testMapHash = serviceSchema.testMap().getIndexHash();
+        OptionalEntry expectedEntry = OptionalEntry.newBuilder()
+            .setKey(ByteString.copyFromUtf8(testMapFullName))
+            .setValue(ByteString.copyFrom(testMapHash.asBytes()))
+            .build();
+        assertThat(aggregatingIndexProof.getEntriesList()).containsExactly(expectedEntry);
+      });
+    }
+
+    @Test
+    void createIndexProofForUnknownIndex() {
+      testKitTest(blockchain -> {
+        String testIndexName = "unknown-index";
+
+        Exception e = assertThrows(IllegalArgumentException.class,
+            () -> blockchain.createIndexProof(testIndexName));
+
+        assertThat(e.getMessage()).contains(testIndexName);
+      });
     }
 
     @Test
@@ -141,7 +254,7 @@ class BlockchainIntegrationTest {
     @Test
     void getHeight() {
       testKitTest((blockchain) -> {
-        long expectedHeight = 1;
+        long expectedHeight = 1L;
         assertThat(blockchain.getHeight()).isEqualTo(expectedHeight);
       });
     }
@@ -149,7 +262,7 @@ class BlockchainIntegrationTest {
     @Test
     void getBlockHashes() {
       testKitTest((blockchain) -> {
-        Block genesisBlock = blockchain.getBlock(0);
+        Block genesisBlock = blockchain.getBlock(GENESIS_BLOCK_HEIGHT);
         List<HashCode> expectedHashes = ImmutableList.of(
             genesisBlock.getBlockHash(),
             block.getBlockHash()
@@ -197,9 +310,21 @@ class BlockchainIntegrationTest {
             () -> blockchain.getBlockTransactions(invalidBlockHeight));
         String expectedMessage =
             String.format(
-                "Height should be less or equal compared to blockchain height %s, but was %s",
+                "Height should be less than or equal to the blockchain height %s, but was %s",
                 block.getHeight(), invalidBlockHeight);
         assertThat(e).hasMessageContaining(expectedMessage);
+      });
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {-1, -2, Long.MIN_VALUE})
+    void getBlockTransactionsByNegativeHeight(long height) {
+      testKitTest((blockchain) -> {
+        Exception e = assertThrows(IllegalArgumentException.class,
+            () -> blockchain.getBlockTransactions(height));
+        assertThat(e.getMessage()).containsIgnoringCase("negative")
+            .containsIgnoringCase("height")
+            .contains(Long.toString(height));
       });
     }
 
@@ -253,30 +378,37 @@ class BlockchainIntegrationTest {
       testKitTest((blockchain) -> {
         MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
         Map<HashCode, TransactionMessage> txMessagesMap = toMap(txMessages);
-        // Should include one executed and one in-pool (submitted in afterCommit) transaction
-        assertThat(txMessagesMap).hasSize(2);
+        assertThat(txMessagesMap).hasSize(1);
         assertThat(txMessagesMap.get(expectedBlockTransaction.hash()))
             .isEqualTo(expectedBlockTransaction);
       });
     }
 
     @Test
-    void getTxResults() {
+    void getCallErrorsNoErrors() {
       testKitTest((blockchain) -> {
-        ProofMapIndexProxy<HashCode, TransactionResult> txResults = blockchain.getTxResults();
-        Map<HashCode, TransactionResult> txResultsMap = toMap(txResults);
-        Map<HashCode, TransactionResult> expected =
-            ImmutableMap.of(expectedBlockTransaction.hash(), TransactionResult.successful());
-        assertThat(txResultsMap).isEqualTo(expected);
+        long height = block.getHeight();
+        ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors =
+            blockchain.getCallErrors(height);
+        Map<CallInBlock, ExecutionError> callErrorsMap = toMap(callErrors);
+        assertThat(callErrorsMap).isEmpty();
       });
     }
 
     @Test
-    void getTxResult() {
+    void getCallErrorsInvalidHeight() {
       testKitTest((blockchain) -> {
-        Optional<TransactionResult> txResult =
+        long invalidHeight = block.getHeight() + 1;
+        assertThrows(IllegalArgumentException.class, () -> blockchain.getCallErrors(invalidHeight));
+      });
+    }
+
+    @Test
+    void getTxResultSuccess() {
+      testKitTest((blockchain) -> {
+        Optional<ExecutionStatus> txResult =
             blockchain.getTxResult(expectedBlockTransaction.hash());
-        assertThat(txResult).hasValue(TransactionResult.successful());
+        assertThat(txResult).hasValue(ExecutionStatuses.SUCCESS);
       });
     }
 
@@ -284,7 +416,7 @@ class BlockchainIntegrationTest {
     void getTxResultOfUnknownTx() {
       testKitTest((blockchain) -> {
         HashCode unknownHash = HashCode.fromBytes(new byte[DEFAULT_HASH_SIZE_BYTES]);
-        Optional<TransactionResult> txResult = blockchain.getTxResult(unknownHash);
+        Optional<ExecutionStatus> txResult = blockchain.getTxResult(unknownHash);
         assertThat(txResult).isEmpty();
       });
     }
@@ -295,7 +427,7 @@ class BlockchainIntegrationTest {
         MapIndex<HashCode, TransactionLocation> txLocations = blockchain.getTxLocations();
         Map<HashCode, TransactionLocation> txLocationsMap = toMap(txLocations);
         TransactionLocation expectedTransactionLocation =
-            TransactionLocation.valueOf(block.getHeight(), 0L);
+            TransactionLocation.valueOf(block.getHeight(), 0);
         assertThat(txLocationsMap)
             .isEqualTo(ImmutableMap.of(expectedBlockTransaction.hash(),
                 expectedTransactionLocation));
@@ -308,7 +440,7 @@ class BlockchainIntegrationTest {
         Optional<TransactionLocation> txLocation =
             blockchain.getTxLocation(expectedBlockTransaction.hash());
         TransactionLocation expectedTransactionLocation =
-            TransactionLocation.valueOf(block.getHeight(), 0L);
+            TransactionLocation.valueOf(block.getHeight(), 0);
         assertThat(txLocation).hasValue(expectedTransactionLocation);
       });
     }
@@ -387,47 +519,96 @@ class BlockchainIntegrationTest {
     }
 
     @Test
-    void getActualConfiguration() {
+    void getConsensusConfiguration() {
       testKitTest((blockchain) -> {
-        StoredConfiguration configuration = blockchain.getActualConfiguration();
-        List<ValidatorKey> validatorKeys = configuration.validatorKeys();
+        Config configuration = blockchain.getConsensusConfiguration();
+        int numKeysInConfig = configuration.getValidatorKeysCount();
         // Check the number of validator keys
-        assertThat(validatorKeys).hasSize(VALIDATOR_COUNT);
+        assertThat(numKeysInConfig).isEqualTo(VALIDATOR_COUNT);
 
-        // Check the public key of the emulated node is included
-        List<PublicKey> serviceKeys = validatorKeys.stream()
-            .map(ValidatorKey::serviceKey)
+        // Check the public service key of the emulated node is included
+        List<PublicKey> serviceKeys = configuration.getValidatorKeysList().stream()
+            .map(ValidatorKeys::getServiceKey)
+            .map(key -> pkFromProto(key))
             .collect(toList());
         EmulatedNode emulatedNode = testKit.getEmulatedNode();
         PublicKey emulatedNodeServiceKey = emulatedNode.getServiceKeyPair().getPublicKey();
         List<PublicKey> expectedKeys = ImmutableList.of(emulatedNodeServiceKey);
         assertThat(serviceKeys).isEqualTo(expectedKeys);
-
-        // Check the previous config is empty
-        assertThat(configuration.previousCfgHash()).isEqualTo(ZERO_HASH_CODE);
       });
     }
 
     @Test
+    // todo: Consider how to test pool operations — through afterCommit?
     void getTransactionPool() {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-      RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-      service.getNode().submitTransaction(rawTransaction);
-
       testKitTest((blockchain) -> {
         KeySetIndexProxy<HashCode> transactionPool = blockchain.getTransactionPool();
-        assertThat(transactionPool.contains(message.hash()))
-            .describedAs("pool=%s", transactionPool)
-            .isTrue();
+        assertThat(transactionPool).isEmpty();
       });
     }
   }
 
-  private void testKitTest(Consumer<Blockchain> test) {
+  @Nested
+  class WithErrorTx {
+
+    final int errorCode = 17;
+    TransactionMessage transactionMessage;
+    Block block;
+
+    @BeforeEach
+    void commitBlockWithErrorTx() {
+      RaiseErrorArgs args = RaiseErrorArgs.newBuilder()
+          .setCode(errorCode)
+          .build();
+      transactionMessage = createTestTransactionMessage(RAISE_ERROR_TX_ID, args);
+      block = testKit.createBlockWithTransactions(transactionMessage);
+    }
+
+    @Test
+    void getCallErrorsWithError() {
+      testKitTest(blockchain -> {
+        ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = blockchain
+            .getCallErrors(block.getHeight());
+        Map<CallInBlock, ExecutionError> callErrorsAsMap = toMap(callErrors);
+
+        int txPosition = 0; // A single tx in block must be at 0 position
+        CallInBlock callId = CallInBlocks.transaction(txPosition);
+        assertThat(callErrorsAsMap).containsOnlyKeys(callId);
+        ExecutionError executionError = callErrorsAsMap.get(callId);
+        checkExecutionError(executionError);
+      });
+    }
+
+    @Test
+    void getTxResultWithError() {
+      testKitTest(blockchain -> {
+        HashCode txHash = transactionMessage.hash();
+        Optional<ExecutionStatus> txResult = blockchain.getTxResult(txHash);
+
+        assertThat(txResult).isPresent();
+        ExecutionStatus executionStatus = txResult.get();
+        assertTrue(executionStatus.hasError());
+        checkExecutionError(executionStatus.getError());
+      });
+    }
+
+    private void checkExecutionError(ExecutionError executionError) {
+      // It's a Blockchain test, therefore it's enough to check that the error
+      // has some of its attributes correct — the rest may be checked in QaService tests
+      // or other ITs.
+      assertThat(executionError.getKind()).isEqualTo(ErrorKind.SERVICE);
+      assertThat(executionError.getCode()).isEqualTo(errorCode);
+    }
+  }
+
+  private void testKitTest(ThrowingConsumer<Blockchain> test) {
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
-    test.accept(blockchain);
+    try {
+      test.accept(blockchain);
+    } catch (Throwable t) {
+      fail(t);
+    }
   }
 
   private static void assertGenesisBlock(Block actualBlock) {
@@ -439,24 +620,24 @@ class BlockchainIntegrationTest {
     return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 
-  private static TransactionMessage constructTestTransactionMessage(
-      String payload, TestKit testKit) {
-    EmulatedNode emulatedNode = testKit.getEmulatedNode();
-    KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
-    return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
+  private static TransactionMessage createPutTransactionMessage() {
+    return createPutTransactionMessage("k1", "v1");
   }
 
-  private static TransactionMessage constructTestTransactionMessage(String payload) {
-    return constructTestTransactionMessage(payload, KEY_PAIR);
+  private static TransactionMessage createPutTransactionMessage(String key, String value) {
+    PutTransactionArgs args = PutTransactionArgs.newBuilder()
+        .setKey(key)
+        .setValue(value)
+        .build();
+    return createTestTransactionMessage(PUT_TX_ID, args);
   }
 
-  private static TransactionMessage constructTestTransactionMessage(
-      String payload, KeyPair keyPair) {
+  private static TransactionMessage createTestTransactionMessage(int txId, MessageLite payload) {
     return TransactionMessage.builder()
-        .serviceId(TestService.SERVICE_ID)
-        .transactionId(TestTransaction.ID)
-        .payload(payload.getBytes(BODY_CHARSET))
-        .sign(keyPair, CRYPTO_FUNCTION);
+        .serviceId(SERVICE_ID)
+        .transactionId(txId)
+        .payload(payload)
+        .sign(KEY_PAIR);
   }
 
   /**
@@ -476,6 +657,20 @@ class BlockchainIntegrationTest {
         .blockHash(hashFunction.hashLong(blockHeight))
         .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
         .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
-        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8));
+        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8))
+        .errorHash(HashCode.fromString("ab"))
+        .additionalHeaders(ImmutableMap.of());
+  }
+
+  private static PublicKey pkFromProto(Types.PublicKey key) {
+    // todo: [ECR-3734] highly error-prone and verbose key#getData.toByteArray susceptible
+    //  to incorrect key#toByteArray.
+    return PublicKey.fromBytes(key.getData().toByteArray());
+  }
+
+  private static HashCode hashFromProto(Types.Hash hash) {
+    // todo: [ECR-3734] highly error-prone and verbose hash#getData.toByteArray susceptible
+    //  to incorrect hash#toByteArray.
+    return HashCode.fromBytes(hash.getData().toByteArray());
   }
 }

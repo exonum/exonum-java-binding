@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.ByteString;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
@@ -71,28 +70,14 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
         .collect(toList());
   }
 
-  @SuppressWarnings("unused") // Native API
-  static UncheckedFlatMapProof fromNative(
-      MapProofEntry[] proofList,
-      MapEntry<byte[], byte[]>[] entries,
-      byte[][] missingKeys) {
-    List<MapProofEntry> proof = Arrays.asList(proofList);
-    List<MapEntry<ByteString, ByteString>> entriesList = Arrays.stream(entries)
-        .map(
-            e -> MapEntry.valueOf(
-                ByteString.copyFrom(e.getKey()),
-                ByteString.copyFrom(e.getValue()))
-        )
-        .collect(toList());
-    List<byte[]> missingKeysList = Arrays.asList(missingKeys);
-    return new UncheckedFlatMapProof(proof, entriesList, missingKeysList);
-  }
-
   @Override
   public CheckedMapProof check() {
     MapProofStatus orderCheckResult = orderCheck();
     if (orderCheckResult != MapProofStatus.CORRECT) {
       return CheckedFlatMapProof.invalid(orderCheckResult);
+    }
+    if (containsInvalidHashes()) {
+      return CheckedFlatMapProof.invalid(MapProofStatus.INVALID_HASH_SIZE);
     }
     if (prefixesIncluded()) {
       return CheckedFlatMapProof.invalid(MapProofStatus.EMBEDDED_PATH);
@@ -138,6 +123,17 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
   }
 
   /**
+   * Returns true if any hash in the proof has size different from 32 bytes.
+   */
+  private boolean containsInvalidHashes() {
+    // TODO: [ECR-2410] Migrate to ProofHashes#checkSha256Hash.
+    return proof.stream()
+        .map(MapProofEntry::getHash)
+        .map(HashCode::bits)
+        .anyMatch(size -> size != Hashing.DEFAULT_HASH_SIZE_BITS);
+  }
+
+  /**
    * Check if any entry has a prefix among the paths in the proof entries. Both found and absent
    * keys are checked.
    */
@@ -149,8 +145,8 @@ public class UncheckedFlatMapProof implements UncheckedMapProof {
             missingKeys.stream())
         .map(DbKey::newLeafKey);
 
-    // TODO: proof entries are checked to be sorted at this stage, so it's possible …
-    // to use binary search here
+    // TODO: proof entries are checked to be sorted at this stage, so it's possible
+    //   to use binary search here
     return requestedKeys
         .anyMatch(leafEntryKey -> proof.stream()
             .map(MapProofEntry::getDbKey)

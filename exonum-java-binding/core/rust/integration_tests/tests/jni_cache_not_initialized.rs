@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate java_bindings;
-
-use java_bindings::utils::jni_cache;
+use java_bindings::utils::{assert_panics, jni_cache};
 
 #[test]
-#[should_panic(expected = "JNI cache is not initialized")]
 fn cache_not_initialized() {
-    jni_cache::transaction_adapter::execute_id();
+    assert_panics("JNI cache is not initialized", || {
+        jni_cache::runtime_adapter::execute_tx_id()
+    });
 }

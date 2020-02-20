@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-extern crate integration_tests;
-extern crate java_bindings;
-#[macro_use]
-extern crate lazy_static;
-
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
+use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
     jni::{objects::JThrowable, JNIEnv, JavaVM},
     utils::{
@@ -28,6 +23,7 @@ use java_bindings::{
     },
     Executor, JniErrorKind, JniResult,
 };
+use lazy_static::lazy_static;
 use std::sync::Arc;
 
 const ERROR_CLASS: &str = "java/lang/Error";
@@ -38,7 +34,7 @@ const ARITHMETIC_EXCEPTION_CLASS_FQN: &str = "java.lang.ArithmeticException";
 const CUSTOM_EXCEPTION_MESSAGE: &str = "Test exception message";
 
 lazy_static! {
-    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_classes();
     pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 

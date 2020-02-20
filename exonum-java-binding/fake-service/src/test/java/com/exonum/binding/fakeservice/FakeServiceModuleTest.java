@@ -16,12 +16,14 @@
 
 package com.exonum.binding.fakeservice;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.Service;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.Test;
@@ -30,12 +32,18 @@ class FakeServiceModuleTest {
 
   @Test
   void configure() {
-    Injector injector = Guice.createInjector(new FakeServiceModule());
+    // todo: Do we need this wonderful test?
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(ServiceInstanceSpec.class).toInstance(ServiceInstanceSpec.newInstance("test", 1,
+            ServiceArtifactId.newJavaId("a/b", "1")));
+      }
+    }, new FakeServiceModule());
 
     Service instance = injector.getInstance(Service.class);
 
     assertNotNull(instance);
     assertThat(instance, instanceOf(FakeService.class));
-    assertThat(instance.getId(), equalTo(FakeService.ID));
   }
 }

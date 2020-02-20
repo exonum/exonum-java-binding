@@ -16,24 +16,32 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import com.exonum.binding.core.storage.database.View;
-
 /**
  * Storage index is a persistent, named collection built on top of Exonum key-value storage.
  *
- * <p>Also known as a collection, a table, and also as (rarely) a view for
- * a {@linkplain View database view} is inherently associated with an index.
+ * <p>Also known as a collection, a table, and also as (rarely) a database view.
  */
 public interface StorageIndex {
 
-  /** Returns the name of this index. */
+  /**
+   * Returns the name of this index.
+   *
+   * <p>Please note that the implementations may return either relative or absolute name.
+   * The name is not required to be equal to the one passed to the index constructor.
+   * <!-- This vague-ish clause and strange behaviour are needed to allow index caching across
+   *      Accesses -->
+   */
   default String getName() {
     return getAddress().getName();
   }
 
   /**
-   * Returns the <em>index address</em>: its unique identifier in the database. It consists
-   * of the name and, in case this index belongs to an index family, a family identifier.
+   * Returns the <em>index address</em>: its identifier in the database.
+   *
+   * <p>Please note that the implementations may return either relative or absolute address.
+   * The address is not required to be equal to the one passed to the index constructor.
+   * <!-- This vague-ish clause and strange behaviour are needed to allow index caching across
+   *      Accesses. -->
    */
   IndexAddress getAddress();
 }

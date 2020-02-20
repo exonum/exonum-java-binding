@@ -16,21 +16,32 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.common.hash.HashCode;
-import java.util.List;
+import com.exonum.binding.core.blockchain.Block;
+import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.transaction.Transaction;
 
 /**
  * A schema of the collections (a.k.a. indices) of a service.
+ *
+ * <p>To verify the integrity of the database state on each node in the network,
+ * Exonum automatically tracks every Merkelized collection used by the user
+ * services. It aggregates state hashes of these collections into a single
+ * Merkelized meta-map. The hash of this meta-map is considered the hash of the
+ * entire blockchain state and is recorded as such in {@linkplain Block#getStateHash() blocks}
+ * and Precommit messages.
+ *
+ * <p>Exonum starts aggregating a service collection state hash once it is <em>initialized</em>:
+ * created for the first time with a read-write
+ * {@link com.exonum.binding.core.blockchain.BlockchainData} (e.g., in a
+ * {@linkplain Service#initialize(BlockchainData, Configuration) service constructor},
+ * or in a {@linkplain Transaction}).
+ *
+ * <p>Please note that if the service does not use any Merkelized collections,
+ * the framework will not be able to verify that its transactions cause the same
+ * results on different nodes.
+ *
+ * @see com.exonum.binding.core.storage.indices.HashableIndex
+ * @see com.exonum.binding.core.blockchain.Blockchain
  */
 public interface Schema {
-
-  /**
-   * Returns the root hashes of Merkelized tables in this database schema, as of the current
-   * state of the database. If there are no Merkelized tables, returns an empty list.
-   *
-   * <p>This list of root hashes represents the current service state. Lists of these hashes
-   * from each service are aggregated in a single <em>blockchain state hash</em> that reflects
-   * the state of all services in the blockchain.
-   */
-  List<HashCode> getStateHashes();
 }

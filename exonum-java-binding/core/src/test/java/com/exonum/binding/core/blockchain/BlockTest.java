@@ -16,14 +16,10 @@
 
 package com.exonum.binding.core.blockchain;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.HashFunction;
-import com.exonum.binding.common.hash.Hashing;
-import com.exonum.binding.core.blockchain.Block.Builder;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
@@ -34,7 +30,7 @@ class BlockTest {
 
   @Test
   void isEmpty() {
-    Block emptyBlock = aBlock()
+    Block emptyBlock = Blocks.aBlock()
         .numTransactions(0)
         .build();
 
@@ -44,7 +40,7 @@ class BlockTest {
   @ParameterizedTest
   @ValueSource(ints = {1, 2, Integer.MAX_VALUE})
   void nonEmptyBlock(int numTransactions) {
-    Block nonEmptyBlock = aBlock()
+    Block nonEmptyBlock = Blocks.aBlock()
         .numTransactions(numTransactions)
         .build();
 
@@ -60,18 +56,5 @@ class BlockTest {
         .suppress(Warning.STRICT_HASHCODE)
         .withPrefabValues(HashCode.class, HashCode.fromInt(1), HashCode.fromInt(2))
         .verify();
-  }
-
-  private static Builder aBlock() {
-    HashFunction hashFunction = Hashing.sha256();
-    long blockHeight = 1;
-    return Block.builder()
-        .proposerId(0)
-        .height(blockHeight)
-        .numTransactions(0)
-        .blockHash(hashFunction.hashLong(blockHeight))
-        .previousBlockHash(hashFunction.hashLong(blockHeight - 1))
-        .txRootHash(hashFunction.hashString("transactions at" + blockHeight, UTF_8))
-        .stateHash(hashFunction.hashString("state hash at " + blockHeight, UTF_8));
   }
 }

@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -24,6 +25,7 @@ import com.exonum.binding.core.service.ServiceModule;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -39,18 +41,20 @@ import org.pf4j.PluginState;
  * a certain format ('groupId:artifactId:version'); have a single {@link ServiceModule} as
  * an extension.
  *
+ * <p>This class is not thread-safe.
+ *
  * @see <a href="https://pf4j.org/doc/getting-started.html">PF4J docs</a>
  */
 final class Pf4jServiceLoader implements ServiceLoader {
 
-  private static final Comparator<ServiceId> SERVICE_ID_COMPARATOR =
-      Comparator.comparing(ServiceId::getGroupId)
-          .thenComparing(ServiceId::getArtifactId)
-          .thenComparing(ServiceId::getVersion);
+  private static final Comparator<ServiceArtifactId> SERVICE_ID_COMPARATOR =
+      // No need to compare id — it is always Java
+      Comparator.comparing(ServiceArtifactId::getName)
+          .thenComparing(ServiceArtifactId::getVersion);
 
   private final PluginManager pluginManager;
   private final ClassLoadingScopeChecker classLoadingChecker;
-  private final SortedMap<ServiceId, LoadedServiceDefinition> loadedServices;
+  private final SortedMap<ServiceArtifactId, LoadedServiceDefinition> loadedServices;
 
   @Inject
   Pf4jServiceLoader(PluginManager pluginManager, ClassLoadingScopeChecker classLoadingChecker) {
@@ -116,23 +120,28 @@ final class Pf4jServiceLoader implements ServiceLoader {
 
   /** Loads the service definition from the already loaded plugin with the given id. */
   private LoadedServiceDefinition loadDefinition(String pluginId) throws ServiceLoadingException {
-    ServiceId serviceId = extractServiceId(pluginId);
+    ServiceArtifactId artifactId = extractServiceId(pluginId);
     Supplier<ServiceModule> serviceModuleSupplier = findServiceModuleSupplier(pluginId);
     LoadedServiceDefinition serviceDefinition =
-        LoadedServiceDefinition.newInstance(serviceId, serviceModuleSupplier);
+        LoadedServiceDefinition.newInstance(artifactId, serviceModuleSupplier);
 
-    assert !loadedServices.containsKey(serviceId);
-    loadedServices.put(serviceId, serviceDefinition);
+    assert !loadedServices.containsKey(artifactId);
+    loadedServices.put(artifactId, serviceDefinition);
     return serviceDefinition;
   }
 
-  private static ServiceId extractServiceId(String pluginId) throws ServiceLoadingException {
+  private static ServiceArtifactId extractServiceId(String pluginId)
+      throws ServiceLoadingException {
     try {
-      return ServiceId.parseFrom(pluginId);
+      ServiceArtifactId serviceArtifactId = ServiceArtifactId.parseFrom(pluginId);
+      checkArgument(serviceArtifactId.getRuntimeId() == JAVA.getId(),
+          "Required Java (%s) runtime id, but actually was %s",
+          JAVA.getId(), serviceArtifactId.getRuntimeId());
+      return serviceArtifactId;
     } catch (IllegalArgumentException e) {
-      throw new ServiceLoadingException(
-          String.format("Invalid plugin id (%s) is specified in service artifact metadata, "
-              + "must be in format 'groupId:artifactId:version'", pluginId));
+      String message = String.format(
+          "Invalid plugin id (%s) is specified in service artifact metadata", pluginId);
+      throw new ServiceLoadingException(message, e);
     }
   }
 
@@ -178,22 +187,50 @@ final class Pf4jServiceLoader implements ServiceLoader {
   }
 
   @Override
-  public Optional<LoadedServiceDefinition> findService(ServiceId serviceId) {
-    return Optional.ofNullable(loadedServices.get(serviceId));
+  public Optional<LoadedServiceDefinition> findService(ServiceArtifactId artifactId) {
+    return Optional.ofNullable(loadedServices.get(artifactId));
   }
 
   @Override
-  public void unloadService(ServiceId serviceId) {
-    checkArgument(loadedServices.containsKey(serviceId), "No such serviceId: %s", serviceId);
-
-    String pluginId = serviceId.toString();
+  public void unloadService(ServiceArtifactId artifactId) {
+    checkArgument(loadedServices.containsKey(artifactId), "No such artifactId: %s", artifactId);
+    String pluginId = artifactId.toString();
     try {
       boolean stopped = pluginManager.unloadPlugin(pluginId);
       // The docs don't say why it may fail to stop the plugin.
       // Follow: https://github.com/pf4j/pf4j/issues/291
       checkState(stopped, "Unknown error whilst unloading the plugin (%s)", pluginId);
     } finally {
-      loadedServices.remove(serviceId);
+      loadedServices.remove(artifactId);
+    }
+  }
+
+  @Override
+  public void unloadAll() {
+    // Unload the services. As it does not matter if there are strong refs to the classes
+    // loaded by the plugin classloaders (instances of a subclass of URLClassLoader) when
+    // they are closed, unload first, clear second.
+
+    // Unload the plugins
+    List<Exception> errors = new ArrayList<>();
+    for (ServiceArtifactId artifactId : loadedServices.keySet()) {
+      String pluginId = artifactId.toString();
+      try {
+        unloadPlugin(pluginId);
+      } catch (Exception e) {
+        errors.add(e);
+      }
+    }
+
+    // Clear the loaded services
+    loadedServices.clear();
+
+    // Communicate the errors, if any
+    if (!errors.isEmpty()) {
+      IllegalStateException e = new IllegalStateException(
+          "Failed to unload some plugins (see suppressed)");
+      errors.forEach(e::addSuppressed);
+      throw e;
     }
   }
 

@@ -16,8 +16,6 @@
 
 package com.exonum.binding.core.storage.indices;
 
-import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexType;
-
 import com.exonum.binding.common.collect.MapEntry;
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.common.serialization.Serializer;
@@ -25,12 +23,12 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.util.LibraryLoader;
-import com.google.protobuf.MessageLite;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.LongSupplier;
+import javax.annotation.Nullable;
 
 /**
  * A MapIndex is an index that maps keys to values. A map cannot contain duplicate keys;
@@ -40,18 +38,18 @@ import java.util.function.LongSupplier;
  *
  * <p>The "destructive" methods of the map, i.e., the one that change the map contents,
  * are specified to throw {@link UnsupportedOperationException} if
- * the map has been created with a read-only database view.
+ * the map has been created with a read-only database access.
  *
  * <p>All method arguments are non-null by default.
  *
  * <p>This class is not thread-safe and its instances shall not be shared between threads.
  *
- * <p>When the view goes out of scope, this map is destroyed. Subsequent use of the closed map
+ * <p>When the access goes out of scope, this map is destroyed. Subsequent use of the closed map
  * is prohibited and will result in {@link IllegalStateException}.
  *
  * @param <K> the type of keys in this map
  * @param <V> the type of values in this map
- * @see View
+ * @see Access
  */
 public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements MapIndex<K, V> {
 
@@ -63,127 +61,49 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
   private final CheckingSerializerDecorator<V> valueSerializer;
 
   /**
-   * Creates a new MapIndexProxy using protobuf messages.
-   *
-   * <p>If only a key or a value is a protobuf message, use
-   * {@link MapIndexProxy#newInstance(String, View, Serializer, Serializer)}
-   * and {@link com.exonum.binding.common.serialization.StandardSerializers#protobuf(Class)}.
-   *
-   * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
-   *             [a-zA-Z0-9_]
-   * @param view a database view. Must be valid
-   *             If a view is read-only, "destructive" operations are not permitted
-   * @param keyType the class of keys-protobuf messages
-   * @param valueType the class of values-protobuf messages
-   * @param <K> the type of keys in the map; must be a protobuf message
-   * @param <V> the type of values in the map; must be a protobuf message
-   * @throws IllegalStateException if the view is not valid
-   * @throws IllegalArgumentException if the name is empty; or a key or value class is
-   *     not a valid protobuf message that has a public static {@code #parseFrom(byte[])} method
-   */
-  public static <K extends MessageLite, V extends MessageLite> MapIndexProxy<K, V> newInstance(
-      String name, View view, Class<K> keyType, Class<V> valueType) {
-    return newInstance(name, view, StandardSerializers.protobuf(keyType),
-        StandardSerializers.protobuf(valueType));
-  }
-
-  /**
    * Creates a new MapIndexProxy.
    *
-   * @param name a unique alphanumeric non-empty identifier of this map in the underlying storage:
-   *             [a-zA-Z0-9_]
-   * @param view a database view. Must be valid.
-   *             If a view is read-only, "destructive" operations are not permitted.
+   * <p><strong>Warning:</strong> do not invoke this method from service code, use
+   * {@link Access#getMap(IndexAddress, Serializer, Serializer)}.
+   *
+   * @param address an index address
+   * @param access a database access. Must be valid.
+   *             If an access is read-only, "destructive" operations are not permitted.
    * @param keySerializer a serializer of keys
    * @param valueSerializer a serializer of values
    * @param <K> the type of keys in the map
    * @param <V> the type of values in the map
-   * @throws IllegalStateException if the view is not valid
+   * @throws IllegalStateException if the access is not valid
    * @throws IllegalArgumentException if the name is empty
    * @see StandardSerializers
    */
-  public static <K, V> MapIndexProxy<K, V> newInstance(String name, View view,
+  public static <K, V> MapIndexProxy<K, V> newInstance(IndexAddress address, AbstractAccess access,
                                                        Serializer<K> keySerializer,
                                                        Serializer<V> valueSerializer) {
-    IndexAddress address = IndexAddress.valueOf(name);
-    long viewNativeHandle = view.getViewNativeHandle();
-    LongSupplier nativeMapConstructor = () -> nativeCreate(name, viewNativeHandle);
-
-    return getOrCreate(address, view, keySerializer, valueSerializer, nativeMapConstructor);
-  }
-
-  /**
-   * Creates a new map in a <a href="package-summary.html#families">collection group</a>
-   * with the given name.
-   *
-   * <p>See a <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
-   *
-   * @param groupName a name of the collection group
-   * @param mapId an identifier of this collection in the group, see the caveats
-   * @param view a database view
-   * @param keySerializer a serializer of keys
-   * @param valueSerializer a serializer of values
-   * @param <K> the type of keys in the map
-   * @param <V> the type of values in the map
-   * @return a new map proxy
-   * @throws IllegalStateException if the view is not valid
-   * @throws IllegalArgumentException if the name or index id is empty
-   * @see StandardSerializers
-   */
-  public static <K, V> MapIndexProxy<K, V> newInGroupUnsafe(String groupName,
-                                                            byte[] mapId,
-                                                            View view,
-                                                            Serializer<K> keySerializer,
-                                                            Serializer<V> valueSerializer) {
-    IndexAddress address = IndexAddress.valueOf(groupName, mapId);
-    long viewNativeHandle = view.getViewNativeHandle();
-    LongSupplier nativeMapConstructor =
-        () -> nativeCreateInGroup(groupName, mapId, viewNativeHandle);
-
-    return getOrCreate(address, view, keySerializer, valueSerializer, nativeMapConstructor);
-  }
-
-  private static <K, V> MapIndexProxy<K, V> getOrCreate(IndexAddress address, View view,
-      Serializer<K> keySerializer, Serializer<V> valueSerializer,
-      LongSupplier nativeMapConstructor) {
-    return view.findOpenIndex(address)
-        .map(MapIndexProxy::<K, V>checkCachedInstance)
-        .orElseGet(() -> newMapIndexProxy(address, view, keySerializer, valueSerializer,
-            nativeMapConstructor));
-  }
-
-  @SuppressWarnings("unchecked") // The compiler is correct: the cache is not type-safe: ECR-3387
-  private static <K, V> MapIndexProxy<K, V> checkCachedInstance(StorageIndex cachedIndex) {
-    checkIndexType(cachedIndex, MapIndexProxy.class);
-    return (MapIndexProxy<K, V>) cachedIndex;
-  }
-
-  private static <K, V> MapIndexProxy<K, V> newMapIndexProxy(IndexAddress address, View view,
-      Serializer<K> keySerializer, Serializer<V> valueSerializer,
-      LongSupplier nativeMapConstructor) {
     CheckingSerializerDecorator<K> ks = CheckingSerializerDecorator.from(keySerializer);
     CheckingSerializerDecorator<V> vs = CheckingSerializerDecorator.from(valueSerializer);
 
-    NativeHandle mapNativeHandle = createNativeMap(view, nativeMapConstructor);
+    NativeHandle mapNativeHandle = createNativeMap(address, access);
 
-    MapIndexProxy<K, V> map = new MapIndexProxy<>(mapNativeHandle, address, view, ks, vs);
-    view.registerIndex(map);
-    return map;
+    return new MapIndexProxy<>(mapNativeHandle, address, access, ks, vs);
   }
 
-  private static NativeHandle createNativeMap(View view, LongSupplier nativeMapConstructor) {
-    NativeHandle mapNativeHandle = new NativeHandle(nativeMapConstructor.getAsLong());
+  private static NativeHandle createNativeMap(IndexAddress address, AbstractAccess access) {
+    long accessNativeHandle = access.getAccessNativeHandle();
+    long handle = nativeCreate(address.getName(), address.getIdInGroup().orElse(null),
+        accessNativeHandle);
+    NativeHandle mapNativeHandle = new NativeHandle(handle);
 
-    Cleaner cleaner = view.getCleaner();
+    Cleaner cleaner = access.getCleaner();
     ProxyDestructor.newRegistered(cleaner, mapNativeHandle, MapIndexProxy.class,
         MapIndexProxy::nativeFree);
     return mapNativeHandle;
   }
 
-  private MapIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
+  private MapIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
                         CheckingSerializerDecorator<K> keySerializer,
                         CheckingSerializerDecorator<V> valueSerializer) {
-    super(nativeHandle, address, view);
+    super(nativeHandle, address, access);
     this.keySerializer = keySerializer;
     this.valueSerializer = valueSerializer;
   }
@@ -235,7 +155,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
         nativeCreateKeysIter(getNativeHandle()),
         this::nativeKeysIterNext,
         this::nativeKeysIterFree,
-        dbView,
+        dbAccess,
         modCounter,
         keySerializer::fromBytes
     );
@@ -247,7 +167,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
         nativeCreateValuesIter(getNativeHandle()),
         this::nativeValuesIterNext,
         this::nativeValuesIterFree,
-        dbView,
+        dbAccess,
         modCounter,
         valueSerializer::fromBytes
     );
@@ -259,7 +179,7 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
         nativeCreateEntriesIter(getNativeHandle()),
         this::nativeEntriesIterNext,
         this::nativeEntriesIterFree,
-        dbView,
+        dbAccess,
         modCounter,
         (entry) -> entry.toMapEntry(entry, keySerializer, valueSerializer)
     );
@@ -277,10 +197,8 @@ public final class MapIndexProxy<K, V> extends AbstractIndexProxy implements Map
     nativeClear(getNativeHandle());
   }
 
-  private static native long nativeCreate(String name, long viewNativeHandle);
-
-  private static native long nativeCreateInGroup(String groupName, byte[] mapId,
-                                                 long viewNativeHandle);
+  private static native long nativeCreate(String name, @Nullable byte[] idInGroup,
+      long accessNativeHandle);
 
   private native boolean nativeContainsKey(long nativeHandle, byte[] key);
 

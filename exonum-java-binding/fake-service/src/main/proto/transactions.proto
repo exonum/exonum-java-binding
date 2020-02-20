@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package exonum.fakeservice;
+
+option java_package = "com.exonum.binding.fakeservice";
+
+message PutTransactionArgs {
+  string key = 1;
+  string value = 2;
+}
+
+message RaiseErrorArgs {
+  uint32 code = 1;
+}

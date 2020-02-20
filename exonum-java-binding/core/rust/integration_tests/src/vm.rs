@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-use std::fs::File;
-use std::io::Read;
-use std::path::PathBuf;
-use std::sync::Arc;
+use java_bindings::{
+    jni::{InitArgsBuilder, JNIVersion, JavaVM},
+    utils::jni_cache,
+};
 
-use java_bindings::jni::{InitArgsBuilder, JNIVersion, JavaVM};
-use java_bindings::utils::jni_cache;
+use std::{fs::File, io::Read, path::PathBuf, sync::Arc};
 
 /// Kibibyte
 pub const KIB: usize = 1024;
@@ -31,41 +30,37 @@ const CONVERSION_FAILED_MESSAGE: &str = "Failed to convert FS path into utf-8";
 
 /// Creates a configured `JavaVM` for benchmarks.
 /// _`JavaVM` should be created only *once*._
-#[allow(dead_code)]
 pub fn create_vm_for_benchmarks() -> Arc<JavaVM> {
     Arc::new(create_vm(false, false))
 }
 
-/// Creates a configured `JavaVM` for benchmarks with fake classes.
+/// Creates a configured `JavaVM` for benchmarks with EJB classes.
 /// _`JavaVM` should be created only *once*._
-#[allow(dead_code)]
-pub fn create_vm_for_benchmarks_with_fakes() -> Arc<JavaVM> {
+pub fn create_vm_for_benchmarks_with_classes() -> Arc<JavaVM> {
     Arc::new(create_vm(false, true))
 }
 
-/// Creates a configured `JavaVM` for tests.
+/// Creates a configured `JavaVM` for tests with EJB classes.
 /// _`JavaVM` should be created only *once*._
-#[allow(dead_code)]
-pub fn create_vm_for_tests() -> Arc<JavaVM> {
-    Arc::new(create_vm(true, false))
-}
-
-/// Creates a configured `JavaVM` for tests with fake classes.
-/// _`JavaVM` should be created only *once*._
-#[allow(dead_code)]
-pub fn create_vm_for_tests_with_fake_classes() -> Arc<JavaVM> {
+pub fn create_vm_for_tests_with_classes() -> Arc<JavaVM> {
     Arc::new(create_vm(true, true))
 }
 
 /// Creates a configured `JavaVM`.
 /// _JavaVM should be created only *once*._
-fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
+///
+/// If `debug` is true, additional checks of correctness of JNI operations are
+/// enabled.
+///
+/// If `with_classes` is true, Java classes, dependencies of the EJB App are
+/// included.
+fn create_vm(debug: bool, with_classes: bool) -> JavaVM {
     let mut jvm_args_builder = InitArgsBuilder::new()
         .version(JNIVersion::V8)
         .option(&libpath_option());
 
-    if with_fakes {
-        jvm_args_builder = jvm_args_builder.option(&fakes_classpath_option());
+    if with_classes {
+        jvm_args_builder = jvm_args_builder.option(&tests_classpath_option());
         // Enable log4j
         jvm_args_builder = jvm_args_builder.option(&log4j_path_option());
     }
@@ -84,8 +79,8 @@ fn create_vm(debug: bool, with_fakes: bool) -> JavaVM {
 
     let vm = JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e));
 
-    // Initialize JNI cache for testing with fakes
-    if with_fakes {
+    // Initialize JNI cache
+    if with_classes {
         let env = vm.attach_current_thread().unwrap();
         jni_cache::init_cache(&env);
     }
@@ -105,25 +100,26 @@ pub fn create_vm_for_leak_tests(memory_limit_mib: usize) -> JavaVM {
     JavaVM::new(jvm_args).unwrap_or_else(|e| panic!("{:#?}", e))
 }
 
-fn fakes_classpath_option() -> String {
-    format!("-Djava.class.path={}", fakes_classpath())
+fn tests_classpath_option() -> String {
+    format!("-Djava.class.path={}", tests_classpath())
 }
 
-pub fn fakes_classpath() -> String {
-    let classpath_txt_path =
-        java_binding_parent_root_dir().join("fakes/target/ejb-fakes-classpath.txt");
+pub fn tests_classpath() -> String {
+    let core_classpath = java_binding_parent_root_dir()
+        .join("core/target/classes")
+        .to_str()
+        .expect(CONVERSION_FAILED_MESSAGE)
+        .to_owned();
 
-    let mut class_path = String::new();
-    File::open(classpath_txt_path)
+    let mut dependencies_classpath = String::new();
+    let dependencies_txt_path =
+        java_binding_parent_root_dir().join("core/target/ejb-core-classpath.txt");
+    File::open(dependencies_txt_path)
         .expect("Can't open classpath.txt")
-        .read_to_string(&mut class_path)
+        .read_to_string(&mut dependencies_classpath)
         .expect("Failed to read classpath.txt");
 
-    let fakes_path = java_binding_parent_root_dir().join("fakes/target/classes/");
-    let fakes_classes = fakes_path.to_str().expect(CONVERSION_FAILED_MESSAGE);
-
-    // should be used `;` as path separator on Windows [https://jira.bf.local/browse/ECR-587]
-    format!("{}:{}", class_path, fakes_classes)
+    format!("{}:{}", core_classpath, dependencies_classpath)
 }
 
 /// Returns a Log4j system property pointing to the configuration file. The file is in
@@ -132,16 +128,15 @@ pub fn fakes_classpath() -> String {
 ///
 /// It requires the log4j-core library to be present on the classpath, which is the case with fakes.
 fn log4j_path_option() -> String {
-    format!("-Dlog4j.configurationFile={}", log4j_path())
+    format!(
+        "-Dlog4j.configurationFile={}",
+        log4j_path().to_str().unwrap()
+    )
 }
 
 /// Returns a path to Log4j configuration file to be used in the integration tests.
-pub fn log4j_path() -> String {
-    project_root_dir()
-        .join("log4j2.xml")
-        .to_str()
-        .expect(CONVERSION_FAILED_MESSAGE)
-        .to_owned()
+pub fn log4j_path() -> PathBuf {
+    project_root_dir().join("log4j2.xml")
 }
 
 fn libpath_option() -> String {
@@ -158,14 +153,6 @@ pub fn java_library_path() -> String {
              the libjava_bindings dynamically loading library",
         );
     library_path
-        .to_str()
-        .expect(CONVERSION_FAILED_MESSAGE)
-        .to_owned()
-}
-
-pub fn fake_service_artifact_path() -> String {
-    java_binding_parent_root_dir()
-        .join("fake-service/target/fake-service-artifact.jar")
         .to_str()
         .expect(CONVERSION_FAILED_MESSAGE)
         .to_owned()

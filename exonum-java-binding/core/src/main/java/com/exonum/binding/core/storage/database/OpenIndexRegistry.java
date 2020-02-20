@@ -18,7 +18,6 @@ package com.exonum.binding.core.storage.database;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.StorageIndex;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,22 +25,27 @@ import java.util.Optional;
 
 /**
  * A registry of open {@linkplain com.exonum.binding.core.storage.indices indexes}. Allows
- * to de-duplicate the indexes created with the same (View, name, prefix) tuple, which is
+ * to de-duplicate the indexes created with the same (Access, name, prefix) tuple, which is
  * required to overcome the MerkleDB limitation which prevents creating several indexes
  * with the same address (name + prefix) using the same Fork.
+ *
+ * <p>See {@code IndexMetadata} and {@code Access.get_index_metadata} in Rust.
  */
 class OpenIndexRegistry {
 
-  private final Map<IndexAddress, StorageIndex> indexes = new HashMap<>();
+  private final Map<Long, StorageIndex> indexes = new HashMap<>();
 
-  void registerIndex(StorageIndex index) {
-    IndexAddress address = index.getAddress();
-    Object present = indexes.putIfAbsent(address, index);
-    checkArgument(present == null, "Cannot register index (%s): the address (%s) is already "
-        + "associated with index (%s): ", index, address, present);
+  void registerIndex(Long id, StorageIndex index) {
+    Object present = indexes.putIfAbsent(id, index);
+    checkArgument(present == null, "Cannot register index (%s): the id (%s) is already "
+        + "associated with index (%s): ", index, id, present);
   }
 
-  Optional<StorageIndex> findIndex(IndexAddress address) {
-    return Optional.ofNullable(indexes.get(address));
+  Optional<StorageIndex> findIndex(Long id) {
+    return Optional.ofNullable(indexes.get(id));
+  }
+
+  void clear() {
+    indexes.clear();
   }
 }

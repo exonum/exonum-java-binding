@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-extern crate env_logger;
-extern crate exonum_btc_anchoring;
-extern crate exonum_configuration;
-extern crate exonum_time;
-extern crate java_bindings;
-#[macro_use]
-extern crate log;
+use log::info;
 
-#[cfg(test)]
-extern crate tempfile;
+use crate::node::run_node;
+use java_bindings::{get_lib_version, Command};
 
-use java_bindings::get_lib_version;
+mod node;
 
-mod node_builder;
-
-fn main() {
+fn main() -> Result<(), failure::Error> {
     env_logger::init();
     // Panic if `_JAVA_OPTIONS` environmental variable is set.
     java_bindings::panic_if_java_options();
@@ -37,8 +29,7 @@ fn main() {
     // Log app's metadata
     log_app_metadata();
 
-    let builder = node_builder::create();
-    builder.run()
+    run_node(Command::from_args())
 }
 
 // Prints info about version and build mode of started app to the STDOUT.

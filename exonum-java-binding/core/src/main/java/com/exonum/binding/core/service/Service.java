@@ -16,17 +16,9 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
-import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.transaction.ExecutionException;
 import io.vertx.ext.web.Router;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * An Exonum service.
@@ -37,63 +29,51 @@ import java.util.Optional;
 public interface Service {
 
   /**
-   * Returns the id of the service.
-   */
-  short getId();
-
-  /**
-   * Returns the name of the service.
-   */
-  String getName();
-
-  /**
-   * Initializes the service. This method is called once when a genesis block is created
-   * and is supposed to
-   * <ul>
-   *   <li>(a) initialize the database schema of this service, and</li>
-   *   <li>(b) provide an initial <a href="https://exonum.com/doc/version/0.12/architecture/services/#global-configuration">global configuration</a>
-   * of the service.</li>
-   * </ul>
+   * Performs an initial configuration of the service instance. This method is called <em>once</em>
+   * after the service instance is added to the blockchain and allows initializing
+   * some persistent data of the service.
    *
-   * <p>The service configuration parameters must be provided as a JSON string.
-   * It is recorded in a table of global configuration parameters of each service deployed
-   * in the network.
+   * <p>As Exonum passes the configuration parameters only once and does not persist them for
+   * later access, this service method must make any needed changes to the database based
+   * on these parameters. For example, it may initialize some collections in its schema
+   * (including one-off initialization that does not depend on the parameters);
+   * or save all or some configuration parameters as is for later retrieval in transactions
+   * and/or read requests.
    *
-   * @param fork a database fork to apply changes to. Not valid after this method returns
-   * @return a global configuration of the service, or {@code Optional.empty()} if the service
-   *         does not have any configuration parameters.
-   * @see <a href="https://exonum.com/doc/version/0.12/architecture/services/#initialization-handler">Initialization handler</a>
+   * @param blockchainData blockchain data accessor for this service. Not valid after this method
+   *     returns
+   * @param configuration the service configuration parameters
+   * @throws ExecutionException if the configuration parameters are not valid (e.g.,
+   *     malformed, or do not meet the preconditions). Exonum will stop the service if
+   *     its initialization fails. It will save the error into
+   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   *     the registry of call errors}
+   * @see Configurable
    */
-  default Optional<String> initialize(Fork fork) {
-    return Optional.empty();
+  default void initialize(BlockchainData blockchainData, Configuration configuration) {
+    // No configuration
   }
 
   /**
-   * Converts an Exonum raw transaction to an executable transaction of <em>this</em> service.
+   * Resumes the previously stopped service instance. This method is called when
+   * a stopped service instance is restarted.
    *
-   * @param rawTransaction a raw transaction to be converted
-   * @return an executable transaction
-   * @throws IllegalArgumentException if the raw transaction is malformed
-   *         or it doesn't belong to this service
-   * @throws NullPointerException if raw transaction is null
+   * <p>This method may perform any changes to the database. For example, update some service
+   * parameters, deprecate old entries etc.
+   *
+   * <p>Also, note that performing any bulk operations or data migration
+   * <em>is not recommended</em> here, because this method is invoked synchronously
+   * when the block is committed.
+   * <!--TODO: Add a link to the migration procedure -->
+   *
+   * @param blockchainData blockchain data accessor for this service. Not valid after this method
+   *     returns
+   * @param arguments the service arguments
+   * @throws ExecutionException if the arguments are not valid (e.g.,
+   *     malformed, or do not meet the preconditions)
    */
-  Transaction convertToTransaction(RawTransaction rawTransaction);
-
-  /**
-   * Returns a list of root hashes of all Merkelized tables defined by this service,
-   * as of the given snapshot of the blockchain state. If the service doesn't have any Merkelized
-   * tables, returns an empty list.
-   *
-   * <p>The core uses this list to aggregate hashes of tables defined by all services
-   * into a single Merkelized meta-map.  The hash of this meta-map is considered the hash
-   * of the entire blockchain state and is recorded as such in blocks and Precommit messages.
-   *
-   * @param snapshot a snapshot of the blockchain state. Not valid after this method returns
-   * @see ProofListIndexProxy#getIndexHash()
-   * @see ProofMapIndexProxy#getIndexHash()
-   */
-  default List<HashCode> getStateHashes(Snapshot snapshot) {
-    return Collections.emptyList();
+  default void resume(BlockchainData blockchainData, byte[] arguments) {
+    // No actions by default
   }
 
   /**
@@ -112,13 +92,54 @@ public interface Service {
    * });
    * }</pre>
    *
+   * <p>Please remember that Java services use a <em>separate</em> server from Rust services.
+   * The Java server TCP port is specified on node start, see
+   * <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#running-the-node">
+   * documentation</a> for details.
+   *
    * @param node a set-up Exonum node, providing an interface to access
-   *             the current blockchain state and submit transactions
+   *             the current blockchain state and submit transactions. Note that a node gets
+   *             closed automatically by the runtime when the service stops
    * @param router a router responsible for handling requests to this service
-   * @see <a href="https://exonum.com/doc/version/0.12/get-started/java-binding/#external-service-api">
+   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>
    */
   void createPublicApiHandlers(Node node, Router router);
+
+  /**
+   * An optional callback method invoked by the blockchain <em>before</em> any transactions
+   * in a block are executed. See {@link #afterTransactions(BlockchainData)} for details.
+   *
+   * @see #afterTransactions(BlockchainData)
+   * @see com.exonum.binding.core.transaction.Transaction
+   */
+  default void beforeTransactions(BlockchainData blockchainData) {}
+
+  /**
+   * Handles the changes made by all transactions included in the upcoming block.
+   *
+   * <p>This handler is an optional callback method invoked by the blockchain <em>after</em>
+   * all transactions in a block are executed, but before it is committed. The service can modify
+   * its state in this handler, therefore, implementations must be deterministic and use only
+   * the current database state as their input.
+   *
+   * <p>This method is invoked synchronously from the thread that commits the block, therefore,
+   * implementations of this method must not perform any blocking or long-running operations.
+   *
+   * <p>Any exceptions in this method will revert any changes made to the database by it,
+   * but will not affect the processing of this block. Exceptions are saved
+   * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   * the registry of call errors} with appropriate error kinds.
+   *
+   * @param blockchainData blockchain data accessor for this service. Not valid after this method
+   *     returns
+   * @throws ExecutionException if an error occurs during the method execution;
+   *     it is saved as a call error of kind "service". Any other exceptions
+   *     are considered unexpected. They are saved with kind "unexpected".
+   * @see #beforeTransactions(BlockchainData)
+   * @see com.exonum.binding.core.transaction.Transaction
+   */
+  default void afterTransactions(BlockchainData blockchainData) {}
 
   /**
    * Handles read-only block commit event. This handler is an optional callback method which is

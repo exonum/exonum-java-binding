@@ -1,0 +1,27 @@
+networks:
+  - host: "127.0.0.1"
+    ssl: false
+    public-api-port: 3000
+    private-api-port: 3010
+
+deadline_height: 10000
+
+runtimes:
+  java: 1
+
+plugins:
+  runtime:
+    java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
+  artifact: {}
+
+artifacts:
+  cryptocurrency:
+    runtime: java
+    name: "com.exonum.binding/exonum-java-binding-cryptocurrency-demo"
+    version: "0.10.0-SNAPSHOT"
+    spec:
+      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-SNAPSHOT-artifact.jar"
+
+instances:
+  cryptocurrency:
+    artifact: cryptocurrency

@@ -16,39 +16,21 @@
 
 package com.exonum.binding.core.transaction;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.core.storage.database.Fork;
+import com.exonum.binding.core.blockchain.BlockchainData;
+import com.google.auto.value.AutoValue;
 
 /**
  * Default implementation of the transaction context.
  */
-final class InternalTransactionContext implements TransactionContext {
-  private final Fork fork;
-  private final HashCode hash;
-  private final PublicKey authorPk;
+@AutoValue
+abstract class InternalTransactionContext implements TransactionContext {
 
-  InternalTransactionContext(Fork fork, HashCode hash, PublicKey authorPk) {
-    this.fork = checkNotNull(fork);
-    this.hash = checkNotNull(hash);
-    this.authorPk = checkNotNull(authorPk);
+  public static InternalTransactionContext newInstance(BlockchainData blockchainData, HashCode hash,
+                                                       PublicKey authorPk, String serviceName,
+                                                       int serviceId) {
+    return new AutoValue_InternalTransactionContext(blockchainData, hash, authorPk, serviceName,
+        serviceId);
   }
-
-  @Override
-  public Fork getFork() {
-    return fork;
-  }
-
-  @Override
-  public HashCode getTransactionMessageHash() {
-    return hash;
-  }
-
-  @Override
-  public PublicKey getAuthorPk() {
-    return authorPk;
-  }
-
 }

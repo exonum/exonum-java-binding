@@ -1,6 +1,5 @@
 language: java
 dist: xenial
-sudo: false
 
 # Build only the following branches/tags pushed to the repository:
 branches:
@@ -17,24 +16,32 @@ addons:
       - sourceline: 'ppa:fsgmhoward/shadowsocks-libev'
       - sourceline: 'ppa:maarten-fonville/protobuf'
       - sourceline: 'ppa:exonum/rocksdb'
+      - sourceline: 'ppa:deadsnakes/ppa'
     packages:
       - build-essential
       - libsodium-dev
-      - librocksdb5.17
+      - librocksdb6.2
       - libssl-dev
       - pkg-config
       - protobuf-compiler
       - libprotobuf-dev
+      - python3.7
+  homebrew:
+    packages:
+      - libsodium
+      - rocksdb
+      - pkg-config
+      - protobuf
 
 env:
   global:
-    - RUST_COMPILER_VERSION=1.36.0
-    - OSX_PACKAGES="libsodium rocksdb pkg-config protobuf"
+    - RUST_COMPILER_VERSION=stable
     - ROCKSDB_LIB_DIR=/usr/lib
+    - ROCKSDB_STATIC=1
     # REPO_TOKEN used for integration with coveralls is encoded here
     - secure: Fp22iaJpttsIArAyWmdCGNtljIALTYRVKO7O+H2hgBkwHHqrU7+15sbaq3xzhz4YNWNfuFMIkFUBgd/KYHgAuNDDrtm2agib13C0lQT1NFQO9ccmNCJNsXQrYrXGwpnNqPKp0YmfBfgNwzEpBerlbtvzV/T/RZukT/403XxwxU9y5tHfQokwVLibqP2jJsxdihTfCKIOs+o6hBfArmsn+e+panEv17ZrCjOmBIM/W70Rf2rEM26wFnYsfnAUTCkpl4Ong0SYNpZZxNMtw61W8ApDY8bpz7cKUxCv7SmD3kO7Y+TTHWfWYx6FNXtUpE1vCi6I7fZAY16rViTWOX55NCeFQz56XER7ArJQZtC/nC1lZ9tGKtcofu2Rq7WUoRuTwvLTaf6VzAP/CUj0DUxkV+8WUggl3s/Im7Y9rn8Aqvh8LReZmqzTY+dJ0hFG4DLoLtl71eTEnNoumi5UleBhJPaei3wPNPHg1WlOmhFyhRCsbIIGiyFtSj/faLmdc7tN/sBFANb0g4Exl0mRNvB0IfS1gM6XouEGUTlVree68p11PnsGJGs/QaUB9F9AAGVKTZ2kz7sqkCDdGmLxzbdidYDHZtYWfOIYSJCQsA09n2Txi0fwNByKfl/spdyMmtI1uGeT803rhN9vu0NGrQFG3mU7mqO33fUDEStIQ6/xn0A=
 
-matrix:
+jobs:
   include:
     - name: "Linux JDK 8 CHECK_RUST=true"
       os: linux
@@ -44,44 +51,60 @@ matrix:
       os: linux
       jdk: openjdk8
       env: CHECK_RUST=false
+    - name: "Linux JDK 13 CHECK_RUST=false"
+      os: linux
+      jdk: openjdk13
+      env: CHECK_RUST=false
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
-      # Specify the image containing JDK 8
-      # See: https://docs.travis-ci.com/user/reference/osx#os-x-version
-      osx_image: xcode9.3
+      # See: https://docs.travis-ci.com/user/reference/osx#macos-version
+      osx_image: xcode11.3
       env:
-      - CHECK_RUST=false
-      - ROCKSDB_LIB_DIR=/usr/local/lib
-      - ROCKSDB_STATIC=1
-      - SNAPPY_LIB_DIR=/usr/local/lib
-      - SNAPPY_STATIC=1
-    - name: "Linux JDK 12 CHECK_RUST=false"
-      os: linux
-      jdk: openjdk12
-      env: CHECK_RUST=false
+        - CHECK_RUST=false
+        - ROCKSDB_LIB_DIR=/usr/local/lib
+        - SNAPPY_LIB_DIR=/usr/local/lib
+        - SNAPPY_STATIC=1
+    - name: "Python unit tests"
+      before_install: true
+      script:
+        - cd "${TRAVIS_BUILD_DIR}"
+        - .travis/run_python_tests.sh
 
 cache:
   directories:
-    - "$HOME/.cargo"
-    - "$HOME/.m2"
+    # Bits of Rust (see https://docs.travis-ci.com/user/languages/rust/#dependency-management).
+    # We do not cache `target` as the produced artifacts are huge and don't make sense caching.
+    - "$TRAVIS_HOME/.cargo"
+    - "$TRAVIS_HOME/.rustup/"
+    # Java (Maven)
+    - "$TRAVIS_HOME/.m2"
 
 before_cache:
   # Remove the project artifacts — no need to cache them.
-  - rm -rf ${HOME}/.m2/repository/com/exonum/binding/ ${HOME}/.m2/repository/com/exonum/client/
-
+  # See also: https://docs.travis-ci.com/user/languages/rust/#dependency-management
+  - rm -rf "$TRAVIS_HOME/.m2/repository/com/exonum/binding/" "$TRAVIS_HOME/.m2/repository/com/exonum/client/" "$TRAVIS_HOME/.m2/repository/com/exonum/messages/"
+  - rm -rf "$TRAVIS_HOME/.cargo/registry/src"
 
 before_install:
   # Skip the build if only md files were updated.
   - source .travis/skip-ci.sh
+  # Install JDK 8 on Mac. We use latest osx_image for faster Homebrew packages
+  # installation, but it has JDK 13 by default. We can't use Homebrew for installing
+  # a cask, because it will force Homebrew update, which takes a long time.
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    then wget "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u232-b09/OpenJDK8U-jdk_x64_mac_hotspot_8u232b09.tar.gz"
+    tar -xf OpenJDK8U-jdk_x64_mac_hotspot_8u232b09.tar.gz
+    export JAVA_HOME=$PWD/jdk8u232-b09/Contents/Home
+    export PATH=$JAVA_HOME/bin:$PATH
+    java -version
+    fi
   - export PATH="$PATH":"$HOME/.cargo/bin"
   # Install rustup if it's not already installed (i.e., not in CI cache).
   - which rustup > /dev/null || curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain "$RUST_COMPILER_VERSION"
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
-  # Install OSX requirements
-  # TODO: Temporary fix, the problem is described here: https://jira.bf.local/browse/ECR-2795
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install $OSX_PACKAGES || brew install $OSX_PACKAGES; fi
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).

@@ -25,6 +25,7 @@ import com.exonum.binding.common.proofs.map.CheckedMapProof;
  * If it is valid, the proof contents may be accessed. See {@link CheckedListProof}
  * and {@link CheckedMapProof} for available contents description.
  */
+// todo: [ECR-2410] Why do we need to represent invalid proofs with checked proof?
 public interface CheckedProof {
 
   /**

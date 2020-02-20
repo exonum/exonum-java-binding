@@ -23,6 +23,6 @@
  *   <li>Provides the native code with a convenient interface (simpler, faster, more reliable).
  * </ul>
  *
- * <p>Also contains an utility factory to produce proxies of native views.
+ * <p>Also contains an utility factory to produce proxies of native accesses.
  */
 package com.exonum.binding.core.service.adapters;

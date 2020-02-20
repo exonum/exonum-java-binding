@@ -16,14 +16,25 @@
 
 package com.exonum.binding.core.blockchain.serialization;
 
+import static com.exonum.binding.core.blockchain.serialization.BlockSerializer.toHeadersMap;
+import static com.exonum.binding.core.blockchain.serialization.BlockSerializer.toHeadersProto;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blocks;
+import com.exonum.messages.core.Blockchain;
+import com.exonum.messages.core.Blockchain.AdditionalHeaders;
+import com.exonum.messages.core.KeyValueSequenceOuterClass.KeyValue;
+import com.exonum.messages.core.KeyValueSequenceOuterClass.KeyValueSequence;
+import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -40,6 +51,16 @@ class BlockSerializerTest {
     assertThat(actual, equalTo(expected));
   }
 
+  @ParameterizedTest
+  @MethodSource("testSource")
+  void roundTripFromMessage(Block expected) throws InvalidProtocolBufferException {
+    byte[] asBytes = BLOCK_SERIALIZER.toBytes(expected);
+    Blockchain.Block asMessage = Blockchain.Block.parseFrom(asBytes);
+    Block actual = Block.fromMessage(asMessage);
+
+    assertThat(actual, equalTo(expected));
+  }
+
   private static Stream<Block> testSource() {
     Block block1 = Block.builder()
         .proposerId(0)
@@ -49,6 +70,8 @@ class BlockSerializerTest {
         .previousBlockHash(HashCode.fromString("bc"))
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
+        .additionalHeaders(ImmutableMap.of())
+        .errorHash(HashCode.fromString("ef"))
         .build();
     Block block2 = Block.builder()
         .proposerId(Integer.MAX_VALUE)
@@ -58,9 +81,34 @@ class BlockSerializerTest {
         .previousBlockHash(HashCode.fromString("bc"))
         .txRootHash(HashCode.fromString("cd"))
         .stateHash(HashCode.fromString("ab"))
+        .additionalHeaders(ImmutableMap.of("one", ByteString.copyFromUtf8("abcd01")))
+        .errorHash(HashCode.fromString("ef"))
         .build();
 
     return Stream.of(block1, block2)
         .map(Blocks::withProperHash);
   }
+
+  @Test
+  void headersMapStrictOrderRoundTripTest() {
+    KeyValue first = KeyValue.newBuilder()
+        .setKey("foo")
+        .setValue(ByteString.EMPTY)
+        .build();
+    KeyValue second = KeyValue.newBuilder()
+        .setKey("bar")
+        .setValue(ByteString.EMPTY)
+        .build();
+    AdditionalHeaders expected = AdditionalHeaders.newBuilder()
+        .setHeaders(KeyValueSequence.newBuilder()
+            .addEntries(first)
+            .addEntries(second)
+            .build())
+        .build();
+
+    AdditionalHeaders actual = toHeadersProto(toHeadersMap(expected));
+
+    assertThat(actual, is(expected));
+  }
+
 }

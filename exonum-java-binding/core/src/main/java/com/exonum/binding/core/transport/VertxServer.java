@@ -20,10 +20,13 @@ import static com.exonum.binding.core.transport.VertxServer.State.IDLE;
 import static com.exonum.binding.core.transport.VertxServer.State.STARTED;
 import static com.exonum.binding.core.transport.VertxServer.State.STOPPED;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
+import java.util.List;
 import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
@@ -85,6 +88,22 @@ final class VertxServer implements Server {
     }
   }
 
+  @Override
+  public void removeSubRouter(String mountPoint) {
+    synchronized (lock) {
+      checkNotStopped();
+      rootRouter.getRoutes()
+          .stream()
+          .filter(r -> r.getPath().equals(mountPoint))
+          .forEach(Route::remove);
+    }
+  }
+
+  @VisibleForTesting
+  List<Route> getMountedRoutes() {
+    return rootRouter.getRoutes();
+  }
+
   private void checkNotStopped() {
     if (state == STOPPED) {
       throw new IllegalStateException("Server is stopped");
@@ -92,17 +111,26 @@ final class VertxServer implements Server {
   }
 
   @Override
-  public void start(int port) {
+  public CompletableFuture<Integer> start(int port) {
     synchronized (lock) {
       if (state != IDLE) {
         throw new IllegalStateException("Cannot start a server when its state is " + state);
       }
       state = STARTED;
-      server.listen(port, ar -> logServerStartEvent(ar, port));
+
+      CompletableFuture<Integer> startFuture = new CompletableFuture<>();
+      server.listen(port, ar -> handleStartResult(ar, startFuture, port));
+
+      return startFuture;
     }
   }
 
-  private void logServerStartEvent(AsyncResult<HttpServer> startResult, int requestedPort) {
+  private static void handleStartResult(AsyncResult<HttpServer> startResult,
+      CompletableFuture<Integer> startFuture, int requestedPort) {
+    // Complete the future
+    completeFuture(startResult.map(HttpServer::actualPort), startFuture);
+
+    // Log the event
     if (startResult.succeeded()) {
       HttpServer server = startResult.result();
       logger.info("Java server is listening at port {}", server.actualPort());
@@ -137,12 +165,12 @@ final class VertxServer implements Server {
       logger.info("Requesting to stop");
 
       // Request the vertx instance to close itself
-      vertx.close((r) -> notifyVertxStopped());
+      vertx.close(this::notifyVertxStopped);
       return stopFuture;
     }
   }
 
-  private void notifyVertxStopped() {
+  private void notifyVertxStopped(AsyncResult<Void> stopResult) {
     logger.info("Stopped");
 
     synchronized (lock) {
@@ -150,7 +178,16 @@ final class VertxServer implements Server {
       rootRouter.clear();
 
       // Notify the clients that the server is stopped
-      stopFuture.complete(null);
+      completeFuture(stopResult, stopFuture);
+    }
+  }
+
+  private static <R> void completeFuture(AsyncResult<? extends R> result,
+      CompletableFuture<? super R> future) {
+    if (result.succeeded()) {
+      future.complete(result.result());
+    } else {
+      future.completeExceptionally(result.cause());
     }
   }
 
@@ -158,10 +195,10 @@ final class VertxServer implements Server {
   public String toString() {
     synchronized (lock) {
       return "Server{"
-              + "port=" + server.actualPort()
-              + ", state=" + state
-              + ", stopFuture=" + stopFuture
-              + '}';
+          + "port=" + server.actualPort()
+          + ", state=" + state
+          + ", stopFuture=" + stopFuture
+          + '}';
     }
   }
 

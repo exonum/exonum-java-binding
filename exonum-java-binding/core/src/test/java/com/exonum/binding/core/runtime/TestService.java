@@ -16,30 +16,11 @@
 
 package com.exonum.binding.core.runtime;
 
-import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.exonum.binding.core.storage.database.View;
-import com.google.inject.Inject;
+import com.exonum.binding.core.service.Service;
 import io.vertx.ext.web.Router;
-import java.util.Collections;
 
-class TestService extends AbstractService {
-
-  static final short ID = 2;
-  static final String NAME = "test-user-service";
-
-  @Inject
-  TestService(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
-  }
-
-  @Override
-  protected Schema createDataSchema(View view) {
-    return Collections::emptyList;
-  }
-
+class TestService implements Service {
   @Override
   public void createPublicApiHandlers(Node node, Router router) {
     // no-op

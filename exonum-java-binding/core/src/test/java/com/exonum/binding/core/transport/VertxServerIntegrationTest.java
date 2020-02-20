@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
@@ -36,10 +37,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 // Execute the tests sequentially, as each of them creates a Vertx instance with its
 // own thread pool, which drives the delays up.
@@ -83,6 +87,24 @@ class VertxServerIntegrationTest {
   }
 
   @Test
+  void start_WillCommunicateStartFailure()
+      throws ExecutionException, InterruptedException, TimeoutException {
+    try {
+      // Occupy a port
+      int actualPort = server.start(ANY_PORT).get();
+
+      // Create another server
+      Server server2 = new VertxServer();
+      // Try to start on the same port as server1
+      CompletableFuture<Integer> startFuture = server2.start(actualPort);
+      // Verify that server 2 won't start on the same port and will throw an exception
+      assertThrows(ExecutionException.class, startFuture::get);
+    } finally {
+      blockingStop();
+    }
+  }
+
+  @Test
   void getActualPort_BeforeStart() {
     assertThat(server.getActualPort(), equalTo(OptionalInt.empty()));
   }
@@ -119,7 +141,7 @@ class VertxServerIntegrationTest {
     try {
       // Start a server.
       int port = findFreePort();
-      server.start(port);
+      server.start(port).get();
 
       // Check the port
       assertThat(server.getActualPort(), equalTo(OptionalInt.of(port)));
@@ -160,6 +182,59 @@ class VertxServerIntegrationTest {
         wcVertx.close();
       }
     }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"/foo", "/foo/", "/foo/bar", "/foo/:bar", "/foo/:bar/"})
+  void removeRoute(String path) throws Exception {
+    try {
+      server.start(ANY_PORT).get();
+
+      server.mountSubRouter(path, server.createRouter());
+      Assertions.assertThat(server.getMountedRoutes())
+          .anyMatch(route -> routePathEquals(route, path));
+
+      server.removeSubRouter(path);
+
+      Assertions.assertThat(server.getMountedRoutes())
+          .noneMatch(route -> routePathEquals(route, path));
+    } finally {
+      blockingStop();
+    }
+  }
+
+  @Test
+  void removeRoutesWithSamePrefix() throws Exception {
+    try {
+      server.start(ANY_PORT).get();
+
+      String routePath1 = "/foo";
+      Router router1 = server.createRouter();
+      router1.get("/bar").handler(h -> {
+      });
+      server.mountSubRouter(routePath1, router1);
+
+      String routePath2 = "/foo/bar";
+      server.mountSubRouter(routePath2, server.createRouter());
+
+      server.removeSubRouter(routePath1);
+
+      Assertions.assertThat(server.getMountedRoutes())
+          .noneMatch(route -> routePathEquals(route, routePath1));
+      Assertions.assertThat(server.getMountedRoutes())
+          .anyMatch(route -> routePathEquals(route, routePath2));
+
+      server.removeSubRouter(routePath2);
+
+      Assertions.assertThat(server.getMountedRoutes())
+          .noneMatch(route -> routePathEquals(route, routePath2));
+    } finally {
+      blockingStop();
+    }
+  }
+
+  private static boolean routePathEquals(Route route, String path) {
+    return route.getPath().equals(path);
   }
 
   /**

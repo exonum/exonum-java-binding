@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>exonum-java-binding-core</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Core</name>
@@ -21,12 +21,11 @@
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <!-- TODO: stable does not work well until ECR-3459 is resolved. -->
-    <rust.compiler.version>1.36.0</rust.compiler.version>
+    <rust.compiler.version>${env.RUST_COMPILER_VERSION}</rust.compiler.version>
     <!-- Features for integration testing. At least "resource-manager" is required by Java integration tests. Ideally,
      keeping them in sync with the ones that `integration_tests` crate require from the `java_bindings` crate allows
      the native integration tests to avoid recompilation of the `java_binding` library. -->
-    <rust.compiler.features>resource-manager invocation</rust.compiler.features>
+    <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <rust.appSubCrate>exonum-java</rust.appSubCrate>
     <!-- The build directory of Rust workspace  -->
@@ -97,7 +96,13 @@
 
     <dependency>
       <groupId>com.ryanharter.auto.value</groupId>
-      <artifactId>auto-value-gson</artifactId>
+      <artifactId>auto-value-gson-extension</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.ryanharter.auto.value</groupId>
+      <artifactId>auto-value-gson-factory</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -115,12 +120,6 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-api-mockito2</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -143,6 +142,16 @@
       <artifactId>vertx-web-client</artifactId>
       <version>${vertx.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <!-- todo: A workaround for a bug in JDK 8, preventing Mockito from mocking Vertx classes.
+           See: https://github.com/mockito/mockito/issues/366
+           Remove when ECR-521 (Java 10 migration) is resolved -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <version>${vertx.version}</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -287,6 +296,7 @@
         <extensions>true</extensions>
         <executions>
           <execution>
+            <id>protobuf-compile-java</id>
             <goals>
               <goal>compile</goal>
               <goal>test-compile</goal>
@@ -352,8 +362,26 @@
         <configuration>
           <effort>max</effort>
           <threshold>medium</threshold>
-          <excludeFilterFile>${project.basedir}/findbugs-exclude.xml</excludeFilterFile>
+          <excludeFilterFile>${project.basedir}/spotbugs-exclude.xml</excludeFilterFile>
         </configuration>
+      </plugin>
+
+      <!-- Generates a classpath file to be used by native integration tests.
+           Bound to the default phase (generate-sources). -->
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <outputFile>${project.build.directory}/ejb-core-classpath.txt</outputFile>
+          <includeScope>runtime</includeScope>
+        </configuration>
+        <executions>
+          <execution>
+            <id>generate-classpath-file</id>
+            <goals>
+              <goal>build-classpath</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
@@ -372,7 +400,7 @@
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-        <version>1.6.2</version>
+        <version>${os-maven-plugin.version}</version>
       </extension>
     </extensions>
   </build>

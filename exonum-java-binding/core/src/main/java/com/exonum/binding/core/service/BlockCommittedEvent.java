@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import java.util.OptionalInt;
 
 /**
@@ -27,9 +27,9 @@ import java.util.OptionalInt;
 public interface BlockCommittedEvent {
 
   /**
-   * If this node is a <a href="https://exonum.com/doc/version/0.12/glossary/#validator">validator</a>,
+   * If this node is a <a href="https://exonum.com/doc/version/0.13-rc.2/glossary/#validator">validator</a>,
    * returns its identifier.
-   * If this node is an <a href="https://exonum.com/doc/version/0.12/glossary/#auditor">auditor</a>,
+   * If this node is an <a href="https://exonum.com/doc/version/0.13-rc.2/glossary/#auditor">auditor</a>,
    * it will return {@code OptionalInt.empty()}.
    */
   OptionalInt getValidatorId();
@@ -40,8 +40,8 @@ public interface BlockCommittedEvent {
   long getHeight();
 
   /**
-   * Returns the current database snapshot. It is immutable and represents the database state
-   * as of the block at the current {@linkplain #getHeight() height}.
+   * Returns the current database snapshot for the executing service. It is immutable and represents
+   * the database state as of the block at the current {@linkplain #getHeight() height}.
    */
-  Snapshot getSnapshot();
+  BlockchainData getSnapshot();
 }

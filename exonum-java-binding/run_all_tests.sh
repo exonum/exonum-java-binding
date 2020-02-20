@@ -12,6 +12,6 @@ set -eu -o pipefail
 # Run all java tests and native unit tests.
 ./run_maven_tests.sh
 
-# Run native integration tests that require prepared classpaths for fake classes.
+# Run native integration tests that require prepared classpaths for Java classes.
 ./run_native_integration_tests.sh --skip-compile
 ./run_app_tests.sh

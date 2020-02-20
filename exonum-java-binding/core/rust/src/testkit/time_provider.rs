@@ -15,13 +15,14 @@
  */
 
 use chrono::{DateTime, Utc};
-use exonum_merkledb::BinaryValue;
-use exonum_time::time_provider::TimeProvider;
+use exonum::merkledb::BinaryValue;
+use exonum_time::TimeProvider;
 use jni::{
     objects::{GlobalRef, JObject},
     Executor, JNIEnv,
 };
-use utils::unwrap_jni;
+
+use crate::utils::unwrap_jni;
 
 /// Wrapper around Java interface TimeProvider.
 pub struct JavaTimeProvider {

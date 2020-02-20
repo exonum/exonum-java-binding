@@ -16,57 +16,105 @@
 
 package com.exonum.binding.core.blockchain.serialization;
 
+import static com.exonum.binding.common.hash.Hashing.sha256;
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.core.blockchain.Block;
+import com.exonum.messages.core.Blockchain;
+import com.exonum.messages.core.Blockchain.AdditionalHeaders;
+import com.exonum.messages.core.KeyValueSequenceOuterClass.KeyValue;
+import com.exonum.messages.core.KeyValueSequenceOuterClass.KeyValueSequence;
+import com.exonum.messages.core.KeyValueSequenceOuterClass.KeyValueSequence.Builder;
+import com.exonum.messages.crypto.Types;
+import com.exonum.messages.crypto.Types.Hash;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 
 public enum BlockSerializer implements Serializer<Block> {
   INSTANCE;
 
-  private static final Serializer<CoreProtos.Block> PROTO_SERIALIZER =
-      protobuf(CoreProtos.Block.class);
+  private static final Serializer<Blockchain.Block> PROTO_SERIALIZER =
+      protobuf(Blockchain.Block.class);
 
   @Override
   public byte[] toBytes(Block value) {
-    CoreProtos.Block block = CoreProtos.Block.newBuilder()
+    Blockchain.Block block = Blockchain.Block.newBuilder()
         .setProposerId(value.getProposerId())
         .setHeight(value.getHeight())
         .setTxCount(value.getNumTransactions())
         .setPrevHash(toHashProto(value.getPreviousBlockHash()))
         .setTxHash(toHashProto(value.getTxRootHash()))
         .setStateHash(toHashProto(value.getStateHash()))
+        .setErrorHash(toHashProto(value.getErrorHash()))
+        .setAdditionalHeaders(toHeadersProto(value.getAdditionalHeaders()))
         .build();
     return block.toByteArray();
   }
 
   @Override
   public Block fromBytes(byte[] binaryBlock) {
-    HashCode blockHash = Hashing.sha256().hashBytes(binaryBlock);
-    CoreProtos.Block copiedBlocks = PROTO_SERIALIZER.fromBytes(binaryBlock);
+    Blockchain.Block blockMessage = PROTO_SERIALIZER.fromBytes(binaryBlock);
+    HashCode blockHash = sha256().hashBytes(binaryBlock);
+    return newBlockInternal(blockMessage, blockHash);
+  }
+
+  /**
+   * Creates a block from a message and the block hash. Does not check the hash correctness — hence
+   * for internal usage only.
+   */
+  public static Block newBlockInternal(Blockchain.Block blockMessage, HashCode blockHash) {
     return Block.builder()
-        .proposerId(copiedBlocks.getProposerId())
-        .height(copiedBlocks.getHeight())
-        .numTransactions(copiedBlocks.getTxCount())
+        .proposerId(blockMessage.getProposerId())
+        .height(blockMessage.getHeight())
+        .numTransactions(blockMessage.getTxCount())
         .blockHash(blockHash)
-        .previousBlockHash(toHashCode(copiedBlocks.getPrevHash()))
-        .txRootHash(toHashCode(copiedBlocks.getTxHash()))
-        .stateHash(toHashCode(copiedBlocks.getStateHash()))
+        .previousBlockHash(toHashCode(blockMessage.getPrevHash()))
+        .txRootHash(toHashCode(blockMessage.getTxHash()))
+        .stateHash(toHashCode(blockMessage.getStateHash()))
+        .errorHash(toHashCode(blockMessage.getErrorHash()))
+        .additionalHeaders(toHeadersMap(blockMessage.getAdditionalHeaders()))
         .build();
   }
 
-  private static CoreProtos.Hash toHashProto(HashCode hash) {
+  private static Types.Hash toHashProto(HashCode hash) {
     ByteString bytes = ByteString.copyFrom(hash.asBytes());
-    return CoreProtos.Hash.newBuilder()
+    return Types.Hash.newBuilder()
         .setData(bytes)
         .build();
   }
 
-  private static HashCode toHashCode(CoreProtos.Hash hash) {
+  private static HashCode toHashCode(Hash hash) {
     ByteString bytes = hash.getData();
     return HashCode.fromBytes(bytes.toByteArray());
   }
+
+  @VisibleForTesting
+  static ImmutableMap<String, ByteString> toHeadersMap(AdditionalHeaders headers) {
+    return headers.getHeaders().getEntriesList()
+        .stream()
+        .collect(toImmutableMap(KeyValue::getKey, KeyValue::getValue));
+  }
+
+  @VisibleForTesting
+  static AdditionalHeaders toHeadersProto(ImmutableMap<String, ByteString> headers) {
+    Builder additionalHeadersBuilder = KeyValueSequence.newBuilder();
+
+    headers.forEach((k, v) -> additionalHeadersBuilder.addEntries(toProtoEntry(k, v)));
+
+    return AdditionalHeaders.newBuilder()
+        .setHeaders(additionalHeadersBuilder.build())
+        .build();
+  }
+
+  private static KeyValue toProtoEntry(String key, ByteString value) {
+    return KeyValue.newBuilder()
+        .setKey(key)
+        .setValue(value)
+        .build();
+  }
+
 }

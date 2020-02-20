@@ -16,32 +16,24 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.serialization.StandardSerializers;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+
 import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import java.util.Collections;
-import java.util.List;
 
 final class TestSchema implements Schema {
 
-  static final String TEST_MAP_NAME = "TestKitService_map";
+  private static final IndexAddress TEST_MAP_ADDRESS = IndexAddress.valueOf("TestKitService_map");
 
-  private final View view;
+  private final Access access;
 
-  TestSchema(View view) {
-    this.view = view;
+  TestSchema(Access access) {
+    this.access = access;
   }
 
-  ProofMapIndexProxy<HashCode, String> testMap() {
-    return ProofMapIndexProxy.newInstance(TEST_MAP_NAME, view, StandardSerializers.hash(),
-        StandardSerializers.string());
-  }
-
-  @Override
-  public List<HashCode> getStateHashes() {
-    HashCode rootHash = testMap().getIndexHash();
-    return Collections.singletonList(rootHash);
+  ProofMapIndexProxy<String, String> testMap() {
+    return access.getProofMap(TEST_MAP_ADDRESS, string(), string());
   }
 }

@@ -44,20 +44,6 @@ function build-exonum-java-for-platform() {
 }
 
 function build-exonum-java-macos() {
-    # We use static linkage for RocksDB on Mac because in case of dynamic linking
-    # the resulting app has a dependency on a _particular_
-    # `install_name` of the RocksDB library. In case of RocksDB, `install_name`
-    # corresponds to the minor version of the library in terms of Semantic Versioning
-    # and is updated for every breaking change. As `install_name` is stored inside
-    # Exonum Java binary, even minor updates of RocksDB package in the system
-    # package managers would prevent the application from linking against
-    # it and require a new release of the Exonum Java with updated `install_name`.
-    export ROCKSDB_STATIC=1
-    # Check if ROCKSDB_LIB_DIR is set
-    if [ -z "${ROCKSDB_LIB_DIR:-}" ]; then
-      echo "Please set ROCKSDB_LIB_DIR"
-      exit 1
-    fi
     build-exonum-java-for-platform "@loader_path" "libjava_bindings.dylib"
 }
 
@@ -116,7 +102,7 @@ source ./tests_profile
 # Prepare directories
 PACKAGING_BASE_DIR="${EJB_RUST_DIR}/target/${BUILD_MODE}"
 PACKAGING_NATIVE_LIB_DIR="${PACKAGING_BASE_DIR}/lib/native"
-PACKAGING_ETC_DIR="${PACKAGING_BASE_DIR}/etc"
+export PACKAGING_ETC_DIR="${PACKAGING_BASE_DIR}/etc"
 mkdir -p "${PACKAGING_BASE_DIR}"
 mkdir -p "${PACKAGING_NATIVE_LIB_DIR}"
 mkdir -p "${PACKAGING_ETC_DIR}"
@@ -134,8 +120,26 @@ cp LICENSES-THIRD-PARTY.TXT "${PACKAGING_ETC_DIR}"
 # Copy fallback logger configuration
 cp ./core/rust/exonum-java/log4j-fallback.xml "${PACKAGING_ETC_DIR}"
 
-# Copy tutorial
-cp ./core/rust/exonum-java/TUTORIAL.md "${PACKAGING_ETC_DIR}"
+# Copy readme
+cp ./core/rust/exonum-java/README.md "${PACKAGING_ETC_DIR}"
+
+# We use static linkage for RocksDB because in case of dynamic linking
+# the resulting app has a dependency on a _particular_
+# `SONAME` of the RocksDB library (On Mac, `install_name` is used instead of
+# `SONAME`; there are almost no differences between them). In case of RocksDB,
+# `SONAME` corresponds to the minor version of the library in terms of Semantic
+# Versioning and is updated for every breaking change. As `SONAME` is stored
+# inside Exonum Java binary, even minor updates of RocksDB package in the system
+# package managers would prevent the application from linking against
+# it and require a new release of the Exonum Java with updated `SONAME`.
+export ROCKSDB_STATIC=1
+
+# Check if ROCKSDB_LIB_DIR is set. It is needed for faster and more predictable
+# builds.
+if [ -z "${ROCKSDB_LIB_DIR:-}" ]; then
+  echo "Please set ROCKSDB_LIB_DIR"
+  exit 1
+fi
 
 if [[ "$(uname)" == "Darwin" ]]; then
     build-exonum-java-macos

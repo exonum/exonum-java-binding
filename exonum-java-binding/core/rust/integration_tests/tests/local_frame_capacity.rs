@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-extern crate integration_tests;
-extern crate java_bindings;
-#[macro_use]
-extern crate lazy_static;
-extern crate rand;
-
 use integration_tests::vm::create_vm_for_leak_tests;
-use java_bindings::jni::JavaVM;
-use java_bindings::Executor;
+use java_bindings::{jni::JavaVM, Executor};
+use lazy_static::lazy_static;
 
 use std::sync::Arc;
 

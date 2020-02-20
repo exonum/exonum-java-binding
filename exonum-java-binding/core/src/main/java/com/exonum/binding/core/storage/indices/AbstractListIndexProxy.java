@@ -18,10 +18,11 @@ package com.exonum.binding.core.storage.indices;
 
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkElementIndex;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkNoNulls;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.common.serialization.CheckingSerializerDecorator;
 import com.exonum.binding.core.proxy.NativeHandle;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.storage.database.AbstractAccess;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -37,9 +38,9 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
 
   final CheckingSerializerDecorator<T> serializer;
 
-  AbstractListIndexProxy(NativeHandle nativeHandle, IndexAddress address, View view,
+  AbstractListIndexProxy(NativeHandle nativeHandle, IndexAddress address, AbstractAccess access,
                          CheckingSerializerDecorator<T> userSerializer) {
-    super(nativeHandle, address, view);
+    super(nativeHandle, address, access);
     this.serializer = userSerializer;
   }
 
@@ -92,6 +93,23 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
   }
 
   @Override
+  public T removeLast() {
+    notifyModified();
+    byte[] e = nativeRemoveLast(getNativeHandle());
+    if (e == null) {
+      throw new NoSuchElementException("List is empty");
+    }
+    return serializer.fromBytes(e);
+  }
+
+  @Override
+  public void truncate(long newSize) {
+    checkArgument(newSize >= 0, "New size must be non-negative: %s", newSize);
+    notifyModified();
+    nativeTruncate(getNativeHandle(), newSize);
+  }
+
+  @Override
   public final void clear() {
     notifyModified();
     nativeClear(getNativeHandle());
@@ -113,14 +131,14 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
         nativeCreateIter(getNativeHandle()),
         this::nativeIterNext,
         this::nativeIterFree,
-        dbView,
+        dbAccess,
         modCounter,
         serializer::fromBytes);
   }
 
   @Override
   public Stream<T> stream() {
-    boolean immutable = !dbView.canModify();
+    boolean immutable = !dbAccess.canModify();
     ListSpliterator<T> spliterator = new ListSpliterator<>(this, modCounter, immutable);
     return StreamSupport.stream(spliterator, false);
   }
@@ -132,6 +150,10 @@ abstract class AbstractListIndexProxy<T> extends AbstractIndexProxy implements L
   abstract byte[] nativeGet(long nativeHandle, long index);
 
   abstract byte[] nativeGetLast(long nativeHandle);
+
+  abstract byte[] nativeRemoveLast(long nativeHandle);
+
+  abstract void nativeTruncate(long nativeHandle, long newSize);
 
   abstract void nativeClear(long nativeHandle);
 

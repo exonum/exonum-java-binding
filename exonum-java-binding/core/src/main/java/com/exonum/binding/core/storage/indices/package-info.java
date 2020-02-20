@@ -17,18 +17,27 @@
 /**
  * Contains Exonum indexes — persistent, named collections built on top of Exonum key-value storage.
  *
- * <p>Indexes are also known as collections, tables, and rarely as views for
- * a {@linkplain com.exonum.binding.core.storage.database.View database view} is inherently
- * associated with an index.
+ * <p>Indexes are also known as collections, tables, and rarely as database views.
  *
- * <h2><a name="families">Index families</a></h2>
+ * <h2>Accessing indexes</h2>
+ *
+ * <p>Indexes shall be created using the database
+ * {@link com.exonum.binding.core.storage.database.Access} object.
+ *
+ * <h3 id="modifications">Modifications</h3>
+ *
+ * <p>Whether an index can be modified is inherited from the Access object. If the database access
+ * objects forbids modifications, any modifying (or "destructive") methods of the index
+ * will throw {@link java.lang.UnsupportedOperationException}.
+ *
+ * <h2 id="families">Index families</h2>
  *
  * <p>An index family is a named group of indexes of the same type. Each index in the group
  * is identified by an <em>identifier</em>, an arbitrary byte string. An index in the group works
  * the same as an individual index. Indexes in a family are isolated from each other.
  * It is not possible to iterate through all elements that are stored inside an index group.
  *
- * <h3><a name="families-use-cases">Use cases</a></h3>
+ * <h3 id="families-use-cases">Use cases</h3>
  *
  * <p>Index families provide a way to separate elements by a certain criterion. Applications include
  * indexing, where you create a separate collection group to index another collection of elements
@@ -36,7 +45,7 @@
  * where you keep an identifier into a collection in group Bar in a structure stored
  * in collection Foo.
  *
- * <h3><a name="families-limitations">Limitations</a></h3>
+ * <h3 id="families-limitations">Limitations</h3>
  *
  * <p>Currently Exonum prepends an index identifier within a group to internal,
  * implementation-specific, keys of that index to keep their elements separate from each other.
@@ -48,6 +57,6 @@
  * <p>Until this limitation is fixed, care must be taken when using this feature, because
  * the identifiers are not checked.
  *
- * @see <a href="https://exonum.com/doc/version/0.12/architecture/storage/#table-types">Exonum indexes reference documentation</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/storage/#table-types">Exonum indexes reference documentation</a>
  */
 package com.exonum.binding.core.storage.indices;

@@ -20,8 +20,8 @@ import static com.exonum.client.response.TransactionStatus.COMMITTED;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import com.google.common.base.Objects;
 import lombok.Value;
 
@@ -39,7 +39,7 @@ public class TransactionResponse {
    * Transaction execution result.
    * Not available unless the transaction is {@linkplain #isCommitted committed} to the blockchain.
    */
-  TransactionResult executionResult;
+  ExecutionStatus executionResult;
   /**
    * Transaction location in the blockchain.
    * Not available unless the transaction is {@linkplain #isCommitted committed} to the blockchain.
@@ -50,7 +50,7 @@ public class TransactionResponse {
    * Returns transaction execution result.
    * @throws IllegalStateException if the transaction is not committed yet
    */
-  public TransactionResult getExecutionResult() {
+  public ExecutionStatus getExecutionResult() {
     checkState(status == COMMITTED,
         "Transaction result is available for committed transactions only");
     return executionResult;

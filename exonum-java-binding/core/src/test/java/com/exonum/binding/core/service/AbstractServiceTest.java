@@ -16,51 +16,36 @@
 
 package com.exonum.binding.core.service;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
+import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import io.vertx.ext.web.Router;
 import org.junit.jupiter.api.Test;
 
 class AbstractServiceTest {
 
+  private static final String NAME = "test";
+  private static final int ID = 1;
+  private static final ServiceInstanceSpec INSTANCE_SPEC = ServiceInstanceSpec.newInstance(NAME, ID,
+      ServiceArtifactId.newJavaId("g/a","1"));
+
   @Test
-  void constructorDiscardsEmptyName() {
-    assertThrows(IllegalArgumentException.class,
-        () -> new ServiceUnderTest((short) 1, "", mock(TransactionConverter.class)));
+  void getName() {
+    AbstractService service = new ServiceUnderTest(INSTANCE_SPEC);
+    assertThat(service.getName()).isEqualTo(NAME);
   }
 
   @Test
-  void constructorDiscardsNullName() {
-    assertThrows(NullPointerException.class,
-        () -> new ServiceUnderTest((short) 1, null, mock(TransactionConverter.class)));
-  }
-
-  @Test
-  void constructorDiscardsNullConverter() {
-    assertThrows(NullPointerException.class,
-        () -> new ServiceUnderTest((short) 1, "service#1", null));
-  }
-
-  @Test
-  void getStateHashes_EmptySchema() {
-    Service service = new ServiceUnderTest((short) 1, "s1", mock(TransactionConverter.class));
-    assertTrue(service.getStateHashes(mock(Snapshot.class)).isEmpty());
+  void getId() {
+    AbstractService service = new ServiceUnderTest(INSTANCE_SPEC);
+    assertThat(service.getId()).isEqualTo(ID);
   }
 
   static class ServiceUnderTest extends AbstractService {
 
-    ServiceUnderTest(short id, String name,
-        TransactionConverter transactionConverter) {
-      super(id, name, transactionConverter);
-    }
-
-    @Override
-    protected Schema createDataSchema(View view) {
-      return mock(Schema.class);
+    ServiceUnderTest(ServiceInstanceSpec instanceSpec) {
+      super(instanceSpec);
     }
 
     @Override

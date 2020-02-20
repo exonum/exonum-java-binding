@@ -15,6 +15,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## 0.5.0 — 2019-12-23
+
+The new release of the light client brings support for dynamic services.
+
+### Versions Support
+- Exonum version, 0.13
+- Exonum Java Binding version, 0.9
+
+### Added
+- Java 13 support.
+- `ExonumClient#findServiceInfo(String)` to retrieve a service id by its
+  name and `ExonumClient#getServiceInfoList` to retrieve the list of all
+  started services - their names and ids. (#1247)
+
+### Changed
+- `TransactionResponse#getExecutionResult` now returns `ExecutionStatus`
+  instead of `TransactionResult`. (#1244)
+
 ## 0.4.0 — 2019-10-09
 
 The new release of the light client brings support for Exonum 0.12
@@ -28,7 +46,7 @@ and Exonum Java 0.8.
 - `ExonumClient#getBlockByHeight` and `#getBlocks` to throw
   `IllegalArgumentException` when blocks with heights exceeding
   the current blockchain height are requested (#1137)
-- `Block` JSON representation to be compatible with the one used 
+- `Block` JSON representation to be compatible with the one used
   for blocks by the core. Applied `@SerializedName` annotation
   to all fields. (#1137)
 - Updated project dependencies to the newest versions.
@@ -87,4 +105,3 @@ This release brings:
 
 [system-api-public]: https://exonum.com/doc/version/0.12/advanced/node-management/#public-endpoints
 [explorer-api]: https://exonum.com/doc/version/0.12/advanced/node-management/#explorer-api-endpoints
-

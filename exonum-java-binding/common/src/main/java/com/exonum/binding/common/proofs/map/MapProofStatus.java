@@ -26,7 +26,8 @@ public enum MapProofStatus implements ProofStatus {
   NON_TERMINAL_NODE("Proof entry in a singleton proof is of branch type (must be a leaf)"),
   INVALID_ORDER("Proof entries are placed in the wrong order"),
   DUPLICATE_PATH("There are entries with duplicate keys"),
-  EMBEDDED_PATH("One key in the proof is a prefix of another key");
+  EMBEDDED_PATH("One key in the proof is a prefix of another key"),
+  INVALID_HASH_SIZE("Invalid size of proof hash, must be 32 bytes");
 
   final String description;
 

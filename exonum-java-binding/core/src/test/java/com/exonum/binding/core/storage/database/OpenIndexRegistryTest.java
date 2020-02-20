@@ -19,9 +19,7 @@ package com.exonum.binding.core.storage.database;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.StorageIndex;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,42 +33,48 @@ class OpenIndexRegistryTest {
   @Nested
   class WithSingleIndex {
 
-    private final IndexAddress address = IndexAddress.valueOf("name");
+    private final Long id = 1L;
     private final StorageIndex index = mock(StorageIndex.class, "index 1");
 
     @BeforeEach
     void registerIndex() {
-      when(index.getAddress()).thenReturn(address);
-
-      registry.registerIndex(index);
+      registry.registerIndex(id, index);
     }
 
     @Test
     void canFindRegisteredIndex() {
-      Optional<StorageIndex> actual = registry.findIndex(address);
+      Optional<StorageIndex> actual = registry.findIndex(id);
 
       assertThat(actual).hasValue(index);
     }
 
     @Test
-    void registerThrowsIfAlreadyRegisteredSameAddress() {
+    void registerThrowsIfAlreadyRegisteredSameId() {
       StorageIndex otherIndex = mock(StorageIndex.class, "other index");
-      when(otherIndex.getAddress()).thenReturn(address);
 
       Exception e = assertThrows(IllegalArgumentException.class,
-          () -> registry.registerIndex(otherIndex));
+          () -> registry.registerIndex(id, otherIndex));
 
       String message = e.getMessage();
-      assertThat(message).contains(String.valueOf(address))
+      assertThat(message).contains(String.valueOf(id))
           .contains(String.valueOf(index))
           .contains(String.valueOf(otherIndex));
+    }
+
+    @Test
+    void clearRemovesTheIndex() {
+      registry.clear();
+
+      Optional<StorageIndex> actual = registry.findIndex(id);
+
+      assertThat(actual).isEmpty();
     }
   }
 
   @Test
   void findUnknownIndex() {
-    IndexAddress unknownAddress = IndexAddress.valueOf("Unknown");
-    Optional<StorageIndex> index = registry.findIndex(unknownAddress);
+    long unknownId = 1024L;
+    Optional<StorageIndex> index = registry.findIndex(unknownId);
 
     assertThat(index).isEmpty();
   }

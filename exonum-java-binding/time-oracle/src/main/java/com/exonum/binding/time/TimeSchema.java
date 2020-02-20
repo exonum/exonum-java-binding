@@ -17,43 +17,44 @@
 package com.exonum.binding.time;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.storage.indices.EntryIndexProxy;
+import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import java.time.ZonedDateTime;
 
 /**
  * Exonum time service database schema. It provides read-only access to the state
- * of the time oracle for a given {@linkplain View database view}.
+ * of a time oracle service instance.
  *
- * @see <a href="https://exonum.com/doc/version/0.12/advanced/time/">Time oracle documentation</a>
+ * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/time/">Time oracle documentation</a>
  */
 public interface TimeSchema {
 
   /**
-   * Constructs a time schema for a given dbView.
+   * Constructs a schema of the time oracle instance with the given name.
    *
-   * <p>Won't be constructed unless time service is enabled. To enable time service, put 'time'
-   * into 'services.toml' file.
+   * @param blockchainData the blockchain data; may come from any service
+   * @param name the name of the time oracle service instance to use
    *
-   * @throws IllegalStateException if time service is not enabled
+   * @throws IllegalArgumentException if there is no service with the given name or it is not
+   *     an Exonum time oracle
    */
-  static TimeSchema newInstance(View dbView) {
-    return new TimeSchemaProxy(dbView);
+  static TimeSchema newInstance(BlockchainData blockchainData, String name) {
+    return new TimeSchemaProxy(blockchainData, name);
   }
 
   /**
-   * Returns consolidated time output by the service, which can be used by other business logic on
-   * the blockchain.
+   * Returns consolidated time output by the service in UTC.
    *
-   * <p>At the time when a new blockchain is launched, the consolidated time is unknown until the
-   * transactions from at least two thirds of validator nodes are processed. In that case the result
-   * will not contain a value.
+   * <p>When this time oracle instance is started, the consolidated time remains unknown until
+   * the transactions with time updates from at least two thirds of validator nodes are processed.
+   * After that the time will be always present.
    */
-  EntryIndexProxy<ZonedDateTime> getTime();
+  ProofEntryIndex<ZonedDateTime> getTime();
 
   /**
-   * Returns the table that stores time for every validator.
+   * Returns the table that stores time for every validator. Note that this is a proof map that
+   * uses non-hashed keys.
    */
   ProofMapIndexProxy<PublicKey, ZonedDateTime> getValidatorsTimes();
 }

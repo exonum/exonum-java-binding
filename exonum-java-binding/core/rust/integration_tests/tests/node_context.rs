@@ -14,38 +14,32 @@
  * limitations under the License.
  */
 
-extern crate futures;
-extern crate integration_tests;
-extern crate java_bindings;
-#[macro_use]
-extern crate lazy_static;
-extern crate failure;
-
-use std::sync::Arc;
-
 use futures::{
     sync::mpsc::{self, Receiver},
     Stream,
 };
-use integration_tests::vm::create_vm_for_tests_with_fake_classes;
+use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
     exonum::{
-        blockchain::{Blockchain, Service, Transaction},
-        crypto::{gen_keypair, Hash, PublicKey, SecretKey},
-        messages::{RawTransaction, ServiceTransaction},
-        node::{ApiSender, ExternalMessage},
+        blockchain::{ApiSender, Blockchain},
+        crypto::{gen_keypair, PublicKey, SecretKey},
+        merkledb::TemporaryDB,
+        messages::Verified,
+        runtime::{AnyTx, CallInfo},
     },
-    exonum_merkledb::{Snapshot, TemporaryDB},
     jni::JavaVM,
-    Executor, NodeContext,
+    Executor, Node,
 };
+use lazy_static::lazy_static;
+
+use std::sync::Arc;
 
 lazy_static! {
-    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_fake_classes();
+    static ref VM: Arc<JavaVM> = create_vm_for_tests_with_classes();
     pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
-const TEST_TRANSACTION_ID: u16 = 0;
+const TEST_TRANSACTION_ID: u32 = 0;
 const TEST_TRANSACTION_PAYLOAD: &[u8] = &[1, 2, 3];
 
 #[test]
@@ -53,21 +47,16 @@ fn submit_transaction() {
     let keypair = gen_keypair();
     let tx_author = keypair.0;
     let service_id = 0;
-    let raw_transaction = create_raw_transaction(service_id);
+    let raw_transaction = create_transaction(service_id);
 
     let (node, app_rx) = create_node(keypair);
     node.submit(raw_transaction.clone()).unwrap();
     let sent_message = app_rx.wait().next().unwrap().unwrap();
 
-    match sent_message {
-        ExternalMessage::Transaction(sent) => {
-            let message_payload = sent.payload();
-            let message_author = sent.author();
-            assert_eq!(&raw_transaction, message_payload);
-            assert_eq!(message_author, tx_author);
-        }
-        _ => panic!("Message is not Transaction"),
-    }
+    let message_payload = sent_message.payload();
+    let message_author = sent_message.author();
+    assert_eq!(raw_transaction, *message_payload);
+    assert_eq!(message_author, tx_author);
 }
 
 #[test]
@@ -76,52 +65,25 @@ fn submit_transaction_to_missing_service() {
     let (node, _) = create_node(keypair);
     // invalid service_id
     let service_id = 1;
-    let raw_transaction = create_raw_transaction(service_id);
+    let transaction = create_transaction(service_id);
 
-    let res = node.submit(raw_transaction.clone());
+    let res = node.submit(transaction);
     assert!(res.is_err());
 }
 
-fn create_raw_transaction(service_id: u16) -> RawTransaction {
-    let service_transaction = ServiceTransaction::from_raw_unchecked(
-        TEST_TRANSACTION_ID,
-        TEST_TRANSACTION_PAYLOAD.to_vec(),
-    );
-    RawTransaction::new(service_id, service_transaction)
+fn create_transaction(instance_id: u32) -> AnyTx {
+    let call_info = CallInfo::new(instance_id, TEST_TRANSACTION_ID);
+    let tx_args = TEST_TRANSACTION_PAYLOAD.to_vec();
+    AnyTx::new(call_info, tx_args)
 }
 
-fn create_node(keypair: (PublicKey, SecretKey)) -> (NodeContext, Receiver<ExternalMessage>) {
+fn create_node(keypair: (PublicKey, SecretKey)) -> (Node, Receiver<Verified<AnyTx>>) {
     let api_channel = mpsc::channel(128);
     let (app_tx, app_rx) = (ApiSender::new(api_channel.0), api_channel.1);
 
-    struct EmptyService;
-
-    impl Service for EmptyService {
-        fn service_id(&self) -> u16 {
-            0
-        }
-
-        fn service_name(&self) -> &str {
-            "empty_service"
-        }
-
-        fn state_hash(&self, _: &Snapshot) -> Vec<Hash> {
-            vec![]
-        }
-
-        fn tx_from_raw(&self, _: RawTransaction) -> Result<Box<dyn Transaction>, failure::Error> {
-            unimplemented!()
-        }
-    }
-
     let storage = TemporaryDB::new();
-    let blockchain = Blockchain::new(
-        storage,
-        vec![Box::new(EmptyService)],
-        keypair.0,
-        keypair.1,
-        app_tx.clone(),
-    );
-    let node = NodeContext::new(EXECUTOR.clone(), blockchain, keypair.0, app_tx);
+    let blockchain = Blockchain::new(storage, keypair, app_tx);
+    let node = Node::new(blockchain);
+
     (node, app_rx)
 }

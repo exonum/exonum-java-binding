@@ -16,10 +16,14 @@
 
 package com.exonum.binding.test;
 
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_DIR;
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_FILENAME;
+import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_ID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.testkit.EmulatedNode;
 import com.exonum.binding.testkit.FakeTimeProvider;
@@ -28,6 +32,7 @@ import com.exonum.binding.testkit.TimeProvider;
 import com.exonum.binding.time.TimeSchema;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -35,7 +40,11 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @RequiresNativeLibrary
 class TimeSchemaProxyIntegrationTest {
@@ -43,52 +52,123 @@ class TimeSchemaProxyIntegrationTest {
   private static final ZonedDateTime EXPECTED_TIME = ZonedDateTime
       .of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
-  private TestKit testKit;
+  @Test
+  void newInstanceFailsIfNoSuchService() {
+    // Create a testkit with some service, just to be able to request BlockchainData
+    String someService = "some-service";
+    try (TestKit testkit = TestKit.builder()
+        .withArtifactsDirectory(ARTIFACT_DIR)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, someService, 10)
+        .build()) {
+      BlockchainData blockchainData = testkit.getBlockchainData(someService);
 
-  @BeforeEach
-  void createTestKit() {
+      String timeServiceName = "inactive-service";
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> TimeSchema.newInstance(blockchainData, timeServiceName));
+
+      assertThat(e.getMessage()).containsIgnoringCase("No time service instance")
+          .contains(timeServiceName);
+    }
+  }
+
+  @Test
+  void newInstanceFailsIfServiceOfOtherType() {
+    String serviceName = "other-service";
+    try (TestKit testkit = TestKit.builder()
+        .withArtifactsDirectory(ARTIFACT_DIR)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, serviceName, 10)
+        .build()) {
+      BlockchainData snapshot = testkit.getBlockchainData(serviceName);
+      Exception e = assertThrows(IllegalArgumentException.class,
+          () -> TimeSchema.newInstance(snapshot, serviceName));
+
+      assertThat(e.getMessage()).containsIgnoringCase("Not an Exonum time oracle")
+          .contains(serviceName)
+          .contains(ARTIFACT_ID.getName());
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "default-time",
+      "mars-time"
+  })
+  void getTimeAccessibleFromAnyInstance(String timeServiceName, @TempDir Path tmp) {
     TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
-    testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
-        .withTimeService(timeProvider)
-        .build();
+    try (TestKit testkit = TestKit.builder()
+        .withArtifactsDirectory(tmp)
+        .withTimeService(timeServiceName, 10, timeProvider)
+        .build()) {
+      setUpConsolidatedTime(testkit);
+      BlockchainData blockchainData = testkit.getBlockchainData(timeServiceName);
+      TimeSchema timeSchema = TimeSchema.newInstance(blockchainData, timeServiceName);
+      assertThat(timeSchema.getTime().toOptional()).hasValue(EXPECTED_TIME);
+    }
   }
 
-  @AfterEach
-  void destroyTestkit() {
-    testKit.close();
+  @Nested
+  class WithTimeService {
+
+    private static final String SERVICE_NAME = "default-time";
+    private TestKit testKit;
+
+    @BeforeEach
+    void createTestKit(@TempDir Path tmp) {
+      TimeProvider timeProvider = FakeTimeProvider.create(EXPECTED_TIME);
+      testKit = TestKit.builder()
+          .withArtifactsDirectory(tmp)
+          .withTimeService(SERVICE_NAME, 10, timeProvider)
+          .build();
+    }
+
+    @AfterEach
+    void destroyTestkit() {
+      testKit.close();
+    }
+
+    @Test
+    void getTime() {
+      setUpConsolidatedTime();
+      testKitTest((timeSchema) -> {
+        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
+        assertThat(consolidatedTime).hasValue(EXPECTED_TIME);
+      });
+    }
+
+    @Test
+    void getTimeBeforeConsolidated() {
+      testKitTest((timeSchema) -> {
+        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
+        assertThat(consolidatedTime).isEmpty();
+      });
+    }
+
+    @Test
+    void getValidatorsTime() {
+      setUpConsolidatedTime();
+      testKitTest((timeSchema) -> {
+        Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
+        EmulatedNode emulatedNode = testKit.getEmulatedNode();
+        PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
+        Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, EXPECTED_TIME);
+        assertThat(validatorsTimes).isEqualTo(expected);
+      });
+    }
+
+    private void setUpConsolidatedTime() {
+      TimeSchemaProxyIntegrationTest.setUpConsolidatedTime(testKit);
+    }
+
+    private void testKitTest(Consumer<TimeSchema> test) {
+      BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+      TimeSchema timeSchema = TimeSchema.newInstance(blockchainData, SERVICE_NAME);
+      test.accept(timeSchema);
+    }
   }
 
-  @Test
-  void getTime() {
-    setUpConsolidatedTime();
-    testKitTest((timeSchema) -> {
-      Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-      assertThat(consolidatedTime).hasValue(EXPECTED_TIME);
-    });
-  }
-
-  @Test
-  void getTimeBeforeConsolidated() {
-    testKitTest((timeSchema) -> {
-      Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-      assertThat(consolidatedTime).isEmpty();
-    });
-  }
-
-  @Test
-  void getValidatorsTime() {
-    setUpConsolidatedTime();
-    testKitTest((timeSchema) -> {
-      Map<PublicKey, ZonedDateTime> validatorsTimes = toMap(timeSchema.getValidatorsTimes());
-      EmulatedNode emulatedNode = testKit.getEmulatedNode();
-      PublicKey nodePublicKey = emulatedNode.getServiceKeyPair().getPublicKey();
-      Map<PublicKey, ZonedDateTime> expected = ImmutableMap.of(nodePublicKey, EXPECTED_TIME);
-      assertThat(validatorsTimes).isEqualTo(expected);
-    });
-  }
-
-  private void setUpConsolidatedTime() {
+  static void setUpConsolidatedTime(TestKit testKit) {
     // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
     // after the first block time transactions are generated and after the second one they are
     // processed
@@ -96,13 +176,7 @@ class TimeSchemaProxyIntegrationTest {
     testKit.createBlock();
   }
 
-  private void testKitTest(Consumer<TimeSchema> test) {
-    Snapshot view = testKit.getSnapshot();
-    TimeSchema timeSchema = TimeSchema.newInstance(view);
-    test.accept(timeSchema);
-  }
-
-  private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
+  private static <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
     return Maps.toMap(mapIndex.keys(), mapIndex::get);
   }
 }

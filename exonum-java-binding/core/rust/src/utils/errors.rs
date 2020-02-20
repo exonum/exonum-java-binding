@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-use jni::objects::JObject;
-use jni::JNIEnv;
+use exonum::merkledb::Error as DatabaseError;
+use jni::{objects::JObject, signature::JavaType, JNIEnv};
+use log::error;
 
-use std::any::Any;
-use std::cell::Cell;
-use std::error::Error;
-use std::result;
-use std::thread;
+use std::{any::Any, cell::Cell, error::Error, result, thread};
 
-use utils::{get_class_name, get_exception_message, jni_cache::classes_refs};
-use {JniError, JniErrorKind, JniResult};
+use crate::{
+    utils::{
+        get_class_name, get_exception_message,
+        jni_cache::{classes_refs, throwable::get_cause_id},
+    },
+    JniError, JniErrorKind, JniResult,
+};
+use jni::objects::JValue;
+
+const JAVA_LANG_THROWABLE: &str = "java/lang/Throwable";
 
 /// Unwraps the result, returning its content.
 ///
@@ -137,11 +142,20 @@ type ExceptionResult<T> = thread::Result<result::Result<T, JniError>>;
 
 /// Returns value or "throws" exception. `error_val` is returned, because exception will be thrown
 /// at the Java side. So this function should be used only for the `panic::catch_unwind` result.
+///
+/// The function accepts `Result<JniResult, Error>`, where outer `Result<..., Error>` corresponds
+/// to a return type of `panic::catch_unwind` and is `Err` in case of catched panic; inner
+/// `JniResult` represents the errors during Rust-Java interoperability. Therefore, the function
+/// can't be used for handling __any__ user-defined error type, but supports only a set of
+/// JNI-related errors and also handles unexpected panics.
 pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> T {
     match res {
-        Ok(val) => {
-            match val {
+        // No panic
+        Ok(jni_result) => {
+            match jni_result {
+                // No JNI error
                 Ok(val) => val,
+                // JNI error
                 Err(jni_error) => {
                     // Do nothing if there is a pending Java-exception that will be thrown
                     // automatically by the JVM when the native method returns.
@@ -153,8 +167,9 @@ pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> 
                 }
             }
         }
-        Err(ref e) => {
-            throw(env, &any_to_string(e));
+        // Panic occurred
+        Err(panic_occurred) => {
+            throw(env, &any_to_string(&panic_occurred));
             error_val
         }
     }
@@ -163,6 +178,23 @@ pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> 
 /// Same as `unwrap_exc_or` but returns default value.
 pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) -> T {
     unwrap_exc_or(env, res, T::default())
+}
+
+/// Returns a cause of the passed exception by using `Throwable#getCause` method.
+///
+/// Panics if `exception` is null.
+///
+/// Does not check for the returned `JObject` being `null`, the caller is
+/// responsible for that.
+pub fn get_exception_cause<'a>(env: &JNIEnv<'a>, exception: JObject<'a>) -> JniResult<JObject<'a>> {
+    assert!(!exception.is_null(), "Exception is null");
+    env.call_method_unchecked(
+        exception,
+        get_cause_id(),
+        JavaType::Object(JAVA_LANG_THROWABLE.into()),
+        &[],
+    )
+    .and_then(JValue::l)
 }
 
 /// Calls a corresponding `JNIEnv` method, so exception will be thrown when execution returns to
@@ -181,11 +213,13 @@ fn throw(env: &JNIEnv, error_message: &str) {
 /// Tries to get meaningful description from panic-error.
 pub fn any_to_string(any: &Box<dyn Any + Send>) -> String {
     if let Some(s) = any.downcast_ref::<&str>() {
-        s.to_string()
+        (*s).to_string()
     } else if let Some(s) = any.downcast_ref::<String>() {
         s.clone()
     } else if let Some(error) = any.downcast_ref::<Box<dyn Error + Send>>() {
         error.description().to_string()
+    } else if let Some(error) = any.downcast_ref::<DatabaseError>() {
+        error.to_string()
     } else {
         "Unknown error occurred".to_string()
     }
@@ -214,10 +248,17 @@ mod tests {
 
     #[test]
     fn box_error_any() {
-        let error: Box<Error + Send> = Box::new("e".parse::<i32>().unwrap_err());
+        let error: Box<dyn Error + Send> = Box::new("e".parse::<i32>().unwrap_err());
         let description = error.description().to_owned();
         let error = panic_error(error);
         assert_eq!(description, any_to_string(&error));
+    }
+
+    #[test]
+    fn database_error_any() {
+        let error = DatabaseError::new("Database error");
+        let error = panic_error(error);
+        assert_eq!("Database error", any_to_string(&error));
     }
 
     #[test]
@@ -226,7 +267,7 @@ mod tests {
         assert_eq!("Unknown error occurred", any_to_string(&error));
     }
 
-    fn panic_error<T: Send + 'static>(val: T) -> Box<Any + Send> {
+    fn panic_error<T: Send + 'static>(val: T) -> Box<dyn Any + Send> {
         panic::catch_unwind(panic::AssertUnwindSafe(|| panic!(val))).unwrap_err()
     }
 }

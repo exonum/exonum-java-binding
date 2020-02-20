@@ -17,7 +17,7 @@ use jni::JNIEnv;
 
 use std::mem;
 
-use JniResult;
+use crate::JniResult;
 
 /// A wrapper around Iterator used for constructing Java objects from their
 /// serialized representation. It allows to store the type information about

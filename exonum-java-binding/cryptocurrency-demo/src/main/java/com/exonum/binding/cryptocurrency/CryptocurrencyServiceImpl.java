@@ -16,6 +16,14 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.core.transaction.ExecutionPreconditions.checkExecution;
+import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
+import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
+import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_RECEIVER;
+import static com.exonum.binding.cryptocurrency.TransactionError.UNKNOWN_SENDER;
+import static com.exonum.binding.cryptocurrency.TransactionError.WALLET_ALREADY_EXISTS;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 
@@ -23,16 +31,18 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.exonum.binding.core.storage.database.Fork;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.inject.Inject;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.ext.web.Router;
 import java.util.List;
@@ -43,21 +53,15 @@ import javax.annotation.Nullable;
 public final class CryptocurrencyServiceImpl extends AbstractService
     implements CryptocurrencyService {
 
-  @Nullable private Node node;
+  public static final int CREATE_WALLET_TX_ID = 1;
+  public static final int TRANSFER_TX_ID = 2;
+
+  @Nullable
+  private Node node;
 
   @Inject
-  public CryptocurrencyServiceImpl(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
-  }
-
-  @Override
-  protected Schema createDataSchema(View view) {
-    return new CryptocurrencySchema(view);
-  }
-
-  @Override
-  public Optional<String> initialize(Fork fork) {
-    return Optional.empty();
+  public CryptocurrencyServiceImpl(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
   }
 
   @Override
@@ -73,8 +77,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public Optional<Wallet> getWallet(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot((view) -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    return node.withServiceData(serviceData -> {
+      CryptocurrencySchema schema = new CryptocurrencySchema(serviceData);
       MapIndex<PublicKey, Wallet> wallets = schema.wallets();
 
       return Optional.ofNullable(wallets.get(ownerKey));
@@ -85,10 +89,10 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   public List<HistoryEntity> getWalletHistory(PublicKey ownerKey) {
     checkBlockchainInitialized();
 
-    return node.withSnapshot(view -> {
-      CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    return node.withBlockchainData(blockchainData -> {
+      CryptocurrencySchema schema = createDataSchema(blockchainData);
       ListIndex<HashCode> walletHistory = schema.transactionsHistory(ownerKey);
-      Blockchain blockchain = Blockchain.newInstance(view);
+      Blockchain blockchain = blockchainData.getBlockchain();
       MapIndex<HashCode, TransactionMessage> txMessages = blockchain.getTxMessages();
 
       return walletHistory.stream()
@@ -98,9 +102,63 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     });
   }
 
+  @Override
+  @Transaction(CREATE_WALLET_TX_ID)
+  public void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context) {
+    PublicKey ownerPublicKey = context.getAuthorPk();
+
+    CryptocurrencySchema schema = createDataSchema(context.getBlockchainData());
+    MapIndex<PublicKey, Wallet> wallets = schema.wallets();
+
+    checkExecution(!wallets.containsKey(ownerPublicKey), WALLET_ALREADY_EXISTS.errorCode);
+
+    long initialBalance = arguments.getInitialBalance();
+    checkArgument(initialBalance >= 0, "The initial balance (%s) must not be negative.",
+        initialBalance);
+    Wallet wallet = new Wallet(initialBalance);
+
+    wallets.put(ownerPublicKey, wallet);
+  }
+
+  @Override
+  @Transaction(TRANSFER_TX_ID)
+  public void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context) {
+    long sum = arguments.getSum();
+    checkExecution(0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode,
+        "Non-positive transfer amount: " + sum);
+
+    PublicKey fromWallet = context.getAuthorPk();
+    PublicKey toWallet = toPublicKey(arguments.getToWallet());
+    checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
+
+    CryptocurrencySchema schema = createDataSchema(context.getBlockchainData());
+    ProofMapIndexProxy<PublicKey, Wallet> wallets = schema.wallets();
+    checkExecution(wallets.containsKey(fromWallet), UNKNOWN_SENDER.errorCode);
+    checkExecution(wallets.containsKey(toWallet), UNKNOWN_RECEIVER.errorCode);
+
+    Wallet from = wallets.get(fromWallet);
+    Wallet to = wallets.get(toWallet);
+    checkExecution(sum <= from.getBalance(), INSUFFICIENT_FUNDS.errorCode);
+
+    // Update the balances
+    wallets.put(fromWallet, new Wallet(from.getBalance() - sum));
+    wallets.put(toWallet, new Wallet(to.getBalance() + sum));
+
+    // Update the transaction history of each wallet
+    HashCode messageHash = context.getTransactionMessageHash();
+    schema.transactionsHistory(fromWallet).add(messageHash);
+    schema.transactionsHistory(toWallet).add(messageHash);
+  }
+
+  private CryptocurrencySchema createDataSchema(BlockchainData blockchainData) {
+    return new CryptocurrencySchema(blockchainData.getExecutingServiceData());
+  }
+
+  private static PublicKey toPublicKey(ByteString s) {
+    return PublicKey.fromBytes(s.toByteArray());
+  }
+
   private HistoryEntity createTransferHistoryEntry(TransactionMessage txMessage) {
-    checkState(txMessage.getServiceId() == getId(),
-        "Service ID mismatch: message contains %s, expected %s", txMessage.getServiceId(), getId());
     try {
       TxMessageProtos.TransferTx txBody = TxMessageProtos.TransferTx
           .parseFrom(txMessage.getPayload());

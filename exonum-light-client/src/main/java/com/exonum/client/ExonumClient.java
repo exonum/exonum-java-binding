@@ -27,6 +27,7 @@ import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.HealthCheckInfo;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,8 +38,8 @@ import okhttp3.OkHttpClient;
 /**
  * Main interface for Exonum Light client.
  * Provides a convenient way for interaction with Exonum framework APIs.
- * All the methods of the interface work in a blocking way
- * i.e. invoke underlying request immediately, and block until the response can be processed
+ * All the methods of the interface work in a blocking way,
+ * i.e., invoke underlying request immediately, and block until the response can be processed
  * or an error occurs. In case the thread is interrupted, the blocked methods will complete
  * exceptionally.
  *
@@ -184,6 +185,21 @@ public interface ExonumClient {
   Optional<Block> getLastNonEmptyBlock();
 
   /**
+   * Returns the service info of a started service instance with a given name; or
+   * {@code Optional.empty()} if there is no service instance with such name.
+   *
+   * @param serviceName the name of a service instance
+   */
+  Optional<ServiceInstanceInfo> findServiceInfo(String serviceName);
+
+  /**
+   * Returns information on all started service instances.
+   *
+   * @see #findServiceInfo
+   */
+  List<ServiceInstanceInfo> getServiceInfoList();
+
+  /**
    * Returns Exonum client builder.
    */
   static Builder newBuilder() {
@@ -201,7 +217,13 @@ public interface ExonumClient {
     private String prefix = "";
 
     /**
-     * Sets Exonum host url.
+     * Sets the Exonum host url.
+     *
+     * @param exonumHost Exonum <em>public API address</em>
+     * @see <a href="https://exonum.com/doc/version/latest/architecture/configuration/#api">
+     *   API Configuration</a>
+     * @see <a href="https://exonum.com/doc/version/latest/get-started/java-binding/#node-configuration">
+     *   Exonum Node Configuraion</a>
      */
     public Builder setExonumHost(URL exonumHost) {
       this.exonumHost = checkNotNull(exonumHost);
@@ -209,8 +231,11 @@ public interface ExonumClient {
     }
 
     /**
-     * Sets Exonum host url.
+     * Sets the Exonum host url.
+     *
+     * @param exonumHost Exonum <em>public API address</em>
      * @throws IllegalArgumentException if the url is malformed
+     * @see #setExonumHost(URL)
      */
     public Builder setExonumHost(String exonumHost) {
       String host = checkNotNull(exonumHost);

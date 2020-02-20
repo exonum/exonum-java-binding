@@ -16,12 +16,28 @@
 
 package com.exonum.binding.testkit;
 
+import static com.exonum.binding.testkit.TestKit.MAX_SERVICE_INSTANCE_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_FILENAME;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_FILENAME_2;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.ARTIFACT_ID_2;
+import static com.exonum.binding.testkit.TestKitTestUtils.CONFIGURATION_VALUE;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_CONFIGURATION;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_ID;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_ID_2;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_NAME;
+import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_NAME_2;
+import static com.exonum.binding.testkit.TestKitTestUtils.checkIfServiceEnabled;
+import static com.exonum.binding.testkit.TestKitTestUtils.createInvalidArtifact;
+import static com.exonum.binding.testkit.TestKitTestUtils.createTestService2Artifact;
+import static com.exonum.binding.testkit.TestKitTestUtils.createTestServiceArtifact;
+import static com.exonum.binding.testkit.TestService.TEST_TRANSACTION_ID;
+import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
-import static com.exonum.binding.testkit.TestTransaction.BODY_CHARSET;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.crypto.CryptoFunction;
 import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.crypto.KeyPair;
@@ -30,98 +46,236 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.service.AbstractServiceModule;
-import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.service.ServiceModule;
-import com.exonum.binding.core.service.TransactionConverter;
+import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
+import com.exonum.binding.testkit.Transactions.PutTransactionArgs;
 import com.exonum.binding.time.TimeSchema;
+import com.exonum.messages.core.Blockchain.Config;
+import com.exonum.messages.core.Blockchain.ValidatorKeys;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.inject.Singleton;
-import io.vertx.ext.web.Router;
+import com.google.protobuf.ByteString;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TestKitTest {
-
-  @RegisterExtension
-  TestKitExtension testKitExtension = new TestKitExtension(
-      TestKit.builder()
-          .withService(TestServiceModule.class));
+  private static final String TIME_SERVICE_NAME = "time-service";
+  private static final int TIME_SERVICE_ID = 10;
 
   private static final CryptoFunction CRYPTO_FUNCTION = CryptoFunctions.ed25519();
   private static final KeyPair KEY_PAIR = CRYPTO_FUNCTION.generateKeyPair();
   private static final ZonedDateTime TIME =
       ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 1, ZoneOffset.UTC);
 
+  @TempDir
+  @SuppressWarnings("WeakerAccess") // @TempDir can't be private
+  static Path artifactsDirectory;
+
+  @RegisterExtension
+  TestKitExtension testKitExtension = new TestKitExtension(
+      TestKit.builder()
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+          .withArtifactsDirectory(artifactsDirectory));
+
+  @BeforeAll
+  static void setUp() throws IOException {
+    createTestServiceArtifact(artifactsDirectory);
+    createTestService2Artifact(artifactsDirectory);
+  }
+
   @Test
-  void createTestKitForSingleService() {
-    TestService service;
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      checkTestServiceInitialization(testKit, service);
+  void createTestKitForSingleServiceWithDefaultConfiguration() {
+    // Deploy service that ignores configuration and should initialize correctly
+    // with the default one
+    try (TestKit testKit = TestKit.forService(ARTIFACT_ID_2, ARTIFACT_FILENAME_2,
+        SERVICE_NAME_2, SERVICE_ID_2, artifactsDirectory)) {
+      checkTestService2Initialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
     }
   }
 
   @Test
   void createTestKitWithBuilderForSingleService() {
     try (TestKit testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+        .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      checkTestServiceInitialization(testKit, service);
+      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
     }
   }
 
   @Test
-  void createTestKitWithBuilderForMultipleSameServices() {
+  void createTestKitWithTwoServiceInstancesSameArtifact() {
+    try (TestKit testKit = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+        .withService(ARTIFACT_ID, SERVICE_NAME_2, SERVICE_ID_2, SERVICE_CONFIGURATION)
+        .withArtifactsDirectory(artifactsDirectory)
+        .build()) {
+      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
+      checkTestServiceInitialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
+    }
+  }
+
+  @Test
+  void createTestKitWithDeployedArtifactWithoutCreatedServicesThrows() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    List<Class<? extends ServiceModule>> serviceModules = ImmutableList.of(TestServiceModule.class,
-        TestServiceModule.class);
     TestKit.Builder testKitBuilder = TestKit.builder()
-        .withServices(serviceModules);
-    assertThrows(exceptionType, testKitBuilder::build);
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withArtifactsDirectory(artifactsDirectory);
+    IllegalArgumentException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    assertThat(thrownException.getMessage())
+        .isEqualTo("Following service artifacts were deployed, but not used for"
+            + " service instantiation: [%s]", ARTIFACT_ID.toString());
+  }
+
+  @Test
+  void createTestKitWithoutDeployedArtifactThrows() {
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withArtifactsDirectory(artifactsDirectory);
+    IllegalArgumentException thrownException = assertThrows(exceptionType,
+        () -> testKitBuilder.withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID,
+            SERVICE_CONFIGURATION));
+    assertThat(thrownException.getMessage())
+        .isEqualTo("Service %s should be deployed first in order to be created",
+        ARTIFACT_ID.toString());
+  }
+
+  @Test
+  void createTestKitWithDifferentDeployedArtifactAndCreatedServiceThrows() {
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withArtifactsDirectory(artifactsDirectory);
+    IllegalArgumentException thrownException = assertThrows(exceptionType,
+        () -> testKitBuilder.withService(ARTIFACT_ID_2, SERVICE_NAME_2, SERVICE_ID_2));
+    assertThat(thrownException.getMessage())
+        .isEqualTo("Service %s should be deployed first in order to be created",
+        ARTIFACT_ID_2.toString());
+  }
+
+  @Test
+  void createTestKitWithoutArtifactsDirectoryThrows() {
+    Class<IllegalStateException> exceptionType = IllegalStateException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION);
+    IllegalStateException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    assertThat(thrownException.getMessage()).isEqualTo("Artifacts directory was not set.");
+  }
+
+  @Test
+  void createTestKitWithNoFileThrows() {
+    String nonexistentArtifactFilename = "nonexistent-artifact.jar";
+    Class<RuntimeException> exceptionType = RuntimeException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, nonexistentArtifactFilename)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+        .withArtifactsDirectory(artifactsDirectory);
+    RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    assertThat(thrownException.getMessage())
+        .contains("Failed to load the service from ", nonexistentArtifactFilename);
+  }
+
+  @Test
+  void createTestKitWithInvalidArtifactThrows() throws Exception {
+    String artifactFilename = "invalid-artifact.jar";
+    createInvalidArtifact(artifactsDirectory, artifactFilename);
+
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, artifactFilename)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+        .withArtifactsDirectory(artifactsDirectory);
+
+    Exception e = assertThrows(RuntimeException.class, testKitBuilder::build);
+
+    assertThat(e.getMessage()).contains("Cannot deploy an artifact");
+  }
+
+  // todo: invalidartifact — causing deploy errors (as ^) and causing instantiation errors (todo)
+
+  @Test
+  void createTestKitWithCustomConfiguration() {
+    String configurationValue = "Custom value";
+    TestConfiguration testConfiguration = TestConfiguration.newBuilder()
+        .setValue(configurationValue)
+        .build();
+    try (TestKit testKit = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, testConfiguration)
+        .withArtifactsDirectory(artifactsDirectory)
+        .build()) {
+      // Check that configuration value is used in initialization
+      BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+      TestSchema testSchema = new TestSchema(blockchainData.getExecutingServiceData());
+      ProofMapIndexProxy<String, String> testProofMap = testSchema.testMap();
+      Map<String, String> testMap = toMap(testProofMap);
+      Map<String, String> expected = ImmutableMap.of(
+          TestService.INITIAL_ENTRY_KEY, configurationValue);
+      assertThat(testMap).isEqualTo(expected);
+    }
+  }
+
+  @Test
+  void createTestKitWithThrowingInitialization() {
+    TestConfiguration invalidConfiguration = TestConfiguration.newBuilder()
+        .setValue(THROWING_VALUE)
+        .build();
+    Class<RuntimeException> exceptionType = RuntimeException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        // Initialize with special invalid configuration
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, invalidConfiguration)
+        .withArtifactsDirectory(artifactsDirectory);
+    RuntimeException thrownException = assertThrows(exceptionType, testKitBuilder::build);
+    assertThat(thrownException.getMessage())
+        .contains("Service configuration had an invalid value:", THROWING_VALUE);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {-1, MAX_SERVICE_INSTANCE_ID + 1})
+  void createTestKitWithInvalidServiceId(int invalidServiceId) {
+    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
+    TestKit.Builder testKitBuilder = TestKit.builder()
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withArtifactsDirectory(artifactsDirectory);
+    assertThrows(exceptionType,
+        () -> testKitBuilder.withService(ARTIFACT_ID, SERVICE_NAME, invalidServiceId));
   }
 
   @Test
   void createTestKitWithBuilderForMultipleDifferentServices() {
     try (TestKit testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
-        .withService(TestServiceModule2.class)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+        .withDeployedArtifact(ARTIFACT_ID_2, ARTIFACT_FILENAME_2)
+        .withService(ARTIFACT_ID_2, SERVICE_NAME_2, SERVICE_ID_2)
+        .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      checkTestServiceInitialization(testKit, service);
-      TestService2 service2 = testKit.getService(TestService2.SERVICE_ID, TestService2.class);
-      checkTestService2Initialization(testKit, service2);
-    }
-  }
-
-  @Test
-  void createTestKitWithBuilderForMultipleDifferentServicesVarargs() {
-    try (TestKit testKit = TestKit.builder()
-        .withServices(TestServiceModule.class, TestServiceModule2.class)
-        .build()) {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      checkTestServiceInitialization(testKit, service);
-      TestService2 service2 = testKit.getService(TestService2.SERVICE_ID, TestService2.class);
-      checkTestService2Initialization(testKit, service2);
+      checkTestServiceInitialization(testKit, SERVICE_NAME, SERVICE_ID);
+      checkTestService2Initialization(testKit, SERVICE_NAME_2, SERVICE_ID_2);
     }
   }
 
@@ -129,53 +283,41 @@ class TestKitTest {
   void createTestKitWithTimeService() {
     TimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
-        .withTimeService(timeProvider)
+        .withTimeService(TIME_SERVICE_NAME, TIME_SERVICE_ID, timeProvider)
+        .withArtifactsDirectory(artifactsDirectory)
         .build()) {
-      TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-      checkTestServiceInitialization(testKit, service);
+      checkIfServiceEnabled(testKit, TIME_SERVICE_NAME, TIME_SERVICE_ID);
     }
   }
 
-  private void checkTestServiceInitialization(TestKit testKit, TestService service) {
-    // Check that TestKit contains an instance of TestService
-    assertThat(service.getId()).isEqualTo(TestService.SERVICE_ID);
-    assertThat(service.getName()).isEqualTo(TestService.SERVICE_NAME);
+  private void checkTestServiceInitialization(TestKit testKit, String serviceName, int serviceId) {
+    BlockchainData blockchainData = testKit.getBlockchainData(serviceName);
+    // Check that genesis block was committed
+    checkGenesisBlockCommit(blockchainData.getBlockchain());
 
-    // Check that TestService API is mounted
-    Node serviceNode = service.getNode();
-    EmulatedNode emulatedTestKitNode = testKit.getEmulatedNode();
-    assertThat(serviceNode.getPublicKey())
-        .isEqualTo(emulatedTestKitNode.getServiceKeyPair().getPublicKey());
+    // Check that service appears in dispatcher schema
+    checkIfServiceEnabled(testKit, serviceName, serviceId);
 
     // Check that initialization changed database state
-    Snapshot view = testKit.getSnapshot();
-    TestSchema testSchema = service.createDataSchema(view);
-    ProofMapIndexProxy<HashCode, String> testProofMap = testSchema.testMap();
-    Map<HashCode, String> testMap = toMap(testProofMap);
-    Map<HashCode, String> expected = ImmutableMap.of(
-        TestService.INITIAL_ENTRY_KEY, TestService.INITIAL_ENTRY_VALUE);
+    TestSchema testSchema = new TestSchema(blockchainData.getExecutingServiceData());
+    ProofMapIndexProxy<String, String> testProofMap = testSchema.testMap();
+    Map<String, String> testMap = toMap(testProofMap);
+    Map<String, String> expected = ImmutableMap.of(
+        TestService.INITIAL_ENTRY_KEY, CONFIGURATION_VALUE);
     assertThat(testMap).isEqualTo(expected);
-
-    // Check that genesis block was committed
-    Blockchain blockchain = Blockchain.newInstance(view);
-    assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
-  private void checkTestService2Initialization(TestKit testKit, TestService2 service) {
-    // Check that TestKit contains an instance of TestService2
-    assertThat(service.getId()).isEqualTo(TestService2.SERVICE_ID);
-    assertThat(service.getName()).isEqualTo(TestService2.SERVICE_NAME);
-
-    // Check that TestService2 API is mounted
-    Node serviceNode = service.getNode();
-    EmulatedNode emulatedTestKitNode = testKit.getEmulatedNode();
-    assertThat(serviceNode.getPublicKey())
-        .isEqualTo(emulatedTestKitNode.getServiceKeyPair().getPublicKey());
-
+  private void checkTestService2Initialization(TestKit testKit, String serviceName,
+                                               int serviceId) {
     // Check that genesis block was committed
-    Snapshot view = testKit.getSnapshot();
-    Blockchain blockchain = Blockchain.newInstance(view);
+    Snapshot snapshot = testKit.getSnapshot();
+    checkGenesisBlockCommit(Blockchain.newInstance(snapshot));
+
+    // Check that service appears in dispatcher schema
+    checkIfServiceEnabled(testKit, serviceName, serviceId);
+  }
+
+  private void checkGenesisBlockCommit(Blockchain blockchain) {
     assertThat(blockchain.getBlockHashes().size()).isEqualTo(1L);
   }
 
@@ -183,12 +325,14 @@ class TestKitTest {
   void createTestKitWithSeveralValidators() {
     short validatorCount = 2;
     try (TestKit testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withValidators(validatorCount)
+        .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       Snapshot view = testKit.getSnapshot();
       Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
+      assertThat(blockchain.getConsensusConfiguration().getValidatorKeysCount())
           .isEqualTo(validatorCount);
     }
   }
@@ -198,12 +342,14 @@ class TestKitTest {
     short validatorCount = 2;
     try (TestKit testKit = TestKit.builder()
         .withNodeType(EmulatedNodeType.AUDITOR)
-        .withService(TestServiceModule.class)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
         .withValidators(validatorCount)
+        .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       Snapshot view = testKit.getSnapshot();
       Blockchain blockchain = Blockchain.newInstance(view);
-      assertThat(blockchain.getActualConfiguration().validatorKeys().size())
+      assertThat(blockchain.getConsensusConfiguration().getValidatorKeysCount())
           .isEqualTo(validatorCount);
     }
   }
@@ -213,52 +359,40 @@ class TestKitTest {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     short invalidValidatorCount = 0;
     TestKit.Builder testKitBuilder = TestKit.builder()
-        .withService(TestServiceModule.class);
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+        .withArtifactsDirectory(artifactsDirectory);
     assertThrows(exceptionType, () -> testKitBuilder.withValidators(invalidValidatorCount));
-  }
-
-  @Test
-  void requestWrongServiceClass() {
-    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    try (TestKit testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
-        .build()) {
-      assertThrows(exceptionType,
-          () -> testKit.getService(TestService.SERVICE_ID, TestService2.class));
-    }
-  }
-
-  @Test
-  void requestWrongServiceId() {
-    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    try (TestKit testKit = TestKit.forService(TestServiceModule.class)) {
-      assertThrows(exceptionType, () -> testKit.getService((short) -1, TestService2.class));
-    }
   }
 
   @Test
   void createTestKitMoreThanMaxServiceNumber() {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    List<Class<? extends ServiceModule>> serviceModules = new ArrayList<>();
-    for (int i = 0; i < TestKit.MAX_SERVICE_NUMBER + 1; i++) {
-      serviceModules.add(TestServiceModule.class);
-    }
     TestKit.Builder testKitBuilder = TestKit.builder()
-        .withServices(serviceModules);
+            .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+            .withArtifactsDirectory(artifactsDirectory);
+    for (int i = 0; i < TestKit.MAX_SERVICE_NUMBER + 1; i++) {
+      String serviceName = SERVICE_NAME + i;
+      int serviceId = SERVICE_ID + i;
+      testKitBuilder = testKitBuilder.withService(ARTIFACT_ID, serviceName, serviceId);
+    }
     assertThrows(exceptionType, testKitBuilder::build);
   }
 
   @Test
   void createTestKitWithoutServices() {
-    Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
-    TestKit.Builder testKitBuilder = TestKit.builder();
-    assertThrows(exceptionType, testKitBuilder::build);
+    try (TestKit testKit = TestKit.builder()
+        .withArtifactsDirectory(artifactsDirectory)
+        .build()) {
+      // Shouldn't throw
+    }
   }
 
   @Test
   void createEmptyBlock(TestKit testKit) {
     Block block = testKit.createBlock();
-    assertThat(block.getNumTransactions()).isEqualTo(0);
+    // A transaction submitted by the service instance in after_commit
+    assertThat(block.getNumTransactions()).isEqualTo(1);
 
     Snapshot view = testKit.getSnapshot();
     Blockchain blockchain = Blockchain.newInstance(view);
@@ -271,16 +405,18 @@ class TestKitTest {
     // Create a block so that afterCommit transaction is submitted
     Block block = testKit.createBlock();
     List<TransactionMessage> inPoolTransactions = testKit
-        .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+        .findTransactionsInPool(tx -> tx.getServiceId() == SERVICE_ID);
     assertThat(inPoolTransactions).hasSize(1);
     TransactionMessage inPoolTransaction = inPoolTransactions.get(0);
-    RawTransaction afterCommitTransaction = constructAfterCommitTransaction(block.getHeight());
+    RawTransaction afterCommitTransaction =
+        constructAfterCommitTransaction(SERVICE_ID, block.getHeight());
 
     assertThat(inPoolTransaction.getServiceId())
         .isEqualTo(afterCommitTransaction.getServiceId());
     assertThat(inPoolTransaction.getTransactionId())
         .isEqualTo(afterCommitTransaction.getTransactionId());
-    assertThat(inPoolTransaction.getPayload()).isEqualTo(afterCommitTransaction.getPayload());
+    ByteString expectedPayload = ByteString.copyFrom(afterCommitTransaction.getPayload());
+    assertThat(inPoolTransaction.getPayload()).isEqualTo(expectedPayload);
 
     Block nextBlock = testKit.createBlock();
     assertThat(nextBlock.getNumTransactions()).isEqualTo(1);
@@ -297,8 +433,27 @@ class TestKitTest {
 
     // Two blocks were created, so two afterCommit transactions should be submitted into pool
     List<TransactionMessage> inPoolTransactions = testKit
-        .findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
+        .findTransactionsInPool(tx -> tx.getServiceId() == SERVICE_ID);
     assertThat(inPoolTransactions).hasSize(2);
+  }
+
+  @Test
+  void getTransactionPool(TestKit testKit) {
+    // Create two blocks with no transactions, so two afterCommit transactions are stored in
+    // the transaction pool
+    Block block1 = testKit.createBlock();
+    // Use #createBlockWithTransactions() so that an empty block is created and first afterCommit
+    // transaction stays in pool
+    Block block2 = testKit.createBlockWithTransactions();
+    RawTransaction afterCommitTransaction1 =
+        constructAfterCommitTransaction(SERVICE_ID, block1.getHeight());
+    RawTransaction afterCommitTransaction2 =
+        constructAfterCommitTransaction(SERVICE_ID, block2.getHeight());
+    List<RawTransaction> rawTransactionsInPool = testKit.getTransactionPool().stream()
+        .map(RawTransaction::fromMessage)
+        .collect(toList());
+    assertThat(rawTransactionsInPool)
+        .containsExactlyInAnyOrder(afterCommitTransaction1, afterCommitTransaction2);
   }
 
   @Test
@@ -311,10 +466,9 @@ class TestKitTest {
     Blockchain blockchain = Blockchain.newInstance(view);
     assertThat(blockchain.getHeight()).isEqualTo(1);
     assertThat(block).isEqualTo(blockchain.getBlock(1));
-    Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
-    assertThat(transactionResults).hasSize(1);
-    TransactionResult transactionResult = transactionResults.get(message.hash());
-    assertThat(transactionResult).isEqualTo(TransactionResult.successful());
+
+    ProofListIndexProxy<HashCode> blockTransactions = blockchain.getBlockTransactions(block);
+    assertThat(blockTransactions).containsExactly(message.hash());
   }
 
   @Test
@@ -323,56 +477,13 @@ class TestKitTest {
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
 
     Block block = testKit.createBlockWithTransactions(ImmutableList.of(message, message2));
+    // Check the returned block
     assertThat(block.getNumTransactions()).isEqualTo(2);
+    assertThat(block.getHeight()).isEqualTo(1);
 
-    testKit.withSnapshot((view) -> checkTransactionsCommittedSuccessfully(
-        view, block, message, message2));
-  }
-
-  @Test
-  void nodeSubmittedTransactionsArePlacedInPool(TestKit testKit) {
-    TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-
-    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-    service.getNode().submitTransaction(rawTransaction);
-
-    List<TransactionMessage> transactionsInPool =
-        testKit.findTransactionsInPool(tx -> tx.getServiceId() == TestService.SERVICE_ID);
-    assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
-  }
-
-  @Test
-  void getTransactionPool(TestKit testKit) {
-    TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-
-    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-    TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
-    RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
-
-    service.getNode().submitTransaction(rawTransaction);
-    service.getNode().submitTransaction(rawTransaction2);
-
-    List<TransactionMessage> transactionsInPool = testKit.getTransactionPool();
-    assertThat(transactionsInPool).containsExactlyInAnyOrder(message, message2);
-  }
-
-  @Test
-  void findTransactionsInPool(TestKit testKit) {
-    TestService service = testKit.getService(TestService.SERVICE_ID, TestService.class);
-
-    TransactionMessage message = constructTestTransactionMessage("Test message", testKit);
-    RawTransaction rawTransaction = RawTransaction.fromMessage(message);
-    TransactionMessage message2 = constructTestTransactionMessage("Test message 2", testKit);
-    RawTransaction rawTransaction2 = RawTransaction.fromMessage(message2);
-    service.getNode().submitTransaction(rawTransaction);
-    service.getNode().submitTransaction(rawTransaction2);
-
-    List<TransactionMessage> transactionsInPool =
-        testKit.findTransactionsInPool(
-            tx -> Arrays.equals(tx.getPayload(), message.getPayload()));
-    assertThat(transactionsInPool).isEqualTo(ImmutableList.of(message));
+    // Check the transactions are indeed executed by the core
+    testKit.withSnapshot((snapshot) -> checkCommittedBlockWithMessages(
+        snapshot, block, message, message2));
   }
 
   @Test
@@ -381,71 +492,61 @@ class TestKitTest {
     TransactionMessage message2 = constructTestTransactionMessage("Test message 2");
 
     Block block = testKit.createBlockWithTransactions(message, message2);
+    // Check the returned block
     assertThat(block.getNumTransactions()).isEqualTo(2);
+    assertThat(block.getHeight()).isEqualTo(1);
 
-    testKit.withSnapshot((view) -> checkTransactionsCommittedSuccessfully(
-        view, block, message, message2));
+    // Check the transactions are indeed executed by the core
+    testKit.withSnapshot((snapshot) -> checkCommittedBlockWithMessages(
+        snapshot, block, message, message2));
   }
 
-  private TransactionMessage constructTestTransactionMessage(String payload) {
-    return constructTestTransactionMessage(payload, KEY_PAIR);
+  private TransactionMessage constructTestTransactionMessage(String key) {
+    return constructTestTransactionMessage(key, KEY_PAIR);
   }
 
-  private TransactionMessage constructTestTransactionMessage(String payload, TestKit testKit) {
-    EmulatedNode emulatedNode = testKit.getEmulatedNode();
-    KeyPair emulatedNodeKeyPair = emulatedNode.getServiceKeyPair();
-    return constructTestTransactionMessage(payload, emulatedNodeKeyPair);
-  }
-
-  private TransactionMessage constructTestTransactionMessage(String payload, KeyPair keyPair) {
+  private TransactionMessage constructTestTransactionMessage(String key, KeyPair keyPair) {
     return TransactionMessage.builder()
-        .serviceId(TestService.SERVICE_ID)
-        .transactionId(TestTransaction.ID)
-        .payload(payload.getBytes(BODY_CHARSET))
-        .sign(keyPair, CRYPTO_FUNCTION);
+        .serviceId(SERVICE_ID)
+        .transactionId(TEST_TRANSACTION_ID)
+        .payload(
+            PutTransactionArgs.newBuilder()
+                .setKey(key)
+                .build())
+        .sign(keyPair);
   }
 
-  private void checkTransactionsCommittedSuccessfully(
-      View view, Block block, TransactionMessage message, TransactionMessage message2) {
-    Blockchain blockchain = Blockchain.newInstance(view);
-    assertThat(blockchain.getHeight()).isEqualTo(1);
-    assertThat(block).isEqualTo(blockchain.getBlock(1));
-    Map<HashCode, TransactionResult> transactionResults = toMap(blockchain.getTxResults());
-    assertThat(transactionResults).hasSize(2);
+  private void checkCommittedBlockWithMessages(Access access, Block lastBlock,
+      TransactionMessage... messages) {
+    // Check the info in blockchain matches the block
+    Blockchain blockchain = Blockchain.newInstance(access);
+    long blockHeight = lastBlock.getHeight();
+    assertThat(blockchain.getHeight()).isEqualTo(blockHeight);
+    assertThat(blockchain.getBlock(blockHeight)).isEqualTo(lastBlock);
 
-    TransactionResult transactionResult = transactionResults.get(message.hash());
-    assertThat(transactionResult).isEqualTo(TransactionResult.successful());
-    TransactionResult transactionResult2 = transactionResults.get(message2.hash());
-    assertThat(transactionResult2).isEqualTo(TransactionResult.successful());
-  }
-
-  @Test
-  void createBlockWithTransactionWithWrongServiceId(TestKit testKit) {
-    short wrongServiceId = (short) (TestService.SERVICE_ID + 1);
-    TransactionMessage message = TransactionMessage.builder()
-        .serviceId(wrongServiceId)
-        .transactionId(TestTransaction.ID)
-        .payload("Test message".getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
-    IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
-        () -> testKit.createBlockWithTransactions(message));
-    assertThat(thrownException.getMessage())
-        .contains("Unknown service id", Integer.toString(wrongServiceId), message.toString());
+    // Check the messages are committed
+    ProofListIndexProxy<HashCode> blockTransactions = blockchain.getBlockTransactions(blockHeight);
+    assertThat(blockTransactions).hasSize(messages.length);
+    for (TransactionMessage message : messages) {
+      HashCode hash = message.hash();
+      assertThat(blockTransactions)
+          .as("No hash for %s", message)
+          .contains(hash);
+    }
   }
 
   @Test
-  void createBlockWithTransactionWithWrongTransactionId(TestKit testKit) {
-    short wrongTransactionId = (short) (TestTransaction.ID + 1);
+  void createBlockWithTransactionWithUnknownServiceId(TestKit testKit) {
+    short unknownServiceId = SERVICE_ID + 100;
     TransactionMessage message = TransactionMessage.builder()
-        .serviceId(TestService.SERVICE_ID)
-        .transactionId(wrongTransactionId)
-        .payload("Test message".getBytes(BODY_CHARSET))
-        .sign(KEY_PAIR, CRYPTO_FUNCTION);
-    IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class,
+        .serviceId(unknownServiceId)
+        .transactionId(TEST_TRANSACTION_ID)
+        .payload(new byte[0])
+        .sign(KEY_PAIR);
+    Exception e = assertThrows(Exception.class,
         () -> testKit.createBlockWithTransactions(message));
-    assertThat(thrownException.getMessage())
-        .contains("failed to convert transaction", TestService.SERVICE_NAME,
-            Integer.toString(TestService.SERVICE_ID), message.toString());
+    assertThat(e)
+        .hasMessageContaining("Suitable runtime for the given service instance ID is not found");
   }
 
   @Test
@@ -453,14 +554,28 @@ class TestKitTest {
     EmulatedNode node = testKit.getEmulatedNode();
     assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.VALIDATOR);
     assertThat(node.getValidatorId()).isNotEmpty();
-    assertThat(node.getServiceKeyPair()).isNotNull();
+
+    Snapshot view = testKit.getSnapshot();
+    Blockchain blockchain = Blockchain.newInstance(view);
+    Config configuration = blockchain.getConsensusConfiguration();
+
+    // Check the public service key of the emulated node is included
+    List<PublicKey> serviceKeys = configuration.getValidatorKeysList().stream()
+        .map(ValidatorKeys::getServiceKey)
+        .map(key -> PublicKey.fromBytes(key.getData().toByteArray()))
+        .collect(toList());
+    PublicKey emulatedNodeServiceKey = node.getServiceKeyPair().getPublicKey();
+    List<PublicKey> expectedKeys = ImmutableList.of(emulatedNodeServiceKey);
+    assertThat(serviceKeys).isEqualTo(expectedKeys);
   }
 
   @Test
   void getAuditorEmulatedNode() {
     try (TestKit testKit = TestKit.builder()
         .withNodeType(EmulatedNodeType.AUDITOR)
-        .withService(TestServiceModule.class)
+        .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+        .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID, SERVICE_CONFIGURATION)
+        .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       EmulatedNode node = testKit.getEmulatedNode();
       assertThat(node.getNodeType()).isEqualTo(EmulatedNodeType.AUDITOR);
@@ -473,25 +588,24 @@ class TestKitTest {
   void timeServiceWorksInTestKit() {
     FakeTimeProvider timeProvider = FakeTimeProvider.create(TIME);
     try (TestKit testKit = TestKit.builder()
-        .withService(TestServiceModule.class)
-        .withTimeService(timeProvider)
+        .withTimeService(TIME_SERVICE_NAME, TIME_SERVICE_ID, timeProvider)
+        .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       // Commit two blocks for time oracle to prepare consolidated time. Two blocks are needed as
       // after the first block time transactions are generated and after the second one they are
       // processed
       testKit.createBlock();
       testKit.createBlock();
-      testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
-        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-        assertThat(consolidatedTime).contains(TIME);
+      // Check the time after the first processed time transaction
+      BlockchainData blockchainData1 = testKit.getBlockchainData(TIME_SERVICE_NAME);
+      TimeSchema timeSchema1 = TimeSchema.newInstance(blockchainData1, TIME_SERVICE_NAME);
+      Optional<ZonedDateTime> consolidatedTime = timeSchema1.getTime().toOptional();
+      assertThat(consolidatedTime).contains(TIME);
+      // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
+      // public key and time provider's time
+      checkValidatorsTimes(timeSchema1, testKit, TIME);
 
-        // Check that validatorsTimes contains one exactly entry with TestKit emulated node's
-        // public key and time provider's time
-        checkValidatorsTimes(timeSchema, testKit, TIME);
-      });
-
-      // Update time in time provider
+      // Update the time in time provider
       ZonedDateTime newTime = TIME.plusDays(1);
       timeProvider.setTime(newTime);
       // Commit two blocks for time oracle to update consolidated time. Two blocks are needed as
@@ -499,11 +613,11 @@ class TestKitTest {
       // processed
       testKit.createBlock();
       testKit.createBlock();
-      testKit.withSnapshot((view) -> {
-        TimeSchema timeSchema = TimeSchema.newInstance(view);
-        Optional<ZonedDateTime> consolidatedTime = timeSchema.getTime().toOptional();
-        assertThat(consolidatedTime).contains(newTime);
-      });
+      // Check the time after the 3rd time transaction which uses the new time
+      BlockchainData blockchainData2 = testKit.getBlockchainData(TIME_SERVICE_NAME);
+      TimeSchema timeSchema = TimeSchema.newInstance(blockchainData2, TIME_SERVICE_NAME);
+      Optional<ZonedDateTime> consolidatedTime2 = timeSchema.getTime().toOptional();
+      assertThat(consolidatedTime2).contains(newTime);
     }
   }
 
@@ -513,12 +627,11 @@ class TestKitTest {
     Class<IllegalArgumentException> exceptionType = IllegalArgumentException.class;
     short invalidValidatorCount = TestKit.MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE + 1;
     TestKit.Builder testKitBuilder = TestKit.builder()
-        .withService(TestServiceModule.class)
-        .withTimeService(timeProvider)
+        .withTimeService(TIME_SERVICE_NAME, TIME_SERVICE_ID, timeProvider)
         .withValidators(invalidValidatorCount);
     IllegalArgumentException thrownException = assertThrows(exceptionType, testKitBuilder::build);
     String expectedMessage = String.format("Number of validators (%s) should be less than or equal"
-        + " to %s when TimeService is enabled.",
+        + " to %s when TimeService is instantiated.",
         invalidValidatorCount, TestKit.MAX_VALIDATOR_COUNT_WITH_ENABLED_TIME_SERVICE);
     assertThat(thrownException).hasMessageContaining(expectedMessage);
   }
@@ -534,8 +647,46 @@ class TestKitTest {
     testKit.close();
 
     // Verify that snapshot proxies were closed
-    assertThrows(exceptionType, view1::getViewNativeHandle);
-    assertThrows(exceptionType, view2::getViewNativeHandle);
+    assertThrows(exceptionType, view1::getAccessNativeHandle);
+    assertThrows(exceptionType, view2::getAccessNativeHandle);
+  }
+
+  @Test
+  void getServiceData(TestKit testKit) {
+    Prefixed serviceData = testKit.getServiceData(SERVICE_NAME);
+    // Check the service has the initial value in its schema
+    TestSchema testSchema = new TestSchema(serviceData);
+    Map<String, String> testMap = toMap(testSchema.testMap());
+    assertThat(testMap).containsKey(TestService.INITIAL_ENTRY_KEY);
+  }
+
+  @Test
+  void getServiceDataUnknownService(TestKit testKit) {
+    String name = "unknown-service";
+    // Check it is not possible to access unknown service data
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> testKit.getServiceData(name));
+    assertThat(e).hasMessageContaining(name);
+  }
+
+  @Test
+  void getBlockchainData(TestKit testKit) {
+    BlockchainData blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+    // Check the blockchain data provides access to the service data:
+    // the service must have the initial value in its schema.
+    Prefixed serviceData = blockchainData.getExecutingServiceData();
+    TestSchema testSchema = new TestSchema(serviceData);
+    Map<String, String> testMap = toMap(testSchema.testMap());
+    assertThat(testMap).containsKey(TestService.INITIAL_ENTRY_KEY);
+  }
+
+  @Test
+  void getBlockchainDataUnknownService(TestKit testKit) {
+    String name = "unknown-service";
+    // Check it is not possible to access unknown service data
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> testKit.getBlockchainData(name));
+    assertThat(e).hasMessageContaining(name);
   }
 
   private void checkValidatorsTimes(
@@ -547,52 +698,7 @@ class TestKitTest {
     assertThat(validatorsTimes).isEqualTo(expected);
   }
 
-  private <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
+  private static <K, V> Map<K, V> toMap(MapIndex<K, V> mapIndex) {
     return Maps.toMap(mapIndex.keys(), mapIndex::get);
-  }
-
-  public static final class TestServiceModule2 extends AbstractServiceModule {
-
-    private static final TransactionConverter THROWING_TX_CONVERTER = (tx) -> {
-      throw new IllegalStateException("No transactions in this service: " + tx);
-    };
-
-    @Override
-    protected void configure() {
-      bind(Service.class).to(TestService2.class).in(Singleton.class);
-      bind(TransactionConverter.class).toInstance(THROWING_TX_CONVERTER);
-    }
-  }
-
-  static final class TestService2 implements Service {
-
-    static final short SERVICE_ID = 48;
-    static final String SERVICE_NAME = "Test service 2";
-
-    private Node node;
-
-    @Override
-    public short getId() {
-      return SERVICE_ID;
-    }
-
-    @Override
-    public String getName() {
-      return SERVICE_NAME;
-    }
-
-    Node getNode() {
-      return node;
-    }
-
-    @Override
-    public Transaction convertToTransaction(RawTransaction rawTransaction) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void createPublicApiHandlers(Node node, Router router) {
-      this.node = node;
-    }
   }
 }

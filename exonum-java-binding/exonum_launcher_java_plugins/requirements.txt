@@ -1,0 +1,1 @@
+-e git+https://github.com/exonum/exonum-launcher@10547be5#egg=exonum-launcher

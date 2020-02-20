@@ -16,65 +16,41 @@
 
 package com.exonum.binding.core.service;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
-import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.core.transaction.Transaction;
-import java.util.List;
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 
 /**
  * A base class for user services.
  */
 public abstract class AbstractService implements Service {
 
-  private final short id;
-  private final String name;
-  private final TransactionConverter transactionConverter;
+  private final ServiceInstanceSpec instanceSpec;
 
-  /**
-   * Creates an AbstractService.
-   *
-   * @param id an id of the service
-   * @param name a name of the service
-   * @param transactionConverter a transaction converter that is aware of
-   *                             all transactions of this service
-   */
-  protected AbstractService(short id, String name, TransactionConverter transactionConverter) {
-    this.id = id;
-    checkArgument(!name.isEmpty(), "The service name must not be empty");
-    this.name = name;
-    this.transactionConverter = checkNotNull(transactionConverter);
-  }
-
-  @Override
-  public short getId() {
-    return id;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public Transaction convertToTransaction(RawTransaction rawTransaction) {
-    return transactionConverter.toTransaction(rawTransaction);
-  }
-
-  @Override
-  public List<HashCode> getStateHashes(Snapshot snapshot) {
-    return createDataSchema(snapshot).getStateHashes();
+  protected AbstractService(ServiceInstanceSpec instanceSpec) {
+    this.instanceSpec = checkNotNull(instanceSpec);
   }
 
   /**
-   * Creates a data schema of this service.
-   *
-   * @param view a database view
-   * @return a data schema of the service
+   * Returns the name of the service instance.
+   * @see ServiceInstanceSpec#getName()
    */
-  protected abstract Schema createDataSchema(View view);
+  protected final String getName() {
+    return instanceSpec.getName();
+  }
+
+  /**
+   * Returns the numeric id of the service instance.
+   * @see ServiceInstanceSpec#getId()
+   */
+  protected final int getId() {
+    return instanceSpec.getId();
+  }
+
+  /**
+   * Returns this service instance specification.
+   */
+  protected final ServiceInstanceSpec getInstanceSpec() {
+    return instanceSpec;
+  }
 }

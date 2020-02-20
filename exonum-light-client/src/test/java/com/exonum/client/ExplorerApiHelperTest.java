@@ -30,20 +30,62 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import com.exonum.binding.common.blockchain.ExecutionStatuses;
 import com.exonum.binding.common.blockchain.TransactionLocation;
-import com.exonum.binding.common.blockchain.TransactionResult;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksResponse;
+import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
+import com.exonum.messages.core.runtime.Errors.CallSite;
+import com.exonum.messages.core.runtime.Errors.CallSite.Type;
+import com.exonum.messages.core.runtime.Errors.ErrorKind;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Empty;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import lombok.Value;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class ExplorerApiHelperTest {
+
+  private static TransactionMessage TRANSACTION_MESSAGE = createTransactionMessage();
+  private static long BLOCK_HEIGHT = 1L;
+  private static int INDEX_IN_BLOCK = 0;
+
+  private static String TEMPLATE_TRANSACTION_MESSAGE_JSON = "{\n"
+      + "    'type': 'committed',\n"
+      + "    'message': '" + toHex(TRANSACTION_MESSAGE) + "',\n"
+      + "    'location': {\n"
+      + "        'block_height': " + BLOCK_HEIGHT + ",\n"
+      + "        'position_in_block': " + INDEX_IN_BLOCK + "\n"
+      + "    },\n"
+      + "    'location_proof': {\n"
+      + "        'entries': [\n"
+      + "            [\n"
+      + "                0,\n"
+      + "                'd27f4ae6692fc00caf4e51ca7c072bab35487bb0d56272e08b6069ebadb52100'\n"
+      + "            ]\n"
+      + "        ],\n"
+      + "        'length': 1,\n"
+      + "        'proof': []\n"
+      + "    },\n"
+      + "    %s,\n"
+      + "    'time': '2019-12-02T21:51:36.439431Z'"
+      + "}";
 
   @Test
   void parseSubmitTxResponse() {
@@ -56,130 +98,29 @@ class ExplorerApiHelperTest {
 
   @Test
   void parseGetTxResponseInPool() {
-    TransactionMessage expectedMessage = createTransactionMessage();
     String json = "{\n"
         + "    'type': 'in-pool',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'to': {\n"
-        + "                'data': []\n"
-        + "            },\n"
-        + "            'amount': 10,\n"
-        + "            'seed': 9587307158524814255\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    }\n"
+        + "    'message': '" + toHex(TRANSACTION_MESSAGE) + "'\n"
         + "}";
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.IN_POOL));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
+    assertThat(transactionResponse.getMessage(), is(TRANSACTION_MESSAGE));
     assertThrows(IllegalStateException.class, transactionResponse::getExecutionResult);
     assertThrows(IllegalStateException.class, transactionResponse::getLocation);
   }
 
-  @Test
-  void parseGetTxResponseCommitted() {
-    TransactionMessage expectedMessage = createTransactionMessage();
-    String json = "{\n"
-        + "    'type': 'committed',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'to': {\n"
-        + "                'data': []\n"
-        + "            },\n"
-        + "            'amount': 10,\n"
-        + "            'seed': 2084648087298472854\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    },\n"
-        + "    'location': {\n"
-        + "        'block_height': 11,\n"
-        + "        'position_in_block': 0\n"
-        + "    },\n"
-        + "    'location_proof': {\n"
-        + "        'val': '2f23541b10b258dfc80693ed1bf6'\n"
-        + "    },\n"
-        + "    'status': {\n"
-        + "        'type': 'success'\n"
-        + "    }\n"
-        + "}";
+  @ParameterizedTest
+  @MethodSource("txResponseTestData")
+  void parseGetTxResponseCommitted(ExecutionStatus executionStatus, String statusJson) {
+    String json = String.format(TEMPLATE_TRANSACTION_MESSAGE_JSON, statusJson);
     TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
 
     assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(), is(TransactionResult.successful()));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(11L, 0L)));
-  }
-
-  @Test
-  void parseGetTxResponseCommittedWithError() {
-    TransactionMessage expectedMessage = createTransactionMessage();
-    int errorCode = 2;
-    String errorDescription = "Receiver doesn't exist";
-    String json = "{\n"
-        + "    'type': 'committed',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'amount': 1,\n"
-        + "            'seed': 5019726028924803177\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    },\n"
-        + "    'location': {\n"
-        + "        'block_height': 1,\n"
-        + "        'position_in_block': 0\n"
-        + "    },\n"
-        + "    'location_proof': {\n"
-        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
-        + "    },\n"
-        + "    'status': {\n"
-        + "        'type': 'error',\n"
-        + "        'code': " + errorCode + ",\n"
-        + "        'description': \"" + errorDescription + "\""
-        + "    }\n"
-        + "}";
-    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
-
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.error(errorCode, errorDescription)));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
-  }
-
-  @Test
-  void parseGetTxResponseCommittedWithPanic() {
-    TransactionMessage expectedMessage = createTransactionMessage();
-    String errorDescription = "panic happens";
-    String json = "{\n"
-        + "    'type': 'committed',\n"
-        + "    'content': {\n"
-        + "        'debug': {\n"
-        + "            'amount': 1,\n"
-        + "            'seed': 5019726028924803177\n"
-        + "        },\n"
-        + "        'message': '" + toHex(expectedMessage) + "'\n"
-        + "    },\n"
-        + "    'location': {\n"
-        + "        'block_height': 1,\n"
-        + "        'position_in_block': 0\n"
-        + "    },\n"
-        + "    'location_proof': {\n"
-        + "        'val': 'e8a00b3747d396be45dbea3bc31cdb072'\n"
-        + "    },\n"
-        + "    'status': {\n"
-        + "        'type': 'panic',\n"
-        + "        'description': '" + errorDescription + "'"
-        + "    }\n"
-        + "}";
-    TransactionResponse transactionResponse = ExplorerApiHelper.parseGetTxResponse(json);
-
-    assertThat(transactionResponse.getStatus(), is(TransactionStatus.COMMITTED));
-    assertThat(transactionResponse.getMessage(), is(expectedMessage));
-    assertThat(transactionResponse.getExecutionResult(),
-        is(TransactionResult.unexpectedError(errorDescription)));
-    assertThat(transactionResponse.getLocation(), is(TransactionLocation.valueOf(1L, 0L)));
+    assertThat(transactionResponse.getMessage(), is(TRANSACTION_MESSAGE));
+    assertThat(transactionResponse.getExecutionResult(), is(executionStatus));
+    assertThat(transactionResponse.getLocation(),
+        is(TransactionLocation.valueOf(BLOCK_HEIGHT, INDEX_IN_BLOCK)));
   }
 
   @Test
@@ -240,4 +181,128 @@ class ExplorerApiHelperTest {
     assertThat(response.getBlocksRangeEnd(), is(288L));
   }
 
+  @Test
+  void parseServicesResponse() {
+    String serviceName1 = "service-name-1";
+    String serviceName2 = "service-name-2";
+    int serviceId1 = 1;
+    int serviceId2 = 2;
+    ServiceInstanceInfo serviceInstanceInfo1 = new ServiceInstanceInfo(serviceName1, serviceId1);
+    ServiceInstanceInfo serviceInstanceInfo2 = new ServiceInstanceInfo(serviceName2, serviceId2);
+    List<ServiceInstanceInfo> expected = Arrays.asList(serviceInstanceInfo1, serviceInstanceInfo2);
+    String json = "{\n"
+        + "    \"services\": [{\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + serviceName1 + "\",\n"
+        + "            \"id\": " + serviceId1 + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        },\n"
+        + "        {\n"
+        + "        \"spec\": {\n"
+        + "            \"name\": \"" + serviceName2 + "\",\n"
+        + "            \"id\": " + serviceId2 + "\n"
+        + "            },\n"
+        + "            \"status\": \"Active\"\n"
+        + "        }\n"
+        + "    ]\n"
+        + "}";
+
+    List<ServiceInstanceInfo> actual = ExplorerApiHelper.parseServicesResponse(json);
+    assertThat(actual, contains(expected.toArray()));
+  }
+
+  private static Collection<Arguments> txResponseTestData() {
+    List<Arguments> arguments = new ArrayList<>();
+
+    // Add success status
+    String successStatus = "'status': {\n"
+        + "    'type': 'success'\n"
+        + "}\n";
+    arguments.add(arguments(ExecutionStatuses.SUCCESS, successStatus));
+
+    // Add error statuses of various types from various call site types:
+    int errorCode = 1;
+    String errorDescription = "Some error";
+    int runtimeId = 2;
+    int instanceId = 3;
+    int methodId = 4;
+    String interfaceId = "exonum.Configure";
+
+    ExecutionError errorTemplate = ExecutionError.newBuilder()
+        .setCode(errorCode)
+        .setDescription(errorDescription)
+        .setRuntimeId(runtimeId)
+        .buildPartial();
+    CallSite callSiteTemplate = CallSite.newBuilder()
+        .setInstanceId(instanceId)
+        .setMethodId(methodId)
+        .setInterface(interfaceId)
+        .buildPartial();
+
+    String errorStatusTemplate = "'status': {\n"
+        + "    'type': '%s',\n"
+        + "    'code': " + errorCode + ",\n"
+        + "    'description': \"" + errorDescription + "\","
+        + "    \"runtime_id\": " + runtimeId + ",\n"
+        + "    \"call_site\": {\n"
+        + "            \"instance_id\": " + instanceId + ",\n"
+        + "            \"call_type\": \"%s\",\n"
+        + "            \"method_id\": " + methodId + ",\n"
+        + "            \"interface\": \"" + interfaceId + "\"\n"
+        + "    }\n"
+        + "}\n";
+
+    @Value
+    class StatusParameters {
+      ErrorKind errorKind;
+      String errorKindStr;
+      CallSite.Type callSiteType;
+      String callSiteTypeStr;
+    }
+
+    List<StatusParameters> combinations = ImmutableList.of(
+        new StatusParameters(ErrorKind.UNEXPECTED, "unexpected_error",
+            Type.CONSTRUCTOR, "constructor"),
+        new StatusParameters(ErrorKind.CORE, "core_error", Type.METHOD, "method"),
+        new StatusParameters(ErrorKind.RUNTIME, "runtime_error",
+            Type.BEFORE_TRANSACTIONS, "before_transactions"),
+        new StatusParameters(ErrorKind.SERVICE, "service_error",
+            Type.AFTER_TRANSACTIONS, "after_transactions"),
+        new StatusParameters(ErrorKind.COMMON, "common_error", Type.RESUME, "resume")
+    );
+
+    for (StatusParameters params: combinations) {
+      arguments.add(
+          arguments(
+              ExecutionStatus.newBuilder()
+                  .setError(
+                      ExecutionError.newBuilder(errorTemplate)
+                          .setKind(params.errorKind)
+                          .setCallSite(
+                              CallSite.newBuilder(callSiteTemplate)
+                                  .setCallType(params.callSiteType)))
+                  .build(),
+              String.format(errorStatusTemplate, params.errorKindStr, params.callSiteTypeStr)));
+    }
+
+    // Add an error with no optional properties: no code, no runtime id, no call site.
+    arguments.add(arguments(
+        ExecutionStatus.newBuilder()
+          .setError(
+              ExecutionError.newBuilder()
+                  .setKind(ErrorKind.UNEXPECTED)
+                  .setDescription(errorDescription)
+                  .setNoRuntimeId(Empty.getDefaultInstance())
+                  .setNoCallSite(Empty.getDefaultInstance())
+                  .build())
+          .build(),
+        "'status': {\n"
+            + "    'type': 'unexpected_error',\n"
+            + "    'description': \"" + errorDescription + "\""
+            + "}\n"
+    ));
+
+    return arguments;
+  }
 }

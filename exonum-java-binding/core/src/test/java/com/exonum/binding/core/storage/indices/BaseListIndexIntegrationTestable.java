@@ -31,9 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.database.View;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -43,8 +43,9 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Base class for common ListIndex tests.
@@ -235,6 +236,114 @@ abstract class BaseListIndexIntegrationTestable
   }
 
   @Test
+  void removeLastEmptyList() {
+    runTestWithView(database::createFork, (l) -> {
+      assertThrows(NoSuchElementException.class, l::removeLast);
+    });
+  }
+
+  @Test
+  void removeLastWithSnapshot() {
+    runTestWithView(database::createSnapshot, (l) -> {
+      assertThrows(UnsupportedOperationException.class, l::removeLast);
+    });
+  }
+
+  @Test
+  void removeLastSingleElementList() {
+    runTestWithView(database::createFork, (l) -> {
+      String addedElement = V1;
+      l.add(addedElement);
+      String last = l.removeLast();
+
+      assertThat(last, equalTo(addedElement));
+      assertTrue(l.isEmpty());
+    });
+  }
+
+  @Test
+  void removeLastTwoElementList() {
+    runTestWithView(database::createFork, (l) -> {
+      l.add(V1);
+      l.add(V2);
+      String last = l.removeLast();
+
+      assertThat(last, equalTo(V2));
+      assertThat(l.size(), equalTo(1L));
+      assertThat(l.get(0), equalTo(V1));
+    });
+  }
+
+  @Test
+  void truncateNonEmptyToZero() {
+    runTestWithView(database::createFork, (l) -> {
+      l.add(V1);
+      l.truncate(0);
+
+      assertTrue(l.isEmpty());
+      assertThat(l.size(), equalTo(0L));
+    });
+  }
+
+  @Test
+  void truncateToSameSize() {
+    runTestWithView(database::createFork, (l) -> {
+      l.add(V1);
+      long newSize = l.size();
+
+      l.truncate(newSize);
+
+      assertThat(l.size(), equalTo(newSize));
+    });
+  }
+
+  @Test
+  void truncateToSmallerSize() {
+    runTestWithView(database::createFork, (l) -> {
+      long newSize = 1;
+      l.add(V1);
+      l.add(V2);
+      l.truncate(newSize);
+
+      assertThat(l.size(), equalTo(newSize));
+    });
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {3, 4, Long.MAX_VALUE})
+  void truncateToGreaterSizeHasNoEffect(long newSize) {
+    runTestWithView(database::createFork, (l) -> {
+      // Create a list of two elements
+      l.add(V1);
+      l.add(V2);
+
+      long oldSize = l.size();
+      l.truncate(newSize);
+
+      assertThat(l.size(), equalTo(oldSize));
+    });
+  }
+
+  @ParameterizedTest
+  @ValueSource(longs = {-1, -2, Long.MIN_VALUE})
+  void truncateToNegativeSizeThrows(long invalidSize) {
+    runTestWithView(database::createFork, (l) -> {
+      l.add(V1);
+
+      assertThrows(IllegalArgumentException.class,
+          () -> l.truncate(invalidSize));
+    });
+  }
+
+  @Test
+  void truncateWithSnapshot() {
+    runTestWithView(database::createSnapshot, (l) -> {
+      assertThrows(UnsupportedOperationException.class,
+          () -> l.truncate(0L));
+    });
+  }
+
+  @Test
   void clearEmptyHasNoEffect() {
     runTestWithView(database::createFork, (l) -> {
       l.clear();
@@ -339,12 +448,12 @@ abstract class BaseListIndexIntegrationTestable
   void structuralModificationsInvalidateTheIteratorsOfIndexesWithSameName()
       throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Fork view = database.createFork(cleaner);
+      Fork fork = database.createFork(cleaner);
       List<String> elements = TestStorageItems.values;
       // Create two lists with the same name
       String name = "Test_List";
-      ListIndex<String> l1 = create(name, view);
-      ListIndex<String> l2 = create(name, view);
+      ListIndex<String> l1 = create(name, fork);
+      ListIndex<String> l2 = create(name, fork);
       l1.addAll(elements);
 
       // Take the iterator from the first list index proxy
@@ -364,11 +473,11 @@ abstract class BaseListIndexIntegrationTestable
   @Test
   void indexModificationCountersOfIndyIndexesMustBeIndependent() throws CloseFailuresException {
     try (Cleaner cleaner = new Cleaner()) {
-      Fork view = database.createFork(cleaner);
+      Fork fork = database.createFork(cleaner);
       List<String> elements = TestStorageItems.values;
       // Create two independent lists
-      ListIndex<String> l1 = create("List1", view);
-      ListIndex<String> l2 = create("List123", view);
+      ListIndex<String> l1 = create("List1", fork);
+      ListIndex<String> l2 = create("List123", fork);
       l1.addAll(elements);
 
       // Take the iterator from the first list
@@ -455,11 +564,11 @@ abstract class BaseListIndexIntegrationTestable
     });
   }
 
-  private void runTestWithView(Function<Cleaner, View> viewFactory,
+  private void runTestWithView(Function<Cleaner, Access> accessFactory,
       Consumer<ListIndex<String>> listTest) {
     try (Cleaner cleaner = new Cleaner()) {
-      View view = viewFactory.apply(cleaner);
-      ListIndex<String> list = this.create(LIST_NAME, view);
+      Access access = accessFactory.apply(cleaner);
+      ListIndex<String> list = this.create(LIST_NAME, access);
 
       listTest.accept(list);
     } catch (CloseFailuresException e) {

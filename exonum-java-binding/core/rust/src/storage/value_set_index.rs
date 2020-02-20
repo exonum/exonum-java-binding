@@ -12,9 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum_merkledb::{
-    value_set_index::{ValueSetIndexHashes, ValueSetIndexIter},
-    Fork, Snapshot, ValueSetIndex,
+use std::{panic, ptr};
+
+use exonum::{
+    crypto::Hash,
+    merkledb::{
+        access::AccessExt,
+        generic::{ErasedAccess, GenericRawAccess},
+        indexes::{Entries, Keys},
+        ValueSetIndex,
+    },
 };
 use jni::{
     objects::{JClass, JObject, JString},
@@ -22,23 +29,16 @@ use jni::{
     JNIEnv,
 };
 
-use std::{panic, ptr};
-
-use handle::{self, Handle};
-use storage::{
-    db::{Value, View, ViewRef},
-    PairIter,
+use crate::{
+    handle::{self, Handle},
+    storage::{PairIter, Value},
+    utils,
 };
-use utils;
 
-type Index<T> = ValueSetIndex<T, Value>;
+type Index = ValueSetIndex<GenericRawAccess<'static>, Value>;
 
-enum IndexType {
-    SnapshotIndex(Index<&'static dyn Snapshot>),
-    ForkIndex(Index<&'static Fork>),
-}
-
-type Iter<'a> = PairIter<ValueSetIndexIter<'a, Value>>;
+type Iter<'a> = PairIter<Entries<'a, Hash, Value>>;
+type HashIter<'a> = Keys<'a, Hash>;
 
 const JAVA_ENTRY_FQN: &str =
     "com/exonum/binding/core/storage/indices/ValueSetIndexProxy$EntryInternal";
@@ -49,43 +49,14 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     env: JNIEnv,
     _: JClass,
     name: JString,
-    view_handle: Handle,
+    id_in_group: jbyteArray,
+    access_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let name = utils::convert_to_string(&env, name)?;
-        Ok(handle::to_handle(
-            match handle::cast_handle::<View>(view_handle).get() {
-                ViewRef::Snapshot(snapshot) => {
-                    IndexType::SnapshotIndex(Index::new(name, &*snapshot))
-                }
-                ViewRef::Fork(fork) => IndexType::ForkIndex(Index::new(name, fork)),
-            },
-        ))
-    });
-    utils::unwrap_exc_or_default(&env, res)
-}
-
-/// Returns a pointer to the created `ValueSetIndex` instance in an index family (= group).
-#[no_mangle]
-pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetIndexProxy_nativeCreateInGroup(
-    env: JNIEnv,
-    _: JClass,
-    group_name: JString,
-    set_id: jbyteArray,
-    view_handle: Handle,
-) -> Handle {
-    let res = panic::catch_unwind(|| {
-        let group_name = utils::convert_to_string(&env, group_name)?;
-        let set_id = env.convert_byte_array(set_id)?;
-        let view_ref = handle::cast_handle::<View>(view_handle).get();
-        Ok(handle::to_handle(match view_ref {
-            ViewRef::Snapshot(snapshot) => {
-                IndexType::SnapshotIndex(Index::new_in_family(group_name, &set_id, &*snapshot))
-            }
-            ViewRef::Fork(fork) => {
-                IndexType::ForkIndex(Index::new_in_family(group_name, &set_id, fork))
-            }
-        }))
+        let address = utils::convert_to_index_address(&env, name, id_in_group)?;
+        let access = handle::cast_handle::<ErasedAccess>(access_handle);
+        let index: Index = access.get_value_set(address);
+        Ok(handle::to_handle(index))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -97,7 +68,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     _: JClass,
     set_handle: Handle,
 ) {
-    handle::drop_handle::<IndexType>(&env, set_handle);
+    handle::drop_handle::<Index>(&env, set_handle);
 }
 
 /// Returns `true` if the set contains the specified value.
@@ -109,11 +80,10 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ValueSetIndexProx
     value: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
         let value = env.convert_byte_array(value)?;
-        Ok(match *handle::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.contains(&value),
-            IndexType::ForkIndex(ref set) => set.contains(&value),
-        } as jboolean)
+        let contains = set.contains(&value);
+        Ok(contains as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -127,11 +97,10 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ValueSetIndexProx
     hash: jbyteArray,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
         let hash = utils::convert_to_hash(&env, hash)?;
-        Ok(match *handle::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.contains_by_hash(&hash),
-            IndexType::ForkIndex(ref set) => set.contains_by_hash(&hash),
-        } as jboolean)
+        let contains = set.contains_by_hash(&hash);
+        Ok(contains as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -144,10 +113,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        let iter = match *handle::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.iter(),
-            IndexType::ForkIndex(ref set) => set.iter(),
-        };
+        let set = handle::cast_handle::<Index>(set_handle);
+        let iter = set.iter();
         let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
         Ok(handle::to_handle(iter))
     });
@@ -163,11 +130,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     from: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
         let from = utils::convert_to_hash(&env, from)?;
-        let iter = match *handle::cast_handle::<IndexType>(set_handle) {
-            IndexType::SnapshotIndex(ref set) => set.iter_from(&from),
-            IndexType::ForkIndex(ref set) => set.iter_from(&from),
-        };
+        let iter = set.iter_from(&from);
         let iter = Iter::new(&env, iter, JAVA_ENTRY_FQN)?;
         Ok(handle::to_handle(iter))
     });
@@ -182,12 +147,9 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     set_handle: Handle,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
-        Ok(handle::to_handle(
-            match *handle::cast_handle::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.hashes(),
-                IndexType::ForkIndex(ref set) => set.hashes(),
-            },
-        ))
+        let set = handle::cast_handle::<Index>(set_handle);
+        let hashes = set.hashes();
+        Ok(handle::to_handle(hashes))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -201,13 +163,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     from: jbyteArray,
 ) -> Handle {
     let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
         let from = utils::convert_to_hash(&env, from)?;
-        Ok(handle::to_handle(
-            match *handle::cast_handle::<IndexType>(set_handle) {
-                IndexType::SnapshotIndex(ref set) => set.hashes_from(&from),
-                IndexType::ForkIndex(ref set) => set.hashes_from(&from),
-            },
-        ))
+        let hashes = set.hashes_from(&from);
+        Ok(handle::to_handle(hashes))
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -220,15 +179,11 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     set_handle: Handle,
     value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(set_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut set) => {
-            let value = env.convert_byte_array(value)?;
-            set.insert(value);
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
+        let value = env.convert_byte_array(value)?;
+        set.insert(value);
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -241,15 +196,11 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ValueSetIndexProx
     set_handle: Handle,
     value: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(set_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut set) => {
-            let value = env.convert_byte_array(value)?;
-            set.remove(&value);
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
+        let value = env.convert_byte_array(value)?;
+        set.remove(&value);
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -262,15 +213,11 @@ pub extern "C" fn Java_com_exonum_binding_core_storage_indices_ValueSetIndexProx
     set_handle: Handle,
     hash: jbyteArray,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(set_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut set) => {
-            let hash = utils::convert_to_hash(&env, hash)?;
-            set.remove_by_hash(&hash);
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
+        let hash = utils::convert_to_hash(&env, hash)?;
+        set.remove_by_hash(&hash);
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -282,14 +229,10 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     _: JObject,
     set_handle: Handle,
 ) {
-    let res = panic::catch_unwind(|| match *handle::cast_handle::<IndexType>(set_handle) {
-        IndexType::SnapshotIndex(_) => {
-            panic!("Unable to modify snapshot.");
-        }
-        IndexType::ForkIndex(ref mut set) => {
-            set.clear();
-            Ok(())
-        }
+    let res = panic::catch_unwind(|| {
+        let set = handle::cast_handle::<Index>(set_handle);
+        set.clear();
+        Ok(())
     });
     utils::unwrap_exc_or_default(&env, res)
 }
@@ -339,7 +282,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     iter_handle: Handle,
 ) -> jbyteArray {
     let res = panic::catch_unwind(|| {
-        let iter = handle::cast_handle::<ValueSetIndexHashes>(iter_handle);
+        let iter = handle::cast_handle::<HashIter>(iter_handle);
         match iter.next() {
             Some(val) => utils::convert_hash(&env, &val),
             None => Ok(ptr::null_mut()),
@@ -355,5 +298,5 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
     _: JObject,
     iter_handle: Handle,
 ) {
-    handle::drop_handle::<ValueSetIndexHashes>(&env, iter_handle);
+    handle::drop_handle::<HashIter>(&env, iter_handle);
 }

@@ -23,7 +23,7 @@ import com.exonum.binding.core.proxy.NativeHandle;
 import com.exonum.binding.core.proxy.ProxyDestructor;
 
 /**
- * A snapshot is a read-only, immutable database view.
+ * A snapshot is a read-only, immutable database access.
  *
  * <p>A snapshot represents database state at the time it was created. Immutability implies that:
  * <ul>
@@ -33,29 +33,35 @@ import com.exonum.binding.core.proxy.ProxyDestructor;
  *   snapshots, however, might correspond to a new database state.
  * </ul>
  *
+ * <p>The Snapshot does not modify the index name upon <em>address resolution</em>.
+ *
  * @see Fork
  */
-public final class Snapshot extends View {
+public final class Snapshot extends AbstractAccess {
+
+  private final Cleaner cleaner;
 
   /**
    * Creates a new owning Snapshot proxy.
    *
    * @param nativeHandle a handle of the native Snapshot object
+   * @param cleaner a cleaner to destroy the native peer and any dependent objects
    */
-  // todo: consider making package-private so that clients aren't able to reference an invalid
-  //   memory region (currently the registry of native allocations is required to be enabled
-  //   to safely discard such attempts): https://jira.bf.local/browse/ECR-471,
-  //   https://jira.bf.local/browse/ECR-1525
+  // todo: (Here and elsewhere) consider making package-private so that clients aren't able to
+  //   reference an invalid memory region (currently the registry of native allocations is
+  //   required to be enabled to safely discard such attempts):
+  //   https://jira.bf.local/browse/ECR-471, https://jira.bf.local/browse/ECR-1525
   public static Snapshot newInstance(long nativeHandle, Cleaner cleaner) {
     return newInstance(nativeHandle, true, cleaner);
   }
 
   /**
    * Creates a new Snapshot proxy.
+   *
    * @param nativeHandle a handle of the native Snapshot object
    * @param owningHandle whether a proxy owns the corresponding native object and is responsible
    *                     to clean it up
-   * @param cleaner a cleaner to destroy the native object
+   * @param cleaner a cleaner to destroy the native peer and any dependent objects
    */
   public static Snapshot newInstance(long nativeHandle, boolean owningHandle, Cleaner cleaner) {
     checkNotNull(cleaner, "cleaner");
@@ -63,7 +69,7 @@ public final class Snapshot extends View {
     NativeHandle h = new NativeHandle(nativeHandle);
     ProxyDestructor.newRegistered(cleaner, h, Snapshot.class, nh -> {
       if (owningHandle) {
-        Views.nativeFree(nh);
+        AbstractAccess.nativeFree(nh);
       }
     });
 
@@ -71,6 +77,12 @@ public final class Snapshot extends View {
   }
 
   private Snapshot(NativeHandle nativeHandle, Cleaner cleaner) {
-    super(nativeHandle, cleaner, false);
+    super(nativeHandle, false);
+    this.cleaner = cleaner;
+  }
+
+  @Override
+  public Cleaner getCleaner() {
+    return cleaner;
   }
 }

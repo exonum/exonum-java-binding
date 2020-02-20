@@ -16,15 +16,18 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.core.storage.database.Snapshot;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKitExtension;
-import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -34,26 +37,17 @@ class CryptocurrencySchemaIntegrationTest {
   @RegisterExtension
   TestKitExtension testKitExtension = new TestKitExtension(
       TestKit.builder()
-          .withService(CryptocurrencyServiceModule.class));
+          .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
+          .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
+          .withArtifactsDirectory(artifactsDirectory));
 
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();
 
   @Test
-  void getStateHashes(TestKit testKit) {
-    Snapshot view = testKit.getSnapshot();
-    CryptocurrencySchema schema = new CryptocurrencySchema(view);
-
-    HashCode walletsMerkleRoot = schema.wallets().getIndexHash();
-    ImmutableList<HashCode> expectedHashes = ImmutableList.of(walletsMerkleRoot);
-
-    assertThat(schema.getStateHashes()).isEqualTo(expectedHashes);
-  }
-
-  @Test
   void walletHistoryNoRecords(TestKit testKit) {
-    Snapshot view = testKit.getSnapshot();
-    CryptocurrencySchema schema = new CryptocurrencySchema(view);
+    Prefixed serviceData = testKit.getServiceData(SERVICE_NAME);
+    CryptocurrencySchema schema = new CryptocurrencySchema(serviceData);
 
     assertThat(schema.transactionsHistory(WALLET_OWNER_KEY)).isEmpty();
   }

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>com.exonum.binding</groupId>
     <artifactId>exonum-java-binding-parent</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>exonum-java-binding-common</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.10.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Common</name>
@@ -22,12 +22,24 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <lazysodium-java.version>4.2.2</lazysodium-java.version>
+    <lazysodium-java.version>4.2.3</lazysodium-java.version>
     <auto-value.version>1.7</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
+    <protobuf.python.deployArguments.outputDirectory>
+      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_java_runtime_plugin/proto
+    </protobuf.python.deployArguments.outputDirectory>
+    <protobuf.python.service.outputDirectory>
+      ${project.parent.basedir}/exonum_launcher_java_plugins/exonum_instance_configuration_plugin/proto
+    </protobuf.python.service.outputDirectory>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>com.exonum.messages</groupId>
+      <artifactId>exonum-messages</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -42,9 +54,6 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <!-- Optional for it is only needed for protobuf serializers support — if you don't
-           use them, you don't need the protobuf. -->
-      <optional>true</optional>
     </dependency>
 
     <dependency>
@@ -67,7 +76,13 @@
 
     <dependency>
       <groupId>com.ryanharter.auto.value</groupId>
-      <artifactId>auto-value-gson</artifactId>
+      <artifactId>auto-value-gson-extension</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.ryanharter.auto.value</groupId>
+      <artifactId>auto-value-gson-factory</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -139,13 +154,42 @@
         <groupId>org.xolstice.maven.plugins</groupId>
         <artifactId>protobuf-maven-plugin</artifactId>
         <extensions>true</extensions>
+        <configuration>
+          <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+        </configuration>
         <executions>
           <execution>
             <goals>
+              <goal>compile</goal>
               <goal>test-compile</goal>
             </goals>
+          </execution>
+          <!-- Compile protobuf description of Java service runtime deploy arguments
+               to Python for exonum_java_runtime_plugin -->
+          <execution>
+            <id>protobuf-compile-python-deploy-arguments</id>
+            <goals>
+              <goal>compile-python</goal>
+            </goals>
             <configuration>
-              <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+              <outputDirectory>${protobuf.python.deployArguments.outputDirectory}</outputDirectory>
+              <includes>
+                <include>exonum/java/deploy_arguments.proto</include>
+              </includes>
+            </configuration>
+          </execution>
+          <!-- Compile protobuf description of Java service runtime deploy arguments
+               to Python for exonum_instance_configuration_plugin -->
+          <execution>
+            <id>protobuf-compile-python-service-configuration</id>
+            <goals>
+              <goal>compile-python</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${protobuf.python.service.outputDirectory}</outputDirectory>
+              <includes>
+                <include>exonum/java/service.proto</include>
+              </includes>
             </configuration>
           </execution>
         </executions>
@@ -214,7 +258,7 @@
       <extension>
         <groupId>kr.motd.maven</groupId>
         <artifactId>os-maven-plugin</artifactId>
-        <version>1.6.2</version>
+        <version>${os-maven-plugin.version}</version>
       </extension>
     </extensions>
   </build>

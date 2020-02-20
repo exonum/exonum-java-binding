@@ -1,7 +1,8 @@
 [package]
 name = "java_bindings"
-version = "0.9.0-SNAPSHOT"
+version = "0.10.0-SNAPSHOT"
 authors = ["Exonum Team <contact@exonum.com>"]
+edition = "2018"
 
 [workspace]
 members = ["integration_tests", "exonum-java"]
@@ -12,25 +13,30 @@ crate-type = ["dylib"]
 [features]
 # Enables native handles checking. Useful for debugging.
 resource-manager = []
-invocation = ["jni/invocation"]
 
 [dependencies]
-exonum = { version = "0.12", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
-exonum-time = "0.12"
-exonum-testkit = "0.12"
-chrono = "0.4.9"
-failure = "0.1.1"
-toml = "0.5"
-jni = { version = "0.13.1", features = ["invocation"] }
-lazy_static = "1.3.0"
-log = "0.4.8"
-parking_lot = "0.6"
-serde = "1.0"
-serde_derive = "1.0"
-serde_json = "1.0.40"
+chrono = "0.4"
+exonum = { version = "1.0.0-rc.1", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
+exonum-btc-anchoring = "1.0.0-rc.1"
+exonum-cli = "1.0.0-rc.1"
+exonum-derive = "1.0.0-rc.1"
+exonum-proto = "1.0.0-rc.1"
+exonum-rust-runtime = "1.0.0-rc.1"
+exonum-supervisor = "1.0.0-rc.1"
+exonum-testkit = "1.0.0-rc.1"
+exonum-time = "1.0.0-rc.1"
+failure = "0.1"
+futures = "0.1"
+jni = { version = "0.14", features = ["invocation"] }
+lazy_static = "1.3"
+log = "0.4"
+parking_lot = "0.10"
+protobuf = { version = "2.8", features = ["with-serde"] }
+serde = {version = "1.0", features = ["serde_derive"] }
+structopt = "0.3"
 
-[dev-dependencies]
-tempfile = "3"
+[build-dependencies]
+exonum-build = { version = "1.0.0-rc.1" }
 
 [profile.dev]
 rpath = true

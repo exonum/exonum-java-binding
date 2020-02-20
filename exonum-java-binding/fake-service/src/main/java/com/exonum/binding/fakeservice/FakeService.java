@@ -16,35 +16,48 @@
 
 package com.exonum.binding.fakeservice;
 
+import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.service.Schema;
-import com.exonum.binding.core.service.TransactionConverter;
-import com.exonum.binding.core.storage.database.View;
-import com.google.common.annotations.VisibleForTesting;
+import com.exonum.binding.core.transaction.ExecutionException;
+import com.exonum.binding.core.transaction.Transaction;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
-import java.util.Collections;
 
-final class FakeService extends AbstractService  {
+public final class FakeService extends AbstractService {
 
-  @VisibleForTesting
-  static final short ID = 1;
-  private static final String NAME = "fake-service";
+  public static final int PUT_TX_ID = 0;
+  public static final int RAISE_ERROR_TX_ID = 1;
 
   @Inject
-  FakeService(TransactionConverter transactionConverter) {
-    super(ID, NAME, transactionConverter);
-  }
-
-  @Override
-  protected Schema createDataSchema(View view) {
-    // No schema
-    return Collections::emptyList;
+  FakeService(ServiceInstanceSpec instanceSpec) {
+    super(instanceSpec);
   }
 
   @Override
   public void createPublicApiHandlers(Node node, Router router) {
     // No handlers
+  }
+
+  /**
+   * Puts an entry (a key-value pair) into the test proof map.
+   */
+  @Transaction(PUT_TX_ID)
+  public void putEntry(Transactions.PutTransactionArgs arguments,
+      TransactionContext context) {
+    FakeSchema schema = new FakeSchema(context.getServiceData());
+    String key = arguments.getKey();
+    String value = arguments.getValue();
+    schema.testMap()
+        .put(key, value);
+  }
+
+  /**
+   * Throws an exception with the given error code and description.
+   */
+  @Transaction(RAISE_ERROR_TX_ID)
+  public void raiseError(Transactions.RaiseErrorArgs arguments, TransactionContext context) {
+    throw new ExecutionException((byte) arguments.getCode());
   }
 }

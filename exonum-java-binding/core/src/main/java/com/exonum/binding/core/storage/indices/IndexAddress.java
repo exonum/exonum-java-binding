@@ -19,6 +19,7 @@ package com.exonum.binding.core.storage.indices;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIdInGroup;
 import static com.exonum.binding.core.storage.indices.StoragePreconditions.checkIndexName;
 
+import com.exonum.binding.core.storage.database.Access;
 import com.google.common.base.MoreObjects;
 import java.util.Arrays;
 import java.util.Objects;
@@ -28,6 +29,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * An Exonum index address: a pair of the name and an optional id in a group, which identifies
  * an Exonum index.
+ *
+ * <p>Index addresses are resolved relatively to database {@link Access} objects.
+ * An index address cannot be translated into a resolved address without the corresponding
+ * {@link Access} object.
+ * <!-- todo: Extend given accesses — shall we keep just IndexAddress, or split into Relative
+ *       and Resolved IndexAddress? -->
  */
 public final class IndexAddress {
 
@@ -37,17 +44,21 @@ public final class IndexAddress {
   /**
    * Creates an address of an individual index.
    *
-   * @param name the name of the index
+   * @param name the name of the index: a alphanumeric non-empty identifier of the index
+   *     in the MerkleDB: [a-zA-Z0-9_.]
    */
   public static IndexAddress valueOf(String name) {
     return new IndexAddress(checkIndexName(name), null);
   }
 
   /**
-   * Creates an address of an index belonging to an index group.
+   * Creates an address of an index belonging to
+   * an <a href="package-summary.html#families">index group</a>.
    *
-   * @param groupName the name of the index group
-   * @param idInGroup the id of the index in group
+   * @param groupName the name of the index group: a alphanumeric non-empty identifier of the index
+   *     group in the MerkleDB: [a-zA-Z0-9_.]
+   * @param idInGroup the id of the index in group. See a
+   *     <a href="package-summary.html#families-limitations">caveat</a> on index identifiers.
    */
   public static IndexAddress valueOf(String groupName, byte[] idInGroup) {
     return new IndexAddress(checkIndexName(groupName), checkIdInGroup(idInGroup));

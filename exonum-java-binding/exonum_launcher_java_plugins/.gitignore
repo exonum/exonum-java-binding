@@ -1,0 +1,7 @@
+# Generated protobuf modules
+exonum_java_runtime_plugin/proto/
+exonum_instance_configuration_plugin/proto/
+
+# Python packaging and caches
+*/__pycache__/
+*.egg-info/

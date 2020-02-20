@@ -10,13 +10,13 @@ set -eu -o pipefail
 # Import necessary environment variables (see the tests_profile header comment for details).
 source tests_profile
 
-# Compile all Java modules by default to ensure that ejb-fakes module, which is required
+# Compile all Java modules by default to ensure that ejb-core module, which is required
 # by native ITs, is up-to-date. This safety net takes about a dozen seconds,
 # so if the Java artefacts are definitely up-to-date, it may be skipped.
 if [ "$#" -eq 0 ]; then
   # Compile Java artefacts.
   echo "Compiling the Java artefacts…"
-  mvn compile --quiet
+  mvn compile --quiet -pl core -am
 else
   if [ "$1" != "--skip-compile" ]; then
     echo "Unknown option: $1"

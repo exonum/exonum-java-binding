@@ -12,7 +12,7 @@ Include `exonum-time-oracle` as a dependency in your `pom.xml`:
     <dependency>
       <groupId>com.exonum.binding</groupId>
       <artifactId>exonum-time-oracle</artifactId>
-      <version>0.9.0-SNAPSHOT</version>
+      <version>0.10.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 ```
@@ -37,9 +37,10 @@ transactions after the commit of each block.
 private final Node node;
 
 public Optional<ZonedDateTime> getTime() {
-  return node.withSnapshot(s -> {
-    TimeSchema timeOracle = TimeSchema.newInstance(s);
-    EntryIndexProxy<ZonedDateTime> currentTime = timeOracle.getTime();
+  return node.withBlockchainData(bd -> {
+    String timeServiceName = "time";
+    TimeSchema timeOracle = TimeSchema.newInstance(bd, timeServiceName);
+    ProofEntryIndex<ZonedDateTime> currentTime = timeOracle.getTime();
     return currentTime.toOptional();
   });
 }
@@ -51,6 +52,6 @@ public Optional<ZonedDateTime> getTime() {
 Apache License (Version 2.0).
 See [LICENSE](../../LICENSE) for details.
 
-[exonum-time]: https://exonum.com/doc/version/0.12/advanced/time/
-[built-in-services]: https://exonum.com/doc/version/0.12/get-started/java-binding/#built-in-services
+[exonum-time]: https://exonum.com/doc/version/0.13-rc.2/advanced/time/
+[built-in-services]: https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#built-in-services
 [time-schema-javadoc]: https://exonum.com/doc/api/java-time-oracle/0.5.0/com/exonum/binding/time/TimeSchema.html

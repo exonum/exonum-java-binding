@@ -21,44 +21,32 @@
 // Function names must follow Java naming for the native functions.
 #![allow(non_snake_case)]
 
-extern crate chrono;
 pub extern crate exonum;
-#[macro_use]
-extern crate failure;
+// Though we do not need exonum-btc-anchoring in libjava_bindings, it solves issue ECR-3459,
+// as all RocksDB-related symbols resides inside libjava_bindings and not need to be exported for
+// exonum-java.
+pub extern crate exonum_btc_anchoring;
+pub extern crate exonum_rust_runtime;
+pub extern crate exonum_supervisor;
+pub extern crate exonum_time;
 pub extern crate jni;
-extern crate toml;
-#[macro_use]
-extern crate log;
-extern crate parking_lot;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-pub extern crate serde_json;
 
-#[macro_use]
-extern crate lazy_static;
-
-extern crate exonum_testkit;
-extern crate exonum_time;
-#[cfg(test)]
-extern crate tempfile;
-
-pub use exonum::exonum_merkledb;
-
-pub mod handle;
+mod cmd;
+mod handle;
+mod proto;
 mod proxy;
 mod runtime;
 mod storage;
 mod testkit;
 pub mod utils;
 
-pub use self::handle::{as_handle, cast_handle, drop_handle, to_handle, Handle};
-pub use handle::resource_manager::*;
-pub use proxy::*;
-pub use runtime::services;
-pub use runtime::*;
-pub use storage::*;
-pub use testkit::*;
+pub use self::handle::{cast_handle, drop_handle, to_handle, Handle};
+pub use crate::cmd::*;
+pub use crate::handle::resource_manager::*;
+pub use crate::proxy::*;
+pub use crate::runtime::*;
+pub use crate::storage::*;
+pub use crate::testkit::*;
 
 pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};
 pub use jni::Executor;

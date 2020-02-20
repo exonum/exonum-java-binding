@@ -16,12 +16,12 @@
 
 package com.exonum.binding.core.storage.database;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static com.exonum.binding.common.serialization.StandardSerializers.string;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.proxy.Cleaner;
-import com.exonum.binding.core.storage.indices.ListIndexProxy;
+import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.test.RequiresNativeLibrary;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +38,7 @@ class NativeResourceManagerIntegrationTest {
 
 
     RuntimeException thrown = assertThrows(RuntimeException.class,
-        () -> Views.nativeFree(unknownNativeHandle));
+        () -> AbstractAccess.nativeFree(unknownNativeHandle));
     assertThat(thrown).hasMessage("Invalid handle value: '110B'");
   }
 
@@ -47,10 +47,10 @@ class NativeResourceManagerIntegrationTest {
     try (Database database = TemporaryDb.newInstance();
          Cleaner cleaner = new Cleaner()) {
       Fork f = database.createFork(cleaner);
-      long viewNativeHandle = f.getViewNativeHandle();
+      long accessNativeHandle = f.getAccessNativeHandle();
 
       // Try to use a handle to fork to access a memory db.
-      TemporaryDb db2 = new TemporaryDb(viewNativeHandle);
+      TemporaryDb db2 = new TemporaryDb(accessNativeHandle);
 
       RuntimeException thrown = assertThrows(RuntimeException.class, db2::close);
       assertThat(thrown).hasMessageContaining("Wrong type id for");
@@ -64,7 +64,7 @@ class NativeResourceManagerIntegrationTest {
          Cleaner cleaner = new Cleaner()) {
       Snapshot s = database.createSnapshot(cleaner);
       // Preserve the handle to the snapshot.
-      snapshotNativeHandle = s.getViewNativeHandle();
+      snapshotNativeHandle = s.getAccessNativeHandle();
     }
 
     // The snapshot created inside try/catch is freed at this point, therefore,
@@ -72,8 +72,10 @@ class NativeResourceManagerIntegrationTest {
     Cleaner cleaner = new Cleaner();
     Snapshot s = Snapshot.newInstance(snapshotNativeHandle, cleaner);
 
+    // An attempt to use that snapshot to create a list must throw:
+    IndexAddress address = IndexAddress.valueOf("foo");
     RuntimeException thrown = assertThrows(RuntimeException.class,
-        () -> ListIndexProxy.newInstance("foo", s, StandardSerializers.string()));
+        () -> s.getList(address, string()));
     assertThat(thrown).hasMessageContaining("Invalid handle value: '"
         + handleToHex(snapshotNativeHandle));
     // No cleaner#close on purpose.
