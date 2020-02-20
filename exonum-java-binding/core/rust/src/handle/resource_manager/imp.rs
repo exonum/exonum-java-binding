@@ -14,7 +14,11 @@
 
 use lazy_static::lazy_static;
 
-use std::{any::{self, TypeId}, collections::HashMap, sync::RwLock};
+use std::{
+    any::{self, TypeId},
+    collections::HashMap,
+    sync::RwLock,
+};
 
 use super::super::Handle;
 
