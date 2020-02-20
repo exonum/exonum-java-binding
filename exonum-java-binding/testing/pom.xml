@@ -14,6 +14,11 @@
 
   <name>Exonum Java Binding: Testing Utils</name>
 
+  <properties>
+    <java.toolchain.version>${java.toolchain.clientVersion}</java.toolchain.version>
+    <java.compiler.version>1.8</java.compiler.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -47,6 +52,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.compiler.version}</source>
+          <target>${java.compiler.version}</target>
+        </configuration>
       </plugin>
 
       <plugin>

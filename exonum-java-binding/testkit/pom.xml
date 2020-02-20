@@ -16,6 +16,7 @@
   <url>https://exonum.com/doc/version/latest/get-started/test-service/</url>
 
   <properties>
+    <java.compiler.release>11</java.compiler.release>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug
     </ejb-core.nativeLibPath>
     <junit-platform-testkit.version>1.6.0</junit-platform-testkit.version>
@@ -65,8 +66,10 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <release>${java.compiler.release}</release>
+        </configuration>
       </plugin>
 
       <plugin>

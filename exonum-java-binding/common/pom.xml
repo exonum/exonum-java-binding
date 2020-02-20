@@ -22,6 +22,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.toolchain.version>${java.toolchain.clientVersion}</java.toolchain.version>
+    <java.compiler.version>1.8</java.compiler.version>
     <lazysodium-java.version>4.2.3</lazysodium-java.version>
     <auto-value.version>1.7</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
@@ -148,6 +150,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.compiler.version}</source>
+          <target>${java.compiler.version}</target>
+        </configuration>
       </plugin>
 
       <plugin>

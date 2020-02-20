@@ -17,7 +17,14 @@ This guide shows how to build the whole project only.
 ### System Dependencies
 You need to install the following dependencies:
   * Linux or macOS. Windows support is coming soon. <!-- TODO: Link Java roadmap when it is published -->
-  * [JDK 1.8+](https://jdk.java.net/).
+  * [JDK 1.8](https://jdk.java.net/) and JDK 11.0+ toolchains.
+  If you have a directory containing (symlinks to) JDKs named after their version
+  (e.g., 1.8 or 11.0), you can use the following script to create a Maven toolchain
+  file:
+  ```
+  export JDK_BASE_DIR="${HOME}/.jenv/versions"  # If you don't use jenv, replace with appropriate location 
+  cat toolchains-template-min.xml | sed "s|JDK_BASE_DIR|${JDK_BASE_DIR}|g" > ~/.m2/toolchains.xml
+  ```
   * [Maven 3.5+](https://maven.apache.org/download.cgi).
   * [Stable Rust compiler](https://www.rust-lang.org/).
     The minimum supported version is Rust 1.41.0.

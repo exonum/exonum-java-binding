@@ -409,8 +409,8 @@ abstract class BaseListIndexIntegrationTestable
 
       l.addAll(elements);
 
-      Iterator<String> iterator = l.iterator();
-      List<String> iterElements = ImmutableList.copyOf(iterator);
+      var iterator = l.iterator();
+      var iterElements = ImmutableList.copyOf(iterator);
 
       assertThat(iterElements, equalTo(elements));
     });

@@ -21,6 +21,7 @@
     <project.build.headersDirectory>${project.build.directory}/native-headers</project.build.headersDirectory>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.compiler.release>11</java.compiler.release>
     <rust.compiler.version>${env.RUST_COMPILER_VERSION}</rust.compiler.version>
     <!-- Features for integration testing. At least "resource-manager" is required by Java integration tests. Ideally,
      keeping them in sync with the ones that `integration_tests` crate require from the `java_bindings` crate allows
@@ -187,6 +188,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
+          <release>${java.compiler.release}</release>
           <!-- Make it possible to add arguments in the parent configuration.
                Default is "merge" which will discard any <arg> child elements in the parent. -->
           <compilerArgs combine.children="append">
