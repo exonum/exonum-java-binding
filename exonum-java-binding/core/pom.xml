@@ -25,7 +25,7 @@
     <!-- Features for integration testing. At least "resource-manager" is required by Java integration tests. Ideally,
      keeping them in sync with the ones that `integration_tests` crate require from the `java_bindings` crate allows
      the native integration tests to avoid recompilation of the `java_binding` library. -->
-    <rust.compiler.features>resource-manager invocation</rust.compiler.features>
+    <rust.compiler.features>resource-manager</rust.compiler.features>
     <rust.itSubCrate>integration_tests</rust.itSubCrate>
     <rust.appSubCrate>exonum-java</rust.appSubCrate>
     <!-- The build directory of Rust workspace  -->
