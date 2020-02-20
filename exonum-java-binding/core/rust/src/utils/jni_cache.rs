@@ -155,68 +155,47 @@ unsafe fn cache_methods(env: &JNIEnv) {
         get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "afterCommit", "(JIJ)V");
     RUNTIME_ADAPTER_SHUTDOWN =
         get_method_id(&env, SERVICE_RUNTIME_ADAPTER_CLASS, "shutdown", "()V");
-    JAVA_LANG_ERROR = env
-        .new_global_ref(env.find_class("java/lang/Error").unwrap().into())
-        .ok();
-    JAVA_LANG_RUNTIME_EXCEPTION = env
-        .new_global_ref(env.find_class("java/lang/RuntimeException").unwrap().into())
-        .ok();
-    JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION = env
-        .new_global_ref(
-            env.find_class("java/lang/IllegalArgumentException")
-                .unwrap()
-                .into(),
-        )
-        .ok();
-    EXECUTION_EXCEPTION = env
-        .new_global_ref(
-            env.find_class("com/exonum/binding/core/transaction/ExecutionException")
-                .unwrap()
-                .into(),
-        )
-        .ok();
 
-    UNEXPECTED_EXECUTION_EXCEPTION = env
-        .new_global_ref(
-            env.find_class("com/exonum/binding/core/runtime/UnexpectedExecutionException")
-                .unwrap()
-                .into(),
-        )
-        .ok();
-
-    assert!(
-        OBJECT_GET_CLASS.is_some()
-            && JAVA_LANG_ERROR.is_some()
-            && THROWABLE_GET_MESSAGE.is_some()
-            && EXECUTION_EXCEPTION_GET_ERROR_CODE.is_some()
-            && RUNTIME_ADAPTER_INITIALIZE.is_some()
-            && RUNTIME_ADAPTER_DEPLOY_ARTIFACT.is_some()
-            && RUNTIME_ADAPTER_IS_ARTIFACT_DEPLOYED.is_some()
-            && RUNTIME_ADAPTER_INITIATE_ADDING_SERVICE.is_some()
-            && RUNTIME_ADAPTER_INITIATE_RESUMING_SERICE.is_some()
-            && RUNTIME_ADAPTER_UPDATE_SERVICE_STATUS.is_some()
-            && RUNTIME_ADAPTER_EXECUTE_TX.is_some()
-            && RUNTIME_ADAPTER_BEFORE_TRANSACTIONS.is_some()
-            && RUNTIME_ADAPTER_AFTER_TRANSACTIONS.is_some()
-            && RUNTIME_ADAPTER_AFTER_COMMIT.is_some()
-            && RUNTIME_ADAPTER_SHUTDOWN.is_some()
-            && JAVA_LANG_ERROR.is_some()
-            && JAVA_LANG_RUNTIME_EXCEPTION.is_some()
-            && JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION.is_some()
-            && EXECUTION_EXCEPTION.is_some()
-            && UNEXPECTED_EXECUTION_EXCEPTION.is_some(),
-        "Error caching Java entities"
+    JAVA_LANG_ERROR = get_class(env, "java/lang/Error");
+    JAVA_LANG_RUNTIME_EXCEPTION = get_class(env, "java/lang/RuntimeException");
+    JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION = get_class(env, "java/lang/IllegalArgumentException");
+    EXECUTION_EXCEPTION = get_class(
+        env,
+        "com/exonum/binding/core/transaction/ExecutionException",
+    );
+    UNEXPECTED_EXECUTION_EXCEPTION = get_class(
+        env,
+        "com/exonum/binding/core/runtime/UnexpectedExecutionException",
     );
 
     debug!("Done caching references to Java classes and methods.");
 }
 
-/// Produces `JMethodID` for a particular class dealing with its lifetime.
+/// Produces `JMethodID` for a particular method dealing with its lifetime.
+///
+/// Always returns `Some(method_id)`, panics if method not found.
 fn get_method_id(env: &JNIEnv, class: &str, name: &str, sig: &str) -> Option<JMethodID<'static>> {
-    env.get_method_id(class, name, sig)
+    let method_id = env
+        .get_method_id(class, name, sig)
         // we need this line to erase lifetime in order to save underlying raw pointer in static
         .map(|mid| mid.into_inner().into())
-        .ok()
+        .unwrap_or_else(|_| {
+            panic!(
+                "Method {} with signature {} of class {} not found",
+                name, sig, class
+            )
+        });
+    Some(method_id)
+}
+
+/// Returns cached class reference.
+///
+/// Always returns Some(class_ref), panics if class not found.
+fn get_class(env: &JNIEnv, class: &str) -> Option<GlobalRef> {
+    let class = env
+        .find_class(class)
+        .unwrap_or_else(|_| panic!("Class {} not found", class));
+    Some(env.new_global_ref(class.into()).unwrap())
 }
 
 fn check_cache_initialized() {
