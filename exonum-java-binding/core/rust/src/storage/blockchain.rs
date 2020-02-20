@@ -7,7 +7,7 @@ use jni::{
 
 use std::{panic, ptr};
 
-use {
+use crate::{
     handle,
     storage::EjbAccessExt,
     utils::{self, convert_to_string, proto_to_java_bytes},

@@ -35,7 +35,7 @@ use jni::{
 
 use std::fmt;
 
-use {
+use crate::{
     runtime::{jni_call_default, jni_call_transaction, Error},
     storage::{blockchain_data_from_execution_context, into_erased_access},
     to_handle,

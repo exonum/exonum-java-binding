@@ -21,7 +21,7 @@ use protobuf::Message;
 
 use std::ptr;
 
-use JniResult;
+use crate::JniResult;
 
 /// Converts Java byte array to `Hash`. Panics if array has the wrong length.
 pub fn convert_to_hash(env: &JNIEnv, array: jbyteArray) -> JniResult<Hash> {

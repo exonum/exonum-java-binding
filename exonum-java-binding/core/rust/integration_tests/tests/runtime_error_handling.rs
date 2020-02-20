@@ -1,10 +1,4 @@
-extern crate integration_tests;
-extern crate java_bindings;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate exonum_derive;
-
+use exonum_derive::ExecutionFail;
 use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
     exonum::{
@@ -18,6 +12,7 @@ use java_bindings::{
     },
     jni_call_default, jni_call_transaction, Error, Executor, JniResult,
 };
+use lazy_static::lazy_static;
 
 use std::sync::Arc;
 

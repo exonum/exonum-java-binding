@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-extern crate integration_tests;
-extern crate java_bindings;
-
 use integration_tests::vm::{java_library_path, log4j_path, tests_classpath};
 use java_bindings::{
     create_java_vm, create_service_runtime, Executor, InternalConfig, JvmConfig, RuntimeConfig,

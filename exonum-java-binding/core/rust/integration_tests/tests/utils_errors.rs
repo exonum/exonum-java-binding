@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-extern crate integration_tests;
-extern crate java_bindings;
-#[macro_use]
-extern crate lazy_static;
-
 use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
     jni::{objects::JThrowable, JNIEnv, JavaVM},
@@ -28,6 +23,7 @@ use java_bindings::{
     },
     Executor, JniErrorKind, JniResult,
 };
+use lazy_static::lazy_static;
 use std::sync::Arc;
 
 const ERROR_CLASS: &str = "java/lang/Error";

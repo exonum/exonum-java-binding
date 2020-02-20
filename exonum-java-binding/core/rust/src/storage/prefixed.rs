@@ -23,7 +23,7 @@ use jni::{
 
 use std::panic;
 
-use {
+use crate::{
     handle,
     utils::{convert_to_string, unwrap_exc_or_default},
     Handle,

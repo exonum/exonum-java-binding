@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-extern crate env_logger;
-extern crate exonum_explorer_service;
-extern crate exonum_node;
-extern crate exonum_system_api;
-extern crate java_bindings;
-#[macro_use]
-extern crate log;
+use log::info;
 
+use crate::node::run_node;
 use java_bindings::{get_lib_version, Command};
-use node::run_node;
 
 mod node;
 

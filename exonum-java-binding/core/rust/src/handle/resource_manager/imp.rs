@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use lazy_static::lazy_static;
+
 use std::{any::TypeId, collections::HashMap, sync::RwLock};
 
 use super::super::Handle;
@@ -86,8 +88,8 @@ pub fn known_handles() -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::assert_panics;
     use std::i64;
-    use utils::assert_panics;
 
     enum T {}
     const INVALID_HANDLE: Handle = i64::MAX;

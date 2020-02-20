@@ -26,9 +26,11 @@ use jni::{
     JNIEnv,
 };
 
-use handle::{self, Handle};
-use storage::Key;
-use utils;
+use crate::{
+    handle::{self, Handle},
+    storage::Key,
+    utils,
+};
 
 type Index = KeySetIndex<GenericRawAccess<'static>, Key>;
 

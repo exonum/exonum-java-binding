@@ -26,9 +26,11 @@ use jni::{
     JNIEnv,
 };
 
-use handle::{self, Handle};
-use storage::Value;
-use utils;
+use crate::{
+    handle::{self, Handle},
+    storage::Value,
+    utils,
+};
 
 type Index = ProofListIndex<GenericRawAccess<'static>, Value>;
 

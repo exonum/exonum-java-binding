@@ -23,11 +23,12 @@ use exonum_cli::command::{
 };
 use exonum_supervisor::mode::Mode;
 use failure;
+use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
 use std::{path::PathBuf, str::FromStr};
 
-use {concat_path, EjbCommand, EjbCommandResult, Run};
+use crate::{concat_path, EjbCommand, EjbCommandResult, Run};
 
 /// EJB-specific `run-dev` command.
 ///

@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use java_bindings::jni::objects::{GlobalRef, JValue};
-use java_bindings::jni::sys::jint;
-use java_bindings::jni::JNIEnv;
-use java_bindings::{Executor, JniResult};
+use java_bindings::{
+    jni::{
+        objects::{GlobalRef, JValue},
+        sys::jint,
+        JNIEnv,
+    },
+    Executor, JniResult,
+};
 
 /// A test example of a native-to-JNI proxy
 #[derive(Clone)]

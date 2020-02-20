@@ -17,7 +17,7 @@ use jni::{objects::JObject, sys::jboolean, JNIEnv};
 
 use std::panic;
 
-use {
+use crate::{
     handle::{self, acquire_handle_ownership, to_handle, Handle},
     storage::EjbAccessExt,
     utils,

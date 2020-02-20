@@ -21,7 +21,8 @@ use jni::{
     objects::{GlobalRef, JObject},
     Executor, JNIEnv,
 };
-use utils::unwrap_jni;
+
+use crate::utils::unwrap_jni;
 
 /// Wrapper around Java interface TimeProvider.
 pub struct JavaTimeProvider {

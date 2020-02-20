@@ -16,11 +16,12 @@
 
 use exonum_cli::command::{run::Run as StandardRun, ExonumCommand, StandardResult};
 use failure;
+use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
 use std::path::PathBuf;
 
-use {executable_directory, Config, EjbCommand, EjbCommandResult, JvmConfig, RuntimeConfig};
+use crate::{executable_directory, Config, EjbCommand, EjbCommandResult, JvmConfig, RuntimeConfig};
 
 /// EJB-specific `run` command which collects standard Exonum Core parameters and
 /// also additional Java runtime and JVM configuration parameters.

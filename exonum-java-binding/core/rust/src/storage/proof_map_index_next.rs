@@ -25,11 +25,12 @@ use jni::{
     sys::{jboolean, jbyteArray, jobject, jobjectArray},
     JNIEnv,
 };
-use JniResult;
 
-use handle::{self, Handle};
-use storage::{PairIter, Value};
-use utils;
+use crate::{
+    handle::{self, Handle},
+    storage::{PairIter, Value},
+    utils, JniResult,
+};
 
 type Key = Vec<u8>;
 type Index = ProofMapIndex<GenericRawAccess<'static>, Key, Value>;

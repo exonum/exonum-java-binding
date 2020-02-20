@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-extern crate futures;
-extern crate integration_tests;
-extern crate java_bindings;
-#[macro_use]
-extern crate lazy_static;
-extern crate failure;
-
-use std::sync::Arc;
-
 use futures::{
     sync::mpsc::{self, Receiver},
     Stream,
@@ -39,6 +30,9 @@ use java_bindings::{
     jni::JavaVM,
     Executor, Node,
 };
+use lazy_static::lazy_static;
+
+use std::sync::Arc;
 
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_classes();
