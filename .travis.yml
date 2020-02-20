@@ -134,3 +134,12 @@ install: true  # Skip the installation step, as Maven requires
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
+
+notifications:
+  email:
+    - if: type=cron
+    - on_success: always
+    - on_failure: always
+    - recipients:
+      - secure: "X8ZEet1Z+4FWqCNPBzV2PQwiLUnEn51qPGOSHBLWtl1aODDeTw3BQq+qsYZPIH4hD++y2dZnkG0fxqdHbSLuqTqi4vNrw0TFu/KIM7GDGRnSsGdtZ4on5sSL8nbO3D7EE9kp/yAt3tN9fV72bHSmfLKXsr1AOea3My8Um1d1vMPpJ0S0+CSbSJqhmYhnm7fpSUKBfFmoX377JMGI+8tSdn9cCKye6y123av7on+X/vZWSHITr1naVEYYPDY0oKi0GA4jopB67GAIdXse91hpv7V/VpI9548MVM47j2piwEikb/UQW+5cTekJ7qQC7IiF4oSP+WQkixXTu/N1WXPFxbFTliGwU72563Z6ZpX98eQqs6rMPc2y868PWaYCOYG5olBAlE26mkI/evIMuiXJAmGfrE7Qf+oczQDxmao5n3U5HzaDiJEfM9U4x1ZOLNJrDG/vOwC2pBx2/pvV+rdCZLu3h7Pow9rCCccv7XLEONi7T37NrXzQdmqmYTvf1mtl6K4L21ndo6TUHlKweCYTdysWbOfEvr8EwJuEo9jYYLpJjMYsAXv012zCyYORBZnyK5CaW7L45bgoumwdmUDeLPcfjI2VQBkrxHGXpKSxImVjww966BhuTevxyg+lxYbXt88CI32a+udPAfKwRgQyq7zkZH4zqgE0H1aV5xQ9Q+g="
+
