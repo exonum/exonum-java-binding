@@ -55,6 +55,20 @@ jobs:
       os: linux
       jdk: openjdk13
       env: CHECK_RUST=false
+    - name: "Linux JDK EA CHECK_RUST=false"
+      os: linux
+      jdk: openjdk-ea
+      env: CHECK_RUST=false
+      before_script:
+        - if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]; then travis_terminate 0 fi
+    - name: "Linux JDK 8 CHECK_RUST=false nightly Rust"
+      os: linux
+      jdk: openjdk13
+      env:
+        - CHECK_RUST=false
+        - RUST_COMPILER_VERSION=nightly
+      before_script:
+        - if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]; then travis_terminate 0 fi
     - name: "OSX JDK 8 CHECK_RUST=false"
       os: osx
       # See: https://docs.travis-ci.com/user/reference/osx#macos-version
@@ -64,6 +78,17 @@ jobs:
         - ROCKSDB_LIB_DIR=/usr/local/lib
         - SNAPPY_LIB_DIR=/usr/local/lib
         - SNAPPY_STATIC=1
+    - name: "OSX JDK 8 CHECK_RUST=false nightly Rust"
+      os: osx
+      osx_image: xcode11.3
+      env:
+        - CHECK_RUST=false
+        - RUST_COMPILER_VERSION=nightly
+        - ROCKSDB_LIB_DIR=/usr/local/lib
+        - SNAPPY_LIB_DIR=/usr/local/lib
+        - SNAPPY_STATIC=1
+      before_script:
+        - if [[ "$TRAVIS_EVENT_TYPE" != "cron" ]]; then travis_terminate 0 fi
     - name: "Python unit tests"
       before_install: true
       script:
