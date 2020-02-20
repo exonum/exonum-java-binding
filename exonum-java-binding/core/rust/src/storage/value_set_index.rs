@@ -29,9 +29,11 @@ use jni::{
     JNIEnv,
 };
 
-use handle::{self, Handle};
-use storage::{PairIter, Value};
-use utils;
+use crate::{
+    handle::{self, Handle},
+    storage::{PairIter, Value},
+    utils,
+};
 
 type Index = ValueSetIndex<GenericRawAccess<'static>, Value>;
 

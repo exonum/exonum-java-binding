@@ -25,9 +25,11 @@ use jni::{
 
 use std::{panic, ptr};
 
-use handle::{self, Handle};
-use storage::Value;
-use utils;
+use crate::{
+    handle::{self, Handle},
+    storage::Value,
+    utils,
+};
 
 type Index = Entry<GenericRawAccess<'static>, Value>;
 

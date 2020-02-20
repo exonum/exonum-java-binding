@@ -31,10 +31,12 @@ use jni::{
 
 use std::{panic, ptr};
 
-use handle::{cast_handle, drop_handle, to_handle, Handle};
-use storage::into_erased_access;
-use utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose};
-use JniResult;
+use crate::{
+    handle::{cast_handle, drop_handle, to_handle, Handle},
+    storage::into_erased_access,
+    utils::{unwrap_exc_or, unwrap_exc_or_default, unwrap_jni_verbose},
+    JniResult,
+};
 
 const TX_SUBMISSION_EXCEPTION: &str =
     "com/exonum/binding/core/service/TransactionSubmissionException";
@@ -93,7 +95,7 @@ pub extern "system" fn Java_com_exonum_binding_core_runtime_NodeProxy_nativeSubm
     instance_id: jint,
     method_id: jint,
 ) -> jbyteArray {
-    use utils::convert_hash;
+    use crate::utils::convert_hash;
     let res = panic::catch_unwind(|| {
         let node = cast_handle::<Node>(node_handle);
         let hash = unwrap_jni_verbose(

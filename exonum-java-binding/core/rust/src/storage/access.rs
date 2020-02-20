@@ -30,8 +30,10 @@ use jni::{
 
 use std::{num::NonZeroU64, panic, rc::Rc};
 
-use handle::{self, Handle};
-use utils;
+use crate::{
+    handle::{self, Handle},
+    utils,
+};
 
 /// Prolongs lifetime of the GenericRawAccess.
 ///

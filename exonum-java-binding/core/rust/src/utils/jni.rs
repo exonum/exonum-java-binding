@@ -18,11 +18,13 @@ use jni::objects::JObject;
 use jni::signature::JavaType;
 use jni::JNIEnv;
 
-use utils::{
-    convert_to_string,
-    jni_cache::{class, object, throwable},
+use crate::{
+    utils::{
+        convert_to_string,
+        jni_cache::{class, object, throwable},
+    },
+    JniResult,
 };
-use JniResult;
 
 const RETVAL_TYPE_STRING: &str = "java/lang/String";
 const RETVAL_TYPE_CLASS: &str = "java/lang/Class";

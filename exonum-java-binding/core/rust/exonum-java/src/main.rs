@@ -22,8 +22,8 @@ extern crate java_bindings;
 #[macro_use]
 extern crate log;
 
+use crate::node::run_node;
 use java_bindings::{get_lib_version, Command};
-use node::run_node;
 
 mod node;
 

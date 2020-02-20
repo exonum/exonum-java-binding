@@ -19,12 +19,14 @@ use jni::{objects::JObject, signature::JavaType, JNIEnv};
 
 use std::{any::Any, cell::Cell, error::Error, result, thread};
 
-use jni::objects::JValue;
-use utils::{
-    get_class_name, get_exception_message,
-    jni_cache::{classes_refs, throwable::get_cause_id},
+use crate::{
+    utils::{
+        get_class_name, get_exception_message,
+        jni_cache::{classes_refs, throwable::get_cause_id},
+    },
+    JniError, JniErrorKind, JniResult,
 };
-use {JniError, JniErrorKind, JniResult};
+use jni::objects::JValue;
 
 const JAVA_LANG_THROWABLE: &str = "java/lang/Throwable";
 

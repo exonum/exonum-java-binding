@@ -19,13 +19,15 @@ use jni::{
     Executor, JNIEnv,
 };
 
-use utils::{
-    describe_java_exception, get_and_clear_java_exception, get_exception_cause,
-    get_exception_message,
-    jni_cache::{classes_refs, execution_exception},
-    unwrap_jni,
+use crate::{
+    utils::{
+        describe_java_exception, get_and_clear_java_exception, get_exception_cause,
+        get_exception_message,
+        jni_cache::{classes_refs, execution_exception},
+        unwrap_jni,
+    },
+    JniError, JniErrorKind, JniResult,
 };
-use {JniError, JniErrorKind, JniResult};
 
 /// List of possible Java runtime errors.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, ExecutionFail)]

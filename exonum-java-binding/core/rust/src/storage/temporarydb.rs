@@ -20,9 +20,11 @@ use jni::{
 
 use std::panic;
 
-use handle::{self, Handle};
-use storage::into_erased_access;
-use utils;
+use crate::{
+    handle::{self, Handle},
+    storage::into_erased_access,
+    utils,
+};
 
 /// Returns pointer to created `TemporaryDB` object.
 #[no_mangle]

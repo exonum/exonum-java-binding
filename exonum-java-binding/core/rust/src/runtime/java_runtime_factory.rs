@@ -21,9 +21,11 @@ use jni::{
     Executor, InitArgs, InitArgsBuilder, JavaVM, Result as JniResult,
 };
 
-use runtime::config::{self, InternalConfig, JvmConfig, RuntimeConfig};
-use utils::unwrap_jni;
-use JavaRuntimeProxy;
+use crate::{
+    runtime::config::{self, InternalConfig, JvmConfig, RuntimeConfig},
+    utils::unwrap_jni,
+    JavaRuntimeProxy,
+};
 
 const SERVICE_RUNTIME_BOOTSTRAP_PATH: &str = "com/exonum/binding/app/ServiceRuntimeBootstrap";
 const CREATE_RUNTIME_ADAPTER_SIGNATURE: &str =

@@ -27,11 +27,12 @@ use jni::{
     JNIEnv,
 };
 use protobuf::Message;
-use JniResult;
 
-use handle::{self, Handle};
-use storage::{Key, PairIter, Value};
-use utils;
+use crate::{
+    handle::{self, Handle},
+    storage::{Key, PairIter, Value},
+    utils, JniResult,
+};
 
 type RawKey = [u8; PROOF_MAP_KEY_SIZE];
 

@@ -8,7 +8,7 @@ use jni::{
 
 use std::panic;
 
-use {
+use crate::{
     handle::{self, Handle},
     utils,
 };

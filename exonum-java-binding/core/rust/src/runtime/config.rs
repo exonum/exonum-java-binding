@@ -18,7 +18,7 @@ use exonum_cli::command::run::NodeRunConfig;
 
 use std::{fmt, path::PathBuf};
 
-use {absolute_library_path, system_classpath};
+use crate::{absolute_library_path, system_classpath};
 
 /// Full configuration of the EJB runtime and JVM.
 pub struct Config {

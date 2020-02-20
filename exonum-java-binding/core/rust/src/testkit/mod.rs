@@ -35,12 +35,15 @@ use jni::{
     Executor, JNIEnv,
 };
 
-use handle::{cast_handle, drop_handle, to_handle, Handle};
-use utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default};
-use {JavaRuntimeProxy, JniResult};
+use crate::{
+    handle::{cast_handle, drop_handle, to_handle, Handle},
+    proto,
+    storage::into_erased_access,
+    utils::{convert_to_string, unwrap_exc_or, unwrap_exc_or_default},
+    JavaRuntimeProxy, JniResult,
+};
 
 use self::time_provider::JavaTimeProvider;
-use {proto, storage::into_erased_access};
 
 mod time_provider;
 

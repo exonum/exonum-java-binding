@@ -26,9 +26,11 @@ use jni::{
     JNIEnv,
 };
 
-use handle::{self, Handle};
-use storage::{Key, PairIter, Value};
-use utils;
+use crate::{
+    handle::{self, Handle},
+    storage::{Key, PairIter, Value},
+    utils,
+};
 
 type Index = MapIndex<GenericRawAccess<'static>, Key, Value>;
 

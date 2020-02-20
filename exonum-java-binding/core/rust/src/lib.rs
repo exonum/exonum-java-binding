@@ -60,12 +60,12 @@ mod testkit;
 pub mod utils;
 
 pub use self::handle::{cast_handle, drop_handle, to_handle, Handle};
-pub use cmd::*;
-pub use handle::resource_manager::*;
-pub use proxy::*;
-pub use runtime::*;
-pub use storage::*;
-pub use testkit::*;
+pub use crate::cmd::*;
+pub use crate::handle::resource_manager::*;
+pub use crate::proxy::*;
+pub use crate::runtime::*;
+pub use crate::storage::*;
+pub use crate::testkit::*;
 
 pub use jni::errors::{Error as JniError, ErrorKind as JniErrorKind, Result as JniResult};
 pub use jni::Executor;

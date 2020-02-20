@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![feature(test)]
-
 extern crate integration_tests;
 extern crate java_bindings;
 #[macro_use]
@@ -36,7 +34,7 @@ use test::{black_box, Bencher};
 const EXECUTION_EXCEPTION_CLASS: &str = "com/exonum/binding/core/transaction/ExecutionException";
 
 lazy_static! {
-    pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_fakes();
+    pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_classes();
     pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
 }
 
