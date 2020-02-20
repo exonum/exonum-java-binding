@@ -32,7 +32,7 @@ pub extern crate exonum_time;
 pub extern crate jni;
 
 mod cmd;
-pub mod handle;
+mod handle;
 mod proto;
 mod proxy;
 mod runtime;
