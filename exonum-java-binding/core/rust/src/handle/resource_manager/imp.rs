@@ -90,14 +90,16 @@ pub fn check_handle<T: 'static>(handle: Handle) {
     {
         Some(info) => {
             let actual_object_type = TypeId::of::<T>();
-            assert_eq!(
-                info.object_type,
-                actual_object_type,
-                "Wrong type id for '{:X}' handle, expected '{}', actual '{}'",
-                handle,
-                info.type_name,
-                any::type_name::<T>(),
-            );
+            if info.object_type != actual_object_type {
+                panic!(
+                    "Wrong type id for '{:X}' handle, expected '{}' ({:?}), actual '{}' ({:?})",
+                    handle,
+                    info.type_name,
+                    info.object_type,
+                    any::type_name::<T>(),
+                    actual_object_type,
+                );
+            }
         }
         None => panic!("Invalid handle value: '{:X}'", handle),
     }
