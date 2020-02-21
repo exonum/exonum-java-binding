@@ -88,7 +88,7 @@ pub fn check_handle<T: 'static>(handle: Handle) {
         .expect("Unable to obtain read-lock")
         .get(&handle)
     {
-        Some(type_id) => {
+        Some(info) => {
             let actual_object_type = TypeId::of::<T>();
             assert_eq!(
                 info.object_type,
