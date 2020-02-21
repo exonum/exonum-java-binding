@@ -27,6 +27,7 @@ addons:
       - libprotobuf-dev
       - python3.7
   homebrew:
+    update: true # remove when fixed: https://travis-ci.community/t/macos-build-fails-because-of-homebrew-bundle-unknown-command/7296
     packages:
       - libsodium
       - rocksdb
