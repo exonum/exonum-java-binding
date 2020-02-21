@@ -56,6 +56,21 @@ jobs:
       os: linux
       jdk: openjdk13
       env: CHECK_RUST=false
+    - name: "OSX JDK 8 CHECK_RUST=false"
+      os: osx
+      # See: https://docs.travis-ci.com/user/reference/osx#macos-version
+      osx_image: xcode11.3
+      env:
+        - CHECK_RUST=false
+        - ROCKSDB_LIB_DIR=/usr/local/lib
+        - SNAPPY_LIB_DIR=/usr/local/lib
+        - SNAPPY_STATIC=1
+    - name: "Python unit tests"
+      before_install: true
+      script:
+        - cd "${TRAVIS_BUILD_DIR}"
+        - .travis/run_python_tests.sh
+    # The following jobs run using Travis cron jobs feature.
     - name: "Linux JDK EA CHECK_RUST=false"
       if: type=cron
       os: linux
@@ -68,15 +83,6 @@ jobs:
       env:
         - CHECK_RUST=false
         - RUST_COMPILER_VERSION=nightly
-    - name: "OSX JDK 8 CHECK_RUST=false"
-      os: osx
-      # See: https://docs.travis-ci.com/user/reference/osx#macos-version
-      osx_image: xcode11.3
-      env:
-        - CHECK_RUST=false
-        - ROCKSDB_LIB_DIR=/usr/local/lib
-        - SNAPPY_LIB_DIR=/usr/local/lib
-        - SNAPPY_STATIC=1
     - name: "OSX JDK 8 CHECK_RUST=false nightly Rust"
       if: type=cron
       os: osx
@@ -87,11 +93,6 @@ jobs:
         - ROCKSDB_LIB_DIR=/usr/local/lib
         - SNAPPY_LIB_DIR=/usr/local/lib
         - SNAPPY_STATIC=1
-    - name: "Python unit tests"
-      before_install: true
-      script:
-        - cd "${TRAVIS_BUILD_DIR}"
-        - .travis/run_python_tests.sh
 
 cache:
   directories:
@@ -138,9 +139,5 @@ script:
 
 notifications:
   email:
-    - if: type=cron
-    - on_success: always
-    - on_failure: always
     - recipients:
-      - secure: "X8ZEet1Z+4FWqCNPBzV2PQwiLUnEn51qPGOSHBLWtl1aODDeTw3BQq+qsYZPIH4hD++y2dZnkG0fxqdHbSLuqTqi4vNrw0TFu/KIM7GDGRnSsGdtZ4on5sSL8nbO3D7EE9kp/yAt3tN9fV72bHSmfLKXsr1AOea3My8Um1d1vMPpJ0S0+CSbSJqhmYhnm7fpSUKBfFmoX377JMGI+8tSdn9cCKye6y123av7on+X/vZWSHITr1naVEYYPDY0oKi0GA4jopB67GAIdXse91hpv7V/VpI9548MVM47j2piwEikb/UQW+5cTekJ7qQC7IiF4oSP+WQkixXTu/N1WXPFxbFTliGwU72563Z6ZpX98eQqs6rMPc2y868PWaYCOYG5olBAlE26mkI/evIMuiXJAmGfrE7Qf+oczQDxmao5n3U5HzaDiJEfM9U4x1ZOLNJrDG/vOwC2pBx2/pvV+rdCZLu3h7Pow9rCCccv7XLEONi7T37NrXzQdmqmYTvf1mtl6K4L21ndo6TUHlKweCYTdysWbOfEvr8EwJuEo9jYYLpJjMYsAXv012zCyYORBZnyK5CaW7L45bgoumwdmUDeLPcfjI2VQBkrxHGXpKSxImVjww966BhuTevxyg+lxYbXt88CI32a+udPAfKwRgQyq7zkZH4zqgE0H1aV5xQ9Q+g="
-
+      - secure: "qUzyPyr/KCt4rTH57d1dq/OFmUKW2eLftu/mHBJ+ePvFk2p7u7LGxAk9bcDNk26WcYbZDhz8ddMDAULQut4Jljq0tcY5ZeAtA1w4Fbci2TT5MCOB7ueowRyGy1sHPRE7B+2XeY7U4Vua9ep43wYmmrygV10QFKikj4wxpEJjFpQJrisOxddosiw4639zj0qykPMx0z7KHETKMJXALP9ycpr/lJ05IzNMVLI3PAhZFM0PJ162oDxJQa0BJs9pyCAUqxeQO0zhAc/4cXql3RhuK4Y80ErylgqDSn0CaWmvx9WNQDd9ehFDBMnumWUuVtg4u6igCHq2t5/AwQJtrIC8Q+6Hj41to+VgR55U7FA8/WDtwfjFuYBc3i/c9SbRZz0h5+R2VZq4IFtstIMl7UsmCc6froPea6HdGHeknSS7RC9G6pqtWZHDSlHQonWJoA/nrjttx0NWTsu8gyUQ8JORHVffn5a3QYpZbwY7OzQA51CcSLHvkiNON3cISdO5ZGtn9chCJWK/N6oyzFmFizyxUehs7XS+gtfQCCzsthqne3yRZpPgWJNmIuIVkxjSmSSdLXVTOQTTGtugiJ7OSm7n9vWPkXQClgd/EWQwAuhhRm57SR32E1aIpwVMqJqL46d4Ynshopf24sv8E+wJUtJY/fcnLF50SFdxEPtF/XQQKhY="
