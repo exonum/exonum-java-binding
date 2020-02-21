@@ -70,6 +70,29 @@ jobs:
       script:
         - cd "${TRAVIS_BUILD_DIR}"
         - .travis/run_python_tests.sh
+    # The following jobs run using Travis cron jobs feature.
+    - name: "Linux JDK EA CHECK_RUST=false"
+      if: type=cron
+      os: linux
+      jdk: openjdk-ea
+      env: CHECK_RUST=false
+    - name: "Linux JDK 8 CHECK_RUST=false nightly Rust"
+      if: type=cron
+      os: linux
+      jdk: openjdk13
+      env:
+        - CHECK_RUST=false
+        - RUST_COMPILER_VERSION=nightly
+    - name: "OSX JDK 8 CHECK_RUST=false nightly Rust"
+      if: type=cron
+      os: osx
+      osx_image: xcode11.3
+      env:
+        - CHECK_RUST=false
+        - RUST_COMPILER_VERSION=nightly
+        - ROCKSDB_LIB_DIR=/usr/local/lib
+        - SNAPPY_LIB_DIR=/usr/local/lib
+        - SNAPPY_STATIC=1
 
 cache:
   directories:
@@ -113,3 +136,8 @@ install: true  # Skip the installation step, as Maven requires
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
+
+notifications:
+  email:
+    - recipients:
+      - secure: "qUzyPyr/KCt4rTH57d1dq/OFmUKW2eLftu/mHBJ+ePvFk2p7u7LGxAk9bcDNk26WcYbZDhz8ddMDAULQut4Jljq0tcY5ZeAtA1w4Fbci2TT5MCOB7ueowRyGy1sHPRE7B+2XeY7U4Vua9ep43wYmmrygV10QFKikj4wxpEJjFpQJrisOxddosiw4639zj0qykPMx0z7KHETKMJXALP9ycpr/lJ05IzNMVLI3PAhZFM0PJ162oDxJQa0BJs9pyCAUqxeQO0zhAc/4cXql3RhuK4Y80ErylgqDSn0CaWmvx9WNQDd9ehFDBMnumWUuVtg4u6igCHq2t5/AwQJtrIC8Q+6Hj41to+VgR55U7FA8/WDtwfjFuYBc3i/c9SbRZz0h5+R2VZq4IFtstIMl7UsmCc6froPea6HdGHeknSS7RC9G6pqtWZHDSlHQonWJoA/nrjttx0NWTsu8gyUQ8JORHVffn5a3QYpZbwY7OzQA51CcSLHvkiNON3cISdO5ZGtn9chCJWK/N6oyzFmFizyxUehs7XS+gtfQCCzsthqne3yRZpPgWJNmIuIVkxjSmSSdLXVTOQTTGtugiJ7OSm7n9vWPkXQClgd/EWQwAuhhRm57SR32E1aIpwVMqJqL46d4Ynshopf24sv8E+wJUtJY/fcnLF50SFdxEPtF/XQQKhY="
