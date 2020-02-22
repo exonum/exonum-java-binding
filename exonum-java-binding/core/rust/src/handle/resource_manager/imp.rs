@@ -14,12 +14,32 @@
 
 use lazy_static::lazy_static;
 
-use std::{any::TypeId, collections::HashMap, sync::RwLock};
+use std::{
+    any::{self, TypeId},
+    collections::HashMap,
+    sync::RwLock,
+};
 
 use super::super::Handle;
 
 lazy_static! {
-    static ref HANDLES_MAP: RwLock<HashMap<Handle, TypeId>> = RwLock::new(HashMap::new());
+    static ref HANDLES_MAP: RwLock<HashMap<Handle, HandleInfo>> = RwLock::new(HashMap::new());
+}
+
+/// Information associated with handle.
+#[derive(Debug)]
+struct HandleInfo {
+    object_type: TypeId,
+    type_name: &'static str,
+}
+
+impl HandleInfo {
+    fn new(object_type: TypeId, type_name: &'static str) -> Self {
+        Self {
+            object_type,
+            type_name,
+        }
+    }
 }
 
 /// Adds given handle to the resource manager.
@@ -33,7 +53,10 @@ pub fn add_handle<T: 'static>(handle: Handle) {
         HANDLES_MAP
             .write()
             .expect("Unable to obtain write-lock")
-            .insert(handle, TypeId::of::<T>())
+            .insert(
+                handle,
+                HandleInfo::new(TypeId::of::<T>(), any::type_name::<T>())
+            )
             .is_none(),
         "Trying to add the same handle for the second time: {:X}",
         handle
@@ -65,13 +88,18 @@ pub fn check_handle<T: 'static>(handle: Handle) {
         .expect("Unable to obtain read-lock")
         .get(&handle)
     {
-        Some(type_id) => {
+        Some(info) => {
             let actual_object_type = TypeId::of::<T>();
-            assert_eq!(
-                *type_id, actual_object_type,
-                "Wrong type id for '{:X}' handle",
-                handle
-            );
+            if info.object_type != actual_object_type {
+                panic!(
+                    "Wrong type id for '{:X}' handle, expected '{}' ({:?}), actual '{}' ({:?})",
+                    handle,
+                    info.type_name,
+                    info.object_type,
+                    any::type_name::<T>(),
+                    actual_object_type,
+                );
+            }
         }
         None => panic!("Invalid handle value: '{:X}'", handle),
     }
