@@ -47,7 +47,6 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.compiler.release>11</java.compiler.release>
     <jmh.version>1.23</jmh.version>
     <!--
         Name of the benchmark Uber-JAR to generate.
@@ -72,10 +71,8 @@ THE POSSIBILITY OF SUCH DAMAGE.
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <release>${java.compiler.release}</release>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

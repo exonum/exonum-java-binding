@@ -37,8 +37,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.toolchain.version>${java.toolchain.clientVersion}</java.toolchain.version>
-    <java.compiler.version>1.8</java.compiler.version>
     <!-- Skip coverage collection for this module -->
     <jacoco.skip>true</jacoco.skip>
   </properties>
@@ -55,10 +53,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>${java.compiler.version}</source>
-          <target>${java.compiler.version}</target>
-        </configuration>
       </plugin>
 
       <plugin>

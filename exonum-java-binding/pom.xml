@@ -99,10 +99,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.toolchain.clientVersion>1.8</java.toolchain.clientVersion>
-    <java.toolchain.frameworkVersion>11.0</java.toolchain.frameworkVersion>
-    <!-- The default version. It is overridden in the projects that require 'client' version. -->
-    <java.toolchain.version>${java.toolchain.frameworkVersion}</java.toolchain.version>
+    <java.compiler.source>8</java.compiler.source>
+    <java.compiler.target>8</java.compiler.target>
     <!-- Enables Java assertions, used in unit and integration tests -->
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
@@ -295,16 +293,12 @@
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-toolchains-plugin</artifactId>
-          <version>3.0.0</version>
-        </plugin>
-
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.1</version>
           <configuration>
             <showWarnings>true</showWarnings>
+            <source>${java.compiler.source}</source>
+            <target>${java.compiler.target}</target>
           </configuration>
         </plugin>
 
@@ -422,10 +416,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.1.1</version>
           <configuration>
-            <!-- Use the framework version for Javadocs
-                   todo: check it works — it probably will, but the Javadocs for client
-                    libs will incorrectly link JDK 11 Javadocs. -->
-            <source>11</source>
+            <source>${java.compiler.source}</source>
             <doclint>none</doclint>
             <detectOfflineLinks>false</detectOfflineLinks>
             <additionalJOption>${maven.javadoc.joption}</additionalJOption>
@@ -515,24 +506,6 @@
                 </requireEnvironmentVariable>
               </rules>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-toolchains-plugin</artifactId>
-        <configuration>
-          <toolchains>
-            <jdk>
-              <version>${java.toolchain.version}</version>
-            </jdk>
-          </toolchains>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>toolchain</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>

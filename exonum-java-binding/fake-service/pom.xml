@@ -14,7 +14,6 @@
   <description>A fake Exonum Java service for various integration tests.</description>
 
   <properties>
-    <java.compiler.release>11</java.compiler.release>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <!-- Service Artifact properties -->
     <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
@@ -61,9 +60,6 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <release>${java.compiler.release}</release>
-        </configuration>
       </plugin>
 
       <plugin>

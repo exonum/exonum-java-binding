@@ -16,7 +16,6 @@
   <description>A simple cryptocurrency Exonum Java service.</description>
 
   <properties>
-    <java.compiler.release>11</java.compiler.release>
     <checkstyle.configLocation>${project.parent.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
     <!-- Service Artifact properties -->
@@ -139,9 +138,6 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <release>${java.compiler.release}</release>
-        </configuration>
       </plugin>
 
       <plugin>
