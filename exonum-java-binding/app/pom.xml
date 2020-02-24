@@ -37,7 +37,6 @@
   </description>
 
   <properties>
-    <java.compiler.release>11</java.compiler.release>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug</ejb-core.nativeLibPath>
   </properties>
 
@@ -79,9 +78,6 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <release>${java.compiler.release}</release>
-        </configuration>
       </plugin>
 
       <plugin>

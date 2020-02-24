@@ -36,8 +36,7 @@ The following table shows versions compatibility:
 | 0.1.0        | 0.10.* | 0.4         |
 
 ## System Dependencies
-- Java 8 or above is required for using this client
-- Maven 3.5 or above (only if you need to build it locally)
+- Java 8 or above is required for using this client.
 
 ## QuickStart
 If you are using Maven, add this to your _pom.xml_ file
@@ -138,14 +137,21 @@ List<ServiceInfo> response = exonumClient.getServiceInfoList();
 ```
 
 ## How to Build
-To build the client locally, clone the repository, and
-run next commands from the project's root 
-i.e. _exonum-java-binding_ directory:
+To build the client locally:
+
+1. Install Java 11+ and Maven 3.5+.
+
+2. Clone this repository.
+ 
+3. Run the next commands from the project's root directory
+(i.e. _exonum-java-binding_):
+
 <!-- TODO: Get rid of the RUSTFLAGS here --> 
 ```bash
 export RUSTFLAGS=none
 mvn install -pl exonum-light-client -am
 ```
+
 It'll build Exonum Light client and the `exonum-java-binding-common` artifact 
 which is required for the client.
 

@@ -37,6 +37,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.compiler.release>${java.compiler.clientRelease}</java.compiler.release>
     <!-- Skip coverage collection for this module -->
     <jacoco.skip>true</jacoco.skip>
   </properties>
