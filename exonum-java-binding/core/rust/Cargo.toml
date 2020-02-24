@@ -38,6 +38,9 @@ structopt = "0.3"
 [build-dependencies]
 exonum-build = { version = "1.0.0-rc.1" }
 
+[profile.dev.packages."*"]
+opt-level = 2
+
 [profile.dev]
 rpath = true
 
