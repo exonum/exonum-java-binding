@@ -14,6 +14,10 @@
 
   <name>Exonum Java Binding: Testing Utils</name>
 
+  <properties>
+    <java.compiler.release>${java.compiler.clientRelease}</java.compiler.release>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>

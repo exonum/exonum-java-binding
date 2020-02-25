@@ -62,8 +62,8 @@
   <properties>
     <!-- Project configuration -->
     <ejb.version>0.10.0-SNAPSHOT</ejb.version>
-    <java.compiler.source>8</java.compiler.source>
-    <java.compiler.target>8</java.compiler.target>
+    <java.compiler.release>8</java.compiler.release>
+    <javadoc.source>8</javadoc.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Project dependencies -->
@@ -173,8 +173,7 @@
         <version>3.8.1</version>
         <configuration>
           <showWarnings>true</showWarnings>
-          <source>${java.compiler.source}</source>
-          <target>${java.compiler.target}</target>
+          <release>${java.compiler.release}</release>
         </configuration>
       </plugin>
 
@@ -241,7 +240,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.1.1</version>
         <configuration>
-          <source>${java.compiler.source}</source>
+          <source>${javadoc.source}</source>
           <doclint>none</doclint>
           <detectOfflineLinks>false</detectOfflineLinks>
           <additionalJOption>${maven.javadoc.joption}</additionalJOption>

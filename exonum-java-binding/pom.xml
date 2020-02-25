@@ -99,8 +99,16 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.compiler.source>8</java.compiler.source>
-    <java.compiler.target>8</java.compiler.target>
+    <java.compiler.clientRelease>8</java.compiler.clientRelease>
+    <java.compiler.frameworkRelease>11</java.compiler.frameworkRelease>
+    <!--
+    The default, most commonly used, release. It is overridden in the projects that require
+    'client' version.
+    -->
+    <java.compiler.release>${java.compiler.frameworkRelease}</java.compiler.release>
+    <!-- 11 is used for Javadoc sources, even for modules using 8, because we aggregate them
+    in a single page. -->
+    <javadoc.source>11</javadoc.source>
     <!-- Enables Java assertions, used in unit and integration tests -->
     <java.vm.assertionFlag>-ea:com.exonum.binding...</java.vm.assertionFlag>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
@@ -296,9 +304,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.1</version>
           <configuration>
+            <release>${java.compiler.release}</release>
             <showWarnings>true</showWarnings>
-            <source>${java.compiler.source}</source>
-            <target>${java.compiler.target}</target>
           </configuration>
         </plugin>
 
@@ -416,7 +423,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.1.1</version>
           <configuration>
-            <source>${java.compiler.source}</source>
+            <source>${javadoc.source}</source>
             <doclint>none</doclint>
             <detectOfflineLinks>false</detectOfflineLinks>
             <additionalJOption>${maven.javadoc.joption}</additionalJOption>
@@ -486,8 +493,8 @@
                   <version>[3.5,)</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>[1.8,)</version>
-                  <message>Java 8 is the minimum supported version.</message>
+                  <version>[11.,)</version>
+                  <message>Java 11 is the minimum supported version.</message>
                 </requireJavaVersion>
                 <requireOS>
                   <!-- If we *do* support Windows and still rely on RUSTFLAGS (see the rule below

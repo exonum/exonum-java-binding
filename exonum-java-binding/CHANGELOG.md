@@ -116,6 +116,11 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
   section below).
     - Use `Access` instead of `View` (which is renamed to `AbstractAccess`).
     - `IndexAddress`es are resolved relatively to `Access`es (#1374)
+- Exonum protobuf messages are moved from `exonum-java-binding-common`
+  to a new module `com.exonum.messages:exonum-messages`.
+- Java 11 is the minimum required version to run Exonum services.
+  _Client_ libraries: `exonum-messages` and `exonum-java-binding-common` remain
+  Java 8 compatible.
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.
