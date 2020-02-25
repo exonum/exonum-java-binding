@@ -17,7 +17,7 @@
     <junit.jupiter.version>5.6.0</junit.jupiter.version>
     <nativeLibPath>${env.EXONUM_HOME}/lib/native</nativeLibPath>
     <hamcrest.version>2.1</hamcrest.version>
-    <mockito.version>3.2.4</mockito.version>
+    <mockito.version>3.3.0</mockito.version>
     <exonum.version>0.10.0-SNAPSHOT</exonum.version>
     <!-- Service Artifact properties -->
     <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
