@@ -220,15 +220,15 @@ class ListSpliteratorTest {
   @DisplayName("spliterator uses the list size at bind time, allowing for structural modifications")
   void spliteratorIsLateBindingUsesProperSize() {
     ListIndex<Integer> list = createListMock();
-    long size = 10;
-    long initialSize = size - 1;
-    when(list.size()).thenReturn(initialSize);
+    long initialSize = 10;
+    lenient().when(list.size()).thenReturn(initialSize);
     ModificationCounter counter = new IncrementalModificationCounter();
 
     // Create a spliterator
     Spliterator<Integer> spliterator = new ListSpliterator<>(list, counter, true);
 
     // "Add" an element to the list
+    long size = initialSize + 1;
     when(list.size()).thenReturn(size);
     counter.notifyModified();
 
