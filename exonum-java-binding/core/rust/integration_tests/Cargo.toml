@@ -10,6 +10,7 @@ workspace = ".."
 crate-type = ["dylib"]
 
 [dependencies]
+dunce = "1.0.0"
 exonum-testkit = "1.0.0-rc.1"
 exonum-derive = "1.0.0-rc.1"
 failure = "0.1"

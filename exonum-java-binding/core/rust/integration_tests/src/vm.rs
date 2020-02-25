@@ -19,7 +19,12 @@ use java_bindings::{
     utils::jni_cache,
 };
 
-use std::{fs::File, io::Read, path::PathBuf, sync::Arc};
+use std::{
+    fs::File,
+    io::Read,
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 
 /// Kibibyte
 pub const KIB: usize = 1024;
@@ -27,6 +32,11 @@ pub const KIB: usize = 1024;
 pub const MIB: usize = KIB * KIB;
 
 const CONVERSION_FAILED_MESSAGE: &str = "Failed to convert FS path into utf-8";
+
+#[cfg(target_os = "windows")]
+const PATH_SEPARATOR: char = ';';
+#[cfg(not(target_os = "windows"))]
+const PATH_SEPARATOR: char = ':';
 
 /// Creates a configured `JavaVM` for benchmarks.
 /// _`JavaVM` should be created only *once*._
@@ -106,20 +116,26 @@ fn tests_classpath_option() -> String {
 
 pub fn tests_classpath() -> String {
     let core_classpath = java_binding_parent_root_dir()
-        .join("core/target/classes")
+        .join("core")
+        .join("target")
+        .join("classes")
         .to_str()
         .expect(CONVERSION_FAILED_MESSAGE)
         .to_owned();
 
     let mut dependencies_classpath = String::new();
-    let dependencies_txt_path =
-        java_binding_parent_root_dir().join("core/target/ejb-core-classpath.txt");
+    let dependencies_txt_path = java_binding_parent_root_dir()
+        .join("core")
+        .join("target")
+        .join("ejb-core-classpath.txt");
     File::open(dependencies_txt_path)
         .expect("Can't open classpath.txt")
         .read_to_string(&mut dependencies_classpath)
         .expect("Failed to read classpath.txt");
 
-    format!("{}:{}", core_classpath, dependencies_classpath)
+    let path_separator = PATH_SEPARATOR.to_string();
+
+    [core_classpath, path_separator, dependencies_classpath].concat()
 }
 
 /// Returns a Log4j system property pointing to the configuration file. The file is in
@@ -145,13 +161,9 @@ fn libpath_option() -> String {
 
 /// Returns path to the java_bindings library for native integration tests.
 pub fn java_library_path() -> String {
-    let library_path = rust_project_root_dir()
-        .join(target_path())
-        .canonicalize()
-        .expect(
-            "Target path not found, but there should be \
-             the libjava_bindings dynamically loading library",
-        );
+    let library_path = rust_project_root_dir().join(target_path());
+    let library_path = canonicalize(library_path);
+
     library_path
         .to_str()
         .expect(CONVERSION_FAILED_MESSAGE)
@@ -159,15 +171,15 @@ pub fn java_library_path() -> String {
 }
 
 fn java_binding_parent_root_dir() -> PathBuf {
-    rust_project_root_dir()
-        .join("../..")
-        .canonicalize()
-        .unwrap()
+    let rust_project_root_dir = rust_project_root_dir();
+    // equivalent to "../../rust_project_root_dir"
+    let path = rust_project_root_dir.ancestors().nth(2).unwrap();
+    canonicalize(path)
 }
 
 /// The path to the root directory of the Rust parent module.
 fn rust_project_root_dir() -> PathBuf {
-    project_root_dir().join("..").canonicalize().unwrap()
+    canonicalize(project_root_dir().parent().unwrap())
 }
 
 /// The path to `integration_tests` root directory.
@@ -182,11 +194,19 @@ fn project_root_dir() -> PathBuf {
 /// This path is included in `java.library.path` JVM property, so that `java_bindings` library
 /// can be discovered and loaded by Java.
 #[cfg(debug_assertions)]
-fn target_path() -> &'static str {
-    "target/debug/deps"
+fn target_path() -> PathBuf {
+    ["target", "debug", "deps"].iter().collect()
 }
 
 #[cfg(not(debug_assertions))]
-fn target_path() -> &'static str {
-    "target/release/deps"
+fn target_path() -> PathBuf {
+    ["target", "release", "deps"].iter().collect()
+}
+
+/// Canonicalizing paths on Windows is a total mess.
+/// `std::fs::canonicalize` produces Windows NT UNC paths (\\?\C:\foo) which are not understandable
+/// by JVM. Crate `dunce` normalizes paths to the most compatible format, and fallbacks to standard
+/// `fs::canonicalize` on non-Windows platforms.
+fn canonicalize<P: AsRef<Path>>(path: P) -> PathBuf {
+    dunce::canonicalize(path).expect("Cannot canonicalize path")
 }
