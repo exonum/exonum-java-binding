@@ -38,6 +38,7 @@ echo "CURRENT_DIR=${EJB_APP_DIR}"
 EJB_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${EJB_ROOT}"
 
+# shellcheck source=/dev/null
 source "${EJB_ROOT}/tests_profile"
 
 ARTIFACTS_PATH=""
