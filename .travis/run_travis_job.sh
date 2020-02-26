@@ -14,8 +14,8 @@ set -x
 if [ "$CHECK_RUST" = true ]
 then
     # Install clippy and rustfmt.
-    rustup component add clippy
-    rustup component add rustfmt
+    # rustup component add clippy
+    # rustup component add rustfmt
     rustfmt -V
     cargo clippy -V
 
