@@ -10,9 +10,13 @@ set -eu -o pipefail
 # Echo commands so that the progress can be seen in CI server logs.
 set -x
 
-# Run rust code checks if CHECK_RUST is true, or java tests if it's not
+# Run Rust and Shell code checks if CHECK_RUST is true, or Java tests if it's not
 if [ "$CHECK_RUST" = true ]
 then
+    # Check the shell scripts
+    shellcheck exonum-java-binding/tests_profile
+    find "${TRAVIS_BUILD_DIR}" -iname '*.sh' -exec shellcheck -x {} +
+
     # Install clippy and rustfmt.
     rustup component add clippy
     rustup component add rustfmt
