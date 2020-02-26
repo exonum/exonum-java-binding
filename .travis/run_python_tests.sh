@@ -10,8 +10,7 @@ set -x
 cd "${TRAVIS_BUILD_DIR}/exonum-java-binding"
 
 # Generate protobuf files needed for plugins
-source ./tests_profile
-mvn install -DskipTests -DskipRustLibBuild -pl common -am
+RUSTFLAGS="none" mvn install -DskipTests -pl common -am
 
 cd "exonum_launcher_java_plugins"
 
