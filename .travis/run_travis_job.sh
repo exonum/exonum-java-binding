@@ -14,7 +14,8 @@ set -x
 if [ "$CHECK_RUST" = true ]
 then
     # Check the shell scripts
-    shellcheck exonum-java-binding/tests_profile
+    shellcheck "${TRAVIS_BUILD_DIR}"/exonum-java-binding/tests_profile
+    shellcheck "${TRAVIS_BUILD_DIR}"/exonum-java-binding/core/rust/exonum-java/exonum-java
     find "${TRAVIS_BUILD_DIR}" -iname '*.sh' -exec shellcheck -x {} +
 
     # Install clippy and rustfmt.
