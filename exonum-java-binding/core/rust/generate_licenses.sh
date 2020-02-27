@@ -10,10 +10,10 @@ cargo-license -h &> /dev/null || cargo install cargo-license
 
 # Going to exonum-java-binding/core/rust directory.
 backup_dir=${PWD}
-script_dir=$(dirname $(realpath -s "$0")) # Directory of this script. Must be exonum-java-binding/core/rust
-cd ${script_dir}
+script_dir="$(dirname "$(realpath -s "$0")")" # Directory of this script. Must be exonum-java-binding/core/rust
+cd "${script_dir}"
 
 cargo-license --json > "${PACKAGING_ETC_DIR:-.}/LICENSES-THIRD-PARTY-NATIVE"
 
 # Restoring initial directory.
-cd ${backup_dir}
+cd "${backup_dir}"

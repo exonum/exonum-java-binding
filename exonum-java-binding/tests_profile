@@ -41,11 +41,13 @@
 #
 # Unfortunately, a simple `which java` will not work for some users (e.g., jenv),
 # hence this a bit complex thing.
-export JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')"
+JAVA_HOME="$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')"
+export JAVA_HOME="${JAVA_HOME}"
 echo "JAVA_HOME=${JAVA_HOME}"
 
 # Find the directory containing libjvm (the relative path has changed in Java 9).
-export JAVA_LIB_DIR="$(find ${JAVA_HOME} -type f -name libjvm.\* | xargs -n1 dirname)"
+JAVA_LIB_DIR="$(find "${JAVA_HOME}" -type f -name 'libjvm.*' -print0 | xargs -0 -n1 dirname)"
+export JAVA_LIB_DIR="${JAVA_LIB_DIR}"
 echo "JAVA_LIB_DIR=${JAVA_LIB_DIR}"
 
 # Version of Rust used to build tests.
@@ -53,7 +55,8 @@ export RUST_COMPILER_VERSION="${RUST_COMPILER_VERSION:-stable}"
 echo "RUST_COMPILER_VERSION: ${RUST_COMPILER_VERSION}"
 
 # Find the directory containing Rust libstd.
-export RUST_LIB_DIR=$(rustup run ${RUST_COMPILER_VERSION} rustc --print sysroot)/lib
+RUST_LIB_DIR=$(rustup run "${RUST_COMPILER_VERSION}" rustc --print sysroot)/lib
+export RUST_LIB_DIR="${RUST_LIB_DIR}"
 echo "RUST_LIB_DIR: ${RUST_LIB_DIR}"
 
 # Linking options with additional paths for the application and tests.

@@ -17,7 +17,7 @@
 set -eu -o pipefail
 
 # Fixes tha lack of the `realpath` tool in OS X.
-if [ ! $(which realpath) ]; then
+if [ ! "$(which realpath)" ]; then
     function realpath() {
         python -c 'import os, sys; print os.path.realpath(sys.argv[1])' "${1%}"
     }
@@ -38,6 +38,7 @@ echo "CURRENT_DIR=${EJB_APP_DIR}"
 EJB_ROOT=$(realpath "../../..")
 echo "PROJ_ROOT=${EJB_ROOT}"
 
+# shellcheck source=/dev/null
 source "${EJB_ROOT}/tests_profile"
 
 ARTIFACTS_PATH=""
@@ -81,42 +82,42 @@ rm -rf ${TESTNET_DIRECTORY}
 mkdir -p ${TESTNET_DIRECTORY}
 
 # Delete the java_bindings library from the target/debug if any to prevent ambiguity in dynamic linking (ECR-3468)
-rm -f ${EJB_ROOT}/core/rust/target/debug/libjava_bindings.*
+rm -f "${EJB_ROOT}"/core/rust/target/debug/libjava_bindings.*
 
 header "COMPILE EXONUM-JAVA"
-cargo +${RUST_COMPILER_VERSION} build
+cargo +"${RUST_COMPILER_VERSION}" build
 
 # Enable predefined native logging configuration,
 # unless it is already set to any value (incl. null)
 export RUST_LOG="${RUST_LOG-warn,exonum=info,exonum-java=info,java_bindings=info}"
 
 header "GENERATE COMMON CONFIG"
-cargo +${RUST_COMPILER_VERSION} run -- generate-template \
+cargo +"${RUST_COMPILER_VERSION}" run -- generate-template \
     --validators-count=1 \
     --supervisor-mode simple \
     ${COMMON_CONFIG_PATH}
 
 header "GENERATE CONFIG"
-cargo +${RUST_COMPILER_VERSION} run -- generate-config \
+cargo +"${RUST_COMPILER_VERSION}" run -- generate-config \
     ${COMMON_CONFIG_PATH} \
     ${TESTNET_DIRECTORY} \
     --no-password \
     --peer-address 127.0.0.1:5400
 
 header "FINALIZE"
-cargo +${RUST_COMPILER_VERSION} run -- finalize \
+cargo +"${RUST_COMPILER_VERSION}" run -- finalize \
     ${SEC_CONFIG_PATH} \
     ${NODE_CONFIG_PATH} \
     --public-configs ${PUB_CONFIG_PATH}
 
 header "START TESTNET"
-cargo +${RUST_COMPILER_VERSION} run -- run \
-    --artifacts-path ${ARTIFACTS_PATH} \
+cargo +"${RUST_COMPILER_VERSION}" run -- run \
+    --artifacts-path "${ARTIFACTS_PATH}" \
     --node-config ${NODE_CONFIG_PATH} \
     --db-path ${DATABASE_PATH} \
     --master-key-pass pass \
     --public-api-address 127.0.0.1:3000 \
     --private-api-address 127.0.0.1:3010 \
-    --ejb-log-config-path ${EJB_LOG_CONFIG_PATH} \
+    --ejb-log-config-path "${EJB_LOG_CONFIG_PATH}" \
     --ejb-port 7000 \
-    --ejb-override-java-library-path ${JAVA_LIBRARY_PATH}
+    --ejb-override-java-library-path "${JAVA_LIBRARY_PATH}"

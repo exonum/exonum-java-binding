@@ -9,21 +9,24 @@ function get_exonum_home() {
     # While file is a symbolic link do…
     while [ -h "$PRG" ] ; do
       # Output the symlink info in a form of "file_name -> real_path"
-      local ls=`ls -ld "$PRG"`
+      local ls
+      ls=$(ls -ld "$PRG")
       # Use regexp to get "real_path" part
-      local link=`expr "$ls" : '.*-> \(.*\)$'`
+      local link
+      link=$(expr "$ls" : '.*-> \(.*\)$')
       # If the path is absolute already
       if expr "$link" : '/.*' > /dev/null; then
         # Use the path as script name for the next iteration
         local PRG="$link"
       else
         # Else do the same but make it absolute before
-        local PRG="`dirname "$PRG"`/$link"
+        local PRG
+        PRG="$(dirname "$PRG")/$link"
       fi
     done
 
     # Go one level up as the script is located in $EXONUM_HOME/bin directory.
-    EXONUM_HOME=`dirname "$PRG"`/..
+    EXONUM_HOME=$(dirname "$PRG")/..
 }
 
 # Try to detect the Java home directory from installed executable in case JAVA_HOME is not set.
@@ -33,7 +36,7 @@ JAVA_HOME="${JAVA_HOME:-$(java -XshowSettings:properties -version \
   awk '{print $3}')}"
 
 # Find the directory containing libjvm.
-LIBJVM_PATH="$(find -L ${JAVA_HOME} -type f -name libjvm.* | xargs -n1 dirname)"
+LIBJVM_PATH="$(find -L "${JAVA_HOME}" -type f -name 'libjvm.*' -print0 | xargs -0 -n1 dirname)"
 
 export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 
@@ -41,4 +44,4 @@ export LD_LIBRARY_PATH="${LIBJVM_PATH}"
 get_exonum_home
 
 # Delegate execution to the app executable.
-${EXONUM_HOME}/exonum-java "$@"
+"${EXONUM_HOME}"/exonum-java "$@"
