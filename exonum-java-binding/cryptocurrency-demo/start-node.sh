@@ -18,7 +18,7 @@ EXONUM_JAVA_APP="exonum-java"
 command -v ${EXONUM_JAVA_APP} >/dev/null 2>&1 || { echo >&2 "Please install the Exonum Java App and make sure that 'exonum-java' binary is available via PATH. Aborting."; exit 1; }
 
 # Find the latest version of artifact and build if not found.
-ARTIFACT_PATH="$(find ./target -type f -name exonum-java-binding-cryptocurrency-demo-*-artifact.jar)"
+ARTIFACT_PATH="$(find ./target -type f -name 'exonum-java-binding-cryptocurrency-demo-*-artifact.jar')"
 
 if [ -z "${ARTIFACT_PATH}" ];
 then

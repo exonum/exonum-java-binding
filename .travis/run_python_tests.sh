@@ -10,8 +10,7 @@ set -x
 cd "${TRAVIS_BUILD_DIR}/exonum-java-binding"
 
 # Generate protobuf files needed for plugins
-source ./tests_profile
-mvn install -DskipTests -DskipRustLibBuild -pl common -am
+RUSTFLAGS="none" mvn install -DskipTests -pl common -am
 
 cd "exonum_launcher_java_plugins"
 
@@ -25,10 +24,13 @@ pip3 install --user -r requirements.txt --no-binary=protobuf
 # Install exonum_launcher_java_plugins
 pip3 install --user -e .
 
-# Download latest protobuf compiler
-wget https://github.com/protocolbuffers/protobuf/releases/download/v3.11.3/protoc-3.11.3-linux-x86_64.zip
-unzip protoc-3.11.3-linux-x86_64.zip
-export PROTOC="$(pwd)/bin/protoc"
+# Download the latest protobuf compiler
+PROTOC_VERSION="3.11.3"
+PROTOC_ZIP_FILENAME="protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+wget "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${PROTOC_ZIP_FILENAME}"
+unzip "${PROTOC_ZIP_FILENAME}"
+PROTOC="$(pwd)/bin/protoc"
+export PROTOC="${PROTOC}"
 
 # Run tests
 cd tests

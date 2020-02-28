@@ -20,8 +20,8 @@ set -eu -o pipefail
 function build-exonum-java() {
     mvn package --activate-profiles package-app -pl :exonum-java-binding-packaging -am \
       -DskipTests \
-      -Dbuild.mode=${BUILD_MODE} \
-      -Dbuild.cargoFlag=${BUILD_CARGO_FLAG} \
+      -Dbuild.mode="${BUILD_MODE}" \
+      -Dbuild.cargoFlag="${BUILD_CARGO_FLAG}" \
       -DskipRustLibBuild \
       -Drust.libraryPath="${RUST_LIBRARY_PATH}"
 }
@@ -108,7 +108,7 @@ mkdir -p "${PACKAGING_NATIVE_LIB_DIR}"
 mkdir -p "${PACKAGING_ETC_DIR}"
 
 # Copy libstd to some known place.
-cp ${RUST_LIB_DIR}/libstd* "${PACKAGING_NATIVE_LIB_DIR}"
+cp "${RUST_LIB_DIR}"/libstd* "${PACKAGING_NATIVE_LIB_DIR}"
 
 # Copy licenses so that the package tool can pick them up.
 cp ../LICENSE "${PACKAGING_ETC_DIR}"
