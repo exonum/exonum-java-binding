@@ -36,7 +36,6 @@ class NativeResourceManagerIntegrationTest {
   void nativeResourceManagerShallThrowIfUnknownHandle() {
     long unknownNativeHandle = 0x110B;
 
-
     RuntimeException thrown = assertThrows(RuntimeException.class,
         () -> AbstractAccess.nativeFree(unknownNativeHandle));
     assertThat(thrown).hasMessage("Invalid handle value: '110B'");
@@ -53,7 +52,9 @@ class NativeResourceManagerIntegrationTest {
       TemporaryDb db2 = new TemporaryDb(accessNativeHandle);
 
       RuntimeException thrown = assertThrows(RuntimeException.class, db2::close);
-      assertThat(thrown).hasMessageContaining("Wrong type id for");
+      assertThat(thrown.getMessage()).contains("Wrong type id for")
+          .containsPattern("expected.+GenericAccess") // Fork keeps a handle to GenericAccess
+          .containsPattern("actual.+TemporaryDB");
     }
   }
 
