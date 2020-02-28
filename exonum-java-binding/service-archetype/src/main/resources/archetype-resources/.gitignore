@@ -1,0 +1,5 @@
+# The testnet directory, used by "start-testnet.sh" script.
+testnet/
+
+# Maven target dirs
+target/

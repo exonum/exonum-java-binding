@@ -3,6 +3,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd">
   <fileSets>
+    <!-- Java sources -->
     <fileSet filtered="true" packaged="true">
       <directory>src/main/java</directory>
       <includes>
@@ -13,6 +14,14 @@
       <directory>src/test/java</directory>
       <includes>
         <include>**/*.java</include>
+      </includes>
+    </fileSet>
+    <!-- Scripts and other files -->
+    <fileSet>
+      <directory/>
+      <includes>
+        <include>.gitignore</include>
+        <include>start-testnet.sh</include>
       </includes>
     </fileSet>
   </fileSets>
