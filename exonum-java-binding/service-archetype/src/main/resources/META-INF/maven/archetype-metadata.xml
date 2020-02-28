@@ -20,7 +20,6 @@
     <fileSet>
       <directory/>
       <includes>
-        <include>.gitignore</include>
         <include>start-testnet.sh</include>
       </includes>
     </fileSet>
