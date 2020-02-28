@@ -18,7 +18,7 @@ package com.exonum.binding.example.testing;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.google.common.base.Strings;
 import java.nio.file.Path;
 import java.nio.file.Paths;

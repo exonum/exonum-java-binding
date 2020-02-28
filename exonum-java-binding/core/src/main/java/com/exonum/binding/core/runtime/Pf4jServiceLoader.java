@@ -16,11 +16,12 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
+import static com.exonum.binding.common.runtime.RuntimeId.JAVA;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.service.ServiceModule;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;

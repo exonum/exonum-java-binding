@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.blockchain.CallInBlocks;
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
-import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;

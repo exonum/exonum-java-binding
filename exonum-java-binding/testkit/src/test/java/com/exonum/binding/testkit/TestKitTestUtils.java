@@ -18,8 +18,8 @@ package com.exonum.binding.testkit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.DispatcherSchema;
-import com.exonum.binding.core.runtime.ServiceArtifactId;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
