@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>${groupId}</groupId>
-  <artifactId>${artifactId}</artifactId>
-  <version>${version}</version>
+  <groupId>\${groupId}</groupId>
+  <artifactId>\${artifactId}</artifactId>
+  <version>\${version}</version>
   <packaging>jar</packaging>
 
   <name>Exonum Service</name>
@@ -13,19 +13,21 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.compiler.release>11</java.compiler.release>
-    <junit.jupiter.version>5.6.0</junit.jupiter.version>
-    <nativeLibPath>${env.EXONUM_HOME}/lib/native</nativeLibPath>
-    <hamcrest.version>2.1</hamcrest.version>
-    <mockito.version>3.3.0</mockito.version>
-    <exonum.version>0.10.0-SNAPSHOT</exonum.version>
+    <java.compiler.release>${afp.java.compiler.release}</java.compiler.release>
+    <junit.jupiter.version>${afp.junit.version}</junit.jupiter.version>
+    <hamcrest.version>${afp.hamcrest.version}</hamcrest.version>
+    <mockito.version>${afp.mockito.version}</mockito.version>
+    <exonum.version>${afp.exonum.version}</exonum.version>
+    <nativeLibPath>\${env.EXONUM_HOME}/lib/native</nativeLibPath>
     <!-- Service Artifact properties -->
     <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
-    <exonum.artifactName>${project.groupId}/${project.artifactId}</exonum.artifactName>
-    <exonum.artifactVersion>${project.version}</exonum.artifactVersion>
-    <exonum.artifactId>${exonum.javaRuntimeId}:${exonum.artifactName}:${exonum.artifactVersion}
+    <exonum.artifactName>\${project.groupId}/\${project.artifactId}</exonum.artifactName>
+    <exonum.artifactVersion>\${project.version}</exonum.artifactVersion>
+    <exonum.artifactId>
+      \${exonum.javaRuntimeId}:\${exonum.artifactName}:\${exonum.artifactVersion}
     </exonum.artifactId>
-    <exonum.artifactFileName>${project.artifactId}-${project.version}-artifact
+    <exonum.artifactFileName>
+      \${project.artifactId}-\${project.version}-artifact
     </exonum.artifactFileName>
   </properties>
 
@@ -34,7 +36,7 @@
       <dependency>
         <groupId>com.exonum.binding</groupId>
         <artifactId>exonum-java-binding-bom</artifactId>
-        <version>${exonum.version}</version>
+        <version>\${exonum.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -42,7 +44,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>${junit.jupiter.version}</version>
+        <version>\${junit.jupiter.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -76,7 +78,7 @@
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
-      <version>${hamcrest.version}</version>
+      <version>\${hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -101,14 +103,14 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>${mockito.version}</version>
+      <version>\${mockito.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <version>${mockito.version}</version>
+      <version>\${mockito.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -118,16 +120,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
+        <version>${afp.maven-compiler-plugin.version}</version>
         <configuration>
           <showWarnings>true</showWarnings>
-          <release>${java.compiler.release}</release>
+          <release>\${java.compiler.release}</release>
         </configuration>
       </plugin>
 
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>${afp.maven-surefire-plugin.version}</version>
         <configuration>
           <excludes>
             <exclude>**/*IntegrationTest.java</exclude>
@@ -138,16 +140,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>${afp.maven-surefire-plugin.version}</version>
         <configuration>
           <includes>
             <include>**/*IntegrationTest.java</include>
           </includes>
-          <argLine>-Djava.library.path=${nativeLibPath}</argLine>
+          <argLine>-Djava.library.path=\${nativeLibPath}</argLine>
           <systemPropertyVariables>
-            <it.artifactFilename>${exonum.artifactFileName}.jar</it.artifactFilename>
-            <it.exonumArtifactId>${exonum.artifactId}</it.exonumArtifactId>
-            <it.artifactsDirectory>${project.build.directory}</it.artifactsDirectory>
+            <it.artifactFilename>\${exonum.artifactFileName}.jar</it.artifactFilename>
+            <it.exonumArtifactId>\${exonum.artifactId}</it.exonumArtifactId>
+            <it.artifactsDirectory>\${project.build.directory}</it.artifactsDirectory>
           </systemPropertyVariables>
         </configuration>
         <executions>
@@ -178,16 +180,16 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <finalName>${exonum.artifactFileName}</finalName>
+          <finalName>\${exonum.artifactFileName}</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <!-- Do not use the produced artifact jar file as a main jar
                i.e. do not install it in the local repo -->
           <attach>false</attach>
           <archive>
             <manifestEntries>
-              <Plugin-Id>${exonum.artifactId}</Plugin-Id>
-              <Plugin-Version>${exonum.artifactVersion}</Plugin-Version>
-              <Plugin-Provider>${project.groupId}</Plugin-Provider>
+              <Plugin-Id>\${exonum.artifactId}</Plugin-Id>
+              <Plugin-Version>\${exonum.artifactVersion}</Plugin-Version>
+              <Plugin-Provider>\${project.groupId}</Plugin-Provider>
             </manifestEntries>
           </archive>
         </configuration>
