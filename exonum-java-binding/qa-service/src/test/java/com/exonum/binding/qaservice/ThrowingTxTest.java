@@ -16,7 +16,7 @@
 
 package com.exonum.binding.qaservice;
 
-import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
+import static com.exonum.binding.common.runtime.RuntimeId.JAVA;
 import static com.exonum.binding.qaservice.QaArtifactInfo.ARTIFACT_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_ID;
 import static com.exonum.binding.qaservice.QaArtifactInfo.QA_SERVICE_NAME;

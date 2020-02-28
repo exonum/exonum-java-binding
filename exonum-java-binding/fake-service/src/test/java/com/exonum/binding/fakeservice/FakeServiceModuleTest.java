@@ -20,7 +20,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.Service;
 import com.google.inject.AbstractModule;

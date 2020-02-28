@@ -121,6 +121,8 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
 - Java 11 is the minimum required version to run Exonum services.
   _Client_ libraries: `exonum-messages` and `exonum-java-binding-common` remain
   Java 8 compatible.
+- ServiceArtifactId and RuntimeId are moved to 
+  `com.exonum.binding.common.runtime` package. (#1452)
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.

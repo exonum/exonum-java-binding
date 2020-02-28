@@ -18,7 +18,7 @@ package com.exonum.binding.core.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import io.vertx.ext.web.Router;
 import org.junit.jupiter.api.Test;
