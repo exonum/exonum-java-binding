@@ -21,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import com.exonum.binding.core.blockchain.Blockchain;
-import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.testkit.TestKit;
 import com.google.common.base.Strings;
 import java.nio.file.Path;
