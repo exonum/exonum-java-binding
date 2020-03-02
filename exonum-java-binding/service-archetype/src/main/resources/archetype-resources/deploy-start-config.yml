@@ -1,0 +1,33 @@
+# An exonum-launcher configuration file for deploying and starting a service instance
+# in the test network. Edit as needed.
+#
+# See:
+#  - start-testnet.sh
+#  - https://exonum.com/doc/version/latest/get-started/java-binding/#deploy-and-start-the-service
+networks:
+  - host: "127.0.0.1"
+    ssl: false
+    public-api-port: 3000
+    private-api-port: 3010
+
+deadline_height: 20000
+
+runtimes:
+  java: 1
+
+plugins:
+  runtime:
+    java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
+
+artifacts:
+  ${artifactId}:
+    runtime: java
+    name: "${groupId}/${artifactId}"
+    version: "${version}"
+    spec:
+      artifact_filename: "${artifactId}-${version}-artifact.jar"
+
+instances:
+  # A test service instance of "${artifactId}".
+  test-${artifactId}:
+    artifact: ${artifactId}
