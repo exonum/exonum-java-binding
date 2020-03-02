@@ -26,6 +26,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import com.exonum.binding.common.runtime.RuntimeId;
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.service.ServiceModule;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;

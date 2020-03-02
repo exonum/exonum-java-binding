@@ -20,10 +20,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.runtime.RuntimeId;
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.BlockchainData;
-import com.exonum.binding.core.runtime.RuntimeId;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.MapIndex;

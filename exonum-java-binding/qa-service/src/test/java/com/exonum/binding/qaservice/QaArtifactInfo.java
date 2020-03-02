@@ -18,7 +18,7 @@ package com.exonum.binding.qaservice;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.core.runtime.ServiceArtifactId;
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.binding.testkit.TestKit.Builder;
