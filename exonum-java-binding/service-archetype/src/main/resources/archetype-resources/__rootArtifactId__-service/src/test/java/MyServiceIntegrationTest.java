@@ -17,10 +17,8 @@
 package ${package};
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.testkit.TestKit;
 import com.google.common.base.Strings;
@@ -54,10 +52,10 @@ class MyServiceIntegrationTest {
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       // Check that genesis block was committed
-      testKit.withSnapshot((snapshot) -> {
-        Blockchain blockchain = Blockchain.newInstance(snapshot);
-        assertThat(blockchain.getBlockHashes().size(), equalTo(1L));
-      });
+      var blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+      var blockchain = blockchainData.getBlockchain();
+      var blockHashes = blockchain.getBlockHashes();
+      assertThat(blockHashes.size()).isEqualTo(1L);
     }
   }
 

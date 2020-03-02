@@ -26,16 +26,38 @@
     any other — shall be escaped.
     -->
     <afp.java.compiler.release>${java.compiler.frameworkRelease}</afp.java.compiler.release>
-    <afp.junit.version>${junit.jupiter.version}</afp.junit.version>
-    <afp.hamcrest.version>${hamcrest.version}</afp.hamcrest.version>
-    <afp.mockito.version>${mockito.version}</afp.mockito.version>
+    <afp.assertj.version>${assertj.version}</afp.assertj.version>
     <afp.exonum.version>${project.version}</afp.exonum.version>
+    <afp.junit.version>${junit.jupiter.version}</afp.junit.version>
+    <afp.maven-assembly-plugin.version>
+      ${maven-assembly-plugin.version}
+    </afp.maven-assembly-plugin.version>
+    <afp.maven-clean-plugin.version>
+      ${maven-clean-plugin.version}
+    </afp.maven-clean-plugin.version>
     <afp.maven-compiler-plugin.version>
       ${maven-compiler-plugin.version}
     </afp.maven-compiler-plugin.version>
+    <afp.maven-dependency-plugin.version>
+      ${maven-dependency-plugin.version}
+    </afp.maven-dependency-plugin.version>
+    <afp.maven-jar-plugin.version>
+      ${maven-jar-plugin.version}
+    </afp.maven-jar-plugin.version>
     <afp.maven-surefire-plugin.version>
       ${maven-surefire-plugin.version}
     </afp.maven-surefire-plugin.version>
+    <afp.mockito.version>${mockito.version}</afp.mockito.version>
+    <afp.os-maven-plugin.version>
+      ${os-maven-plugin.version}
+    </afp.os-maven-plugin.version>
+    <afp.protobuf.version>${protobuf.version}</afp.protobuf.version>
+    <afp.protobuf-maven-plugin.version>
+      ${protobuf-maven-plugin.version}
+    </afp.protobuf-maven-plugin.version>
+    <afp.maven-resources-plugin.version>
+      ${maven-resourcesPlugin.version}
+    </afp.maven-resources-plugin.version>
   </properties>
 
   <dependencies>

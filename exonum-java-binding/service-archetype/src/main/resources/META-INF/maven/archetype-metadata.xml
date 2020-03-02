@@ -2,20 +2,31 @@
   xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd">
+  <modules>
+    <module id="${rootArtifactId}-messages" dir="__rootArtifactId__-messages"
+      name="${rootArtifactId}-messages">
+    </module>
+    <module id="${rootArtifactId}-service" dir="__rootArtifactId__-service"
+      name="${rootArtifactId}-service">
+      <fileSets>
+        <!-- Java sources -->
+        <fileSet filtered="true" packaged="true">
+          <directory>src/main/java</directory>
+          <includes>
+            <include>**/*.java</include>
+          </includes>
+        </fileSet>
+        <fileSet filtered="true" packaged="true">
+          <directory>src/test/java</directory>
+          <includes>
+            <include>**/*.java</include>
+          </includes>
+        </fileSet>
+      </fileSets>
+    </module>
+  </modules>
+  <!-- Root resources -->
   <fileSets>
-    <!-- Java sources -->
-    <fileSet filtered="true" packaged="true">
-      <directory>src/main/java</directory>
-      <includes>
-        <include>**/*.java</include>
-      </includes>
-    </fileSet>
-    <fileSet filtered="true" packaged="true">
-      <directory>src/test/java</directory>
-      <includes>
-        <include>**/*.java</include>
-      </includes>
-    </fileSet>
     <!-- Scripts and other files -->
     <fileSet filtered="true">
       <directory/>

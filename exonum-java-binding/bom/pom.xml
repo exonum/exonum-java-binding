@@ -24,6 +24,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.exonum.messages</groupId>
+        <artifactId>exonum-messages</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.exonum.binding</groupId>
         <artifactId>exonum-java-binding-common</artifactId>
         <version>${project.version}</version>
@@ -106,7 +112,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-
     </dependencies>
   </dependencyManagement>
 </project>
