@@ -32,6 +32,7 @@
       <directory/>
       <includes>
         <include>deploy-start-config.yml</include>
+        <include>README.md</include>
       </includes>
     </fileSet>
     <fileSet>
