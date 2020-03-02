@@ -38,7 +38,7 @@ impl<InnerIter: Iterator> PairIter<InnerIter> {
     /// i.e. `ClassName(byte[], byte[])`.
     pub fn new(env: &JNIEnv, iter: InnerIter, class_name: &str) -> JniResult<Self> {
         let class = env.find_class(class_name)?;
-        let element_class = env.new_global_ref(class.into())?;
+        let element_class = env.new_global_ref(class)?;
         let signature = "([B[B)V";
         let id = env.get_method_id(class_name, "<init>", signature)?;
         Ok(PairIter {
