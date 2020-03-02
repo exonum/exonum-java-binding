@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import java.nio.file.Path;
 import java.util.Optional;
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 The Exonum Team
+ * Copyright 2020 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.runtime;
+package com.exonum.binding.common.runtime;
 
-import static com.exonum.binding.core.runtime.RuntimeId.JAVA;
+import static com.exonum.binding.common.runtime.RuntimeId.JAVA;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Integer.parseInt;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 
 import com.exonum.messages.core.runtime.Base.ArtifactId;
 import com.google.auto.value.AutoValue;
@@ -92,6 +91,10 @@ public abstract class ServiceArtifactId {
     checkArgument(isNotBlank(name), "name is blank: '%s'", name);
     checkArgument(isNotBlank(version), "version is blank: '%s'", version);
     return new AutoValue_ServiceArtifactId(runtimeId, name, version);
+  }
+
+  private static boolean isNotBlank(String s) {
+    return !s.trim().isEmpty();
   }
 
   /**

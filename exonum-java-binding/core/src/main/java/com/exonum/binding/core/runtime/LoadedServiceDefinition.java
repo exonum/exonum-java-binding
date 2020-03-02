@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.service.ServiceModule;
 import com.google.auto.value.AutoValue;
 import java.util.function.Supplier;

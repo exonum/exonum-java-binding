@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
+import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
