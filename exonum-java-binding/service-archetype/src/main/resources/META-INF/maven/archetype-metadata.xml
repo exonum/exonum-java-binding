@@ -5,6 +5,11 @@
   <modules>
     <module id="${rootArtifactId}-messages" dir="__rootArtifactId__-messages"
       name="${rootArtifactId}-messages">
+      <fileSets>
+        <fileSet>
+          <directory>src/main/proto</directory>
+        </fileSet>
+      </fileSets>
     </module>
     <module id="${rootArtifactId}-service" dir="__rootArtifactId__-service"
       name="${rootArtifactId}-service">
