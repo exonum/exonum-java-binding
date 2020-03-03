@@ -18,8 +18,13 @@ package com.example.car;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.example.car.messages.VehicleOuterClass.Vehicle;
+import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
 import com.exonum.binding.core.storage.database.Prefixed;
+import com.exonum.binding.core.storage.indices.IndexAddress;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
 /**
  * {@code MySchema} provides access to the tables of {@link MyService},
@@ -29,11 +34,25 @@ import com.exonum.binding.core.storage.database.Prefixed;
  */
 public final class MySchema implements Schema {
 
+  // ci-block ci-vehicles {
+  private static final Serializer<Vehicle> VEHICLE_SERIALIZER =
+      StandardSerializers.protobuf(Vehicle.class);
+  // }
+
   private final Prefixed access;
 
   public MySchema(Prefixed serviceData) {
     this.access = checkNotNull(serviceData);
   }
 
-  // TODO: Add index factories here.
+  // ci-block ci-vehicles {
+  /**
+   * Provides access to the current state of the vehicles registry.
+   */
+  public ProofMapIndexProxy<String, Vehicle> vehicles() {
+    var address = IndexAddress.valueOf("vehicles");
+    var keySerializer = StandardSerializers.string();
+    return access.getProofMap(address, keySerializer, VEHICLE_SERIALIZER);
+  }
+  // }
 }
