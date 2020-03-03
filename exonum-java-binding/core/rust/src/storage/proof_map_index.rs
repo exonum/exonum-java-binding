@@ -518,8 +518,8 @@ fn create_element(
     class: &GlobalRef,
     constructor: JMethodID,
 ) -> JniResult<jobject> {
-    let key: JObject = env.byte_array_from_slice(key)?.into();
-    let value: JObject = env.byte_array_from_slice(value)?.into();
+    let key = env.byte_array_from_slice(key)?;
+    let value = env.byte_array_from_slice(value)?;
     Ok(env
         .new_object_unchecked(class, constructor, &[key.into(), value.into()])?
         .into_inner())
