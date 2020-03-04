@@ -11,3 +11,8 @@ message AddVehicle {
   Vehicle new_vehicle = 1;
 }
 // }
+
+message ChangeOwner {
+  string id = 1;
+  string new_owner = 2;
+}
