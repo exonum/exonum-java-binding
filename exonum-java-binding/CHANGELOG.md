@@ -121,6 +121,9 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
 - Java 11 is the minimum required version to run Exonum services.
   _Client_ libraries: `exonum-messages` and `exonum-java-binding-common` remain
   Java 8 compatible.
+- The service archetype to produce a multi-module service template project,
+  with a separate module for Protocol Buffers messages, so that they 
+  can be re-used in light clients; and a module for service code. (#1461)
 - ServiceArtifactId and RuntimeId are moved to 
   `com.exonum.binding.common.runtime` package. (#1452)
 

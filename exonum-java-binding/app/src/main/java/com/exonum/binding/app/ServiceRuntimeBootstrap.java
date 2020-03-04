@@ -28,6 +28,7 @@ import com.exonum.binding.core.runtime.ServiceRuntimeAdapter;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.util.LibraryLoader;
 import com.exonum.binding.time.TimeSchema;
+import com.exonum.messages.core.runtime.Base.ArtifactId;
 import com.google.common.base.StandardSystemProperty;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -65,6 +66,7 @@ public final class ServiceRuntimeBootstrap {
    */
   public static final ImmutableMap<String, Class<?>> DEPENDENCY_REFERENCE_CLASSES =
       ImmutableMap.<String, Class<?>>builder()
+          .put("exonum-messages", ArtifactId.class)
           .put("exonum-java-binding-core", Service.class)
           .put("exonum-java-binding-common", HashCode.class)
           .put("exonum-time-oracle", TimeSchema.class)

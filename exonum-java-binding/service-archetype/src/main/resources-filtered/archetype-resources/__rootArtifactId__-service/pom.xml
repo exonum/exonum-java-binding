@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>\${groupId}</groupId>
+    <artifactId>\${rootArtifactId}-parent</artifactId>
+    <version>\${version}</version>
+  </parent>
+
+  <artifactId>\${rootArtifactId}-service</artifactId>
+  <version>\${version}</version>
+  <packaging>jar</packaging>
+
+  <name>Exonum Service</name>
+
+  <properties>
+    <nativeLibPath>\${env.EXONUM_HOME}/lib/native</nativeLibPath>
+    <!-- Service Artifact properties -->
+    <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
+    <exonum.artifactName>\${project.groupId}/\${project.artifactId}</exonum.artifactName>
+    <exonum.artifactVersion>\${project.version}</exonum.artifactVersion>
+    <exonum.artifactId>
+      \${exonum.javaRuntimeId}:\${exonum.artifactName}:\${exonum.artifactVersion}
+    </exonum.artifactId>
+    <exonum.artifactFileName>
+      \${project.artifactId}-\${project.version}-artifact
+    </exonum.artifactFileName>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>\${groupId}</groupId>
+      <artifactId>\${rootArtifactId}-messages</artifactId>
+      <version>\${project.version}</version>
+    </dependency>
+
+     <!-- Exonum *must* have 'provided' scope so that it and its dependencies are not included
+         in the service artifact. Some of transitive dependencies of Exonum are safe
+         and recommended to use in a service in 'provided' scope as well, because they will not
+         be changed in an incompatible way in a compatible release of Exonum. Such dependencies
+         are listed in exonum-java-binding-bom (e.g., guava, guice, gson, vertx, pf4j,
+         protobuf-java). You can either use them implicitly as transitive dependencies
+         (no extra POM modifications needed) or define explicitly below with 'provided' scope
+         and NO version — it will be inherited from exonum-java-binding-bom.
+
+         See also https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Transitive_Dependencies
+         -->
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-java-binding-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Override the scope of exonum-messages in case \${rootArtifactId}-messages depends on them -->
+    <dependency>
+      <groupId>com.exonum.messages</groupId>
+      <artifactId>exonum-messages</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.exonum.binding</groupId>
+      <artifactId>exonum-testkit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+          <argLine>-Djava.library.path=\${nativeLibPath}</argLine>
+          <systemPropertyVariables>
+            <it.artifactFilename>\${exonum.artifactFileName}.jar</it.artifactFilename>
+            <it.exonumArtifactId>\${exonum.artifactId}</it.exonumArtifactId>
+            <it.artifactsDirectory>\${project.build.directory}</it.artifactsDirectory>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>package-service-artifact</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <!-- This configuration produces a JAR file with this service definition in Exonum format -->
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <finalName>\${exonum.artifactFileName}</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+          <!-- Do not use the produced artifact jar file as a main jar
+               i.e. do not install it in the local repo -->
+          <attach>false</attach>
+          <archive>
+            <manifestEntries>
+              <Plugin-Id>\${exonum.artifactId}</Plugin-Id>
+              <Plugin-Version>\${exonum.artifactVersion}</Plugin-Version>
+              <Plugin-Provider>\${project.groupId}</Plugin-Provider>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

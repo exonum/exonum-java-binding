@@ -3,32 +3,31 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>\${groupId}</groupId>
-  <artifactId>\${artifactId}</artifactId>
+  <artifactId>\${rootArtifactId}-parent</artifactId>
   <version>\${version}</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
-  <name>Exonum Service</name>
-  <url>https://exonum.com/</url>
+  <name>Exonum Service Parent</name>
+
+  <modules>
+    <module>\${rootArtifactId}-messages</module>
+    <module>\${rootArtifactId}-service</module>
+  </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.compiler.release>${afp.java.compiler.release}</java.compiler.release>
-    <junit.jupiter.version>${afp.junit.version}</junit.jupiter.version>
-    <hamcrest.version>${afp.hamcrest.version}</hamcrest.version>
-    <mockito.version>${afp.mockito.version}</mockito.version>
+    <java.compiler.clientRelease>8</java.compiler.clientRelease>
+    <java.compiler.serviceRelease>${afp.java.compiler.release}</java.compiler.serviceRelease>
+    <!--
+    The default release. It is overridden in the projects that require 'client' version.
+    -->
+    <java.compiler.release>\${java.compiler.serviceRelease}</java.compiler.release>
+
+    <assertj.version>${afp.assertj.version}</assertj.version>
     <exonum.version>${afp.exonum.version}</exonum.version>
-    <nativeLibPath>\${env.EXONUM_HOME}/lib/native</nativeLibPath>
-    <!-- Service Artifact properties -->
-    <exonum.javaRuntimeId>1</exonum.javaRuntimeId>
-    <exonum.artifactName>\${project.groupId}/\${project.artifactId}</exonum.artifactName>
-    <exonum.artifactVersion>\${project.version}</exonum.artifactVersion>
-    <exonum.artifactId>
-      \${exonum.javaRuntimeId}:\${exonum.artifactName}:\${exonum.artifactVersion}
-    </exonum.artifactId>
-    <exonum.artifactFileName>
-      \${project.artifactId}-\${project.version}-artifact
-    </exonum.artifactFileName>
+    <junit.jupiter.version>${afp.junit.version}</junit.jupiter.version>
+    <protobuf.version>${afp.protobuf.version}</protobuf.version>
   </properties>
 
   <dependencyManagement>
@@ -48,152 +47,72 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>\${assertj.version}</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
-  <dependencies>
-     <!-- Exonum *must* have 'provided' scope so that it and its dependencies are not included
-         in the service artifact. Some of transitive dependencies of Exonum are safe
-         and recommended to use in a service in 'provided' scope as well, because they will not
-         be changed in an incompatible way in a compatible release of Exonum. Such dependencies
-         are listed in exonum-java-binding-bom (e.g., guava, guice, gson, vertx, pf4j,
-         protobuf-java). You can either use them implicitly as transitive dependencies
-         (no extra POM modifications needed) or define explicitly below with 'provided' scope
-         and NO version — it will be inherited from exonum-java-binding-bom.
-
-         See also https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Transitive_Dependencies
-         -->
-    <dependency>
-      <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-java-binding-core</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
-    <!-- Test dependencies -->
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest</artifactId>
-      <version>\${hamcrest.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.exonum.binding</groupId>
-      <artifactId>exonum-testkit</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-web-client</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-junit5</artifactId>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>\${mockito.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <version>\${mockito.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${afp.maven-compiler-plugin.version}</version>
-        <configuration>
-          <showWarnings>true</showWarnings>
-          <release>\${java.compiler.release}</release>
-        </configuration>
-      </plugin>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${afp.maven-compiler-plugin.version}</version>
+          <configuration>
+            <release>\${java.compiler.release}</release>
+            <showWarnings>true</showWarnings>
+          </configuration>
+        </plugin>
 
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${afp.maven-surefire-plugin.version}</version>
-        <configuration>
-          <excludes>
-            <exclude>**/*IntegrationTest.java</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
+        <plugin>
+          <groupId>org.xolstice.maven.plugins</groupId>
+          <artifactId>protobuf-maven-plugin</artifactId>
+          <version>${afp.protobuf-maven-plugin.version}</version>
+        </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${afp.maven-surefire-plugin.version}</version>
-        <configuration>
-          <includes>
-            <include>**/*IntegrationTest.java</include>
-          </includes>
-          <argLine>-Djava.library.path=\${nativeLibPath}</argLine>
-          <systemPropertyVariables>
-            <it.artifactFilename>\${exonum.artifactFileName}.jar</it.artifactFilename>
-            <it.exonumArtifactId>\${exonum.artifactId}</it.exonumArtifactId>
-            <it.artifactsDirectory>\${project.build.directory}</it.artifactsDirectory>
-          </systemPropertyVariables>
-        </configuration>
-        <executions>
-          <execution>
-            <id>integration-test</id>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+        <!-- Use newer version of the standard plugins by default. -->
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${afp.maven-surefire-plugin.version}</version>
+        </plugin>
 
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.2.0</version>
-        <executions>
-          <execution>
-            <id>package-service-artifact</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-        <!-- This configuration produces a JAR file with this service definition in Exonum format -->
-        <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-          <finalName>\${exonum.artifactFileName}</finalName>
-          <appendAssemblyId>false</appendAssemblyId>
-          <!-- Do not use the produced artifact jar file as a main jar
-               i.e. do not install it in the local repo -->
-          <attach>false</attach>
-          <archive>
-            <manifestEntries>
-              <Plugin-Id>\${exonum.artifactId}</Plugin-Id>
-              <Plugin-Version>\${exonum.artifactVersion}</Plugin-Version>
-              <Plugin-Provider>\${project.groupId}</Plugin-Provider>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
+        <plugin>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${afp.maven-surefire-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${afp.maven-dependency-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>${afp.maven-clean-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${afp.maven-assembly-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${afp.maven-jar-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${afp.maven-resources-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>
