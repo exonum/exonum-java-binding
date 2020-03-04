@@ -17,16 +17,21 @@
 package com.example.car;
 
 import com.example.car.messages.Transactions;
+import com.example.car.messages.Transactions.AddVehicle;
 import com.example.car.messages.VehicleOuterClass.Vehicle;
+import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
+import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
+import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
+import java.util.List;
 
 public final class MyService extends AbstractService {
 
@@ -47,6 +52,10 @@ public final class MyService extends AbstractService {
   @Transaction(ADD_VEHICLE_TX_ID)
   public void addVehicle(Transactions.AddVehicle args, TransactionContext context) {
     var serviceData = context.getServiceData();
+    addVehicle(args, serviceData);
+  }
+
+  private void addVehicle(AddVehicle args, Prefixed serviceData) {
     var schema = new MySchema(serviceData);
     ProofMapIndexProxy<String, Vehicle> vehicles = schema.vehicles();
 
@@ -88,6 +97,33 @@ public final class MyService extends AbstractService {
         .build();
     // Write it back to the registry
     vehicles.put(id, updatedVehicleEntry);
+  }
+  // }
+
+  // ci-block ci-initialize {
+  @Override
+  public void initialize(BlockchainData blockchainData, Configuration configuration) {
+    var testVehicles =
+        List.of(vehicleArgs("Car 1", "Ford", "Focus", "Dave"),
+            vehicleArgs("Car 2", "DMC", "DeLorean", "Emmett Brown"),
+            vehicleArgs("Car 3", "McLaren", "P1", "Weeknd"));
+    var serviceData = blockchainData.getExecutingServiceData();
+    for (var vehicle : testVehicles) {
+       addVehicle(vehicle, serviceData);
+    }
+  }
+
+  private static Transactions.AddVehicle vehicleArgs(String id, String make, String model,
+      String owner) {
+    return Transactions.AddVehicle.newBuilder()
+        .setNewVehicle(
+            Vehicle.newBuilder()
+                .setId(id)
+                .setMake(make)
+                .setModel(model)
+                .setOwner(owner)
+                .build())
+        .build();
   }
   // }
 }
