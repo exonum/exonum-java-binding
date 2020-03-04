@@ -272,6 +272,7 @@
                   <includes>
                     <include>libjava_bindings.so</include>
                     <include>libjava_bindings.dylib</include>
+                    <include>java_bindings.dll</include>
                   </includes>
                 </resource>
               </resources>
