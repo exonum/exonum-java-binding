@@ -31,7 +31,9 @@ import io.vertx.ext.web.Router;
 public final class MyService extends AbstractService {
 
   public static final int ADD_VEHICLE_TX_ID = 0;
+  public static final int CHANGE_OWNER_TX_ID = 1;
   public static final byte ID_ALREADY_EXISTS_ERROR_CODE = 100;
+  public static final byte NO_VEHICLE_ERROR_CODE = 101;
 
   @Inject
   public MyService(ServiceInstanceSpec instanceSpec) {
@@ -60,6 +62,32 @@ public final class MyService extends AbstractService {
 
     // Add the vehicle to the registry
     vehicles.put(id, newVehicle);
+  }
+  // }
+
+  // ci-block ci-change-owner {
+  @Transaction(CHANGE_OWNER_TX_ID)
+  public void changeOwner(Transactions.ChangeOwner args, TransactionContext context) {
+    var serviceData = context.getServiceData();
+    var schema = new MySchema(serviceData);
+    ProofMapIndexProxy<String, Vehicle> vehicles = schema.vehicles();
+
+    // Check the vehicle with such ID exists
+    var id = args.getId();
+    if (!vehicles.containsKey(id)) {
+      throw new ExecutionException(NO_VEHICLE_ERROR_CODE, "No vehicle with such id: " + id);
+    }
+
+    // Update the owner
+    // Get the current entry
+    var vehicleEntry = vehicles.get(id);
+    // Update the owner
+    var newOwner = args.getNewOwner();
+    var updatedVehicleEntry = Vehicle.newBuilder(vehicleEntry)
+        .setOwner(newOwner)
+        .build();
+    // Write it back to the registry
+    vehicles.put(id, updatedVehicleEntry);
   }
   // }
 }
