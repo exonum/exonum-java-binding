@@ -16,12 +16,16 @@
 
 package com.exonum.binding.core.runtime;
 
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.pf4j.PluginManager;
 
 /**
  * Verifies that {@link Pf4jServiceLoader} works correctly with the {@link JarPluginManager},
  * our default implementation.
  */
+// ECR-???
+@DisabledOnOs(OS.WINDOWS)
 class Pf4jServiceLoaderWithJarIntegrationTest extends Pf4jServiceLoaderIntegrationTestable {
 
   @Override
