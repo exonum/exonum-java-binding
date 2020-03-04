@@ -47,7 +47,6 @@
     <afp.maven-surefire-plugin.version>
       ${maven-surefire-plugin.version}
     </afp.maven-surefire-plugin.version>
-    <afp.mockito.version>${mockito.version}</afp.mockito.version>
     <afp.os-maven-plugin.version>
       ${os-maven-plugin.version}
     </afp.os-maven-plugin.version>
