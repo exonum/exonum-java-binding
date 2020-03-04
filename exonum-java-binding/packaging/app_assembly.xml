@@ -32,9 +32,11 @@
     </fileSet>
   </fileSets>
   <files>
-    <!--Main Exonum Java app executable-->
+    <!--Main Exonum Java app executable.
+      We use `rust.exonumJavaName` property here, because Windows binaries have .exe extension,
+      while Linux/Mac ones have not-->
     <file>
-      <source>${packaging.basedir}/exonum-java</source>
+      <source>${packaging.basedir}/${packaging.exonumJavaName}</source>
     </file>
     <!--Exonum Java app wrapper script that starts the app executable-->
     <file>

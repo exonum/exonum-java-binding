@@ -28,6 +28,8 @@
     <packaging.java>${packaging.basedir}/lib/java</packaging.java>
     <!--A full path to the shell script that starts the App executable-->
     <packaging.script>${project.parent.basedir}/core/rust/exonum-java/exonum-java</packaging.script>
+    <!--A name of the Exonum Java app binary file. Has no extension on Linux/Mac, but has .exe on Windows-->
+    <packaging.exonumJavaName>exonum-java</packaging.exonumJavaName>
   </properties>
 
   <dependencies>
