@@ -236,10 +236,8 @@ fn serialize_block(env: &JNIEnv, block: Block) -> jni::errors::Result<jbyteArray
 }
 
 fn create_java_keypair<'a>(env: &'a JNIEnv, keypair: KeyPair) -> jni::errors::Result<JValue<'a>> {
-    let public_key_byte_array: JObject =
-        env.byte_array_from_slice(&keypair.public_key()[..])?.into();
-    let secret_key_byte_array: JObject =
-        env.byte_array_from_slice(&keypair.secret_key()[..])?.into();
+    let public_key_byte_array = env.byte_array_from_slice(&keypair.public_key()[..])?;
+    let secret_key_byte_array = env.byte_array_from_slice(&keypair.secret_key()[..])?;
     env.call_static_method(
         KEYPAIR_CLASS,
         "createKeyPair",

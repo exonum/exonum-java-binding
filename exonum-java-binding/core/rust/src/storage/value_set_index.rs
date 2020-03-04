@@ -248,8 +248,8 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_ValueSetInde
         let iterWrapper = handle::cast_handle::<Iter>(iter_handle);
         match iterWrapper.iter.next() {
             Some(val) => {
-                let hash: JObject = utils::convert_hash(&env, &val.0)?.into();
-                let value: JObject = env.byte_array_from_slice(&val.1)?.into();
+                let hash = utils::convert_hash(&env, &val.0)?;
+                let value = env.byte_array_from_slice(&val.1)?;
                 Ok(env
                     .new_object_unchecked(
                         &iterWrapper.element_class,
