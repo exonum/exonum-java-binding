@@ -195,7 +195,7 @@ fn get_class(env: &JNIEnv, class: &str) -> Option<GlobalRef> {
     let class = env
         .find_class(class)
         .unwrap_or_else(|_| panic!("Class {} not found", class));
-    Some(env.new_global_ref(class.into()).unwrap())
+    Some(env.new_global_ref(class).unwrap())
 }
 
 fn check_cache_initialized() {
