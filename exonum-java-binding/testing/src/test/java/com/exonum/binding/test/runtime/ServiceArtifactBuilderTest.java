@@ -121,8 +121,8 @@ class ServiceArtifactBuilderTest {
     assertThat(allJarEntries).containsKey(EXTENSIONS_INDEX_NAME);
     String allExtensions = getExtensionsIndex(allJarEntries);
 
-    String expectedExtensions = TestService.class.getName() + "\n"
-        + ImmutableList.class.getName() + "\n";
+    String expectedExtensions = TestService.class.getName() + System.lineSeparator()
+        + ImmutableList.class.getName() + System.lineSeparator();
     assertThat(allExtensions).isEqualTo(expectedExtensions);
   }
 
@@ -149,7 +149,7 @@ class ServiceArtifactBuilderTest {
     assertThat(allJarEntries).containsKey(EXTENSIONS_INDEX_NAME);
     String allExtensions = getExtensionsIndex(allJarEntries);
 
-    assertThat(allExtensions).isEqualTo("e1\ne2\n");
+    assertThat(allExtensions).isEqualTo(String.format("e1%ne2%n"));
   }
 
   @Test
@@ -165,7 +165,7 @@ class ServiceArtifactBuilderTest {
     assertThat(allJarEntries).containsKey(EXTENSIONS_INDEX_NAME);
     String allExtensions = getExtensionsIndex(allJarEntries);
 
-    assertThat(allExtensions).isEqualTo(ImmutableList.class.getName() + '\n');
+    assertThat(allExtensions).isEqualTo(ImmutableList.class.getName() + System.lineSeparator());
   }
 
   @Test
