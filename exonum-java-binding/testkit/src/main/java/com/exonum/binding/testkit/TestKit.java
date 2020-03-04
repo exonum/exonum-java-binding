@@ -86,8 +86,8 @@ import javax.annotation.Nullable;
  * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized — service instances are
- * {@linkplain Service#initialize(com.exonum.binding.core.blockchain.BlockchainData, Configuration)
- * initialized} and genesis block is committed.
+ * {@linkplain Service#initialize(com.exonum.binding.core.transaction.TransactionContext,
+ * Configuration) initialized} and genesis block is committed.
  * Then the {@linkplain Service#createPublicApiHandlers(Node, Router) public API handlers} are
  * created.
  *

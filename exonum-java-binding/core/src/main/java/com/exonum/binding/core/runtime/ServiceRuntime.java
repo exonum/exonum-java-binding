@@ -20,8 +20,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.BlockCommittedEvent;
@@ -66,6 +68,10 @@ public final class ServiceRuntime implements AutoCloseable {
   @VisibleForTesting
   static final String API_ROOT_PATH = "/api/services";
   private static final Logger logger = LogManager.getLogger(ServiceRuntime.class);
+  @VisibleForTesting static final PublicKey ZERO_PK =
+      PublicKey.fromBytes(new byte[Ed25519.PUBLIC_KEY_BYTES]);
+  @VisibleForTesting static final HashCode ZERO_HASH =
+      HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
 
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
@@ -200,7 +206,8 @@ public final class ServiceRuntime implements AutoCloseable {
         ServiceWrapper service = createServiceInstance(instanceSpec);
 
         // Initialize it
-        service.initialize(blockchainData, new ServiceConfiguration(configuration));
+        TransactionContext context = newContext(service, blockchainData).build();
+        service.initialize(context, new ServiceConfiguration(configuration));
       }
 
       // Log the initialization event
@@ -234,7 +241,8 @@ public final class ServiceRuntime implements AutoCloseable {
       synchronized (lock) {
         checkStoppedService(instanceSpec.getId());
         ServiceWrapper service = createServiceInstance(instanceSpec);
-        service.resume(blockchainData, arguments);
+        TransactionContext context = newContext(service, blockchainData).build();
+        service.resume(context, arguments);
       }
       logger.info("Resumed service: {}", instanceSpec);
     } catch (Exception e) {
@@ -383,13 +391,9 @@ public final class ServiceRuntime implements AutoCloseable {
       PublicKey authorPublicKey) {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
-      String serviceName = service.getName();
-      TransactionContext context = TransactionContext.builder()
-          .blockchainData(blockchainData)
+      TransactionContext context = newContext(service, blockchainData)
           .txMessageHash(txMessageHash)
           .authorPk(authorPublicKey)
-          .serviceName(serviceName)
-          .serviceId(serviceId)
           .build();
       try {
         service.executeTransaction(interfaceName, txId, arguments, callerServiceId, context);
@@ -410,7 +414,8 @@ public final class ServiceRuntime implements AutoCloseable {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       try {
-        service.beforeTransactions(blockchainData);
+        TransactionContext context = newContext(service, blockchainData).build();
+        service.beforeTransactions(context);
       } catch (Exception e) {
         logger.error("Service {} threw exception in beforeTransactions.", service.getName(), e);
         throw e;
@@ -435,13 +440,25 @@ public final class ServiceRuntime implements AutoCloseable {
     synchronized (lock) {
       ServiceWrapper service = getServiceById(serviceId);
       try {
-        service.afterTransactions(blockchainData);
+        TransactionContext context = newContext(service, blockchainData).build();
+        service.afterTransactions(context);
       } catch (Exception e) {
         logger.error("Service {} threw exception in afterTransactions."
             + " Any changes will be rolled-back", service.getName(), e);
         throw e;
       }
     }
+  }
+
+  /** Creates a fully-initialized builder of a 'zero' context for the given service. */
+  private static TransactionContext.Builder newContext(ServiceWrapper service,
+      BlockchainData blockchainData) {
+    return TransactionContext.builder()
+        .blockchainData(blockchainData)
+        .serviceName(service.getName())
+        .serviceId(service.getId())
+        .txMessageHash(ZERO_HASH)
+        .authorPk(ZERO_PK);
   }
 
   /**

@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Throwables.throwIfInstanceOf;
 import static java.lang.String.format;
 
-import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Configuration;
@@ -102,12 +101,12 @@ final class ServiceWrapper {
     return instanceSpec.getId();
   }
 
-  void initialize(BlockchainData blockchainData, Configuration configuration) {
-    callServiceMethod(() -> service.initialize(blockchainData, configuration));
+  void initialize(TransactionContext context, Configuration configuration) {
+    callServiceMethod(() -> service.initialize(context, configuration));
   }
 
-  void resume(BlockchainData blockchainData, byte[] arguments) {
-    callServiceMethod(() -> service.resume(blockchainData, arguments));
+  void resume(TransactionContext context, byte[] arguments) {
+    callServiceMethod(() -> service.resume(context, arguments));
   }
 
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
@@ -141,14 +140,13 @@ final class ServiceWrapper {
         callerServiceId, SUPERVISOR_SERVICE_ID);
     // Invoke the Configurable operation
     Configurable configurable = (Configurable) service;
-    BlockchainData fork = context.getBlockchainData();
     Configuration config = new ServiceConfiguration(arguments);
     switch (txId) {
       case VERIFY_CONFIGURATION_TX_ID:
-        callServiceMethod(() -> configurable.verifyConfiguration(fork, config));
+        callServiceMethod(() -> configurable.verifyConfiguration(context, config));
         break;
       case APPLY_CONFIGURATION_TX_ID:
-        callServiceMethod(() -> configurable.applyConfiguration(fork, config));
+        callServiceMethod(() -> configurable.applyConfiguration(context, config));
         break;
       default:
         throw new IllegalArgumentException(
@@ -156,12 +154,12 @@ final class ServiceWrapper {
     }
   }
 
-  void beforeTransactions(BlockchainData blockchainData) {
-    callServiceMethod(() -> service.beforeTransactions(blockchainData));
+  void beforeTransactions(TransactionContext context) {
+    callServiceMethod(() -> service.beforeTransactions(context));
   }
 
-  void afterTransactions(BlockchainData blockchainData) {
-    callServiceMethod(() -> service.afterTransactions(blockchainData));
+  void afterTransactions(TransactionContext context) {
+    callServiceMethod(() -> service.afterTransactions(context));
   }
 
   /**

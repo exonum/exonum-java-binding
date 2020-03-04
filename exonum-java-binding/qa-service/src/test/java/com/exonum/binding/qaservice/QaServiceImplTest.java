@@ -41,8 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
+import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.common.hash.HashCode;
+import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
@@ -53,6 +56,7 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.transaction.ExecutionException;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.Config.QaResumeArguments;
 import com.exonum.binding.test.Integration;
@@ -90,6 +94,9 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 class QaServiceImplTest {
 
   private static final ZonedDateTime INITIAL_TIME = ZonedDateTime.now(ZoneOffset.UTC);
+  private static final PublicKey ZERO_PK = PublicKey.fromBytes(new byte[Ed25519.PUBLIC_KEY_BYTES]);
+  private static final HashCode ZERO_HASH = HashCode
+      .fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
 
   private final FakeTimeProvider timeProvider = FakeTimeProvider.create(INITIAL_TIME);
 
@@ -142,9 +149,16 @@ class QaServiceImplTest {
         Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
       BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, QA_SERVICE_NAME);
+      TransactionContext context = TransactionContext.builder()
+          .serviceName(QA_SERVICE_NAME)
+          .serviceId(QA_SERVICE_ID)
+          .blockchainData(blockchainData)
+          .txMessageHash(ZERO_HASH)
+          .authorPk(ZERO_PK)
+          .build();
 
       QaServiceImpl qaService = new QaServiceImpl(spec);
-      qaService.resume(blockchainData, arguments);
+      qaService.resume(context, arguments);
 
       QaSchema schema = new QaSchema(blockchainData);
       MapIndex<String, Long> counters = schema.counters();
@@ -160,12 +174,12 @@ class QaServiceImplTest {
         .setShouldThrowException(true)
         .build()
         .toByteArray();
-    BlockchainData fork = mock(BlockchainData.class);
+    TransactionContext context = mock(TransactionContext.class);
 
     QaServiceImpl qaService = new QaServiceImpl(spec);
 
     ExecutionException exception = assertThrows(ExecutionException.class,
-        () -> qaService.resume(fork, arguments));
+        () -> qaService.resume(context, arguments));
     assertThat(exception.getErrorCode()).isEqualTo(RESUME_SERVICE_ERROR.code);
   }
 

@@ -22,13 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.exonum.binding.common.blockchain.CallInBlocks;
 import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.blockchain.Blockchain;
-import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.ExecutionException;
+import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.messages.core.Blockchain.CallInBlock;
@@ -90,7 +90,7 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Override
-    public void afterTransactions(BlockchainData blockchainData) {
+    public void afterTransactions(TransactionContext context) {
       throw new ExecutionException(AFTER_TX_ERROR_CODE);
     }
   }

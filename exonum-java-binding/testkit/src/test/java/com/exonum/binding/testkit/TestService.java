@@ -16,7 +16,6 @@
 
 package com.exonum.binding.testkit;
 
-import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
@@ -48,14 +47,14 @@ public final class TestService extends AbstractService {
   }
 
   @Override
-  public void initialize(BlockchainData blockchainData, Configuration configuration) {
+  public void initialize(TransactionContext context, Configuration configuration) {
     TestConfiguration initialConfiguration = configuration.getAsMessage(TestConfiguration.class);
     String configurationValue = initialConfiguration.getValue();
     if (configurationValue.equals(THROWING_VALUE)) {
       throw new ExecutionException(ANY_ERROR_CODE, "Service configuration had an invalid value: "
           + configurationValue);
     }
-    TestSchema schema = new TestSchema(blockchainData.getExecutingServiceData());
+    TestSchema schema = new TestSchema(context.getServiceData());
     ProofMapIndexProxy<String, String> testMap = schema.testMap();
     testMap.put(INITIAL_ENTRY_KEY, configurationValue);
   }

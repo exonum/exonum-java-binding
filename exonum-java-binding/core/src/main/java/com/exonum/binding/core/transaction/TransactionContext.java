@@ -28,9 +28,14 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Prefixed;
 
 /**
- * Transaction context class. Contains required information for the transaction execution.
- * The context is provided by the framework and users shouldn't create context instances manually
- * except tests.
+ * A transaction execution context. The context provides access to the blockchain data
+ * for the executing service, and also contains the required information for the transaction
+ * execution.
+ *
+ * <p>The context is provided by the framework and users shouldn't create context instances manually
+ * except in tests.
+ *
+ * @see Transaction
  */
 public interface TransactionContext {
 
@@ -54,14 +59,16 @@ public interface TransactionContext {
 
   /**
    * Returns SHA-256 hash of the {@linkplain TransactionMessage transaction message} that
-   * carried the payload of the transaction.
-   * Each transaction message is uniquely identified by its hash; the messages are persisted
+   * carried the payload of the transaction; or a zero hash if no message corresponds to this
+   * context.
+   *
+   * <p>Each transaction message is uniquely identified by its hash; the messages are persisted
    * in the {@linkplain Blockchain#getTxMessages() blockchain} and can be fetched by this hash.
    */
   HashCode getTransactionMessageHash();
 
   /**
-   * Returns public key of the transaction author. The corresponding transaction message
+   * Returns public key of the transaction author. The corresponding transaction message, if any,
    * is guaranteed to have a correct {@link CryptoFunctions#ed25519()} signature
    * with this public key.
    */
@@ -97,6 +104,8 @@ public interface TransactionContext {
     private PublicKey authorPk;
     private String serviceName;
     private Integer serviceId;
+
+    // todo: Init hash and author to zeroes? Or always leave to the client (as now)?
 
     /**
      * Sets the blockchain data for the context.

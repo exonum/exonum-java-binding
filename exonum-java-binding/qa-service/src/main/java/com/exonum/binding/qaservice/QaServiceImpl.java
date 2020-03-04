@@ -105,9 +105,9 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public void initialize(BlockchainData blockchainData, Configuration configuration) {
+  public void initialize(TransactionContext context, Configuration configuration) {
     // Init the time oracle
-    updateTimeOracle(blockchainData, configuration);
+    updateTimeOracle(context, configuration);
 
     // Create the default counters:
     Stream.of(
@@ -115,16 +115,16 @@ public final class QaServiceImpl extends AbstractService implements QaService {
         BEFORE_TXS_COUNTER_NAME,
         AFTER_TXS_COUNTER_NAME,
         AFTER_COMMIT_COUNTER_NAME)
-        .forEach(name -> createCounter(name, blockchainData));
+        .forEach(name -> createCounter(name, context));
   }
 
   @Override
-  public void resume(BlockchainData blockchainData, byte[] arguments) {
+  public void resume(TransactionContext context, byte[] arguments) {
     QaResumeArguments resumeArguments = parseResumeArguments(arguments);
 
     checkExecution(!resumeArguments.getShouldThrowException(), RESUME_SERVICE_ERROR.code);
 
-    createCounter(resumeArguments.getCounterName(), blockchainData);
+    createCounter(resumeArguments.getCounterName(), context);
   }
 
   @Override
@@ -136,13 +136,13 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   }
 
   @Override
-  public void beforeTransactions(BlockchainData blockchainData) {
-    incrementCounter(BEFORE_TXS_COUNTER_NAME, blockchainData);
+  public void beforeTransactions(TransactionContext context) {
+    incrementCounter(BEFORE_TXS_COUNTER_NAME, context);
   }
 
   @Override
-  public void afterTransactions(BlockchainData blockchainData) {
-    incrementCounter(AFTER_TXS_COUNTER_NAME, blockchainData);
+  public void afterTransactions(TransactionContext context) {
+    incrementCounter(AFTER_TXS_COUNTER_NAME, context);
   }
 
   /**
@@ -273,28 +273,28 @@ public final class QaServiceImpl extends AbstractService implements QaService {
    * @throws ExecutionException if time oracle name is empty
    */
   @Override
-  public void verifyConfiguration(BlockchainData blockchainData, Configuration configuration) {
+  public void verifyConfiguration(TransactionContext context, Configuration configuration) {
     QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
     checkConfiguration(config);
   }
 
   @Override
-  public void applyConfiguration(BlockchainData blockchainData, Configuration configuration) {
-    updateTimeOracle(blockchainData, configuration);
+  public void applyConfiguration(TransactionContext context, Configuration configuration) {
+    updateTimeOracle(context, configuration);
   }
 
   @Override
   @Transaction(CREATE_COUNTER_TX_ID)
   public void createCounter(TxMessageProtos.CreateCounterTxBody arguments,
       TransactionContext context) {
-    String name = arguments.getName();
-    checkArgument(!name.trim().isEmpty(), "Name must not be blank: '%s'", name);
-
-    createCounter(name, context.getBlockchainData());
+    String counterName = arguments.getName();
+    createCounter(counterName, context);
   }
 
-  private void createCounter(String counterName, BlockchainData blockchainData) {
-    QaSchema schema = createDataSchema(blockchainData);
+  private void createCounter(String counterName, TransactionContext context) {
+    checkArgument(!counterName.trim().isEmpty(), "Name must not be blank: '%s'", counterName);
+
+    QaSchema schema = createDataSchema(context.getBlockchainData());
     MapIndex<String, Long> counters = schema.counters();
 
     checkExecution(!counters.containsKey(counterName),
@@ -308,11 +308,11 @@ public final class QaServiceImpl extends AbstractService implements QaService {
   public void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
       TransactionContext context) {
     String counterName = arguments.getCounterName();
-    incrementCounter(counterName, context.getBlockchainData());
+    incrementCounter(counterName, context);
   }
 
-  private void incrementCounter(String counterName, BlockchainData blockchainData) {
-    QaSchema schema = createDataSchema(blockchainData);
+  private void incrementCounter(String counterName, TransactionContext context) {
+    QaSchema schema = createDataSchema(context.getBlockchainData());
     ProofMapIndexProxy<String, Long> counters = schema.counters();
 
     // Increment the counter if there is such.
@@ -360,8 +360,8 @@ public final class QaServiceImpl extends AbstractService implements QaService {
         "Empty time oracle name: %s", timeOracleName);
   }
 
-  private void updateTimeOracle(BlockchainData blockchainData, Configuration configuration) {
-    QaSchema schema = createDataSchema(blockchainData);
+  private void updateTimeOracle(TransactionContext context, Configuration configuration) {
+    QaSchema schema = createDataSchema(context.getBlockchainData());
     QaConfiguration config = configuration.getAsMessage(QaConfiguration.class);
 
     // Verify the configuration

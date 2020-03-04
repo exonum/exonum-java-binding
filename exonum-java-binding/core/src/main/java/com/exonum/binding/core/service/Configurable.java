@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.transaction.TransactionContext;
 
 /**
  * A configurable Exonum service. Allows services to update their configuration through
@@ -27,12 +27,11 @@ import com.exonum.binding.core.blockchain.BlockchainData;
  * and application of the new configuration. The protocol of the proposal and approval steps
  * is determined by the installed supervisor service. The verification and application
  * of the parameters are implemented by the service with
- * {@link #verifyConfiguration(BlockchainData, Configuration)}
- * and {@link #applyConfiguration(BlockchainData, Configuration)} methods.
+ * {@link #verifyConfiguration(TransactionContext, Configuration)}
+ * and {@link #applyConfiguration(TransactionContext, Configuration)} methods.
  *
  * <p>Services may use the same configuration parameters as
- * in {@link Service#initialize(com.exonum.binding.core.blockchain.BlockchainData, Configuration)},
- * or different.
+ * in {@link Service#initialize(TransactionContext, Configuration)}, or different.
  * <!--
  * TODO: Link the appropriate documentation section on updating the service configuration
  *   through the supervisor when it becomes available (ideally, on the site; or in published
@@ -48,22 +47,23 @@ public interface Configurable {
    * configuration is correct, this method shall return with no changes to the service data.
    * If it is not valid, this method shall throw an exception.
    *
-   * @param blockchainData a read-only access object representing the current database state
+   * @param context a read-only execution context object, providing access to the current database
+   *     state
    * @param configuration a proposed configuration
    * @throws com.exonum.binding.core.transaction.ExecutionException if the proposed configuration
    *     is not valid to prevent the configuration application
    */
-  void verifyConfiguration(BlockchainData blockchainData, Configuration configuration);
+  void verifyConfiguration(TransactionContext context, Configuration configuration);
 
   /**
    * Applies the given configuration to this service. The configuration is guaranteed to be
-   * valid according to {@link #verifyConfiguration(BlockchainData, Configuration)}.
+   * valid according to {@link #verifyConfiguration(TransactionContext, Configuration)}.
    *
    * <p>The implementation shall make any changes to the service persistent state to apply
    * the new configuration, because the supervisor does <em>not</em> store them for later retrieval.
    *
-   * @param blockchainData blockchain data accessor for this service to apply changes to
+   * @param context an execution context for this service
    * @param configuration a new valid configuration
    */
-  void applyConfiguration(BlockchainData blockchainData, Configuration configuration);
+  void applyConfiguration(TransactionContext context, Configuration configuration);
 }

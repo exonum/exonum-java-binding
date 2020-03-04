@@ -16,8 +16,8 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.transaction.ExecutionException;
+import com.exonum.binding.core.transaction.TransactionContext;
 import io.vertx.ext.web.Router;
 
 /**
@@ -40,8 +40,7 @@ public interface Service {
    * or save all or some configuration parameters as is for later retrieval in transactions
    * and/or read requests.
    *
-   * @param blockchainData blockchain data accessor for this service. Not valid after this method
-   *     returns
+   * @param context the execution context
    * @param configuration the service configuration parameters
    * @throws ExecutionException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
@@ -50,7 +49,7 @@ public interface Service {
    *     the registry of call errors}
    * @see Configurable
    */
-  default void initialize(BlockchainData blockchainData, Configuration configuration) {
+  default void initialize(TransactionContext context, Configuration configuration) {
     // No configuration
   }
 
@@ -66,13 +65,12 @@ public interface Service {
    * when the block is committed.
    * <!--TODO: Add a link to the migration procedure -->
    *
-   * @param blockchainData blockchain data accessor for this service. Not valid after this method
-   *     returns
+   * @param context the execution context
    * @param arguments the service arguments
    * @throws ExecutionException if the arguments are not valid (e.g.,
    *     malformed, or do not meet the preconditions)
    */
-  default void resume(BlockchainData blockchainData, byte[] arguments) {
+  default void resume(TransactionContext context, byte[] arguments) {
     // No actions by default
   }
 
@@ -108,12 +106,12 @@ public interface Service {
 
   /**
    * An optional callback method invoked by the blockchain <em>before</em> any transactions
-   * in a block are executed. See {@link #afterTransactions(BlockchainData)} for details.
+   * in a block are executed. See {@link #afterTransactions(TransactionContext)} for details.
    *
-   * @see #afterTransactions(BlockchainData)
+   * @see #afterTransactions(TransactionContext)
    * @see com.exonum.binding.core.transaction.Transaction
    */
-  default void beforeTransactions(BlockchainData blockchainData) {}
+  default void beforeTransactions(TransactionContext context) {}
 
   /**
    * Handles the changes made by all transactions included in the upcoming block.
@@ -131,15 +129,14 @@ public interface Service {
    * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
    * the registry of call errors} with appropriate error kinds.
    *
-   * @param blockchainData blockchain data accessor for this service. Not valid after this method
-   *     returns
+   * @param context the execution context
    * @throws ExecutionException if an error occurs during the method execution;
    *     it is saved as a call error of kind "service". Any other exceptions
    *     are considered unexpected. They are saved with kind "unexpected".
-   * @see #beforeTransactions(BlockchainData)
+   * @see #beforeTransactions(TransactionContext)
    * @see com.exonum.binding.core.transaction.Transaction
    */
-  default void afterTransactions(BlockchainData blockchainData) {}
+  default void afterTransactions(TransactionContext context) {}
 
   /**
    * Handles read-only block commit event. This handler is an optional callback method which is

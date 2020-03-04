@@ -16,6 +16,8 @@
 
 package com.exonum.binding.core.runtime;
 
+import static com.exonum.binding.core.runtime.ServiceRuntime.ZERO_HASH;
+import static com.exonum.binding.core.runtime.ServiceRuntime.ZERO_PK;
 import static com.exonum.binding.core.runtime.ServiceWrapper.DEFAULT_INTERFACE_NAME;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.collect.Comparators.isInStrictOrder;
@@ -183,6 +185,8 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
         any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
@@ -197,8 +201,9 @@ class ServiceRuntimeIntegrationTest {
         any(ServiceNodeProxy.class));
 
     // and the service was configured
+    TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
     Configuration expectedConfig = new ServiceConfiguration(configuration);
-    verify(serviceWrapper).initialize(blockchainData, expectedConfig);
+    verify(serviceWrapper).initialize(expectedContext, expectedConfig);
 
     // but not committed
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
@@ -238,15 +243,18 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
         any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
 
     BlockchainData blockchainData = mock(BlockchainData.class);
+    TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
     byte[] configuration = anyConfiguration();
     ServiceConfiguration expectedConfig = new ServiceConfiguration(configuration);
     doThrow(IllegalArgumentException.class).when(serviceWrapper)
-        .initialize(blockchainData, expectedConfig);
+        .initialize(expectedContext, expectedConfig);
 
     // Try to create and initialize the service
     assertThrows(IllegalArgumentException.class,
@@ -409,6 +417,8 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(Optional.of(serviceDefinition));
 
     ServiceWrapper serviceWrapper = mock(ServiceWrapper.class);
+    when(serviceWrapper.getName()).thenReturn(TEST_NAME);
+    when(serviceWrapper.getId()).thenReturn(TEST_ID);
     when(servicesFactory.createService(eq(serviceDefinition), eq(instanceSpec),
         any(ServiceNodeProxy.class)))
         .thenReturn(serviceWrapper);
@@ -423,7 +433,8 @@ class ServiceRuntimeIntegrationTest {
         any(ServiceNodeProxy.class));
 
     // and the service was resumed
-    verify(serviceWrapper).resume(blockchainData, arguments);
+    TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+    verify(serviceWrapper).resume(expectedContext, arguments);
 
     // but not registered in the runtime yet:
     assertThat(serviceRuntime.findService(TEST_NAME)).isEmpty();
@@ -576,7 +587,8 @@ class ServiceRuntimeIntegrationTest {
 
         serviceRuntime.beforeTransactions(TEST_ID, blockchainData);
 
-        verify(serviceWrapper).beforeTransactions(blockchainData);
+        TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+        verify(serviceWrapper).beforeTransactions(expectedContext);
       }
     }
 
@@ -589,7 +601,8 @@ class ServiceRuntimeIntegrationTest {
 
         serviceRuntime.afterTransactions(TEST_ID, blockchainData);
 
-        verify(serviceWrapper).afterTransactions(blockchainData);
+        TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+        verify(serviceWrapper).afterTransactions(expectedContext);
       }
     }
 
@@ -600,13 +613,14 @@ class ServiceRuntimeIntegrationTest {
         Fork fork = database.createFork(cleaner);
         BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, TEST_NAME);
         RuntimeException serviceException = new RuntimeException("Service exception");
-        doThrow(serviceException).when(serviceWrapper).afterTransactions(blockchainData);
+        TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+        doThrow(serviceException).when(serviceWrapper).afterTransactions(expectedContext);
 
         RuntimeException actual = assertThrows(serviceException.getClass(),
             () -> serviceRuntime.afterTransactions(TEST_ID, blockchainData));
         assertThat(actual).isSameAs(serviceException);
 
-        verify(serviceWrapper).afterTransactions(blockchainData);
+        verify(serviceWrapper).afterTransactions(expectedContext);
       }
     }
 
@@ -731,5 +745,16 @@ class ServiceRuntimeIntegrationTest {
         dataOrder.verify(blockchainDataFactory).fromRawAccess(snapshot, service.getName());
       }
     }
+  }
+
+  private static TransactionContext zeroContext(int expectedId, String expectedName,
+      BlockchainData expectedData) {
+    return TransactionContext.builder()
+        .serviceName(expectedName)
+        .serviceId(expectedId)
+        .authorPk(ZERO_PK)
+        .txMessageHash(ZERO_HASH)
+        .blockchainData(expectedData)
+        .build();
   }
 }

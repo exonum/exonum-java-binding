@@ -98,6 +98,13 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
   Any exceptions thrown in these methods are saved in the blockchain
   in `Blockchain#getCallErrors` and can be retrieved by any services or
   light clients.
+- Replaced `BlockchainData` argument in transaction-like `Service` and 
+  `Configurable` methods with `TransactionContext`. The `BlockchainData`
+  remains accessible via `TransactionContext#getBlockchainData`,
+  and service data via `TransactionContext#getServiceData`.
+  <!-- TODO: Shall we rename it into `ExecutionContext` (as
+  TransactionExecutionException has become ExecutionException)?
+  -->
 - `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`.
   - Use `CallInBlocks` to concisely create `CallInBlock`s.
 - The specification of `Configurable` operations and `Service#initialize` 
