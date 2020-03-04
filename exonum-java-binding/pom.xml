@@ -499,13 +499,7 @@
                   <version>[11.,)</version>
                   <message>Java 11 is the minimum supported version.</message>
                 </requireJavaVersion>
-                <requireOS>
-                  <!-- If we *do* support Windows and still rely on RUSTFLAGS (see the rule below
-                       and 'tests_profile'), update the instructions. -->
-                  <family>!windows</family>
-                  <message>Java Binding cannot be built on Windows at the moment.
-                    You are welcome to hack on ECR-446 and ECR-587!</message>
-                </requireOS>
+                <!-- TODO(ECR-???): do not check for RUSTFLAGS on Windows?-->
                 <requireEnvironmentVariable>
                   <variableName>RUSTFLAGS</variableName>
                   <message>
