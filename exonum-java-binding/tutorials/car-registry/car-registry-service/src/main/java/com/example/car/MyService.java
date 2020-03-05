@@ -32,6 +32,7 @@ import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
+import java.util.Optional;
 
 public final class MyService extends AbstractService {
 
@@ -124,6 +125,18 @@ public final class MyService extends AbstractService {
                 .setOwner(owner)
                 .build())
         .build();
+  }
+  // }
+
+  // ci-block ci-find-vehicle {
+  /**
+   * Returns a vehicle with the given id, if it exists; or {@code Optional.empty()}
+   * if it does not.
+   */
+  public Optional<Vehicle> findVehicle(String id, BlockchainData blockchainData) {
+    var schema = new MySchema(blockchainData.getExecutingServiceData());
+    var vehicles = schema.vehicles();
+    return Optional.ofNullable(vehicles.get(id));
   }
   // }
 }
