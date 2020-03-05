@@ -22,12 +22,12 @@ plugins:
 artifacts:
   car-registry:
     runtime: java
-    name: "com.example.car/car-registry"
+    name: "com.example.car/car-registry-service"
     version: "1.0.0-SNAPSHOT"
     spec:
-      artifact_filename: "car-registry-1.0.0-SNAPSHOT-artifact.jar"
+      artifact_filename: "car-registry-service-1.0.0-SNAPSHOT-artifact.jar"
 
 instances:
-  # A test service instance of "car-registry".
+  # A test service instance of "car-registry-service".
   test-car-registry:
     artifact: car-registry
