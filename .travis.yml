@@ -46,6 +46,16 @@ env:
 
 jobs:
   include:
+    - name: "Windows"
+      os: windows
+      language: rust
+      before_install:
+        - choco install openjdk -y
+        - choco install maven -y
+        - choco install llvm -y
+      script:
+        - cd $TRAVIS_BUILD_DIR/exonum-java-binding
+        - powershell ./run_all_tests.ps1
     # The following jobs run using Travis cron jobs feature.
     # The minimum supported Java version (11)
     - name: "Linux / JDK 11 / CHECK_RUST=false"
