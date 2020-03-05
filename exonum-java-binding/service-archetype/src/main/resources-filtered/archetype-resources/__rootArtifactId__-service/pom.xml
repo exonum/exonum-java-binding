@@ -52,10 +52,20 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Override the scope of exonum-messages in case \${rootArtifactId}-messages depends on them -->
+    <!--
+     Override the default 'compile' scope of \${rootArtifactId}-messages dependencies
+     that are provided by the framework (see the explanation above): exonum-messages
+     and protobuf-java.
+    -->
     <dependency>
       <groupId>com.exonum.messages</groupId>
       <artifactId>exonum-messages</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
       <scope>provided</scope>
     </dependency>
 
