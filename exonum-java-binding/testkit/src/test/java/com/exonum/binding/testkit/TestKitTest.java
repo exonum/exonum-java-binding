@@ -80,7 +80,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-// TODO(ECR-???)
+// TODO(ECR-4304)
 @DisabledOnOs(OS.WINDOWS)
 class TestKitTest {
   private static final String TIME_SERVICE_NAME = "time-service";

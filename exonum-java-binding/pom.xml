@@ -499,7 +499,7 @@
                   <version>[11.,)</version>
                   <message>Java 11 is the minimum supported version.</message>
                 </requireJavaVersion>
-                <!-- TODO(ECR-???): do not check for RUSTFLAGS on Windows?-->
+                <!-- TODO(ECR-4309): do not check for RUSTFLAGS on Windows?-->
                 <requireEnvironmentVariable>
                   <variableName>RUSTFLAGS</variableName>
                   <message>

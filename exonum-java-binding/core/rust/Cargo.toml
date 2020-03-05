@@ -41,7 +41,7 @@ exonum-build = { version = "1.0.0-rc.1" }
 [profile.dev]
 rpath = true
 
-# TODO(ECR-???): use profile overrides on Windows only, as it greatly affects the build time
+# TODO(ECR-4305): use profile overrides on Windows only, as it greatly affects the build time
 [profile.dev.package."*"]
 opt-level = 2
 

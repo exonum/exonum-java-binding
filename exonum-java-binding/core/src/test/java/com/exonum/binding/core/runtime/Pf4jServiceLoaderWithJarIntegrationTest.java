@@ -24,7 +24,7 @@ import org.pf4j.PluginManager;
  * Verifies that {@link Pf4jServiceLoader} works correctly with the {@link JarPluginManager},
  * our default implementation.
  */
-// ECR-???
+// ECR-4304
 @DisabledOnOs(OS.WINDOWS)
 class Pf4jServiceLoaderWithJarIntegrationTest extends Pf4jServiceLoaderIntegrationTestable {
 

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
-// TODO(ECR-???)
+// TODO(ECR-4304)
 @DisabledOnOs(OS.WINDOWS)
 class TestKitAuditorParameterizationTest {
 

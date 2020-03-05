@@ -1,7 +1,7 @@
 # Package Exonum Java app on Windows
-# TODO(ECR-???): run tests if --skip-tests flag is not supplied?
-# TODO(ECR-???): add release build support
-# TODO(ECR-???): error handling
+# TODO(ECR-4309): run tests if --skip-tests flag is not supplied?
+# TODO(ECR-4309): add release build support
+# TODO(ECR-4309): error handling
 
 Set-StrictMode -Version 1.0
 $erroractionpreference = "stop"
@@ -11,7 +11,7 @@ try
     . .\tests_profile.ps1
 
     # Clear Rust target directory
-    # TODO(ECR-???): option --skip-cargo-clean
+    # TODO(ECR-4309): option --skip-cargo-clean
     $EJB_RUST_DIR = "$PROJECT_ROOT\core\rust"
     # & cargo clean --manifest-path="$EJB_RUST_DIR\Cargo.toml"
 
@@ -36,7 +36,7 @@ try
     Copy-Item -Path $RUST_STD_LIB.FullName -Destination $PACKAGING_NATIVE_LIB_DIR
 
     # Copy licenses
-    # TODO(ECR-???): generate rust dependencies licenses file and copy it as well
+    # TODO(ECR-4309): generate rust dependencies licenses file and copy it as well
     Copy-Item -Path "$PROJECT_ROOT\..\LICENSE" -Destination $PACKAGING_ETC_DIR
     Copy-Item -Path "$PROJECT_ROOT\LICENSES-THIRD-PARTY.TXT" -Destination $PACKAGING_ETC_DIR
 

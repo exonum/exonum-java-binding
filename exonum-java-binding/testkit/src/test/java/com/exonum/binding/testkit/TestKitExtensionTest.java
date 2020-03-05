@@ -44,7 +44,7 @@ import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
 
-// TODO(ECR-???)
+// TODO(ECR-4304)
 @DisabledOnOs(OS.WINDOWS)
 class TestKitExtensionTest {
 

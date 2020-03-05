@@ -1,5 +1,5 @@
 # Find jvm.dll in JAVA_HOME. If JAVA_HOME is not set, we find it by asking java binary.
-# TODO(ECR-???): error if JAVA_HOME is set, but JRE is used and jvm.dll is unavailable?
+# TODO(ECR-4309): error if JAVA_HOME is set, but JRE is used and jvm.dll is unavailable?
 if ($null -eq $env:JAVA_HOME) {
     $output = [string] (& java -XshowSettings:properties -version 2>&1)
     $env:JAVA_HOME = ($output.Split([Environment]::NewLine) | Select-String "java.home").Line.Split("=")[1].Trim()
