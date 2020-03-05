@@ -34,7 +34,7 @@
   <files>
     <!--Main Exonum Java app executable.
       We use `rust.exonumJavaName` property here, because Windows binaries have .exe extension,
-      while Linux/Mac ones have not-->
+      while Linux/Mac ones don't-->
     <file>
       <source>${packaging.basedir}/${packaging.exonumJavaName}</source>
     </file>
