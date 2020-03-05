@@ -25,5 +25,8 @@ try
     }
 }
 catch {
-    $_
+    Write-Host "Caught an exception:" -ForegroundColor Red
+    Write-Host "Exception Type: $($_.Exception.GetType().FullName)" -ForegroundColor Red
+    Write-Host "Exception Message: $($_.Exception.Message)" -ForegroundColor Red
+    Exit 1
 }
