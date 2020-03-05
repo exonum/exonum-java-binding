@@ -52,10 +52,17 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Override the scope of exonum-messages in case car-registry-messages depends on them -->
+    <!-- Override the scope of car-registry-messages dependencies that are provided by the
+         framework: exonum-messages and protobuf -->
     <dependency>
       <groupId>com.exonum.messages</groupId>
       <artifactId>exonum-messages</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
       <scope>provided</scope>
     </dependency>
 
