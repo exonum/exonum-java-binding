@@ -161,7 +161,7 @@ fn libpath_option() -> String {
 
 /// Returns path to the java_bindings library for native integration tests.
 pub fn java_library_path() -> String {
-    let library_path = rust_project_root_dir().join(target_path());
+    let library_path = rust_project_parent_dir().join(target_path());
     let library_path = canonicalize(library_path);
 
     library_path
@@ -171,14 +171,14 @@ pub fn java_library_path() -> String {
 }
 
 fn java_binding_parent_root_dir() -> PathBuf {
-    let rust_project_root_dir = rust_project_root_dir();
+    let rust_project_root_dir = rust_project_parent_dir();
     // equivalent to "../../rust_project_root_dir"
     let path = rust_project_root_dir.ancestors().nth(2).unwrap();
     canonicalize(path)
 }
 
 /// The path to the root directory of the Rust parent module.
-fn rust_project_root_dir() -> PathBuf {
+fn rust_project_parent_dir() -> PathBuf {
     canonicalize(project_root_dir().parent().unwrap())
 }
 
