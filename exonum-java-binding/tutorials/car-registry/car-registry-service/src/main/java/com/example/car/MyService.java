@@ -59,7 +59,7 @@ public final class MyService extends AbstractService {
     var schema = new MySchema(serviceData);
     ProofMapIndexProxy<String, Vehicle> vehicles = schema.vehicles();
 
-    // Check there is no vehicle with such id in the registry already
+    // Check there is no vehicle with such id in the registry yet
     var newVehicle = args.getNewVehicle();
     var id = newVehicle.getId();
     if (vehicles.containsKey(id)) {
