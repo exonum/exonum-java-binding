@@ -660,12 +660,13 @@
       </build>
     </profile>
 
-    <!-- Fill in needed property when generating Javadocs on JDK 11–12 -->
+    <!-- Fill in needed property when generating Javadocs on JDK 11 -->
     <profile>
-      <id>generate-javadocs-jdk11-12</id>
+      <id>generate-javadocs-jdk11</id>
       <activation>
-        <!-- Removed in 13 https://bugs.openjdk.java.net/browse/JDK-8215582-->
-        <jdk>[11,13)</jdk>
+        <!-- Removed in 13 https://bugs.openjdk.java.net/browse/JDK-8215582 , also back-ported
+             to AdoptOpenJDK 11.0.3. -->
+        <jdk>[11,11.0.3)</jdk>
       </activation>
       <properties>
         <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>
