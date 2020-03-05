@@ -46,8 +46,13 @@ public final class MyService extends AbstractService {
     super(instanceSpec);
   }
 
+  // ci-block ci-createPublicApiHandlers {
   @Override
-  public void createPublicApiHandlers(Node node, Router router) {}
+  public void createPublicApiHandlers(Node node, Router router) {
+    var apiController = new ApiController(this, node);
+    apiController.mount(router);
+  }
+  // }
 
   // ci-block ci-add-vehicle {
   @Transaction(ADD_VEHICLE_TX_ID)
