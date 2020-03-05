@@ -44,28 +44,6 @@ env:
 
 jobs:
   include:
-    - name: "Linux / JDK 13 / CHECK_RUST=true"
-      os: linux
-      jdk: openjdk13
-      env: CHECK_RUST=true
-    - name: "Linux / JDK 13 / CHECK_RUST=false"
-      os: linux
-      jdk: openjdk13
-      env: CHECK_RUST=false
-    - name: "OSX / JDK 13 / CHECK_RUST=false"
-      os: osx
-      # See: https://docs.travis-ci.com/user/reference/osx#macos-version
-      osx_image: xcode11.3
-      env:
-        - CHECK_RUST=false
-        - ROCKSDB_LIB_DIR=/usr/local/lib
-        - SNAPPY_LIB_DIR=/usr/local/lib
-        - SNAPPY_STATIC=1
-    - name: "Python unit tests"
-      before_install: true
-      script:
-        - cd "${TRAVIS_BUILD_DIR}"
-        - .travis/run_python_tests.sh
     # The following jobs run using Travis cron jobs feature.
     # The minimum supported Java version (11)
     - name: "Linux / JDK 11 / CHECK_RUST=false"
