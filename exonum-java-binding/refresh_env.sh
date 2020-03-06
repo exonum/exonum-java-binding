@@ -9,7 +9,7 @@ Update-SessionEnvironment
 Get-ChildItem env:* | %{
   if (!($_.Name.Contains('('))) {
     $value = $_.Value
-    if ($_.Name -eq 'PATH') {
+    if ($_.Name -eq 'Path') {
       $value = $value -replace ';',':'
     }
     Write-Output ("export " + $_.Name + "='" + $value + "'")
