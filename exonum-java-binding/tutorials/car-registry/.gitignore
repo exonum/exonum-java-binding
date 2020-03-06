@@ -1,0 +1,5 @@
+# The dir used by test Exonum network
+testnet/
+
+# venv for Python modules
+.venv/
