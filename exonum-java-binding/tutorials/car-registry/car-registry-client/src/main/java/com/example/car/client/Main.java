@@ -26,6 +26,7 @@ import picocli.CommandLine.Command;
 @Command(
     subcommands = {
         AddVehicleCommand.class,
+        ChangeOwnerCommand.class,
         FindVehicleCommand.class,
     }
 )
