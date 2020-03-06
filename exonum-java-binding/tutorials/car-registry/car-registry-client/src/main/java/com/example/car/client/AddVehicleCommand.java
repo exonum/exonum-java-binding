@@ -49,14 +49,14 @@ public final class AddVehicleCommand implements Callable<Integer> {
   String owner;
 
   @Override
-  public Integer call() throws Exception {
+  public Integer call() {
     var client = ExonumClient.newBuilder()
         .setExonumHost(Config.NODE_PUBLIC_API_HOST)
         .build();
 
-    // todo: Shall we add a command to generate a keypair and let all other use that keypair,
-    //   so that the user learns at least that each transaction comes signed with a key into
-    //   the network?
+    // todo (here and in other txs): Shall we add a command to generate a keypair and let all
+    //   other use that keypair, so that the user learns at least that each transaction comes
+    //   signed with a key into the network?
     var keyPair = CryptoFunctions.ed25519().generateKeyPair();
     var txMessage = TransactionMessage.builder()
         .serviceId(findServiceId(client))
