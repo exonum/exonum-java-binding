@@ -1,6 +1,8 @@
 Set-StrictMode -Version 1.0
 $ErrorActionPreference = "continue"
 
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") +
+        ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 refreshenv
 
 try
