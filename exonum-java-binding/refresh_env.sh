@@ -14,11 +14,11 @@ Get-ChildItem env:* | %{
     }
     Write-Output ("export " + $_.Name + "='" + $value + "'")
   }
-} | Out-File -Encoding ascii $env:TEMP\refreshenv.sh
+} | Out-File -Encoding ascii .\refreshenv.sh
 EOF
 
-  echo $(cat "$TEMP/refreshenv.sh")
-  source "$TEMP/refreshenv.sh"
+  echo $(cat "./refreshenv.sh")
+  source "./refreshenv.sh"
 
   echo "Environment variables refeshed"
 }
