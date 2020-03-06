@@ -12,6 +12,7 @@
   <modules>
     <module>car-registry-messages</module>
     <module>car-registry-service</module>
+    <module>car-registry-client</module>
   </modules>
 
   <properties>
