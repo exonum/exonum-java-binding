@@ -21,7 +21,6 @@ import static java.net.HttpURLConnection.HTTP_OK;
 
 import com.example.car.messages.VehicleOuterClass.Vehicle;
 import com.exonum.client.ExonumClient;
-import com.exonum.client.response.ServiceInstanceInfo;
 import com.google.common.net.UrlEscapers;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -30,7 +29,6 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Command(name = "find-vehicle",
@@ -40,11 +38,6 @@ public class FindVehicleCommand implements Callable<Integer> {
 
   @ArgGroup(exclusive = true, multiplicity = "1")
   ServiceIds serviceIds;
-
-  static class ServiceIds {
-    @Option(names = "--service-name", description = "The service instance name") String name;
-    @Option(names = "--service-id", description = "The service instance ID") int id;
-  }
 
   @Parameters(index = "0", description = "Vehicle ID in the registry")
   String vehicleId;
@@ -73,20 +66,16 @@ public class FindVehicleCommand implements Callable<Integer> {
   }
 
   private String findServiceName() {
-    if (serviceIds.name != null) {
+    if (serviceIds.hasName()) {
       // The user graciously provided the name
       return serviceIds.name;
     }
-    // The name is unset, look it up by ID using the node public API:
+    // The name is unset, look it up by ID using the node public API.
     var exonumClient = ExonumClient.newBuilder()
         .setExonumHost(Config.NODE_PUBLIC_API_HOST)
         .build();
-    var serviceId = serviceIds.id;
-    return exonumClient.getServiceInfoList().stream()
-        .filter(info -> info.getId() == serviceId)
-        .findFirst()
-        .map(ServiceInstanceInfo::getName)
-        .orElseThrow(() -> new IllegalArgumentException("No service with id=" + serviceId));
+    var serviceInfoFinder = new ServiceIdResolver(serviceIds, exonumClient);
+    return serviceInfoFinder.getName();
   }
 
   private URI buildRequestUri(String serviceName) {

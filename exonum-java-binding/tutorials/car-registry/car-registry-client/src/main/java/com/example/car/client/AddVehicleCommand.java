@@ -22,8 +22,8 @@ import com.exonum.binding.common.crypto.CryptoFunctions;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExonumClient;
 import java.util.concurrent.Callable;
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Command(name = "add-vehicle",
@@ -33,10 +33,8 @@ public final class AddVehicleCommand implements Callable<Integer> {
 
   private static final int ADD_VEHICLE_TX_ID = 0;
 
-  @Option(names = {"-i", "--service-id"},
-      description = "The numeric service ID, assigned on the instance start",
-      required = true)
-  Integer serviceId;
+  @ArgGroup(exclusive = true, multiplicity = "1")
+  ServiceIds serviceIds;
 
   @Parameters(index = "0")
   String id;
@@ -52,12 +50,16 @@ public final class AddVehicleCommand implements Callable<Integer> {
 
   @Override
   public Integer call() throws Exception {
+    var client = ExonumClient.newBuilder()
+        .setExonumHost(Config.NODE_PUBLIC_API_HOST)
+        .build();
+
     // todo: Shall we add a command to generate a keypair and let all other use that keypair,
     //   so that the user learns at least that each transaction comes signed with a key into
     //   the network?
     var keyPair = CryptoFunctions.ed25519().generateKeyPair();
     var txMessage = TransactionMessage.builder()
-        .serviceId(serviceId)
+        .serviceId(findServiceId(client))
         .transactionId(ADD_VEHICLE_TX_ID)
         .payload(
             Transactions.AddVehicle.newBuilder()
@@ -70,11 +72,13 @@ public final class AddVehicleCommand implements Callable<Integer> {
                 .build())
         .sign(keyPair);
 
-    var client = ExonumClient.newBuilder()
-        .setExonumHost(Config.NODE_PUBLIC_API_HOST)
-        .build();
     // todo: Add logging
     var txHashCode = client.submitTransaction(txMessage);
     return 0;
+  }
+
+  private int findServiceId(ExonumClient client) {
+    var serviceIdResolver = new ServiceIdResolver(serviceIds, client);
+    return serviceIdResolver.getId();
   }
 }
