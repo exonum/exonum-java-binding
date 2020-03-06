@@ -28,7 +28,8 @@ import picocli.CommandLine.Command;
         AddVehicleCommand.class,
         ChangeOwnerCommand.class,
         FindVehicleCommand.class,
-    }
+    },
+    mixinStandardHelpOptions = true
 )
 public class Main implements Callable<Integer> {
 
