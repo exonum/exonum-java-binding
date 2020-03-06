@@ -26,6 +26,7 @@ import picocli.CommandLine.Command;
 @Command(
     subcommands = {
         AddVehicleCommand.class,
+        FindVehicleCommand.class,
     }
 )
 public class Main implements Callable<Integer> {

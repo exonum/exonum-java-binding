@@ -21,7 +21,7 @@ package com.example.car.client;
  */
 final class Config {
   static final String NODE_PUBLIC_API_HOST = "http://127.0.0.1:3000";
-  static final String NODE_JAVA_API_HOST = "127.0.0.1:7000";
+  static final String NODE_JAVA_API_HOST = "http://127.0.0.1:7000";
 
   private Config() {}
 }
