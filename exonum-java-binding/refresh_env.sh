@@ -17,6 +17,7 @@ Get-ChildItem env:* | %{
 } | Out-File -Encoding ascii $env:TEMP\refreshenv.sh
 EOF
 
+  echo $(cat "$TEMP/refreshenv.sh")
   source "$TEMP/refreshenv.sh"
 
   echo "Environment variables refeshed"
