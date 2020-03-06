@@ -60,6 +60,10 @@ jobs:
         - powershell 'echo $env:Path'
       script:
         - cd $TRAVIS_BUILD_DIR/exonum-java-binding
+        - source ./refresh_env.sh
+        - refreshenv
+        - echo $PATH
+        - powershell 'ehco $env:Path'
         - powershell -ExecutionPolicy Bypass -File ./run_all_tests.ps1
     # The following jobs run using Travis cron jobs feature.
     # The minimum supported Java version (11)
