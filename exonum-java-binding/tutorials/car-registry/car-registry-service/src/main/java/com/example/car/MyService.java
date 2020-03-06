@@ -110,9 +110,10 @@ public final class MyService extends AbstractService {
   @Override
   public void initialize(BlockchainData blockchainData, Configuration configuration) {
     var testVehicles =
-        List.of(vehicleArgs("Car 1", "Ford", "Focus", "Dave"),
-            vehicleArgs("Car 2", "DMC", "DeLorean", "Emmett Brown"),
-            vehicleArgs("Car 3", "McLaren", "P1", "Weeknd"));
+        List.of(vehicleArgs("V1", "Ford", "Focus", "Dave"),
+            vehicleArgs("V2", "DMC", "DeLorean", "Emmett Brown"),
+            vehicleArgs("V3", "Peugeot", "406", "Daniel Morales"),
+            vehicleArgs("V4", "McLaren", "P1", "Weeknd"));
     var serviceData = blockchainData.getExecutingServiceData();
     for (var vehicle : testVehicles) {
        addVehicle(vehicle, serviceData);
