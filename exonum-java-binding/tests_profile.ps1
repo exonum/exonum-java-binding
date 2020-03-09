@@ -1,5 +1,5 @@
 Set-StrictMode -Version 1.0
-$ErrorActionPreference = "continue"
+$ErrorActionPreference = "stop"
 
 try
 {
