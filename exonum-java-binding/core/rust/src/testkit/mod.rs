@@ -240,7 +240,7 @@ fn create_java_keypair<'a>(env: &'a JNIEnv, keypair: KeyPair) -> jni::errors::Re
     let secret_key_byte_array = env.byte_array_from_slice(&keypair.secret_key()[..])?;
     env.call_static_method(
         KEYPAIR_CLASS,
-        "createKeyPair",
+        "newInstance",
         KEYPAIR_CTOR_SIGNATURE,
         &[secret_key_byte_array.into(), public_key_byte_array.into()],
     )

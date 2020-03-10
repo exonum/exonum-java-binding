@@ -76,6 +76,7 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
   (see `BlockchainData#getExecutingServiceData`). (#1393)
 - `Prefixed` and `ReadonlyFork` database Accesses. (#1382, #1385)
 - `Service#beforeTranactions`.
+- `KeyPair#newInstance(PrivateKey, PublicKey)`
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 
@@ -126,6 +127,7 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
   can be re-used in light clients; and a module for service code. (#1461)
 - ServiceArtifactId and RuntimeId are moved to 
   `com.exonum.binding.common.runtime` package. (#1452)
+- Renamed the `KeyPair` factory methods to `newInstance`.
 
 ### Removed
 - Classes supporting no longer used tree-like list proof representation.

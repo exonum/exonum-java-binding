@@ -20,14 +20,14 @@ plugins:
     java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
 
 artifacts:
-  ${artifactId}:
+  ${rootArtifactId}:
     runtime: java
-    name: "${groupId}/${artifactId}"
+    name: "${groupId}/${rootArtifactId}-service"
     version: "${version}"
     spec:
-      artifact_filename: "${artifactId}-${version}-artifact.jar"
+      artifact_filename: "${rootArtifactId}-service-${version}-artifact.jar"
 
 instances:
-  # A test service instance of "${artifactId}".
+  # A test service instance of "${rootArtifactId}-service".
   test-${artifactId}:
     artifact: ${artifactId}

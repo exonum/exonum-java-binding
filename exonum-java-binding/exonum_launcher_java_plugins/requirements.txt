@@ -1,1 +1,1 @@
--e git+https://github.com/exonum/exonum-launcher@10547be5#egg=exonum-launcher
+-e git+https://github.com/exonum/exonum-launcher@986e7aca44693ae261e67d8ad75e4e0124065556#egg=exonum-launcher
