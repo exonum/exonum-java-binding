@@ -26,8 +26,9 @@ import picocli.CommandLine.Parameters;
 
 @Command(name = "add-vehicle",
     aliases = {"av"},
-    description = {"Adds a new vehicle to the registry"})
-public final class AddVehicleCommand implements Callable<Integer> {
+    description = {"Adds a new vehicle to the registry."},
+    mixinStandardHelpOptions = true)
+public final class AddVehicleCommand extends AbstractSubmitTxCommand implements Callable<Integer> {
 
   private static final int ADD_VEHICLE_TX_ID = 0;
 

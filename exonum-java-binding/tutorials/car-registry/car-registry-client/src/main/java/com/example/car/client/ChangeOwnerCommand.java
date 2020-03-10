@@ -26,8 +26,9 @@ import picocli.CommandLine.Parameters;
 
 @Command(name = "change-owner",
     aliases = {"co"},
-    description = {"Changes the owner of the vehicle with the given ID"})
-public class ChangeOwnerCommand implements Callable<Integer> {
+    description = {"Changes the owner of the vehicle with the given ID."},
+    mixinStandardHelpOptions = true)
+public class ChangeOwnerCommand extends AbstractSubmitTxCommand implements Callable<Integer> {
 
   private static final int CHANGE_OWNER_TX_ID = 1;
 

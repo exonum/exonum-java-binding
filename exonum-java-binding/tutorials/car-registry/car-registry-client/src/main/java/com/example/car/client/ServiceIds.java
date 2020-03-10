@@ -20,11 +20,11 @@ import picocli.CommandLine.Option;
 
 final class ServiceIds {
   @Option(names = {"-n", "--service-name"},
-      description = "The service instance name")
+      description = "The service instance name.")
   String name;
 
   @Option(names = {"-i", "--service-id"},
-      description = "The numeric service instance ID, assigned on the instance start")
+      description = "The numeric service instance ID, assigned on the instance start.")
   Integer id;
 
   boolean hasName() {
