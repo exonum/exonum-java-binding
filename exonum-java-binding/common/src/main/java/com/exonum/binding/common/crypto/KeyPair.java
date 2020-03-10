@@ -21,35 +21,36 @@ package com.exonum.binding.common.crypto;
  */
 public class KeyPair {
 
-  private final PublicKey publicKey;
   private final PrivateKey privateKey;
+  private final PublicKey publicKey;
 
-  private KeyPair(byte[] privateKey, byte[] publicKey) {
-    this.privateKey = PrivateKey.fromBytesNoCopy(privateKey);
-    this.publicKey = PublicKey.fromBytesNoCopy(publicKey);
+  private KeyPair(PrivateKey privateKey, PublicKey publicKey) {
+    this.privateKey = privateKey;
+    this.publicKey = publicKey;
+  }
+
+  /**
+   * Creates a new KeyPair from the given key pairs.
+   */
+  public static KeyPair newInstance(PrivateKey privateKey, PublicKey publicKey) {
+    return new KeyPair(privateKey, publicKey);
   }
 
   /**
    * Creates a {@code KeyPair} from two byte arrays, representing {@code privateKey}
    * and {@code publicKey}. All arrays are defensively copied.
    */
-  public static KeyPair createKeyPair(byte[] privateKey, byte[] publicKey) {
-    return createKeyPairNoCopy(privateKey.clone(), publicKey.clone());
+  public static KeyPair newInstance(byte[] privateKey, byte[] publicKey) {
+    return newInstanceNoCopy(privateKey.clone(), publicKey.clone());
   }
 
   /**
    * Creates a {@code KeyPair} from two byte arrays, representing {@code privateKey}
    * and {@code publicKey}. Arrays are not copied.
    */
-  static KeyPair createKeyPairNoCopy(byte[] privateKey, byte[] publicKey) {
-    return new KeyPair(privateKey, publicKey);
-  }
-
-  /**
-   * Returns a public key of this pair.
-   */
-  public PublicKey getPublicKey() {
-    return publicKey;
+  static KeyPair newInstanceNoCopy(byte[] privateKey, byte[] publicKey) {
+    return new KeyPair(PrivateKey.fromBytesNoCopy(privateKey),
+        PublicKey.fromBytesNoCopy(publicKey));
   }
 
   /**
@@ -57,5 +58,12 @@ public class KeyPair {
    */
   public PrivateKey getPrivateKey() {
     return privateKey;
+  }
+
+  /**
+   * Returns a public key of this pair.
+   */
+  public PublicKey getPublicKey() {
+    return publicKey;
   }
 }
