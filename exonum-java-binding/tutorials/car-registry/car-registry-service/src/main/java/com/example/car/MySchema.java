@@ -34,11 +34,6 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
  */
 public final class MySchema implements Schema {
 
-  // ci-block ci-vehicles {
-  private static final Serializer<Vehicle> VEHICLE_SERIALIZER =
-      StandardSerializers.protobuf(Vehicle.class);
-  // }
-
   private final Prefixed access;
 
   public MySchema(Prefixed serviceData) {
@@ -52,7 +47,8 @@ public final class MySchema implements Schema {
   public ProofMapIndexProxy<String, Vehicle> vehicles() {
     var address = IndexAddress.valueOf("vehicles");
     var keySerializer = StandardSerializers.string();
-    return access.getProofMap(address, keySerializer, VEHICLE_SERIALIZER);
+    var valueSerializer = StandardSerializers.protobuf(Vehicle.class);
+    return access.getProofMap(address, keySerializer, valueSerializer);
   }
   // }
 }
