@@ -28,6 +28,7 @@ import picocli.CommandLine.Command;
         AddVehicleCommand.class,
         ChangeOwnerCommand.class,
         FindVehicleCommand.class,
+        GenerateKeyCommand.class,
     },
     mixinStandardHelpOptions = true
 )

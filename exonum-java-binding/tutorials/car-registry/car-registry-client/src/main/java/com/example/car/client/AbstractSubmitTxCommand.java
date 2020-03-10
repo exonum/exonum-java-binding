@@ -16,10 +16,15 @@
 
 package com.example.car.client;
 
-import com.exonum.binding.common.crypto.CryptoFunctions;
+import static java.nio.file.Files.readString;
+
 import com.exonum.binding.common.crypto.KeyPair;
+import com.exonum.binding.common.crypto.PrivateKey;
+import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExonumClient;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.ArgGroup;
 
@@ -32,18 +37,25 @@ abstract class AbstractSubmitTxCommand implements Callable<Integer> {
   ServiceIds serviceIds;
 
   @Override
-  public Integer call() {
+  public Integer call() throws IOException {
     var client = ExonumClient.newBuilder()
         .setExonumHost(Config.NODE_PUBLIC_API_HOST)
         .build();
     var serviceId = findServiceId(client);
-    // todo: Shall we add a command to generate a keypair and let all
-    //   other use that keypair, so that the user learns at least that each transaction comes
-    //   signed with a key into the network?
-    var keyPair = CryptoFunctions.ed25519().generateKeyPair();
+    var keyPair = readKeyPair();
     var txMessage = createTxMessage(serviceId, keyPair);
     client.submitTransaction(txMessage);
     return 0;
+  }
+
+  private static KeyPair readKeyPair() throws IOException {
+    var privateKeyStr = readString(Path.of(GenerateKeyCommand.EXONUM_ID_FILENAME));
+    var privateKey = PrivateKey.fromHexString(privateKeyStr);
+
+    var pubKeyStr = readString(Path.of(GenerateKeyCommand.EXONUM_ID_PUB_FILENAME));
+    var pubKey = PublicKey.fromHexString(pubKeyStr);
+
+    return KeyPair.newInstance(privateKey, pubKey);
   }
 
   protected abstract TransactionMessage createTxMessage(int serviceId, KeyPair keyPair);
