@@ -18,11 +18,9 @@ package com.example.car.client;
 
 
 import com.example.car.messages.Transactions;
-import com.exonum.binding.common.crypto.CryptoFunctions;
+import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.message.TransactionMessage;
-import com.exonum.client.ExonumClient;
 import java.util.concurrent.Callable;
-import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
@@ -33,9 +31,6 @@ public class ChangeOwnerCommand implements Callable<Integer> {
 
   private static final int CHANGE_OWNER_TX_ID = 1;
 
-  @ArgGroup(exclusive = true, multiplicity = "1")
-  ServiceIds serviceIds;
-
   @Parameters(index = "0")
   String vehicleId;
 
@@ -43,14 +38,9 @@ public class ChangeOwnerCommand implements Callable<Integer> {
   String newOwner;
 
   @Override
-  public Integer call() {
-    var client = ExonumClient.newBuilder()
-        .setExonumHost(Config.NODE_PUBLIC_API_HOST)
-        .build();
-
-    var keyPair = CryptoFunctions.ed25519().generateKeyPair();
-    var txMessage = TransactionMessage.builder()
-        .serviceId(findServiceId(client))
+  protected TransactionMessage createTxMessage(int serviceId, KeyPair keyPair) {
+    return TransactionMessage.builder()
+        .serviceId(serviceId)
         .transactionId(CHANGE_OWNER_TX_ID)
         .payload(
             Transactions.ChangeOwner.newBuilder()
@@ -58,14 +48,5 @@ public class ChangeOwnerCommand implements Callable<Integer> {
                 .setNewOwner(newOwner)
                 .build())
         .sign(keyPair);
-
-    client.submitTransaction(txMessage);
-
-    return 0;
-  }
-
-  private int findServiceId(ExonumClient client) {
-    var serviceIdResolver = new ServiceIdResolver(serviceIds, client);
-    return serviceIdResolver.getId();
   }
 }
