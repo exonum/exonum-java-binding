@@ -148,14 +148,18 @@ There are several categories of tests:
 <!-- TODO: Shall we explain what `mvn install` runs, and what `run_all_tests`? -->
 For convenience, the tests are divided into several groups.
 To run all tests, invoke this script:
+
 ```$sh
 $ ./run_all_tests.sh
 ```
+
 The following scripts can be run separately 
-from the [EJB](exonum-java-binding) directory:
-* `./run_maven_tests.sh` - all tests in Java and unit tests in Rust.
-* `./run_native_integration_tests.sh` - integration tests in Rust.
-* `./run_app_tests.sh` - application tests in Rust.
+from the [_exonum-java-binding_](exonum-java-binding) directory:
+
+* `./run_maven_tests.sh` — all tests in Java and unit tests in Rust.
+* `./run_native_integration_tests.sh` — integration tests in Rust.
+* `./run_app_tests.sh` — application tests in Rust.
+* `./run_tutorials_tests.sh` — tutorials tests in Java.
 
 ### Writing Tests
 #### Java
