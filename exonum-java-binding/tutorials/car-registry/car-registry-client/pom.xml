@@ -5,13 +5,12 @@
   <parent>
     <artifactId>car-registry-parent</artifactId>
     <groupId>com.example.car</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>car-registry-client</artifactId>
-
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>Exonum Service Client</name>
