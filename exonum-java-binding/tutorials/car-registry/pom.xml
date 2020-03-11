@@ -7,7 +7,7 @@
   <version>1.0.0</version>
   <packaging>pom</packaging>
 
-  <name>Exonum Service Parent</name>
+  <name>Exonum Vehicle Registry: Parent</name>
 
   <modules>
     <module>car-registry-messages</module>

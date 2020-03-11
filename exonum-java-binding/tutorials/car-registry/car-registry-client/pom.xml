@@ -13,7 +13,7 @@
   <version>1.0.0</version>
   <packaging>jar</packaging>
 
-  <name>Exonum Service Client</name>
+  <name>Exonum Vehicle Registry: CLI Client</name>
 
   <properties>
     <exonum-light-client.version>0.6.0-SNAPSHOT</exonum-light-client.version>
