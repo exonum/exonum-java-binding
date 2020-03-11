@@ -29,8 +29,6 @@
     </dependency>
 
     <!--
-    TODO: Shall we include them, if by default Exonum types are not really needed
-      (e.g., proto-definitions in QA & Crypto do not use them)?
     Exonum Protocol Buffers Messages.
     -->
     <dependency>
