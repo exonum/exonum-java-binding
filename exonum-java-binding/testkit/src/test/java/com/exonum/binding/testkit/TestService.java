@@ -26,7 +26,7 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.testkit.TestProtoMessages.TestConfiguration;
 import com.exonum.binding.testkit.Transactions.PutTransactionArgs;
 import com.google.inject.Inject;
@@ -47,7 +47,7 @@ public final class TestService extends AbstractService {
   }
 
   @Override
-  public void initialize(TransactionContext context, Configuration configuration) {
+  public void initialize(ExecutionContext context, Configuration configuration) {
     TestConfiguration initialConfiguration = configuration.getAsMessage(TestConfiguration.class);
     String configurationValue = initialConfiguration.getValue();
     if (configurationValue.equals(THROWING_VALUE)) {
@@ -60,7 +60,7 @@ public final class TestService extends AbstractService {
   }
 
   @Transaction(TEST_TRANSACTION_ID)
-  public void putEntry(PutTransactionArgs arguments, TransactionContext context) {
+  public void putEntry(PutTransactionArgs arguments, ExecutionContext context) {
     Prefixed serviceData = context.getServiceData();
     TestSchema schema = new TestSchema(serviceData);
 

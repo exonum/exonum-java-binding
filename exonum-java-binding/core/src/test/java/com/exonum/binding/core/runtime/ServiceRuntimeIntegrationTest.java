@@ -47,7 +47,7 @@ import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
-import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.messages.core.runtime.Lifecycle.InstanceMigration;
 import com.exonum.messages.core.runtime.Lifecycle.InstanceStatus;
 import com.exonum.messages.core.runtime.Lifecycle.InstanceStatus.Simple;
@@ -201,7 +201,7 @@ class ServiceRuntimeIntegrationTest {
         any(ServiceNodeProxy.class));
 
     // and the service was configured
-    TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+    ExecutionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
     Configuration expectedConfig = new ServiceConfiguration(configuration);
     verify(serviceWrapper).initialize(expectedContext, expectedConfig);
 
@@ -250,7 +250,7 @@ class ServiceRuntimeIntegrationTest {
         .thenReturn(serviceWrapper);
 
     BlockchainData blockchainData = mock(BlockchainData.class);
-    TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+    ExecutionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
     byte[] configuration = anyConfiguration();
     ServiceConfiguration expectedConfig = new ServiceConfiguration(configuration);
     doThrow(IllegalArgumentException.class).when(serviceWrapper)
@@ -433,7 +433,7 @@ class ServiceRuntimeIntegrationTest {
         any(ServiceNodeProxy.class));
 
     // and the service was resumed
-    TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+    ExecutionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
     verify(serviceWrapper).resume(expectedContext, arguments);
 
     // but not registered in the runtime yet:
@@ -544,7 +544,7 @@ class ServiceRuntimeIntegrationTest {
         Fork fork = database.createFork(cleaner);
         BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, TEST_NAME);
         int callerServiceId = 0;
-        TransactionContext expectedContext = TransactionContext.builder()
+        ExecutionContext expectedContext = ExecutionContext.builder()
             .blockchainData(blockchainData)
             .txMessageHash(TEST_HASH)
             .authorPk(TEST_PUBLIC_KEY)
@@ -587,7 +587,7 @@ class ServiceRuntimeIntegrationTest {
 
         serviceRuntime.beforeTransactions(TEST_ID, blockchainData);
 
-        TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+        ExecutionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
         verify(serviceWrapper).beforeTransactions(expectedContext);
       }
     }
@@ -601,7 +601,7 @@ class ServiceRuntimeIntegrationTest {
 
         serviceRuntime.afterTransactions(TEST_ID, blockchainData);
 
-        TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+        ExecutionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
         verify(serviceWrapper).afterTransactions(expectedContext);
       }
     }
@@ -613,7 +613,7 @@ class ServiceRuntimeIntegrationTest {
         Fork fork = database.createFork(cleaner);
         BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, TEST_NAME);
         RuntimeException serviceException = new RuntimeException("Service exception");
-        TransactionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
+        ExecutionContext expectedContext = zeroContext(TEST_ID, TEST_NAME, blockchainData);
         doThrow(serviceException).when(serviceWrapper).afterTransactions(expectedContext);
 
         RuntimeException actual = assertThrows(serviceException.getClass(),
@@ -747,9 +747,9 @@ class ServiceRuntimeIntegrationTest {
     }
   }
 
-  private static TransactionContext zeroContext(int expectedId, String expectedName,
+  private static ExecutionContext zeroContext(int expectedId, String expectedName,
       BlockchainData expectedData) {
-    return TransactionContext.builder()
+    return ExecutionContext.builder()
         .serviceName(expectedName)
         .serviceId(expectedId)
         .authorPk(ZERO_PK)

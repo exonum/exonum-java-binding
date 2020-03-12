@@ -26,7 +26,7 @@ import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.transaction.ExecutionException;
-import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
@@ -101,16 +101,16 @@ final class ServiceWrapper {
     return instanceSpec.getId();
   }
 
-  void initialize(TransactionContext context, Configuration configuration) {
+  void initialize(ExecutionContext context, Configuration configuration) {
     callServiceMethod(() -> service.initialize(context, configuration));
   }
 
-  void resume(TransactionContext context, byte[] arguments) {
+  void resume(ExecutionContext context, byte[] arguments) {
     callServiceMethod(() -> service.resume(context, arguments));
   }
 
   void executeTransaction(String interfaceName, int txId, byte[] arguments, int callerServiceId,
-      TransactionContext context) {
+      ExecutionContext context) {
     switch (interfaceName) {
       case DEFAULT_INTERFACE_NAME: {
         executeIntrinsicTransaction(txId, arguments, context);
@@ -125,12 +125,12 @@ final class ServiceWrapper {
     }
   }
 
-  private void executeIntrinsicTransaction(int txId, byte[] arguments, TransactionContext context) {
+  private void executeIntrinsicTransaction(int txId, byte[] arguments, ExecutionContext context) {
     invoker.invokeTransaction(txId, arguments, context);
   }
 
   private void executeConfigurableTransaction(int txId, byte[] arguments, int callerServiceId,
-      TransactionContext context) {
+      ExecutionContext context) {
     // Check the service implements Configurable
     checkArgument(service instanceof Configurable, "Service (%s) doesn't implement Configurable",
         getName());
@@ -154,11 +154,11 @@ final class ServiceWrapper {
     }
   }
 
-  void beforeTransactions(TransactionContext context) {
+  void beforeTransactions(ExecutionContext context) {
     callServiceMethod(() -> service.beforeTransactions(context));
   }
 
-  void afterTransactions(TransactionContext context) {
+  void afterTransactions(ExecutionContext context) {
     callServiceMethod(() -> service.afterTransactions(context));
   }
 

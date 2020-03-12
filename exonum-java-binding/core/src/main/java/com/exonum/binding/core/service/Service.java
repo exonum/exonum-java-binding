@@ -17,7 +17,7 @@
 package com.exonum.binding.core.service;
 
 import com.exonum.binding.core.transaction.ExecutionException;
-import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import io.vertx.ext.web.Router;
 
 /**
@@ -49,7 +49,7 @@ public interface Service {
    *     the registry of call errors}
    * @see Configurable
    */
-  default void initialize(TransactionContext context, Configuration configuration) {
+  default void initialize(ExecutionContext context, Configuration configuration) {
     // No configuration
   }
 
@@ -70,7 +70,7 @@ public interface Service {
    * @throws ExecutionException if the arguments are not valid (e.g.,
    *     malformed, or do not meet the preconditions)
    */
-  default void resume(TransactionContext context, byte[] arguments) {
+  default void resume(ExecutionContext context, byte[] arguments) {
     // No actions by default
   }
 
@@ -106,12 +106,12 @@ public interface Service {
 
   /**
    * An optional callback method invoked by the blockchain <em>before</em> any transactions
-   * in a block are executed. See {@link #afterTransactions(TransactionContext)} for details.
+   * in a block are executed. See {@link #afterTransactions(ExecutionContext)} for details.
    *
-   * @see #afterTransactions(TransactionContext)
+   * @see #afterTransactions(ExecutionContext)
    * @see com.exonum.binding.core.transaction.Transaction
    */
-  default void beforeTransactions(TransactionContext context) {}
+  default void beforeTransactions(ExecutionContext context) {}
 
   /**
    * Handles the changes made by all transactions included in the upcoming block.
@@ -133,10 +133,10 @@ public interface Service {
    * @throws ExecutionException if an error occurs during the method execution;
    *     it is saved as a call error of kind "service". Any other exceptions
    *     are considered unexpected. They are saved with kind "unexpected".
-   * @see #beforeTransactions(TransactionContext)
+   * @see #beforeTransactions(ExecutionContext)
    * @see com.exonum.binding.core.transaction.Transaction
    */
-  default void afterTransactions(TransactionContext context) {}
+  default void afterTransactions(ExecutionContext context) {}
 
   /**
    * Handles read-only block commit event. This handler is an optional callback method which is

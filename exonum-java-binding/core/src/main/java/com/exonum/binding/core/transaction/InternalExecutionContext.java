@@ -25,12 +25,12 @@ import com.google.auto.value.AutoValue;
  * Default implementation of the transaction context.
  */
 @AutoValue
-abstract class InternalTransactionContext implements TransactionContext {
+abstract class InternalExecutionContext implements ExecutionContext {
 
-  public static InternalTransactionContext newInstance(BlockchainData blockchainData, HashCode hash,
+  public static InternalExecutionContext newInstance(BlockchainData blockchainData, HashCode hash,
                                                        PublicKey authorPk, String serviceName,
                                                        int serviceId) {
-    return new AutoValue_InternalTransactionContext(blockchainData, hash, authorPk, serviceName,
+    return new AutoValue_InternalExecutionContext(blockchainData, hash, authorPk, serviceName,
         serviceId);
   }
 }

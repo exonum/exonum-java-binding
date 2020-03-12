@@ -17,6 +17,7 @@
 package com.exonum.binding.core.service;
 
 import com.exonum.binding.core.blockchain.Block;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.Transaction;
 
 /**
@@ -32,7 +33,7 @@ import com.exonum.binding.core.transaction.Transaction;
  * <p>Exonum starts aggregating a service collection state hash once it is <em>initialized</em>:
  * created for the first time with a read-write
  * {@link com.exonum.binding.core.blockchain.BlockchainData} (e.g., in a
- * {@linkplain Service#initialize(com.exonum.binding.core.transaction.TransactionContext,
+ * {@linkplain Service#initialize(ExecutionContext,
  * Configuration) service constructor}, or in a {@linkplain Transaction}).
  *
  * <p>Please note that if the service does not use any Merkelized collections,

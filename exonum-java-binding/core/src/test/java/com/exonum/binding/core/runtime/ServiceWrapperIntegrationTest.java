@@ -38,8 +38,8 @@ import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.ExecutionException;
-import com.exonum.binding.core.transaction.TransactionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -82,7 +82,7 @@ class ServiceWrapperIntegrationTest {
 
   @Test
   void initialize() {
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     Configuration config = new ServiceConfiguration(new byte[0]);
     serviceWrapper.initialize(context, config);
     verify(service).initialize(context, config);
@@ -91,7 +91,7 @@ class ServiceWrapperIntegrationTest {
   @Test
   void initializePropagatesExecutionException() {
     ExecutionException e = new ExecutionException((byte) 1);
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     Configuration config = new ServiceConfiguration(new byte[0]);
     doThrow(e).when(service).initialize(context, config);
 
@@ -103,7 +103,7 @@ class ServiceWrapperIntegrationTest {
   @Test
   void initializeWrapsRuntimeExceptions() {
     RuntimeException e = new RuntimeException("unexpected");
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     Configuration config = new ServiceConfiguration(new byte[0]);
     doThrow(e).when(service).initialize(context, config);
 
@@ -114,7 +114,7 @@ class ServiceWrapperIntegrationTest {
 
   @Test
   void resume() {
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     byte[] arguments = new byte[0];
     serviceWrapper.resume(context, arguments);
     verify(service).resume(context, arguments);
@@ -123,7 +123,7 @@ class ServiceWrapperIntegrationTest {
   @Test
   void resumePropagatesExecutionException() {
     ExecutionException e = new ExecutionException((byte) 1);
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     byte[] arguments = new byte[0];
     doThrow(e).when(service).resume(context, arguments);
 
@@ -135,7 +135,7 @@ class ServiceWrapperIntegrationTest {
   @Test
   void resumeWrapsRuntimeExceptions() {
     RuntimeException e = new RuntimeException("unexpected");
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     byte[] arguments = new byte[0];
     doThrow(e).when(service).resume(context, arguments);
 
@@ -149,7 +149,7 @@ class ServiceWrapperIntegrationTest {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     serviceWrapper.executeTransaction(DEFAULT_INTERFACE_NAME, txId, arguments, 0, context);
 
     verify(txInvoker).invokeTransaction(txId, arguments, context);
@@ -160,7 +160,7 @@ class ServiceWrapperIntegrationTest {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     doThrow(ExecutionException.class)
         .when(txInvoker)
         .invokeTransaction(txId, arguments, context);
@@ -176,7 +176,7 @@ class ServiceWrapperIntegrationTest {
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
 
     serviceWrapper.executeTransaction(interfaceName, txId, arguments,
         SUPERVISOR_SERVICE_ID, context);
@@ -191,7 +191,7 @@ class ServiceWrapperIntegrationTest {
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
 
     ExecutionException e = new ExecutionException((byte) 0);
     Configuration config = new ServiceConfiguration(arguments);
@@ -209,7 +209,7 @@ class ServiceWrapperIntegrationTest {
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
 
     RuntimeException e = new RuntimeException("unexpected");
     Configuration config = new ServiceConfiguration(arguments);
@@ -227,7 +227,7 @@ class ServiceWrapperIntegrationTest {
     int txId = APPLY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
 
     serviceWrapper.executeTransaction(interfaceName, txId, arguments,
         SUPERVISOR_SERVICE_ID, context);
@@ -243,7 +243,7 @@ class ServiceWrapperIntegrationTest {
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, callerServiceId,
@@ -260,7 +260,7 @@ class ServiceWrapperIntegrationTest {
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
 
     IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
         () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
@@ -277,7 +277,7 @@ class ServiceWrapperIntegrationTest {
     String interfaceName = CONFIGURE_INTERFACE_NAME;
     int txId = VERIFY_CONFIGURATION_TX_ID;
     byte[] arguments = bytes(1, 2, 3);
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments,
@@ -297,7 +297,7 @@ class ServiceWrapperIntegrationTest {
     int txId = 2;
     byte[] arguments = bytes(1, 2, 3);
 
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> serviceWrapper.executeTransaction(interfaceName, txId, arguments, 0, context));
 
@@ -307,7 +307,7 @@ class ServiceWrapperIntegrationTest {
 
   @Test
   void beforeTransactions() {
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     serviceWrapper.beforeTransactions(context);
     verify(service).beforeTransactions(context);
   }
@@ -315,7 +315,7 @@ class ServiceWrapperIntegrationTest {
   @Test
   void afterTransactionsPropagatesExecutionException() {
     ExecutionException e = new ExecutionException((byte) 0);
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     doThrow(e).when(service).afterTransactions(context);
 
     ExecutionException actual = assertThrows(ExecutionException.class,
@@ -326,7 +326,7 @@ class ServiceWrapperIntegrationTest {
   @Test
   void afterTransactionsKeepsRuntimeExceptionAsCause() {
     Exception e = new RuntimeException("Boom");
-    TransactionContext context = anyContext().build();
+    ExecutionContext context = anyContext().build();
     doThrow(e).when(service).afterTransactions(context);
 
     Exception actual = assertThrows(UnexpectedExecutionException.class,
@@ -349,8 +349,8 @@ class ServiceWrapperIntegrationTest {
     assertThat(serviceWrapper.getPublicApiRelativePath()).isEqualTo(expectedPathFragment);
   }
 
-  private static TransactionContext.Builder anyContext() {
-    return TransactionContext.builder()
+  private static ExecutionContext.Builder anyContext() {
+    return ExecutionContext.builder()
         .serviceName(TEST_SERVICE_NAME)
         .serviceId(TEST_SERVICE_ID)
         .authorPk(PublicKey.fromBytes(new byte[Ed25519.PUBLIC_KEY_BYTES]))

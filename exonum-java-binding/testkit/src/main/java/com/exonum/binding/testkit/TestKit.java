@@ -46,6 +46,7 @@ import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.testkit.internal.TestKitProtos.TestKitServiceInstances;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.binding.core.util.LibraryLoader;
@@ -86,7 +87,7 @@ import javax.annotation.Nullable;
  * from the pool are committed when a new block is created with {@link #createBlock()}.
  *
  * <p>When TestKit is created, Exonum blockchain instance is initialized — service instances are
- * {@linkplain Service#initialize(com.exonum.binding.core.transaction.TransactionContext,
+ * {@linkplain Service#initialize(ExecutionContext,
  * Configuration) initialized} and genesis block is committed.
  * Then the {@linkplain Service#createPublicApiHandlers(Node, Router) public API handlers} are
  * created.

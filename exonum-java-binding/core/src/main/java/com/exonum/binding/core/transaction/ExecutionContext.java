@@ -37,7 +37,7 @@ import com.exonum.binding.core.storage.database.Prefixed;
  *
  * @see Transaction
  */
-public interface TransactionContext {
+public interface ExecutionContext {
 
   /**
    * Returns the prefixed database access for the executing service. Allows R/W operations.
@@ -150,8 +150,8 @@ public interface TransactionContext {
     /**
      * Creates the transaction context instance.
      */
-    public TransactionContext build() {
-      return InternalTransactionContext.newInstance(blockchainData, hash, authorPk, serviceName,
+    public ExecutionContext build() {
+      return InternalExecutionContext.newInstance(blockchainData, hash, authorPk, serviceName,
           checkNotNull(serviceId));
     }
 

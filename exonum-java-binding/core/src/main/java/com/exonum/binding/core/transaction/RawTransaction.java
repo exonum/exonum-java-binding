@@ -24,7 +24,7 @@ import com.google.auto.value.AutoValue;
  * An Exonum raw transaction. The raw transaction is different from {@link TransactionMessage}
  * as it only includes the serialized transaction parameters and transaction identifiers.
  * Author’s public key is <em>not</em> included but is accessible from
- * the {@linkplain TransactionContext#getAuthorPk() execution context}.
+ * the {@linkplain ExecutionContext#getAuthorPk() execution context}.
  */
 // todo: [ECR-3438] Reconsider (split into CallInfo and the payload)? It is currently used
 //  in Node#submitTransaction. Will it make #submitTransaction easier or harder to use?

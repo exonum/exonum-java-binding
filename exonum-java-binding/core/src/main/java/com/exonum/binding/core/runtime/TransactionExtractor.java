@@ -21,8 +21,8 @@ import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.MessageLite;
 import java.lang.invoke.MethodHandle;
@@ -96,7 +96,7 @@ final class TransactionExtractor {
     checkArgument(firstParameter == byte[].class || isProtobufArgument(firstParameter),
         String.format(errorMessage
             + " But first parameter type was: %s", firstParameter.getName()));
-    checkArgument(TransactionContext.class.isAssignableFrom(secondParameter),
+    checkArgument(ExecutionContext.class.isAssignableFrom(secondParameter),
         String.format(errorMessage
             + " But second parameter type was: %s", secondParameter.getName()));
   }

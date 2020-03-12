@@ -19,8 +19,8 @@ package com.exonum.binding.core.runtime;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.ExecutionException;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import java.util.Map;
 
@@ -52,7 +52,7 @@ final class TransactionInvoker {
    * @throws UnexpectedExecutionException if any other exception is thrown by
    *     the transaction method, it is wrapped as cause
    */
-  void invokeTransaction(int transactionId, byte[] arguments, TransactionContext context) {
+  void invokeTransaction(int transactionId, byte[] arguments, ExecutionContext context) {
     checkArgument(transactionMethods.containsKey(transactionId),
         "No method with transaction id (%s)", transactionId);
     TransactionMethod transactionMethod = transactionMethods.get(transactionId);

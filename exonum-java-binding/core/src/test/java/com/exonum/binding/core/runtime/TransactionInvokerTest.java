@@ -24,9 +24,9 @@ import static org.mockito.Mockito.verify;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.indices.TestProtoMessages;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import io.vertx.ext.web.Router;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class TransactionInvokerTest {
 
   private static final byte[] ARGUMENTS = new byte[0];
   @Mock
-  private TransactionContext context;
+  private ExecutionContext context;
 
   @Test
   void invokeValidServiceTransaction() {
@@ -115,11 +115,11 @@ class TransactionInvokerTest {
 
     @Transaction(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod(byte[] arguments, TransactionContext context) {}
+    public void transactionMethod(byte[] arguments, ExecutionContext context) {}
 
     @Transaction(TRANSACTION_ID_2)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod2(byte[] arguments, TransactionContext context) {}
+    public void transactionMethod2(byte[] arguments, ExecutionContext context) {}
   }
 
   public static class ThrowingAnyException extends BasicService {
@@ -130,7 +130,7 @@ class TransactionInvokerTest {
     }
 
     @Transaction(TRANSACTION_ID)
-    public void transactionMethod(byte[] arguments, TransactionContext context) throws Exception {
+    public void transactionMethod(byte[] arguments, ExecutionContext context) throws Exception {
       throw exception;
     }
   }
@@ -139,6 +139,6 @@ class TransactionInvokerTest {
 
     @Transaction(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod(TestProtoMessages.Point arguments, TransactionContext context) {}
+    public void transactionMethod(TestProtoMessages.Point arguments, ExecutionContext context) {}
   }
 }

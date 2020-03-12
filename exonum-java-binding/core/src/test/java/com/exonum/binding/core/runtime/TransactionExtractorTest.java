@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.indices.TestProtoMessages;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import io.vertx.ext.web.Router;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ class TransactionExtractorTest {
         TransactionExtractor.findTransactionMethods(ValidService.class);
     assertThat(transactions).hasSize(1);
     Method transactionMethod =
-        ValidService.class.getMethod("transactionMethod", byte[].class, TransactionContext.class);
+        ValidService.class.getMethod("transactionMethod", byte[].class, ExecutionContext.class);
     assertThat(singletonList(transactionMethod))
         .containsExactlyElementsOf(transactions.values());
   }
@@ -109,9 +109,9 @@ class TransactionExtractorTest {
             ValidServiceInterfaceImplementation.class);
     assertThat(transactions).hasSize(2);
     Method transactionMethod = ValidServiceInterfaceImplementation.class.getMethod(
-        "transactionMethod", byte[].class, TransactionContext.class);
+        "transactionMethod", byte[].class, ExecutionContext.class);
     Method transactionMethod2 = ValidServiceInterfaceImplementation.class.getMethod(
-        "transactionMethod2", byte[].class, TransactionContext.class);
+        "transactionMethod2", byte[].class, ExecutionContext.class);
     List<Method> actualMethods = Arrays.asList(transactionMethod, transactionMethod2);
     assertThat(actualMethods).containsExactlyInAnyOrderElementsOf(transactions.values());
   }
@@ -123,7 +123,7 @@ class TransactionExtractorTest {
     assertThat(transactions).hasSize(1);
     Method transactionMethod =
         ValidServiceProtobufArgument.class.getMethod("transactionMethod",
-            TestProtoMessages.Point.class, TransactionContext.class);
+            TestProtoMessages.Point.class, ExecutionContext.class);
     assertThat(transactions.values())
         .containsExactlyElementsOf(singletonList(transactionMethod));
   }
@@ -142,16 +142,16 @@ class TransactionExtractorTest {
 
     @Transaction(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod(byte[] arguments, TransactionContext context) {}
+    public void transactionMethod(byte[] arguments, ExecutionContext context) {}
   }
 
   static class DuplicateTransactionIdsService extends BasicService {
 
     @Transaction(TRANSACTION_ID)
-    public void transactionMethod(byte[] arguments, TransactionContext context) {}
+    public void transactionMethod(byte[] arguments, ExecutionContext context) {}
 
     @Transaction(TRANSACTION_ID)
-    public void anotherTransactionMethod(byte[] arguments, TransactionContext context) {}
+    public void anotherTransactionMethod(byte[] arguments, ExecutionContext context) {}
   }
 
   static class MissingTransactionMethodArgumentsService extends BasicService {
@@ -176,7 +176,7 @@ class TransactionExtractorTest {
     int TRANSACTION_ID = 1;
 
     @Transaction(TRANSACTION_ID)
-    void transactionMethod(byte[] arguments, TransactionContext context);
+    void transactionMethod(byte[] arguments, ExecutionContext context);
   }
 
   static class ValidServiceInterfaceImplementation implements ServiceInterface {
@@ -184,17 +184,17 @@ class TransactionExtractorTest {
     static final int TRANSACTION_ID_2 = 2;
 
     @Transaction(TRANSACTION_ID)
-    public void transactionMethod(byte[] arguments, TransactionContext context) {}
+    public void transactionMethod(byte[] arguments, ExecutionContext context) {}
 
     @Transaction(TRANSACTION_ID_2)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod2(byte[] arguments, TransactionContext context) {}
+    public void transactionMethod2(byte[] arguments, ExecutionContext context) {}
   }
 
   static class ValidServiceProtobufArgument extends BasicService {
 
     @Transaction(TRANSACTION_ID)
     @SuppressWarnings("WeakerAccess") // Should be accessible
-    public void transactionMethod(TestProtoMessages.Point arguments, TransactionContext context) {}
+    public void transactionMethod(TestProtoMessages.Point arguments, ExecutionContext context) {}
   }
 }

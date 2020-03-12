@@ -16,7 +16,7 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.ExecutionContext;
 
 /**
  * A configurable Exonum service. Allows services to update their configuration through
@@ -27,11 +27,11 @@ import com.exonum.binding.core.transaction.TransactionContext;
  * and application of the new configuration. The protocol of the proposal and approval steps
  * is determined by the installed supervisor service. The verification and application
  * of the parameters are implemented by the service with
- * {@link #verifyConfiguration(TransactionContext, Configuration)}
- * and {@link #applyConfiguration(TransactionContext, Configuration)} methods.
+ * {@link #verifyConfiguration(ExecutionContext, Configuration)}
+ * and {@link #applyConfiguration(ExecutionContext, Configuration)} methods.
  *
  * <p>Services may use the same configuration parameters as
- * in {@link Service#initialize(TransactionContext, Configuration)}, or different.
+ * in {@link Service#initialize(ExecutionContext, Configuration)}, or different.
  * <!--
  * TODO: Link the appropriate documentation section on updating the service configuration
  *   through the supervisor when it becomes available (ideally, on the site; or in published
@@ -53,11 +53,11 @@ public interface Configurable {
    * @throws com.exonum.binding.core.transaction.ExecutionException if the proposed configuration
    *     is not valid to prevent the configuration application
    */
-  void verifyConfiguration(TransactionContext context, Configuration configuration);
+  void verifyConfiguration(ExecutionContext context, Configuration configuration);
 
   /**
    * Applies the given configuration to this service. The configuration is guaranteed to be
-   * valid according to {@link #verifyConfiguration(TransactionContext, Configuration)}.
+   * valid according to {@link #verifyConfiguration(ExecutionContext, Configuration)}.
    *
    * <p>The implementation shall make any changes to the service persistent state to apply
    * the new configuration, because the supervisor does <em>not</em> store them for later retrieval.
@@ -65,5 +65,5 @@ public interface Configurable {
    * @param context an execution context for this service
    * @param configuration a new valid configuration
    */
-  void applyConfiguration(TransactionContext context, Configuration configuration);
+  void applyConfiguration(ExecutionContext context, Configuration configuration);
 }

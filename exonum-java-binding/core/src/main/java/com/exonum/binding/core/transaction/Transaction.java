@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * <ol>
  *   <li>transaction arguments either as {@code byte[]} or as a protobuf message.
  *       Protobuf messages are deserialized using a {@code #parseFrom(byte[])} method
- *   <li>transaction execution context as {@link TransactionContext}. It allows to access
+ *   <li>transaction execution context as {@link ExecutionContext}. It allows to access
  *       the information about this transaction and modify the blockchain state
  *       through the included database access object.
  * </ol>

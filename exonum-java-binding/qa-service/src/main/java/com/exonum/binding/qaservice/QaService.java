@@ -21,9 +21,9 @@ import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.service.Configurable;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos;
 import com.exonum.messages.core.Blockchain.Config;
 import java.time.ZonedDateTime;
@@ -66,7 +66,7 @@ public interface QaService extends Service, Configurable {
    * @throws ExecutionException if the counter already exists
    * @throws IllegalArgumentException if the counter name is empty
    */
-  void createCounter(TxMessageProtos.CreateCounterTxBody arguments, TransactionContext context);
+  void createCounter(TxMessageProtos.CreateCounterTxBody arguments, ExecutionContext context);
 
   /**
    * Increments an existing counter.
@@ -77,7 +77,7 @@ public interface QaService extends Service, Configurable {
    * @throws ExecutionException if a counter with the given id does not exist
    */
   void incrementCounter(TxMessageProtos.IncrementCounterTxBody arguments,
-      TransactionContext context);
+      ExecutionContext context);
 
   /**
    * Clears all collections of this service and throws an exception with the given arguments.
@@ -94,7 +94,7 @@ public interface QaService extends Service, Configurable {
    *     error code and error message
    * @throws IllegalArgumentException if the error code is not in range [0; 127]
    */
-  void error(TxMessageProtos.ErrorTxBody arguments, TransactionContext context);
+  void error(TxMessageProtos.ErrorTxBody arguments, ExecutionContext context);
 
   /**
    * Clears all collections of this service and throws a runtime exception.
@@ -104,5 +104,5 @@ public interface QaService extends Service, Configurable {
    *
    * @throws IllegalStateException always
    */
-  void throwing(TxMessageProtos.ThrowingTxBody arguments, TransactionContext context);
+  void throwing(TxMessageProtos.ThrowingTxBody arguments, ExecutionContext context);
 }

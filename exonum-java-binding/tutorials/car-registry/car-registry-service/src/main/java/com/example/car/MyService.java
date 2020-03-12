@@ -24,9 +24,9 @@ import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
@@ -46,7 +46,7 @@ public final class MyService extends AbstractService {
 
   // ci-block ci-initialize {
   @Override
-  public void initialize(TransactionContext context, Configuration configuration) {
+  public void initialize(ExecutionContext context, Configuration configuration) {
     var testVehicles =
         List.of(vehicleArgs("V1", "Ford", "Focus", "Dave"),
             vehicleArgs("V2", "DMC", "DeLorean", "Emmett Brown"),
@@ -73,7 +73,7 @@ public final class MyService extends AbstractService {
 
   // ci-block ci-add-vehicle {
   @Transaction(ADD_VEHICLE_TX_ID)
-  public void addVehicle(Transactions.AddVehicle args, TransactionContext context) {
+  public void addVehicle(Transactions.AddVehicle args, ExecutionContext context) {
     var serviceData = context.getServiceData();
     var schema = new MySchema(serviceData);
     ProofMapIndexProxy<String, Vehicle> vehicles = schema.vehicles();
@@ -95,7 +95,7 @@ public final class MyService extends AbstractService {
 
   // ci-block ci-change-owner {
   @Transaction(CHANGE_OWNER_TX_ID)
-  public void changeOwner(Transactions.ChangeOwner args, TransactionContext context) {
+  public void changeOwner(Transactions.ChangeOwner args, ExecutionContext context) {
     var serviceData = context.getServiceData();
     var schema = new MySchema(serviceData);
     ProofMapIndexProxy<String, Vehicle> vehicles = schema.vehicles();

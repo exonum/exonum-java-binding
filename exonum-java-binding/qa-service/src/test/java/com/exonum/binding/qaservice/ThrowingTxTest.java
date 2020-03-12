@@ -36,7 +36,7 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
-import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ThrowingTxBody;
 import com.exonum.binding.test.Integration;
 import com.exonum.binding.testkit.TestKit;
@@ -94,7 +94,7 @@ class ThrowingTxTest {
       ThrowingTxBody arguments = ThrowingTxBody.newBuilder()
           .setSeed(17L)
           .build();
-      TransactionContext context = newContext(blockchainData)
+      ExecutionContext context = newContext(blockchainData)
           .serviceName(QA_SERVICE_NAME)
           .serviceId(QA_SERVICE_ID)
           .build();

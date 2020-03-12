@@ -38,8 +38,8 @@ import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
@@ -104,7 +104,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   @Override
   @Transaction(CREATE_WALLET_TX_ID)
-  public void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context) {
+  public void createWallet(TxMessageProtos.CreateWalletTx arguments, ExecutionContext context) {
     PublicKey ownerPublicKey = context.getAuthorPk();
 
     CryptocurrencySchema schema = createDataSchema(context.getBlockchainData());
@@ -122,7 +122,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   @Override
   @Transaction(TRANSFER_TX_ID)
-  public void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context) {
+  public void transfer(TxMessageProtos.TransferTx arguments, ExecutionContext context) {
     long sum = arguments.getSum();
     checkExecution(0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode,
         "Non-positive transfer amount: " + sum);

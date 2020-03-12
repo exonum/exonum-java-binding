@@ -37,7 +37,7 @@ import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.transaction.ExecutionException;
-import com.exonum.binding.core.transaction.TransactionContext;
+import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.qaservice.transactions.TxMessageProtos.ErrorTxBody;
 import com.exonum.binding.test.Integration;
 import com.exonum.binding.testkit.TestKit;
@@ -121,7 +121,7 @@ class ErrorTxTest {
           .setErrorCode(1)
           .setErrorDescription("Foo")
           .build();
-      TransactionContext context = newContext(blockchainData)
+      ExecutionContext context = newContext(blockchainData)
           .serviceName(QA_SERVICE_NAME)
           .serviceId(QA_SERVICE_ID)
           .build();
