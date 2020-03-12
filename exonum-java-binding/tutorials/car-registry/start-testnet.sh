@@ -21,14 +21,7 @@ function header() {
 set -eu -o pipefail
 
 # Check whether the Exonum Java App is installed.
-command -v exonum-java >/dev/null 2>&1 || {
-  echo >&2 "Please install the Exonum Java App and make sure that 'exonum-java' binary is available via PATH:
-  - Installation instructions: https://exonum.com/doc/version/latest/get-started/java-binding/#installation
-  - PATH=${PATH}
-
-Aborting.";
-  exit 1;
-}
+command -v exonum-java >/dev/null 2>&1 || { echo >&2 "Please install the Exonum Java App and make sure that 'exonum-java' binary is available via PATH. Aborting."; exit 1; }
 
 # Clear test dir.
 TESTNET_PATH="$PWD/testnet"

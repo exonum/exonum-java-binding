@@ -20,14 +20,14 @@ plugins:
     java: "exonum_java_runtime_plugin.JavaDeploySpecLoader"
 
 artifacts:
-  ${rootArtifactId}:
+  car-registry:
     runtime: java
-    name: "${groupId}/${rootArtifactId}-service"
-    version: "${version}"
+    name: "com.example.car/car-registry-service"
+    version: "1.0.0-SNAPSHOT"
     spec:
-      artifact_filename: "${rootArtifactId}-service-${version}-artifact.jar"
+      artifact_filename: "car-registry-service-1.0.0-SNAPSHOT-artifact.jar"
 
 instances:
-  # A test service instance of "${rootArtifactId}-service".
-  test-${artifactId}:
-    artifact: ${artifactId}
+  # A test service instance of "car-registry-service".
+  test-car-registry:
+    artifact: car-registry

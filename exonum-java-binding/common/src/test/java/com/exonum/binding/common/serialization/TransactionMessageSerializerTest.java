@@ -37,7 +37,7 @@ class TransactionMessageSerializerTest {
   void roundTrip() {
     byte[] payload = Bytes.randomBytes(100);
     byte[] publicKey = Bytes.randomBytes(Ed25519.PUBLIC_KEY_BYTES);
-    KeyPair keys = KeyPair.createKeyPair(Bytes.bytes(0x00), publicKey);
+    KeyPair keys = KeyPair.newInstance(Bytes.bytes(0x00), publicKey);
     byte[] signature = Bytes.randomBytes(Ed25519.SIGNATURE_BYTES);
     CryptoFunction cryptoFunction = Mockito.mock(CryptoFunction.class);
     when(cryptoFunction.signMessage(any(), eq(keys.getPrivateKey()))).thenReturn(signature);

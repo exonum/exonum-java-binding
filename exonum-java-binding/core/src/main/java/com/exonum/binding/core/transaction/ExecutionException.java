@@ -64,6 +64,7 @@ public class ExecutionException extends RuntimeException {
    * Constructs a new transaction exception with no description.
    *
    * @param errorCode the transaction error code
+   * @see ExecutionPreconditions#checkExecution(boolean, byte)
    */
   public ExecutionException(byte errorCode) {
     this(errorCode, null);
@@ -75,6 +76,7 @@ public class ExecutionException extends RuntimeException {
    * @param errorCode the transaction error code
    * @param description the error description. The detail description is saved for
    *     later retrieval by the {@link #getMessage()} method.
+   * @see ExecutionPreconditions#checkExecution(boolean, byte, Object)
    */
   public ExecutionException(byte errorCode, @Nullable String description) {
     this(errorCode, description, null);

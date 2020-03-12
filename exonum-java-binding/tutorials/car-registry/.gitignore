@@ -1,0 +1,8 @@
+# The dir used by test Exonum network
+testnet/
+
+# venv for Python modules
+.venv/
+
+# Exonum key files that the CLI client uses
+exonum_id*

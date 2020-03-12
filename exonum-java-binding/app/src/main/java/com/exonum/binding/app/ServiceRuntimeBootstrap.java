@@ -36,6 +36,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.protobuf.MessageLite;
 import io.vertx.core.Vertx;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,6 +71,7 @@ public final class ServiceRuntimeBootstrap {
           .put("exonum-java-binding-core", Service.class)
           .put("exonum-java-binding-common", HashCode.class)
           .put("exonum-time-oracle", TimeSchema.class)
+          .put("protobuf-java", MessageLite.class)
           .put("vertx", Vertx.class)
           .put("gson", Gson.class)
           .put("guava", ImmutableMap.class)

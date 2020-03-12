@@ -54,7 +54,7 @@ final class Ed25519CryptoFunction implements CryptoFunction {
     if (!lazySodium.cryptoSignSeedKeypair(publicKey, privateKey, seed)) {
       throw new RuntimeException("Failed to generate a key pair");
     }
-    return KeyPair.createKeyPairNoCopy(privateKey, publicKey);
+    return KeyPair.newInstanceNoCopy(privateKey, publicKey);
   }
 
   @Override
@@ -65,7 +65,7 @@ final class Ed25519CryptoFunction implements CryptoFunction {
     if (!lazySodium.cryptoSignKeypair(publicKey, privateKey)) {
       throw new RuntimeException("Failed to generate a key pair");
     }
-    return KeyPair.createKeyPairNoCopy(privateKey, publicKey);
+    return KeyPair.newInstanceNoCopy(privateKey, publicKey);
   }
 
   @Override

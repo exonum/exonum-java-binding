@@ -52,7 +52,7 @@ class TransactionMessageBuilderTest {
   void messageBuilderTest() {
     byte[] payload = Bytes.randomBytes(100);
     byte[] publicKey = Bytes.randomBytes(PUBLIC_KEY_BYTES);
-    KeyPair keys = KeyPair.createKeyPair(Bytes.bytes(0x00), publicKey);
+    KeyPair keys = KeyPair.newInstance(Bytes.bytes(0x00), publicKey);
     byte[] signature = Bytes.randomBytes(Ed25519.SIGNATURE_BYTES);
     CryptoFunction cryptoFunction = mock(CryptoFunction.class);
     when(cryptoFunction.signMessage(any(), eq(keys.getPrivateKey()))).thenReturn(signature);
@@ -80,7 +80,7 @@ class TransactionMessageBuilderTest {
         .payload(Bytes.bytes());
 
     byte[] publicKeyBytes = Bytes.bytes(0x00, 0x01, 0x02, 0x03);
-    KeyPair keys = KeyPair.createKeyPair(Bytes.bytes(0x00, 0x01), publicKeyBytes);
+    KeyPair keys = KeyPair.newInstance(Bytes.bytes(0x00, 0x01), publicKeyBytes);
 
     Exception e = assertThrows(IllegalArgumentException.class,
         () -> messageBuilder.sign(keys));

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package example.vehicle;
+
+option java_package = "com.example.car.messages";
+
+message Vehicle {
+  string id = 1;
+  string make = 2;
+  string model = 3;
+  string owner = 4;
+}
