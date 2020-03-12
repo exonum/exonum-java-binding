@@ -5,18 +5,21 @@ import fnmatch
 
 
 def shared_lib_extension():
-    if os.name == 'posix':
+    if sys.platform == 'linux2':
         return ".so"
-    elif os.name == 'os2':
+    elif sys.platform == 'darwin':
         return ".dylib"
-    elif os.name == 'nt':
+    elif sys.platform == 'win32':
         return ".dll"
     else:
-        raise Exception(f"This OS ({os.name}) is unsupported")
+        raise Exception(f"This OS ({sys.platform}) is unsupported")
 
 
 def jvm_lib_name():
-    return "jvm" + shared_lib_extension()
+    if sys.platform == 'win32':
+        return "jvm" + shared_lib_extension()
+    else:
+        return "libjvm" + shared_lib_extension()
 
 
 def get_java_lib_dir(java_home):
@@ -27,7 +30,7 @@ def get_java_lib_dir(java_home):
 
 
 def get_std_lib_location(rust_sysroot):
-    lib_name = "std-*" + shared_lib_extension()
+    lib_name = "*std-*" + shared_lib_extension()
     for root, _, filenames in os.walk(rust_sysroot):
         for filename in fnmatch.filter(filenames, lib_name):
             return root, filename
@@ -59,7 +62,7 @@ def create_path(java_home, std_lib_dir, project_root):
 
 
 def set_rustflags(std_lib_dir, java_lib_dir):
-    if os.name == 'nt':
+    if sys.platform == 'win32':
         new_rustflags = " "
     else:
         new_rustflags = f"-C link-arg=-Wl,-rpath,{std_lib_dir} -C link-arg=-Wl,-rpath,{java_lib_dir}"
@@ -94,8 +97,7 @@ def tests_profile():
 
 
 def run_maven_tests():
-    subprocess.run(["mvn", "install", "-Drust.compiler.version=stable", "--activate-profiles", "ci-build"], shell=True,
-                   check=True)
+    subprocess.run(["mvn install -Drust.compiler.version=stable --activate-profiles ci-build"], shell=True, check=True)
 
 
 def run_native_integration_tests(project_root):
