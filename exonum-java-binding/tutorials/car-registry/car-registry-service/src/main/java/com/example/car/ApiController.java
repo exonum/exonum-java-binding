@@ -16,7 +16,6 @@
 
 package com.example.car;
 
-import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 
 import com.exonum.binding.core.service.Node;
@@ -49,7 +48,7 @@ final class ApiController {
       // Respond with the vehicle details
       var vehicle = vehicleOpt.get();
       routingContext.response()
-          .putHeader(CONTENT_TYPE, "application/octet-stream")
+          .putHeader("Content-Type", "application/octet-stream")
           .end(Buffer.buffer(vehicle.toByteArray()));
     } else {
       // Respond that the vehicle with such ID is not found
