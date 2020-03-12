@@ -59,8 +59,8 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
      `ListProof`;
      - [`Blockchain`][blockchain-proofs].
 - `ProofEntryIndexProxy` collection.
-- Transaction precondition utility methods,
-  see `com.exonum.binding.core.transaction.ExecutionPreconditions`. (#1351)
+- Execution preconditions utility methods,
+  see `com.exonum.binding.core.service.ExecutionPreconditions`. (#1351)
 - `supervisor-mode` CLI parameter added for `generate-template` command. It
   allows to configure the mode of the Supervisor service. Possible values are
   "simple" and "decentralized". (#1361)
@@ -85,27 +85,28 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
   `@Transaction(TX_ID)`, instead of classes implementing
   `Transaction` _interface_. (#1274, #1307)
 - Any exceptions thrown from the `Transaction` methods
-  but `TransactionExecutionException` are saved with the error kind
+  but `ExecutionException` are saved with the error kind
   "unexpected" into `Blockchain#getCallErrors`.
 - Redefined `TransactionExecutionException`:
-  - Renamed into `ExecutionException`
+  - Renamed into `ExecutionException` and moved to package
+  `com.exonum.binding.core.service`
   - Made `TransactionExecutionException` an unchecked (runtime) exception
   - Specified it as _the_ exception to communicate execution errors
   of `Service` methods: `@Transaction`s; `Service#afterTransactions`,
   `#initialize`; `Configurable` methods.
+- Similarly, redefined `TransactionContext`:
+  - Renamed into `ExecutionContext`  and moved to package 
+  `com.exonum.binding.core.service`
+  - Replaced `BlockchainData` argument in transaction-like `Service` and 
+  `Configurable` methods with `ExecutionContext`. The `BlockchainData`
+  remains accessible via `TransactionContext#getBlockchainData`,
+  and service data via `TransactionContext#getServiceData`.
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
 - Allowed throwing execution exceptions from `Service#afterTransactions`
   (ex. `beforeCommit`).
   Any exceptions thrown in these methods are saved in the blockchain
   in `Blockchain#getCallErrors` and can be retrieved by any services or
   light clients.
-- Replaced `BlockchainData` argument in transaction-like `Service` and 
-  `Configurable` methods with `TransactionContext`. The `BlockchainData`
-  remains accessible via `TransactionContext#getBlockchainData`,
-  and service data via `TransactionContext#getServiceData`.
-  <!-- TODO: Shall we rename it into `ExecutionContext` (as
-  TransactionExecutionException has become ExecutionException)?
-  -->
 - `Blockchain#getTxResults` is replaced by `Blockchain#getCallErrors`.
   - Use `CallInBlocks` to concisely create `CallInBlock`s.
 - The specification of `Configurable` operations and `Service#initialize` 
