@@ -14,6 +14,7 @@ set -eu -o pipefail
 source exonum-java-binding/tests_profile
 
 echo "Start building the project with running all Java test"
+
 # Run unit and integration tests in ci-build profile. This profile includes:
 #  - Java unit & integration tests, including ci-only & slow non-critical tests,
 #    which are excluded in the default profile.
@@ -30,3 +31,6 @@ cd exonum-java-binding
 # Run native integration tests that require prepared classpaths for Java classes.
 ./run_native_integration_tests.sh --skip-compile
 ./run_app_tests.sh
+
+# Run tutorials tests
+./run_tutorials_tests.sh

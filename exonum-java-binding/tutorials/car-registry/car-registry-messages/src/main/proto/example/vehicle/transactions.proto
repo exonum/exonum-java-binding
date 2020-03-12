@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package example.vehicle;
+
+option java_package = "com.example.car.messages";
+
+// ci-block ci-add-vehicle {
+import "example/vehicle/vehicle.proto";
+
+message AddVehicle {
+  Vehicle new_vehicle = 1;
+}
+// }
+
+message ChangeOwner {
+  string id = 1;
+  string new_owner = 2;
+}
