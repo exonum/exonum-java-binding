@@ -27,9 +27,11 @@ import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.transaction.Transaction;
+import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
- * A transaction execution context. The context provides access to the blockchain data
+ * An execution context. The context provides access to the blockchain data
  * for the executing service, and also contains the required information for the transaction
  * execution.
  *
@@ -60,20 +62,22 @@ public interface ExecutionContext {
 
   /**
    * Returns SHA-256 hash of the {@linkplain TransactionMessage transaction message} that
-   * carried the payload of the transaction; or a zero hash if no message corresponds to this
-   * context.
+   * carried the payload of the transaction; or {@code Optional.empty()} if no message corresponds
+   * to this context.
    *
    * <p>Each transaction message is uniquely identified by its hash; the messages are persisted
    * in the {@linkplain Blockchain#getTxMessages() blockchain} and can be fetched by this hash.
    */
-  HashCode getTransactionMessageHash();
+  Optional<HashCode> getTransactionMessageHash();
 
   /**
-   * Returns public key of the transaction author. The corresponding transaction message, if any,
-   * is guaranteed to have a correct {@link CryptoFunctions#ed25519()} signature
-   * with this public key.
+   * Returns public key of the transaction author; or {@code Optional.empty()} if no transaction
+   * message corresponds to this context.
+   *
+   * <p>The corresponding transaction message, if any, is guaranteed to have a correct
+   * {@link CryptoFunctions#ed25519()} signature with this public key.
    */
-  PublicKey getAuthorPk();
+  Optional<PublicKey> getAuthorPk();
 
   /**
    * Returns the name of the service instance.
@@ -106,8 +110,6 @@ public interface ExecutionContext {
     private String serviceName;
     private Integer serviceId;
 
-    // todo: Init hash and author to zeroes? Or always leave to the client (as now)?
-
     /**
      * Sets the blockchain data for the context.
      */
@@ -119,7 +121,7 @@ public interface ExecutionContext {
     /**
      * Sets transaction message hash for the context.
      */
-    public Builder txMessageHash(HashCode hash) {
+    public Builder txMessageHash(@Nullable HashCode hash) {
       this.hash = hash;
       return this;
     }
@@ -127,7 +129,7 @@ public interface ExecutionContext {
     /**
      * Sets transaction author public key for the context.
      */
-    public Builder authorPk(PublicKey authorPk) {
+    public Builder authorPk(@Nullable PublicKey authorPk) {
       this.authorPk = authorPk;
       return this;
     }

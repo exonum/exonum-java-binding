@@ -20,10 +20,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.service.BlockCommittedEvent;
@@ -68,10 +66,6 @@ public final class ServiceRuntime implements AutoCloseable {
   @VisibleForTesting
   static final String API_ROOT_PATH = "/api/services";
   private static final Logger logger = LogManager.getLogger(ServiceRuntime.class);
-  @VisibleForTesting static final PublicKey ZERO_PK =
-      PublicKey.fromBytes(new byte[Ed25519.PUBLIC_KEY_BYTES]);
-  @VisibleForTesting static final HashCode ZERO_HASH =
-      HashCode.fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
 
   private final ServiceLoader serviceLoader;
   private final ServicesFactory servicesFactory;
@@ -456,9 +450,7 @@ public final class ServiceRuntime implements AutoCloseable {
     return ExecutionContext.builder()
         .blockchainData(blockchainData)
         .serviceName(service.getName())
-        .serviceId(service.getId())
-        .txMessageHash(ZERO_HASH)
-        .authorPk(ZERO_PK);
+        .serviceId(service.getId());
   }
 
   /**

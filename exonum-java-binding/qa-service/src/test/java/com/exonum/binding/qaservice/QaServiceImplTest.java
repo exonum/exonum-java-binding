@@ -41,11 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-import com.exonum.binding.common.crypto.CryptoFunctions.Ed25519;
 import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.crypto.PublicKey;
-import com.exonum.binding.common.hash.HashCode;
-import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
@@ -94,9 +91,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 class QaServiceImplTest {
 
   private static final ZonedDateTime INITIAL_TIME = ZonedDateTime.now(ZoneOffset.UTC);
-  private static final PublicKey ZERO_PK = PublicKey.fromBytes(new byte[Ed25519.PUBLIC_KEY_BYTES]);
-  private static final HashCode ZERO_HASH = HashCode
-      .fromBytes(new byte[Hashing.DEFAULT_HASH_SIZE_BYTES]);
 
   private final FakeTimeProvider timeProvider = FakeTimeProvider.create(INITIAL_TIME);
 
@@ -153,8 +147,6 @@ class QaServiceImplTest {
           .serviceName(QA_SERVICE_NAME)
           .serviceId(QA_SERVICE_ID)
           .blockchainData(blockchainData)
-          .txMessageHash(ZERO_HASH)
-          .authorPk(ZERO_PK)
           .build();
 
       QaServiceImpl qaService = new QaServiceImpl(spec);

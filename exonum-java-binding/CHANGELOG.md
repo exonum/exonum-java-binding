@@ -101,6 +101,9 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
   `Configurable` methods with `ExecutionContext`. The `BlockchainData`
   remains accessible via `TransactionContext#getBlockchainData`,
   and service data via `TransactionContext#getServiceData`.
+  - Made `getTransactionMessageHash` return `Optional<HashCode`;
+  and `getAuthorPk` return `Optional<PublicKey>` because the context
+  is also used for non-transaction methods. (#1462)
 - Renamed `Service#beforeCommit` into `Service#afterTransactions`.
 - Allowed throwing execution exceptions from `Service#afterTransactions`
   (ex. `beforeCommit`).

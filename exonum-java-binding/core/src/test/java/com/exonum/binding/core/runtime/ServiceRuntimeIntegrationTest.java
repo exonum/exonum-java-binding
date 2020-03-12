@@ -16,8 +16,6 @@
 
 package com.exonum.binding.core.runtime;
 
-import static com.exonum.binding.core.runtime.ServiceRuntime.ZERO_HASH;
-import static com.exonum.binding.core.runtime.ServiceRuntime.ZERO_PK;
 import static com.exonum.binding.core.runtime.ServiceWrapper.DEFAULT_INTERFACE_NAME;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.collect.Comparators.isInStrictOrder;
@@ -752,8 +750,6 @@ class ServiceRuntimeIntegrationTest {
     return ExecutionContext.builder()
         .serviceName(expectedName)
         .serviceId(expectedId)
-        .authorPk(ZERO_PK)
-        .txMessageHash(ZERO_HASH)
         .blockchainData(expectedData)
         .build();
   }

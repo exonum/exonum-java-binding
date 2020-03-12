@@ -105,7 +105,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
   @Override
   @Transaction(CREATE_WALLET_TX_ID)
   public void createWallet(TxMessageProtos.CreateWalletTx arguments, ExecutionContext context) {
-    PublicKey ownerPublicKey = context.getAuthorPk();
+    PublicKey ownerPublicKey = context.getAuthorPk().orElseThrow();
 
     CryptocurrencySchema schema = createDataSchema(context.getBlockchainData());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
@@ -127,7 +127,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     checkExecution(0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode,
         "Non-positive transfer amount: " + sum);
 
-    PublicKey fromWallet = context.getAuthorPk();
+    PublicKey fromWallet = context.getAuthorPk().orElseThrow();
     PublicKey toWallet = toPublicKey(arguments.getToWallet());
     checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
 
@@ -145,7 +145,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     wallets.put(toWallet, new Wallet(to.getBalance() + sum));
 
     // Update the transaction history of each wallet
-    HashCode messageHash = context.getTransactionMessageHash();
+    HashCode messageHash = context.getTransactionMessageHash().orElseThrow();
     schema.transactionsHistory(fromWallet).add(messageHash);
     schema.transactionsHistory(toWallet).add(messageHash);
   }

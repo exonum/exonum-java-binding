@@ -20,6 +20,8 @@ import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.google.auto.value.AutoValue;
+import java.util.Optional;
+import javax.annotation.Nullable;
 
 /**
  * Default implementation of the transaction context.
@@ -27,10 +29,12 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 abstract class InternalExecutionContext implements ExecutionContext {
 
-  public static InternalExecutionContext newInstance(BlockchainData blockchainData, HashCode hash,
-                                                       PublicKey authorPk, String serviceName,
-                                                       int serviceId) {
-    return new AutoValue_InternalExecutionContext(blockchainData, hash, authorPk, serviceName,
-        serviceId);
+  public static InternalExecutionContext newInstance(BlockchainData blockchainData,
+      @Nullable HashCode txMessageHash, @Nullable PublicKey authorPk, String serviceName,
+      int serviceId) {
+    var txMessageHashOpt = Optional.ofNullable(txMessageHash);
+    var authorPkOpt = Optional.ofNullable(authorPk);
+    return new AutoValue_InternalExecutionContext(blockchainData, txMessageHashOpt, authorPkOpt,
+        serviceName, serviceId);
   }
 }
