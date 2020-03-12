@@ -18,9 +18,9 @@ package com.exonum.binding.core.runtime;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.transaction.ExecutionContext;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.google.inject.Inject;
 import java.util.Map;
 

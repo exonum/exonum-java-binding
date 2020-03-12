@@ -17,7 +17,6 @@
 package com.exonum.binding.core.service;
 
 import com.exonum.binding.core.blockchain.Block;
-import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.Transaction;
 
 /**

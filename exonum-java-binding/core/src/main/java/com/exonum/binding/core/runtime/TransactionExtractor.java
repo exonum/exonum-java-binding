@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toMap;
 
 import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
-import com.exonum.binding.core.transaction.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.transaction.Transaction;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.MessageLite;

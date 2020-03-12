@@ -19,6 +19,7 @@ package com.exonum.binding.core.transaction;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import com.exonum.binding.core.service.ExecutionException;
 import org.junit.jupiter.api.Test;
 
 class ExecutionExceptionTest {

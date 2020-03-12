@@ -17,9 +17,9 @@
 package com.exonum.binding.cryptocurrency;
 
 import com.exonum.binding.common.crypto.PublicKey;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.transaction.ExecutionContext;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import java.util.List;
 import java.util.Optional;

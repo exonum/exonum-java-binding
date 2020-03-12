@@ -16,7 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.core.transaction.ExecutionPreconditions.checkExecution;
+import static com.exonum.binding.core.service.ExecutionPreconditions.checkExecution;
 import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
 import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
@@ -34,11 +34,11 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
+import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.inject.Inject;

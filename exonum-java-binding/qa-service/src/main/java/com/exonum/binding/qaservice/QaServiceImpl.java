@@ -17,7 +17,7 @@
 package com.exonum.binding.qaservice;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
-import static com.exonum.binding.core.transaction.ExecutionPreconditions.checkExecution;
+import static com.exonum.binding.core.service.ExecutionPreconditions.checkExecution;
 import static com.exonum.binding.qaservice.QaExecutionError.COUNTER_ALREADY_EXISTS;
 import static com.exonum.binding.qaservice.QaExecutionError.EMPTY_TIME_ORACLE_NAME;
 import static com.exonum.binding.qaservice.QaExecutionError.RESUME_SERVICE_ERROR;
@@ -35,12 +35,12 @@ import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.ExecutionContext;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transaction.Transaction;
 import com.exonum.binding.qaservice.Config.QaConfiguration;

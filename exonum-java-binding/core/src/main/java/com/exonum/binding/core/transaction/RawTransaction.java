@@ -18,6 +18,7 @@ package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
+import com.exonum.binding.core.service.ExecutionContext;
 import com.google.auto.value.AutoValue;
 
 /**

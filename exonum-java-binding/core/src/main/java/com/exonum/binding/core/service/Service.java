@@ -16,8 +16,6 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.transaction.ExecutionException;
-import com.exonum.binding.core.transaction.ExecutionContext;
 import io.vertx.ext.web.Router;
 
 /**

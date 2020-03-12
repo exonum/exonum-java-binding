@@ -18,7 +18,6 @@ package com.exonum.binding.core.service;
 
 import com.exonum.binding.common.messages.Service.ServiceConfiguration;
 import com.exonum.binding.common.messages.Service.ServiceConfiguration.Format;
-import com.exonum.binding.core.transaction.ExecutionContext;
 import com.google.protobuf.MessageLite;
 import java.util.Properties;
 

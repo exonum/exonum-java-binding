@@ -20,10 +20,10 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.indices.TestProtoMessages;
-import com.exonum.binding.core.transaction.ExecutionContext;
 import com.exonum.binding.core.transaction.Transaction;
 import io.vertx.ext.web.Router;
 import java.lang.reflect.Method;

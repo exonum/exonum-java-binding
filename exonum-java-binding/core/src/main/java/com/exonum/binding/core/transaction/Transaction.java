@@ -18,6 +18,8 @@ package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Service;
 import com.exonum.messages.core.runtime.Errors.ErrorKind;
 import com.exonum.messages.core.runtime.Errors.ExecutionError;

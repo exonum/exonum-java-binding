@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.indices.TestProtoMessages;
-import com.exonum.binding.core.transaction.ExecutionContext;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
 import io.vertx.ext.web.Router;
 import java.io.IOException;

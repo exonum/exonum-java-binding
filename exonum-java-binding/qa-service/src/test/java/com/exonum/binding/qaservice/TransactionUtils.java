@@ -19,8 +19,8 @@ package com.exonum.binding.qaservice;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.transaction.ExecutionContext;
 
 /**
  * Helper class with utilities aiding in testing some transactions.

@@ -16,8 +16,6 @@
 
 package com.exonum.binding.core.service;
 
-import com.exonum.binding.core.transaction.ExecutionContext;
-
 /**
  * A configurable Exonum service. Allows services to update their configuration through
  * the supervisor service during their operation.
@@ -50,7 +48,7 @@ public interface Configurable {
    * @param context a read-only execution context object, providing access to the current database
    *     state
    * @param configuration a proposed configuration
-   * @throws com.exonum.binding.core.transaction.ExecutionException if the proposed configuration
+   * @throws ExecutionException if the proposed configuration
    *     is not valid to prevent the configuration application
    */
   void verifyConfiguration(ExecutionContext context, Configuration configuration);

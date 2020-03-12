@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 The Exonum Team
+ * Copyright 2020 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.transaction;
+package com.exonum.binding.core.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -26,6 +26,7 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.storage.database.Prefixed;
+import com.exonum.binding.core.transaction.Transaction;
 
 /**
  * A transaction execution context. The context provides access to the blockchain data
