@@ -20,15 +20,15 @@
 //!
 //! See: https://docs.oracle.com/en/java/javase/12/docs/specs/jni/invocation.html#jni_onload
 
+use std::{os::raw::c_void, panic::catch_unwind};
+
 use jni::{
-    objects::{GlobalRef, JMethodID},
-    sys::{jint, JNI_VERSION_1_8},
-    JNIEnv, JavaVM,
+    JavaVM,
+    JNIEnv,
+    objects::{GlobalRef, JMethodID}, sys::{jint, JNI_VERSION_1_8},
 };
 use log::debug;
 use parking_lot::Once;
-
-use std::{os::raw::c_void, panic::catch_unwind};
 
 /// Invalid JNI version constant, signifying JNI_OnLoad failure.
 const INVALID_JNI_VERSION: jint = 0;
@@ -97,7 +97,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
     );
     EXECUTION_EXCEPTION_GET_ERROR_CODE = get_method_id(
         &env,
-        "com/exonum/binding/core/transaction/ExecutionException",
+        "com/exonum/binding/core/service/ExecutionException",
         "getErrorCode",
         "()B",
     );
@@ -161,7 +161,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
     JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION = get_class(env, "java/lang/IllegalArgumentException");
     EXECUTION_EXCEPTION = get_class(
         env,
-        "com/exonum/binding/core/transaction/ExecutionException",
+        "com/exonum/binding/core/service/ExecutionException",
     );
     UNEXPECTED_EXECUTION_EXCEPTION = get_class(
         env,
