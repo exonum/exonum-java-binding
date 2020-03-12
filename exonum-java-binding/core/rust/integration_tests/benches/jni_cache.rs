@@ -19,16 +19,16 @@ extern crate lazy_static;
 extern crate test;
 
 use std::sync::Arc;
-use test::{Bencher, black_box};
+use test::{black_box, Bencher};
 
 use integration_tests::vm::create_vm_for_benchmarks_with_classes;
 use java_bindings::{
-    Executor,
     jni::{
-        JavaVM,
-        JNIEnv, objects::{JObject, JValue},
+        objects::{JObject, JValue},
+        JNIEnv, JavaVM,
     },
-    JniResult, utils::{convert_to_string, get_class_name, jni_cache},
+    utils::{convert_to_string, get_class_name, jni_cache},
+    Executor, JniResult,
 };
 
 const EXECUTION_EXCEPTION_CLASS: &str = "com/exonum/binding/core/service/ExecutionException";

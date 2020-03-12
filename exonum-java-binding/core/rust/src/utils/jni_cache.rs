@@ -23,9 +23,9 @@
 use std::{os::raw::c_void, panic::catch_unwind};
 
 use jni::{
-    JavaVM,
-    JNIEnv,
-    objects::{GlobalRef, JMethodID}, sys::{jint, JNI_VERSION_1_8},
+    objects::{GlobalRef, JMethodID},
+    sys::{jint, JNI_VERSION_1_8},
+    JNIEnv, JavaVM,
 };
 use log::debug;
 use parking_lot::Once;
@@ -159,10 +159,7 @@ unsafe fn cache_methods(env: &JNIEnv) {
     JAVA_LANG_ERROR = get_class(env, "java/lang/Error");
     JAVA_LANG_RUNTIME_EXCEPTION = get_class(env, "java/lang/RuntimeException");
     JAVA_LANG_ILLEGAL_ARGUMENT_EXCEPTION = get_class(env, "java/lang/IllegalArgumentException");
-    EXECUTION_EXCEPTION = get_class(
-        env,
-        "com/exonum/binding/core/service/ExecutionException",
-    );
+    EXECUTION_EXCEPTION = get_class(env, "com/exonum/binding/core/service/ExecutionException");
     UNEXPECTED_EXECUTION_EXCEPTION = get_class(
         env,
         "com/exonum/binding/core/runtime/UnexpectedExecutionException",

@@ -4,16 +4,16 @@ use exonum_derive::ExecutionFail;
 
 use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
-    Error,
-    Executor,
     exonum::{
         self,
-        runtime::{ErrorKind, ErrorMatch},
         runtime::ExecutionError,
-    }, jni::{
-        JavaVM,
-        JNIEnv, objects::{JObject, JThrowable},
-    }, jni_call_default, jni_call_transaction, JniResult,
+        runtime::{ErrorKind, ErrorMatch},
+    },
+    jni::{
+        objects::{JObject, JThrowable},
+        JNIEnv, JavaVM,
+    },
+    jni_call_default, jni_call_transaction, Error, Executor, JniResult,
 };
 use lazy_static::lazy_static;
 
