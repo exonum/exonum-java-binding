@@ -44,11 +44,30 @@ public final class MyService extends AbstractService {
     super(instanceSpec);
   }
 
-  // ci-block ci-createPublicApiHandlers {
+  // ci-block ci-initialize {
   @Override
-  public void createPublicApiHandlers(Node node, Router router) {
-    var apiController = new ApiController(this, node);
-    apiController.mount(router);
+  public void initialize(TransactionContext context, Configuration configuration) {
+    var testVehicles =
+        List.of(vehicleArgs("V1", "Ford", "Focus", "Dave"),
+            vehicleArgs("V2", "DMC", "DeLorean", "Emmett Brown"),
+            vehicleArgs("V3", "Peugeot", "406", "Daniel Morales"),
+            vehicleArgs("V4", "McLaren", "P1", "Weeknd"));
+    for (var vehicle : testVehicles) {
+      addVehicle(vehicle, context);
+    }
+  }
+
+  private static Transactions.AddVehicle vehicleArgs(String id, String make, String model,
+      String owner) {
+    return Transactions.AddVehicle.newBuilder()
+        .setNewVehicle(
+            Vehicle.newBuilder()
+                .setId(id)
+                .setMake(make)
+                .setModel(model)
+                .setOwner(owner)
+                .build())
+        .build();
   }
   // }
 
@@ -100,33 +119,6 @@ public final class MyService extends AbstractService {
   }
   // }
 
-  // ci-block ci-initialize {
-  @Override
-  public void initialize(TransactionContext context, Configuration configuration) {
-    var testVehicles =
-        List.of(vehicleArgs("V1", "Ford", "Focus", "Dave"),
-            vehicleArgs("V2", "DMC", "DeLorean", "Emmett Brown"),
-            vehicleArgs("V3", "Peugeot", "406", "Daniel Morales"),
-            vehicleArgs("V4", "McLaren", "P1", "Weeknd"));
-    for (var vehicle : testVehicles) {
-       addVehicle(vehicle, context);
-    }
-  }
-
-  private static Transactions.AddVehicle vehicleArgs(String id, String make, String model,
-      String owner) {
-    return Transactions.AddVehicle.newBuilder()
-        .setNewVehicle(
-            Vehicle.newBuilder()
-                .setId(id)
-                .setMake(make)
-                .setModel(model)
-                .setOwner(owner)
-                .build())
-        .build();
-  }
-  // }
-
   // ci-block ci-find-vehicle {
   /**
    * Returns a vehicle with the given id, if it exists; or {@code Optional.empty()}
@@ -136,6 +128,14 @@ public final class MyService extends AbstractService {
     var schema = new MySchema(blockchainData.getExecutingServiceData());
     var vehicles = schema.vehicles();
     return Optional.ofNullable(vehicles.get(id));
+  }
+  // }
+
+  // ci-block ci-createPublicApiHandlers {
+  @Override
+  public void createPublicApiHandlers(Node node, Router router) {
+    var apiController = new ApiController(this, node);
+    apiController.mount(router);
   }
   // }
 }
