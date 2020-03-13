@@ -26,6 +26,7 @@ use java_bindings::{
     exonum_rust_runtime::RustRuntimeBuilder,
     exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor},
     exonum_time::TimeServiceFactory,
+    timestamping::TimestampingService,
     Command,
     Config,
     DefaultConfigManager,
