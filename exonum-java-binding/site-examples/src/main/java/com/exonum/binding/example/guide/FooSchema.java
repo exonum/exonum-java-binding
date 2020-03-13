@@ -22,7 +22,7 @@ import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 
-@SuppressWarnings("unused") // Used in the examples
+@SuppressWarnings("unused") // Example code
 final class FooSchema implements Schema {
 
   private final Prefixed view;

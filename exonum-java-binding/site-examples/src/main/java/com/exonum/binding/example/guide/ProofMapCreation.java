@@ -20,7 +20,7 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 
-@SuppressWarnings("unused") // Used in the examples
+@SuppressWarnings("unused") // Example code
 class ProofMapCreation {
 
   void putEntry(Prefixed access, String key, String value) {
