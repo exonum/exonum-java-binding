@@ -30,6 +30,7 @@ pub extern crate exonum_rust_runtime;
 pub extern crate exonum_supervisor;
 pub extern crate exonum_time;
 pub extern crate jni;
+pub extern crate timestamping;
 
 mod cmd;
 mod handle;

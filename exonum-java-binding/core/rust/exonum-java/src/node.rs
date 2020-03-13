@@ -24,6 +24,7 @@ use java_bindings::{
     exonum_rust_runtime::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory},
     exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor},
     exonum_time::TimeServiceFactory,
+    timestamping::TimestampingService,
     Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
     JavaRuntimeProxy,
 };
@@ -71,6 +72,7 @@ fn create_genesis_config(config: &Config) -> GenesisConfig {
         .with_artifact(ExplorerFactory.artifact_id())
         .with_instance(ExplorerFactory.default_instance())
         .with_artifact(BtcAnchoringService.artifact_id())
+        .with_artifact(TimestampingService.artifact_id())
         .build()
 }
 
@@ -80,6 +82,7 @@ fn create_rust_runtime(channel: &NodeChannel) -> RustRuntime {
         .with_factory(Supervisor)
         .with_factory(ExplorerFactory)
         .with_factory(BtcAnchoringService)
+        .with_factory(TimestampingService)
         .build(channel.endpoints_sender())
 }
 
