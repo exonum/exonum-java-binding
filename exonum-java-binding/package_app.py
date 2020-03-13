@@ -5,8 +5,8 @@ from pathlib import Path
 from tests_profile import TestsProfile
 
 
-def clear_cargo(ejb_rust_dir):
-    manifest_path = os.path.join(ejb_rust_dir, "Cargo.toml")
+def clear_cargo(manifest_dir):
+    manifest_path = os.path.join(manifest_dir, "Cargo.toml")
     subprocess.run(["cargo", "clean", "--manifest-path", manifest_path], check=True)
 
 
