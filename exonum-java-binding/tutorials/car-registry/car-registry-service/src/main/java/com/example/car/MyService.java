@@ -46,7 +46,8 @@ public final class MyService extends AbstractService {
 
   // ci-block ci-initialize {
   @Override
-  public void initialize(ExecutionContext context, Configuration configuration) {
+  public void initialize(ExecutionContext context,
+      Configuration configuration) {
     var testVehicles =
         List.of(vehicleArgs("V1", "Ford", "Focus", "Dave"),
             vehicleArgs("V2", "DMC", "DeLorean", "Emmett Brown"),
@@ -57,8 +58,8 @@ public final class MyService extends AbstractService {
     }
   }
 
-  private static Transactions.AddVehicle vehicleArgs(String id, String make, String model,
-      String owner) {
+  private static Transactions.AddVehicle vehicleArgs(String id, String make,
+      String model, String owner) {
     return Transactions.AddVehicle.newBuilder()
         .setNewVehicle(
             Vehicle.newBuilder()
@@ -83,8 +84,9 @@ public final class MyService extends AbstractService {
     var id = newVehicle.getId();
     if (vehicles.containsKey(id)) {
       var existingVehicle = vehicles.get(id);
-      var errorDescription = String.format("The registry already contains a vehicle "
-          + "with id (%s): existing=%s, new=%s", id, existingVehicle, newVehicle);
+      var errorDescription = String
+          .format("The registry already contains a vehicle with id (%s): "
+              + "existing=%s, new=%s", id, existingVehicle, newVehicle);
       throw new ExecutionException(ID_ALREADY_EXISTS_ERROR_CODE, errorDescription);
     }
 
@@ -95,7 +97,8 @@ public final class MyService extends AbstractService {
 
   // ci-block ci-change-owner {
   @Transaction(CHANGE_OWNER_TX_ID)
-  public void changeOwner(Transactions.ChangeOwner args, ExecutionContext context) {
+  public void changeOwner(Transactions.ChangeOwner args,
+      ExecutionContext context) {
     var serviceData = context.getServiceData();
     var schema = new MySchema(serviceData);
     ProofMapIndexProxy<String, Vehicle> vehicles = schema.vehicles();
@@ -103,10 +106,11 @@ public final class MyService extends AbstractService {
     // Check the vehicle with such ID exists
     var id = args.getId();
     if (!vehicles.containsKey(id)) {
-      throw new ExecutionException(NO_VEHICLE_ERROR_CODE, "No vehicle with such id: " + id);
+      throw new ExecutionException(NO_VEHICLE_ERROR_CODE,
+          "No vehicle with such id: " + id);
     }
 
-    // Update the owner
+    // Update the vehicle entry
     // Get the current entry
     var vehicleEntry = vehicles.get(id);
     // Update the owner
