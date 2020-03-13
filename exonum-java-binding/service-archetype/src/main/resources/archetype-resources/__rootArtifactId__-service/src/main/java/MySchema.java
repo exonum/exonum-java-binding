@@ -19,6 +19,7 @@ package ${package};
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.exonum.binding.core.service.Schema;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Prefixed;
 
 /**

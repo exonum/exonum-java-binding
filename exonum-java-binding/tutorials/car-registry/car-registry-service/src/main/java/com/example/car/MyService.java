@@ -32,6 +32,9 @@ import io.vertx.ext.web.Router;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A vehicle registry service.
+ */
 public final class MyService extends AbstractService {
 
   public static final int ADD_VEHICLE_TX_ID = 0;
