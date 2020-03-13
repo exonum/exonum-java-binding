@@ -17,18 +17,16 @@
 package com.example.car;
 
 import com.example.car.messages.Transactions;
-import com.example.car.messages.Transactions.AddVehicle;
 import com.example.car.messages.VehicleOuterClass.Vehicle;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
 import com.exonum.binding.core.service.Configuration;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Node;
-import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.google.inject.Inject;
 import io.vertx.ext.web.Router;
 import java.util.List;
@@ -46,22 +44,37 @@ public final class MyService extends AbstractService {
     super(instanceSpec);
   }
 
-  // ci-block ci-createPublicApiHandlers {
+  // ci-block ci-initialize {
   @Override
-  public void createPublicApiHandlers(Node node, Router router) {
-    var apiController = new ApiController(this, node);
-    apiController.mount(router);
+  public void initialize(ExecutionContext context, Configuration configuration) {
+    var testVehicles =
+        List.of(vehicleArgs("V1", "Ford", "Focus", "Dave"),
+            vehicleArgs("V2", "DMC", "DeLorean", "Emmett Brown"),
+            vehicleArgs("V3", "Peugeot", "406", "Daniel Morales"),
+            vehicleArgs("V4", "McLaren", "P1", "Weeknd"));
+    for (var vehicle : testVehicles) {
+      addVehicle(vehicle, context);
+    }
+  }
+
+  private static Transactions.AddVehicle vehicleArgs(String id, String make, String model,
+      String owner) {
+    return Transactions.AddVehicle.newBuilder()
+        .setNewVehicle(
+            Vehicle.newBuilder()
+                .setId(id)
+                .setMake(make)
+                .setModel(model)
+                .setOwner(owner)
+                .build())
+        .build();
   }
   // }
 
   // ci-block ci-add-vehicle {
   @Transaction(ADD_VEHICLE_TX_ID)
-  public void addVehicle(Transactions.AddVehicle args, TransactionContext context) {
+  public void addVehicle(Transactions.AddVehicle args, ExecutionContext context) {
     var serviceData = context.getServiceData();
-    addVehicle(args, serviceData);
-  }
-
-  private void addVehicle(AddVehicle args, Prefixed serviceData) {
     var schema = new MySchema(serviceData);
     ProofMapIndexProxy<String, Vehicle> vehicles = schema.vehicles();
 
@@ -82,7 +95,7 @@ public final class MyService extends AbstractService {
 
   // ci-block ci-change-owner {
   @Transaction(CHANGE_OWNER_TX_ID)
-  public void changeOwner(Transactions.ChangeOwner args, TransactionContext context) {
+  public void changeOwner(Transactions.ChangeOwner args, ExecutionContext context) {
     var serviceData = context.getServiceData();
     var schema = new MySchema(serviceData);
     ProofMapIndexProxy<String, Vehicle> vehicles = schema.vehicles();
@@ -106,34 +119,6 @@ public final class MyService extends AbstractService {
   }
   // }
 
-  // ci-block ci-initialize {
-  @Override
-  public void initialize(BlockchainData blockchainData, Configuration configuration) {
-    var testVehicles =
-        List.of(vehicleArgs("V1", "Ford", "Focus", "Dave"),
-            vehicleArgs("V2", "DMC", "DeLorean", "Emmett Brown"),
-            vehicleArgs("V3", "Peugeot", "406", "Daniel Morales"),
-            vehicleArgs("V4", "McLaren", "P1", "Weeknd"));
-    var serviceData = blockchainData.getExecutingServiceData();
-    for (var vehicle : testVehicles) {
-       addVehicle(vehicle, serviceData);
-    }
-  }
-
-  private static Transactions.AddVehicle vehicleArgs(String id, String make, String model,
-      String owner) {
-    return Transactions.AddVehicle.newBuilder()
-        .setNewVehicle(
-            Vehicle.newBuilder()
-                .setId(id)
-                .setMake(make)
-                .setModel(model)
-                .setOwner(owner)
-                .build())
-        .build();
-  }
-  // }
-
   // ci-block ci-find-vehicle {
   /**
    * Returns a vehicle with the given id, if it exists; or {@code Optional.empty()}
@@ -143,6 +128,14 @@ public final class MyService extends AbstractService {
     var schema = new MySchema(blockchainData.getExecutingServiceData());
     var vehicles = schema.vehicles();
     return Optional.ofNullable(vehicles.get(id));
+  }
+  // }
+
+  // ci-block ci-createPublicApiHandlers {
+  @Override
+  public void createPublicApiHandlers(Node node, Router router) {
+    var apiController = new ApiController(this, node);
+    apiController.mount(router);
   }
   // }
 }

@@ -19,6 +19,8 @@ package com.exonum.binding.core.transaction;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.exonum.binding.core.service.ExecutionException;
+import com.exonum.binding.core.service.ExecutionPreconditions;
 import org.junit.jupiter.api.Test;
 
 class ExecutionPreconditionsTest {

@@ -49,10 +49,11 @@ import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.TemporaryDb;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.qaservice.Config.QaConfiguration;
 import com.exonum.binding.qaservice.Config.QaResumeArguments;
 import com.exonum.binding.test.Integration;
@@ -142,9 +143,14 @@ class QaServiceImplTest {
         Cleaner cleaner = new Cleaner()) {
       Fork fork = db.createFork(cleaner);
       BlockchainData blockchainData = BlockchainData.fromRawAccess(fork, QA_SERVICE_NAME);
+      ExecutionContext context = ExecutionContext.builder()
+          .serviceName(QA_SERVICE_NAME)
+          .serviceId(QA_SERVICE_ID)
+          .blockchainData(blockchainData)
+          .build();
 
       QaServiceImpl qaService = new QaServiceImpl(spec);
-      qaService.resume(blockchainData, arguments);
+      qaService.resume(context, arguments);
 
       QaSchema schema = new QaSchema(blockchainData);
       MapIndex<String, Long> counters = schema.counters();
@@ -160,12 +166,12 @@ class QaServiceImplTest {
         .setShouldThrowException(true)
         .build()
         .toByteArray();
-    BlockchainData fork = mock(BlockchainData.class);
+    ExecutionContext context = mock(ExecutionContext.class);
 
     QaServiceImpl qaService = new QaServiceImpl(spec);
 
     ExecutionException exception = assertThrows(ExecutionException.class,
-        () -> qaService.resume(fork, arguments));
+        () -> qaService.resume(context, arguments));
     assertThat(exception.getErrorCode()).isEqualTo(RESUME_SERVICE_ERROR.code);
   }
 

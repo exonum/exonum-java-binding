@@ -19,8 +19,8 @@ package com.exonum.binding.qaservice;
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.transaction.TransactionContext;
 
 /**
  * Helper class with utilities aiding in testing some transactions.
@@ -33,8 +33,8 @@ final class TransactionUtils {
   /**
    * Returns new context with default values for a given fork.
    */
-  static TransactionContext.Builder newContext(BlockchainData fork) {
-    return TransactionContext.builder()
+  static ExecutionContext.Builder newContext(BlockchainData fork) {
+    return ExecutionContext.builder()
         .blockchainData(fork)
         .txMessageHash(DEFAULT_HASH)
         .authorPk(DEFAULT_AUTHOR_KEY);

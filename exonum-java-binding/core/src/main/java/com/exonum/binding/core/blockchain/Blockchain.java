@@ -27,6 +27,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.proofs.BlockProof;
 import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.service.Configuration;
+import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
@@ -195,7 +196,7 @@ public final class Blockchain {
    *     logic, an index may remain uninitialized indefinitely. Therefore, if proofs for an
    *     empty index need to be created, it must be initialized early in the service lifecycle
    *     (e.g., in {@link
-   *     com.exonum.binding.core.service.Service#initialize(BlockchainData, Configuration)}.
+   *     com.exonum.binding.core.service.Service#initialize(ExecutionContext, Configuration)}.
    *     <!-- TODO: Simplify once initialization happens automatically: ECR-4121 -->
    */
   public IndexProof createIndexProof(String fullIndexName) {

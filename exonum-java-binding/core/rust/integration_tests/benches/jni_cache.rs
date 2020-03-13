@@ -18,6 +18,9 @@ extern crate java_bindings;
 extern crate lazy_static;
 extern crate test;
 
+use std::sync::Arc;
+use test::{black_box, Bencher};
+
 use integration_tests::vm::create_vm_for_benchmarks_with_classes;
 use java_bindings::{
     jni::{
@@ -28,10 +31,7 @@ use java_bindings::{
     Executor, JniResult,
 };
 
-use std::sync::Arc;
-use test::{black_box, Bencher};
-
-const EXECUTION_EXCEPTION_CLASS: &str = "com/exonum/binding/core/transaction/ExecutionException";
+const EXECUTION_EXCEPTION_CLASS: &str = "com/exonum/binding/core/service/ExecutionException";
 
 lazy_static! {
     pub static ref VM: Arc<JavaVM> = create_vm_for_benchmarks_with_classes();

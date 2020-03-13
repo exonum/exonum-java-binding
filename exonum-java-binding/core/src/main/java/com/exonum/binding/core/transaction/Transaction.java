@@ -18,6 +18,8 @@ package com.exonum.binding.core.transaction;
 
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.Blockchain;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Service;
 import com.exonum.messages.core.runtime.Errors.ErrorKind;
 import com.exonum.messages.core.runtime.Errors.ExecutionError;
@@ -38,7 +40,7 @@ import java.lang.annotation.Target;
  * <ol>
  *   <li>transaction arguments either as {@code byte[]} or as a protobuf message.
  *       Protobuf messages are deserialized using a {@code #parseFrom(byte[])} method
- *   <li>transaction execution context as {@link TransactionContext}. It allows to access
+ *   <li>transaction execution context as {@link ExecutionContext}. It allows to access
  *       the information about this transaction and modify the blockchain state
  *       through the included database access object.
  * </ol>

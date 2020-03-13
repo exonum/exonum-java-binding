@@ -17,9 +17,9 @@
 package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.serialization.Serializer;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Service;
-import com.exonum.binding.core.transaction.ExecutionException;
-import com.exonum.binding.core.transaction.TransactionContext;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.WrongMethodTypeException;
 
@@ -36,7 +36,7 @@ class TransactionMethod {
     this.argumentsSerializer = argumentsSerializer;
   }
 
-  void invoke(Service targetService, byte[] arguments, TransactionContext context) {
+  void invoke(Service targetService, byte[] arguments, ExecutionContext context) {
     Object argumentsObject = serializeArguments(arguments);
     try {
       methodHandle.invoke(targetService, argumentsObject, context);
