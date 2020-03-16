@@ -23,12 +23,13 @@ package com.exonum.client;
 final class ExonumUrls {
   private static final String EXPLORER_PATHS_PREFIX = "api/explorer/v1";
   private static final String SYS_PATHS_PREFIX = "api/system/v1";
+  private static final String SUPERVISOR_PATHS_PREFIX = "api/services/supervisor";
   static final String TRANSACTIONS = EXPLORER_PATHS_PREFIX + "/transactions";
   static final String BLOCK = EXPLORER_PATHS_PREFIX + "/block";
   static final String BLOCKS = EXPLORER_PATHS_PREFIX + "/blocks";
   static final String STATS = SYS_PATHS_PREFIX + "/stats";
   static final String HEALTH_CHECK = SYS_PATHS_PREFIX + "/healthcheck";
   static final String USER_AGENT = SYS_PATHS_PREFIX + "/user_agent";
-  static final String SERVICES = SYS_PATHS_PREFIX + "/services";
+  static final String SERVICES = SUPERVISOR_PATHS_PREFIX + "/services";
 
 }

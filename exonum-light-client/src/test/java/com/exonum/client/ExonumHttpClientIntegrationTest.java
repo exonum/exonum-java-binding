@@ -234,7 +234,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+    assertThat(recordedRequest, hasPath("api/services/supervisor/services"));
   }
 
   @Test
@@ -261,7 +261,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+    assertThat(recordedRequest, hasPath("api/services/supervisor/services"));
   }
 
   @Test
@@ -299,6 +299,6 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+    assertThat(recordedRequest, hasPath("api/services/supervisor/services"));
   }
 }
