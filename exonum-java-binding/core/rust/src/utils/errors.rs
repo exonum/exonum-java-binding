@@ -217,7 +217,7 @@ pub fn any_to_string(any: &Box<dyn Any + Send>) -> String {
     } else if let Some(s) = any.downcast_ref::<String>() {
         s.clone()
     } else if let Some(error) = any.downcast_ref::<Box<dyn Error + Send>>() {
-        error.description().to_string()
+        error.to_string()
     } else if let Some(error) = any.downcast_ref::<DatabaseError>() {
         error.to_string()
     } else {
