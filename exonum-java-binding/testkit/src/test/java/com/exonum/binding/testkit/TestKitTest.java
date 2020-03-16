@@ -211,7 +211,7 @@ class TestKitTest {
 
     Exception e = assertThrows(RuntimeException.class, testKitBuilder::build);
 
-    assertThat(e.getMessage()).contains("Cannot deploy an artifact");
+    assertThat(e.getMessage()).contains("Cannot deploy a built-in artifact");
   }
 
   // todo: invalidartifact — causing deploy errors (as ^) and causing instantiation errors (todo)
