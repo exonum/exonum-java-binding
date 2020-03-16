@@ -545,8 +545,9 @@ class TestKitTest {
         .sign(KEY_PAIR);
     Exception e = assertThrows(Exception.class,
         () -> testKit.createBlockWithTransactions(message));
+    String expectedMessage = String.format("Cannot dispatch transaction to unknown service with ID %s", unknownServiceId);
     assertThat(e)
-        .hasMessageContaining("Suitable runtime for the given service instance ID is not found");
+        .hasMessageContaining(expectedMessage);
   }
 
   @Test
