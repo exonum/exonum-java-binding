@@ -545,7 +545,9 @@ class TestKitTest {
         .sign(KEY_PAIR);
     Exception e = assertThrows(Exception.class,
         () -> testKit.createBlockWithTransactions(message));
-    String expectedMessage = String.format("Cannot dispatch transaction to unknown service with ID %s", unknownServiceId);
+    String expectedMessage =
+        String.format("Cannot dispatch transaction to unknown service with ID %s",
+                      unknownServiceId);
     assertThat(e)
         .hasMessageContaining(expectedMessage);
   }
