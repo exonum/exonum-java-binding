@@ -39,7 +39,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -49,7 +48,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 // Execute the tests sequentially, as each of them creates a Vertx instance with its
 // own thread pool, which drives the delays up.
 @Execution(ExecutionMode.SAME_THREAD)
-@Disabled
 class VertxServerIntegrationTest {
 
   private static final int ANY_PORT = 0;
