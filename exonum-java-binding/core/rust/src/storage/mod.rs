@@ -30,7 +30,7 @@ pub use self::temporarydb::*;
 pub use self::value_set_index::*;
 
 use exonum::merkledb::{Database, RocksDB};
-use exonum_cli::command::run::NodeRunConfig;
+use exonum_cli::command::NodeRunConfig;
 use std::sync::Arc;
 
 mod access;
@@ -56,7 +56,7 @@ pub(crate) type Key = Vec<u8>;
 pub(crate) type Value = Vec<u8>;
 
 /// Creates database.
-pub fn create_database(config: &NodeRunConfig) -> Result<Arc<dyn Database>, failure::Error> {
+pub fn create_database(config: &NodeRunConfig) -> Result<Arc<dyn Database>, anyhow::Error> {
     let database = Arc::new(RocksDB::open(
         &config.db_path,
         &config.node_config.private_config.database,

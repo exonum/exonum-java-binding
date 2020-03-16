@@ -15,20 +15,23 @@
  */
 
 use exonum_cli::command::{
-    finalize::Finalize,
-    generate_config::{GenerateConfig, PRIVATE_CONFIG_FILE_NAME, PUBLIC_CONFIG_FILE_NAME},
-    generate_template::GenerateTemplate,
-    run::Run as StandardRun,
+    Finalize,
+    GenerateConfig,
+    GenerateTemplate,
+    Run as StandardRun,
     ExonumCommand,
 };
 use exonum_supervisor::mode::Mode;
-use failure;
+use anyhow;
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
 use std::{path::PathBuf, str::FromStr};
 
 use crate::{concat_path, EjbCommand, EjbCommandResult, Run};
+
+pub const PUBLIC_CONFIG_FILE_NAME: &str = "pub.toml";
+pub const PRIVATE_CONFIG_FILE_NAME: &str = "sec.toml";
 
 /// EJB-specific `run-dev` command.
 ///
@@ -57,7 +60,7 @@ impl RunDev {
     /// Automatically generates node configuration and returns a path to node configuration file.
     ///
     /// Does not alter existing configuration files.
-    fn generate_node_configuration_if_needed(&self) -> Result<PathBuf, failure::Error> {
+    fn generate_node_configuration_if_needed(&self) -> Result<PathBuf, anyhow::Error> {
         let config_directory = concat_path(self.blockchain_path.clone(), "config");
         let node_config_path = concat_path(config_directory.clone(), "node.toml");
 
@@ -110,7 +113,7 @@ impl RunDev {
 }
 
 impl EjbCommand for RunDev {
-    fn execute(self) -> Result<EjbCommandResult, failure::Error> {
+    fn execute(self) -> Result<EjbCommandResult, anyhow::Error> {
         let db_path = concat_path(self.blockchain_path.clone(), "db");
         let node_config_path = self.generate_node_configuration_if_needed()?;
 

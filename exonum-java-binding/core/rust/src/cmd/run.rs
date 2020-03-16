@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-use exonum_cli::command::{run::Run as StandardRun, ExonumCommand, StandardResult};
-use failure;
+use anyhow;
+use exonum_cli::command::{ExonumCommand, Run as StandardRun, StandardResult};
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
@@ -67,7 +67,7 @@ pub struct Run {
 }
 
 impl EjbCommand for Run {
-    fn execute(self) -> Result<EjbCommandResult, failure::Error> {
+    fn execute(self) -> Result<EjbCommandResult, anyhow::Error> {
         if let StandardResult::Run(node_run_config) = self.standard.execute()? {
             let jvm_config = JvmConfig {
                 args_prepend: self.jvm_args_prepend,
@@ -91,7 +91,7 @@ impl EjbCommand for Run {
             };
 
             let config = Config {
-                run_config: node_run_config,
+                run_config: *node_run_config,
                 jvm_config,
                 runtime_config,
             };

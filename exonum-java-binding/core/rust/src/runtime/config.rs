@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use exonum_cli::command::run::NodeRunConfig;
+use exonum_cli::command::NodeRunConfig;
 use serde::{Deserialize, Serialize};
 
 use std::{fmt, path::PathBuf};

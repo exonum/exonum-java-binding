@@ -15,72 +15,70 @@
  */
 
 use exonum_explorer_service::ExplorerFactory;
-use exonum_node::{Node, NodeBuilder, NodeChannel, NodeConfig as CoreNodeConfig};
+use exonum_node::{Node, NodeBuilder, NodeConfig as CoreNodeConfig};
 use exonum_system_api::SystemApiPlugin;
 use java_bindings::{
-    create_database, create_java_vm, create_service_runtime,
-    exonum::blockchain::config::{GenesisConfigBuilder, InstanceInitParams},
-    exonum_btc_anchoring::BtcAnchoringService,
-    exonum_rust_runtime::{DefaultInstance, RustRuntime, RustRuntimeBuilder, ServiceFactory},
+    create_database,
+    create_java_vm,
+    create_service_runtime,
+    exonum::blockchain::config::GenesisConfigBuilder,
+    // exonum_btc_anchoring::BtcAnchoringService,
+    exonum_rust_runtime::RustRuntimeBuilder,
     exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor},
     exonum_time::TimeServiceFactory,
-    Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
+    Command,
+    Config,
+    DefaultConfigManager,
+    EjbCommand,
+    EjbCommandResult,
+    Executor,
+    InternalConfig,
     JavaRuntimeProxy,
 };
 
-use java_bindings::exonum::blockchain::config::GenesisConfig;
+use java_bindings::exonum_rust_runtime::spec::{Deploy, Spec};
 use std::sync::Arc;
 
-pub fn run_node(command: Command) -> Result<(), failure::Error> {
+pub async fn run_node(command: Command) -> Result<(), anyhow::Error> {
     if let EjbCommandResult::EjbRun(config) = command.execute()? {
         let node = create_node(config)?;
-        node.run()
+        node.run().await
     } else {
         Ok(())
     }
 }
 
-fn create_node(config: Config) -> Result<Node, failure::Error> {
+fn create_node(config: Config) -> Result<Node, anyhow::Error> {
     let database = create_database(&config.run_config)?;
     let node_config: CoreNodeConfig = config.run_config.node_config.clone().into();
     let node_keys = config.run_config.node_keys.clone();
-    let genesis_config = create_genesis_config(&config);
     let config_manager = DefaultConfigManager::new(config.run_config.node_config_path.clone());
 
-    let node = NodeBuilder::new(database, node_config, node_keys)
-        .with_genesis_config(genesis_config)
-        .with_runtime_fn(|api| create_rust_runtime(api))
-        .with_runtime(create_java_runtime(&config))
-        .with_config_manager(config_manager)
-        .with_plugin(SystemApiPlugin)
-        .build();
-    Ok(node)
-}
-
-fn create_genesis_config(config: &Config) -> GenesisConfig {
-    let supervisor_service = supervisor_service(&config);
+    let mut rust_runtime_builder = RustRuntimeBuilder::new();
     let consensus_config = config
         .run_config
         .node_config
         .public_config
         .consensus
         .clone();
-    GenesisConfigBuilder::with_consensus_config(consensus_config)
-        .with_artifact(Supervisor.artifact_id())
-        .with_instance(supervisor_service)
-        .with_artifact(ExplorerFactory.artifact_id())
-        .with_instance(ExplorerFactory.default_instance())
-        .with_artifact(BtcAnchoringService.artifact_id())
-        .build()
-}
+    let mut genesis_config_builder = GenesisConfigBuilder::with_consensus_config(consensus_config);
+    Spec::new(ExplorerFactory)
+        .with_default_instance()
+        .deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
+    let supervisor_service = supervisor_service(&config);
+    supervisor_service.deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
 
-fn create_rust_runtime(channel: &NodeChannel) -> RustRuntime {
-    RustRuntimeBuilder::new()
-        .with_factory(TimeServiceFactory::default())
-        .with_factory(Supervisor)
-        .with_factory(ExplorerFactory)
-        .with_factory(BtcAnchoringService)
-        .build(channel.endpoints_sender())
+    Spec::new(TimeServiceFactory::default())
+        .deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
+
+    let node = NodeBuilder::new(database, node_config, node_keys)
+        .with_genesis_config(genesis_config_builder.build())
+        .with_runtime_fn(|api| rust_runtime_builder.build(api.endpoints_sender()))
+        .with_runtime(create_java_runtime(&config))
+        .with_config_manager(config_manager)
+        .with_plugin(SystemApiPlugin)
+        .build();
+    Ok(node)
 }
 
 fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
@@ -93,7 +91,7 @@ fn create_java_runtime(config: &Config) -> JavaRuntimeProxy {
     create_service_runtime(executor, &config.runtime_config)
 }
 
-fn supervisor_service(config: &Config) -> InstanceInitParams {
+fn supervisor_service(config: &Config) -> impl Deploy {
     let mode = &config
         .run_config
         .node_config
@@ -103,5 +101,6 @@ fn supervisor_service(config: &Config) -> InstanceInitParams {
     match *mode {
         SupervisorMode::Simple => Supervisor::simple(),
         SupervisorMode::Decentralized => Supervisor::decentralized(),
+        _ => unreachable!(),
     }
 }
