@@ -41,7 +41,7 @@ final class FooSchema implements Schema {
    * <p>Such factory methods may be used in transactions and read requests
    * to access a collection of a certain type and name. Here,
    * a ProofMap with String keys and values is created with a full name
-   * "<service name>.test-map".
+   * {@code "<service name>.test-map"}.
    */
   ProofMapIndexProxy<String, String> testMap() {
     var address = IndexAddress.valueOf("test-map");
