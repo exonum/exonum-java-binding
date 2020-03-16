@@ -79,6 +79,7 @@ class ErrorTxTest {
     assertThat(error.getDescription()).contains(Integer.toString(errorCode));
   }
 
+  @Disabled
   @ParameterizedTest
   @CsvSource({
       "0, ''",
