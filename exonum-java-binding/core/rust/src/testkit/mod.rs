@@ -94,18 +94,18 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
 
             let testkit_services = testkit_initialization_data_from_proto(&env, services)?;
 
-            for (spec, instance) in testkit_services
-                .artifact_specs
-                .into_iter()
-                .zip(testkit_services.service_specs.into_iter())
-            {
-                let spec = ForeignSpec::new(spec.artifact)
-                    .with_deploy_spec(spec.payload)
-                    .with_instance(
-                        instance.instance_spec.id,
-                        instance.instance_spec.name,
-                        instance.constructor,
-                    );
+            for artifact in testkit_services.artifact_specs {
+                let mut spec = ForeignSpec::new(artifact.artifact.clone())
+                    .with_deploy_spec(artifact.payload.clone());
+                for instance in &testkit_services.service_specs {
+                    if artifact.artifact == instance.instance_spec.artifact {
+                        spec = spec.with_instance(
+                            instance.instance_spec.id,
+                            instance.instance_spec.name.clone(),
+                            instance.constructor.clone(),
+                        );
+                    }
+                }
                 builder = builder.with(spec);
             }
 
