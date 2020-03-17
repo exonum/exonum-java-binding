@@ -1678,8 +1678,7 @@ version = "0.10.0-SNAPSHOT"
 dependencies = [
  "exonum-derive",
  "exonum-testkit",
- "failure",
- "futures 0.1.29",
+ "futures 0.3.4",
  "java_bindings",
  "lazy_static",
  "rand",
