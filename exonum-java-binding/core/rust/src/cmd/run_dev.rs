@@ -15,23 +15,17 @@
  */
 
 use exonum_cli::command::{
-    Finalize,
-    GenerateConfig,
-    GenerateTemplate,
-    Run as StandardRun,
+    StandardResult,
+    RunDev as StandardRunDev,
     ExonumCommand,
 };
-use exonum_supervisor::mode::Mode;
 use anyhow;
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
-use std::{path::PathBuf, str::FromStr};
+use std::path::PathBuf;
 
-use crate::{concat_path, EjbCommand, EjbCommandResult, Run};
-
-pub const PUBLIC_CONFIG_FILE_NAME: &str = "pub.toml";
-pub const PRIVATE_CONFIG_FILE_NAME: &str = "sec.toml";
+use crate::{EjbCommand, EjbCommandResult, JvmConfig, get_path_to_default_log_config, RuntimeConfig, Config};
 
 /// EJB-specific `run-dev` command.
 ///
@@ -40,6 +34,9 @@ pub const PRIVATE_CONFIG_FILE_NAME: &str = "sec.toml";
 #[derive(Debug, StructOpt, Serialize, Deserialize)]
 #[structopt(rename_all = "kebab-case")]
 pub struct RunDev {
+    #[structopt(flatten)]
+    #[serde(flatten)]
+    standard: StandardRunDev,
     /// Path to the directory containing Java service artifacts.
     #[structopt(long)]
     artifacts_path: PathBuf,
@@ -56,88 +53,35 @@ pub struct RunDev {
     ejb_log_config_path: Option<PathBuf>,
 }
 
-impl RunDev {
-    /// Automatically generates node configuration and returns a path to node configuration file.
-    ///
-    /// Does not alter existing configuration files.
-    fn generate_node_configuration_if_needed(&self) -> Result<PathBuf, anyhow::Error> {
-        let config_directory = concat_path(self.blockchain_path.clone(), "config");
-        let node_config_path = concat_path(config_directory.clone(), "node.toml");
-
-        // Configuration files exist, skip generation.
-        if config_directory.exists() {
-            return Ok(node_config_path);
-        }
-
-        let validators_count = 1;
-        let peer_address = "127.0.0.1:6200".parse().unwrap();
-        let public_api_address = "127.0.0.1:8080".parse().unwrap();
-        let private_api_address = "127.0.0.1:8081".parse().unwrap();
-        let public_allow_origin = "http://127.0.0.1:8080, http://localhost:8080".into();
-        let private_allow_origin = "http://127.0.0.1:8081, http://localhost:8081".into();
-        let common_config_path = concat_path(config_directory.clone(), "template.toml");
-        let public_config_path = concat_path(config_directory.clone(), PUBLIC_CONFIG_FILE_NAME);
-        let private_config_path = concat_path(config_directory.clone(), PRIVATE_CONFIG_FILE_NAME);
-
-        let generate_template = GenerateTemplate {
-            common_config: common_config_path.clone(),
-            validators_count,
-            supervisor_mode: Mode::Simple,
-        };
-        generate_template.execute()?;
-
-        let generate_config = GenerateConfig {
-            common_config: common_config_path,
-            output_dir: config_directory,
-            peer_address,
-            listen_address: None,
-            no_password: true,
-            master_key_pass: None,
-            master_key_path: None,
-        };
-        generate_config.execute()?;
-
-        let finalize = Finalize {
-            private_config_path,
-            output_config_path: node_config_path.clone(),
-            public_configs: vec![public_config_path],
-            public_api_address: Some(public_api_address),
-            private_api_address: Some(private_api_address),
-            public_allow_origin: Some(public_allow_origin),
-            private_allow_origin: Some(private_allow_origin),
-        };
-        finalize.execute()?;
-
-        Ok(node_config_path)
-    }
-}
-
 impl EjbCommand for RunDev {
     fn execute(self) -> Result<EjbCommandResult, anyhow::Error> {
-        let db_path = concat_path(self.blockchain_path.clone(), "db");
-        let node_config_path = self.generate_node_configuration_if_needed()?;
+        if let StandardResult::Run(node_run_config) = self.standard.execute()? {
+            let jvm_config = JvmConfig {
+                args_prepend: Vec::new(),
+                args_append: Vec::new(),
+                jvm_debug_socket: None,
+            };
 
-        let ejb_port = 6400;
+            let log_config_path = self
+                .ejb_log_config_path
+                .unwrap_or_else(get_path_to_default_log_config);
 
-        let standard_run = StandardRun {
-            node_config: node_config_path,
-            db_path,
-            public_api_address: None,
-            private_api_address: None,
-            master_key_pass: Some(FromStr::from_str("pass:").unwrap()),
-        };
+            let runtime_config = RuntimeConfig {
+                artifacts_path: self.artifacts_path,
+                log_config_path,
+                port: 6400,
+                override_system_lib_path: None,
+            };
 
-        let run = Run {
-            standard: standard_run,
-            ejb_port,
-            artifacts_path: self.artifacts_path,
-            ejb_log_config_path: self.ejb_log_config_path,
-            ejb_override_java_library_path: None,
-            jvm_debug: None,
-            jvm_args_prepend: vec![],
-            jvm_args_append: vec![],
-        };
+            let config = Config {
+                run_config: *node_run_config,
+                jvm_config,
+                runtime_config,
+            };
 
-        run.execute()
+            Ok(EjbCommandResult::EjbRun(config))
+        } else {
+            panic!()
+        }
     }
 }

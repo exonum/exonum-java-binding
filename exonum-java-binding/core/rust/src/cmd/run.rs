@@ -105,7 +105,7 @@ impl EjbCommand for Run {
 
 /// Returns full path to the default log configuration file assuming the `exonum-java` app is
 /// packaged/installed.
-fn get_path_to_default_log_config() -> PathBuf {
+pub(crate) fn get_path_to_default_log_config() -> PathBuf {
     let mut path = executable_directory();
     path.push("log4j-fallback.xml");
     path

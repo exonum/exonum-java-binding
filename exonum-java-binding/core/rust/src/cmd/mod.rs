@@ -25,10 +25,10 @@ use std::path::PathBuf;
 use super::Config;
 
 mod run;
-// mod run_dev;
+mod run_dev;
 
 pub use self::run::*;
-// pub use self::run_dev::*;
+pub use self::run_dev::*;
 pub use exonum_cli::DefaultConfigManager;
 
 /// Exonum Java Bindings Application.
@@ -53,12 +53,12 @@ pub enum Command {
     /// Run the node with provided node config and Java runtime enabled.
     #[structopt(name = "run")]
     Run(Run),
-    // /// Run the node in development mode (generate configuration and db files automatically).
-    // ///
-    // /// Runs one node with public API address 127.0.0.1:8080, private API address 127.0.0.1:8081,
-    // /// EJB port 6400.
-    // #[structopt(name = "run-dev")]
-    // RunDev(RunDev),
+    /// Run the node in development mode (generate configuration and db files automatically).
+    ///
+    /// Runs one node with public API address 127.0.0.1:8080, private API address 127.0.0.1:8081,
+    /// EJB port 6400.
+    #[structopt(name = "run-dev")]
+    RunDev(RunDev),
     /// Perform different maintenance actions.
     #[structopt(name = "maintenance")]
     Maintenance(Maintenance),
@@ -79,7 +79,7 @@ impl EjbCommand for Command {
             Command::GenerateConfig(c) => c.execute().map(Into::into),
             Command::Finalize(c) => c.execute().map(Into::into),
             Command::Run(c) => c.execute(),
-            // Command::RunDev(c) => c.execute(),
+            Command::RunDev(c) => c.execute(),
             Command::Maintenance(c) => c.execute().map(Into::into),
         }
     }
