@@ -37,7 +37,6 @@ import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.messages.core.Blockchain.CallInBlock;
 import com.exonum.messages.core.Blockchain.Config;
 import com.exonum.messages.core.Proofs;
-import com.exonum.messages.core.runtime.Errors.ExecutionError;
 import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Optional;
@@ -315,7 +314,7 @@ public final class Blockchain {
    *     the {@linkplain #getHeight() blockchain height}
    * @see CallInBlocks
    */
-  public ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
+  public CallRecords getCallErrors(long blockHeight) {
     return schema.getCallErrors(blockHeight);
   }
 
@@ -332,16 +331,12 @@ public final class Blockchain {
 
   private ExecutionStatus getExecutionStatus(TransactionLocation txLocation) {
     long height = txLocation.getHeight();
-    ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = getCallErrors(height);
+    CallRecords callRecords = getCallErrors(height);
     CallInBlock txCall = CallInBlocks.transaction(txLocation.getIndexInBlock());
-    if (callErrors.containsKey(txCall)) {
-      ExecutionError txError = callErrors.get(txCall);
-      return ExecutionStatus.newBuilder()
-          .setError(txError)
-          .build();
-    }
-    // No error: tx completed successfully
-    return ExecutionStatuses.SUCCESS;
+    Optional<ExecutionStatus> executionStatus =
+        callRecords.get(txCall).map(txError ->
+            ExecutionStatus.newBuilder().setError(txError).build());
+    return executionStatus.orElse(ExecutionStatuses.SUCCESS);
   }
 
   /**
