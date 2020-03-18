@@ -3446,7 +3446,7 @@ dependencies = [
 [[package]]
 name = "timestamping"
 version = "0.3.0"
-source = "git+https://github.com/exonum/timestamping?rev=073cf11edc#073cf11edc1065c415945bb0f3768fa67646a368"
+source = "git+ssh://git@github.com/exonum/timestamping?rev=073cf11edc#073cf11edc1065c415945bb0f3768fa67646a368"
 dependencies = [
  "chrono",
  "exonum",
