@@ -443,4 +443,11 @@ public final class Blockchain {
   public KeySetIndexProxy<HashCode> getTransactionPool() {
     return schema.getTransactionPool();
   }
+
+  /**
+   * Returns the total number of transactions committed to the blockchain.
+   */
+  public long getNumTransactions() {
+    return schema.getNumTransactions().orElse(0L);
+  }
 }

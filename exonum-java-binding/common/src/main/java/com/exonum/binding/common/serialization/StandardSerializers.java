@@ -43,7 +43,8 @@ public final class StandardSerializers {
   }
 
   /**
-   * Returns a serializer of integers as four bytes in little-endian byte order.
+   * Returns a serializer of integers as four bytes in {@linkplain java.nio.ByteOrder#LITTLE_ENDIAN
+   * little-endian byte order}.
    * More efficient than {@link StandardSerializers#uint32()}
    * if values are often greater than {@code 2^28}.
    */
@@ -71,7 +72,8 @@ public final class StandardSerializers {
   }
 
   /**
-   * Returns a serializer of longs as eight bytes in little-endian byte order.
+   * Returns a serializer of longs as eight bytes in {@linkplain java.nio.ByteOrder#LITTLE_ENDIAN
+   * little-endian byte order}.
    * More efficient than {@link StandardSerializers#uint32()}
    * if values are often greater than {@code 2^56}.
    */
@@ -98,14 +100,16 @@ public final class StandardSerializers {
   }
 
   /**
-   * Returns a serializer of floats in little-endian byte order.
+   * Returns a serializer of floats in {@linkplain java.nio.ByteOrder#LITTLE_ENDIAN
+   * little-endian byte order}.
    */
   public static Serializer<Float> floats() {
     return FloatSerializer.INSTANCE;
   }
 
   /**
-   * Returns a serializer of doubles in little-endian byte order.
+   * Returns a serializer of doubles in {@linkplain java.nio.ByteOrder#LITTLE_ENDIAN
+   * little-endian byte order}.
    */
   public static Serializer<Double> doubles() {
     return DoubleSerializer.INSTANCE;

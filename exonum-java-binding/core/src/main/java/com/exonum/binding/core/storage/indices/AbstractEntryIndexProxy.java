@@ -65,6 +65,11 @@ abstract class AbstractEntryIndexProxy<T> extends AbstractIndexProxy implements 
   }
 
   @Override
+  public T orElse(T valueIfAbsent) {
+    return isPresent() ? get() : valueIfAbsent;
+  }
+
+  @Override
   public void remove() {
     notifyModified();
     nativeRemove(getNativeHandle());

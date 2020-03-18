@@ -58,7 +58,8 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
      - `ProofListIndexProxy.getProof`, `ProofListIndexProxy.getRangeProof` and
      `ListProof`;
      - [`Blockchain`][blockchain-proofs].
-- `ProofEntryIndexProxy` collection.
+- `ProofEntryIndex` collection and `EntryIndex` interface.
+     - `EntryIndex#orElse` method.
 - Execution preconditions utility methods,
   see `com.exonum.binding.core.service.ExecutionPreconditions`. (#1351)
 - `supervisor-mode` CLI parameter added for `generate-template` command. It
@@ -77,6 +78,8 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
 - `Prefixed` and `ReadonlyFork` database Accesses. (#1382, #1385)
 - `Service#beforeTranactions`.
 - `KeyPair#newInstance(PrivateKey, PublicKey)`
+- `Blockchain#getNumTransactions`, returning the total number of committed
+  to the blockchain transactions.
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 

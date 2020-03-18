@@ -29,6 +29,7 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
 import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.EntryIndex;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
@@ -168,6 +169,11 @@ final class CoreSchema {
     return configEntry.get();
   }
 
+  EntryIndex<Long> getNumTransactions() {
+    var serializer = StandardSerializers.fixed64();
+    return dbAccess.getEntry(CoreIndex.NUM_TRANSACTIONS, serializer);
+  }
+
   /**
    * Checks that a given block height corresponds to an existing block in the blockchain
    * (i.e., {@code 0 <= blockHeight <= blockchainHeight}).
@@ -207,5 +213,7 @@ final class CoreSchema {
         .valueOf(PREFIX + "transactions_pool");
     private static final IndexAddress CONSENSUS_CONFIG = IndexAddress
         .valueOf(PREFIX + "consensus_config");
+    private static final IndexAddress NUM_TRANSACTIONS = IndexAddress
+        .valueOf(PREFIX + "transactions_len");
   }
 }

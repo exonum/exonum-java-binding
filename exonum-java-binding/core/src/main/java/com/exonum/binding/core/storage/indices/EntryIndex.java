@@ -61,12 +61,21 @@ public interface EntryIndex<T> extends StorageIndex {
    * If value is present in the entry, returns it, otherwise,
    * throws {@link NoSuchElementException}.
    *
-   * @return a non-null value
    * @throws NoSuchElementException if a value is not present in the Entry
    * @throws IllegalStateException if the index is invalid
    * @throws IllegalArgumentException if the supplied serializer cannot decode the value
    */
   T get();
+
+  /**
+   * Returns the value of this entry, if it is present; otherwise,
+   * the given value.
+   *
+   * @param valueIfAbsent a value to return if there is none in this entry
+   * @throws IllegalStateException if the index is invalid
+   * @throws IllegalArgumentException if the supplied serializer cannot decode the value
+   */
+  T orElse(T valueIfAbsent);
 
   /**
    * Removes a value from this entry.
