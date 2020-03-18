@@ -44,7 +44,6 @@ import com.exonum.binding.testkit.TestKitExtension;
 import com.exonum.messages.core.runtime.Errors.ErrorKind;
 import com.exonum.messages.core.runtime.Errors.ExecutionError;
 import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -55,7 +54,6 @@ class ThrowingTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       QaArtifactInfo.createQaServiceTestkit());
 
-  @Disabled
   @Test
   void throwingTxMustHaveUnexpectedErrorCode(TestKit testKit) {
     long seed = 0L;
