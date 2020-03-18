@@ -26,7 +26,6 @@ import com.exonum.client.request.BlockTimeOption;
 import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksRange;
-import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import java.net.MalformedURLException;
@@ -54,28 +53,6 @@ public interface ExonumClient {
    *        (e.g., in case of connectivity problems)
    */
   HashCode submitTransaction(TransactionMessage tx);
-
-  /**
-   * Returns a number of unconfirmed transactions which are currently located in
-   * the unconfirmed transactions pool and are waiting for acceptance to a block.
-   * @throws RuntimeException if the client is unable to complete a request
-   *        (e.g., in case of connectivity problems)
-   */
-  int getUnconfirmedTransactionsCount();
-
-  /**
-   * Returns the node health check information.
-   * @throws RuntimeException if the client is unable to complete a request
-   *        (e.g., in case of connectivity problems)
-   */
-  HealthCheckInfo healthCheck();
-
-  /**
-   * Returns string containing information about Exonum, Rust and OS version.
-   * @throws RuntimeException if the client is unable to complete a request
-   *        (e.g., in case of connectivity problems)
-   */
-  String getUserAgentInfo();
 
   /**
    * Returns the information about the transaction; or {@code Optional.empty()}

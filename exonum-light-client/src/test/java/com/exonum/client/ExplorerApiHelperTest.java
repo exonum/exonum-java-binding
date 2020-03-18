@@ -62,11 +62,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class ExplorerApiHelperTest {
 
-  private static TransactionMessage TRANSACTION_MESSAGE = createTransactionMessage();
-  private static long BLOCK_HEIGHT = 1L;
-  private static int INDEX_IN_BLOCK = 0;
+  private static final TransactionMessage TRANSACTION_MESSAGE = createTransactionMessage();
+  private static final long BLOCK_HEIGHT = 1L;
+  private static final int INDEX_IN_BLOCK = 0;
 
-  private static String TEMPLATE_TRANSACTION_MESSAGE_JSON = "{\n"
+  private static final String TEMPLATE_TRANSACTION_MESSAGE_JSON = "{\n"
       + "    'type': 'committed',\n"
       + "    'message': '" + toHex(TRANSACTION_MESSAGE) + "',\n"
       + "    'location': {\n"
