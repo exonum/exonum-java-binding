@@ -21,11 +21,8 @@ import static com.exonum.client.ExonumApi.MAX_BLOCKS_PER_REQUEST;
 import static com.exonum.client.ExonumIterables.indexOf;
 import static com.exonum.client.ExonumUrls.BLOCK;
 import static com.exonum.client.ExonumUrls.BLOCKS;
-import static com.exonum.client.ExonumUrls.HEALTH_CHECK;
 import static com.exonum.client.ExonumUrls.SERVICES;
-import static com.exonum.client.ExonumUrls.STATS;
 import static com.exonum.client.ExonumUrls.TRANSACTIONS;
-import static com.exonum.client.ExonumUrls.USER_AGENT;
 import static com.exonum.client.HttpUrlHelper.getFullUrl;
 import static com.exonum.client.request.BlockFilteringOption.INCLUDE_EMPTY;
 import static com.exonum.client.request.BlockFilteringOption.SKIP_EMPTY;
@@ -46,9 +43,7 @@ import com.exonum.client.response.Block;
 import com.exonum.client.response.BlockResponse;
 import com.exonum.client.response.BlocksRange;
 import com.exonum.client.response.BlocksResponse;
-import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.ServiceInstanceInfo;
-import com.exonum.client.response.SystemStatistics;
 import com.exonum.client.response.TransactionResponse;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -92,32 +87,6 @@ class ExonumHttpClient implements ExonumClient {
         ExplorerApiHelper.createSubmitTxBody(transactionMessage));
 
     return blockingExecuteAndParse(request, ExplorerApiHelper::parseSubmitTxResponse);
-  }
-
-  @Override
-  public int getUnconfirmedTransactionsCount() {
-    SystemStatistics systemStatistics = getSystemStats();
-    return systemStatistics.getNumUnconfirmedTransactions();
-  }
-
-  // todo: [ECR-3601] Replace the ^ with this one
-  private SystemStatistics getSystemStats() {
-    Request request = get(url(STATS));
-    return blockingExecuteAndParse(request, SystemApiHelper::parseStatsJson);
-  }
-
-  @Override
-  public HealthCheckInfo healthCheck() {
-    Request request = get(url(HEALTH_CHECK));
-
-    return blockingExecuteAndParse(request, SystemApiHelper::parseHealthCheckJson);
-  }
-
-  @Override
-  public String getUserAgentInfo() {
-    Request request = get(url(USER_AGENT));
-
-    return blockingExecutePlainText(request);
   }
 
   @Override
