@@ -11,6 +11,7 @@ configure a network of nodes and run your services in it.
 For more information see the relevant documentation on the tool:
   - [User Guide](https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/)
   - [Javadocs](https://exonum.com/doc/api/java-binding/0.9.0-rc2/index.html)
+  - [Java Service Development Tutorial](https://exonum.com/doc/version/1.0/get-started/first-java-service/)
   - [Cryptocurrency Example Service](cryptocurrency-demo)
 
 ## License
