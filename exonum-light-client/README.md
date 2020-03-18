@@ -145,6 +145,11 @@ To retrieve the list of all started service instances:
 List<ServiceInfo> response = exonumClient.getServiceInfoList();
 ```
 
+### Example Client Application
+
+[The Vehicle Registry Service](../exonum-java-binding/tutorials/car-registry) 
+includes a Java client application based on this library.
+
 ## How to Build
 To build the client locally:
 
