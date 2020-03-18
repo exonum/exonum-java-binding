@@ -102,6 +102,25 @@ abstract class BaseEntryIndexProxyIntegrationTest<IndexT extends EntryIndex<Stri
   }
 
   @Test
+  void orElseNotPresent() {
+    runTestWithView(database::createSnapshot, e -> {
+      String expected = "Value if not present";
+      String actual = e.orElse(expected);
+      assertThat(actual, equalTo(expected));
+    });
+  }
+
+  @Test
+  void orElsePresent() {
+    runTestWithView(database::createFork, e -> {
+      e.set(V1);
+      String valueIfNotPresent = "Value if not present";
+      String actual = e.orElse(valueIfNotPresent);
+      assertThat(actual, equalTo(V1));
+    });
+  }
+
+  @Test
   void removeIfNoValue() {
     runTestWithView(database::createFork, (e) -> {
       assertFalse(e.isPresent());
