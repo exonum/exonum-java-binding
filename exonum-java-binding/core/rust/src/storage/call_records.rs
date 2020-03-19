@@ -8,13 +8,13 @@ use jni::{
 
 use std::panic;
 
+use crate::utils::proto_to_java_bytes;
 use crate::{
     handle::{self, Handle},
     utils,
 };
-use exonum::blockchain::{Schema, CallInBlock};
+use exonum::blockchain::{CallInBlock, Schema};
 use exonum::helpers::Height;
-use crate::utils::proto_to_java_bytes;
 
 type CallRecords = exonum::blockchain::CallRecords<GenericRawAccess<'static>>;
 
@@ -30,7 +30,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_CallRecords_nativ
         let access = handle::cast_handle::<ErasedAccess<'static>>(base_access_handle);
         let schema = match access {
             GenericAccess::Raw(raw) => Schema::new(raw.clone()),
-            _ => panic!()
+            _ => panic!(),
         };
         let call_records: CallRecords = schema.call_records(Height(block_height as u64)).unwrap();
         Ok(handle::to_handle(call_records))
@@ -67,7 +67,7 @@ pub extern "system" fn Java_com_exonum_binding_core_blockchain_CallRecords_nativ
             Err(execution_error) => {
                 let serialized_error = proto_to_java_bytes(&env, &execution_error).unwrap();
                 Ok(serialized_error)
-            },
+            }
         }
     });
 

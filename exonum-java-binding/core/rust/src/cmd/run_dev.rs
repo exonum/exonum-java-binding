@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-use exonum_cli::command::{
-    StandardResult,
-    RunDev as StandardRunDev,
-    ExonumCommand,
-};
 use anyhow;
+use exonum_cli::command::{ExonumCommand, RunDev as StandardRunDev, StandardResult};
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
 use std::path::PathBuf;
 
-use crate::{EjbCommand, EjbCommandResult, JvmConfig, get_path_to_default_log_config, RuntimeConfig, Config};
+use crate::{
+    get_path_to_default_log_config, Config, EjbCommand, EjbCommandResult, JvmConfig, RuntimeConfig,
+};
 
 /// EJB-specific `run-dev` command.
 ///
