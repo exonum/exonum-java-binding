@@ -61,7 +61,13 @@ const TIME_PROVIDER_FIELD_TYPE: &str = "Lcom/exonum/binding/testkit/TimeProvider
 #[derive(BinaryValue, ProtobufConvert)]
 #[protobuf_convert(source = "proto::TestKitServiceInstances")]
 struct TestKitServiceInstances {
-    artifact_specs: Vec<ArtifactSpec>,
+    services: Vec<TestKitService>,
+}
+
+#[derive(BinaryValue, ProtobufConvert)]
+#[protobuf_convert(source = "proto::TestKitService")]
+struct TestKitService {
+    artifact_spec: ArtifactSpec,
     service_specs: Vec<InstanceInitParams>,
 }
 
@@ -94,18 +100,18 @@ pub extern "system" fn Java_com_exonum_binding_testkit_TestKit_nativeCreateTestK
 
             let testkit_services = testkit_initialization_data_from_proto(&env, services)?;
 
-            for artifact in testkit_services.artifact_specs {
-                let mut spec = ForeignSpec::new(artifact.artifact.clone())
-                    .with_deploy_spec(artifact.payload.clone());
-                for instance in &testkit_services.service_specs {
-                    if artifact.artifact == instance.instance_spec.artifact {
-                        spec = spec.with_instance(
-                            instance.instance_spec.id,
-                            instance.instance_spec.name.clone(),
-                            instance.constructor.clone(),
-                        );
-                    }
+            for service in testkit_services.services {
+                let mut spec = ForeignSpec::new(service.artifact_spec.artifact)
+                    .with_deploy_spec(service.artifact_spec.payload);
+
+                for instance in service.service_specs {
+                    spec = spec.with_instance(
+                        instance.instance_spec.id,
+                        instance.instance_spec.name,
+                        instance.constructor,
+                    );
                 }
+
                 builder = builder.with(spec);
             }
 
