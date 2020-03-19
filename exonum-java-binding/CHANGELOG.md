@@ -80,6 +80,7 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
 - `KeyPair#newInstance(PrivateKey, PublicKey)`
 - `Blockchain#getNumTransactions`, returning the total number of committed
   to the blockchain transactions.
+- `Blockchain#getNextHeight`, returning the height of the next committed block.
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 
