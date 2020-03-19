@@ -140,6 +140,13 @@ class BlockchainIntegrationTest {
     }
 
     @Test
+    void getNextHeight() {
+      testKitTest(blockchain -> {
+        assertThat(blockchain.getNextHeight()).isEqualTo(1 + GENESIS_BLOCK_HEIGHT);
+      });
+    }
+
+    @Test
     void getBlocks() {
       testKitTest(blockchain -> {
         Map<HashCode, Block> blocks = toMap(blockchain.getBlocks());
@@ -265,6 +272,14 @@ class BlockchainIntegrationTest {
       testKitTest((blockchain) -> {
         long expectedHeight = 1L;
         assertThat(blockchain.getHeight()).isEqualTo(expectedHeight);
+      });
+    }
+
+    @Test
+    void getNextHeight() {
+      testKitTest((blockchain) -> {
+        long expectedHeight = 2L;
+        assertThat(blockchain.getNextHeight()).isEqualTo(expectedHeight);
       });
     }
 
