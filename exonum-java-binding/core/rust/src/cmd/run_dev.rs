@@ -38,14 +38,6 @@ pub struct RunDev {
     /// Path to the directory containing Java service artifacts.
     #[structopt(long)]
     artifacts_path: PathBuf,
-    /// Path to a directory for blockchain database and configuration files.
-    ///
-    /// Database is located in <blockchain_path>/db directory, node configuration files
-    /// are located in <blockchain_path>/config directory. Existing files and directories are
-    /// reused. To generate new node configuration and start a new blockchain, the user must
-    /// manually delete existing <blockchain_path> directory or specify a new one.
-    #[structopt(long)]
-    blockchain_path: PathBuf,
     /// Path to log4j configuration file.
     #[structopt(long)]
     ejb_log_config_path: Option<PathBuf>,
