@@ -17,6 +17,7 @@
 package com.exonum.binding.core.blockchain;
 
 import static com.exonum.binding.common.serialization.StandardSerializers.hash;
+import static com.exonum.binding.common.serialization.StandardSerializers.protobuf;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -27,7 +28,6 @@ import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
-import com.exonum.binding.core.storage.database.AbstractAccess;
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
@@ -35,7 +35,10 @@ import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
+import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
+import com.exonum.messages.core.Blockchain.CallInBlock;
 import com.exonum.messages.core.Blockchain.Config;
+import com.exonum.messages.core.runtime.Errors.ExecutionError;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -54,6 +57,10 @@ final class CoreSchema {
   private static final Serializer<Block> BLOCK_SERIALIZER = BlockSerializer.INSTANCE;
   private static final Serializer<TransactionLocation> TRANSACTION_LOCATION_SERIALIZER =
       TransactionLocationSerializer.INSTANCE;
+  private static final Serializer<ExecutionError> EXECUTION_ERROR_SERIALIZER =
+      protobuf(ExecutionError.class);
+  private static final Serializer<CallInBlock> CALL_IN_BLOCK_SERIALIZER =
+      protobuf(CallInBlock.class);
   private static final Serializer<TransactionMessage> TRANSACTION_MESSAGE_SERIALIZER =
       StandardSerializers.transactionMessage();
   private static final Serializer<Config> CONSENSUS_CONFIG_SERIALIZER =
@@ -121,9 +128,11 @@ final class CoreSchema {
    * Returns execution errors that occurred in the given block indexed by calls in that block.
    * @param blockHeight the height of the block
    */
-  CallRecords getCallErrors(long blockHeight) {
+  ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
     checkBlockHeight(blockHeight);
-    return CallRecords.fromRawAccess((AbstractAccess) dbAccess, blockHeight);
+    byte[] idInGroup = toCoreStorageKey(blockHeight);
+    IndexAddress address = IndexAddress.valueOf(CoreIndex.CALL_ERRORS, idInGroup);
+    return dbAccess.getProofMap(address, CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_SERIALIZER);
   }
 
   /**

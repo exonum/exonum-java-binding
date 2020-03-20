@@ -36,7 +36,6 @@ use std::sync::Arc;
 mod access;
 mod blockchain;
 mod blockchain_data;
-mod call_records;
 mod entry;
 mod fork;
 mod key_set_index;
