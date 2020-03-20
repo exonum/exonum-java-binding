@@ -39,6 +39,7 @@ import com.exonum.messages.core.runtime.Errors.ExecutionError;
 import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,6 +54,7 @@ class CreateCounterTxTest {
   );
 
 
+  @Disabled
   @ParameterizedTest
   @ValueSource(strings = {"", " ", "  ", "\n", "\t"})
   void executeNewCounterRejectsEmptyName(String name, TestKit testKit) {
