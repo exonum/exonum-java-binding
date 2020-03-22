@@ -18,7 +18,7 @@
   <properties>
     <ejb-core.nativeLibPath>${project.parent.basedir}/core/rust/target/debug
     </ejb-core.nativeLibPath>
-    <junit-platform-testkit.version>1.6.0</junit-platform-testkit.version>
+    <junit-platform-testkit.version>1.6.1</junit-platform-testkit.version>
   </properties>
 
   <dependencies>
