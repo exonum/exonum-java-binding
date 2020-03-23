@@ -43,3 +43,17 @@ rpath = true
 
 [profile.release]
 rpath = true
+
+[patch.crates-io]
+exonum = { git = "https://github.com/exonum/exonum", rev = "f3d38e40", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
+exonum-cli = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-derive = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-proto = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-rust-runtime = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-supervisor = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-testkit = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-time = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-build = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-explorer-service = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-node = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
+exonum-system-api = { git = "https://github.com/exonum/exonum", rev = "f3d38e40" }
