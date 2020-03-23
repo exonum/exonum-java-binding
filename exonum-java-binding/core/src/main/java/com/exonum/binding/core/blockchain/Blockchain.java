@@ -230,10 +230,21 @@ public final class Blockchain {
    * <p>For example, the "genesis" block has height {@code h = 0}. The latest committed block
    * has height {@code h = getBlockHashes().size() - 1}.
    *
-   * @throws RuntimeException if the "genesis block" was not created
+   * @throws RuntimeException if the "genesis block" was not created yet;
+   *     consider using {@link #getNextHeight()} in service methods that might be invoked
+   *     before the genesis block commit
    */
   public long getHeight() {
     return schema.getHeight();
+  }
+
+  /**
+   * Returns the blockchain height of the <em>next</em> block to be committed.
+   *
+   * @see #getHeight()
+   */
+  public long getNextHeight() {
+    return getBlockHashes().size();
   }
 
   /**
@@ -442,5 +453,12 @@ public final class Blockchain {
    */
   public KeySetIndexProxy<HashCode> getTransactionPool() {
     return schema.getTransactionPool();
+  }
+
+  /**
+   * Returns the total number of transactions committed to the blockchain.
+   */
+  public long getNumTransactions() {
+    return schema.getNumTransactions().orElse(0L);
   }
 }

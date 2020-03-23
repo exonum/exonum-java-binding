@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package example.guide;
+
+option java_package = "com.exonum.binding.example.guide";
+
+message PutEntryArgs {
+  string key = 1;
+  string value = 2;
+}

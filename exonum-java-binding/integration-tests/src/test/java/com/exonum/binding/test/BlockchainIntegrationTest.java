@@ -77,6 +77,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -139,6 +140,13 @@ class BlockchainIntegrationTest {
     }
 
     @Test
+    void getNextHeight() {
+      testKitTest(blockchain -> {
+        assertThat(blockchain.getNextHeight()).isEqualTo(1 + GENESIS_BLOCK_HEIGHT);
+      });
+    }
+
+    @Test
     void getBlocks() {
       testKitTest(blockchain -> {
         Map<HashCode, Block> blocks = toMap(blockchain.getBlocks());
@@ -162,6 +170,14 @@ class BlockchainIntegrationTest {
       testKitTest((blockchain) -> {
         Block genesisBlock = blockchain.getLastBlock();
         assertGenesisBlock(genesisBlock);
+      });
+    }
+
+    @Test
+    void getNumTransactions() {
+      testKitTest(blockchain -> {
+        var numTransactions = blockchain.getNumTransactions();
+        assertThat(numTransactions).isEqualTo(0L);
       });
     }
   }
@@ -256,6 +272,14 @@ class BlockchainIntegrationTest {
       testKitTest((blockchain) -> {
         long expectedHeight = 1L;
         assertThat(blockchain.getHeight()).isEqualTo(expectedHeight);
+      });
+    }
+
+    @Test
+    void getNextHeight() {
+      testKitTest((blockchain) -> {
+        long expectedHeight = 2L;
+        assertThat(blockchain.getNextHeight()).isEqualTo(expectedHeight);
       });
     }
 
@@ -545,6 +569,30 @@ class BlockchainIntegrationTest {
         KeySetIndexProxy<HashCode> transactionPool = blockchain.getTransactionPool();
         assertThat(transactionPool).isEmpty();
       });
+    }
+
+    @Test
+    void getNumTransactions() {
+      testKitTest(blockchain -> {
+        var numTransactions = blockchain.getNumTransactions();
+        assertThat(numTransactions).isEqualTo(1L);
+      });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void getNumTransactionsSeveralTransactions(int numTransactionsToCommit) {
+      var transactions = IntStream.range(0, numTransactionsToCommit)
+          .mapToObj(txId -> createPutTransactionMessage("Key " + txId, "Any Value"))
+          .collect(toList());
+
+      testKit.createBlockWithTransactions(transactions);
+
+      var blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+      var blockchain = blockchainData.getBlockchain();
+      long initialNumTransactions = 1L;
+      long expectedTransactions = initialNumTransactions + numTransactionsToCommit;
+      assertThat(blockchain.getNumTransactions()).isEqualTo(expectedTransactions);
     }
   }
 

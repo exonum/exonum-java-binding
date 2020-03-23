@@ -29,11 +29,20 @@ The following table shows versions compatibility:
 
 | Light Client | Exonum | Exonum Java |
 |--------------|--------|-------------|
+| 0.6.0        | 1.0.*  | 0.10.*      |
 | 0.5.0        | 0.13.* | 0.9.*       |
-| 0.4.0        | 0.12.* | 0.8.0       |
+| 0.4.0        | 0.12.* | 0.8.*       |
+
+<details>
+<summary><em>Previous versions</em></summary>
+
+| Light Client | Exonum | Exonum Java |
+|--------------|--------|-------------|
 | 0.3.0        | 0.11.* | 0.6.0-0.7.0 |
 | 0.2.0        | 0.11.* | 0.6.0       |
 | 0.1.0        | 0.10.* | 0.4         |
+
+</details>
 
 ## System Dependencies
 - Java 8 or above is required for using this client.
@@ -135,6 +144,11 @@ To retrieve the list of all started service instances:
 ```java
 List<ServiceInfo> response = exonumClient.getServiceInfoList();
 ```
+
+### Example Client Application
+
+[The Vehicle Registry Service](../exonum-java-binding/tutorials/car-registry) 
+includes a Java client application based on this library.
 
 ## How to Build
 To build the client locally:
