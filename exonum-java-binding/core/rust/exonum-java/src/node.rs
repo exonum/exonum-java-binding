@@ -41,7 +41,7 @@ use std::sync::Arc;
 
 pub async fn run_node(command: Command) -> Result<(), anyhow::Error> {
     if let EjbCommandResult::EjbRun(config) = command.execute()? {
-        let node = create_node(config)?;
+        let node = create_node(*config)?;
         node.run().await
     } else {
         Ok(())

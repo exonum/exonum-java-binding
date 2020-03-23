@@ -69,7 +69,7 @@ impl EjbCommand for RunDev {
                 runtime_config,
             };
 
-            Ok(EjbCommandResult::EjbRun(config))
+            Ok(EjbCommandResult::EjbRun(Box::new(config)))
         } else {
             panic!()
         }

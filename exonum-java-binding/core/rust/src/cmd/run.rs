@@ -96,7 +96,7 @@ impl EjbCommand for Run {
                 runtime_config,
             };
 
-            Ok(EjbCommandResult::EjbRun(config))
+            Ok(EjbCommandResult::EjbRun(Box::new(config)))
         } else {
             unreachable!("Standard run command returned invalid result")
         }

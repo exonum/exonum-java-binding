@@ -90,7 +90,7 @@ pub enum EjbCommandResult {
     /// Output of the standard Exonum Core commands.
     Standard(StandardResult),
     /// Output of EJB-specific `run` command.
-    EjbRun(Config),
+    EjbRun(Box<Config>),
 }
 
 impl From<StandardResult> for EjbCommandResult {

@@ -249,7 +249,7 @@ mod tests {
     #[test]
     fn box_error_any() {
         let error: Box<dyn Error + Send> = Box::new("e".parse::<i32>().unwrap_err());
-        let description = error.to_string().to_owned();
+        let description = error.to_string();
         let error = panic_error(error);
         assert_eq!(description, any_to_string(&error));
     }
