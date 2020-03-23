@@ -54,7 +54,7 @@ class CreateCounterTxTest {
   );
 
 
-  @Disabled
+  @Disabled("ECR-4344")
   @ParameterizedTest
   @ValueSource(strings = {"", " ", "  ", "\n", "\t"})
   void executeNewCounterRejectsEmptyName(String name, TestKit testKit) {

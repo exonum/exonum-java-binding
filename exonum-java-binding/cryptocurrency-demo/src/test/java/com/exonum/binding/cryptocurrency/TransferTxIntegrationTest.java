@@ -47,11 +47,13 @@ import com.exonum.messages.core.runtime.Errors.ExecutionError;
 import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+@Disabled("ECR-4344")
 class TransferTxIntegrationTest {
 
   @RegisterExtension

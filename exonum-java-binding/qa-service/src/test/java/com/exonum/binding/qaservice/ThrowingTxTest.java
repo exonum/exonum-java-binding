@@ -55,7 +55,7 @@ class ThrowingTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       QaArtifactInfo.createQaServiceTestkit());
 
-  @Disabled
+  @Disabled("ECR-4344")
   @Test
   void throwingTxMustHaveUnexpectedErrorCode(TestKit testKit) {
     long seed = 0L;

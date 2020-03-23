@@ -61,7 +61,7 @@ class ErrorTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       createQaServiceTestkit());
 
-  @Disabled
+  @Disabled("ECR-4344")
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -2, -1, 128, Integer.MAX_VALUE})
   void executeThrowsIfInvalidErrorCode(int errorCode, TestKit testKit) {
@@ -79,7 +79,7 @@ class ErrorTxTest {
     assertThat(error.getDescription()).contains(Integer.toString(errorCode));
   }
 
-  @Disabled
+  @Disabled("ECR-4344")
   @ParameterizedTest
   @CsvSource({
       "0, ''",
