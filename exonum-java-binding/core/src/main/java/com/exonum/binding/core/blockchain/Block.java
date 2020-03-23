@@ -97,7 +97,7 @@ public abstract class Block {
   /**
    * Root hash of exceptions occurred in the block.
    *
-   * @see Blockchain#getCallErrors(long)
+   * @see Blockchain#getCallRecords(long)
    */
   public abstract HashCode getErrorHash();
 
@@ -202,7 +202,7 @@ public abstract class Block {
     /**
      * Sets error hash.
      *
-     * @see Blockchain#getCallErrors(long)
+     * @see Blockchain#getCallRecords(long)
      */
     public abstract Builder errorHash(HashCode errorHash);
 

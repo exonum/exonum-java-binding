@@ -157,7 +157,8 @@ class TestkitExamplesTest {
       ExecutionStatus executionStatus = txResult.get();
       ExecutionError executionError = executionStatus.getError();
       assertThat(executionError.getCode()).isEqualTo(errorCode);
-      assertThat(executionError.getDescription()).isEmpty();
+      assertThat(executionError.getDescription())
+          .contains("Diagnostic message");
       // ExecutionError also includes some properties of the error
       // that are set by the framework: error kind, call site, etc.
       // (not shown here, see ExecutionError API)

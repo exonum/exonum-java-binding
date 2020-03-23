@@ -43,7 +43,7 @@ public interface Service {
    * @throws ExecutionException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
    *     its initialization fails. It will save the error into
-   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallRecords(long)}
    *     the registry of call errors}
    * @see Configurable
    */
@@ -124,7 +124,7 @@ public interface Service {
    *
    * <p>Any exceptions in this method will revert any changes made to the database by it,
    * but will not affect the processing of this block. Exceptions are saved
-   * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallRecords(long)
    * the registry of call errors} with appropriate error kinds.
    *
    * @param context the execution context
