@@ -59,7 +59,7 @@ import java.lang.annotation.Target;
  *
  * <p>Exonum rolls back any changes made by a transaction that threw an exception.
  * It also saves any error into
- * {@linkplain Blockchain#getCallErrors(long) the registry of call errors}.
+ * {@linkplain Blockchain#getCallRecords(long) the registry of call errors}.
  * The transaction clients can request the error information to know the reason of the failure.
  *
  * @see <a href="https://exonum.com/doc/version/0.13-rc.2/architecture/transactions">Exonum Transactions</a>

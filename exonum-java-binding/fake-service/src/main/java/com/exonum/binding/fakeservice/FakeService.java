@@ -58,6 +58,8 @@ public final class FakeService extends AbstractService {
    */
   @Transaction(RAISE_ERROR_TX_ID)
   public void raiseError(Transactions.RaiseErrorArgs arguments, ExecutionContext context) {
-    throw new ExecutionException((byte) arguments.getCode());
+    var code = (byte) arguments.getCode();
+    var description = "Diagnostic message " + code;
+    throw new ExecutionException(code, description);
   }
 }
