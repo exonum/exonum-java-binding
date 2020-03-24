@@ -46,8 +46,6 @@ import com.exonum.messages.core.runtime.Errors.ErrorKind;
 import com.exonum.messages.core.runtime.Errors.ExecutionError;
 import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
 import java.util.Optional;
-
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,7 +59,6 @@ class ErrorTxTest {
   TestKitExtension testKitExtension = new TestKitExtension(
       createQaServiceTestkit());
 
-  @Disabled("ECR-4344")
   @ParameterizedTest
   @ValueSource(ints = {Integer.MIN_VALUE, -2, -1, 128, Integer.MAX_VALUE})
   void executeThrowsIfInvalidErrorCode(int errorCode, TestKit testKit) {
@@ -79,7 +76,6 @@ class ErrorTxTest {
     assertThat(error.getDescription()).contains(Integer.toString(errorCode));
   }
 
-  @Disabled("ECR-4344")
   @ParameterizedTest
   @CsvSource({
       "0, ''",
