@@ -590,9 +590,6 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       TestKitServiceInstances.Builder builder = TestKitServiceInstances.newBuilder();
 
       for (ServiceArtifactId artifactId : services.keySet()) {
-        TestKitProtos.TestKitService.Builder serviceBuilder =
-            TestKitProtos.TestKitService.newBuilder();
-
         String artifactFilename = serviceArtifactFilenames.get(artifactId);
         Base.ArtifactSpec artifactSpec = Base.ArtifactSpec.newBuilder()
             .setArtifact(artifactIdToProto(artifactId))
@@ -602,8 +599,11 @@ public final class TestKit extends AbstractCloseableNativeProxy {
                 .toByteString())
             .build();
 
+        TestKitProtos.TestKitService.Builder serviceBuilder =
+            TestKitProtos.TestKitService.newBuilder();
         serviceBuilder.setArtifactSpec(artifactSpec);
         serviceBuilder.addAllServiceSpecs(services.get(artifactId));
+
         builder.addServices(serviceBuilder.build());
       }
 
