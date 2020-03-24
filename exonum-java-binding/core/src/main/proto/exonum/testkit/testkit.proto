@@ -24,8 +24,12 @@ import "exonum/runtime/base.proto";
 
 // DTO for TestKit initialization.
 message TestKitServiceInstances {
-    // Artifacts to deploy on blockchain instantiation.
-    repeated exonum.runtime.ArtifactSpec artifact_specs = 1;
+    repeated TestKitService services = 1;
+}
+
+message TestKitService {
+    // Artifact description.
+    exonum.runtime.ArtifactSpec artifact_spec = 1;
     // Services to start on blockchain instantiation.
     repeated exonum.runtime.InstanceInitParams service_specs = 2;
 }

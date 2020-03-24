@@ -46,6 +46,7 @@ import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.testkit.internal.TestKitProtos;
 import com.exonum.binding.core.testkit.internal.TestKitProtos.TestKitServiceInstances;
 import com.exonum.binding.core.transaction.RawTransaction;
 import com.exonum.binding.core.transport.Server;
@@ -67,7 +68,6 @@ import io.vertx.ext.web.Router;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -589,23 +589,22 @@ public final class TestKit extends AbstractCloseableNativeProxy {
       checkDeployedArtifactsAreUsed();
       TestKitServiceInstances.Builder builder = TestKitServiceInstances.newBuilder();
 
-      // Add specifications of artifacts to deploy.
-      for (Map.Entry<ServiceArtifactId, String> entry : serviceArtifactFilenames.entrySet()) {
-        ServiceArtifactId artifactId = entry.getKey();
+      for (ServiceArtifactId artifactId : services.keySet()) {
+        String artifactFilename = serviceArtifactFilenames.get(artifactId);
         Base.ArtifactSpec artifactSpec = Base.ArtifactSpec.newBuilder()
             .setArtifact(artifactIdToProto(artifactId))
             .setPayload(DeployArguments.newBuilder()
-                .setArtifactFilename(entry.getValue())
+                .setArtifactFilename(artifactFilename)
                 .build()
                 .toByteString())
             .build();
 
-        builder.addArtifactSpecs(artifactSpec);
-      }
+        TestKitProtos.TestKitService.Builder serviceBuilder =
+            TestKitProtos.TestKitService.newBuilder();
+        serviceBuilder.setArtifactSpec(artifactSpec);
+        serviceBuilder.addAllServiceSpecs(services.get(artifactId));
 
-      // Add specifications of service instances to start.
-      for (Lifecycle.InstanceInitParams instanceInitParams : services.values()) {
-        builder.addServiceSpecs(instanceInitParams);
+        builder.addServices(serviceBuilder.build());
       }
 
       return builder.build();

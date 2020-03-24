@@ -76,7 +76,7 @@ pub extern "system" fn Java_com_exonum_binding_core_storage_indices_KeySetIndexP
         let set = handle::cast_handle::<Index>(set_handle);
         let value = env.convert_byte_array(value)?;
         let contains = set.contains(&value);
-        (Ok(contains as jboolean))
+        Ok(contains as jboolean)
     });
     utils::unwrap_exc_or_default(&env, res)
 }

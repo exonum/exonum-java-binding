@@ -25,7 +25,7 @@ pub extern crate exonum;
 // Though we do not need exonum-btc-anchoring in libjava_bindings, it solves issue ECR-3459,
 // as all RocksDB-related symbols resides inside libjava_bindings and not need to be exported for
 // exonum-java.
-pub extern crate exonum_btc_anchoring;
+// pub extern crate exonum_btc_anchoring;
 pub extern crate exonum_rust_runtime;
 pub extern crate exonum_supervisor;
 pub extern crate exonum_time;
