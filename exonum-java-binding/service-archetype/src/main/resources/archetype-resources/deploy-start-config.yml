@@ -26,8 +26,10 @@ artifacts:
     version: "${version}"
     spec:
       artifact_filename: "${rootArtifactId}-service-${version}-artifact.jar"
+    action: deploy
 
 instances:
   # A test service instance of "${rootArtifactId}-service".
   test-${artifactId}:
     artifact: ${artifactId}
+    action: start

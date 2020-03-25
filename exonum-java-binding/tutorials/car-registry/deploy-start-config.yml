@@ -26,8 +26,10 @@ artifacts:
     version: "1.0.0-SNAPSHOT"
     spec:
       artifact_filename: "car-registry-service-1.0.0-SNAPSHOT-artifact.jar"
+    action: deploy
 
 instances:
   # A test service instance of "car-registry-service".
   test-car-registry:
     artifact: car-registry
+    action: start

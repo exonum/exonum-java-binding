@@ -22,20 +22,23 @@ artifacts:
     version: "0.10.0-SNAPSHOT"
     spec:
       artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-SNAPSHOT-artifact.jar"
+    action: deploy
   time:
     runtime: rust
     name: "exonum-time"
-    version: "0.13.0-rc.2"
+    version: "1.0.0-rc.3"
   timestamping:
     runtime: rust
     name: "exonum-timestamping"
-    version: "0.13.0-rc.2"
+    version: "1.0.0-rc.3"
 
 instances:
   cryptocurrency:
     artifact: cryptocurrency
+    action: start
   time:
     artifact: time
+    action: start
   timestamping:
     artifact: timestamping
     config:
@@ -44,3 +47,4 @@ instances:
       message_name: "Config"
       data:
         time_service_name: "time"
+    action: start
