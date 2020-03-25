@@ -19,7 +19,7 @@ package com.exonum.binding.core.runtime;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.exonum.binding.core.transaction.ExecutionException;
+import com.exonum.binding.core.service.ExecutionException;
 
 /**
  * An "unexpected" service execution exception indicates that any exception

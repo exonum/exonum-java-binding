@@ -27,8 +27,8 @@ import java.util.Properties;
  * <p>Network administrators agree on and pass
  * the configuration parameters as a service-specific protobuf message when adding
  * that service instance to the network. After Exonum starts the service, it
- * {@linkplain Service#initialize(com.exonum.binding.core.blockchain.BlockchainData, Configuration)
- * passes the configuration parameters} to the newly created service instance.
+ * {@linkplain Service#initialize(ExecutionContext,
+ * Configuration) passes the configuration parameters} to the newly created service instance.
  *
  * <p>Services that have few arguments are encouraged to use the standard protobuf
  * message {@link ServiceConfiguration}. It supports common text-based configuration formats.
@@ -36,7 +36,7 @@ import java.util.Properties;
  * <p>Reconfiguration of a started service may be implemented with a supervisor service
  * and {@link Configurable} interface.
  *
- * @see Service#initialize(com.exonum.binding.core.blockchain.BlockchainData, Configuration)
+ * @see Service#initialize(ExecutionContext, Configuration)
  * @see Configurable
  */
 public interface Configuration {

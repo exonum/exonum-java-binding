@@ -20,12 +20,12 @@ use exonum::{
     merkledb::{BinaryValue, Snapshot},
     runtime::{
         migrations::{InitMigrationError, MigrationScript},
+        oneshot,
         versioning::Version,
-        ArtifactId, Caller, ExecutionContext, ExecutionError, InstanceId, InstanceSpec,
-        InstanceStatus, Mailbox, Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
+        ArtifactId, Caller, ExecutionContext, ExecutionError, InstanceId, InstanceSpec, Mailbox,
+        Runtime, RuntimeIdentifier, SnapshotExt, WellKnownRuntime,
     },
 };
-use futures::{Future, IntoFuture};
 use jni::{
     objects::{GlobalRef, JObject, JValue},
     signature::{JavaType, Primitive},
@@ -42,6 +42,7 @@ use crate::{
     utils::{jni_cache::runtime_adapter, panic_on_exception, proto_to_java_bytes, unwrap_jni},
     Node,
 };
+use exonum::runtime::InstanceState;
 
 /// Default validator ID. -1 is used as not-a-value in Java runtime.
 const DEFAULT_VALIDATOR_ID: i32 = -1;
@@ -97,7 +98,7 @@ impl Runtime for JavaRuntimeProxy {
         &mut self,
         artifact_id: ArtifactId,
         deploy_spec: Vec<u8>,
-    ) -> Box<dyn Future<Item = (), Error = ExecutionError>> {
+    ) -> oneshot::Receiver {
         let result = jni_call_default(&self.exec, |env| {
             let artifact_id = JObject::from(proto_to_java_bytes(env, &artifact_id)?);
             let spec = JObject::from(env.byte_array_from_slice(&deploy_spec)?);
@@ -111,7 +112,10 @@ impl Runtime for JavaRuntimeProxy {
             .and_then(JValue::v)
         });
 
-        Box::new(result.map(|_| ()).into_future())
+        let (sender, receiver) = oneshot::channel();
+        sender.send(result.map(|_| ()));
+
+        receiver
     }
 
     fn is_artifact_deployed(&self, artifact_id: &ArtifactId) -> bool {
@@ -197,15 +201,11 @@ impl Runtime for JavaRuntimeProxy {
         })
     }
 
-    fn update_service_status(
-        &mut self,
-        _snapshot: &dyn Snapshot,
-        spec: &InstanceSpec,
-        status: &InstanceStatus,
-    ) {
+    fn update_service_status(&mut self, _snapshot: &dyn Snapshot, state: &InstanceState) {
         unwrap_jni(self.exec.with_attached(|env| {
-            let instance_spec = JObject::from(proto_to_java_bytes(env, spec)?);
-            let instance_status = JObject::from(proto_to_java_bytes(env, status)?);
+            let instance_spec = JObject::from(proto_to_java_bytes(env, &state.spec)?);
+            let instance_status =
+                JObject::from(proto_to_java_bytes(env, state.status.as_ref().unwrap())?);
 
             panic_on_exception(
                 env,

@@ -16,7 +16,7 @@
 
 package com.exonum.binding.cryptocurrency;
 
-import static com.exonum.binding.core.transaction.ExecutionPreconditions.checkExecution;
+import static com.exonum.binding.core.service.ExecutionPreconditions.checkExecution;
 import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
 import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
@@ -34,12 +34,12 @@ import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.runtime.ServiceInstanceSpec;
 import com.exonum.binding.core.service.AbstractService;
+import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.core.transaction.Transaction;
-import com.exonum.binding.core.transaction.TransactionContext;
 import com.exonum.binding.cryptocurrency.transactions.TxMessageProtos;
 import com.google.inject.Inject;
 import com.google.protobuf.ByteString;
@@ -104,8 +104,8 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   @Override
   @Transaction(CREATE_WALLET_TX_ID)
-  public void createWallet(TxMessageProtos.CreateWalletTx arguments, TransactionContext context) {
-    PublicKey ownerPublicKey = context.getAuthorPk();
+  public void createWallet(TxMessageProtos.CreateWalletTx arguments, ExecutionContext context) {
+    PublicKey ownerPublicKey = context.getAuthorPk().orElseThrow();
 
     CryptocurrencySchema schema = createDataSchema(context.getBlockchainData());
     MapIndex<PublicKey, Wallet> wallets = schema.wallets();
@@ -122,12 +122,12 @@ public final class CryptocurrencyServiceImpl extends AbstractService
 
   @Override
   @Transaction(TRANSFER_TX_ID)
-  public void transfer(TxMessageProtos.TransferTx arguments, TransactionContext context) {
+  public void transfer(TxMessageProtos.TransferTx arguments, ExecutionContext context) {
     long sum = arguments.getSum();
     checkExecution(0 < sum, NON_POSITIVE_TRANSFER_AMOUNT.errorCode,
         "Non-positive transfer amount: " + sum);
 
-    PublicKey fromWallet = context.getAuthorPk();
+    PublicKey fromWallet = context.getAuthorPk().orElseThrow();
     PublicKey toWallet = toPublicKey(arguments.getToWallet());
     checkExecution(!fromWallet.equals(toWallet), SAME_SENDER_AND_RECEIVER.errorCode);
 
@@ -145,7 +145,7 @@ public final class CryptocurrencyServiceImpl extends AbstractService
     wallets.put(toWallet, new Wallet(to.getBalance() + sum));
 
     // Update the transaction history of each wallet
-    HashCode messageHash = context.getTransactionMessageHash();
+    HashCode messageHash = context.getTransactionMessageHash().orElseThrow();
     schema.transactionsHistory(fromWallet).add(messageHash);
     schema.transactionsHistory(toWallet).add(messageHash);
   }

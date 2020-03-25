@@ -17,18 +17,17 @@
 package com.exonum.binding.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.exonum.binding.common.blockchain.CallInBlocks;
 import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.blockchain.Blockchain;
-import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.blockchain.CallRecords;
 import com.exonum.binding.core.service.AbstractServiceModule;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.ExecutionException;
 import com.exonum.binding.core.service.Node;
 import com.exonum.binding.core.service.Service;
 import com.exonum.binding.core.storage.database.Snapshot;
-import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
-import com.exonum.binding.core.transaction.ExecutionException;
 import com.exonum.binding.test.runtime.ServiceArtifactBuilder;
 import com.exonum.binding.testkit.TestKit;
 import com.exonum.messages.core.Blockchain.CallInBlock;
@@ -73,10 +72,9 @@ class ServiceRuntimeIntegrationTest {
       // Verify the result of afterTransaction
       Snapshot snapshot = testKit.getSnapshot();
       Blockchain blockchain = Blockchain.newInstance(snapshot);
-      ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = blockchain.getCallErrors(1L);
+      CallRecords callErrors = blockchain.getCallRecords(1L);
       CallInBlock afterTxId = CallInBlocks.afterTransactions(serviceId);
-      assertTrue(callErrors.containsKey(afterTxId));
-      ExecutionError executionError = callErrors.get(afterTxId);
+      ExecutionError executionError = callErrors.get(afterTxId).orElseThrow();
       assertThat(executionError.getKind()).isEqualTo(ErrorKind.SERVICE);
       assertThat(executionError.getCode()).isEqualTo(AFTER_TX_ERROR_CODE);
     }
@@ -90,7 +88,7 @@ class ServiceRuntimeIntegrationTest {
     }
 
     @Override
-    public void afterTransactions(BlockchainData blockchainData) {
+    public void afterTransactions(ExecutionContext context) {
       throw new ExecutionException(AFTER_TX_ERROR_CODE);
     }
   }

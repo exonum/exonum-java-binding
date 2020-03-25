@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 The Exonum Team
+ * Copyright 2020 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.transaction;
+package com.exonum.binding.core.service;
 
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.core.blockchain.Blockchain;
@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
  * <p>Exonum translates this exception into an {@link ExecutionError} type
  * with error kind equal to {@linkplain ErrorKind#SERVICE}. The execution error copies
  * the error code and the description from this exception. Exonum saves it into the database in
- * {@linkplain Blockchain#getCallErrors(long) the registry of call errors}.
+ * {@linkplain Blockchain#getCallRecords(long) the registry of call errors}.
  * Note that only the value of the error code affects the blockchain state.
  *
  * <p>The other attributes of a Java exception — a stack trace, a cause, suppressed exceptions —
@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
  *
  * <p>An execution error, including the error code and description, can be requested:
  * <ul>
- *   <li>by any Exonum Service, using {@link Blockchain#getCallErrors(long)}</li>
+ *   <li>by any Exonum Service, using {@link Blockchain#getCallRecords(long)}</li>
  *   <li>by an authorized Light Client, using the Exonum endpoints. For example, when
  *   the clients requests the transaction information, it will get the execution error,
  *   if it occurred. See
@@ -51,7 +51,7 @@ import javax.annotation.Nullable;
  * </ul>
  *
  * @see Blockchain#getTxResult(HashCode)
- * @see Blockchain#getCallErrors(long)
+ * @see Blockchain#getCallRecords(long)
  * @see ExecutionStatus
  * @see ExecutionPreconditions
  */

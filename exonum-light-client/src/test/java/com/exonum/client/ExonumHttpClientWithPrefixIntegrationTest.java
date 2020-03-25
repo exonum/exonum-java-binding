@@ -17,8 +17,10 @@
 package com.exonum.client;
 
 import static com.exonum.client.RecordedRequestMatchers.hasPathStartingWith;
+import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import com.exonum.binding.common.hash.HashCode;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -31,7 +33,7 @@ import org.junit.jupiter.api.Test;
 class ExonumHttpClientWithPrefixIntegrationTest {
   private MockWebServer server;
   private ExonumClient exonumClient;
-  private String prefixUrl = "pre/fix";
+  private final String prefixUrl = "pre/fix";
 
   @BeforeEach
   void start() throws IOException {
@@ -53,10 +55,10 @@ class ExonumHttpClientWithPrefixIntegrationTest {
   @DisplayName("LC applies the given prefix to the underlying requests")
   void requestWithPrefix() throws InterruptedException {
     // Mock response
-    server.enqueue(new MockResponse().setBody("ok"));
+    server.enqueue(new MockResponse().setResponseCode(HTTP_NOT_FOUND));
 
     // Call
-    exonumClient.getUserAgentInfo();
+    exonumClient.getTransaction(HashCode.fromString("abcd"));
 
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();

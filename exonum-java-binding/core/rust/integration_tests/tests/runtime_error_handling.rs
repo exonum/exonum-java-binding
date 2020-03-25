@@ -1,4 +1,7 @@
+use std::sync::Arc;
+
 use exonum_derive::ExecutionFail;
+
 use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
     exonum::{
@@ -14,8 +17,6 @@ use java_bindings::{
 };
 use lazy_static::lazy_static;
 
-use std::sync::Arc;
-
 lazy_static! {
     static ref VM: Arc<JavaVM> = create_vm_for_tests_with_classes();
     pub static ref EXECUTOR: Executor = Executor::new(VM.clone());
@@ -23,7 +24,7 @@ lazy_static! {
 
 const ARITHMETIC_EXCEPTION_CLASS: &str = "java/lang/ArithmeticException";
 const ILLEGAL_ARGUMENT_EXCEPTION_CLASS: &str = "java/lang/IllegalArgumentException";
-const EXECUTION_EXCEPTION_CLASS: &str = "com/exonum/binding/core/transaction/ExecutionException";
+const EXECUTION_EXCEPTION_CLASS: &str = "com/exonum/binding/core/service/ExecutionException";
 const UNEXPECTED_EXECUTION_EXCEPTION_CLASS: &str =
     "com/exonum/binding/core/runtime/UnexpectedExecutionException";
 const STRING_CLASS: &str = "java/lang/String";

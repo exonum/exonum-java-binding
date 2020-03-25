@@ -21,8 +21,6 @@ use exonum::{
     messages::Verified,
     runtime::{AnyTx, CallInfo},
 };
-use failure;
-use futures::Future;
 use jni::{
     objects::JClass,
     sys::{jbyteArray, jint},
@@ -65,7 +63,7 @@ impl Node {
     }
 
     #[doc(hidden)]
-    pub fn submit(&self, tx: AnyTx) -> Result<Hash, failure::Error> {
+    pub fn submit(&self, tx: AnyTx) -> Result<Hash, anyhow::Error> {
         let keypair = self.blockchain.service_keypair();
 
         let verified = Verified::from_value(tx, keypair.public_key(), keypair.secret_key());
@@ -73,8 +71,7 @@ impl Node {
         // TODO(ECR-3679): check Core behaviour/any errors on service inactivity
         self.blockchain
             .sender()
-            .broadcast_transaction(verified)
-            .wait()?;
+            .broadcast_transaction_blocking(verified)?;
         Ok(tx_hash)
     }
 }

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+use anyhow;
 use exonum_cli::command::{
-    finalize::Finalize, generate_config::GenerateConfig, generate_template::GenerateTemplate,
-    maintenance::Maintenance, ExonumCommand, StandardResult,
+    ExonumCommand, Finalize, GenerateConfig, GenerateTemplate, Maintenance, StandardResult,
 };
-use failure;
 use structopt::StructOpt;
 
 use std::path::PathBuf;
@@ -74,7 +73,7 @@ impl Command {
 }
 
 impl EjbCommand for Command {
-    fn execute(self) -> Result<EjbCommandResult, failure::Error> {
+    fn execute(self) -> Result<EjbCommandResult, anyhow::Error> {
         match self {
             Command::GenerateTemplate(c) => c.execute().map(Into::into),
             Command::GenerateConfig(c) => c.execute().map(Into::into),
@@ -91,7 +90,7 @@ pub enum EjbCommandResult {
     /// Output of the standard Exonum Core commands.
     Standard(StandardResult),
     /// Output of EJB-specific `run` command.
-    EjbRun(Config),
+    EjbRun(Box<Config>),
 }
 
 impl From<StandardResult> for EjbCommandResult {
@@ -103,7 +102,7 @@ impl From<StandardResult> for EjbCommandResult {
 /// Interface of Java Bindings CLI commands.
 pub trait EjbCommand {
     /// Returns the result of command execution.
-    fn execute(self) -> Result<EjbCommandResult, failure::Error>;
+    fn execute(self) -> Result<EjbCommandResult, anyhow::Error>;
 }
 
 /// Concatenates PathBuf and string. Useful to make a `PathBuf` to a file in the specific directory.

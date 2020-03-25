@@ -70,10 +70,10 @@
     <okhttp.version>4.4.1</okhttp.version>
     <lombok.version>1.18.12</lombok.version>
     <!--Test dependencies-->
-    <junit.jupiter.version>5.6.0</junit.jupiter.version>
-    <mockito.version>3.3.0</mockito.version>
+    <junit.jupiter.version>5.6.1</junit.jupiter.version>
+    <mockito.version>3.3.3</mockito.version>
     <hamcrest.version>2.2</hamcrest.version>
-    <equalsverifier.version>3.1.12</equalsverifier.version>
+    <equalsverifier.version>3.1.13</equalsverifier.version>
     <!--Plugins-->
     <!-- Checkstyle -->
     <checkstyle.severity>warning</checkstyle.severity>
@@ -238,7 +238,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.2.0</version>
         <configuration>
           <source>${javadoc.source}</source>
           <doclint>none</doclint>

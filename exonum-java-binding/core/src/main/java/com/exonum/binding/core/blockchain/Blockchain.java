@@ -27,6 +27,7 @@ import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.binding.core.blockchain.proofs.BlockProof;
 import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.service.Configuration;
+import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
@@ -80,8 +81,11 @@ import java.util.Optional;
  *
  * <p>A call result proof proves that a given service call completed with a particular
  * result in a block at a certain height. It consists of a block proof and a map proof
- * from {@link #getCallErrors(long)}. In case of <em>transaction</em> calls, it also
- * includes a list proof from {@link #getBlockTransactions(long)}.
+ * from the call errors registry, which {@linkplain ProofMapIndexProxy#getIndexHash() index hash}
+ * is recorded in the block header as {@link Block#getErrorHash()}.
+ *
+ * <p>To construct such a proof, access the call records for a particular block with
+ * {@link #getCallRecords(long)}; and use {@link CallRecords#getProof(CallInBlock)}.
  *
  * <h3 id="service-data-proof">Service Data Proof</h3>
  *
@@ -195,7 +199,7 @@ public final class Blockchain {
    *     logic, an index may remain uninitialized indefinitely. Therefore, if proofs for an
    *     empty index need to be created, it must be initialized early in the service lifecycle
    *     (e.g., in {@link
-   *     com.exonum.binding.core.service.Service#initialize(BlockchainData, Configuration)}.
+   *     com.exonum.binding.core.service.Service#initialize(ExecutionContext, Configuration)}.
    *     <!-- TODO: Simplify once initialization happens automatically: ECR-4121 -->
    */
   public IndexProof createIndexProof(String fullIndexName) {
@@ -229,10 +233,21 @@ public final class Blockchain {
    * <p>For example, the "genesis" block has height {@code h = 0}. The latest committed block
    * has height {@code h = getBlockHashes().size() - 1}.
    *
-   * @throws RuntimeException if the "genesis block" was not created
+   * @throws RuntimeException if the "genesis block" was not created yet;
+   *     consider using {@link #getNextHeight()} in service methods that might be invoked
+   *     before the genesis block commit
    */
   public long getHeight() {
     return schema.getHeight();
+  }
+
+  /**
+   * Returns the blockchain height of the <em>next</em> block to be committed.
+   *
+   * @see #getHeight()
+   */
+  public long getNextHeight() {
+    return getBlockHashes().size();
   }
 
   /**
@@ -297,25 +312,15 @@ public final class Blockchain {
   }
 
   /**
-   * Returns execution errors that occurred in the block at the given height. Execution errors
-   * are preserved for transactions and before/after transaction handlers.
-   *
-   * <p>The {@linkplain ProofMapIndexProxy#getIndexHash() index hash} of this index is recorded
-   * in the block header as {@link Block#getErrorHash()}. That
-   * enables constructing <a href="Blockchain.html#call-result-proof">proofs</a>
-   * that a certain operation was executed with a particular result. For example,
-   * a proof that a transaction with a certain message hash at
-   * a certain {@linkplain TransactionLocation location} had a certain result must include
-   * a BlockProof, a proof from this collection, and a proof from
-   * {@link #getBlockTransactions(long)}.
+   * Returns the call records, containing the execution errors that occurred in the block
+   * at the given height.
    *
    * @param blockHeight the height of the block
    * @throws IllegalArgumentException if the height is invalid: negative or exceeding
    *     the {@linkplain #getHeight() blockchain height}
-   * @see CallInBlocks
    */
-  public ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
-    return schema.getCallErrors(blockHeight);
+  public CallRecords getCallRecords(long blockHeight) {
+    return new CallRecords(schema, this, blockHeight);
   }
 
   /**
@@ -331,10 +336,11 @@ public final class Blockchain {
 
   private ExecutionStatus getExecutionStatus(TransactionLocation txLocation) {
     long height = txLocation.getHeight();
-    ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = getCallErrors(height);
-    CallInBlock txCall = CallInBlocks.transaction(txLocation.getIndexInBlock());
-    if (callErrors.containsKey(txCall)) {
-      ExecutionError txError = callErrors.get(txCall);
+    var callRecords = getCallRecords(height);
+    var txCallId = CallInBlocks.transaction(txLocation.getIndexInBlock());
+    var txErrorOpt = callRecords.get(txCallId);
+    if (txErrorOpt.isPresent()) {
+      ExecutionError txError = txErrorOpt.get();
       return ExecutionStatus.newBuilder()
           .setError(txError)
           .build();
@@ -441,5 +447,12 @@ public final class Blockchain {
    */
   public KeySetIndexProxy<HashCode> getTransactionPool() {
     return schema.getTransactionPool();
+  }
+
+  /**
+   * Returns the total number of transactions committed to the blockchain.
+   */
+  public long getNumTransactions() {
+    return schema.getNumTransactions().orElse(0L);
   }
 }

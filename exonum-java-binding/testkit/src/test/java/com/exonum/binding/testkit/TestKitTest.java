@@ -211,7 +211,7 @@ class TestKitTest {
 
     Exception e = assertThrows(RuntimeException.class, testKitBuilder::build);
 
-    assertThat(e.getMessage()).contains("Cannot deploy an artifact");
+    assertThat(e.getMessage()).contains("Cannot deploy a built-in artifact");
   }
 
   // todo: invalidartifact — causing deploy errors (as ^) and causing instantiation errors (todo)
@@ -545,8 +545,11 @@ class TestKitTest {
         .sign(KEY_PAIR);
     Exception e = assertThrows(Exception.class,
         () -> testKit.createBlockWithTransactions(message));
+    String expectedMessage =
+        String.format("Cannot dispatch transaction to unknown service with ID %s",
+                      unknownServiceId);
     assertThat(e)
-        .hasMessageContaining("Suitable runtime for the given service instance ID is not found");
+        .hasMessageContaining(expectedMessage);
   }
 
   @Test

@@ -19,9 +19,9 @@ package com.example.car;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.example.car.messages.VehicleOuterClass.Vehicle;
-import com.exonum.binding.common.serialization.Serializer;
 import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.service.Schema;
+import com.exonum.binding.core.storage.database.Access;
 import com.exonum.binding.core.storage.database.Prefixed;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;

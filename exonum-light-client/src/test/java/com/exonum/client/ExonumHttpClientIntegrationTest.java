@@ -34,8 +34,6 @@ import com.exonum.binding.common.crypto.KeyPair;
 import com.exonum.binding.common.hash.HashCode;
 import com.exonum.binding.common.message.TransactionMessage;
 import com.exonum.client.ExplorerApiHelper.SubmitTxRequest;
-import com.exonum.client.response.ConsensusStatus;
-import com.exonum.client.response.HealthCheckInfo;
 import com.exonum.client.response.ServiceInstanceInfo;
 import com.exonum.client.response.TransactionResponse;
 import com.exonum.client.response.TransactionStatus;
@@ -51,8 +49,8 @@ import org.junit.jupiter.api.Test;
 
 class ExonumHttpClientIntegrationTest {
 
-  private static String SERVICE_NAME = "service-name";
-  private static int SERVICE_ID = 1;
+  private static final String SERVICE_NAME = "service-name";
+  private static final int SERVICE_ID = 1;
 
   private MockWebServer server;
   private ExonumClient exonumClient;
@@ -103,62 +101,6 @@ class ExonumHttpClientIntegrationTest {
     TransactionMessage actualTxMessage = actualRequest.getTxBody();
 
     assertThat(actualTxMessage, is(txMessage));
-  }
-
-  @Test
-  void getUnconfirmedTransactions() throws InterruptedException {
-    // Mock response
-    int txPoolSize = 10;
-    String mockResponse = "{\"tx_pool_size\": " + txPoolSize + ", \"tx_count\": 1 }";
-    server.enqueue(new MockResponse().setBody(mockResponse));
-
-    // Call
-    int actualCount = exonumClient.getUnconfirmedTransactionsCount();
-
-    // Assert response
-    assertThat(actualCount, is(txPoolSize));
-
-    // Assert request params
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/stats"));
-  }
-
-  @Test
-  void healthCheck() throws InterruptedException {
-    // Mock response
-    HealthCheckInfo expected = new HealthCheckInfo(ConsensusStatus.ENABLED, 0);
-    String mockResponse = "{\"consensus_status\": \"Enabled\", \"connectivity\": \"NotConnected\"}";
-    server.enqueue(new MockResponse().setBody(mockResponse));
-
-    // Call
-    HealthCheckInfo actual = exonumClient.healthCheck();
-
-    // Assert response
-    assertThat(actual, is(expected));
-
-    // Assert request params
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/healthcheck"));
-  }
-
-  @Test
-  void getUserAgentInfo() throws InterruptedException {
-    // Mock response
-    String mockResponse = "exonum 0.6.0/rustc 1.26.0 (2789b067d 2018-03-06)\n\n/Mac OS10.13.3";
-    server.enqueue(new MockResponse().setBody(mockResponse));
-
-    // Call
-    String actualResponse = exonumClient.getUserAgentInfo();
-
-    // Assert response
-    assertThat(actualResponse, is(mockResponse));
-
-    // Assert request params
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/user_agent"));
   }
 
   @Test
@@ -234,7 +176,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+    assertThat(recordedRequest, hasPath("api/services/supervisor/services"));
   }
 
   @Test
@@ -261,7 +203,7 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+    assertThat(recordedRequest, hasPath("api/services/supervisor/services"));
   }
 
   @Test
@@ -299,6 +241,6 @@ class ExonumHttpClientIntegrationTest {
     // Assert request params
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getMethod(), is("GET"));
-    assertThat(recordedRequest, hasPath("api/system/v1/services"));
+    assertThat(recordedRequest, hasPath("api/services/supervisor/services"));
   }
 }

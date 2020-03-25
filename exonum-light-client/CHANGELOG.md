@@ -15,6 +15,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Versions Support
+- Exonum 1.0
+- Exonum Java Binding 0.10
+
+### Added
+- Exonum 1.0.0 compatibility
+
+### Removed
+- System API operations that were made private and/or removed. If you need
+  any of these, use the [system REST API directly](https://docs.rs/exonum-system-api/1.0.0/exonum_system_api/).
+   - `getUnconfirmedTransactionsCount`. `stats` system API endpoint is made private.
+   - `healthCheck`. `healthcheck` endpoint is merged into `info` (and made private).
+   - `getUserAgentInfo`. `user_agent` endpoint is merged into `info`.
+
 ## 0.5.0 — 2019-12-23
 
 The new release of the light client brings support for dynamic services.

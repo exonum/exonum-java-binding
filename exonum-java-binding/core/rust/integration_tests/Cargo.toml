@@ -10,10 +10,9 @@ workspace = ".."
 crate-type = ["dylib"]
 
 [dependencies]
-exonum-testkit = "1.0.0-rc.1"
-exonum-derive = "1.0.0-rc.1"
-failure = "0.1"
-futures = "0.1"
+exonum-testkit = "1.0.0-rc.3"
+exonum-derive = "1.0.0-rc.3"
+futures = "0.3"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855)
 java_bindings = { path = "..", features = ["resource-manager"] }
 lazy_static = "1.3"

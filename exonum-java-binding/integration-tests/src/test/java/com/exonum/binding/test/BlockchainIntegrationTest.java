@@ -25,6 +25,7 @@ import static com.exonum.binding.test.TestArtifactInfo.ARTIFACT_ID;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -40,15 +41,16 @@ import com.exonum.binding.common.hash.HashFunction;
 import com.exonum.binding.common.hash.Hashing;
 import com.exonum.binding.common.message.SignedMessage;
 import com.exonum.binding.common.message.TransactionMessage;
+import com.exonum.binding.common.runtime.RuntimeId;
 import com.exonum.binding.core.blockchain.Block;
 import com.exonum.binding.core.blockchain.Blockchain;
 import com.exonum.binding.core.blockchain.BlockchainData;
+import com.exonum.binding.core.blockchain.CallRecords;
 import com.exonum.binding.core.blockchain.proofs.BlockProof;
 import com.exonum.binding.core.blockchain.proofs.IndexProof;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.MapIndex;
-import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.binding.fakeservice.FakeSchema;
 import com.exonum.binding.fakeservice.Transactions.PutTransactionArgs;
 import com.exonum.binding.fakeservice.Transactions.RaiseErrorArgs;
@@ -62,6 +64,7 @@ import com.exonum.messages.core.Messages.CoreMessage;
 import com.exonum.messages.core.Messages.CoreMessage.KindCase;
 import com.exonum.messages.core.Messages.Precommit;
 import com.exonum.messages.core.Proofs;
+import com.exonum.messages.core.Proofs.CallProof;
 import com.exonum.messages.core.runtime.Errors.ErrorKind;
 import com.exonum.messages.core.runtime.Errors.ExecutionError;
 import com.exonum.messages.core.runtime.Errors.ExecutionStatus;
@@ -72,11 +75,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Empty;
 import com.google.protobuf.MessageLite;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -139,6 +144,13 @@ class BlockchainIntegrationTest {
     }
 
     @Test
+    void getNextHeight() {
+      testKitTest(blockchain -> {
+        assertThat(blockchain.getNextHeight()).isEqualTo(1 + GENESIS_BLOCK_HEIGHT);
+      });
+    }
+
+    @Test
     void getBlocks() {
       testKitTest(blockchain -> {
         Map<HashCode, Block> blocks = toMap(blockchain.getBlocks());
@@ -162,6 +174,14 @@ class BlockchainIntegrationTest {
       testKitTest((blockchain) -> {
         Block genesisBlock = blockchain.getLastBlock();
         assertGenesisBlock(genesisBlock);
+      });
+    }
+
+    @Test
+    void getNumTransactions() {
+      testKitTest(blockchain -> {
+        var numTransactions = blockchain.getNumTransactions();
+        assertThat(numTransactions).isEqualTo(0L);
       });
     }
   }
@@ -256,6 +276,14 @@ class BlockchainIntegrationTest {
       testKitTest((blockchain) -> {
         long expectedHeight = 1L;
         assertThat(blockchain.getHeight()).isEqualTo(expectedHeight);
+      });
+    }
+
+    @Test
+    void getNextHeight() {
+      testKitTest((blockchain) -> {
+        long expectedHeight = 2L;
+        assertThat(blockchain.getNextHeight()).isEqualTo(expectedHeight);
       });
     }
 
@@ -385,21 +413,48 @@ class BlockchainIntegrationTest {
     }
 
     @Test
-    void getCallErrorsNoErrors() {
+    void getCallRecordsNoErrors() {
       testKitTest((blockchain) -> {
         long height = block.getHeight();
-        ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors =
-            blockchain.getCallErrors(height);
-        Map<CallInBlock, ExecutionError> callErrorsMap = toMap(callErrors);
-        assertThat(callErrorsMap).isEmpty();
+        var callRecords = blockchain.getCallRecords(height);
+        assertThat(callRecords.getErrors()).isEmpty();
       });
     }
 
     @Test
-    void getCallErrorsInvalidHeight() {
+    void getCallErrorProofNoErrors() {
+      testKitTest(blockchain -> {
+        var height = block.getHeight();
+        CallRecords callRecords = blockchain.getCallRecords(height);
+
+        int txPosition = 0; // A single tx in block must be at 0 position
+        var callId = CallInBlocks.transaction(txPosition);
+        CallProof callProof = callRecords.getProof(callId);
+
+        // Check some basic properties of the proof
+        // Check the block proof
+        Proofs.BlockProof blockProof = callProof.getBlockProof();
+        assertThat(blockProof.getBlock().getHeight()).isEqualTo(height);
+
+        // Check the call map proof
+        MapProof callErrorProof = callProof.getCallProof();
+        var expectedEntry = OptionalEntry.newBuilder()
+            .setKey(callId.toByteString())
+            .setNoValue(Empty.getDefaultInstance())
+            .build();
+        assertThat(callErrorProof.getEntriesList()).containsExactly(expectedEntry);
+
+        // Check no (= empty) description
+        assertThat(callProof.getErrorDescription()).isEmpty();
+      });
+    }
+
+    @Test
+    void getCallRecordsInvalidHeight() {
       testKitTest((blockchain) -> {
         long invalidHeight = block.getHeight() + 1;
-        assertThrows(IllegalArgumentException.class, () -> blockchain.getCallErrors(invalidHeight));
+        assertThrows(IllegalArgumentException.class,
+            () -> blockchain.getCallRecords(invalidHeight));
       });
     }
 
@@ -546,6 +601,30 @@ class BlockchainIntegrationTest {
         assertThat(transactionPool).isEmpty();
       });
     }
+
+    @Test
+    void getNumTransactions() {
+      testKitTest(blockchain -> {
+        var numTransactions = blockchain.getNumTransactions();
+        assertThat(numTransactions).isEqualTo(1L);
+      });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void getNumTransactionsSeveralTransactions(int numTransactionsToCommit) {
+      var transactions = IntStream.range(0, numTransactionsToCommit)
+          .mapToObj(txId -> createPutTransactionMessage("Key " + txId, "Any Value"))
+          .collect(toList());
+
+      testKit.createBlockWithTransactions(transactions);
+
+      var blockchainData = testKit.getBlockchainData(SERVICE_NAME);
+      var blockchain = blockchainData.getBlockchain();
+      long initialNumTransactions = 1L;
+      long expectedTransactions = initialNumTransactions + numTransactionsToCommit;
+      assertThat(blockchain.getNumTransactions()).isEqualTo(expectedTransactions);
+    }
   }
 
   @Nested
@@ -565,17 +644,54 @@ class BlockchainIntegrationTest {
     }
 
     @Test
-    void getCallErrorsWithError() {
+    void getCallRecordsWithError() {
       testKitTest(blockchain -> {
-        ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors = blockchain
-            .getCallErrors(block.getHeight());
-        Map<CallInBlock, ExecutionError> callErrorsAsMap = toMap(callErrors);
+        CallRecords callRecords = blockchain.getCallRecords(block.getHeight());
 
         int txPosition = 0; // A single tx in block must be at 0 position
-        CallInBlock callId = CallInBlocks.transaction(txPosition);
-        assertThat(callErrorsAsMap).containsOnlyKeys(callId);
-        ExecutionError executionError = callErrorsAsMap.get(callId);
+        var callId = CallInBlocks.transaction(txPosition);
+        var executionError = callRecords.get(callId).orElseThrow();
         checkExecutionError(executionError);
+
+        // Check the CallRecords#getErrors includes the same error
+        var callErrors = callRecords.getErrors();
+        assertThat(callErrors).containsExactly(entry(callId, executionError));
+      });
+    }
+
+    @Test
+    void getCallErrorProofWithError() {
+      testKitTest(blockchain -> {
+        var height = block.getHeight();
+        CallRecords callRecords = blockchain.getCallRecords(height);
+
+        int txPosition = 0; // A single tx in block must be at 0 position
+        var callId = CallInBlocks.transaction(txPosition);
+        var proof = callRecords.getProof(callId);
+
+        // Check some basic properties of the proof
+        // Check the block proof
+        var blockProof = proof.getBlockProof();
+        assertThat(blockProof.getBlock().getHeight()).isEqualTo(height);
+
+        // Check the call proof
+        var callProof = proof.getCallProof();
+        var callProofEntries = callProof.getEntriesList();
+        assertThat(callProofEntries).hasSize(1);
+        var proofEntry = callProofEntries.get(0);
+        // Try to deserialize the key and the value and check their properties
+        // We don't (can't) use equality checks because Exonum includes too much info
+        // in the ExecutionError, so creating an expected one in this test will be too
+        // much work and result in a brittle test.
+        var callInBlockFromProof = CallInBlock.parseFrom(proofEntry.getKey());
+        assertThat(callInBlockFromProof).isEqualTo(callId);
+
+        var executionErrorFromProof = ExecutionError.parseFrom(proofEntry.getValue());
+        assertThat(executionErrorFromProof.getCode()).isEqualTo(errorCode);
+        assertThat(executionErrorFromProof.getDescription())
+            .as("Error description must not be included in the proof")
+            .isEmpty();
+        assertThat(executionErrorFromProof.getRuntimeId()).isEqualTo(RuntimeId.JAVA.getId());
       });
     }
 
@@ -598,6 +714,9 @@ class BlockchainIntegrationTest {
       // or other ITs.
       assertThat(executionError.getKind()).isEqualTo(ErrorKind.SERVICE);
       assertThat(executionError.getCode()).isEqualTo(errorCode);
+      // Check the message, as blockchain merges the description into the exec. error
+      assertThat(executionError.getDescription())
+          .containsIgnoringCase("Diagnostic message " + errorCode);
     }
   }
 

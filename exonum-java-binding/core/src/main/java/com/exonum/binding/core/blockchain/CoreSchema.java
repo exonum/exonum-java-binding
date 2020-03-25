@@ -29,16 +29,19 @@ import com.exonum.binding.common.serialization.StandardSerializers;
 import com.exonum.binding.core.blockchain.serialization.BlockSerializer;
 import com.exonum.binding.core.blockchain.serialization.TransactionLocationSerializer;
 import com.exonum.binding.core.storage.database.Access;
+import com.exonum.binding.core.storage.indices.EntryIndex;
 import com.exonum.binding.core.storage.indices.IndexAddress;
 import com.exonum.binding.core.storage.indices.KeySetIndexProxy;
 import com.exonum.binding.core.storage.indices.ListIndex;
 import com.exonum.binding.core.storage.indices.MapIndex;
+import com.exonum.binding.core.storage.indices.MapIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofEntryIndex;
 import com.exonum.binding.core.storage.indices.ProofListIndexProxy;
 import com.exonum.binding.core.storage.indices.ProofMapIndexProxy;
 import com.exonum.messages.core.Blockchain.CallInBlock;
 import com.exonum.messages.core.Blockchain.Config;
 import com.exonum.messages.core.runtime.Errors.ExecutionError;
+import com.exonum.messages.core.runtime.Errors.ExecutionErrorAux;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -59,6 +62,8 @@ final class CoreSchema {
       TransactionLocationSerializer.INSTANCE;
   private static final Serializer<ExecutionError> EXECUTION_ERROR_SERIALIZER =
       protobuf(ExecutionError.class);
+  private static final Serializer<ExecutionErrorAux> EXECUTION_ERROR_AUX_SERIALIZER =
+      protobuf(ExecutionErrorAux.class);
   private static final Serializer<CallInBlock> CALL_IN_BLOCK_SERIALIZER =
       protobuf(CallInBlock.class);
   private static final Serializer<TransactionMessage> TRANSACTION_MESSAGE_SERIALIZER =
@@ -126,6 +131,7 @@ final class CoreSchema {
 
   /**
    * Returns execution errors that occurred in the given block indexed by calls in that block.
+   *
    * @param blockHeight the height of the block
    */
   ProofMapIndexProxy<CallInBlock, ExecutionError> getCallErrors(long blockHeight) {
@@ -133,6 +139,19 @@ final class CoreSchema {
     byte[] idInGroup = toCoreStorageKey(blockHeight);
     IndexAddress address = IndexAddress.valueOf(CoreIndex.CALL_ERRORS, idInGroup);
     return dbAccess.getProofMap(address, CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_SERIALIZER);
+  }
+
+  /**
+   * Returns auxiliary info on the execution errors that occurred in the given block,
+   * indexed by calls in that block.
+   *
+   * @param blockHeight the height of the block
+   */
+  MapIndexProxy<CallInBlock, ExecutionErrorAux> getCallErrorsAux(long blockHeight) {
+    checkBlockHeight(blockHeight);
+    byte[] idInGroup = toCoreStorageKey(blockHeight);
+    IndexAddress address = IndexAddress.valueOf(CoreIndex.CALL_ERRORS_AUX, idInGroup);
+    return dbAccess.getMap(address, CALL_IN_BLOCK_SERIALIZER, EXECUTION_ERROR_AUX_SERIALIZER);
   }
 
   /**
@@ -168,6 +187,11 @@ final class CoreSchema {
     return configEntry.get();
   }
 
+  EntryIndex<Long> getNumTransactions() {
+    var serializer = StandardSerializers.fixed64();
+    return dbAccess.getEntry(CoreIndex.NUM_TRANSACTIONS, serializer);
+  }
+
   /**
    * Checks that a given block height corresponds to an existing block in the blockchain
    * (i.e., {@code 0 <= blockHeight <= blockchainHeight}).
@@ -201,11 +225,14 @@ final class CoreSchema {
     private static final IndexAddress TRANSACTIONS = IndexAddress.valueOf(PREFIX + "transactions");
     private static final IndexAddress BLOCKS = IndexAddress.valueOf(PREFIX + "blocks");
     private static final String CALL_ERRORS = PREFIX + "call_errors";
+    private static final String CALL_ERRORS_AUX = PREFIX + "call_errors_aux";
     private static final IndexAddress TRANSACTIONS_LOCATIONS = IndexAddress
         .valueOf(PREFIX + "transactions_locations");
     private static final IndexAddress TRANSACTIONS_POOL = IndexAddress
         .valueOf(PREFIX + "transactions_pool");
     private static final IndexAddress CONSENSUS_CONFIG = IndexAddress
         .valueOf(PREFIX + "consensus_config");
+    private static final IndexAddress NUM_TRANSACTIONS = IndexAddress
+        .valueOf(PREFIX + "transactions_len");
   }
 }
