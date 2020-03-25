@@ -21,7 +21,9 @@ artifacts:
     version: "0.10.0-SNAPSHOT"
     spec:
       artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-SNAPSHOT-artifact.jar"
+    action: deploy
 
 instances:
   cryptocurrency:
     artifact: cryptocurrency
+    action: start
