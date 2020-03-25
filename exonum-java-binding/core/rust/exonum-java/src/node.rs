@@ -72,6 +72,8 @@ fn create_node(config: Config) -> Result<Node, anyhow::Error> {
     Spec::new(TimeServiceFactory::default())
         .deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
 
+    Spec::new(TimestampingService).deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
+
     let node = NodeBuilder::new(database, node_config, node_keys)
         .with_genesis_config(genesis_config_builder.build())
         .with_runtime_fn(|api| rust_runtime_builder.build(api.endpoints_sender()))
