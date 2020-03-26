@@ -31,13 +31,9 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
-// TODO(ECR-4304)
-@DisabledOnOs(OS.WINDOWS)
 class TestKitParameterizationTest {
 
   private static final short TEMPLATE_VALIDATOR_COUNT = 1;

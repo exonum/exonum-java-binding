@@ -17,8 +17,6 @@
 package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.test.CiOnly;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
 
@@ -27,8 +25,6 @@ import org.pf4j.PluginManager;
  * so that we are able to understand if our {@linkplain JarPluginManager custom plugin manager}
  * has any impact in case of any problems.
  */
-// ECR-4304
-@DisabledOnOs(OS.WINDOWS)
 @CiOnly // We don't use DefaultPluginManager in prod, hence run this on CI-server only
 class Pf4jServiceLoaderWithDefaultIntegrationTest extends Pf4jServiceLoaderIntegrationTestable {
 

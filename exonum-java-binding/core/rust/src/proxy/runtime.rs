@@ -346,7 +346,9 @@ impl Runtime for JavaRuntimeProxy {
             Ok(())
         }));
     }
+}
 
+impl JavaRuntimeProxy {
     fn shutdown(&mut self) {
         unwrap_jni(self.exec.with_attached(|env| {
             panic_on_exception(
@@ -360,6 +362,12 @@ impl Runtime for JavaRuntimeProxy {
             );
             Ok(())
         }));
+    }
+}
+
+impl std::ops::Drop for JavaRuntimeProxy {
+    fn drop(&mut self) {
+        self.shutdown();
     }
 }
 

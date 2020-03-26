@@ -28,13 +28,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
-// TODO(ECR-4304)
-@DisabledOnOs(OS.WINDOWS)
 class TestKitAuditorParameterizationTest {
 
   @TempDir

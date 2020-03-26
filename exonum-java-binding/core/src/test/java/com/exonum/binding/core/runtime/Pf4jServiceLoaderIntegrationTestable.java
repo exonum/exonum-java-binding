@@ -45,6 +45,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.pf4j.Plugin;
 import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
 
 abstract class Pf4jServiceLoaderIntegrationTestable {
 
@@ -78,6 +81,15 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
     serviceLoader = new Pf4jServiceLoader(pluginManager,
         new ClassLoadingScopeChecker(TEST_DEPENDENCY_REFERENCE_CLASSES));
     artifactLocation = tmp.resolve("service.jar");
+  }
+
+  @AfterEach
+  void tearDown() {
+    var plugins = pluginManager.getPlugins();
+    for (PluginWrapper plugin : plugins) {
+      var pluginId = plugin.getPluginId();
+      pluginManager.unloadPlugin(pluginId);
+    }
   }
 
   abstract PluginManager createPluginManager();
