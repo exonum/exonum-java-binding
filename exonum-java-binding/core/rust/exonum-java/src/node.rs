@@ -18,21 +18,13 @@ use exonum_explorer_service::ExplorerFactory;
 use exonum_node::{Node, NodeBuilder, NodeConfig as CoreNodeConfig};
 use exonum_system_api::SystemApiPlugin;
 use java_bindings::{
-    create_database,
-    create_java_vm,
-    create_service_runtime,
+    create_database, create_java_vm, create_service_runtime,
     exonum::blockchain::config::GenesisConfigBuilder,
-    // exonum_btc_anchoring::BtcAnchoringService,
+    exonum_btc_anchoring::BtcAnchoringService,
     exonum_rust_runtime::RustRuntimeBuilder,
     exonum_supervisor::{mode::Mode as SupervisorMode, Supervisor},
     exonum_time::TimeServiceFactory,
-    Command,
-    Config,
-    DefaultConfigManager,
-    EjbCommand,
-    EjbCommandResult,
-    Executor,
-    InternalConfig,
+    Command, Config, DefaultConfigManager, EjbCommand, EjbCommandResult, Executor, InternalConfig,
     JavaRuntimeProxy,
 };
 
@@ -62,14 +54,20 @@ fn create_node(config: Config) -> Result<Node, anyhow::Error> {
         .consensus
         .clone();
     let mut genesis_config_builder = GenesisConfigBuilder::with_consensus_config(consensus_config);
+
+    // Deploy Rust services:
+    // Explorer
     Spec::new(ExplorerFactory)
         .with_default_instance()
         .deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
+    // Supervisor
     let supervisor_service = supervisor_service(&config);
     supervisor_service.deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
-
+    // Time Oracle
     Spec::new(TimeServiceFactory::default())
         .deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
+    // BTC Anchoring
+    Spec::new(BtcAnchoringService).deploy(&mut genesis_config_builder, &mut rust_runtime_builder);
 
     let node = NodeBuilder::new(database, node_config, node_keys)
         .with_genesis_config(genesis_config_builder.build())
