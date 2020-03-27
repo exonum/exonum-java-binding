@@ -54,7 +54,7 @@ public interface CleanAction<ResourceDescriptionT> {
                                              ResourceDescriptionT resourceType) {
     checkNotNull(resourceType, "resourceType must not be null");
 
-    return new CleanAction<ResourceDescriptionT>() {
+    return new CleanAction<>() {
       @Override
       public void clean() {
         action.run();

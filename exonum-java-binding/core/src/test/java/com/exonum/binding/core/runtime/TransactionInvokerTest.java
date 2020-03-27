@@ -32,6 +32,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+@SuppressWarnings("EmptyMethod") // Most transaction methods are empty
 class TransactionInvokerTest {
 
   static final int TRANSACTION_ID = 1;

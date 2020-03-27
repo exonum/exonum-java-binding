@@ -64,7 +64,7 @@ public final class ProofEntryIndexProxy<T> extends AbstractEntryIndexProxy<T> im
           in the interface as well. */
       AbstractAccess access,
       Serializer<E> serializer) {
-    checkArgument(!address.getIdInGroup().isPresent(),
+    checkArgument(address.getIdInGroup().isEmpty(),
         "Groups of Entries are not supported, use a ProofMapIndex instead");
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 

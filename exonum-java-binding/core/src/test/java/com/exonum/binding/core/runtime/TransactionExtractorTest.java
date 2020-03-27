@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("EmptyMethod") // Most transaction methods are empty
 class TransactionExtractorTest {
 
   @Test

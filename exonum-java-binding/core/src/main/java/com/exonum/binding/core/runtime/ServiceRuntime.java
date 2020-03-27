@@ -313,7 +313,7 @@ public final class ServiceRuntime implements AutoCloseable {
   private ServiceWrapper createServiceInstance(ServiceInstanceSpec instanceSpec) {
     // Check no such service in the runtime
     String name = instanceSpec.getName();
-    checkArgument(!findService(name).isPresent(),
+    checkArgument(findService(name).isEmpty(),
         "Service with name '%s' already created: %s", name, services.get(name));
 
     // Find the service definition

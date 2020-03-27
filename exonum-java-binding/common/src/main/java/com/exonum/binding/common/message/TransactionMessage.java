@@ -111,7 +111,7 @@ public interface TransactionMessage {
    * Builder for the binary transaction message.
    */
   class Builder {
-    private static CryptoFunction DEFAULT_CRYPTO_FUNCTION = CryptoFunctions.ed25519();
+    private static final CryptoFunction DEFAULT_CRYPTO_FUNCTION = CryptoFunctions.ed25519();
     private Integer serviceId;
     private Integer transactionId;
     private ByteString payload;

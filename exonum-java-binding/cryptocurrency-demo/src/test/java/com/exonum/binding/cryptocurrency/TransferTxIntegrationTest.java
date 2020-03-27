@@ -16,11 +16,11 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACTS_DIRECTORY;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
-import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.TransactionError.INSUFFICIENT_FUNDS;
 import static com.exonum.binding.cryptocurrency.TransactionError.NON_POSITIVE_TRANSFER_AMOUNT;
 import static com.exonum.binding.cryptocurrency.TransactionError.SAME_SENDER_AND_RECEIVER;
@@ -58,7 +58,7 @@ class TransferTxIntegrationTest {
       TestKit.builder()
           .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
           .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-          .withArtifactsDirectory(artifactsDirectory));
+          .withArtifactsDirectory(ARTIFACTS_DIRECTORY));
 
   private static final KeyPair FROM_KEY_PAIR = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair TO_KEY_PAIR = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;
