@@ -16,11 +16,11 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACTS_DIRECTORY;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
-import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.exonum.binding.common.crypto.PublicKey;
@@ -39,7 +39,7 @@ class CryptocurrencySchemaIntegrationTest {
       TestKit.builder()
           .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
           .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-          .withArtifactsDirectory(artifactsDirectory));
+          .withArtifactsDirectory(ARTIFACTS_DIRECTORY));
 
   private static final PublicKey WALLET_OWNER_KEY =
       PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR.getPublicKey();

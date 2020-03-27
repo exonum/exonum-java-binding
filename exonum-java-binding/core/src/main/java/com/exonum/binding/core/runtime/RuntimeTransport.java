@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
  */
 public final class RuntimeTransport implements AutoCloseable {
 
-  private static Logger logger = LogManager.getLogger(RuntimeTransport.class);
+  private static final Logger logger = LogManager.getLogger(RuntimeTransport.class);
 
   private final Server server;
   private final int port;

@@ -104,7 +104,7 @@ class CheckedMapProofMatcher extends TypeSafeMatcher<CheckedMapProof> {
 
   private Set<ByteString> getExpectedMissingKeys() {
     return entries.stream()
-        .filter(e -> !e.getValue().isPresent())
+        .filter(e -> e.getValue().isEmpty())
         .map(e -> ByteString.copyFrom(e.getKey().asBytes()))
         .collect(toSet());
   }

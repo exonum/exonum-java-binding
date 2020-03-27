@@ -42,6 +42,7 @@ import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Event;
 import org.junit.platform.testkit.engine.Events;
 
+@SuppressWarnings("EmptyMethod")
 class TestKitExtensionTest {
 
   @TempDir

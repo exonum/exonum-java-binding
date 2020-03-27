@@ -54,6 +54,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+@SuppressWarnings("EmptyMethod")
 @Integration
 class TestkitExamplesTest {
 

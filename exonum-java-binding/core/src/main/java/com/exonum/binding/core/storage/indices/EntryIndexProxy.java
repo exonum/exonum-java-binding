@@ -59,7 +59,7 @@ public final class EntryIndexProxy<T> extends AbstractEntryIndexProxy<T> {
    */
   public static <E> EntryIndexProxy<E> newInstance(IndexAddress address, AbstractAccess access,
       Serializer<E> serializer) {
-    checkArgument(!address.getIdInGroup().isPresent(),
+    checkArgument(address.getIdInGroup().isEmpty(),
         "Groups of Entries are not supported, use a MapIndex instead");
     CheckingSerializerDecorator<E> s = CheckingSerializerDecorator.from(serializer);
 

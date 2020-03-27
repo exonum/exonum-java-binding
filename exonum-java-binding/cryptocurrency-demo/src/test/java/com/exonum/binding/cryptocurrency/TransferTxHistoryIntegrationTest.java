@@ -16,11 +16,11 @@
 
 package com.exonum.binding.cryptocurrency;
 
+import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACTS_DIRECTORY;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_FILENAME;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.ARTIFACT_ID;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_ID;
 import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.SERVICE_NAME;
-import static com.exonum.binding.cryptocurrency.PredefinedServiceParameters.artifactsDirectory;
 import static com.exonum.binding.cryptocurrency.TransactionUtils.newCreateWalletTransaction;
 import static com.exonum.binding.cryptocurrency.TransactionUtils.newTransferTransaction;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +45,7 @@ class TransferTxHistoryIntegrationTest {
       TestKit.builder()
           .withDeployedArtifact(ARTIFACT_ID, ARTIFACT_FILENAME)
           .withService(ARTIFACT_ID, SERVICE_NAME, SERVICE_ID)
-          .withArtifactsDirectory(artifactsDirectory));
+          .withArtifactsDirectory(ARTIFACTS_DIRECTORY));
 
   private static final KeyPair ACCOUNT_1 = PredefinedOwnerKeys.FIRST_OWNER_KEY_PAIR;
   private static final KeyPair ACCOUNT_2 = PredefinedOwnerKeys.SECOND_OWNER_KEY_PAIR;

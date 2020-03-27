@@ -41,8 +41,8 @@ public final class CallRecords {
 
   private final Blockchain blockchain;
   private final long blockHeight;
-  private ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors;
-  private MapIndexProxy<CallInBlock, ExecutionErrorAux> callErrorsAux;
+  private final ProofMapIndexProxy<CallInBlock, ExecutionError> callErrors;
+  private final MapIndexProxy<CallInBlock, ExecutionErrorAux> callErrorsAux;
 
   CallRecords(CoreSchema schema, Blockchain blockchain, long blockHeight) {
     this.blockchain = blockchain;

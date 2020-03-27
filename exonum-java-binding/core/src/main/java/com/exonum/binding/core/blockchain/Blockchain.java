@@ -48,7 +48,7 @@ import java.util.Optional;
  * blockchain::Schema</a> features in the Core API: blocks, transaction messages, execution
  * results.
  *
- * <!-- This section is suppossed to be the main Javadoc on proofs, documenting how
+ * <!-- This section is supposed to be the main Javadoc on proofs, documenting how
  *      to create various blockchain proofs from their components.
  *
  *      Link here with <a href="<relative path>/Blockchain.html#proofs">Blockchain Proofs</a>.

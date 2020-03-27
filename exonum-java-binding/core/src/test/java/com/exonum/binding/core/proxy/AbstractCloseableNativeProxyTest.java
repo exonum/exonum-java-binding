@@ -358,7 +358,7 @@ class AbstractCloseableNativeProxyTest {
 
   private Matcher<AbstractCloseableNativeProxy> hasInvalidReferences(
       Collection<AbstractCloseableNativeProxy> expected) {
-    return new TypeSafeMatcher<AbstractCloseableNativeProxy>() {
+    return new TypeSafeMatcher<>() {
 
       @Override
       protected boolean matchesSafely(AbstractCloseableNativeProxy item) {
