@@ -17,15 +17,6 @@ Include `exonum-time-oracle` as a dependency in your `pom.xml`:
     </dependency>
 ```
 
-To use the time oracle, we should enable it. To do that, include its name `time` in
-`services.toml` configuration file in the Exonum Java app's directory with the following content:
-
-```toml
-system_services = ["time"]
-```
-
-See more information on built-in services [here][built-in-services].
-
 [`TimeSchema`][time-schema-javadoc] allows to access the state of time oracle.
 Below is an example of a service method that uses time oracle to return the consolidated time. Note
 that at the time when a new blockchain is launched, the consolidated time is unknown until the
@@ -46,6 +37,11 @@ public Optional<ZonedDateTime> getTime() {
 }
 ```
 
+### Service Instantiation
+
+To use the time oracle in your service, you should start an instance of it.
+See [_Deploy and Start Services_][deploy-start-java-services] for details.
+
 ## License
 
 `exonum-time-oracle` is licensed under the
@@ -53,5 +49,5 @@ Apache License (Version 2.0).
 See [LICENSE](../../LICENSE) for details.
 
 [exonum-time]: https://exonum.com/doc/version/1.0/advanced/time/
-[built-in-services]: https://exonum.com/doc/version/1.0/get-started/java-binding/#built-in-services
+[deploy-start-java-services]: https://exonum.com/doc/version/1.0/get-started/java-binding/#deploy-and-start-the-service
 [time-schema-javadoc]: https://exonum.com/doc/api/java-binding/0.10.0/com/exonum/binding/time/TimeSchema.html
