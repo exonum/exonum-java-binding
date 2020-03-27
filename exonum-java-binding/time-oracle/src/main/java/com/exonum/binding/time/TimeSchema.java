@@ -26,7 +26,7 @@ import java.time.ZonedDateTime;
  * Exonum time service database schema. It provides read-only access to the state
  * of a time oracle service instance.
  *
- * @see <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/time/">Time oracle documentation</a>
+ * @see <a href="https://exonum.com/doc/version/1.0/advanced/time/">Time oracle documentation</a>
  */
 public interface TimeSchema {
 

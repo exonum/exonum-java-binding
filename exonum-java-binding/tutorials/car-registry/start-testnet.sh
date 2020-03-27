@@ -5,7 +5,7 @@
 # The network files are placed in `$PWD/testnet` directory, which is cleared at the beginning.
 # The Java service artifacts must be placed into 'testnet/artifacts' directory.
 #
-# See https://exonum.com/doc/version/latest/get-started/java-binding/#node-configuration
+# See https://exonum.com/doc/version/1.0/get-started/java-binding/#node-configuration
 # for extra information.
 
 # Prints a section header

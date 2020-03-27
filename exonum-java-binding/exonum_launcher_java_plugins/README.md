@@ -30,7 +30,7 @@ python3 -m pip install -e exonum_launcher_java_plugins
 
 See [Deploy and Start the Service][deploy-and-start].
 
-[deploy-and-start]: https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#deploy-and-start-the-service
+[deploy-and-start]: https://exonum.com/doc/version/1.0/get-started/java-binding/#deploy-and-start-the-service
 
 # License
 

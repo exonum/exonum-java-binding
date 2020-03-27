@@ -160,7 +160,7 @@ simple or the new decentralized.
 See the updated node and application configuration [documentation][node-config] on the site
 for the detailed instructions.
 
-[node-config]: https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#node-configuration
+[node-config]: https://exonum.com/doc/version/1.0/get-started/java-binding/#node-configuration
 
 ## Update the Clients
 
@@ -174,7 +174,7 @@ See the [release page][release-page] for an overview of the new features.
 ## See Also
 
 - The 0.10.0 [release page][release-page] for the changelog and pre-built binaries.
-- [User Guide](https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/)
+- [User Guide](https://exonum.com/doc/version/1.0/get-started/java-binding/)
 - [Javadocs](https://exonum.com/doc/api/java-binding/0.10.0/index.html)
 
 [release-page]: https://github.com/exonum/exonum-java-binding/releases/tag/ejb/v0.10.0

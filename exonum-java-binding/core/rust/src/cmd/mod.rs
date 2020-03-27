@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
+use std::path::PathBuf;
+
 use anyhow;
 use exonum_cli::command::{
     ExonumCommand, Finalize, GenerateConfig, GenerateTemplate, Maintenance, StandardResult,
 };
+pub use exonum_cli::DefaultConfigManager;
 use structopt::StructOpt;
-
-use std::path::PathBuf;
 
 use super::Config;
 
-mod run;
-mod run_dev;
-
 pub use self::run::*;
 pub use self::run_dev::*;
-pub use exonum_cli::DefaultConfigManager;
+
+mod run;
+mod run_dev;
 
 /// Exonum Java Bindings Application.
 ///
 /// Configures and runs Exonum node with Java runtime enabled.
 ///
-/// See https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#node-configuration
+/// See https://exonum.com/doc/version/1.0/get-started/java-binding/#node-configuration
 #[derive(StructOpt, Debug)]
 #[structopt(author, about)]
 #[allow(clippy::large_enum_variant)]
