@@ -46,8 +46,8 @@ import javax.annotation.Nullable;
  *   <li>by an authorized Light Client, using the Exonum endpoints. For example, when
  *   the clients requests the transaction information, it will get the execution error,
  *   if it occurred. See
- *   <a href="https://exonum.com/doc/version/0.13-rc.2/advanced/node-management/#transaction">the API endpoint documentation</a>
- *   for more information.</li>
+ *   <a href="https://exonum.com/doc/version/1.0/advanced/other-services/#explorer">the Explorer API
+ *   endpoint documentation</a> for more information.</li>
  * </ul>
  *
  * @see Blockchain#getTxResult(HashCode)
