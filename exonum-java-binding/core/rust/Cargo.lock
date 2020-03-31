@@ -995,9 +995,9 @@ dependencies = [
 
 [[package]]
 name = "exonum-derive"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72b14387ea465a2a030cd71ca609988bdde25994ccbf918fa7c1a1ac18c243f3"
+checksum = "df63aca14a1d8025eeece41ec0fdc57434c35d8dc18f279fb3484af42e12deb3"
 dependencies = [
  "darling",
  "proc-macro2 1.0.8",
