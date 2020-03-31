@@ -13,7 +13,7 @@ pub fn executable_directory() -> PathBuf {
 /// This directory contains `libjava_bindings.so` so JVM is able to load native functions
 /// from the library.
 pub fn absolute_library_path() -> String {
-    let library_path = executable_directory().join("lib").join("native").to_owned();
+    let library_path = executable_directory().join("lib").join("native");
     library_path.to_string_lossy().into_owned()
 }
 
@@ -22,7 +22,7 @@ pub fn absolute_library_path() -> String {
 /// The returned value is colon- or semicolon-separated list of absolute paths to files.
 pub fn system_classpath() -> String {
     let mut jars = Vec::new();
-    let jars_directory = executable_directory().join("lib").join("java").to_owned();
+    let jars_directory = executable_directory().join("lib").join("java");
     for entry in fs::read_dir(jars_directory).expect("Could not read java classes directory") {
         let file = entry.unwrap();
         if file.file_type().unwrap().is_file() {
