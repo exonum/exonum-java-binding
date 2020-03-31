@@ -25,6 +25,8 @@ import com.exonum.binding.test.runtime.testplugin.TestServiceExtensionImpl;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -35,6 +37,7 @@ import org.pf4j.PluginWrapper;
 
 class ServiceArtifactBuilderSmokeIntegrationTest {
 
+  @Disabled
   @Test
   @DisplayName("Created plugin must be successfully loaded and unloaded by the PluginManager. "
       + "If this test does not work, subsequent use of ServiceArtifactBuilder in other ITs makes "
