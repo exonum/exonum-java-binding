@@ -51,10 +51,10 @@ jobs:
       language: rust
       before_install:
         - echo $PATH
-        - choco install openjdk -y
+        - choco install openjdk13 -y
         - choco install maven -y
         - export M2_HOME="/c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.3"
-        - export PATH=$PATH:"/c/Program Files/OpenJDK/jdk-14/bin"
+        - export PATH=$PATH:"/c/Program Files/OpenJDK/jdk-13.0.2/bin"
 
         - echo $PATH
         - powershell 'echo $env:Path'
