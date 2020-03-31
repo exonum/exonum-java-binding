@@ -943,9 +943,9 @@ dependencies = [
 
 [[package]]
 name = "exonum-build"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "474c9da67a1dc4379172c6c63df362f9c65a3c66c66aafa1fc668b30f7ace51c"
+checksum = "fd048eb3b672628adc5c8391a57b6c6128b0c9599ab8045bec6801ae914bd4fc"
 dependencies = [
  "proc-macro2 1.0.8",
  "protoc-rust",
