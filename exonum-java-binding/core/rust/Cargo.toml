@@ -17,7 +17,7 @@ resource-manager = []
 [dependencies]
 chrono = "0.4"
 exonum = { version = "1.0.0-rc.1", features = ["rocksdb_snappy", "rocksdb_lz4", "rocksdb_zlib", "rocksdb_bzip2"] }
-exonum-btc-anchoring = "1.0.0-rc.1"
+exonum-btc-anchoring = "1.0.0-rc.3"
 exonum-cli = "1.0.0-rc.1"
 exonum-derive = "1.0.0-rc.1"
 exonum-proto = "1.0.0-rc.1"
