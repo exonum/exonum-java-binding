@@ -23,7 +23,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.compiler.release>${java.compiler.clientRelease}</java.compiler.release>
-    <lazysodium-java.version>4.2.3</lazysodium-java.version>
+    <lazysodium-java.version>4.2.5</lazysodium-java.version>
     <auto-value.version>1.7</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
     <protobuf.python.deployArguments.outputDirectory>
@@ -50,6 +50,12 @@
       <groupId>com.goterl.lazycode</groupId>
       <artifactId>lazysodium-java</artifactId>
       <version>${lazysodium-java.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>co.libly</groupId>
+      <artifactId>resource-loader</artifactId>
+      <version>1.3.6</version>
     </dependency>
 
     <dependency>
@@ -138,9 +144,15 @@
   </dependencies>
 
   <repositories>
+    <!-- lazysodium-java is fetched from JCenter -->
     <repository>
       <id>jcenter</id>
       <url>https://jcenter.bintray.com/</url>
+    </repository>
+    <!-- resource-loader is fetched from Jitpack -->
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
     </repository>
   </repositories>
 
