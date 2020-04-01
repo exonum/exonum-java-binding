@@ -122,6 +122,11 @@ before_install:
   - rustup default "$RUST_COMPILER_VERSION"
   # List all installed cargo packages.
   - cargo install --list
+  # Build and install the patched resource-loader
+  - git clone https://github.com/dmitry-timofeev/resource-loader.git
+  - cd resource-loader/
+  - ./gradlew publishToMavenLocal
+  - cd -
 
 install: true  # Skip the installation step, as Maven requires
                # several extra properties when run on a CI server (see below).
