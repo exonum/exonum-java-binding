@@ -76,11 +76,17 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
   with a service name followed by a dot as a prefix 
   (see `BlockchainData#getExecutingServiceData`). (#1393)
 - `Prefixed` and `ReadonlyFork` database Accesses. (#1382, #1385)
-- `Service#beforeTranactions`.
+- `Service#beforeTransactions`.
 - `KeyPair#newInstance(PrivateKey, PublicKey)`
 - `Blockchain#getNumTransactions`, returning the total number of committed
   to the blockchain transactions.
 - `Blockchain#getNextHeight`, returning the height of the next committed block.
+- `Configuration` can be passed in several text-based formats: JSON, Java
+  properties, plain text. 
+  The configuration parameters are transferred using a standard protobuf message
+  `ServiceConfiguration`.  
+  `exonum-launcher` comes with built-in support for text-based configuration 
+  formats.
 
 [blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 

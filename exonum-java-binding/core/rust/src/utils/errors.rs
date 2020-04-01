@@ -217,7 +217,7 @@ pub fn any_to_string(any: &Box<dyn Any + Send>) -> String {
     } else if let Some(s) = any.downcast_ref::<String>() {
         s.clone()
     } else if let Some(error) = any.downcast_ref::<Box<dyn Error + Send>>() {
-        error.description().to_string()
+        error.to_string()
     } else if let Some(error) = any.downcast_ref::<DatabaseError>() {
         error.to_string()
     } else {
@@ -249,7 +249,7 @@ mod tests {
     #[test]
     fn box_error_any() {
         let error: Box<dyn Error + Send> = Box::new("e".parse::<i32>().unwrap_err());
-        let description = error.description().to_owned();
+        let description = error.to_string();
         let error = panic_error(error);
         assert_eq!(description, any_to_string(&error));
     }

@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-use exonum_cli::command::{
-    finalize::Finalize, generate_config::GenerateConfig, generate_template::GenerateTemplate,
-    maintenance::Maintenance, ExonumCommand, StandardResult,
-};
-use failure;
-use structopt::StructOpt;
-
 use std::path::PathBuf;
+
+use anyhow;
+use exonum_cli::command::{
+    ExonumCommand, Finalize, GenerateConfig, GenerateTemplate, Maintenance, StandardResult,
+};
+pub use exonum_cli::DefaultConfigManager;
+use structopt::StructOpt;
 
 use super::Config;
 
-mod run;
-mod run_dev;
-
 pub use self::run::*;
 pub use self::run_dev::*;
-pub use exonum_cli::DefaultConfigManager;
+
+mod run;
+mod run_dev;
 
 /// Exonum Java Bindings Application.
 ///
 /// Configures and runs Exonum node with Java runtime enabled.
 ///
-/// See https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#node-configuration
+/// See https://exonum.com/doc/version/1.0/get-started/java-binding/#node-configuration
 #[derive(StructOpt, Debug)]
 #[structopt(author, about)]
 #[allow(clippy::large_enum_variant)]
@@ -74,7 +73,7 @@ impl Command {
 }
 
 impl EjbCommand for Command {
-    fn execute(self) -> Result<EjbCommandResult, failure::Error> {
+    fn execute(self) -> Result<EjbCommandResult, anyhow::Error> {
         match self {
             Command::GenerateTemplate(c) => c.execute().map(Into::into),
             Command::GenerateConfig(c) => c.execute().map(Into::into),
@@ -91,7 +90,7 @@ pub enum EjbCommandResult {
     /// Output of the standard Exonum Core commands.
     Standard(StandardResult),
     /// Output of EJB-specific `run` command.
-    EjbRun(Config),
+    EjbRun(Box<Config>),
 }
 
 impl From<StandardResult> for EjbCommandResult {
@@ -103,7 +102,7 @@ impl From<StandardResult> for EjbCommandResult {
 /// Interface of Java Bindings CLI commands.
 pub trait EjbCommand {
     /// Returns the result of command execution.
-    fn execute(self) -> Result<EjbCommandResult, failure::Error>;
+    fn execute(self) -> Result<EjbCommandResult, anyhow::Error>;
 }
 
 /// Concatenates PathBuf and string. Useful to make a `PathBuf` to a file in the specific directory.

@@ -76,7 +76,7 @@ public final class ExampleService extends AbstractService {
    */
   @Transaction(PUT_TX_ID)
   public void putEntry(Transactions.PutTransactionArgs arguments,
-      TransactionContext context) {
+      ExecutionContext context) {
     ExampleSchema schema = new ExampleSchema(context.getServiceData());
     String key = arguments.getKey();
     String value = arguments.getValue();
@@ -101,8 +101,39 @@ Prefer ExecutionException for service-defined errors to other runtime exceptions
     2. groupId, artifactId, version are the standard Maven coordinates.
     3. The «groupId/artifactId» part is considered to be the _Exonum service artifact name_.  
     An example Plugin-Id value: "1:com.acme/example-service:1.2.1".
-2. Then, update the exonum-launcher configuration files with the new service name: «groupId/artifactId»,
-and add the version to them.
+
+2. Then, update the exonum-launcher configuration files with the new service name: 
+«groupId/artifactId», and add the version to them.
+
+3. Specify in exonum-launcher configuration files the _actions_ that must
+be performed for the artifact (e.g., deploy) and the service (e.g., start):
+
+```yaml
+artifacts:
+  cryptocurrency:
+    runtime: java
+    name: "com.exonum.examples/cryptocurrency"
+    version: "0.10.0"
+    spec:
+      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-artifact.jar"
+    # Explicit artifact action: deploy
+    action: deploy
+  # The built-in services come pre-deployed in the genesis block, no action
+  # needed
+  time:
+    runtime: rust
+    name: "exonum-time"
+    version: "1.0.0"
+
+instances:
+  cryptocurrency:
+    artifact: cryptocurrency
+    # Explicit service instance action: start
+    action: start
+  time:
+    artifact: time
+    action: start
+```
 
 ### Update the Integration Tests
 
@@ -129,7 +160,7 @@ simple or the new decentralized.
 See the updated node and application configuration [documentation][node-config] on the site
 for the detailed instructions.
 
-[node-config]: https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#node-configuration
+[node-config]: https://exonum.com/doc/version/1.0/get-started/java-binding/#node-configuration
 
 ## Update the Clients
 
@@ -143,7 +174,7 @@ See the [release page][release-page] for an overview of the new features.
 ## See Also
 
 - The 0.10.0 [release page][release-page] for the changelog and pre-built binaries.
-- [User Guide](https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/)
+- [User Guide](https://exonum.com/doc/version/1.0/get-started/java-binding/)
 - [Javadocs](https://exonum.com/doc/api/java-binding/0.10.0/index.html)
 
 [release-page]: https://github.com/exonum/exonum-java-binding/releases/tag/ejb/v0.10.0

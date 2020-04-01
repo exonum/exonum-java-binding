@@ -43,7 +43,7 @@ public interface Service {
    * @throws ExecutionException if the configuration parameters are not valid (e.g.,
    *     malformed, or do not meet the preconditions). Exonum will stop the service if
    *     its initialization fails. It will save the error into
-   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   *     {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallRecords(long)}
    *     the registry of call errors}
    * @see Configurable
    */
@@ -90,14 +90,14 @@ public interface Service {
    *
    * <p>Please remember that Java services use a <em>separate</em> server from Rust services.
    * The Java server TCP port is specified on node start, see
-   * <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#running-the-node">
+   * <a href="https://exonum.com/doc/version/1.0/get-started/java-binding/#running-the-node">
    * documentation</a> for details.
    *
    * @param node a set-up Exonum node, providing an interface to access
    *             the current blockchain state and submit transactions. Note that a node gets
    *             closed automatically by the runtime when the service stops
    * @param router a router responsible for handling requests to this service
-   * @see <a href="https://exonum.com/doc/version/0.13-rc.2/get-started/java-binding/#external-service-api">
+   * @see <a href="https://exonum.com/doc/version/1.0/get-started/java-binding/#external-service-api">
    *   Documentation on service API</a>
    */
   void createPublicApiHandlers(Node node, Router router);
@@ -124,7 +124,7 @@ public interface Service {
    *
    * <p>Any exceptions in this method will revert any changes made to the database by it,
    * but will not affect the processing of this block. Exceptions are saved
-   * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallErrors(long)
+   * in {@linkplain com.exonum.binding.core.blockchain.Blockchain#getCallRecords(long)
    * the registry of call errors} with appropriate error kinds.
    *
    * @param context the execution context

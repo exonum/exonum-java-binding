@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 class BoolSerializerTest {
 
-  private Serializer<Boolean> serializer = BoolSerializer.INSTANCE;
+  private final Serializer<Boolean> serializer = BoolSerializer.INSTANCE;
 
   @Test
   void roundTrip() {

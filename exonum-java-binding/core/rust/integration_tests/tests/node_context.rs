@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-use futures::{
-    sync::mpsc::{self, Receiver},
-    Stream,
-};
+use futures::channel::mpsc::{self, Receiver};
 use integration_tests::vm::create_vm_for_tests_with_classes;
 use java_bindings::{
     exonum::{
@@ -49,9 +46,9 @@ fn submit_transaction() {
     let service_id = 0;
     let raw_transaction = create_transaction(service_id);
 
-    let (node, app_rx) = create_node(keypair);
+    let (node, mut app_rx) = create_node(keypair);
     node.submit(raw_transaction.clone()).unwrap();
-    let sent_message = app_rx.wait().next().unwrap().unwrap();
+    let sent_message = app_rx.try_next().unwrap().unwrap();
 
     let message_payload = sent_message.payload();
     let message_author = sent_message.author();

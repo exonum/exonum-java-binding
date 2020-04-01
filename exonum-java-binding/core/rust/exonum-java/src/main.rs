@@ -21,7 +21,8 @@ use java_bindings::{get_lib_version, Command};
 
 mod node;
 
-fn main() -> Result<(), failure::Error> {
+#[tokio::main]
+async fn main() -> Result<(), anyhow::Error> {
     env_logger::init();
     // Panic if `_JAVA_OPTIONS` environmental variable is set.
     java_bindings::panic_if_java_options();
@@ -29,7 +30,7 @@ fn main() -> Result<(), failure::Error> {
     // Log app's metadata
     log_app_metadata();
 
-    run_node(Command::from_args())
+    run_node(Command::from_args()).await
 }
 
 // Prints info about version and build mode of started app to the STDOUT.
