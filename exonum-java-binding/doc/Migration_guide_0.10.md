@@ -123,7 +123,7 @@ artifacts:
   time:
     runtime: rust
     name: "exonum-time"
-    version: "1.0.0-rc.3"
+    version: "1.0.0"
 
 instances:
   cryptocurrency:

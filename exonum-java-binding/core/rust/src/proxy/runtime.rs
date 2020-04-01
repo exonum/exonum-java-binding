@@ -346,8 +346,10 @@ impl Runtime for JavaRuntimeProxy {
             Ok(())
         }));
     }
+}
 
-    fn shutdown(&mut self) {
+impl Drop for JavaRuntimeProxy {
+    fn drop(&mut self) {
         unwrap_jni(self.exec.with_attached(|env| {
             panic_on_exception(
                 env,

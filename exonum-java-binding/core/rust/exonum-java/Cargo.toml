@@ -7,9 +7,9 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0"
 env_logger = "0.6"
-exonum-explorer-service = "1.0.0-rc.3"
-exonum-node = "1.0.0-rc.3"
-exonum-system-api = "1.0.0-rc.3"
+exonum-explorer-service = "1.0.0"
+exonum-node = "1.0.0"
+exonum-system-api = "1.0.0"
 # Specify the "resource-manager" feature explicitly to prevent issues with linking (see ECR-2855).
 # Although its primary goal is to detect _programming_ errors that shall not occur
 # in a correct application early, it is currently required in the application
