@@ -18,8 +18,6 @@
 
 use std::{panic, sync::Arc};
 
-// TODO(ECR-4316): remove
-use anyhow as failure;
 use exonum::{
     blockchain::{config::InstanceInitParams, Block},
     crypto::KeyPair,
