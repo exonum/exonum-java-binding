@@ -17,6 +17,7 @@
 package com.exonum.binding.common.crypto;
 
 import com.goterl.lazycode.lazysodium.interfaces.Sign;
+import com.goterl.lazycode.lazysodium.utils.LibraryLoader.Mode;
 
 /**
  * A collection of public-key signature system crypto functions.
@@ -34,7 +35,11 @@ public final class CryptoFunctions {
    * if it is not available, it will use the bundled one.
    */
   public static CryptoFunction ed25519() {
-    return Ed25519CryptoFunction.INSTANCE;
+    return Ed25519Holder.INSTANCE;
+  }
+
+  static final class Ed25519Holder {
+    static final CryptoFunction INSTANCE = new Ed25519CryptoFunction(Mode.PREFER_SYSTEM);
   }
 
   public static class Ed25519 {
