@@ -1944,9 +1944,9 @@ dependencies = [
 
 [[package]]
 name = "jni"
-version = "0.15.0"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ba3cd65bd48a02c50381dc90678744e1cc9842d0c957bf5a4660618df10a0c2"
+checksum = "22bbdc25b49340bc4fc3d9c96dd84d878c4beeca35e3651efa53db51a68d7d4d"
 dependencies = [
  "cesu8",
  "combine",
