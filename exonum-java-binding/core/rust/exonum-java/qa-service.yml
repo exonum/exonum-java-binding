@@ -19,9 +19,9 @@ artifacts:
   qa-service:
     runtime: java
     name: "com.exonum.binding/exonum-java-binding-qa-service"
-    version: "0.10.0-SNAPSHOT"
+    version: "0.10.0"
     spec:
-      artifact_filename: "exonum-java-binding-qa-service-0.10.0-SNAPSHOT-artifact.jar"
+      artifact_filename: "exonum-java-binding-qa-service-0.10.0-artifact.jar"
     action: deploy
   time:
     runtime: rust

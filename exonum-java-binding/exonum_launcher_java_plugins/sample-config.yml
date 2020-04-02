@@ -19,9 +19,9 @@ artifacts:
   cryptocurrency:
     runtime: java
     name: "com.exonum.examples/cryptocurrency"
-    version: "0.10.0-SNAPSHOT"
+    version: "0.10.0"
     spec:
-      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-SNAPSHOT-artifact.jar"
+      artifact_filename: "exonum-java-binding-cryptocurrency-demo-0.10.0-artifact.jar"
     action: deploy
   time:
     runtime: rust

@@ -1,6 +1,6 @@
 [package]
 name = "integration_tests"
-version = "0.10.0-SNAPSHOT"
+version = "0.10.0"
 authors = ["Exonum Team <contact@exonum.com>"]
 edition = "2018"
 publish = false

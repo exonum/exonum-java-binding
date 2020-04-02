@@ -88,7 +88,7 @@ stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
   `exonum-launcher` comes with built-in support for text-based configuration 
   formats.
 
-[blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0-SNAPSHOT/com/exonum/binding/core/blockchain/Blockchain.html#proofs
+[blockchain-proofs]: https://exonum.com/doc/api/java-binding/0.10.0/com/exonum/binding/core/blockchain/Blockchain.html#proofs
 
 ### Changed
 - Transactions are now implemented as service methods annotated with

@@ -25,7 +25,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name="exonum_launcher_java_plugins",
-    version="0.10.0-SNAPSHOT",
+    version="0.10.0",
     author="The Exonum team",
     author_email="contact@exonum.com",
     description="Exonum Java plugins for exonum-launcher",

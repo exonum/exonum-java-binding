@@ -21,12 +21,12 @@
   <parent>
     <artifactId>exonum-java-binding-parent</artifactId>
     <groupId>com.exonum.binding</groupId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>0.10.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>site-examples</artifactId>
-  <version>0.10.0-SNAPSHOT</version>
+  <version>0.10.0</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Binding: Examples for Documentation</name>

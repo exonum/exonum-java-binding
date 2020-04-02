@@ -1208,7 +1208,7 @@ dependencies = [
 
 [[package]]
 name = "exonum-java"
-version = "0.10.0-SNAPSHOT"
+version = "0.10.0"
 dependencies = [
  "anyhow",
  "env_logger 0.6.2",
@@ -1878,7 +1878,7 @@ dependencies = [
 
 [[package]]
 name = "integration_tests"
-version = "0.10.0-SNAPSHOT"
+version = "0.10.0"
 dependencies = [
  "exonum-derive",
  "exonum-testkit",
@@ -1918,7 +1918,7 @@ checksum = "b8b7a7c0c47db5545ed3fef7468ee7bb5b74691498139e4b3f6a20685dc6dd8e"
 
 [[package]]
 name = "java_bindings"
-version = "0.10.0-SNAPSHOT"
+version = "0.10.0"
 dependencies = [
  "anyhow",
  "chrono",
