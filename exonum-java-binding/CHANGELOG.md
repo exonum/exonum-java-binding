@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.10.0] - 2020-02-TBD
+## [0.10.0] - 2020-04-03
 
 ### Overview
 
@@ -28,16 +28,16 @@ Most of the user-facing interfaces were reworked to facilitate access to the
 database and transaction execution context, and more distinction between
 storage access abstractions were added to enforce services isolation.
 
-Finally, the support of Protobuf-serialized proofs has been reenabled and
+Finally, the support of Protobuf-serialized proofs has been re-enabled and
 expanded since the last release.
 
 *If you are upgrading an existing Java service, consult
 the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.10.0/exonum-java-binding/doc/Migration_guide_0.10.md).*
 
-This release is based on [Exonum 1.0.0-rc.1][exonum-1.0.0-rc.1], the first
-stable Exonum release. See [release notes][exonum-1.0.0-rc.1] for details.
+This release is based on [Exonum 1.0.0][exonum-1.0.0], the first
+stable Exonum release. See [release notes][exonum-1.0.0] for details.
 
-[exonum-1.0.0-rc.1]: https://github.com/exonum/exonum/releases/tag/v1.0.0-rc.1
+[exonum-1.0.0]: https://github.com/exonum/exonum/releases/tag/v1.0.0
 
 ### Added
 - Support of creation of various blockchain proofs:
