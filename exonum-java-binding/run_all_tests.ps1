@@ -2,7 +2,7 @@
 # TODO(ERC-???): split in separate files, like .sh scripts?
 
 Set-StrictMode -Version 1.0
-#$erroractionpreference = "stop"
+$ErrorActionPreference = "continue"
 
 try
 {
