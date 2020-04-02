@@ -48,6 +48,6 @@ See [_Deploy and Start Services_][deploy-start-java-services] for details.
 Apache License (Version 2.0).
 See [LICENSE](../../LICENSE) for details.
 
-[exonum-time]: https://exonum.com/doc/version/1.0/advanced/time/
-[deploy-start-java-services]: https://exonum.com/doc/version/1.0/get-started/java-binding/#deploy-and-start-the-service
+[exonum-time]: https://exonum.com/doc/version/1.0.0/advanced/time/
+[deploy-start-java-services]: https://exonum.com/doc/version/1.0.0/get-started/java-binding/#deploy-and-start-the-service
 [time-schema-javadoc]: https://exonum.com/doc/api/java-binding/0.10.0/com/exonum/binding/time/TimeSchema.html

@@ -92,8 +92,8 @@ import javax.annotation.Nullable;
  * Then the {@linkplain Service#createPublicApiHandlers(Node, Router) public API handlers} are
  * created.
  *
- * @see <a href="https://exonum.com/doc/version/1.0/get-started/java-binding/#testing">Service Testing</a>
- * @see <a href="https://exonum.com/doc/version/1.0/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
+ * @see <a href="https://exonum.com/doc/version/1.0.0/get-started/java-binding/#testing">Service Testing</a>
+ * @see <a href="https://exonum.com/doc/version/1.0.0/advanced/consensus/specification/#pool-of-unconfirmed-transactions">Pool of Unconfirmed Transactions</a>
  */
 public final class TestKit extends AbstractCloseableNativeProxy {
 
