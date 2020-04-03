@@ -25,6 +25,8 @@ import com.exonum.binding.core.transaction.RawTransaction;
  */
 public final class TransactionSubmissionException extends RuntimeException {
 
+  private static final long serialVersionUID = -4818447239123659240L;
+
   public TransactionSubmissionException(String message) {
     super(message);
   }
