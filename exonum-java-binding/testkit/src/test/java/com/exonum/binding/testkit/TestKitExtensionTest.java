@@ -102,9 +102,10 @@ class TestKitExtensionTest {
   }
 
   private String getFailedEventExceptionMessage(Event event) {
-    TestExecutionResult testExecutionResult = event.getPayload(TestExecutionResult.class).get();
-    Throwable throwable = testExecutionResult.getThrowable().get();
-    return throwable.getMessage();
+    return event.getPayload(TestExecutionResult.class)
+        .flatMap(TestExecutionResult::getThrowable)
+        .map(Throwable::getMessage)
+        .orElseThrow();
   }
 
   private Events getTestCaseEvents(Class<?> testCaseClass) {
