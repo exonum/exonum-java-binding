@@ -72,6 +72,14 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- One of our dependencies uses SLF4J (PF4J). This SLF4J binding allows
+         applications coded to the SLF4J API to use Log4j 2 as the implementation. -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j18-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
