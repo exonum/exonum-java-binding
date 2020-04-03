@@ -17,6 +17,7 @@
 package com.exonum.binding.testkit;
 
 import com.google.common.collect.ImmutableSet;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.Set;
@@ -107,7 +108,7 @@ public class TestKitExtension implements ParameterResolver {
 
   private static final Namespace NAMESPACE = Namespace.create(TestKitExtension.class);
   private static final String TESTKIT_KEY = "Testkit";
-  private static final Set<Class> testKitModificationAnnotations =
+  private static final Set<Class<? extends Annotation>> testKitModificationAnnotations =
       ImmutableSet.of(Auditor.class, Validator.class, ValidatorCount.class);
 
   private final TestKit.Builder templateTestKitBuilder;

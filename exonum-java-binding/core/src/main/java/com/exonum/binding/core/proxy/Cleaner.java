@@ -167,7 +167,7 @@ public final class Cleaner implements AutoCloseable {
     // the clean actions might be included as well.
     List<Throwable> suppressedExceptions = new ArrayList<>();
     while (!registeredCleanActions.isEmpty()) {
-      CleanAction cleanAction = registeredCleanActions.pop();
+      CleanAction<?> cleanAction = registeredCleanActions.pop();
       // Try to perform the operation.
       try {
         cleanAction.clean();
@@ -190,7 +190,7 @@ public final class Cleaner implements AutoCloseable {
     }
   }
 
-  private void logCleanActionFailure(CleanAction cleanAction, Throwable cleanException) {
+  private void logCleanActionFailure(CleanAction<?> cleanAction, Throwable cleanException) {
     logger.error("Exception occurred when this context ({}) attempted to perform "
         + "a clean operation ({}):", this, cleanAction, cleanException);
   }
