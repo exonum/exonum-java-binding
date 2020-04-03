@@ -109,12 +109,12 @@ class TestKitExtensionTest {
 
   private Events getTestCaseEvents(Class<?> testCaseClass) {
     return getTestCaseEngineExecutionResults(testCaseClass)
-        .tests();
+        .testEvents();
   }
 
   private Events getAllTestCaseEvents(Class<?> testCaseClass) {
     return getTestCaseEngineExecutionResults(testCaseClass)
-        .all();
+        .allEvents();
   }
 
   private EngineExecutionResults getTestCaseEngineExecutionResults(Class<?> testCaseClass) {
