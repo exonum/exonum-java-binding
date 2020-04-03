@@ -31,6 +31,8 @@ import com.exonum.binding.core.service.ExecutionException;
  */
 public class UnexpectedExecutionException extends RuntimeException {
 
+  private static final long serialVersionUID = -8474907119858724532L;
+
   /**
    * Creates a new unexpected execution exception.
    * @param cause an exception that occurred in a transaction; must not be null or an instance of

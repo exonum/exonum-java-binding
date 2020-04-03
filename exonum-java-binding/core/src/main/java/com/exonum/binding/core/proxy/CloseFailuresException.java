@@ -23,6 +23,8 @@ package com.exonum.binding.core.proxy;
  */
 public final class CloseFailuresException extends Exception {
 
+  private static final long serialVersionUID = 5578500940650637495L;
+
   /**
    * Constructs a new exception with the specified detail message.  The
    * cause is not initialized, and may subsequently be initialized by

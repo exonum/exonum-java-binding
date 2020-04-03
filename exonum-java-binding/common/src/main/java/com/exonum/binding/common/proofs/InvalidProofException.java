@@ -21,6 +21,8 @@ package com.exonum.binding.common.proofs;
  */
 public class InvalidProofException extends RuntimeException {
 
+  private static final long serialVersionUID = -2334490440044042330L;
+
   /**
    * Constructs a new runtime exception with {@code null} as its detail message.  The cause is not
    * initialized, and may subsequently be initialized by a call to {@link #initCause}.

@@ -57,6 +57,7 @@ import javax.annotation.Nullable;
  */
 public class ExecutionException extends RuntimeException {
 
+  private static final long serialVersionUID = -7846280377611566774L;
   // TODO: Consider using enums and taking their ordinal as the error code: ECR-2006?
   private final byte errorCode;
 

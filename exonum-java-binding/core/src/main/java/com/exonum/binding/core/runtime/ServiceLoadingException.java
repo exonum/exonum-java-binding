@@ -21,6 +21,8 @@ package com.exonum.binding.core.runtime;
  */
 public class ServiceLoadingException extends Exception {
 
+  private static final long serialVersionUID = -5073976663800635538L;
+
   public ServiceLoadingException(String message) {
     super(message);
   }
