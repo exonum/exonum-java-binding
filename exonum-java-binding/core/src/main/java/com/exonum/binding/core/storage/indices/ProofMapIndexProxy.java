@@ -243,7 +243,8 @@ public final class ProofMapIndexProxy<K, V> extends AbstractIndexProxy implement
    *     <a href="ProofMapIndexProxy.html#key-hashing">proof map that uses non-hashed keys</a>)
    * @see <a href="../../blockchain/Blockchain.html#proofs">Blockchain Proofs</a>
    */
-  public MapProof getProof(K key, K... otherKeys) {
+  @SafeVarargs
+  public final MapProof getProof(K key, K... otherKeys) {
     if (otherKeys.length == 0) {
       return getSingleKeyProof(key);
     } else {
