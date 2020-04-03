@@ -12,6 +12,10 @@
             <AppenderRef ref="Console" />
         </Root>
 
+        <Logger name="org.pf4j" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+
         <Logger name="com.exonum.binding" level="DEBUG" additivity="false">
             <AppenderRef ref="Console" />
         </Logger>
