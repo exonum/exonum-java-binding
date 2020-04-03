@@ -122,6 +122,7 @@
           <argLine>${jacoco.it.args}
             -Djava.library.path=${ejb-core.nativeLibPath}
             ${java.vm.assertionFlag}
+            -Xcheck:jni
           </argLine>
           <systemPropertyVariables>
             <it.artifactsDir>${project.parent.basedir}/fake-service/target</it.artifactsDir>
