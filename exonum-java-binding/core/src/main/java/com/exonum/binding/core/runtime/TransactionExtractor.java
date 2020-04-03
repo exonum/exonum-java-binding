@@ -103,9 +103,11 @@ final class TransactionExtractor {
 
   private static TransactionMethod toTransactionMethod(Method method, Lookup lookup) {
     Serializer<?> argumentsSerializer = StandardSerializers.bytes();
-    Class parameterType = method.getParameterTypes()[0];
+    Class<?> parameterType = method.getParameterTypes()[0];
     if (isProtobufArgument(parameterType)) {
-      argumentsSerializer = StandardSerializers.protobuf(parameterType);
+      @SuppressWarnings("unchecked") /* Checked above */
+      var messageType = (Class<? extends MessageLite>) parameterType;
+      argumentsSerializer = StandardSerializers.protobuf(messageType);
     }
     MethodHandle methodHandle;
     try {
@@ -120,7 +122,7 @@ final class TransactionExtractor {
   /**
    * Returns true if given class is a protobuf type; false otherwise.
    */
-  private static boolean isProtobufArgument(Class type) {
+  private static boolean isProtobufArgument(Class<?> type) {
     return MessageLite.class.isAssignableFrom(type);
   }
 
