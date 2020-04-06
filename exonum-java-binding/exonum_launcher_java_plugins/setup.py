@@ -16,7 +16,7 @@
 
 import setuptools
 
-INSTALL_REQUIRES = ["exonum-launcher"]
+INSTALL_REQUIRES = ["exonum-launcher==0.2.0"]
 
 PYTHON_REQUIRES = ">=3.6"
 

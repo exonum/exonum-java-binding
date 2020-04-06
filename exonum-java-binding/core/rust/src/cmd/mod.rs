@@ -35,7 +35,7 @@ mod run_dev;
 ///
 /// Configures and runs Exonum node with Java runtime enabled.
 ///
-/// See https://exonum.com/doc/version/1.0/get-started/java-binding/#node-configuration
+/// See https://exonum.com/doc/version/1.0.0/get-started/java-binding/#node-configuration
 #[derive(StructOpt, Debug)]
 #[structopt(author, about)]
 #[allow(clippy::large_enum_variant)]

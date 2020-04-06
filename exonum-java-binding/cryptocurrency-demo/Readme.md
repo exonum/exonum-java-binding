@@ -26,7 +26,7 @@ Be sure you installed necessary packages:
 - [Exonum Java][ejb-installation] application.
 - [Exonum Launcher Plugins](../exonum_launcher_java_plugins/README.md).
 
-[ejb-installation]: https://exonum.com/doc/version/1.0/get-started/java-binding/#installation
+[ejb-installation]: https://exonum.com/doc/version/1.0.0/get-started/java-binding/#installation
 
 #### Build and Run
 
@@ -87,5 +87,5 @@ Ready! Find demo at [http://127.0.0.1:6040](http://127.0.0.1:6040).
 
 ## See Also
 
-- [Reference Documentation](https://exonum.com/doc/version/1.0/get-started/java-binding)
-- [Java Service Development Tutorial](https://exonum.com/doc/version/1.0/get-started/first-java-service/)
+- [Reference Documentation](https://exonum.com/doc/version/1.0.0/get-started/java-binding)
+- [Java Service Development Tutorial](https://exonum.com/doc/version/1.0.0/get-started/first-java-service/)
