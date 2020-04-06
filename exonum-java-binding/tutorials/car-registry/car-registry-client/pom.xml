@@ -16,7 +16,7 @@
   <name>Exonum Vehicle Registry: CLI Client</name>
 
   <properties>
-    <exonum-light-client.version>0.6.0-SNAPSHOT</exonum-light-client.version>
+    <exonum-light-client.version>0.6.0</exonum-light-client.version>
     <picocli.version>4.2.0</picocli.version>
   </properties>
 
