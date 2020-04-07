@@ -53,12 +53,12 @@ If you are using Maven, add this to your _pom.xml_ file
 <dependency>
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.5.0</version>
+  <version>0.6.0</version>
 </dependency>
 ```
 If you are using Gradle, add this to your dependencies
 ```Groovy
-compile 'com.exonum.client:exonum-light-client:0.5.0'
+compile 'com.exonum.client:exonum-light-client:0.6.0'
 ```
 
 ## Examples
@@ -178,4 +178,4 @@ Apache 2.0 - see [LICENSE](../LICENSE) for more information.
 [protobuf]: https://developers.google.com/protocol-buffers/docs/proto3
 [standard-serializers]: https://exonum.com/doc/api/java-binding/0.10.0/com/exonum/binding/common/serialization/StandardSerializers.html
 [send-tx-it]: ./src/test/java/com/exonum/client/ExonumHttpClientIntegrationTest.java
-[exonum-client]: https://exonum.com/doc/api/java-light-client/0.5.0/com/exonum/client/ExonumClient.html
+[exonum-client]: https://exonum.com/doc/api/java-light-client/0.6.0/com/exonum/client/ExonumClient.html
