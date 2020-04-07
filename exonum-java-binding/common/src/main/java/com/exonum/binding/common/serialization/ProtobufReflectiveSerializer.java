@@ -46,8 +46,7 @@ class ProtobufReflectiveSerializer<MessageT extends MessageLite> implements Seri
     // classloaders if several instances of the same artifact are loaded; or PF4J and TestKit
     // classloaders), the lookup object must use the message class as its lookup class to satisfy
     // linkage constraints.
-    MethodHandles.Lookup lookup = MethodHandles.publicLookup()
-        .in(messageType);
+    MethodHandles.Lookup lookup = MethodHandles.lookup().in(messageType);
     try {
       messageParseFrom = lookup
           .findStatic(messageType, "parseFrom", MethodType.methodType(messageType, byte[].class));
