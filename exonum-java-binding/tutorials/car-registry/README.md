@@ -3,7 +3,7 @@
 Exonum vehicle registry service for a [tutorial][car-registry-tutorial]
 on Java service development.
 
-[car-registry-tutorial]: https://exonum.com/doc/version/1.0/get-started/first-java-service/ 
+[car-registry-tutorial]: https://exonum.com/doc/version/1.0.0/get-started/first-java-service/ 
 
 ## Project Structure
 
@@ -24,7 +24,7 @@ The project consist of the following modules:
 - Apache Maven
 - JDK 11+
 
-[ejb-installation]: https://exonum.com/doc/version/1.0/get-started/java-binding/#installation
+[ejb-installation]: https://exonum.com/doc/version/1.0.0/get-started/java-binding/#installation
 
 ### Building
 

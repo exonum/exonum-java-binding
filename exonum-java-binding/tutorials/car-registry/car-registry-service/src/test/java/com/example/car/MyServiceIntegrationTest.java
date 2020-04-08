@@ -42,7 +42,7 @@ class MyServiceIntegrationTest {
    *
    * <p>If you get an UnsatisfiedLinkError in this test — please check that the EXONUM_HOME
    * environment variable is set properly:
-   * https://exonum.com/doc/version/1.0/get-started/java-binding/#after-install
+   * https://exonum.com/doc/version/1.0.0/get-started/java-binding/#after-install
    */
   @Test
   void testGenesisBlockCommit() {

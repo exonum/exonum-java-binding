@@ -79,7 +79,7 @@ class ClassLoadingScopeChecker {
             + "  2. Does not specify its version (i.e., inherits it "
             + "from exonum-java-binding-bom)%n"
             + "See also: "
-            + "https://exonum.com/doc/version/1.0/get-started/java-binding/#using-libraries",
+            + "https://exonum.com/doc/version/1.0.0/get-started/java-binding/#using-libraries",
         pluginClassloader, libraryCopies);
     throw new IllegalArgumentException(message);
   }

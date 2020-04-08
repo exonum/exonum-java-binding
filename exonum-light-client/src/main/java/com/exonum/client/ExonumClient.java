@@ -97,7 +97,7 @@ public interface ExonumClient {
    *        the {@linkplain Block#getCommitTime() block commit time}
    * @return blocks in the requested range
    * @throws IllegalArgumentException if {@code fromHeight} or {@code toHeight} are not valid:
-   *        out of range {@code [0, blockchainHeight]}; {@code fromHeight} > {@code toHeight}
+   *        out of range {@code [0, blockchainHeight]}; {@code fromHeight} &gt; {@code toHeight}
    * @throws RuntimeException if the client is unable to complete a request
    *        (e.g., in case of connectivity problems)
    */

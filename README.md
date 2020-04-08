@@ -16,8 +16,8 @@ The following projects are available:
  
 ## Links
 For more information see the relevant documentation on the tool:
-  - [What is Exonum?](https://exonum.com/doc/version/1.0/get-started/what-is-exonum/)
-  - [Roadmap](https://exonum.com/doc/version/1.0/roadmap/)
+  - [What is Exonum?](https://exonum.com/doc/version/1.0.0/get-started/what-is-exonum/)
+  - [Roadmap](https://exonum.com/doc/version/1.0.0/roadmap/)
   - [Contribution Guide](CONTRIBUTING.md)
   - [Code of Conduct](https://github.com/exonum/exonum/blob/master/CODE_OF_CONDUCT.md)
 

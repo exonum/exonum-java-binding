@@ -23,7 +23,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.compiler.release>${java.compiler.clientRelease}</java.compiler.release>
-    <lazysodium-java.version>4.2.3</lazysodium-java.version>
+    <lazysodium-java.version>4.2.6</lazysodium-java.version>
     <auto-value.version>1.7</auto-value.version>
     <jsonpath.version>2.4.0</jsonpath.version>
     <protobuf.python.deployArguments.outputDirectory>
@@ -221,9 +221,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
+          <!-- Also specify the JNA library path for Mac / Java 14+, where sodium is installed -->
           <argLine>
             ${jacoco.it.args}
             ${java.vm.assertionFlag}
+            -Djna.library.path=/usr/local/lib
           </argLine>
           <includes>
             <include>**/*Test.java</include>

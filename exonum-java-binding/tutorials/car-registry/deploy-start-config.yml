@@ -3,7 +3,7 @@
 #
 # See:
 #  - start-testnet.sh
-#  - https://exonum.com/doc/version/1.0/get-started/java-binding/#deploy-and-start-the-service
+#  - https://exonum.com/doc/version/1.0.0/get-started/java-binding/#deploy-and-start-the-service
 networks:
   - host: "127.0.0.1"
     ssl: false

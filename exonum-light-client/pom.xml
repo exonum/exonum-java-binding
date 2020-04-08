@@ -4,7 +4,7 @@
 
   <groupId>com.exonum.client</groupId>
   <artifactId>exonum-light-client</artifactId>
-  <version>0.6.0-SNAPSHOT</version>
+  <version>0.7.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Exonum Java Light Client</name>
@@ -61,13 +61,13 @@
 
   <properties>
     <!-- Project configuration -->
-    <ejb.version>0.11.0-SNAPSHOT</ejb.version>
+    <ejb.version>0.10.0</ejb.version>
     <java.compiler.release>8</java.compiler.release>
     <javadoc.source>8</javadoc.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Project dependencies -->
-    <okhttp.version>4.4.1</okhttp.version>
+    <okhttp.version>4.5.0</okhttp.version>
     <lombok.version>1.18.12</lombok.version>
     <!--Test dependencies-->
     <junit.jupiter.version>5.6.1</junit.jupiter.version>
@@ -83,8 +83,6 @@
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
-    <!-- Empty for all JDKs but 11 and 12 -->
-    <maven.javadoc.joption></maven.javadoc.joption>
   </properties>
 
   <dependencyManagement>
@@ -238,12 +236,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.1.1</version>
         <configuration>
           <source>${javadoc.source}</source>
           <doclint>none</doclint>
           <detectOfflineLinks>false</detectOfflineLinks>
-          <additionalJOption>${maven.javadoc.joption}</additionalJOption>
           <!-- Allow fetching external resources to generate links -->
           <isOffline>false</isOffline>
           <links>
@@ -370,6 +367,30 @@
       <build>
         <plugins>
           <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <version>3.0.0-M3</version>
+            <executions>
+              <execution>
+                <id>check-release-build-prerequisites</id>
+                <phase>validate</phase>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireJavaVersion>
+                      <version>[13.,)</version>
+                      <message>
+                        Java 13 is the minimum version where JLC Javadocs can be built.
+                      </message>
+                    </requireJavaVersion>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>1.6</version>
@@ -407,18 +428,6 @@
           </plugin>
         </plugins>
       </build>
-    </profile>
-
-    <!-- Fill in needed property when generating Javadocs on JDK 11–12 -->
-    <profile>
-      <id>generate-javadocs-jdk11-12</id>
-      <activation>
-        <!-- Removed in 13 https://bugs.openjdk.java.net/browse/JDK-8215582-->
-        <jdk>[11,13)</jdk>
-      </activation>
-      <properties>
-        <maven.javadoc.joption>--no-module-directories</maven.javadoc.joption>
-      </properties>
     </profile>
   </profiles>
 </project>
