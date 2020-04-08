@@ -221,9 +221,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
+          <!-- Also specify the JNA library path for Mac / Java 14+, where sodium is installed -->
           <argLine>
             ${jacoco.it.args}
             ${java.vm.assertionFlag}
+            -Djna.library.path=/usr/local/lib
           </argLine>
           <includes>
             <include>**/*Test.java</include>

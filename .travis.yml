@@ -45,15 +45,15 @@ env:
 
 jobs:
   include:
-    - name: "Linux / JDK 13 / CHECK_RUST=true"
+    - name: "Linux / JDK 14 / CHECK_RUST=true"
       os: linux
-      jdk: openjdk13
+      jdk: openjdk14
       env: CHECK_RUST=true
-    - name: "Linux / JDK 13 / CHECK_RUST=false"
+    - name: "Linux / JDK 14 / CHECK_RUST=false"
       os: linux
-      jdk: openjdk13
+      jdk: openjdk14
       env: CHECK_RUST=false
-    - name: "OSX / JDK 13 / CHECK_RUST=false"
+    - name: "OSX / JDK 14 / CHECK_RUST=false"
       os: osx
       # See: https://docs.travis-ci.com/user/reference/osx#macos-version
       osx_image: xcode11.3
@@ -81,15 +81,15 @@ jobs:
       jdk: openjdk-ea
       env: CHECK_RUST=false
     # Nightly Rust on Linux.
-    - name: "Linux / JDK 13 / CHECK_RUST=false / Nightly Rust"
+    - name: "Linux / JDK 14 / CHECK_RUST=false / Nightly Rust"
       if: type=cron
       os: linux
-      jdk: openjdk13
+      jdk: openjdk14
       env:
         - CHECK_RUST=false
         - RUST_COMPILER_VERSION=nightly
     # Nightly Rust on macOS.
-    - name: "OSX / JDK 13 / CHECK_RUST=false / Nightly Rust"
+    - name: "OSX / JDK 14 / CHECK_RUST=false / Nightly Rust"
       if: type=cron
       os: osx
       osx_image: xcode11.3
