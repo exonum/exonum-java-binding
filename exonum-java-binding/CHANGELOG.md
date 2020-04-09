@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- Java 14 support.
+- Java 14 support. (#1509)
 
 ## [0.10.0] - 2020-04-03
 
@@ -36,7 +36,8 @@ Finally, the support of Protobuf-serialized proofs has been re-enabled and
 expanded since the last release.
 
 *If you are upgrading an existing Java service, consult
-the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.10.0/exonum-java-binding/doc/Migration_guide_0.10.md).*
+the [migration guide](https://github.com/exonum/exonum-java-binding/blob/ejb/v0.10.0/exonum-java-binding/doc/Migration_guide_0.10.md).
+If you are new to Exonum — see the new [tutorial on service development](https://exonum.com/doc/version/1.0.0/get-started/first-java-service/).*
 
 This release is based on [Exonum 1.0.0][exonum-1.0.0], the first
 stable Exonum release. See [release notes][exonum-1.0.0] for details.
@@ -175,6 +176,9 @@ stable Exonum release. See [release notes][exonum-1.0.0] for details.
 - `AbstractService#createDataSchema` — just use the schema constructor/factory
   method, as passing the instance name is no longer required with the `Prefixed`
   DB Access. (#1393)
+
+### Known Issues
+- Java 14 is not supported as the runtime for Exonum Java services — see #1509.
 
 ## 0.9.0-rc2 - 2019-12-17
 
