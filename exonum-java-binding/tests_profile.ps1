@@ -1,6 +1,9 @@
 Set-StrictMode -Version 1.0
 $ErrorActionPreference = "continue"
 
+echo $env:TMP
+echo $env:TEMP
+
 try
 {
     # Find jvm.dll in JAVA_HOME. If JAVA_HOME is not set, we find it by asking java binary.
