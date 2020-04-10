@@ -8,7 +8,10 @@ try
 {
     . .\tests_profile.ps1
 
-    $args = "install -Drust.compiler.version=$RUST_COMPILER_VERSION -Djna.debug_load=true"
+    $args = "-version"
+    $process = Start-Process mvn $args.Split(" ") -Wait -NoNewWindow -PassThru
+
+    $args = "install -Drust.compiler.version=$RUST_COMPILER_VERSION"
     $process = Start-Process mvn $args.Split(" ") -Wait -NoNewWindow -PassThru
 
     if ($process.ExitCode -ne 0) {
