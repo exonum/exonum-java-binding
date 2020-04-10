@@ -55,9 +55,10 @@ jobs:
         - choco install maven -y
         - export M2_HOME="/c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.3"
         - export PATH=$PATH:"/c/Program Files/OpenJDK/jdk-13.0.2/bin"
-
         - echo $PATH
-        - powershell 'echo $env:Path'
+        - echo $TMP
+        - echo $TEMP
+        - echo $TMPDIR
       script:
         - cd $TRAVIS_BUILD_DIR/exonum-java-binding
         - powershell -ExecutionPolicy Bypass -File ./run_all_tests.ps1
