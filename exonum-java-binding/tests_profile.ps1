@@ -3,6 +3,9 @@ $ErrorActionPreference = "continue"
 
 echo $env:TMP
 echo $env:TEMP
+New-Item -ItemType Directory -Force -Path "$PSScriptRoot\tmpdir"
+$env:TMP = "$PSScriptRoot\tmpdir"
+$env:TEMP = "$PSScriptRoot\tmpdir"
 
 try
 {
