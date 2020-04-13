@@ -34,7 +34,7 @@ import com.goterl.lazycode.lazysodium.utils.LibraryLoader.Mode;
  */
 final class Ed25519CryptoFunction implements CryptoFunction {
 
-  static final Ed25519CryptoFunction INSTANCE = new Ed25519CryptoFunction(Mode.PREFER_SYSTEM);
+  static final Ed25519CryptoFunction INSTANCE = new Ed25519CryptoFunction(Mode.SYSTEM_ONLY);
 
   private final LazySodiumJava lazySodium;
 
