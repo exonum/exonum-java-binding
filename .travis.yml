@@ -56,12 +56,10 @@ jobs:
         - export M2_HOME="/c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.3"
         - export PATH=$PATH:"/c/Program Files/OpenJDK/jdk-13.0.2/bin"
         - echo $PATH
-        - echo $TMP
-        - echo $TEMP
-        - echo $TMPDIR
       script:
         - cd $TRAVIS_BUILD_DIR/exonum-java-binding
         - powershell -ExecutionPolicy Bypass -File ./run_all_tests.ps1
+        - cat "common/target/failsafe-reports/com.exonum.binding.common.crypto.Ed25519CryptoFunctionWithSystemSodiumTest-output.txt"
     # The following jobs run using Travis cron jobs feature.
     # The minimum supported Java version (11)
     - name: "Linux / JDK 11 / CHECK_RUST=false"
