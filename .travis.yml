@@ -58,8 +58,8 @@ jobs:
         - cd $TRAVIS_BUILD_DIR
         - wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18-msvc.zip
         - unzip libsodium-1.0.18-msvc.zip
-        - export PATH=$PATH:"$TRAVIS_BUILD_DIR/libsodium/x64/Release/v142/dynamic"
-        - ls "$TRAVIS_BUILD_DIR/libsodium/x64/Release/v142/dynamic"
+        - export PATH=$PATH:"$TRAVIS_BUILD_DIR/libsodium/Win32/Release/v142/dynamic"
+        - ls "$TRAVIS_BUILD_DIR/libsodium/Win32/Release/v142/dynamic"
         - echo $PATH
       script:
         - cd $TRAVIS_BUILD_DIR/exonum-java-binding
