@@ -88,6 +88,15 @@
             <configuration>
               <repoToken>${env.COVERALLS_TOKEN}</repoToken>
             </configuration>
+            <dependencies>
+              <!-- Workaround for Java 9+,
+              see: https://github.com/trautonen/coveralls-maven-plugin/issues/112 -->
+              <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version>
+              </dependency>
+            </dependencies>
           </plugin>
         </plugins>
       </build>
