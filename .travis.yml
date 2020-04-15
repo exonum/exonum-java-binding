@@ -136,9 +136,6 @@ script:
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
 
-after_success:
-  - mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -Dsonar.projectKey=exonum_exonum-java-binding
-
 notifications:
   email:
     - recipients:
