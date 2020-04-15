@@ -49,60 +49,71 @@ env:
 
 jobs:
   include:
-    - name: "Linux / JDK 14 / CHECK_RUST=true"
+#    - name: "Linux / JDK 14 / CHECK_RUST=true"
+#      os: linux
+#      jdk: openjdk14
+#      env: CHECK_RUST=true
+#    - name: "Linux / JDK 14 / CHECK_RUST=false"
+#      os: linux
+#      jdk: openjdk14
+#      env: CHECK_RUST=false
+#    - name: "OSX / JDK 14 / CHECK_RUST=false"
+#      os: osx
+#      # See: https://docs.travis-ci.com/user/reference/osx#macos-version
+#      osx_image: xcode11.3
+#      env:
+#        - CHECK_RUST=false
+#        - ROCKSDB_LIB_DIR=/usr/local/lib
+#        - SNAPPY_LIB_DIR=/usr/local/lib
+#        - SNAPPY_STATIC=1
+#    - name: "Python unit tests"
+#      before_install: true
+#      script:
+#        - cd "${TRAVIS_BUILD_DIR}"
+#        - .travis/run_python_tests.sh
+#    # The following jobs run using Travis cron jobs feature.
+#    # The minimum supported Java version (11)
+#    - name: "Linux / JDK 11 / CHECK_RUST=false"
+#      if: type=cron
+#      os: linux
+#      jdk: openjdk11
+#      env: CHECK_RUST=false
+#    # Early-access Java version.
+#    - name: "Linux / JDK EA / CHECK_RUST=false"
+#      if: type=cron
+#      os: linux
+#      jdk: openjdk-ea
+#      env: CHECK_RUST=false
+#    # Nightly Rust on Linux.
+#    - name: "Linux / JDK 14 / CHECK_RUST=false / Nightly Rust"
+#      if: type=cron
+#      os: linux
+#      jdk: openjdk14
+#      env:
+#        - CHECK_RUST=false
+#        - RUST_COMPILER_VERSION=nightly
+#    # Nightly Rust on macOS.
+#    - name: "OSX / JDK 14 / CHECK_RUST=false / Nightly Rust"
+#      if: type=cron
+#      os: osx
+#      osx_image: xcode11.3
+#      env:
+#        - CHECK_RUST=false
+#        - RUST_COMPILER_VERSION=nightly
+#        - ROCKSDB_LIB_DIR=/usr/local/lib
+#        - SNAPPY_LIB_DIR=/usr/local/lib
+#        - SNAPPY_STATIC=1
+
+    - name: "Reports: code coverage + sonar"
       os: linux
-      jdk: openjdk14
-      env: CHECK_RUST=true
-    - name: "Linux / JDK 14 / CHECK_RUST=false"
-      os: linux
-      jdk: openjdk14
-      env: CHECK_RUST=false
-    - name: "OSX / JDK 14 / CHECK_RUST=false"
-      os: osx
-      # See: https://docs.travis-ci.com/user/reference/osx#macos-version
-      osx_image: xcode11.3
-      env:
-        - CHECK_RUST=false
-        - ROCKSDB_LIB_DIR=/usr/local/lib
-        - SNAPPY_LIB_DIR=/usr/local/lib
-        - SNAPPY_STATIC=1
-    - name: "Python unit tests"
-      before_install: true
+      jdk: openjdk13
       script:
-        - cd "${TRAVIS_BUILD_DIR}"
-        - .travis/run_python_tests.sh
-    # The following jobs run using Travis cron jobs feature.
-    # The minimum supported Java version (11)
-    - name: "Linux / JDK 11 / CHECK_RUST=false"
-      if: type=cron
-      os: linux
-      jdk: openjdk11
-      env: CHECK_RUST=false
-    # Early-access Java version.
-    - name: "Linux / JDK EA / CHECK_RUST=false"
-      if: type=cron
-      os: linux
-      jdk: openjdk-ea
-      env: CHECK_RUST=false
-    # Nightly Rust on Linux.
-    - name: "Linux / JDK 14 / CHECK_RUST=false / Nightly Rust"
-      if: type=cron
-      os: linux
-      jdk: openjdk14
-      env:
-        - CHECK_RUST=false
-        - RUST_COMPILER_VERSION=nightly
-    # Nightly Rust on macOS.
-    - name: "OSX / JDK 14 / CHECK_RUST=false / Nightly Rust"
-      if: type=cron
-      os: osx
-      osx_image: xcode11.3
-      env:
-        - CHECK_RUST=false
-        - RUST_COMPILER_VERSION=nightly
-        - ROCKSDB_LIB_DIR=/usr/local/lib
-        - SNAPPY_LIB_DIR=/usr/local/lib
-        - SNAPPY_STATIC=1
+        - source exonum-java-binding/tests_profile
+        - mvn package -DskipTests
+#        - shellcheck exonum-java-binding/service-archetype/target/test-classes/projects/project/integration-test/start-testnet.sh
+#        - mvn org.eluder.coveralls:coveralls-maven-plugin:report
+        - mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -Dsonar.projectKey=exonum_exonum-java-binding
+
 
 cache:
   directories:
