@@ -12,6 +12,10 @@ branches:
     - core-1.0
 
 addons:
+  sonarcloud:
+    organization: "exonum"
+    token:
+      secure: "PDViuHB/dEJcYqUoC8C42Umo44N9OGhuq0Z1tYTtrlwatDFviC1a4Wp6J2lQflwZSJZSUIuYCk/nJ5XR/9pqSrnoLXIBrjfLs62/KZDLPjO3b+SOxRNsN015KTl1+i/s80T/AOTMstlCaimPzigTf/AeS7059V3vY7nIz5O1rBwZfiqnFgTmrHivXbvsLFM6m8PpARp6lNZ1O/E6/3BUrfdi2GKJuugQP+z6jQSZ1oMJToHSMrvHR6RuA1fdsDiRFR6x6W7R4dsh1IjCZf5Hdohsc5Z5U27ECnbOX+A/+z8wpT3gfzjPWXaBGX+4GXYGA1h4GnbRU9nCBZ3vSwEyIjNxpzdwWfoYCVde+FdK/6Hmjwv5EVOAiXFcnEnjEaVEz3KDtdBPDtoa3tEQHdIvGm9FqcKbpzAS7W5eTGLZkyzFuoy9mqGkh7zWWr/9zfzLelzi5Ed+lTL4uq2UEIsNVbwfOITWsJMzoOmgdbRHpP/rQjiUewoG48OJJuxggqtMJ1f+ScPh6H1ell01G6WhLQ5RQY2ZxTvHZSHSJVbwEBqElkFUCSqs3oMMktwkIxuEYNtj2lr+nivm2VBI5Qi4OthrZjsICffU+OXS+GCEaZcgEdhxHJacadc+FvDBqxHhncCh2dDc1Qjmw1ac116MFtUvgepsHsVhOFF18X3pr7Y="
   apt:
     sources:
       - sourceline: 'ppa:fsgmhoward/shadowsocks-libev'
@@ -102,11 +106,6 @@ jobs:
 
     - name: "Reports: code coverage + sonar"
       os: linux
-      addons:
-        sonarcloud:
-          organization: "exonum"
-          token:
-            secure: "PDViuHB/dEJcYqUoC8C42Umo44N9OGhuq0Z1tYTtrlwatDFviC1a4Wp6J2lQflwZSJZSUIuYCk/nJ5XR/9pqSrnoLXIBrjfLs62/KZDLPjO3b+SOxRNsN015KTl1+i/s80T/AOTMstlCaimPzigTf/AeS7059V3vY7nIz5O1rBwZfiqnFgTmrHivXbvsLFM6m8PpARp6lNZ1O/E6/3BUrfdi2GKJuugQP+z6jQSZ1oMJToHSMrvHR6RuA1fdsDiRFR6x6W7R4dsh1IjCZf5Hdohsc5Z5U27ECnbOX+A/+z8wpT3gfzjPWXaBGX+4GXYGA1h4GnbRU9nCBZ3vSwEyIjNxpzdwWfoYCVde+FdK/6Hmjwv5EVOAiXFcnEnjEaVEz3KDtdBPDtoa3tEQHdIvGm9FqcKbpzAS7W5eTGLZkyzFuoy9mqGkh7zWWr/9zfzLelzi5Ed+lTL4uq2UEIsNVbwfOITWsJMzoOmgdbRHpP/rQjiUewoG48OJJuxggqtMJ1f+ScPh6H1ell01G6WhLQ5RQY2ZxTvHZSHSJVbwEBqElkFUCSqs3oMMktwkIxuEYNtj2lr+nivm2VBI5Qi4OthrZjsICffU+OXS+GCEaZcgEdhxHJacadc+FvDBqxHhncCh2dDc1Qjmw1ac116MFtUvgepsHsVhOFF18X3pr7Y="
       jdk: openjdk13
       script:
         - set -e
@@ -114,6 +113,7 @@ jobs:
         - mvn install -Pci-build
         - shellcheck exonum-java-binding/service-archetype/target/test-classes/projects/project/integration-test/start-testnet.sh
         - mvn org.eluder.coveralls:coveralls-maven-plugin:report
+        -
         - mvn sonar:sonar -Dsonar.projectKey=exonum_exonum-java-binding -Pci-build
 
 
