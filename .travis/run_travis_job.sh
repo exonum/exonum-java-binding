@@ -61,7 +61,7 @@ else
 
     # Upload the coverage reports from a single job only
     if [[ "${TRAVIS_JOB_NAME}" == "Linux / JDK 14 / CHECK_RUST=false" ]]; then
-      mvn org.eluder.coveralls:coveralls-maven-plugin:report
+      #mvn org.eluder.coveralls:coveralls-maven-plugin:report
       mvn org.jacoco:jacoco-maven-plugin:prepare-agent sonar:sonar -Dsonar.projectKey=exonum_exonum-java-binding
     fi
 fi
