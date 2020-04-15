@@ -12,6 +12,10 @@ branches:
     - core-1.0
 
 addons:
+  sonarcloud:
+    organization: "exonum"
+    token:
+      secure: "ffs6iJtM+BeFz2ldcLUygVaGmyq8ZbdEsow8qk/xovfMumk4gQ2bK72oRExeOCRj2ZhpAan4XYkGXSMTZja+fpfDGO+VHbIdXp6oCTbppJzZojljOLnm6eiSEWQHyUA139FiZW9kot5lRifRJa6D1Vji/n8ef3xO6EQdlFOekdjmlh0N/gcPh1KGkOaW54RyNOqRWqwG2ia6aIsfxI79/Uafh1vO8PSL15zdlNmFxkgceQJxlkM4D69dcxHXdnI0QN5tZU0Yl9c+U2v8alLFO1uwmdMMaW9IMnzIo6vvdCmaGBkklWZ8yn6RXOARseWzXLI5mAjpsuHcYfLK2KU3mKA+xFEUtUGeYCJVBqHaHIk2/m5kRDqvdlJP+EnuveZyOu7ZiV1yfRVdIZpwKM6bgGcoxwy3ceuB4p5CiS5G8tBcUZduYTU1I2kpeMxIis4yPJXdSCoTWyT7ddedD3z6vSEQjtZZ2Db5bfDsFtSLcUD68Zoq2xJmyoBDZ5mU2aJNbitO4Q4lVxu7iP0Y4ruxD1mwWkZPd2xg4SoDCRFMLfBR+bD9BYRdjN4v5TFSGNMCrNE8//Yg5u4zyq5pk0+kiyD/u9LT+lcub4WD/kfoivO68okXs+4JcyG+nw/X19bK4NCkSRnL831w7uoODjKppn1f5aS4i46tgrj2O60HmoA="
   apt:
     sources:
       - sourceline: 'ppa:fsgmhoward/shadowsocks-libev'
@@ -131,6 +135,7 @@ install: true  # Skip the installation step, as Maven requires
 script:
   - cd "$TRAVIS_BUILD_DIR"
   - .travis/run_travis_job.sh
+  - mvn sonar:sonar -Dsonar.projectKey=exonum_exonum-java-binding
 
 notifications:
   email:
