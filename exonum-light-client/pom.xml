@@ -83,6 +83,7 @@
     <jacoco.reports-path>${project.build.directory}/coverage-reports</jacoco.reports-path>
     <!-- Skip generating Javadocs by default. Some profiles override this.  -->
     <maven.javadoc.skip>true</maven.javadoc.skip>
+    <sonar.java.source>${java.compiler.release}</sonar.java.source>
   </properties>
 
   <dependencyManagement>
