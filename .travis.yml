@@ -110,8 +110,8 @@ jobs:
       script:
         - source exonum-java-binding/tests_profile
         - mvn package -DskipTests
-#        - shellcheck exonum-java-binding/service-archetype/target/test-classes/projects/project/integration-test/start-testnet.sh
-#        - mvn org.eluder.coveralls:coveralls-maven-plugin:report -Pci-build
+        - shellcheck exonum-java-binding/service-archetype/target/test-classes/projects/project/integration-test/start-testnet.sh
+        - mvn org.eluder.coveralls:coveralls-maven-plugin:report -Pci-build
         - mvn sonar:sonar -Dsonar.projectKey=exonum_exonum-java-binding
 
 
