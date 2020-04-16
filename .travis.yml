@@ -112,7 +112,6 @@ jobs:
         - source exonum-java-binding/tests_profile
         - mvn install sonar:sonar -Dsonar.projectKey=exonum_exonum-java-binding -Pci-build
 
-
 cache:
   directories:
     # Bits of Rust (see https://docs.travis-ci.com/user/languages/rust/#dependency-management).
