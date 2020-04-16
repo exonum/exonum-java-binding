@@ -104,7 +104,7 @@ jobs:
         - SNAPPY_LIB_DIR=/usr/local/lib
         - SNAPPY_STATIC=1
 
-    - name: "Sonar report"
+    - name: "Linux / JDK 13 / Sonar Report"
       os: linux
       jdk: openjdk13
       script:
