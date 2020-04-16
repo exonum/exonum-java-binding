@@ -60,7 +60,7 @@ else
     fi
 
     # Upload the coverage report to Coveralls from a single job only
-    if [[ "${TRAVIS_JOB_NAME}" == "Linux JDK 8 CHECK_RUST=false" ]]; then
+    if [[ "${TRAVIS_JOB_NAME}" == "Linux / JDK 14 / CHECK_RUST=false" ]]; then
       mvn org.eluder.coveralls:coveralls-maven-plugin:report
     fi
 fi

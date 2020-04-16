@@ -26,6 +26,7 @@
     </exonum.artifactId>
     <exonum.artifactFileName>${project.artifactId}-${project.version}-artifact
     </exonum.artifactFileName>
+    <sonar.sources>pom.xml,src/main/java,frontend</sonar.sources>
   </properties>
 
   <dependencyManagement>
