@@ -75,7 +75,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.inclusions>
-      exonum-java-binding/exonum_launcher_java_plugins
+      exonum-java-binding/exonum_launcher_java_plugins/**.py
     </sonar.inclusions>
   </properties>
 
