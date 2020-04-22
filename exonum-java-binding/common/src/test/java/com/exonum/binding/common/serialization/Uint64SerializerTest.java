@@ -34,7 +34,8 @@ class Uint64SerializerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTestUtils#invalidVarints64")
+  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTestUtils"
+      + "#invalidVarints64")
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
   }

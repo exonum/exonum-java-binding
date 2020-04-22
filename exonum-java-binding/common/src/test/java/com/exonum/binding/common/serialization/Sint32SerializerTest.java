@@ -34,7 +34,8 @@ class Sint32SerializerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTestUtils#invalidVarints32")
+  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTestUtils"
+      + "#invalidVarints32")
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
   }
