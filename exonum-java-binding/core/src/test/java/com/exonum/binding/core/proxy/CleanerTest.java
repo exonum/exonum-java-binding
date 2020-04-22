@@ -17,6 +17,7 @@
 package com.exonum.binding.core.proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -67,8 +68,8 @@ class CleanerTest {
   }
 
   @Test
-  void closeEmptyNoExceptions() throws CloseFailuresException {
-    context.close();
+  void closeEmptyNoExceptions() {
+    assertThatCode(context::close).doesNotThrowAnyException();
   }
 
   @Test

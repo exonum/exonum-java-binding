@@ -119,7 +119,7 @@ public class TestKitExtension implements ParameterResolver {
 
   @Override
   public boolean supportsParameter(ParameterContext parameterContext,
-                                   ExtensionContext extensionContext) {
+      ExtensionContext extensionContext) {
     return parameterContext.getParameter().getType() == TestKit.class;
   }
 
@@ -151,16 +151,17 @@ public class TestKitExtension implements ParameterResolver {
    */
   private void checkExtensionContext(ExtensionContext extensionContext) {
     Optional<Method> testMethod = extensionContext.getTestMethod();
-    testMethod.orElseThrow(() ->
-        new ParameterResolutionException("TestKit can't be injected in @BeforeAll or @AfterAll"
-            + " because it is a stateful, mutable object and sharing it between all tests is"
-            + " error-prone. Consider injecting it in @BeforeEach instead.\n"
-            + " If you do need the same instance for all tests — just use `TestKit#builder`"
-            + " directly. Don't forget to destroy it in @AfterEach."));
+    if (testMethod.isEmpty()) {
+      throw new ParameterResolutionException("TestKit can't be injected in @BeforeAll or @AfterAll"
+          + " because it is a stateful, mutable object and sharing it between all tests is"
+          + " error-prone. Consider injecting it in @BeforeEach instead.\n"
+          + " If you do need the same instance for all tests — just use `TestKit#builder`"
+          + " directly. Don't forget to destroy it in @AfterEach.");
+    }
   }
 
   private TestKit buildTestKit(ParameterContext parameterContext,
-                               ExtensionContext extensionContext) {
+      ExtensionContext extensionContext) {
     TestKit.Builder testKitBuilder = createTestKitBuilder(parameterContext, extensionContext);
     return testKitBuilder.build();
   }
@@ -171,7 +172,7 @@ public class TestKitExtension implements ParameterResolver {
   }
 
   private TestKit.Builder createTestKitBuilder(ParameterContext parameterContext,
-                                               ExtensionContext extensionContext) {
+      ExtensionContext extensionContext) {
     TestKit.Builder testKitBuilder = templateTestKitBuilder.shallowCopy();
     Optional<Auditor> auditorAnnotation = parameterContext.findAnnotation(Auditor.class);
     Optional<Validator> validatorAnnotation = parameterContext.findAnnotation(Validator.class);

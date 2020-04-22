@@ -20,6 +20,7 @@ import static com.exonum.binding.common.serialization.StandardSerializers.string
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -41,7 +42,8 @@ class TemporaryDbIntegrationTest {
   @Test
   void databaseMustClosePromptly() {
     TemporaryDb database = TemporaryDb.newInstance();
-    database.close();  // No exceptions.
+
+    assertThatCode(database::close).doesNotThrowAnyException();
   }
 
   @Test
