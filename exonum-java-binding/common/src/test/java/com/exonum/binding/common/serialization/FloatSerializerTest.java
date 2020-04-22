@@ -17,8 +17,8 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.exonum.binding.common.serialization.StandardSerializersTest.invalidBytesValueTest;
-import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
+import static com.exonum.binding.common.serialization.StandardSerializersTestUtils.invalidBytesValueTest;
+import static com.exonum.binding.common.serialization.StandardSerializersTestUtils.roundTripTest;
 
 import com.exonum.binding.test.Bytes;
 import com.google.common.collect.ImmutableList;

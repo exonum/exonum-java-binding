@@ -17,8 +17,8 @@
 
 package com.exonum.binding.common.serialization;
 
-import static com.exonum.binding.common.serialization.StandardSerializersTest.invalidBytesValueTest;
-import static com.exonum.binding.common.serialization.StandardSerializersTest.roundTripTest;
+import static com.exonum.binding.common.serialization.StandardSerializersTestUtils.invalidBytesValueTest;
+import static com.exonum.binding.common.serialization.StandardSerializersTestUtils.roundTripTest;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,13 +28,13 @@ class Sint32SerializerTest {
   private Serializer<Integer> serializer = Sint32Serializer.INSTANCE;
 
   @ParameterizedTest
-  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTest#intValues")
+  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTestUtils#intValues")
   void roundTrip(Integer value) {
     roundTripTest(value, serializer);
   }
 
   @ParameterizedTest
-  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTest#invalidVarints32")
+  @MethodSource("com.exonum.binding.common.serialization.StandardSerializersTestUtils#invalidVarints32")
   void deserializeInvalidValue(byte[] value) {
     invalidBytesValueTest(value, serializer);
   }

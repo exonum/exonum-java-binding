@@ -37,6 +37,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -84,7 +85,7 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
   private final HashCode key3 = getTestKeys().get(2);
 
   private static final HashCode EMPTY_MAP_INDEX_HASH = HashCode.fromString(
-          "7324b5c72b51bb5d4c180f1109cfd347b60473882145841c39f3e584576296f9");
+      "7324b5c72b51bb5d4c180f1109cfd347b60473882145841c39f3e584576296f9");
 
   abstract List<HashCode> getTestKeys();
 
@@ -333,7 +334,8 @@ abstract class BaseProofMapIndexProxyIntegrationTestable
 
   @Test
   void clearEmptyHasNoEffect() {
-    runTestWithView(database::createFork, ProofMapIndexProxy::clear);
+    runTestWithView(database::createFork, map -> assertThatCode(map::clear)
+        .doesNotThrowAnyException());
   }
 
   @Test

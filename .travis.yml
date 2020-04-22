@@ -110,7 +110,7 @@ jobs:
       script:
         - set -e
         - source exonum-java-binding/tests_profile
-        - mvn install sonar:sonar -Dsonar.projectKey=exonum_exonum-java-binding -Pci-build
+        - mvn install sonar:sonar -Pci-build
 
 cache:
   directories:

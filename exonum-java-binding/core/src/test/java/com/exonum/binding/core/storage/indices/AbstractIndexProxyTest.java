@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.storage.indices;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
@@ -70,8 +71,8 @@ class AbstractIndexProxyTest {
     Fork dbView = createFork();
 
     proxy = new IndexProxyImpl(dbView);
-    // Check the notifications does not cause exceptions
-    proxy.notifyModified();
+
+    assertThatCode(proxy::notifyModified).doesNotThrowAnyException();
   }
 
   @Test

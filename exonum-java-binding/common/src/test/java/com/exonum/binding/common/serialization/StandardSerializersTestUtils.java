@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class StandardSerializersTest {
+class StandardSerializersTestUtils {
 
   /**
    * Performs a round trip tests: ObjectT -> Binary -> ObjectT.
@@ -42,7 +42,7 @@ class StandardSerializersTest {
   /**
    * Performs check for invalid argument.
    */
-  static void invalidBytesValueTest(byte[] invalidValue, Serializer serializer) {
+  static <T> void invalidBytesValueTest(byte[] invalidValue, Serializer<T> serializer) {
     assertThrows(IllegalArgumentException.class, () -> serializer.fromBytes(invalidValue));
   }
 
@@ -104,5 +104,8 @@ class StandardSerializersTest {
         Bytes.bytes(0x80, 0x81, 0x02, 0x83, 0x84), // A 2-byte tail
         Bytes.bytes(0x80, 0x81, 0x82, 0x03, 0x84) // A 5th byte is invalid
     );
+  }
+
+  private StandardSerializersTestUtils() {
   }
 }
