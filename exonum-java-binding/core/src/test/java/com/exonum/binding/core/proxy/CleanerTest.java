@@ -33,8 +33,7 @@ class CleanerTest {
   private Cleaner context = new Cleaner();
 
   @Test
-  @SuppressWarnings("UnstableApiUsage")
-    // OK in an internal test
+  @SuppressWarnings("UnstableApiUsage") // OK in an internal test
   void testRejectsNull() {
     //TODO Consider rewriting this test to get rid of JUnit4 dependency through Guava Testing.
     NullPointerTester tester = new NullPointerTester();
