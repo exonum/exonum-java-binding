@@ -27,9 +27,9 @@ export default new Vuex.Store({
     keyPair: keyPair
   },
   mutations: {
-    login: (state, keyPair) => {
-      localStorage.setItem(KEY, JSON.stringify(keyPair))
-      state.keyPair = keyPair
+    login: (state, keys) => {
+      localStorage.setItem(KEY, JSON.stringify(keys))
+      state.keyPair = keys
     },
     logout: state => {
       localStorage.removeItem(KEY)
