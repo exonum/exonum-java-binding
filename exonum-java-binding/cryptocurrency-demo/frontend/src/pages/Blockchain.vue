@@ -60,7 +60,7 @@
           this.isSpinnerVisible = false
         } catch (error) {
           this.isSpinnerVisible = false
-          this.$notify('error', error.toString())
+          this.$notify(error.toString(), 'error')
         }
       },
 

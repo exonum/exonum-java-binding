@@ -72,7 +72,7 @@
     methods: {
       login() {
         if (!this.$validateHex(this.secretKey, 64)) {
-          return this.$notify('error', 'Invalid secret key is passed')
+          return this.$notify('Invalid secret key is passed', 'error')
         }
 
         this.isSpinnerVisible = true
@@ -97,7 +97,7 @@
           this.isModalVisible = true
         } catch (error) {
           this.isSpinnerVisible = false
-          this.$notify('error', error.toString())
+          this.$notify(error.toString(), 'error')
         }
       },
 
