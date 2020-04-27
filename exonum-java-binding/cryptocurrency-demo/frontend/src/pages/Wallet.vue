@@ -111,17 +111,17 @@
           this.isSpinnerVisible = false
         } catch (error) {
           this.isSpinnerVisible = false
-          this.$notify('error', error.toString())
+          this.$notify(error.toString(), 'error')
         }
       },
 
       async transfer() {
         if (!this.$validateHex(this.receiver)) {
-          return this.$notify('error', 'Invalid public key is passed')
+          return this.$notify('Invalid public key is passed', 'error')
         }
 
         if (this.receiver === this.keyPair.publicKey) {
-          return this.$notify('error', 'Can not transfer funds to yourself')
+          return this.$notify('Can not transfer funds to yourself', 'error')
         }
 
         this.isSpinnerVisible = true
@@ -134,10 +134,10 @@
           this.balance = data.wallet.balance
           this.transactions = data.transactions
           this.isSpinnerVisible = false
-          this.$notify('success', 'Transfer transaction has been written into the blockchain')
+          this.$notify('Transfer transaction has been written into the blockchain', 'success')
         } catch (error) {
           this.isSpinnerVisible = false
-          this.$notify('error', error.toString())
+          this.$notify(error.toString(), 'error')
         }
       }
     },

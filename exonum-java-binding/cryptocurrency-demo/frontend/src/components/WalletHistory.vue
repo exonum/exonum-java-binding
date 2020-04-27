@@ -4,12 +4,13 @@
     <div class="card-body">
       <div class="table-responsive">
         <table class="table table-bordered">
+          <caption>Funds history</caption>
           <thead>
             <tr>
-              <th>From</th>
-              <th>To</th>
-              <th>Amount</th>
-              <th>Transaction</th>
+              <th scope="col">From</th>
+              <th scope="col">To</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Transaction</th>
             </tr>
           </thead>
           <tbody>
