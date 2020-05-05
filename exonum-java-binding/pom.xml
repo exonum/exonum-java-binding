@@ -116,7 +116,7 @@
     <!-- Empty for all JDKs but 11 -->
     <maven.javadoc.joption></maven.javadoc.joption>
 
-    <assertj.version>3.15.0</assertj.version>
+    <assertj.version>3.16.0</assertj.version>
     <checkstyle.configLocation>${project.basedir}/../checkstyle.xml</checkstyle.configLocation>
     <checkstyle.severity>warning</checkstyle.severity>
     <guice.version>4.2.3</guice.version>
