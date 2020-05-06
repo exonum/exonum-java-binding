@@ -110,6 +110,7 @@ public final class Bytes {
    * @return a new array that contains random bytes
    * @throws IllegalArgumentException in case the size is negative
    */
+  @SuppressWarnings("squid:S2245") //sonar: security-sensitive pseudorandom
   public static byte[] randomBytes(int size) {
     checkArgument(0 <= size, "Size is negative: %s", size);
     byte[] array = new byte[size];
@@ -117,5 +118,6 @@ public final class Bytes {
     return array;
   }
 
-  private Bytes() {}
+  private Bytes() {
+  }
 }
