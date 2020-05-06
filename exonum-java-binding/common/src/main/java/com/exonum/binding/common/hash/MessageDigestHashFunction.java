@@ -87,6 +87,7 @@ final class MessageDigestHashFunction extends AbstractHashFunction implements Se
     return toString;
   }
 
+  @SuppressWarnings("squid:S4790") //sonar: Security-sensitive hashing data
   private static MessageDigest getMessageDigest(String algorithmName) {
     try {
       return MessageDigest.getInstance(algorithmName);

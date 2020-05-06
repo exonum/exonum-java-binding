@@ -21,7 +21,7 @@ var proxy = require('http-proxy-middleware')
 var app = express()
 
 // Get app params
-var argv = require('yargs-parser')(process.argv.slice(2))
+var argv = require('yargs-parser')(process.argv.slice(2)) //NOSONAR
 var port = argv.port
 var explorerRoot = argv.explorerRoot
 var apiRoot = argv.apiRoot

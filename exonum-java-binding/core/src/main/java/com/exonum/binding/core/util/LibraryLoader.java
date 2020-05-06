@@ -111,6 +111,7 @@ public final class LibraryLoader {
     }
   }
 
+  @SuppressWarnings("squid:S5304") //sonar: Using environment variables
   private static String extraLibLoadErrorInfo() {
     String javaLibPath = System.getProperty(JAVA_LIBRARY_PATH_PROPERTY);
     if (runningUnitTests()) {
