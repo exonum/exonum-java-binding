@@ -1,6 +1,6 @@
 <template>
   <div>
-    <navbar/>
+    <navbar />
 
     <div class="container">
       <div class="row">
@@ -8,21 +8,31 @@
           <nav v-if="location.block_height" class="mt-5" aria-label="breadcrumb">
             <ol class="breadcrumb">
               <li class="breadcrumb-item">
-                <router-link :to="{ name: 'blockchain' }">Blockchain</router-link>
+                <router-link :to="{ name: 'blockchain' }">
+                  Blockchain
+                </router-link>
               </li>
               <li class="breadcrumb-item">
-                <router-link :to="{ name: 'block', params: { height: location.block_height } }">Block {{ location.block_height }}</router-link>
+                <router-link :to="{ name: 'block', params: { height: location.block_height } }">
+                  Block {{ location.block_height }}
+                </router-link>
               </li>
-              <li class="breadcrumb-item active" aria-current="page">Transaction {{ hash }}</li>
+              <li class="breadcrumb-item active" aria-current="page">
+                Transaction {{ hash }}
+              </li>
             </ol>
           </nav>
 
           <div class="card mt-5">
-            <div class="card-header">Transaction</div>
+            <div class="card-header">
+              Transaction
+            </div>
             <ul class="list-group list-group-flush">
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Hash:</strong></div>
+                  <div class="col-sm-3">
+                    <strong>Hash:</strong>
+                  </div>
                   <div class="col-sm-9">
                     <code>{{ hash }}</code>
                   </div>
@@ -30,15 +40,21 @@
               </li>
               <li v-if="location.block_height" class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Block:</strong></div>
+                  <div class="col-sm-3">
+                    <strong>Block:</strong>
+                  </div>
                   <div class="col-sm-9">
-                    <router-link :to="{ name: 'block', params: { height: location.block_height } }">{{ location.block_height }}</router-link>
+                    <router-link :to="{ name: 'block', params: { height: location.block_height } }">
+                      {{ location.block_height }}
+                    </router-link>
                   </div>
                 </div>
               </li>
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Type:</strong></div>
+                  <div class="col-sm-3">
+                    <strong>Type:</strong>
+                  </div>
                   <div class="col-sm-9">
                     <code>{{ type }}</code>
                   </div>
@@ -46,7 +62,9 @@
               </li>
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Status:</strong></div>
+                  <div class="col-sm-3">
+                    <strong>Status:</strong>
+                  </div>
                   <div class="col-sm-9">
                     <code>{{ status.type }}</code>
                   </div>
@@ -54,31 +72,49 @@
               </li>
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Protocol version:</strong></div>
-                  <div class="col-sm-9">{{ transaction.protocol_version }}</div>
+                  <div class="col-sm-3">
+                    <strong>Protocol version:</strong>
+                  </div>
+                  <div class="col-sm-9">
+                    {{ transaction.protocol_version }}
+                  </div>
                 </div>
               </li>
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Network ID:</strong></div>
-                  <div class="col-sm-9">{{ transaction.network_id }}</div>
+                  <div class="col-sm-3">
+                    <strong>Network ID:</strong>
+                  </div>
+                  <div class="col-sm-9">
+                    {{ transaction.network_id }}
+                  </div>
                 </div>
               </li>
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Service ID:</strong></div>
-                  <div class="col-sm-9">{{ transaction.service_id }}</div>
+                  <div class="col-sm-3">
+                    <strong>Service ID:</strong>
+                  </div>
+                  <div class="col-sm-9">
+                    {{ transaction.service_id }}
+                  </div>
                 </div>
               </li>
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Message ID:</strong></div>
-                  <div class="col-sm-9">{{ transaction.message_id }}</div>
+                  <div class="col-sm-3">
+                    <strong>Message ID:</strong>
+                  </div>
+                  <div class="col-sm-9">
+                    {{ transaction.message_id }}
+                  </div>
                 </div>
               </li>
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Signature:</strong></div>
+                  <div class="col-sm-3">
+                    <strong>Signature:</strong>
+                  </div>
                   <div class="col-sm-9">
                     <code>{{ transaction.signature }}</code>
                   </div>
@@ -86,7 +122,9 @@
               </li>
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Body:</strong></div>
+                  <div class="col-sm-3">
+                    <strong>Body:</strong>
+                  </div>
                   <div class="col-sm-9">
                     <pre><code>{{ JSON.stringify(transaction.body, null, 2) }}</code></pre>
                   </div>
@@ -98,7 +136,7 @@
       </div>
     </div>
 
-    <spinner :visible="isSpinnerVisible"/>
+    <spinner :visible="isSpinnerVisible" />
   </div>
 </template>
 
@@ -106,13 +144,16 @@
   import Navbar from '../components/Navbar.vue'
   import Spinner from '../components/Spinner.vue'
 
-  module.exports = {
+  export default {
     components: {
       Navbar,
       Spinner
     },
     props: {
-      hash: String
+      hash: {
+        type: String,
+        default: ""
+      }
     },
     data() {
       return {
@@ -122,6 +163,11 @@
         type: '',
         isSpinnerVisible: false
       }
+    },
+    mounted() {
+      this.$nextTick(function() {
+        this.loadTransaction()
+      })
     },
     methods: {
       async loadTransaction() {
@@ -139,11 +185,6 @@
           this.$notify(error.toString(), 'error')
         }
       }
-    },
-    mounted() {
-      this.$nextTick(function() {
-        this.loadTransaction()
-      })
     }
   }
 </script>

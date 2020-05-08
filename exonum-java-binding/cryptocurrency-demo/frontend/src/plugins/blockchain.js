@@ -17,7 +17,7 @@
 import * as Exonum from 'exonum-client'
 import axios from 'axios'
 import bigInt from 'big-integer'
-import * as proto from '../proto/proto.js'
+import proto from '../proto/proto.js'
 
 const TRANSACTION_URL = '/api/explorer/v1/transactions'
 const SERVICE_ID = 42
@@ -55,7 +55,7 @@ function TransferTransaction(publicKey) {
   })
 }
 
-module.exports = {
+export default {
   install (Vue) {
     Vue.prototype.$blockchain = {
       generateKeyPair () {
