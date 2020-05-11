@@ -1,6 +1,6 @@
 <template>
   <div>
-    <router-view/>
+    <router-view />
 
     <footer class="pb-4 hr">
       <hr class="mt-5 mb-5">
@@ -9,12 +9,18 @@
           <div class="col-sm-12">
             <img src="images/exonum.png" width="41" height="36" class="float-left mt-sm-1 mr-3" alt="">
             <ul class="list-unstyled">
-              <li>Sources on <a href="https://github.com/exonum/exonum-java-binding/tree/master/cryptocurrency-demo"
-                                target="_blank"
-                                rel="noopener noreferrer">GitHub</a></li>
-              <li><a href="https://exonum.com/doc/version/1.0.0/"
-                     target="_blank"
-                     rel="noopener noreferrer">Exonum docs</a></li>
+              <li>
+                Sources on <a href="https://github.com/exonum/exonum-java-binding/tree/master/cryptocurrency-demo"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                >GitHub</a>
+              </li>
+              <li>
+                <a href="https://exonum.com/doc/version/1.0.0/"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                >Exonum docs</a>
+              </li>
             </ul>
           </div>
         </div>

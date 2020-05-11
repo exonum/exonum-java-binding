@@ -15,7 +15,7 @@
  */
 
 var express = require('express')
-var proxy = require('http-proxy-middleware')
+const { createProxyMiddleware } = require('http-proxy-middleware')
 
 // Initialize application
 var app = express()
@@ -42,8 +42,8 @@ if (typeof explorerRoot === 'undefined') {
 app.use(express.static(__dirname + '/'))
 
 // Activate proxy
-app.use('/api/explorer', proxy({ target: explorerRoot, changeOrigin: true }))
-app.use('/api', proxy({ target: apiRoot, changeOrigin: true }))
+app.use('/api/explorer', createProxyMiddleware({ target: explorerRoot, changeOrigin: true }))
+app.use('/api', createProxyMiddleware({ target: apiRoot, changeOrigin: true }))
 
 // Single Page Application entry point
 app.get('/', function (req, res) {

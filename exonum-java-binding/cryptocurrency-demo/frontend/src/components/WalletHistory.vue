@@ -1,16 +1,26 @@
 <template>
   <div class="card mt-5">
-    <div class="card-header">Funds history</div>
+    <div class="card-header">
+      Funds history
+    </div>
     <div class="card-body">
       <div class="table-responsive">
         <table class="table table-bordered">
           <caption>Funds history</caption>
           <thead>
             <tr>
-              <th scope="col">From</th>
-              <th scope="col">To</th>
-              <th scope="col">Amount</th>
-              <th scope="col">Transaction</th>
+              <th scope="col">
+                From
+              </th>
+              <th scope="col">
+                To
+              </th>
+              <th scope="col">
+                Amount
+              </th>
+              <th scope="col">
+                Transaction
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -40,8 +50,13 @@
 <script>
   import { mapState } from 'vuex'
 
-  module.exports = {
-    name: 'walletHistory',
+  export default {
+    name: 'WalletHistory',
+    filters: {
+      slice: function (value) {
+        return `${value.slice(0, 30)}...`
+      }
+    },
     data () {
       return {
         loading: false,
@@ -49,21 +64,16 @@
         history: []
       }
     },
-    filters: {
-      slice: function (value) {
-        return `${value.slice(0, 30)}...`
-      }
-    },
     computed: mapState({
       keyPair: state => state.keyPair
     }),
+    mounted () {
+      this.loadHistory()
+    },
     methods: {
       async loadHistory () {
         this.history = await this.$blockchain.getHistory(this.keyPair.publicKey)
       }
-    },
-    mounted () {
-      this.loadHistory()
     }
   }
 </script>

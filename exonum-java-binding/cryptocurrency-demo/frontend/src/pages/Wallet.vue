@@ -1,30 +1,42 @@
 <template>
   <div>
-    <navbar/>
+    <navbar />
 
     <div class="container">
       <div class="row">
         <div class="col-md-6">
           <div class="card mt-5">
-            <div class="card-header">User summary</div>
+            <div class="card-header">
+              User summary
+            </div>
             <ul class="list-group list-group-flush">
               <li class="list-group-item">
                 <div class="row">
-                  <div class="col-sm-3"><strong>Name:</strong></div>
-                  <div class="col-sm-9">{{ name }}</div>
-                </div>
-              </li>
-              <li class="list-group-item">
-                <div class="row">
-                  <div class="col-sm-3"><strong>Public key:</strong></div>
-                  <div class="col-sm-9"><code>{{ keyPair.publicKey }}</code></div>
-                </div>
-              </li>
-              <li class="list-group-item">
-                <div class="row">
-                  <div class="col-sm-3"><strong>Balance:</strong></div>
+                  <div class="col-sm-3">
+                    <strong>Name:</strong>
+                  </div>
                   <div class="col-sm-9">
-                    <span v-numeral="balance"/>
+                    {{ name }}
+                  </div>
+                </div>
+              </li>
+              <li class="list-group-item">
+                <div class="row">
+                  <div class="col-sm-3">
+                    <strong>Public key:</strong>
+                  </div>
+                  <div class="col-sm-9">
+                    <code>{{ keyPair.publicKey }}</code>
+                  </div>
+                </div>
+              </li>
+              <li class="list-group-item">
+                <div class="row">
+                  <div class="col-sm-3">
+                    <strong>Balance:</strong>
+                  </div>
+                  <div class="col-sm-9">
+                    <span v-numeral="balance" />
                   </div>
                 </div>
               </li>
@@ -32,9 +44,10 @@
           </div>
         </div>
         <div class="col-md-6">
-
           <div class="card mt-5">
-            <div class="card-header">Transfer funds</div>
+            <div class="card-header">
+              Transfer funds
+            </div>
             <div class="card-body">
               <form @submit.prevent="transfer">
                 <div class="form-group">
@@ -45,12 +58,16 @@
                   <label>Amount:</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
-                      <div class="input-group-text">$</div>
+                      <div class="input-group-text">
+                        $
+                      </div>
                     </div>
                     <input v-model="amountToTransfer" type="number" class="form-control" placeholder="Enter amount" min="0" required>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Transfer funds</button>
+                <button type="submit" class="btn btn-primary">
+                  Transfer funds
+                </button>
               </form>
             </div>
           </div>
@@ -59,7 +76,7 @@
       <walletHistory />
     </div>
 
-    <spinner :visible="isSpinnerVisible"/>
+    <spinner :visible="isSpinnerVisible" />
   </div>
 </template>
 
@@ -70,9 +87,8 @@
   import Spinner from '../components/Spinner.vue'
   import WalletHistory from '../components/WalletHistory.vue'
 
-  module.exports = {
+  export default {
     components: {
-      Modal,
       Navbar,
       Spinner,
       WalletHistory
@@ -94,6 +110,11 @@
     }, mapState({
       keyPair: state => state.keyPair
     })),
+    mounted() {
+      this.$nextTick(function() {
+        this.loadUser()
+      })
+    },
     methods: {
       async loadUser() {
         if (this.keyPair === null) {
@@ -140,11 +161,6 @@
           this.$notify(error.toString(), 'error')
         }
       }
-    },
-    mounted() {
-      this.$nextTick(function() {
-        this.loadUser()
-      })
     }
   }
 </script>

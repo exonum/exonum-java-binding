@@ -17,7 +17,8 @@
 import Vue from 'vue/dist/vue'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
-import * as Blockchain from '../src/plugins/blockchain.js'
+import Blockchain from '../src/plugins/blockchain.js'
+import 'babel-polyfill'
 
 const mock = new MockAdapter(axios)
 const MAX_VALUE = 2147483647
