@@ -25,6 +25,7 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.V2;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V3;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V4;
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -358,15 +359,14 @@ class MapIndexProxyIntegrationTest
 
   @Test
   void clearEmptyFork() {
-    runTestWithView(database::createFork, MapIndexProxy::clear);  // no-op
+    runTestWithView(database::createFork,
+        (map) -> assertThatCode(map::clear).doesNotThrowAnyException());
   }
 
   @Test
   void clearSnapshotMustFail() {
-    runTestWithView(database::createSnapshot, (m) -> {
-      assertThrows(UnsupportedOperationException.class,
-          m::clear);
-    });
+    runTestWithView(database::createSnapshot,
+        (map) -> assertThrows(UnsupportedOperationException.class, map::clear));
   }
 
   @Test

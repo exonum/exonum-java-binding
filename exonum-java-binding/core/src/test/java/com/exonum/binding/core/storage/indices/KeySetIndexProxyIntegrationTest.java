@@ -21,6 +21,7 @@ import static com.exonum.binding.core.storage.indices.TestStorageItems.K1;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.K9;
 import static com.exonum.binding.core.storage.indices.TestStorageItems.V1;
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -70,7 +71,8 @@ class KeySetIndexProxyIntegrationTest
 
   @Test
   void clearEmptyHasNoEffect() {
-    runTestWithView(database::createFork, KeySetIndexProxy::clear);
+    runTestWithView(database::createFork,
+        (set) -> assertThatCode(set::clear).doesNotThrowAnyException());
   }
 
   @Test

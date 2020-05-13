@@ -24,6 +24,8 @@ import static com.exonum.binding.testkit.TestKitTestUtils.SERVICE_NAME;
 import static com.exonum.binding.testkit.TestKitTestUtils.checkIfServiceEnabled;
 import static com.exonum.binding.testkit.TestKitTestUtils.createTestServiceArtifact;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 import java.io.IOException;
@@ -167,12 +169,12 @@ class TestKitExtensionTest {
 
     @BeforeEach
     void beforeEach(TestKit testKit) {
-      // Should pass
+      assertNotNull(testKit);
     }
 
     @Test
     void testTestKitReconfiguration(@Auditor TestKit testKit) {
-      // Shouldn't be executed
+      fail("Shouldn't be executed");
     }
   }
 
@@ -186,12 +188,12 @@ class TestKitExtensionTest {
 
     @AfterEach
     void afterEach(@ValidatorCount(8) TestKit testKit) {
-      // Shouldn't be executed
+      fail("Shouldn't be executed");
     }
 
     @Test
     void testTestKitReconfiguration(TestKit testKit) {
-      // This test should pass
+      assertNotNull(testKit);
     }
   }
 
@@ -211,7 +213,7 @@ class TestKitExtensionTest {
 
     @Test
     void test(TestKit testKit) {
-      // Shouldn't be executed
+      fail("Shouldn't be executed");
     }
   }
 
@@ -230,6 +232,7 @@ class TestKitExtensionTest {
     }
 
     @Test
+    @SuppressWarnings("squid:S2699")
     void test() {
       // Should pass
     }

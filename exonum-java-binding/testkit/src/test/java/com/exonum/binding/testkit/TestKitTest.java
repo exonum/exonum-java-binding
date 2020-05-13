@@ -36,6 +36,7 @@ import static com.exonum.binding.testkit.TestService.THROWING_VALUE;
 import static com.exonum.binding.testkit.TestService.constructAfterCommitTransaction;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.exonum.binding.common.crypto.CryptoFunction;
@@ -385,6 +386,7 @@ class TestKitTest {
         .withArtifactsDirectory(artifactsDirectory)
         .build()) {
       // Shouldn't throw
+      assertNotNull(testKit);
     }
   }
 
