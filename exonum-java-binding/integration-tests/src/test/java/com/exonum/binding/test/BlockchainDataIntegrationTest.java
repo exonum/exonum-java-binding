@@ -198,8 +198,8 @@ public class BlockchainDataIntegrationTest {
     DispatcherSchema dispatcherSchema = blockchainData.getDispatcherSchema();
     ProofMapIndexProxy<String, InstanceState> instances = dispatcherSchema
         .serviceInstances();
-    assertThat(instances.containsKey(SERVICE_1_NAME));
-    assertThat(instances.containsKey(SERVICE_2_NAME));
+    assertThat(instances.containsKey(SERVICE_1_NAME)).isTrue();
+    assertThat(instances.containsKey(SERVICE_2_NAME)).isTrue();
   }
 
   private static TransactionMessage createPutTransaction(int serviceId, String key, String value) {

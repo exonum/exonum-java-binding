@@ -32,7 +32,7 @@ import com.exonum.messages.core.Blockchain.Config;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-@SuppressWarnings("EmptyMethod")
+@SuppressWarnings({"EmptyMethod", "squid:S2699"})
 @Integration
 class TestkitExamples2Test {
 
