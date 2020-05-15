@@ -250,6 +250,8 @@ public final class ValueSetIndexProxy<E> extends AbstractIndexProxy
 
     // Do not include (potentially) large value in the hash code: we already have a SHA-256 hash.
     @Override
+    // TODO: remove after https://jira.sonarsource.com/browse/SONARJAVA-3377
+    @SuppressWarnings("squid:S1206")
     public final int hashCode() {
       // Use just the first 4 bytes of the SHA-256 hash of the binary value,
       // as they will have close to uniform distribution.

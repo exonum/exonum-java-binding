@@ -107,6 +107,8 @@ public abstract class Block {
    */
   public abstract ImmutableMap<String, ByteString> getAdditionalHeaders();
 
+  // TODO: remove after https://jira.sonarsource.com/browse/SONARJAVA-3377
+  @SuppressWarnings("squid:S1206")
   @Override
   public int hashCode() {
     // Use just the first 4 bytes of the SHA-256 hash of the binary object representation,
