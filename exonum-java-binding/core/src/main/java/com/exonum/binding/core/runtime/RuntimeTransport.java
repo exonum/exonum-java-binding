@@ -58,8 +58,11 @@ public final class RuntimeTransport implements AutoCloseable {
   void start() {
     try {
       server.start(port).get();
-    } catch (InterruptedException | ExecutionException e) {
+    } catch (ExecutionException e) {
       throw new IllegalStateException(e);
+    } catch (InterruptedException e) {
+      logger.error("Start services API server was interrupted", e);
+      Thread.currentThread().interrupt();
     }
   }
 

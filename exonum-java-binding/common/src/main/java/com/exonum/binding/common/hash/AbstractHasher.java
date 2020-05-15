@@ -134,7 +134,7 @@ abstract class AbstractHasher implements Hasher {
     return this;
   }
 
-  @SuppressWarnings("EmptyMethod")
+  @SuppressWarnings({"EmptyMethod", "squid:S1206"})
   @Override
   @Deprecated
   public int hashCode() {
