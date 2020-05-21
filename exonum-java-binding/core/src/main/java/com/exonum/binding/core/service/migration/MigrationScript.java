@@ -18,6 +18,7 @@ package com.exonum.binding.core.service.migration;
 
 import com.exonum.binding.core.service.ExecutionContext;
 import java.util.Optional;
+import org.pf4j.ExtensionPoint;
 
 /**
  * Migration script interface which allows to construct data migrations performed during service
@@ -37,7 +38,7 @@ import java.util.Optional;
  * <ul>
  *   <li>Migration script class should implement {@linkplain MigrationScript this interface}.</li>
  *   <li>Migration script class should have default constructor.</li>
- *   <li>Migration script class should be annotated with {@link org.pf4j.Extension} annotation.</li>
+ *   <li>Migration script class should be marked with {@link org.pf4j.Extension} annotation.</li>
  *   <li>There shouldn't be more two (or more) scripts for the same
  *   {@linkplain #targetVersion() target version} in the module.</li>
  * </ul>
@@ -45,7 +46,7 @@ import java.util.Optional;
  * @see com.exonum.binding.core.service.migration
  * @see <a href="https://semver.org/">Semantic versioning</a>
  */
-public interface MigrationScript {
+public interface MigrationScript extends ExtensionPoint {
 
   /**
    * Represents a name of the migration script.
