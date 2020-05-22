@@ -62,8 +62,6 @@ public interface MigrationScript extends ExtensionPoint {
     return Optional.empty();
   }
 
-  ;
-
   /**
    * Version of the service data the current script migrates to.
    */
