@@ -16,12 +16,12 @@
 
 package com.exonum.binding.core.runtime;
 
-import com.exonum.binding.core.service.ServiceModule;
 import com.google.common.base.MoreObjects;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
+import org.pf4j.ExtensionPoint;
 
 // todo: such implementation is nicer in terms of error handling (it happens upfront), but
 //   does not allow package-private modules until Java 9 with MethodHandles#privateLookupIn
@@ -30,10 +30,10 @@ import java.util.function.Supplier;
 /**
  * A reflective supplier of service modules that instantiates them with a no-arg constructor.
  */
-public final class ReflectiveModuleSupplier implements Supplier<ServiceModule> {
+public final class ReflectiveExtensionSupplier<T extends ExtensionPoint> implements Supplier<T> {
 
-  private final Class<? extends ServiceModule> moduleClass;
-  private final MethodHandle moduleConstructor;
+  private final Class<? extends T> extensionClass;
+  private final MethodHandle extensionConstructor;
 
   /**
    * Creates a module supplier for a given service module class.
@@ -41,26 +41,26 @@ public final class ReflectiveModuleSupplier implements Supplier<ServiceModule> {
    * @throws NoSuchMethodException if the constructor of given service module class does not exist
    * @throws IllegalAccessException if accessing the no-arg module constructor failed
    */
-  public ReflectiveModuleSupplier(Class<? extends ServiceModule> moduleClass)
+  public ReflectiveExtensionSupplier(Class<? extends T> extensionClass)
       throws NoSuchMethodException, IllegalAccessException {
-    this.moduleClass = moduleClass;
+    this.extensionClass = extensionClass;
     MethodHandles.Lookup lookup = MethodHandles.lookup();
     MethodType mt = MethodType.methodType(void.class);
-    moduleConstructor = lookup.findConstructor(moduleClass, mt);
+    extensionConstructor = lookup.findConstructor(extensionClass, mt);
   }
 
   @Override
-  public ServiceModule get() {
-    return newServiceModule();
+  public T get() {
+    return initializeExtension();
   }
 
-  private ServiceModule newServiceModule() {
+  private T initializeExtension() {
     try {
-      return (ServiceModule) moduleConstructor.invoke();
+      return (T) extensionConstructor.invoke();
     } catch (Throwable throwable) {
       String message = String
-          .format("Cannot instantiate a service module of class %s using constructor %s",
-              moduleClass, moduleConstructor);
+          .format("Cannot instantiate extension of class %s using constructor %s",
+              extensionClass, extensionConstructor);
       throw new IllegalStateException(message, throwable);
     }
   }
@@ -68,8 +68,8 @@ public final class ReflectiveModuleSupplier implements Supplier<ServiceModule> {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("moduleClass", moduleClass)
-        .add("moduleConstructor", moduleConstructor)
+        .add("extensionClass", extensionClass)
+        .add("extensionConstructor", extensionConstructor)
         .toString();
   }
 }

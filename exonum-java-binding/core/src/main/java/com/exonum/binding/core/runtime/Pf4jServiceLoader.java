@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.service.ServiceModule;
+import com.exonum.binding.core.service.migration.MigrationScript;
 import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 import org.pf4j.Extension;
+import org.pf4j.ExtensionPoint;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginState;
 
@@ -122,9 +124,10 @@ final class Pf4jServiceLoader implements ServiceLoader {
   /** Loads the service definition from the already loaded plugin with the given id. */
   private LoadedServiceDefinition loadDefinition(String pluginId) throws ServiceLoadingException {
     ServiceArtifactId artifactId = extractServiceId(pluginId);
-    Supplier<ServiceModule> serviceModuleSupplier = findServiceModuleSupplier(pluginId);
+    var serviceModuleSupplier = findServiceModuleSupplier(pluginId);
+    var migrationScripts = findMigrationScripts(pluginId);
     LoadedServiceDefinition serviceDefinition =
-        LoadedServiceDefinition.newInstance(artifactId, serviceModuleSupplier);
+        LoadedServiceDefinition.newInstance(artifactId, serviceModuleSupplier, migrationScripts);
 
     assert !loadedServices.containsKey(artifactId);
     loadedServices.put(artifactId, serviceDefinition);
@@ -153,11 +156,30 @@ final class Pf4jServiceLoader implements ServiceLoader {
     checkServiceModules(pluginId, extensionClasses);
 
     Class<? extends ServiceModule> serviceModuleClass = extensionClasses.get(0);
+    return createReflectiveExtensionSupplier(pluginId, serviceModuleClass);
+  }
+
+  private List<Supplier<MigrationScript>> findMigrationScripts(String pluginId)
+      throws ServiceLoadingException {
+    List<Class<? extends MigrationScript>> classes = pluginManager
+        .getExtensionClasses(MigrationScript.class, pluginId);
+
+    List<Supplier<MigrationScript>> suppliers = new ArrayList<>(classes.size());
+    for (var extension : classes) {
+      suppliers.add(createReflectiveExtensionSupplier(pluginId, extension));
+    }
+
+    return suppliers;
+  }
+
+  private <T extends ExtensionPoint> Supplier<T> createReflectiveExtensionSupplier(
+      String pluginId,
+      Class<? extends T> extensionClass) throws ServiceLoadingException {
     try {
-      return new ReflectiveModuleSupplier(serviceModuleClass);
+      return new ReflectiveExtensionSupplier<>(extensionClass);
     } catch (NoSuchMethodException | IllegalAccessException e) {
-      String message = String.format("Cannot load a plugin (%s): module (%s) is not valid",
-          pluginId, serviceModuleClass);
+      String message = String.format("Cannot load a plugin (%s): extension (%s) is not valid",
+          pluginId, extensionClass);
       throw new ServiceLoadingException(message, e);
     }
   }

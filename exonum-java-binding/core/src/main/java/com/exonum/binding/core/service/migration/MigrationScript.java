@@ -58,7 +58,11 @@ public interface MigrationScript extends ExtensionPoint {
    * Minimum version of the service data the current script compatible with.
    * Or {@link Optional#empty()} if the script is compatible with any data version.
    */
-  Optional<String> minSupportedVersion();
+  default Optional<String> minSupportedVersion() {
+    return Optional.empty();
+  }
+
+  ;
 
   /**
    * Version of the service data the current script migrates to.

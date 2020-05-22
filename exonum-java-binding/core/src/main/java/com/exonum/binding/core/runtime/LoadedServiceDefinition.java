@@ -18,7 +18,9 @@ package com.exonum.binding.core.runtime;
 
 import com.exonum.binding.common.runtime.ServiceArtifactId;
 import com.exonum.binding.core.service.ServiceModule;
+import com.exonum.binding.core.service.migration.MigrationScript;
 import com.google.auto.value.AutoValue;
+import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -41,8 +43,18 @@ abstract class LoadedServiceDefinition {
    */
   public abstract Supplier<ServiceModule> getModuleSupplier();
 
+  /**
+   * Returns {@linkplain MigrationScript migration script} suppliers for performing asynchronous
+   * migration of the service.
+   * It will always return the same number of scripts, but different instances.
+   */
+  public abstract List<Supplier<MigrationScript>> getMigrationScripts();
+
   static LoadedServiceDefinition newInstance(ServiceArtifactId artifactId,
-      Supplier<ServiceModule> serviceModuleSupplier) {
-    return new AutoValue_LoadedServiceDefinition(artifactId, serviceModuleSupplier);
+      Supplier<ServiceModule> serviceModuleSupplier,
+      List<Supplier<MigrationScript>> migrationScripts
+  ) {
+    return new AutoValue_LoadedServiceDefinition(artifactId, serviceModuleSupplier,
+        migrationScripts);
   }
 }

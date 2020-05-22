@@ -23,41 +23,41 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.core.runtime.ReflectiveModuleSupplierTest.Modules.BadInaccessibleCtor;
-import com.exonum.binding.core.runtime.ReflectiveModuleSupplierTest.Modules.BadNoNoArgCtor;
-import com.exonum.binding.core.runtime.ReflectiveModuleSupplierTest.Modules.BadThrowsInCtor;
-import com.exonum.binding.core.runtime.ReflectiveModuleSupplierTest.Modules.Good;
+import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.BadInaccessibleCtor;
+import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.BadNoNoArgCtor;
+import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.BadThrowsInCtor;
+import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.Good;
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.ServiceModule;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
-class ReflectiveModuleSupplierTest {
+class ReflectiveExtensionSupplierTest {
 
-  ReflectiveModuleSupplier supplier;
+  ReflectiveExtensionSupplier<ServiceModule> supplier;
 
   @Test
   void newFailsIfNoConstuctor() {
     assertThrows(NoSuchMethodException.class,
-        () -> new ReflectiveModuleSupplier(BadNoNoArgCtor.class));
+        () -> new ReflectiveExtensionSupplier<>(BadNoNoArgCtor.class));
   }
 
   @Test
   void newFailsIfInaccessibleConstuctor() {
     assertThrows(IllegalAccessException.class,
-        () -> new ReflectiveModuleSupplier(BadInaccessibleCtor.class));
+        () -> new ReflectiveExtensionSupplier<>(BadInaccessibleCtor.class));
   }
 
   @Test
   void get() throws NoSuchMethodException, IllegalAccessException {
-    supplier = new ReflectiveModuleSupplier(Good.class);
+    supplier = new ReflectiveExtensionSupplier<>(Good.class);
     ServiceModule serviceModule = supplier.get();
     assertThat(serviceModule, instanceOf(Good.class));
   }
 
   @Test
   void getProducesFreshInstances() throws NoSuchMethodException, IllegalAccessException {
-    supplier = new ReflectiveModuleSupplier(Good.class);
+    supplier = new ReflectiveExtensionSupplier<>(Good.class);
     ServiceModule serviceModule1 = supplier.get();
     ServiceModule serviceModule2 = supplier.get();
     // Check *both* are OK
@@ -69,7 +69,7 @@ class ReflectiveModuleSupplierTest {
 
   @Test
   void getPropagatesExceptions() throws NoSuchMethodException, IllegalAccessException {
-    supplier = new ReflectiveModuleSupplier(BadThrowsInCtor.class);
+    supplier = new ReflectiveExtensionSupplier<>(BadThrowsInCtor.class);
 
     IllegalStateException e = assertThrows(IllegalStateException.class,
         () -> supplier.get());

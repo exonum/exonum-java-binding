@@ -16,6 +16,7 @@
 
 package com.exonum.binding.core.runtime;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -48,7 +49,7 @@ class GuiceServicesFactoryTest {
   void createService() {
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     Node node = mock(Node.class);
@@ -66,7 +67,7 @@ class GuiceServicesFactoryTest {
     ServiceArtifactId artifactId = ServiceArtifactId
         .newJavaId("com.acme/incomplete-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, IncompleteServiceModule::new);
+        .newInstance(artifactId, IncompleteServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     Node node = mock(Node.class);
