@@ -32,7 +32,7 @@ import org.pf4j.ExtensionPoint;
  *
  * <p/>
  * <h3>Contract and restrictions</h3>
- * Service artifact module could have any number of migration scripts implementations. To be visible
+ * Service artifact module could have any number of migration script implementations. To be visible
  * and applicable by the system those implementations must satisfy the following contract:
  *
  * <ul>
