@@ -51,6 +51,7 @@ public final class ReflectiveExtensionSupplier<T extends ExtensionPoint> impleme
     return initializeExtension();
   }
 
+  @SuppressWarnings("unchecked")
   private T initializeExtension() {
     try {
       return (T) extensionConstructor.invoke();
