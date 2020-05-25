@@ -10,6 +10,8 @@ branches:
     # … and release branches, e.g. jlc/v0.2.0-release
     - /^.+-release$/
     - core-1.0
+    # Temporary enable
+    - async-migrations
 
 addons:
   sonarcloud:
