@@ -16,7 +16,6 @@
 
 use std::path::PathBuf;
 
-use anyhow;
 use exonum_cli::command::{
     ExonumCommand, Finalize, GenerateConfig, GenerateTemplate, Maintenance, StandardResult,
 };
