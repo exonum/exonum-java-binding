@@ -52,8 +52,7 @@ abstract class LoadedServiceDefinition {
 
   static LoadedServiceDefinition newInstance(ServiceArtifactId artifactId,
       Supplier<ServiceModule> serviceModuleSupplier,
-      List<Supplier<MigrationScript>> migrationScripts
-  ) {
+      List<Supplier<MigrationScript>> migrationScripts) {
     return new AutoValue_LoadedServiceDefinition(artifactId, serviceModuleSupplier,
         migrationScripts);
   }
