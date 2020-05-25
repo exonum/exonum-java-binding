@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-use anyhow;
 use exonum_cli::command::{ExonumCommand, Run as StandardRun, StandardResult};
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
