@@ -23,10 +23,10 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.BadInaccessibleCtor;
 import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.BadNoNoArgCtor;
 import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.BadThrowsInCtor;
 import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.Good;
+import com.exonum.binding.core.runtime.ReflectiveExtensionSupplierTest.Modules.GoodWithPrivateConstructor;
 import com.exonum.binding.core.service.AbstractServiceModule;
 import com.exonum.binding.core.service.ServiceModule;
 import org.junit.jupiter.api.Test;
@@ -37,15 +37,16 @@ class ReflectiveExtensionSupplierTest {
   ReflectiveExtensionSupplier<ServiceModule> supplier;
 
   @Test
-  void newFailsIfNoConstuctor() {
+  void newFailsIfNoConstructor() {
     assertThrows(NoSuchMethodException.class,
         () -> new ReflectiveExtensionSupplier<>(BadNoNoArgCtor.class));
   }
 
   @Test
-  void newFailsIfInaccessibleConstuctor() {
-    assertThrows(IllegalAccessException.class,
-        () -> new ReflectiveExtensionSupplier<>(BadInaccessibleCtor.class));
+  void okWithPrivateConstructor() throws NoSuchMethodException, IllegalAccessException {
+    supplier = new ReflectiveExtensionSupplier<>(GoodWithPrivateConstructor.class);
+    ServiceModule serviceModule = supplier.get();
+    assertThat(serviceModule, instanceOf(GoodWithPrivateConstructor.class));
   }
 
   @Test
@@ -79,14 +80,22 @@ class ReflectiveExtensionSupplierTest {
     assertThat(cause.getMessage(), equalTo("BadThrowsInCtor indeed"));
   }
 
+  @Test
+  void packagePrivateExtensionsIsAllowed()
+      throws NoSuchMethodException, IllegalAccessException, ClassNotFoundException {
+    supplier = new ReflectiveExtensionSupplier<>((Class<ServiceModule>) Class
+        .forName("com.exonum.binding.core.runtime.module.PackagePrivateModule"));
+    assertThat(supplier.get(), instanceOf(AbstractServiceModule.class));
+  }
+
   static class Modules {
     static class BadNoNoArgCtor extends AbstractServiceModule {
       BadNoNoArgCtor(String s1) {
       }
     }
 
-    static class BadInaccessibleCtor extends AbstractServiceModule {
-      private BadInaccessibleCtor() {
+    static class GoodWithPrivateConstructor extends AbstractServiceModule {
+      private GoodWithPrivateConstructor() {
       }
     }
 

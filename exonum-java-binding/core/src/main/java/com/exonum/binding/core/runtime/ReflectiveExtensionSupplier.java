@@ -23,10 +23,6 @@ import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
 import org.pf4j.ExtensionPoint;
 
-// todo: such implementation is nicer in terms of error handling (it happens upfront), but
-//   does not allow package-private modules until Java 9 with MethodHandles#privateLookupIn
-//   [ECR-3008, ECR-521]
-
 /**
  * A reflective supplier of service modules that instantiates them with a no-arg constructor.
  */
@@ -44,7 +40,8 @@ public final class ReflectiveExtensionSupplier<T extends ExtensionPoint> impleme
   public ReflectiveExtensionSupplier(Class<? extends T> extensionClass)
       throws NoSuchMethodException, IllegalAccessException {
     this.extensionClass = extensionClass;
-    MethodHandles.Lookup lookup = MethodHandles.lookup();
+    MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(extensionClass,
+        MethodHandles.lookup());
     MethodType mt = MethodType.methodType(void.class);
     extensionConstructor = lookup.findConstructor(extensionClass, mt);
   }
