@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The Exonum Team
+ * Copyright 2020 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.runtime;
+package com.exonum.binding.core.runtime.module;
 
 import com.exonum.binding.core.service.AbstractServiceModule;
 
-final class TestServiceModuleInaccessibleCtor extends AbstractServiceModule {
-
-  TestServiceModuleInaccessibleCtor(String s) {
+class PackagePrivateModule extends AbstractServiceModule {
+  PackagePrivateModule() {
   }
 }

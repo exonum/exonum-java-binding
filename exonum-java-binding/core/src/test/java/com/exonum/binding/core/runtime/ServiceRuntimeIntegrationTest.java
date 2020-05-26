@@ -19,6 +19,7 @@ package com.exonum.binding.core.runtime;
 import static com.exonum.binding.core.runtime.ServiceWrapper.DEFAULT_INTERFACE_NAME;
 import static com.exonum.binding.test.Bytes.bytes;
 import static com.google.common.collect.Comparators.isInStrictOrder;
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -116,7 +117,7 @@ class ServiceRuntimeIntegrationTest {
     String artifactFilename = "foo-service.jar";
     Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(serviceId, TestServiceModule::new);
+        .newInstance(serviceId, TestServiceModule::new, emptyList());
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenReturn(serviceDefinition);
     when(serviceLoader.findService(serviceId))
@@ -136,7 +137,7 @@ class ServiceRuntimeIntegrationTest {
     String artifactFilename = "foo-service.jar";
     Path serviceArtifactLocation = ARTIFACTS_DIR.resolve(artifactFilename);
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(actualId, TestServiceModule::new);
+        .newInstance(actualId, TestServiceModule::new, emptyList());
     when(serviceLoader.loadService(serviceArtifactLocation))
         .thenReturn(serviceDefinition);
 
@@ -176,7 +177,7 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme/foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     when(serviceLoader.findService(artifactId))
@@ -234,7 +235,7 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     when(serviceLoader.findService(artifactId))
@@ -267,7 +268,7 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     when(serviceLoader.findService(artifactId))
@@ -301,7 +302,7 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     when(serviceLoader.findService(artifactId))
@@ -348,7 +349,7 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     when(serviceLoader.findService(artifactId))
@@ -408,7 +409,7 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceArtifactId artifactId = ServiceArtifactId.parseFrom("1:com.acme/foo-service:1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     when(serviceLoader.findService(artifactId))
@@ -444,7 +445,7 @@ class ServiceRuntimeIntegrationTest {
 
     ServiceArtifactId artifactId = ServiceArtifactId.newJavaId("com.acme/foo-service", "1.0.0");
     LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-        .newInstance(artifactId, TestServiceModule::new);
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
     ServiceInstanceSpec instanceSpec = ServiceInstanceSpec.newInstance(TEST_NAME,
         TEST_ID, artifactId);
     when(serviceLoader.findService(artifactId))
@@ -520,7 +521,7 @@ class ServiceRuntimeIntegrationTest {
       when(serviceWrapper.getName()).thenReturn(TEST_NAME);
       // Setup the loader
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-          .newInstance(ARTIFACT_ID, TestServiceModule::new);
+          .newInstance(ARTIFACT_ID, TestServiceModule::new, emptyList());
       when(serviceLoader.findService(ARTIFACT_ID))
           .thenReturn(Optional.of(serviceDefinition));
       // Setup the factory
@@ -690,7 +691,7 @@ class ServiceRuntimeIntegrationTest {
       serviceRuntime.initialize(mock(NodeProxy.class));
 
       LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
-          .newInstance(ARTIFACT_ID, TestServiceModule::new);
+          .newInstance(ARTIFACT_ID, TestServiceModule::new, emptyList());
       when(serviceLoader.findService(ARTIFACT_ID))
           .thenReturn(Optional.of(serviceDefinition));
       // Setup the factory

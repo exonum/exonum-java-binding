@@ -107,6 +107,30 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
 
     // Check the definition is accessible
     assertThat(serviceLoader.findService(serviceId)).hasValue(serviceDefinition);
+
+    //Check no scripts found
+    assertThat(serviceDefinition.getMigrationScripts()).isEmpty();
+  }
+
+  @Test
+  void canLoadServiceWithMigrationScripts() throws Exception {
+    String pluginId = PLUGIN_ID;
+    Class<?> moduleType = TestServiceModule1.class;
+    Class<?> scriptType = TestMigrationScript1.class;
+
+    anArtifact()
+        .setPluginId(pluginId)
+        .addExtensionClasses(moduleType, scriptType)
+        .writeTo(artifactLocation);
+
+    // Try to load the service
+    LoadedServiceDefinition serviceDefinition = serviceLoader.loadService(artifactLocation);
+
+    // Check the definition
+    var migrationScripts = serviceDefinition.getMigrationScripts();
+    assertThat(migrationScripts).hasSize(1);
+    var actualScript = migrationScripts.get(0).get();
+    assertNamesEqual(actualScript.getClass(), scriptType);
   }
 
   @Test
@@ -231,7 +255,7 @@ abstract class Pf4jServiceLoaderIntegrationTestable {
         arguments(asList(TestServiceModule1.class, TestServiceModule2.class),
             "must provide exactly one service module as an extension.+2 modules found:"),
         arguments(singletonList(TestServiceModuleInaccessibleCtor.class),
-            "Cannot load a plugin.+module.+not valid")
+            "Cannot load a plugin.+extension.+not valid")
     );
   }
 
