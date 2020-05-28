@@ -28,23 +28,29 @@ import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.BlockCommittedEventImpl;
 import com.exonum.binding.core.service.ExecutionContext;
 import com.exonum.binding.core.service.ExecutionException;
+import com.exonum.binding.core.service.migration.MigrationScript;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.binding.core.transport.Server;
 import com.exonum.messages.core.runtime.Errors.ErrorKind;
 import com.exonum.messages.core.runtime.Lifecycle.InstanceStatus;
 import com.exonum.messages.core.runtime.Lifecycle.InstanceStatus.Simple;
+import com.github.zafarkhaja.semver.Version;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -587,4 +593,77 @@ public final class ServiceRuntime implements AutoCloseable {
   Optional<ServiceWrapper> findService(String name) {
     return Optional.ofNullable(services.get(name));
   }
+
+  /**
+   * Returns migration script for the given artifact to perform asynchronous data migration.
+   *
+   * @param artifactId Java service artifact id
+   * @param dataVersion base data version migrate from
+   * @return migration script instance or {@link Optional#empty()} if there is no scripts found
+   * @throws IllegalArgumentException if the provided artifact is not deployed
+   * @throws IllegalStateException if there is scripts incompatibility
+   */
+  public Optional<MigrationScript> migrate(ServiceArtifactId artifactId, String dataVersion) {
+    try {
+      synchronized (lock) {
+        LoadedServiceDefinition serviceDefinition = serviceLoader.findService(artifactId)
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Migration called on unknown artifactId: " + artifactId));
+
+        if (serviceDefinition.getMigrationScripts().isEmpty()) {
+          logger.info("Service data migration is not required, skipping."
+              + " No scripts found for the given artifact {}", artifactId);
+          return Optional.empty();
+        }
+
+        Version artifactVersion = Version.valueOf(artifactId.getVersion());
+        Version baseDataVersion = Version.valueOf(dataVersion);
+
+        List<MigrationScript> scripts = serviceDefinition.getMigrationScripts()
+            .stream()
+            .map(Supplier::get)
+            .collect(Collectors.toList());
+
+        checkScriptsCompatibility(scripts, baseDataVersion);
+
+        Optional<MigrationScript> nextLinearScript = scripts
+            .stream()
+            .filter(m -> Version.valueOf(m.targetVersion()).lessThanOrEqualTo(artifactVersion))
+            .min(Comparator.comparing(script -> Version.valueOf(script.targetVersion())));
+
+        nextLinearScript.flatMap(MigrationScript::minSupportedVersion)
+            .ifPresent(minSupportedVersion -> {
+              if (Version.valueOf(minSupportedVersion).lessThan(baseDataVersion)) {
+                throw new IllegalStateException(
+                    String.format("Migration script requires at least %s "
+                        + "data version, but actual is %s", minSupportedVersion, baseDataVersion));
+              }
+            });
+        logger.info("Performing service migration from {} version data for the given artifact {}"
+            + " using script {}", baseDataVersion, artifactId, nextLinearScript);
+        return nextLinearScript;
+      }
+    } catch (Exception e) {
+      logger.error("Failed to perform migration for the given artifact {} and base data version {}",
+          artifactId, dataVersion);
+      throw e;
+    }
+  }
+
+  private void checkScriptsCompatibility(List<MigrationScript> scripts, Version baseDataVersion) {
+    Optional<Version> maxTargetVersion = scripts.stream()
+        .map(MigrationScript::targetVersion)
+        .map(Version::valueOf)
+        .max(Comparator.naturalOrder());
+
+    maxTargetVersion.ifPresent(v -> {
+          if (v.lessThan(baseDataVersion)) {
+            throw new IllegalStateException(String.format("Scripts too old."
+                    + " Base data version is %s, but migration scripts are up to %s only",
+                baseDataVersion, v));
+          }
+        }
+    );
+  }
+
 }

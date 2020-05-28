@@ -43,6 +43,7 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.migration.MigrationScript;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -501,6 +502,82 @@ class ServiceRuntimeIntegrationTest {
     verify(serviceLoader).unloadAll();
   }
 
+  @Test
+  void migrateServiceWithoutScripts() {
+    String baseVersion = "0.0.1";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    Optional<MigrationScript> script = serviceRuntime.migrate(artifactId, baseVersion);
+
+    assertThat(script).isEmpty();
+  }
+
+  @Test
+  void migrateService() {
+    String baseVersion = "0.0.1";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript = createScript(targetVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, List.of(() -> migrationScript));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    Optional<MigrationScript> script = serviceRuntime.migrate(artifactId, baseVersion);
+
+    assertThat(script).hasValue(migrationScript);
+  }
+
+  @Test
+  void migrateServiceIncompatibleScriptsVersion() {
+    String scriptsMaxTargetVersion = "0.0.5";
+    String baseVersion = "0.1.0";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript = createScript(scriptsMaxTargetVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, List.of(() -> migrationScript));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    assertThrows(IllegalStateException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+  }
+
+  @Test
+  void migrateServiceMinDataVersionScriptViolation() {
+    String scriptsMinSupportedVersion = "0.1.0";
+    String baseVersion = "0.5.0";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript = createScriptWithMinVersion(targetVersion,
+        scriptsMinSupportedVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, List.of(() -> migrationScript));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    assertThrows(IllegalStateException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+  }
+
+  @Test
+  void migrateServiceWrongArtifact() {
+    String baseVersion = "0.0.1";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
+
+    assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+  }
+
   @Nested
   class WithSingleService {
     final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId
@@ -753,5 +830,47 @@ class ServiceRuntimeIntegrationTest {
         .serviceId(expectedId)
         .blockchainData(expectedData)
         .build();
+  }
+
+  private static MigrationScript createScript(String version) {
+    return new MigrationScript() {
+      @Override
+      public String name() {
+        return "script-for-" + targetVersion();
+      }
+
+      @Override
+      public String targetVersion() {
+        return version;
+      }
+
+      @Override
+      public void execute(ExecutionContext context) {
+      }
+    };
+  }
+
+  private static MigrationScript createScriptWithMinVersion(String targetVersion,
+      String minVersion) {
+    return new MigrationScript() {
+      @Override
+      public String name() {
+        return "script-for-" + targetVersion();
+      }
+
+      @Override
+      public String targetVersion() {
+        return targetVersion;
+      }
+
+      @Override
+      public Optional<String> minSupportedVersion() {
+        return Optional.of(minVersion);
+      }
+
+      @Override
+      public void execute(ExecutionContext context) {
+      }
+    };
   }
 }
