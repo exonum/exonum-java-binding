@@ -533,6 +533,18 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
+  void migrateServiceWrongArtifact() {
+    String baseVersion = "0.0.1";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
+
+    assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+  }
+
+  @Test
   void migrateServiceIncompatibleScriptsVersion() {
     String scriptsMaxTargetVersion = "0.0.5";
     String baseVersion = "0.1.0";
@@ -566,15 +578,19 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
-  void migrateServiceWrongArtifact() {
-    String baseVersion = "0.0.1";
+  void migrateServiceWithMinDataVersionScript() {
+    String baseVersion = "0.5.0";
     String targetVersion = "1.0.0";
     ServiceArtifactId artifactId = ServiceArtifactId
         .newJavaId("com.acme/foo-service", targetVersion);
-    when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
+    MigrationScript migrationScript = createScriptWithMinVersion(targetVersion, baseVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, List.of(() -> migrationScript));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
 
-    assertThrows(IllegalArgumentException.class,
-        () -> serviceRuntime.migrate(artifactId, baseVersion));
+    Optional<MigrationScript> actualScript = serviceRuntime.migrate(artifactId, baseVersion);
+
+    assertThat(actualScript).hasValue(migrationScript);
   }
 
   @Nested
