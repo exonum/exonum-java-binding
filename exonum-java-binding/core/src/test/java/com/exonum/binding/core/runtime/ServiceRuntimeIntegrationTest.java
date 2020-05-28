@@ -54,7 +54,6 @@ import com.exonum.messages.core.runtime.Lifecycle.InstanceStatus.Simple;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +64,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
@@ -76,9 +76,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ServiceRuntimeIntegrationTest {
 
-  // [ECR-587] Replace with a temp directory obtained from a TempDir JUnit extension so that
-  //   the check of its existence passes.
-  static final Path ARTIFACTS_DIR = Paths.get("/tmp/");
+  @TempDir
+  static Path ARTIFACTS_DIR;
   static final String TEST_NAME = "test_service_name";
   static final int TEST_ID = 17;
   static final HashCode TEST_HASH = HashCode.fromBytes(bytes(1, 2, 3));
