@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-package com.exonum.binding.core.runtime;
+package com.exonum.binding.core.service.migration;
 
-import com.exonum.binding.core.service.ExecutionContext;
-import com.exonum.binding.core.service.migration.AbstractMigrationScript;
+import com.google.common.base.MoreObjects;
+import java.util.Optional;
 
-public class TestMigrationScript1 extends AbstractMigrationScript {
+/**
+ * A base class for migration scripts implementation.
+ */
+public abstract class AbstractMigrationScript implements MigrationScript {
+
   @Override
-  public String name() {
-    return "Test migration 1";
+  public Optional<String> minSupportedVersion() {
+    return Optional.empty();
   }
 
   @Override
-  public String targetVersion() {
-    return "1.0";
-  }
-
-  @Override
-  public void execute(ExecutionContext context) {
-    // no-op
+  public String toString() {
+    return MoreObjects.toStringHelper("MigrationScript")
+        .add("name", name())
+        .add("targetVersion", targetVersion())
+        .add("minSupportedVersion", minSupportedVersion())
+        .toString();
   }
 }
