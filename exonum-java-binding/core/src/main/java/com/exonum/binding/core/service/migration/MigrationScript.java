@@ -55,15 +55,21 @@ public interface MigrationScript extends ExtensionPoint {
   String name();
 
   /**
-   * Minimum version of the service data the current script compatible with.
+   * Minimum version of the service data the current script compatible with (e.g., "1.0.0").
    * Or {@link Optional#empty()} if the script is compatible with any data version.
+   * The value should have a valid <b>Semantic versioning</b> format.
+   *
+   * @see <a href="https://semver.org/">Semantic versioning</a>
    */
   default Optional<String> minSupportedVersion() {
     return Optional.empty();
   }
 
   /**
-   * Version of the service data the current script migrates to.
+   * Version of the service data the current script migrates to (e.g., "1.2.0").
+   * The value should have a valid <b>Semantic versioning</b> format.
+   *
+   * @see <a href="https://semver.org/">Semantic versioning</a>
    */
   String targetVersion();
 

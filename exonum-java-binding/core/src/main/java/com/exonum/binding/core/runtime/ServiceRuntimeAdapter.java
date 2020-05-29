@@ -24,6 +24,7 @@ import com.exonum.binding.core.blockchain.BlockchainData;
 import com.exonum.binding.core.proxy.Cleaner;
 import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.ExecutionException;
+import com.exonum.binding.core.service.migration.MigrationScript;
 import com.exonum.binding.core.storage.database.Snapshot;
 import com.exonum.messages.core.runtime.Base.ArtifactId;
 import com.exonum.messages.core.runtime.Base.InstanceSpec;
@@ -184,6 +185,23 @@ public class ServiceRuntimeAdapter {
     ServiceInstanceSpec javaInstanceSpec = parseInstanceSpec(instanceSpec);
     InstanceStatus status = parseInstanceStatus(instanceStatus);
     serviceRuntime.updateInstanceStatus(javaInstanceSpec, status);
+  }
+
+  /**
+   * Returns migration script for the given artifact to the native to perform asynchronous data
+   * migration.
+   *
+   * @param artifactId bytes representation of the Java service artifact id as a serialized message
+   * @param dataVersion base data version migrate from
+   * @return migration script instance or {@code null} if there is no scripts found
+   * @see ServiceRuntime#migrate(ServiceArtifactId, String)
+   */
+  MigrationScript migrate(byte[] artifactId, String dataVersion) {
+    ArtifactId artifact = parseArtifact(artifactId);
+    ServiceArtifactId javaServiceArtifact = ServiceArtifactId.fromProto(artifact);
+
+    return serviceRuntime.migrate(javaServiceArtifact, dataVersion)
+        .orElse(null);
   }
 
   private static ServiceInstanceSpec parseInstanceSpec(byte[] instanceSpec) {

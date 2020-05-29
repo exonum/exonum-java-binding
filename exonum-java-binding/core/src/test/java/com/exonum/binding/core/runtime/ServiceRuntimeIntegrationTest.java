@@ -43,6 +43,7 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.migration.MigrationScript;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
 import com.exonum.binding.core.storage.database.Snapshot;
@@ -53,7 +54,6 @@ import com.exonum.messages.core.runtime.Lifecycle.InstanceStatus.Simple;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +64,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
@@ -75,9 +76,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ServiceRuntimeIntegrationTest {
 
-  // [ECR-587] Replace with a temp directory obtained from a TempDir JUnit extension so that
-  //   the check of its existence passes.
-  static final Path ARTIFACTS_DIR = Paths.get("/tmp/");
+  @TempDir
+  static Path ARTIFACTS_DIR;
   static final String TEST_NAME = "test_service_name";
   static final int TEST_ID = 17;
   static final HashCode TEST_HASH = HashCode.fromBytes(bytes(1, 2, 3));
@@ -501,6 +501,119 @@ class ServiceRuntimeIntegrationTest {
     verify(serviceLoader).unloadAll();
   }
 
+  @Test
+  void migrateServiceWithoutScripts() {
+    String baseVersion = "0.0.1";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, emptyList());
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    Optional<MigrationScript> script = serviceRuntime.migrate(artifactId, baseVersion);
+
+    assertThat(script).isEmpty();
+  }
+
+  @Test
+  void migrateService() {
+    String baseVersion = "0.0.1";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript = createScript(targetVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, List.of(() -> migrationScript));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    Optional<MigrationScript> script = serviceRuntime.migrate(artifactId, baseVersion);
+
+    assertThat(script).hasValue(migrationScript);
+  }
+
+  @Test
+  void migrateServiceWrongArtifact() {
+    String baseVersion = "0.0.1";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.empty());
+
+    assertThrows(IllegalArgumentException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+  }
+
+  @Test
+  void migrateServiceIncompatibleScriptsVersion() {
+    String scriptsMaxTargetVersion = "0.0.5";
+    String baseVersion = "0.1.0";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript = createScript(scriptsMaxTargetVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, List.of(() -> migrationScript));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    assertThrows(IllegalStateException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+  }
+
+  @Test
+  void migrateServiceMinDataVersionScriptViolation() {
+    String scriptsMinSupportedVersion = "0.1.0";
+    String baseVersion = "0.5.0";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript = createScriptWithMinVersion(targetVersion,
+        scriptsMinSupportedVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, List.of(() -> migrationScript));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    assertThrows(IllegalStateException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+  }
+
+  @Test
+  void migrateServiceDuplicateScripts() {
+    String baseVersion = "0.5.0";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript1 = createScript(targetVersion);
+    MigrationScript migrationScript2 = createScript(targetVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new,
+            List.of(() -> migrationScript1, () -> migrationScript2));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    var exception = assertThrows(IllegalStateException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+
+    assertThat(exception)
+        .hasMessageContaining(targetVersion)
+        .hasMessageContaining("duplications found: 2 scripts");
+  }
+
+  @Test
+  void migrateServiceWithMinDataVersionScript() {
+    String baseVersion = "0.5.0";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript = createScriptWithMinVersion(targetVersion, baseVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new, List.of(() -> migrationScript));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    Optional<MigrationScript> actualScript = serviceRuntime.migrate(artifactId, baseVersion);
+
+    assertThat(actualScript).hasValue(migrationScript);
+  }
+
   @Nested
   class WithSingleService {
     final ServiceArtifactId ARTIFACT_ID = ServiceArtifactId
@@ -753,5 +866,47 @@ class ServiceRuntimeIntegrationTest {
         .serviceId(expectedId)
         .blockchainData(expectedData)
         .build();
+  }
+
+  private static MigrationScript createScript(String version) {
+    return new MigrationScript() {
+      @Override
+      public String name() {
+        return "script-for-" + targetVersion();
+      }
+
+      @Override
+      public String targetVersion() {
+        return version;
+      }
+
+      @Override
+      public void execute(ExecutionContext context) {
+      }
+    };
+  }
+
+  private static MigrationScript createScriptWithMinVersion(String targetVersion,
+      String minVersion) {
+    return new MigrationScript() {
+      @Override
+      public String name() {
+        return "script-for-" + targetVersion();
+      }
+
+      @Override
+      public String targetVersion() {
+        return targetVersion;
+      }
+
+      @Override
+      public Optional<String> minSupportedVersion() {
+        return Optional.of(minVersion);
+      }
+
+      @Override
+      public void execute(ExecutionContext context) {
+      }
+    };
   }
 }

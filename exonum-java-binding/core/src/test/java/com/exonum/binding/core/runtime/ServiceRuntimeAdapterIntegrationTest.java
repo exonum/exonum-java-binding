@@ -234,4 +234,15 @@ class ServiceRuntimeAdapterIntegrationTest {
         .newInstance(serviceName, serviceId, ServiceArtifactId.fromProto(artifact));
     verify(serviceRuntime).updateInstanceStatus(expectedSpec, status);
   }
+
+  @Test
+  void migrate() {
+    ArtifactId artifact = ARTIFACT_ID;
+    String baseDataVersion = "1.2.3";
+
+    serviceRuntimeAdapter.migrate(artifact.toByteArray(), baseDataVersion);
+
+    ServiceArtifactId expectedId = ServiceArtifactId.fromProto(artifact);
+    verify(serviceRuntime).migrate(expectedId, baseDataVersion);
+  }
 }
