@@ -19,6 +19,9 @@ package com.exonum.binding.core.runtime;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 import com.exonum.binding.common.crypto.PublicKey;
 import com.exonum.binding.common.hash.HashCode;
@@ -601,7 +604,11 @@ public final class ServiceRuntime implements AutoCloseable {
    * @param dataVersion base data version migrate from
    * @return migration script instance or {@link Optional#empty()} if there is no scripts found
    * @throws IllegalArgumentException if the provided artifact is not deployed
-   * @throws IllegalStateException if there is scripts incompatibility
+   * @throws IllegalStateException if scripts aren't singular i.e. there are more then one script
+   *        for the same target version;
+   *        Or migration scripts too old i.e. base data version is greater then max target version
+   *        specified in migration scripts;
+   *        Or found a script which requires data version greater the provided
    */
   public Optional<MigrationScript> migrate(ServiceArtifactId artifactId, String dataVersion) {
     try {
@@ -624,6 +631,7 @@ public final class ServiceRuntime implements AutoCloseable {
             .map(Supplier::get)
             .collect(Collectors.toList());
 
+        checkScriptVersionsUnique(scripts);
         checkScriptsCompatibility(scripts, baseDataVersion);
 
         Optional<MigrationScript> nextLinearScript = scripts
@@ -658,12 +666,29 @@ public final class ServiceRuntime implements AutoCloseable {
 
     maxTargetVersion.ifPresent(v -> {
           if (v.lessThan(baseDataVersion)) {
-            throw new IllegalStateException(String.format("Scripts too old."
-                    + " Base data version is %s, but migration scripts are up to %s only",
+            throw new IllegalStateException(String.format("Scripts too old. "
+                    + "Base data version is %s, but migration scripts are up to %s only",
                 baseDataVersion, v));
           }
         }
     );
+  }
+
+  private void checkScriptVersionsUnique(List<MigrationScript> scripts) {
+    Map<Version, Long> targetVersionsCount = scripts.stream()
+        .map(MigrationScript::targetVersion)
+        .map(Version::valueOf)
+        .collect(groupingBy(identity(), counting()));
+
+    targetVersionsCount.entrySet()
+        .stream()
+        .filter(e -> e.getValue() > 1)
+        .findAny()
+        .ifPresent(duplicate -> {
+          throw new IllegalStateException(String.format("Migration scripts should be singular, "
+                  + "but duplications found: %s scripts for the same version %s",
+              duplicate.getValue(), duplicate.getKey()));
+        });
   }
 
 }

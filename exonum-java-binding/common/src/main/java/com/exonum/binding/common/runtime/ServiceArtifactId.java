@@ -49,6 +49,9 @@ public abstract class ServiceArtifactId {
 
   /**
    * Returns the artifact version of this service (e.g., "1.2.0").
+   * The value should have a valid <b>Semantic versioning</b> format.
+   *
+   * @see <a href="https://semver.org/">Semantic versioning</a>
    */
   public abstract String getVersion();
 

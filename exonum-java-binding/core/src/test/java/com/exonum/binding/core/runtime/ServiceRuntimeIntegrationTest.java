@@ -578,6 +578,27 @@ class ServiceRuntimeIntegrationTest {
   }
 
   @Test
+  void migrateServiceDuplicateScripts() {
+    String baseVersion = "0.5.0";
+    String targetVersion = "1.0.0";
+    ServiceArtifactId artifactId = ServiceArtifactId
+        .newJavaId("com.acme/foo-service", targetVersion);
+    MigrationScript migrationScript1 = createScript(targetVersion);
+    MigrationScript migrationScript2 = createScript(targetVersion);
+    LoadedServiceDefinition serviceDefinition = LoadedServiceDefinition
+        .newInstance(artifactId, TestServiceModule::new,
+            List.of(() -> migrationScript1, () -> migrationScript2));
+    when(serviceLoader.findService(artifactId)).thenReturn(Optional.of(serviceDefinition));
+
+    var exception = assertThrows(IllegalStateException.class,
+        () -> serviceRuntime.migrate(artifactId, baseVersion));
+
+    assertThat(exception)
+        .hasMessageContaining(targetVersion)
+        .hasMessageContaining("duplications found: 2 scripts");
+  }
+
+  @Test
   void migrateServiceWithMinDataVersionScript() {
     String baseVersion = "0.5.0";
     String targetVersion = "1.0.0";

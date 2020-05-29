@@ -194,6 +194,7 @@ public class ServiceRuntimeAdapter {
    * @param artifactId bytes representation of the Java service artifact id as a serialized message
    * @param dataVersion base data version migrate from
    * @return migration script instance or {@code null} if there is no scripts found
+   * @see ServiceRuntime#migrate(ServiceArtifactId, String)
    */
   MigrationScript migrate(byte[] artifactId, String dataVersion) {
     ArtifactId artifact = parseArtifact(artifactId);
