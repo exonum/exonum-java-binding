@@ -43,8 +43,8 @@ import org.pf4j.ExtensionPoint;
  *   {@linkplain #targetVersion() target version} in the module.</li>
  * </ul>
  *
- * <p>You shall usually subclass an {@link AbstractMigrationScript} which implements some
- * of the methods declared in this interface.
+ * <p>A migration scripts usually should be created by extending from
+ * {@link AbstractMigrationScript} which implements some of the methods declared in this interface.
  *
  * @see com.exonum.binding.core.service.migration
  * @see <a href="https://semver.org/">Semantic versioning</a>
