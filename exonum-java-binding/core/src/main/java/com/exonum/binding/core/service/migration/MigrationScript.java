@@ -43,6 +43,9 @@ import org.pf4j.ExtensionPoint;
  *   {@linkplain #targetVersion() target version} in the module.</li>
  * </ul>
  *
+ * <p>A migration scripts usually should be created by extending from
+ * {@link AbstractMigrationScript} which implements some of the methods declared in this interface.
+ *
  * @see com.exonum.binding.core.service.migration
  * @see <a href="https://semver.org/">Semantic versioning</a>
  */
@@ -61,9 +64,7 @@ public interface MigrationScript extends ExtensionPoint {
    *
    * @see <a href="https://semver.org/">Semantic versioning</a>
    */
-  default Optional<String> minSupportedVersion() {
-    return Optional.empty();
-  }
+  Optional<String> minSupportedVersion();
 
   /**
    * Version of the service data the current script migrates to (e.g., "1.2.0").

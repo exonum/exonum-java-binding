@@ -43,6 +43,7 @@ import com.exonum.binding.core.proxy.CloseFailuresException;
 import com.exonum.binding.core.service.BlockCommittedEvent;
 import com.exonum.binding.core.service.Configuration;
 import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.migration.AbstractMigrationScript;
 import com.exonum.binding.core.service.migration.MigrationScript;
 import com.exonum.binding.core.storage.database.Database;
 import com.exonum.binding.core.storage.database.Fork;
@@ -869,7 +870,7 @@ class ServiceRuntimeIntegrationTest {
   }
 
   private static MigrationScript createScript(String version) {
-    return new MigrationScript() {
+    return new AbstractMigrationScript() {
       @Override
       public String name() {
         return "script-for-" + targetVersion();
@@ -888,7 +889,7 @@ class ServiceRuntimeIntegrationTest {
 
   private static MigrationScript createScriptWithMinVersion(String targetVersion,
       String minVersion) {
-    return new MigrationScript() {
+    return new AbstractMigrationScript() {
       @Override
       public String name() {
         return "script-for-" + targetVersion();
