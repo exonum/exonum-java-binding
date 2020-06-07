@@ -189,7 +189,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
+        <version>3.0.0</version>
         <!-- A configuration shared across multiple executions -->
         <configuration>
           <executable>cargo</executable>
@@ -422,7 +422,7 @@
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
-            <version>1.6.0</version>
+            <version>3.0.0</version>
             <executions>
               <!-- Run the unit-tests of the Rust library without resource-manager feature. -->
               <execution>
