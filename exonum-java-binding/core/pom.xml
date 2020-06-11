@@ -35,6 +35,7 @@
     <!--A directory containing native dynamic libraries used by the App-->
     <packaging.native>${rust.build.directory}/${build.mode}/lib/native</packaging.native>
     <auto-value.version>1.7.2</auto-value.version>
+    <java-semver.version>0.9.0</java-semver.version>
     <!-- Skip building Rust library for tests -->
     <skipRustLibBuild>false</skipRustLibBuild>
     <!-- This flag is empty for debug builds and equals to `release` otherwise -->

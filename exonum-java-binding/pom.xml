@@ -142,7 +142,6 @@
     <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
-    <java-semver.version>0.9.0</java-semver.version>
 
     <!-- Default values of properties set by Jacoco when coverage is enabled.
          Passed to the JVM running tests. -->
