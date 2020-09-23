@@ -41,7 +41,7 @@ addons:
 
 env:
   global:
-    - RUST_COMPILER_VERSION=stable
+    - RUST_COMPILER_VERSION=1.45.2
     - ROCKSDB_LIB_DIR=/usr/lib
     - ROCKSDB_STATIC=1
     # REPO_TOKEN used for integration with coveralls is encoded here
