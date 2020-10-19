@@ -125,7 +125,7 @@
     <junit.version>4.13.1</junit.version>
     <junit.jupiter.version>5.6.2</junit.jupiter.version>
     <protobuf.version>3.11.0</protobuf.version>
-    <mockito.version>3.4.4</mockito.version>
+    <mockito.version>3.5.13</mockito.version>
     <guava.version>29.0-jre</guava.version>
     <vertx.version>3.9.1</vertx.version>
     <equalsverifier.version>3.4</equalsverifier.version>
