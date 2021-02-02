@@ -17,4 +17,4 @@ exonum-system-api = "1.0.0"
 java_bindings = { path = "..", features = ["resource-manager"] }
 log = "0.4"
 serde = { version = "1.0", features = ["serde_derive"] }
-tokio = "0.2.13"
+tokio = "1.1.1"
