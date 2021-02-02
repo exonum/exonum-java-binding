@@ -36,7 +36,7 @@ serde = { version = "1.0", features = ["serde_derive"] }
 structopt = "0.3"
 
 [build-dependencies]
-exonum-build = { version = "1.0.0" }
+exonum-build = { version = "1.0.1" }
 
 [profile.dev]
 rpath = true
