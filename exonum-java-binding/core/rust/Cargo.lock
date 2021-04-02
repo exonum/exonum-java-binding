@@ -515,7 +515,7 @@ dependencies = [
  "regex",
  "rustc-hash",
  "shlex",
- "which",
+ "which 3.1.1",
 ]
 
 [[package]]
@@ -1112,9 +1112,9 @@ dependencies = [
 
 [[package]]
 name = "exonum-build"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd048eb3b672628adc5c8391a57b6c6128b0c9599ab8045bec6801ae914bd4fc"
+checksum = "40c143750c765e3f8020501e4ebfc10e81674467e37852e2f7862d08e32e8717"
 dependencies = [
  "proc-macro2",
  "protoc-rust",
@@ -2480,9 +2480,9 @@ dependencies = [
 
 [[package]]
 name = "protobuf"
-version = "2.12.0"
+version = "2.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71964f34fd51cf04882d7ae3325fa0794d4cad66a03d0003f38d8ae4f63ba126"
+checksum = "86473d5f16580f10b131a0bf0afb68f8e029d1835d33a00f37281b05694e5312"
 dependencies = [
  "serde",
  "serde_derive",
@@ -2490,9 +2490,9 @@ dependencies = [
 
 [[package]]
 name = "protobuf-codegen"
-version = "2.12.0"
+version = "2.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f122718d40a717194a9b6df594ab8f8718a31f40787a98606fcdc32fc308fdb6"
+checksum = "c8b6ba4581fcd9c3ce3576f25e528467b0d3516e332884c0da6f2084fe59045f"
 dependencies = [
  "protobuf",
 ]
@@ -2514,18 +2514,19 @@ dependencies = [
 
 [[package]]
 name = "protoc"
-version = "2.12.0"
+version = "2.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "995500a03bb869ba06b6616b841953146fd289e64a2aa8e36856312accde6abc"
+checksum = "13870c0b44e3de0aa1439da1661a284c2c8ec628f41a7bfe375b605fef1a6ebd"
 dependencies = [
  "log 0.4.14",
+ "which 4.0.2",
 ]
 
 [[package]]
 name = "protoc-rust"
-version = "2.12.0"
+version = "2.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5c0f4e0ca9124c1565ae833acdcba94905c8338b4b343f28f321f8c1114780a"
+checksum = "cbb6fb4fd8a3aa76e96d16b460419b3c7441f42e52ebd7d93a9c42fa1715ac75"
 dependencies = [
  "protobuf",
  "protobuf-codegen",
@@ -3676,6 +3677,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d011071ae14a2f6671d0b74080ae0cd8ebf3a6f8c9589a2cd45f23126fe29724"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "which"
+version = "4.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87c14ef7e1b8b8ecfc75d5eca37949410046e66f15d185c01d70824f1f8111ef"
+dependencies = [
+ "libc",
+ "thiserror",
 ]
 
 [[package]]
