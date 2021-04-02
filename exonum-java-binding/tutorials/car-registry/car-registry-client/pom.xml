@@ -17,7 +17,7 @@
 
   <properties>
     <exonum-light-client.version>0.6.0</exonum-light-client.version>
-    <picocli.version>4.5.2</picocli.version>
+    <picocli.version>4.6.1</picocli.version>
   </properties>
 
   <dependencies>
