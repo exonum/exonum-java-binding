@@ -19,7 +19,7 @@
     Use clientRelease for messages, as arbitrary clients may need the messages.
     -->
     <java.compiler.release>${java.compiler.clientRelease}</java.compiler.release>
-    <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
+    <os-maven-plugin.version>1.7.0</os-maven-plugin.version>
   </properties>
 
   <dependencies>
