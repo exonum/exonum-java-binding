@@ -16,8 +16,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-
 - Java 14 support. (#1509)
+- Asynchronous data migration support. (#1555, #1558)
+
+### Changed
+- `ServiceModule`'s can be package-private now. (#1557)
 
 ## [0.10.0] - 2020-04-03
 

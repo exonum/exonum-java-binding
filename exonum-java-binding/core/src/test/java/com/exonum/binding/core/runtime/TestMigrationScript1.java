@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The Exonum Team
+ * Copyright 2020 The Exonum Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,22 @@
 
 package com.exonum.binding.core.runtime;
 
-import com.exonum.binding.core.service.AbstractServiceModule;
+import com.exonum.binding.core.service.ExecutionContext;
+import com.exonum.binding.core.service.migration.AbstractMigrationScript;
 
-final class TestServiceModuleInaccessibleCtor extends AbstractServiceModule {
+public class TestMigrationScript1 extends AbstractMigrationScript {
+  @Override
+  public String name() {
+    return "Test migration 1";
+  }
 
-  TestServiceModuleInaccessibleCtor(String s) {
+  @Override
+  public String targetVersion() {
+    return "1.0";
+  }
+
+  @Override
+  public void execute(ExecutionContext context) {
+    // no-op
   }
 }
